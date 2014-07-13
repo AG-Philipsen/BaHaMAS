@@ -619,12 +619,14 @@ if [ $LISTSTATUS = "TRUE" ]; then
  			JOBNAME=$(llq -l $JOBID | grep "Job Name:" | sed "s/^.*Job Name: \(muiPiT.*$\)/\1/")
 			#if [ $i = "b.57500" ]; then echo $JOBNAME 
 			#fi
-			JOBNAME_BETA=$(echo $JOBNAME | sed "s/^.*\([[:digit:]]\.[[:digit:]]\{4\}$\)/\1/")
+			JOBNAME_NTAU=$(echo $JOBNAME | sed "s/^.*_nt\([[:digit:]]\)_.*$/\1/")
+			JOBNAME_NSPAT=$(echo $JOBNAME | sed "s/^.*_n[[:alpha:]]\([[:digit:]]\{2\}\)_.*$/\1/")
 			JOBNAME_KAPPA=$(echo $JOBNAME | sed "s/^.*_k\([[:digit:]]\{4\}\)_.*$/\1/")
+			JOBNAME_BETA=$(echo $JOBNAME | sed "s/^.*\([[:digit:]]\.[[:digit:]]\{4\}$\)/\1/")
 
 			STATUS="notQueued"	
 
-			if [ $JOBNAME_BETA = $BETA ] && [ $JOBNAME_KAPPA = $KAPPA ]; then
+			if [ $JOBNAME_BETA = $BETA ] && [ $JOBNAME_KAPPA = $KAPPA ] && [ $JOBNAME_NTAU = $NTAU ] && [ $JOBNAME_NSPAT = $NSPAT ]; then
 
 				STATUS=$(llq -l $JOBID | grep "^[[:blank:]]*Status:" | sed "s/^.*Status: \([[:alpha:]].*$\)/\1/")
 				#if [ $i = "b5.7500" ]; then echo "break" 
@@ -644,20 +646,38 @@ if [ $LISTSTATUS = "TRUE" ]; then
 		OUTPUTFILE_GLOBALPATH="$WORK_BETADIRECTORY/$OUTPUTFILE_NAME"
 		#-------------------------------------------------------------------------------------------------------------------------#
 
-		if [ -d $HOME_BETADIRECTORY ] && [ -d $WORK_BETADIRECTORY ] && [ -f $INPUTFILE_GLOBALPATH ] && [ -f $OUTPUTFILE_GLOBALPATH ]; then
+		if [ -d $WORK_BETADIRECTORY ] && [ -f $OUTPUTFILE_GLOBALPATH ]; then
+
+			WORKDIRS_EXIST="true"
+		else 
+
+			WORKDIRS_EXIST="false"
+		fi
+
+		if [ -d $HOME_BETADIRECTORY ] && [ -f $INPUTFILE_GLOBALPATH ]; then
 						
 			#if [ $i = "b5.7500" ]; then echo "after break in if" 
 			#fi
 
 			TOTAL_NR_TRAJECTORIES=$(grep "Total number of trajectories" $INPUTFILE_GLOBALPATH | grep -o "[[:digit:]]\+")	
 			TOTAL_NR_TRAJECTORIES=$(expr $TOTAL_NR_TRAJECTORIES - 0)
-			TRAJECTORIES_DONE=$(tail -n1 $OUTPUTFILE_GLOBALPATH | grep -o "^[[:digit:]]\{8\}")
-			TRAJECTORIES_DONE=$(expr $TRAJECTORIES_DONE + 1)
+
+			if [ $WORKDIRS_EXIST = "true" ]; then
+
+				TRAJECTORIES_DONE=$(tail -n1 $OUTPUTFILE_GLOBALPATH | grep -o "^[[:digit:]]\{8\}")
+				TRAJECTORIES_DONE=$(expr $TRAJECTORIES_DONE + 1)
+			else
+
+				TRAJECTORIES_DONE=0
+			fi
 			MEASUREMENTS_REMAINING=$(expr $TOTAL_NR_TRAJECTORIES - $TRAJECTORIES_DONE)
 
 			if [ $STATUS = "notQueued" ] && [ $MEASUREMENTS_REMAINING -eq "0" ]; then
+
 				STATUS="finished"
-			elif [ $STATUS = "notQueued" ] && [ $MEASUREMENTS_REMAINING -ne "0" ]; then
+
+			elif [ $STATUS = "notQueued" ] && [ $MEASUREMENTS_REMAINING -ne "0" ] && [ $WORKDIRS_EXIST = "true" ]; then
+
 				STATUS="canceled"
 			fi
 
