@@ -76,7 +76,7 @@ echo '# directory where the executable is stored' >> $JOBSCRIPT_GLOBALPATH
 echo 'export EDIR=${IDIR}' >> $JOBSCRIPT_GLOBALPATH
 echo '#' >> $JOBSCRIPT_GLOBALPATH
 echo '# directory with the scripts (StartToContinue.sh, GetParameterValue.sh, Produce.nstore_counter)' >> $JOBSCRIPT_GLOBALPATH
-echo 'export SDIR=${SCRIPT_DIR}' >> $JOBSCRIPT_GLOBALPATH
+echo 'export SDIR='"${SCRIPT_DIR}" >> $JOBSCRIPT_GLOBALPATH
 echo '#' >> $JOBSCRIPT_GLOBALPATH
 echo '# Save initial position to go back at the end of the job. In this case if the job is' >> $JOBSCRIPT_GLOBALPATH
 echo '# submitted again, the standard output is saved to the same directory' >> $JOBSCRIPT_GLOBALPATH
