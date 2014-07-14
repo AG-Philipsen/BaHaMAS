@@ -16,10 +16,9 @@
 #       underscores.
 
 # Global variables:
-MU_PREFIX="mu"
-MUI_PREFIX="mui"
-NT_PREFIX="nt"
-NS_PREFIX="ns"
+CHEMPOT_PREFIX="mui"
+NTIME_PREFIX="nt"
+NSPACE_PREFIX="ns"
 KAPPA_PREFIX="k"
 CHEMPOT_POSITION=0
 KAPPA_POSITION=1
@@ -30,29 +29,32 @@ KAPPA=0
 NSPACE=0
 NTIME=0
 PARAMETERS_PATH=""
+PARAMETERS_STRING=""
 
 # Global functions
 
-function SetParametersPath(){
+function SetParametersPathAndString(){
     if [ $KAPPA -eq 0 ] || [ $NSPACE -eq 0 ] || [ $NTIME -eq 0 ] || [[ $CHEMPOT == "" ]]; then
 	echo "Unable to SetParametersPath! Aborting..."
         exit -1
     fi
-    local PREFIXES=([$CHEMPOT_POSITION]=$MUI_PREFIX [$KAPPA_POSITION]=$KAPPA_PREFIX [$NTIME_POSITION]=$NT_PREFIX [$NSPACE_POSITION]=$NS_PREFIX)
+    local PREFIXES=([$CHEMPOT_POSITION]=$CHEMPOT_PREFIX [$KAPPA_POSITION]=$KAPPA_PREFIX [$NTIME_POSITION]=$NTIME_PREFIX [$NSPACE_POSITION]=$NSPACE_PREFIX)
     local PARAMETERS_VALUE=([$CHEMPOT_POSITION]=$CHEMPOT [$KAPPA_POSITION]=$KAPPA [$NTIME_POSITION]=$NTIME [$NSPACE_POSITION]=$NSPACE)
     for ((i=0; i<${#PREFIXES[@]}; i++)); do    
 	PARAMETERS_PATH="$PARAMETERS_PATH/${PREFIXES[$i]}${PARAMETERS_VALUE[$i]}"
+	PARAMETERS_STRING="$PARAMETERS_STRING${PREFIXES[$i]}${PARAMETERS_VALUE[$i]}_"
     done
+    PARAMETERS_STRING=${PARAMETERS_STRING%?} #Remove last underscore
 }
 
 function ReadParametersFromPath(){
-    local PREFIXES=([$CHEMPOT_POSITION]=$MUI_PREFIX [$KAPPA_POSITION]=$KAPPA_PREFIX [$NTIME_POSITION]=$NT_PREFIX [$NSPACE_POSITION]=$NS_PREFIX)
+    local PREFIXES=([$CHEMPOT_POSITION]=$CHEMPOT_PREFIX [$KAPPA_POSITION]=$KAPPA_PREFIX [$NTIME_POSITION]=$NTIME_PREFIX [$NSPACE_POSITION]=$NSPACE_PREFIX)
     local PARAMETERS_VALUE=()
     #Path given as first argument to this function
     local PATH_TO_BE_USED="/$1/" #Add in front and back a "/" just to be general in the search
     for ((i=0; i<${#PREFIXES[@]}; i++)); do
 	if [ $(echo $PATH_TO_BE_USED | grep -o "/${PREFIXES[$i]}" | wc -l) -ne 1 ]; then
-	    echo "Unable to recover \"${PREFIXES[$i]}\" from the path \"$1\". Aborting..."
+	    printf "\e[0;31m Unable to recover \"${PREFIXES[$i]}\" from the path \"$1\". Aborting...\n\n\e[0m"
             exit -1
 	fi
 	PARAMETERS_VALUE[$i]=$(echo "$PATH_TO_BE_USED" | awk -v expr="${PREFIXES[$i]}" \
@@ -65,17 +67,34 @@ function ReadParametersFromPath(){
     NSPACE=${PARAMETERS_VALUE[$NSPACE_POSITION]}
     #Check that the recovered parameter makes sense
     if [[ ! $KAPPA =~ ^[[:digit:]]{4}$ ]]; then
-	printf "\n\e[0;31m Unable to recover \"$KAPPA_PREFIX\" from the path \"$1\". Aborting...\n\n\e[0m"
+	printf "\n\e[0;31m Parameter \"$KAPPA_PREFIX\" from the path \"$1\" not allowed! Aborting...\n\n\e[0m"
 	exit -1
     elif [[ ! $NTIME =~ ^[[:digit:]]{1}$ ]]; then
-	printf "\n\e[0;31m Unable to recover \"$NT_PREFIX\" from the path \"$1\". Aborting...\n\n\e[0m"
+	printf "\n\e[0;31m Parameter \"$NTIME_PREFIX\" from the path \"$1\" not allowed! Aborting...\n\n\e[0m"
 	exit -1
     elif [[ ! $NSPACE =~ ^[[:digit:]]{2}$ ]]; then
-	printf "\n\e[0;31m Unable to recover \"$NS_PREFIX\" from the path \"$1\". Aborting...\n\n\e[0m"
+	printf "\n\e[0;31m Parameter \"$NSPACE_PREFIX\" from the path \"$1\" not allowed! Aborting...\n\n\e[0m"
 	exit -1
     fi
     #Set parameters path
-    SetParametersPath
+    SetParametersPathAndString
 }
+
+function CheckSingleOccurrenceInPath(){
+    for var in $@; do
+	Var=$(echo $(pwd) | grep -o "$var" | wc -l)
+	if [ $Var -ne 1 ] ; then
+	    printf "\n\e[0;31m The string \"$var\" may only occure once in the path! Aborting...\n\n\e[0m" 
+	    exit 1
+	fi
+    done
+}
+
+
+
+
+
+
+
 
 
