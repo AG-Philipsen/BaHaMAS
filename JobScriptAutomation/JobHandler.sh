@@ -48,7 +48,7 @@ LISTSTATUS="FALSE"
 
 USER_MAIL="czaban@th.physik.uni-frankfurt.de"
 HMC_BUILD_PATH="tmLQCD_imagMu_Juqueen/Program/build"
-SIMULATION_GLOBALPATH="ImagMu_Output_Data"
+SIMULATION_PATH="ImagMu_Output_Data"
 HOME_DIR="/homeb/hkf8/hkf806" 
 WORK_DIR="/work/hkf8/hkf806" 
 SCRIPT_DIR="$HOME_DIR/Script/tmLQCD_Juqueen"
@@ -257,7 +257,7 @@ fi
 
 #-----------------------------------Crosscheck HOME_DIR_WITH_BETAFOLDERS path with actual position---------------------------------#
 
-HOME_DIR_WITH_BETAFOLDERS="$HOME_DIR/$SIMULATION_GLOBALPATH/$CHEMPOT_PREFIX$CHEMPOT/$KAPPA_PREFIX$KAPPA/$NTAU_PREFIX$NTAU/$NSPAT_PREFIX$NSPAT"
+HOME_DIR_WITH_BETAFOLDERS="$HOME_DIR/$SIMULATION_PATH/$CHEMPOT_PREFIX$CHEMPOT/$KAPPA_PREFIX$KAPPA/$NTAU_PREFIX$NTAU/$NSPAT_PREFIX$NSPAT"
 if [ "$HOME_DIR_WITH_BETAFOLDERS" != "$(pwd)" ]; then
 	printf "\n\e[0;31m Constructed path to directory containing beta folders does not match the actual position! Aborting...\n\n\e[0m"
 	exit -1
@@ -265,7 +265,7 @@ fi
 #------------------------------------------------------------------------------------------------------------------------------#
 
 #-------------------------------------Construct WORK_DIR_WITH_BETAFOLDERS------------------------------------------------------#
-WORK_DIR_WITH_BETAFOLDERS="$WORK_DIR/$SIMULATION_GLOBALPATH/$CHEMPOT_PREFIX$CHEMPOT/$KAPPA_PREFIX$KAPPA/$NTAU_PREFIX$NTAU/$NSPAT_PREFIX$NSPAT"
+WORK_DIR_WITH_BETAFOLDERS="$WORK_DIR/$SIMULATION_PATH/$CHEMPOT_PREFIX$CHEMPOT/$KAPPA_PREFIX$KAPPA/$NTAU_PREFIX$NTAU/$NSPAT_PREFIX$NSPAT"
 #------------------------------------------------------------------------------------------------------------------------------#
 
 #-----------------------------------Check for correct specification of parallelization parameters---------------------------------#
