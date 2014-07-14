@@ -17,8 +17,8 @@ echo '2KappaMu = 0.' >> $INPUTFILE_GLOBALPATH
 echo '' >> $INPUTFILE_GLOBALPATH
 echo '#######################################################' >> $INPUTFILE_GLOBALPATH
 echo '## global parameters' >> $INPUTFILE_GLOBALPATH
-echo "L = $NSPAT" >> $INPUTFILE_GLOBALPATH
-echo "T = $NTAU" >> $INPUTFILE_GLOBALPATH
+echo "L = $NSPACE" >> $INPUTFILE_GLOBALPATH
+echo "T = $NTIME" >> $INPUTFILE_GLOBALPATH
 echo "Measurements = $MEASUREMENTS" >> $INPUTFILE_GLOBALPATH
 echo "# Total number of trajectories = $MEASUREMENTS" >> $INPUTFILE_GLOBALPATH
 echo '' >> $INPUTFILE_GLOBALPATH
