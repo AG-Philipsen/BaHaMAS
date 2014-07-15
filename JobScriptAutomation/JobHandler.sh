@@ -39,7 +39,6 @@ source $HOME/Script/JobScriptAutomation/AuxiliaryFunction.sh || exit -2
 #-----------------------------------------------------------------------------------------------------------------#
 # Set default values for the command line parameters
 
-JOBSCRIPT_PREFIX="job.submit.script.imagMu"
 BETA_PREFIX="b"
 BETASFILE="betas"
 KAPPA="1000"
@@ -82,7 +81,7 @@ fi
 #-----------------------------------------------------------------------------------------------------------------#
 # Check if the necessary scripts exist.
 if [ ! -f $PRODUCEJOBSCRIPTSH ] || [ ! -f $PRODUCEINPUTFILESH ] || [ ! -f $HMC_TM_GLOBALPATH ]; then
-	printf "\n\e[0;31m One or more of the following scripts are missing:\n\e[0m"
+	printf "\n\e[0;31m One or more of the following files are missing:\n\e[0m"
 	printf "\n\e[0;31m   - $PRODUCEJOBSCRIPTSH\e[0m"
 	printf "\n\e[0;31m   - $PRODUCEINPUTFILESH\e[0m"
 	printf "\n\e[0;31m   - $HMC_TM_GLOBALPATH\e[0m"
@@ -108,14 +107,12 @@ fi
 WORK_DIR_WITH_BETAFOLDERS="$WORK_DIR/$SIMULATION_PATH$PARAMETERS_PATH"
 #-----------------------------------------------------------------------------------------------------------------#
 
-exit
-
 
 #-----------------------------------------------------------------------------------------------------------------#
-# Check for correct specification of parallelization parameters
+# Check for correct specification of parallelization parameters, only on JUQUEEN
 if [ $LISTSTATUS = "FALSE" ]; then
 
-    CheckParallelizationTmlqcdForJuqueen
+    if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then CheckParallelizationTmlqcdForJuqueen; fi
 
 fi
 #-----------------------------------------------------------------------------------------------------------------#
@@ -138,15 +135,19 @@ PROBLEM_BETA_ARRAY=() #Arrays that will contain the beta values that actually wi
 
 if [ $SUBMITONLY = "FALSE" ] && [ $CONTINUE = "FALSE" ] && [ $LISTSTATUS = "FALSE" ]; then  
 
-    ProduceInputFileAndJobScriptForEachBeta #TODO: Declare all possible local variable in this function as local!
+    ProduceInputFileAndJobScriptForEachBeta
 
-elif [ $SUBMITONLY = "TRUE" ] && [ $CONTINUE = "FALSE" ] && [ $LISTSTATUS = "FALSE" ]; then  
+elif [ $SUBMITONLY = "TRUE" ]; then  
 
+    echo "B"
     ProcessBetaValuesForSubmitOnly #TODO: Declare all possible local variable in this function as local!
+    exit
 
 elif [ $CONTINUE = "TRUE" ]; then 
 
+    echo "C"
     ProcessBetaValuesForContinue #TODO: Declare all possible local variable in this function as local! Use also only capital letters!
+    exit
 
 fi
 

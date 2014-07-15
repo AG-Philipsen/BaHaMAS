@@ -10,4 +10,6 @@ PRODUCEINPUTFILESH="$HOME_DIR/Script/JobScriptAutomation/ProduceInputFile.sh"
 HMC_TM_FILENAME="hmc_tm"
 HMC_TM_GLOBALPATH="$HOME_DIR/$HMC_BUILD_PATH/$HMC_TM_FILENAME"
 INPUTFILE_NAME="hmc.input"
-OUTPUTFILE_NAME="output.data"
+JOBSCRIPT_PREFIX="job.script"
+
+#OUTPUTFILE_NAME="output.data"

@@ -82,7 +82,7 @@ function ReadBetaValuesFromFile(){
 	done
 	printf "\e[0;36m===================================================================================\n\e[0m"
     else	
-	printf "\e[0;34m No beta values in betas file. Aborting...:\n\e[0m"
+	printf "\n\e[0;31m  No beta values in betas file. Aborting...\n\n\e[0m"
 	exit -1
     fi
 }
@@ -92,21 +92,21 @@ function ProduceInputFileAndJobScriptForEachBeta(){
     for BETA in ${BETAVALUES[@]}; do
 	
 	#-------------------------------------------------------------------------------------------------------------------------#
-	HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
-	JOBSCRIPT_NAME="${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}_$BETA_PREFIX$BETA"
-	JOBSCRIPT_GLOBALPATH="${HOME_BETADIRECTORY}/$JOBSCRIPT_NAME"
-	INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$INPUTFILE_NAME"
+	local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
+	local JOBSCRIPT_NAME="${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}_$BETA_PREFIX$BETA"
+	local JOBSCRIPT_GLOBALPATH="${HOME_BETADIRECTORY}/$JOBSCRIPT_NAME"
+	local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$INPUTFILE_NAME"
 	#-------------------------------------------------------------------------------------------------------------------------#
 
 	if [ ! -d $HOME_BETADIRECTORY ]; then
-	    printf "\e[0;34m Creating directory for beta = $BETA...\n\e[0m"
+	    printf "\e[0;34m Creating directory for beta = $BETA...\e[0m"
 	    mkdir $HOME_BETADIRECTORY || exit -2
+	    printf "\e[0;34m done!\n\e[0m"
 	    SUBMIT_BETA_ARRAY+=( $BETA )
 	else
 	    #$HOME_BETADIRECTORY already exists. Check if there are files in $HOME_BETADIRECTORY. 
 	    if [ $(ls $HOME_BETADIRECTORY | wc -l) -gt 0 ]; then
-		printf "\n\e[0;31m There are already files in $HOME_BETADIRECTORY...\n\e[0m"
-		printf "\e[0;31m Leaving out $BETA ...\n\n\e[0m"
+		printf "\n\e[0;31m There are already files in $HOME_BETADIRECTORY. The value beta=$BETA will be skipped!\n\e[0m"
 		PROBLEM_BETA_ARRAY+=( $BETA )
 		continue
 	    fi
@@ -116,16 +116,17 @@ function ProduceInputFileAndJobScriptForEachBeta(){
 	printf "\e[0;34m Producing files inside $HOME_BETADIRECTORY/... \n\e[0m"
 	. $PRODUCEJOBSCRIPTSH	
 	. $PRODUCEINPUTFILESH	
-	cp $HMC_TM_GLOBALPATH $HOME_BETADIRECTORY 
+	if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
+	    cp $HMC_TM_GLOBALPATH $HOME_BETADIRECTORY || exit -2
+	fi
 	
-	if [ -f "$INPUTFILE_GLOBALPATH" ] && [ -f "$JOBSCRIPT_GLOBALPATH" ] && [ -f "$HOME_BETADIRECTORY/$HMC_TM_FILENAME" ]; then
-	    printf "\e[0;34m Built files successfully...\n\n\e[0m"
+	if [ -f "$INPUTFILE_GLOBALPATH" ] && [ -f "$JOBSCRIPT_GLOBALPATH" ]; then
+	    printf "\e[0;34m ...files built successfully!\n\n\e[0m"
 	else
-	    printf "\n\e[0;31m One or more of the following files are missing:\n\e[0m"
-	    printf "\n\e[0;31m $INPUTFILE_GLOBALPATH\e[0m"
-	    printf "\n\e[0;31m $JOBSCRIPT_GLOBALPATH\e[0m"
-	    printf "\n\e[0;31m $HOME_BETADIRECTORY/$HMC_TM_FILENAME\e[0m"
-	    printf "\n\e[0;31m Aborting...\n\e[0m"
+	    printf "\n\e[0;31m One or more of the following files has not been successfully created:\n\e[0m"
+	    printf "\n\e[0;31m  - $INPUTFILE_GLOBALPATH\e[0m"
+	    printf "\n\e[0;31m  - $JOBSCRIPT_GLOBALPATH\n\e[0m"
+	    printf "\n\e[0;31m Aborting...\n\n\e[0m"
 	    exit -1
 	fi
     done

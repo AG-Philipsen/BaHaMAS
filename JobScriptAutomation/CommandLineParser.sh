@@ -32,7 +32,8 @@ function ParseCommandLineOption(){
 		echo -e "                                     ->    If a number is specified finished jobs will be continued up to the specified number."
 		echo -e "  \e[0;34m--liststatus\e[0;32m                       ->    The measurement status for all beta in the current directory will be displayed"
 		echo ""
-		echo -e "\e[0;33mNOTE: The blue options are mutually exclusive!"
+		echo -e "\e[0;33mNOTE: The blue options are mutually exclusive and they are all FALSE by default! In other words, if none of them"
+		echo -e "\e[0;33m      is given, the script will create beta-folders with the right files inside, but no job will be submitted."
 		printf "\n\e[0m"
 		exit
 		shift;;
