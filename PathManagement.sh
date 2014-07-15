@@ -84,7 +84,7 @@ function CheckSingleOccurrenceInPath(){
     for var in $@; do
 	Var=$(echo $(pwd) | grep -o "$var" | wc -l)
 	if [ $Var -ne 1 ] ; then
-	    printf "\n\e[0;31m The string \"$var\" may only occure once in the path! Aborting...\n\n\e[0m" 
+	    printf "\n\e[0;31m The string \"$var\" must occur once and only once in the path! Aborting...\n\n\e[0m" 
 	    exit 1
 	fi
     done
