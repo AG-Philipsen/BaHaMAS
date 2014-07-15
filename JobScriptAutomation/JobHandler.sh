@@ -139,20 +139,20 @@ if [ $SUBMITONLY = "FALSE" ] && [ $CONTINUE = "FALSE" ] && [ $LISTSTATUS = "FALS
 
 elif [ $SUBMITONLY = "TRUE" ]; then  
 
-    echo "B"
-    ProcessBetaValuesForSubmitOnly #TODO: Declare all possible local variable in this function as local!
-    exit
+    ProcessBetaValuesForSubmitOnly
 
 elif [ $CONTINUE = "TRUE" ]; then 
 
-    echo "C"
     ProcessBetaValuesForContinue #TODO: Declare all possible local variable in this function as local! Use also only capital letters!
-    exit
 
 fi
+#-----------------------------------------------------------------------------------------------------------------#
 
+
+exit
 
 #-----------------------------------------------------------------------------------------------------------------#
+# TODO: Should not this if be an elif of above!?
 if [ $LISTSTATUS = "TRUE" ]; then #TODO: This option should be reconsidered and improved
 
     ProduceJobStatusFile #TODO: Declare all possible local variable in this function as local! Use PARAMETERS_STRING/PATH where needed!
