@@ -59,10 +59,11 @@ SUBMITONLY="FALSE"
 CONTINUE="FALSE"
 CONTINUE_NUMBER="0"
 LISTSTATUS="FALSE"
+CLUSTER_NAME="LOEWE"
 
 #-----------------------------------------------------------------------------------------------------------------#
 # Set default values for the non-modifyable variables ---> Modify this file to change them!
-source ./UserSpecificVariables_$(whoami).sh || exit -2
+source $HOME/Script/JobScriptAutomation/UserSpecificVariables_$(whoami).sh || exit -2
 #-----------------------------------------------------------------------------------------------------------------#
 
 
@@ -70,6 +71,11 @@ source ./UserSpecificVariables_$(whoami).sh || exit -2
 # Extract options and their arguments into variables.
 source $HOME/Script/JobScriptAutomation/CommandLineParser.sh || exit -2
 ParseCommandLineOption $@
+# NOTE: The CLUSTER_NAME variable has not been so far put in the parser since
+#       it can be either LOEWE or JUQUEEN. It is set using whoami. Change this in future if needed!
+if [[ $(whoami) =~ ^hkf[[:digit:]]{3} ]]; then
+    CLUSTER_NAME="JUQUEEN"
+fi
 #-----------------------------------------------------------------------------------------------------------------#
 
 
@@ -88,7 +94,11 @@ fi
 
 #-----------------------------------------------------------------------------------------------------------------#
 # Perform all the checks on the path, reading out some variables 
-CheckSingleOccurrenceInPath "homeb" "hkf8/" "hkf8[[:digit:]]\+" "mui" "k[[:digit:]]\+" "nt[[:digit:]]\+" "ns[[:digit:]]\+"
+if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
+    CheckSingleOccurrenceInPath "homeb" "hkf8[^[:digit:]]" "hkf8[[:digit:]]{2}" "mui" "k[[:digit:]]\+" "nt[[:digit:]]\+" "ns[[:digit:]]\+"
+else
+    CheckSingleOccurrenceInPath "home" "hfftheo" "$(whoami)" "mui" "k[[:digit:]]\+" "nt[[:digit:]]\+" "ns[[:digit:]]\+"
+fi
 ReadParametersFromPath $(pwd)
 HOME_DIR_WITH_BETAFOLDERS="$HOME_DIR/$SIMULATION_PATH$PARAMETERS_PATH"
 if [ "$HOME_DIR_WITH_BETAFOLDERS" != "$(pwd)" ]; then
@@ -97,6 +107,8 @@ if [ "$HOME_DIR_WITH_BETAFOLDERS" != "$(pwd)" ]; then
 fi
 WORK_DIR_WITH_BETAFOLDERS="$WORK_DIR/$SIMULATION_PATH$PARAMETERS_PATH"
 #-----------------------------------------------------------------------------------------------------------------#
+
+exit
 
 
 #-----------------------------------------------------------------------------------------------------------------#
