@@ -40,13 +40,8 @@ source $HOME/Script/JobScriptAutomation/AuxiliaryFunction.sh || exit -2
 # Set default values for the command line parameters
 
 JOBSCRIPT_PREFIX="job.submit.script.imagMu"
-#CHEMPOT_PREFIX="mui"
-#KAPPA_PREFIX="k"
-#NTIME_PREFIX="nt"
-#NSPACE_PREFIX="ns"
 BETA_PREFIX="b"
 BETASFILE="betas"
-#CHEMPOT="PiT"
 KAPPA="1000"
 WALLTIME="00:30:00"
 BGSIZE="32"
@@ -67,7 +62,7 @@ LISTSTATUS="FALSE"
 
 #-----------------------------------------------------------------------------------------------------------------#
 # Set default values for the non-modifyable variables ---> Modify this file to change them!
-source $HOME/Script/JobScriptAutomation/UserSpecificVariablesCzaban.sh || exit -2
+source ./UserSpecificVariables_$(whoami).sh || exit -2
 #-----------------------------------------------------------------------------------------------------------------#
 
 

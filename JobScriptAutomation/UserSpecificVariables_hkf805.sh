@@ -1,3 +1,4 @@
+# Paths on JUQUEEN using tmLQCD
 USER_MAIL="sciarra@th.physik.uni-frankfurt.de"
 HMC_BUILD_PATH="tmLQCD/Program/build"
 SIMULATION_PATH="WilsonProject"
