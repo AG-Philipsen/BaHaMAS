@@ -59,6 +59,7 @@ CONTINUE="FALSE"
 CONTINUE_NUMBER="0"
 LISTSTATUS="FALSE"
 CLUSTER_NAME="LOEWE"
+LOEWE_PARTITION="parallel"
 
 #-----------------------------------------------------------------------------------------------------------------#
 # Set default values for the non-modifyable variables ---> Modify this file to change them!
@@ -69,12 +70,12 @@ source $HOME/Script/JobScriptAutomation/UserSpecificVariables_$(whoami).sh || ex
 #-----------------------------------------------------------------------------------------------------------------#
 # Extract options and their arguments into variables.
 source $HOME/Script/JobScriptAutomation/CommandLineParser.sh || exit -2
-ParseCommandLineOption $@
 # NOTE: The CLUSTER_NAME variable has not been so far put in the parser since
 #       it can be either LOEWE or JUQUEEN. It is set using whoami. Change this in future if needed!
 if [[ $(whoami) =~ ^hkf[[:digit:]]{3} ]]; then
     CLUSTER_NAME="JUQUEEN"
 fi
+ParseCommandLineOption $@
 #-----------------------------------------------------------------------------------------------------------------#
 
 
@@ -149,13 +150,13 @@ fi
 #-----------------------------------------------------------------------------------------------------------------#
 
 
-exit
-
 #-----------------------------------------------------------------------------------------------------------------#
 # TODO: Should not this if be an elif of above!?
-if [ $LISTSTATUS = "TRUE" ]; then #TODO: This option should be reconsidered and improved
+if [ $LISTSTATUS = "TRUE" ]; then #TODO: This option should be reconsidered and improved for Juqueen
 
-    ProduceJobStatusFile #TODO: Declare all possible local variable in this function as local! Use PARAMETERS_STRING/PATH where needed!
+    ProduceJobStatusFile 
+    #TODO: On Juqueen, declare all possible local variable in this function as local! Use PARAMETERS_STRING/PATH where needed!
+    #TODO: Test on LOEWE! 
 
 fi
 #------------------------------------------------------------------------------------------------------------------------------#
@@ -172,20 +173,10 @@ fi
 
 
 #------------------------------------------------------------------------------------------------------------------------------#
-# Printing report for problem betas
-if [ ${#PROBLEM_BETA_ARRAY[@]} -gt "0" ]; then	
-printf "\e[0;31m \n For the following beta values something went wrong \n\e[0m"
-printf "\e[0;31m and hence these were left out during file creation and/or job submission:\n\e[0m"
-
-	printf "\n\e[0;31m===================================================================================\n\e[0m"
-	printf "\e[0;31m problematic beta values:\n"
-	for i in ${PROBLEM_BETA_ARRAY[@]}; do
-		echo "  - $i"
-	done
-	printf "\e[0;31m===================================================================================\n\e[0m"
-fi
+# Report on eventual problems
+PrintReportForProblematicBeta
 #------------------------------------------------------------------------------------------------------------------------------#
 
-printf "\e[0;34m \n done!\n\e[0m"
+printf "\e[0;34m \n ...done!\n\n\e[0m"
 
 exit 0

@@ -295,6 +295,7 @@ function ProcessBetaValuesForContinue() {
 
 
 function ProduceJobStatusFile(){
+     if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
 
 	JOBS_STATUS_FILE="jobs_status_""$CHEMPOT_PREFIX$CHEMPOT"_"$KAPPA_PREFIX$KAPPA"_"$NTIME_PREFIX$NTIME"_"$NSPACE_PREFIX$NSPACE"".txt"
 
@@ -398,6 +399,70 @@ function ProduceJobStatusFile(){
 		
 	done
 	printf "\e[0;36m==================================================================================================\n\e[0m"
+
+    else # On LOEWE
+	 
+	 local JOBS_STATUS_FILE="jobs_status_$PARAMETERS_STRING.txt"
+	 rm -f $JOBS_STATUS_FILE
+	 
+	 printf "\n\e[0;36m==================================================================================================\n\e[0m"
+	 printf "\e[0;34m%s\t\t%s\t\t%s\n\e[0m"   "Beta"   "Trajectories done"   "Status"
+	 printf "%s\t\t%s\t\t%s\n"   "Beta"   "Trajectories done"   "Status" >> $JOBS_STATUS_FILE
+	 for BETA in b*; do
+
+	     BETA=$(echo $BETA | grep -o "[[:digit:]].[[:digit:]]\{4\}")
+	     if [[ ! $BETA =~ [[:digit:]].[[:digit:]]{4} ]]; then continue; fi
+	     
+	     JOBID_ARRAY=( $(squeue | awk 'NR>1{print $1}') )
+	     STATUS=( )
+	     for JOBID in ${JOBID_ARRAY[@]}; do
+		 
+		 JOBNAME=$(scontrol show job $JOBID | grep "Name=" | sed "s/^.*Name=\(.*$\)/\1/")
+		 JOBNAME_CHEMPOT=$(echo $JOBNAME | awk -v pref=$CHEMPOT_PREFIX -v pref_len=${#CHEMPOT_PREFIX} '{print substr($0, index($0, pref)+pref_len)}' \
+                                                 | awk '{if(index($0, "_")) {print substr($0, 1, index($0, "_")-1)} else {print $0}}')
+ 		 JOBNAME_NTIME=$(echo $JOBNAME | awk -v pref=$NTIME_PREFIX -v pref_len=${#NTIME_PREFIX} '{print substr($0, index($0, pref)+pref_len)}' \
+                                               | awk '{if(index($0, "_")) {print substr($0, 1, index($0, "_")-1)} else {print $0}}')
+		 JOBNAME_NSPACE=$(echo $JOBNAME | awk -v pref=$NSPACE_PREFIX -v pref_len=${#NSPACE_PREFIX} '{print substr($0, index($0, pref)+pref_len)}' \
+                                                | awk '{if(index($0, "_")) {print substr($0, 1, index($0, "_")-1)} else {print $0}}')
+		 JOBNAME_KAPPA=$(echo $JOBNAME | awk -v pref=$KAPPA_PREFIX -v pref_len=${#KAPPA_PREFIX} '{print substr($0, index($0, pref)+pref_len)}' \
+                                               | awk '{if(index($0, "_")) {print substr($0, 1, index($0, "_")-1)} else {print $0}}')
+		 JOBNAME_BETA=$(echo $JOBNAME | awk -v pref=$BETA_PREFIX -v pref_len=${#BETA_PREFIX} '{print substr($0, index($0, pref)+pref_len)}' \
+                                              | awk '{if(index($0, "_")) {print substr($0, 1, index($0, "_")-1)} else {print $0}}')
+		 
+		 if [ $JOBNAME_BETA = $BETA ] && [ $JOBNAME_KAPPA = $KAPPA ] && [ $JOBNAME_NTIME = $NTIME ] \
+                                              && [ $JOBNAME_NSPACE = $NSPACE ] && [ $JOBNAME_CHEMPOT = $CHEMPOT ]; then
+		     STATUS+=( $(scontrol show job $JOBID | grep "^[[:blank:]]*JobState=" | sed "s/^.*JobState=\([[:alpha:]]*[[:blank:]]\).*$/\1/"))
+		 fi
+		 
+	     done
+	     
+	     if [ ${#STATUS[@]} -eq 0 ]; then
+		 STATUS="notQueued"
+	     elif [ ${#STATUS[@]} -ne 1 ]; then
+		 printf " \e[1;37;41mWARNING:\e[0;31m \e[4mThere are more than one job with $PARAMETERS_STRING as parameters! Serious problem! Aborting...\e[0m\n"
+		 exit -1
+	     fi
+
+	     #----Constructing WORK_BETADIRECTORY, HOME_BETADIRECTORY, JOBSCRIPT_NAME, JOBSCRIPT_GLOBALPATH and INPUTFILE_GLOBALPATH---#
+	     local OUTPUTFILE_GLOBALPATH="$WORK_BETADIRECTORY/$OUTPUTFILE_NAME"
+	     #-------------------------------------------------------------------------------------------------------------------------#
+
+	     if [ -f $OUTPUTFILE_GLOBALPATH ]; then
+		 
+		 TRAJECTORIES_DONE=$(( $(awk 'END{print $1}' $OUTPUTFILE_GLOBALPATH) +1 ))
+		 
+	     else
+		 
+		 TRAJECTORIES_DONE=0
+		 
+	     fi
+	     printf "\e[0;34m%s\t\t%17d\t\t%s\n\e[0m"   "$BETA"   "$TRAJECTORIES_DONE"   "$STATUS"
+	     printf "%s\t%d\t\t%s\n\e[0m"   "$BETA"   "$TRAJECTORIES_DONE"   "$STATUS" >> $JOBS_STATUS_FILE
+	     
+	 done
+	 printf "\e[0;36m==================================================================================================\n\e[0m"
+	 
+     fi
 }
 
 
@@ -406,28 +471,45 @@ function SubmitJobsForValidBetaValues() {
 	
 	printf "\n\e[0;36m===================================================================================\n\e[0m"
 	printf "\e[0;34m Jobs will be submitted for the following beta values:\n\e[0m"
-	for i in ${SUBMIT_BETA_ARRAY[@]}; do
-	    echo "  - $i"
+	for BETA in ${SUBMIT_BETA_ARRAY[@]}; do
+	    echo "  - $BETA"
 	done
-	printf "\e[0;36m===================================================================================\n\e[0m"
 	
 	for BETA in ${SUBMIT_BETA_ARRAY[@]}; do
 	    
 	    #-------------------------------------------------------------------------------------------------------------------------#
-	    HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
-	    JOBSCRIPT_NAME="${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}_$BETA_PREFIX$BETA"
-	    JOBSCRIPT_GLOBALPATH="${HOME_BETADIRECTORY}/$JOBSCRIPT_NAME"
-   	    #-------------------------------------------------------------------------------------------------------------------------#
+	    local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
+	    local JOBSCRIPT_NAME="${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}_$BETA_PREFIX$BETA"
+	    #-------------------------------------------------------------------------------------------------------------------------#
 	    
 	    cd $HOME_BETADIRECTORY
-	    printf "\n\e[0;34m actual location: $(pwd) \n\e[0m"
-	    printf "\e[0;34m Submitting:\n\e[0m"
-	    printf "\e[0;34m llsubmit $JOBSCRIPT_GLOBALPATH\n\e[0m"
-	    llsubmit $JOBSCRIPT_GLOBALPATH
+	    printf "\n\e[0;34m Actual location: \e[0;35m$(pwd) \n\e[0m"
+	    printf "\e[0;34m      Submitting:\e[0m"
+	    if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
+		printf "\e[0;32m \e[4mllsubmit $JOBSCRIPT_NAME\n\e[0m"
+		llsubmit $JOBSCRIPT_NAME
+	    else
+		printf "\e[0;32m \e[4msbatch $JOBSCRIPT_NAME\n\e[0m"
+		#sbatch $JOBSCRIPT_NAME
+	    fi
 	    cd ..
 	done
+	printf "\n\e[0;36m===================================================================================\n\e[0m"
     else
 	printf " \e[1;37;41mNo jobs will be submitted.\e[0m\n"
     fi
 }
 
+
+function PrintReportForProblematicBeta() {
+
+    if [ ${#PROBLEM_BETA_ARRAY[@]} -gt "0" ]; then	
+	printf "\n\e[0;31m===================================================================================\n\e[0m"
+	printf "\e[0;31m For the following beta values something went wrong and hence\n\e[0m"
+	printf "\e[0;31m they were left out during file creation and/or job submission:\n"
+	for BETA in ${PROBLEM_BETA_ARRAY[@]}; do
+	    printf "  - \e[1m$BETA\e[0;31m\n"
+	done
+	printf "\e[0;31m===================================================================================\n\e[0m"
+    fi
+}
