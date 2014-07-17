@@ -67,13 +67,13 @@ LISTSTATUS="FALSE"
 
 #-----------------------------------------------------------------------------------------------------------------#
 # Set default values for the non-modifyable variables ---> Modify this file to change them!
-source ./UserSpecificVariablesSciarra.sh || exit -2
+source $HOME/Script/JobScriptAutomation/UserSpecificVariablesCzaban.sh || exit -2
 #-----------------------------------------------------------------------------------------------------------------#
 
 
 #-----------------------------------------------------------------------------------------------------------------#
 # Extract options and their arguments into variables.
-source ./CommandLineParser.sh || exit -2
+source $HOME/Script/JobScriptAutomation/CommandLineParser.sh || exit -2
 ParseCommandLineOption $@
 #-----------------------------------------------------------------------------------------------------------------#
 
@@ -93,7 +93,7 @@ fi
 
 #-----------------------------------------------------------------------------------------------------------------#
 # Perform all the checks on the path, reading out some variables 
-CheckSingleOccurrenceInPath "homeb" "hkf8[[:digit:]]" "hkf80[[:digit:]]" "mui" "k[[:digit:]]" "nt[[:digit:]]" "ns[[:digit:]]"
+CheckSingleOccurrenceInPath "homeb" "hkf8/" "hkf8[[:digit:]]\+" "mui" "k[[:digit:]]\+" "nt[[:digit:]]\+" "ns[[:digit:]]\+"
 ReadParametersFromPath $(pwd)
 HOME_DIR_WITH_BETAFOLDERS="$HOME_DIR/$SIMULATION_PATH$PARAMETERS_PATH"
 if [ "$HOME_DIR_WITH_BETAFOLDERS" != "$(pwd)" ]; then

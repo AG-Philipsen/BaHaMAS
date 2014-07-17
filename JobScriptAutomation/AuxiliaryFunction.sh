@@ -271,10 +271,7 @@ function ProduceJobStatusFile(){
 
 	JOBS_STATUS_FILE="jobs_status_""$CHEMPOT_PREFIX$CHEMPOT"_"$KAPPA_PREFIX$KAPPA"_"$NTIME_PREFIX$NTIME"_"$NSPACE_PREFIX$NSPACE"".txt"
 
-	if [ -f $JOBS_STATUS_FILE ]; then
-		
-		rm $JOBS_STATUS_FILE
-	fi
+	rm -f $JOBS_STATUS_FILE
 
 	printf "\n\e[0;36m==================================================================================================\n\e[0m"
 	printf "\e[0;34m Listing current measurements status...\n\e[0m"
