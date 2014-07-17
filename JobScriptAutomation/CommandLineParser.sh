@@ -26,6 +26,7 @@ function ParseCommandLineOption(){
 		echo "  --intsteps0                        ->    default value = 7"
 		echo "  --intsteps1                        ->    default value = 5"
 		echo "  --intsteps2                        ->    default value = 5"
+		echo "  --partition                        ->    default value = parallel (ONLY for LOEWE)"
 		echo -e "  \e[0;34m--submit\e[0;32m                           ->    jobs will be submitted"
 		echo -e "  \e[0;34m--submitonly\e[0;32m                       ->    jobs will be submitted (no files are created)"
 		echo -e "  \e[0;34m--continue | --continue=[number]\e[0;32m   ->    Unfinished jobs will be continued up to the nr. of measurements specified in the input file."
@@ -57,6 +58,12 @@ function ParseCommandLineOption(){
 	    --intsteps0=* )		 INTSTEPS0=${1#*=}; shift ;;
 	    --intsteps1=* )		 INTSTEPS1=${1#*=}; shift ;;
 	    --intsteps2=* )		 INTSTEPS2=${1#*=}; shift ;;
+	    --partition=* )		 LOEWE_PARTITION=${1#*=}; 
+	        if [[ $CLUSTER_NAME != "LOEWE" ]]; then
+		    printf "\n\e[0;31m The options --partition can be used only on the LOEWE! Aborting...\n\n\e[0m"
+                    exit -1
+		fi
+		shift ;;
 	    --submit )
 	        if [ $SUBMITONLY = "FALSE" ] && [ $CONTINUE = "FALSE" ] && [ $LISTSTATUS = "FALSE" ]; then 
 		    SUBMIT="TRUE"
