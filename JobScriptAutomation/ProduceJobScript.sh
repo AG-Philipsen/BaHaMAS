@@ -189,6 +189,9 @@ if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
     echo '   day=$(date +'"'"'%d.%m.%Y_%H.%M'"'"')' >> $JOBSCRIPT_GLOBALPATH
     echo '   cp ${ODIR}/output.data ${IDIR}/output.data.${day}' >> $JOBSCRIPT_GLOBALPATH
     echo '   cp ${ODIR}/polyakovloop_dir0 ${IDIR}/polykovloop_dir0.${day}' >> $JOBSCRIPT_GLOBALPATH
+    echo '   printf "Removing ${ODIR}/..conf.tmp* files..."' >> $JOBSCRIPT_GLOBALPATH
+    echo '   rm ${ODIR}/..conf.tmp*' >> $JOBSCRIPT_GLOBALPATH
+    echo '   printf "done!\n"' >> $JOBSCRIPT_GLOBALPATH
     echo '' >> $JOBSCRIPT_GLOBALPATH
     echo '   ' >> $JOBSCRIPT_GLOBALPATH
     echo '   llsubmit ${IDIR}/${THIS_JOB}' >> $JOBSCRIPT_GLOBALPATH
@@ -210,6 +213,9 @@ if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
     echo '   day=$(date +'"'"'%d.%m.%Y_%H.%M'"'"')' >> $JOBSCRIPT_GLOBALPATH
     echo '   cp ${ODIR}/output.data ${IDIR}/output.data.${day}' >> $JOBSCRIPT_GLOBALPATH
     echo '   cp ${ODIR}/polyakovloop_dir0 ${IDIR}/polykovloop_dir0.${day}' >> $JOBSCRIPT_GLOBALPATH
+    echo '   printf "Removing ${ODIR}/..conf.tmp* files..."' >> $JOBSCRIPT_GLOBALPATH
+    echo '   rm ${ODIR}/..conf.tmp*' >> $JOBSCRIPT_GLOBALPATH
+    echo '   printf "done!\n"' >> $JOBSCRIPT_GLOBALPATH
     echo 'fi' >> $JOBSCRIPT_GLOBALPATH
     echo '' >> $JOBSCRIPT_GLOBALPATH
     
