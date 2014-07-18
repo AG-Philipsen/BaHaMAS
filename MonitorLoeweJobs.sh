@@ -28,9 +28,9 @@ for NAME in ${JOBNAME[@]}; do
     if [ ${#NAME} -gt ${#LONGEST_NAME} ]; then
 	LONGEST_NAME=$NAME
     fi
-    if [[ $JOBSTATUS == "RUNNING" ]]; then
+    if [[ ${JOBSTATUS[$i]} == "RUNNING" ]]; then
 	RUNNING_JOBS=$(($RUNNING_JOBS + 1))
-    elif [[ $JOBSTATUS == "PENDING" ]]; then
+    elif [[ ${JOBSTATUS[$i]} == "PENDING" ]]; then
 	PENDING_JOBS=$(($PENDING_JOBS + 1))
     fi
 done
