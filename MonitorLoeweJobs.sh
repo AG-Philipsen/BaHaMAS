@@ -22,15 +22,17 @@ for JOBID in ${JOBID_ARRAY[@]}; do
 done
 
 LONGEST_NAME=${JOBNAME[0]}
-RUNNING_JOBS=0
-PENDING_JOBS=0
 for NAME in ${JOBNAME[@]}; do
     if [ ${#NAME} -gt ${#LONGEST_NAME} ]; then
 	LONGEST_NAME=$NAME
     fi
-    if [[ ${JOBSTATUS[$i]} == "RUNNING" ]]; then
+done
+RUNNING_JOBS=0
+PENDING_JOBS=0
+for ((j=0; j<${#JOBSTATUS[@]}; j++)); do
+    if [[ ${JOBSTATUS[$j]} == "RUNNING" ]]; then
 	RUNNING_JOBS=$(($RUNNING_JOBS + 1))
-    elif [[ ${JOBSTATUS[$i]} == "PENDING" ]]; then
+    elif [[ ${JOBSTATUS[$j]} == "PENDING" ]]; then
 	PENDING_JOBS=$(($PENDING_JOBS + 1))
     fi
 done
