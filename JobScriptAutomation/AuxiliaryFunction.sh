@@ -197,7 +197,7 @@ function ProcessBetaValuesForSubmitOnly() {
 function ProcessBetaValuesForContinue() {
     if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
 
-	for i in ${BETAVALUES[@]}; do
+	for BETA in ${BETAVALUES[@]}; do
 	    
      	    #-------------------------------------------------------------------------------------------------------------------------#
 	    WORK_BETADIRECTORY="$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
