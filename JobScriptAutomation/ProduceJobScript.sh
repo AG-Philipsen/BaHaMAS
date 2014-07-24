@@ -261,7 +261,7 @@ else
     echo "echo \"---------------------------\"" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "# run hmc" >> $JOBSCRIPT_GLOBALPATH
-    echo "srun --gres=gpu:1 $HMC_TM_GLOBALPATH --input-file=\$SLURM_SUBMIT_DIR/hmc.input --kappa=0.$KAPPA --ns=$NSPACE --nt=$NTIME --hmcsteps=$MEASUREMENTS --integrationsteps0=$INTSTEPS0 --integrationsteps1=$INTSTEPS1 --startcondition=hot --beta=$BETA || exit 1" >> $JOBSCRIPT_GLOBALPATH
+    echo "srun --gres=gpu:1 $HMC_TM_GLOBALPATH --input-file=\$SLURM_SUBMIT_DIR/hmc.input --kappa=0.$KAPPA --ns=$NSPACE --nt=$NTIME --hmcsteps=$MEASUREMENTS --integrationsteps0=$INTSTEPS0 --integrationsteps1=$INTSTEPS1 --savefrequency=$NSAVE --startcondition=hot --beta=$BETA || exit 1" >> $JOBSCRIPT_GLOBALPATH
     echo "err=\`echo \$?\`" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"---------------------------\"" >> $JOBSCRIPT_GLOBALPATH

@@ -490,7 +490,7 @@ function SubmitJobsForValidBetaValues() {
 		llsubmit $JOBSCRIPT_NAME
 	    else
 		printf "\e[0;32m \e[4msbatch $JOBSCRIPT_NAME\n\e[0m"
-		#sbatch $JOBSCRIPT_NAME
+		sbatch $JOBSCRIPT_NAME
 	    fi
 	    cd ..
 	done

@@ -123,7 +123,7 @@ else
     echo "solver=cg" >> $INPUTFILE_GLOBALPATH
     echo "sourcetype=volume" >> $INPUTFILE_GLOBALPATH
     echo "sourcecontent=gaussian" >> $INPUTFILE_GLOBALPATH
-    echo "num_sources=96" >> $INPUTFILE_GLOBALPATH
+    echo "num_sources=16" >> $INPUTFILE_GLOBALPATH
     echo "measure_pbp=1" >> $INPUTFILE_GLOBALPATH
     echo "tau=1" >> $INPUTFILE_GLOBALPATH
     echo "num_timescales=2" >> $INPUTFILE_GLOBALPATH
