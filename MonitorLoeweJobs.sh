@@ -37,12 +37,12 @@ for ((j=0; j<${#JOBSTATUS[@]}; j++)); do
     fi
 done
 
-TABLE_FORMAT="%-$((2+${#LONGEST_NAME}))s%-5s%-7s%-5s%-19s%-5s%-19s%-5s%-s"
+TABLE_FORMAT="%-8s%-5s%-$((2+${#LONGEST_NAME}))s%-5s%-7s%-5s%-19s%-5s%-19s%-5s%-s"
 
 printf "\n\e[0;36m"
 for (( c=1; c<=$(($(tput cols)-3)); c++ )); do printf "="; done
 printf "\e[0m\n"
-printf "\e[0;34m\e[2m$TABLE_FORMAT\e[0m\n"   "  JOB NAME:" ""   "STATUS:" ""   "START TIME:" ""   "SUBMITTED ON:" ""   "SUBMITTED FROM:"
+printf "\e[0;34m\e[2m$TABLE_FORMAT\e[0m\n"   "JOBID:" ""   "  JOB NAME:" ""   "STATUS:" ""   "START TIME:" ""   "SUBMITTED ON:" ""   "SUBMITTED FROM:"
 
 for((i=0; i<${#JOBNAME[@]}; i++)) do
 
@@ -54,7 +54,7 @@ for((i=0; i<${#JOBNAME[@]}; i++)) do
 	printf "\e[0;31m"
     fi
     
-    printf "$TABLE_FORMAT\e[0m\n"   "  ${JOBNAME[$i]}" ""   "${JOBSTATUS[$i]}" ""   "${JOBSTARTTIME[$i]}" ""   "${JOBSUBTIME[$i]}" ""   "${JOBSUBFROM[$i]}"
+    printf "$TABLE_FORMAT\e[0m\n"   "${JOBID_ARRAY[$i]}" ""   "  ${JOBNAME[$i]}" ""   "${JOBSTATUS[$i]}" ""   "${JOBSTARTTIME[$i]}" ""   "${JOBSUBTIME[$i]}" ""   "${JOBSUBFROM[$i]}"
     
 done
 
