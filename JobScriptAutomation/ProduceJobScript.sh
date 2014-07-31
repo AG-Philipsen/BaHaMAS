@@ -239,6 +239,11 @@ else
     echo "echo \"GPU:  \$GPU_DEVICE_ORDINAL\"" >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"Date and time: \$(date)\"" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
+    echo "# todo: this is necessary because the log file is produced in the directoy" >> $JOBSCRIPT_GLOBALPATH
+    echo "# of the exec. Copying it later does not guarantee that it is still the same..." >> $JOBSCRIPT_GLOBALPATH
+    echo "echo \"Copy executable to working directory...\"" >> $JOBSCRIPT_GLOBALPATH
+    echo "cp -a $HMC_TM_GLOBALPATH $SLURM_SUBMIT_DIR " >> $JOBSCRIPT_GLOBALPATH
+    echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "# prepare" >> $JOBSCRIPT_GLOBALPATH
     echo "echo \$SLURM_JOB_NODELIST > hmc.\$SLURM_JOB_ID.nodelist" >> $JOBSCRIPT_GLOBALPATH
     echo "mkdir -p \$WORKDIR || exit 2" >> $JOBSCRIPT_GLOBALPATH
@@ -261,7 +266,7 @@ else
     echo "echo \"---------------------------\"" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "# run hmc" >> $JOBSCRIPT_GLOBALPATH
-    echo "srun --gres=gpu:1 $HMC_TM_GLOBALPATH --input-file=\$SLURM_SUBMIT_DIR/hmc.input --kappa=0.$KAPPA --ns=$NSPACE --nt=$NTIME --hmcsteps=$MEASUREMENTS --integrationsteps0=$INTSTEPS0 --integrationsteps1=$INTSTEPS1 --savefrequency=$NSAVE --startcondition=hot --beta=$BETA || exit 1" >> $JOBSCRIPT_GLOBALPATH
+    echo "srun --gres=gpu:1 ./$HMC_TM_FILENAME --input-file=\$SLURM_SUBMIT_DIR/hmc.input --kappa=0.$KAPPA --ns=$NSPACE --nt=$NTIME --hmcsteps=$MEASUREMENTS --integrationsteps0=$INTSTEPS0 --integrationsteps1=$INTSTEPS1 --savefrequency=$NSAVE --startcondition=hot --beta=$BETA || exit 1" >> $JOBSCRIPT_GLOBALPATH
     echo "err=\`echo \$?\`" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"---------------------------\"" >> $JOBSCRIPT_GLOBALPATH
@@ -280,9 +285,9 @@ else
     echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"---------------------------\"" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
-    echo "# go back and clean up" >> $JOBSCRIPT_GLOBALPATH
+    echo "# go back and remove executable" >> $JOBSCRIPT_GLOBALPATH
     echo "cd \$SLURM_SUBMIT_DIR" >> $JOBSCRIPT_GLOBALPATH
-    echo "rm \$WORKDIR/*pbp.dat" >> $JOBSCRIPT_GLOBALPATH
+    echo "rm  $SLURM_SUBMIT_DIR/$HMC_TM_FILENAME || exit 2 " >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
 
 fi
