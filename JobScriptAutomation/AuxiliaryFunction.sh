@@ -322,7 +322,12 @@ function ProduceJobsStatusFile_JobIdLoop(){
 		done
 }
 
-function ProduceJobsStatusFile_BetaLoop(){
+function ProduceJobsStatusFile_local(){
+
+	printf "\n\e[0;36m==================================================================================================\n\e[0m"
+
+	printf "\n\e[0;34m%s  %s  %s  %s %s %s\n\e[0m" "  Beta" "Total nr of trajectories" "Trajectories done" "Trajectories remaining" "Status"
+	printf "%s  %s  %s  %s %s\n" "  Beta" "Total nr of trajectories" "Trajectories done" "Trajectories remaining" "Status" >> $JOBS_STATUS_FILE
 
 	for i in b*; do
 
@@ -399,6 +404,46 @@ function ProduceJobsStatusFile_BetaLoop(){
 	done
 }
 
+function ProduceJobsStatusFile_global(){
+
+		ORIGINAL_HOME_DIR_WITH_BETAFOLDERS=$HOME_DIR_WITH_BETAFOLDERS
+		ORIGINAL_WORK_DIR_WITH_BETAFOLDERS=$WORK_DIR_WITH_BETAFOLDERS
+
+		PARAMETER_REGEX_ARRAY=()
+		DIRECTORY_ARRAY=()
+		#Filling PARAMETER_REGEX_ARRAY and DIRECTORY_ARRAY:
+		BuildRegexPath
+
+
+		for i in ${DIRECTORY_ARRAY[@]}; do
+			
+			cd $i	
+
+			PARAMETERS_PATH=""
+			PARAMETERS_STRING=""
+
+			ReadParametersFromPath $(pwd)
+
+			HOME_DIR_WITH_BETAFOLDERS="$HOME_DIR/$SIMULATION_PATH$PARAMETERS_PATH"
+
+			if [ "$HOME_DIR_WITH_BETAFOLDERS" != "$(pwd)" ]; then
+				printf "\n\e[0;31m Constructed path to directory containing beta folders does not match the actual position! Aborting...\n\n\e[0m"
+				exit -1
+			fi
+			#echo $HOME_DIR_WITH_BETAFOLDERS
+			WORK_DIR_WITH_BETAFOLDERS="$WORK_DIR/$SIMULATION_PATH$PARAMETERS_PATH"
+			#echo $WORK_DIR_WITH_BETAFOLDERS
+
+			JOBS_STATUS_FILE="jobs_status_""$CHEMPOT_PREFIX$CHEMPOT"_"$KAPPA_PREFIX$KAPPA"_"$NTIME_PREFIX$NTIME"_"$NSPACE_PREFIX$NSPACE"".txt"
+			#echo $JOBS_STATUS_FILE
+			rm -f $JOBS_STATUS_FILE
+
+			ProduceJobsStatusFile_local
+		done
+
+		cd $ORIGINAL_HOME_DIR_WITH_BETAFOLDERS
+}
+
 function BuildRegexPath(){
 
 	PARAMETER_REGEX_ARRAY=([$KAPPA_POSITION]=$KAPPA_PREFIX$KAPPA_REGEX [$NTIME_POSITION]=$NTIME_PREFIX$NTIME_REGEX [$NSPACE_POSITION]=$NSPACE_PREFIX$NSPACE_REGEX)
@@ -456,56 +501,16 @@ function ProduceJobStatusFile_Main(){
 		printf "\n\e[0;36m==================================================================================================\n\e[0m"
 		printf "\e[0;34m Listing current local measurements status...\n\e[0m"
 
-		printf "\n\e[0;34m%s  %s  %s  %s %s %s\n\e[0m" "  Beta" "Total nr of trajectories" "Trajectories done" "Trajectories remaining" "Status"
-		printf "%s  %s  %s  %s %s\n" "  Beta" "Total nr of trajectories" "Trajectories done" "Trajectories remaining" "Status" >> $JOBS_STATUS_FILE
-
-		ProduceJobsStatusFile_BetaLoop
+		ProduceJobsStatusFile_local
 
 	elif [ $LISTSTATUS = "TRUE" ] && [ $LISTSTATUSALL = "TRUE" ]; then
 
-		ORIGINAL_HOME_DIR_WITH_BETAFOLDERS=$HOME_DIR_WITH_BETAFOLDERS
-		ORIGINAL_WORK_DIR_WITH_BETAFOLDERS=$WORK_DIR_WITH_BETAFOLDERS
-
-		local PARAMETER_REGEX_ARRAY=()
-		local DIRECTORY_ARRAY=()
-		#Filling PARAMETER_REGEX_ARRAY and DIRECTORY_ARRAY:
-		BuildRegexPath
-
+		printf "\n\e[0;36m==================================================================================================\n\e[0m"
 		printf "\e[0;34m Listing current global measurements status...\n\e[0m"
 
-		for i in ${DIRECTORY_ARRAY[@]}; do
-			
-			cd $i	
+		ProduceJobsStatusFile_global
 
-			PARAMETERS_PATH=""
-			PARAMETERS_STRING=""
-
-			ReadParametersFromPath $(pwd)
-
-			HOME_DIR_WITH_BETAFOLDERS="$HOME_DIR/$SIMULATION_PATH$PARAMETERS_PATH"
-
-			if [ "$HOME_DIR_WITH_BETAFOLDERS" != "$(pwd)" ]; then
-				printf "\n\e[0;31m Constructed path to directory containing beta folders does not match the actual position! Aborting...\n\n\e[0m"
-				exit -1
-			fi
-			#echo $HOME_DIR_WITH_BETAFOLDERS
-			WORK_DIR_WITH_BETAFOLDERS="$WORK_DIR/$SIMULATION_PATH$PARAMETERS_PATH"
-			#echo $WORK_DIR_WITH_BETAFOLDERS
-
-			JOBS_STATUS_FILE="jobs_status_""$CHEMPOT_PREFIX$CHEMPOT"_"$KAPPA_PREFIX$KAPPA"_"$NTIME_PREFIX$NTIME"_"$NSPACE_PREFIX$NSPACE"".txt"
-			#echo $JOBS_STATUS_FILE
-			rm -f $JOBS_STATUS_FILE
-
-			printf "\n\e[0;36m==================================================================================================\n\e[0m"
-
-			printf "\n\e[0;34m%s  %s  %s  %s %s %s\n\e[0m" "  Beta" "Total nr of trajectories" "Trajectories done" "Trajectories remaining" "Status"
-			printf "%s  %s  %s  %s %s\n" "  Beta" "Total nr of trajectories" "Trajectories done" "Trajectories remaining" "Status" >> $JOBS_STATUS_FILE
-
-			ProduceJobsStatusFile_BetaLoop
-		done
-
-		cd $ORIGINAL_HOME_DIR_WITH_BETAFOLDERS
-
+		printf "\n\e[0;36m==================================================================================================\n\e[0m"
 		BuildGlobalJobStatusFile
 	fi
 
