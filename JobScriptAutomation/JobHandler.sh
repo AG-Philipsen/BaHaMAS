@@ -61,6 +61,7 @@ LISTSTATUS="FALSE"
 LISTSTATUSALL="FALSE"
 CLUSTER_NAME="LOEWE"
 LOEWE_PARTITION="parallel"
+JOBS_STATUS_PREFIX="jobs_status_"
 
 #-----------------------------------------------------------------------------------------------------------------#
 # Set default values for the non-modifyable variables ---> Modify this file to change them!

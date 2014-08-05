@@ -408,11 +408,37 @@ function BuildRegexPath(){
 		REGEX_PATH=$REGEX_PATH"/$i"
 	done
 
-	REGEX_PATH='.*'$REGEX_PATH
+	local REGEX_PATH='.*'$REGEX_PATH
 
 	FIND_LOCATION_PATH=$HOME_DIR'/'$SIMULATION_PATH'/'$CHEMPOT_PREFIX$CHEMPOT'/'
 
 	DIRECTORY_ARRAY=( $(find $FIND_LOCATION_PATH -regextype grep -regex $REGEX_PATH) )
+}
+
+function BuildGlobalJobStatusFile(){
+
+	DATE='D_'$(date +"%d_%m_%Y")'_T_'$(date +"%H_%M")
+	JOBS_STATUS_FILE_GLOBAL=$HOME_DIR'/'$SIMULATION_PATH'/global_'$JOBS_STATUS_PREFIX$DATE'.txt'
+
+	rm -f $JOBS_STATUS_FILE_GLOBAL
+
+	local REGEX_PATH=$JOBS_STATUS_PREFIX'[^~]*$'
+	REGEX_PATH='.*'$REGEX_PATH
+
+	for i in ${DIRECTORY_ARRAY[@]}; do
+
+		LOCAL_FILE=$(find $i -regextype grep -regex $REGEX_PATH)
+
+		KAPPA_TMP=`echo $LOCAL_FILE | grep -o "$JOBS_STATUS_PREFIX.*" | grep -o "$KAPPA_PREFIX$KAPPA_REGEX"`
+		NTIME_TMP=`echo $LOCAL_FILE | grep -o "$JOBS_STATUS_PREFIX.*" | grep -o "$NTIME_PREFIX$NTIME_REGEX"`
+		NSPACE_TMP=`echo $LOCAL_FILE | grep -o "$JOBS_STATUS_PREFIX.*" | grep -o "$NSPACE_PREFIX$NSPACE_REGEX"`
+
+		echo "$KAPPA_TMP $NTIME_TMP $NSPACE_TMP" >> "$JOBS_STATUS_FILE_GLOBAL"
+		cat $LOCAL_FILE >> "$JOBS_STATUS_FILE_GLOBAL"
+		echo "" >> "$JOBS_STATUS_FILE_GLOBAL"
+	done
+
+	printf "\n\e[0;34m A global jobs status file has been created: %s\n\e[0m" $JOBS_STATUS_FILE_GLOBAL
 }
 
 function ProduceJobStatusFile_Main(){
@@ -479,6 +505,8 @@ function ProduceJobStatusFile_Main(){
 		done
 
 		cd $ORIGINAL_HOME_DIR_WITH_BETAFOLDERS
+
+		BuildGlobalJobStatusFile
 	fi
 
 	printf "\e[0;36m==================================================================================================\n\e[0m"
