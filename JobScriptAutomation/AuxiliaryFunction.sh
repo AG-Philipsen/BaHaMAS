@@ -193,6 +193,35 @@ function ProcessBetaValuesForSubmitOnly() {
     done
 }
 
+function ConstructJobName(){
+
+	local JOBNAME=$CHEMPOT_PREFIX$CHEMPOT'_'$KAPPA_PREFIX$KAPPA'_'$NTIME_PREFIX$NTIME'_'$NSPACE_PREFIX$NSPACE'_'$BETA_PREFIX$BETA 
+
+	echo $JOBNAME
+}
+
+function CheckIfJobIsInQueue(){
+
+	local JOBNAME=$( ConstructJobName )	
+
+	local JOBID_ARRAY=( $(llq -u hkf806 | grep -o "juqueen[[:alnum:]]\{3\}\.[[:digit:]]\+\.[[:digit:]]") )
+
+	for JOBID in ${JOBID_ARRAY[@]}; do
+
+		GREPPED_JOBNAME=$(llq -l $JOBID | grep "Job Name:" | sed "s/^.*Job Name: \(muiPiT.*$\)/\1/")
+
+		if [ $GREPPED_JOBNAME = $JOBNAME ]; then
+			
+			echo "Job with name $GREPPED_JOBNAME and id $JOBID seems to be already running."
+			echo "Job cannot be continued..."
+
+			return 0
+		fi
+
+	done
+
+	return 1
+}
 
 function ProcessBetaValuesForContinue() {
     if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
@@ -220,6 +249,13 @@ function ProcessBetaValuesForContinue() {
 		printf "\e[0;31m Simulation cannot be continued. Leaving out beta = $BETA .\n\e[0m"
 		PROBLEM_BETA_ARRAY+=( $BETA )
 		continue
+	    fi
+
+	    CheckIfJobIsInQueue
+	    if [ $? == 0 ]; then
+
+		    PROBLEM_BETA_ARRAY+=( $BETA )
+		    continue
 	    fi
 	    
 	    grep -q "^StartCondition = continue" $INPUTFILE_GLOBALPATH
@@ -293,33 +329,114 @@ function ProcessBetaValuesForContinue() {
     fi
 }
 
-function ProduceJobsStatusFile_JobIdLoop(){
+function ShowQueuedJobsLocal(){
+#TODO: Generalize user name
 
-		for k in ${JOBID_ARRAY[@]}; do
+	if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
 
-		
-			JOBID=$k
-			#if [ $i = "b5.7500" ]; then 
-			#	echo $JOBID 
-			#fi
- 			JOBNAME=$(llq -l $JOBID | grep "Job Name:" | sed "s/^.*Job Name: \(muiPiT.*$\)/\1/")
-			#if [ $i = "b.57500" ]; then echo $JOBNAME 
-			#fi
-			JOBNAME_NTIME=$(echo $JOBNAME | sed "s/^.*_nt\([[:digit:]]\)_.*$/\1/")
-			JOBNAME_NSPACE=$(echo $JOBNAME | sed "s/^.*_n[[:alpha:]]\([[:digit:]]\{2\}\)_.*$/\1/")
-			JOBNAME_KAPPA=$(echo $JOBNAME | sed "s/^.*_k\([[:digit:]]\{4\}\)_.*$/\1/")
-			JOBNAME_BETA=$(echo $JOBNAME | sed "s/^.*\([[:digit:]]\.[[:digit:]]\{4\}$\)/\1/")
+		local JOBID_ARRAY=( $(llq -u hkf806 | grep -o "juqueen[[:alnum:]]\{3\}\.[[:digit:]]\+\.[[:digit:]]") )
 
+		printf "\n================================================================\n\n"
 
-			if [ $JOBNAME_BETA = $BETA ] && [ $JOBNAME_KAPPA = $KAPPA ] && [ $JOBNAME_NTIME = $NTIME ] && [ $JOBNAME_NSPACE = $NSPACE ]; then
+		for JOBID in ${JOBID_ARRAY[@]}; do
 
-				STATUS=$(llq -l $JOBID | grep "^[[:blank:]]*Status:" | sed "s/^.*Status: \([[:alpha:]].*$\)/\1/")
-				#if [ $i = "b5.7500" ]; then echo "break" 
-				#fi
-				break;
+			local JOBNAME=$(llq -l $JOBID | grep "Job Name:" | sed "s/^.*Job Name: \(muiPiT.*$\)/\1/")
+			local STATUS=$(llq -l $JOBID | grep "^[[:blank:]]*Status:" | sed "s/^.*Status: \([[:alpha:]].*$\)/\1/")
+
+			local JOBNAME_KAPPA=$(echo $JOBNAME | sed "s/^.*_k\([[:digit:]]\{4\}\)_.*$/\1/")
+
+			local JOBNAME_NTIME=$(echo $JOBNAME | sed "s/^.*$NTIME_PREFIX\($NTIME_REGEX\)_.*$/\1/")
+
+			local JOBNAME_NSPACE=$(echo $JOBNAME | sed "s/^.*_$NSPACE_PREFIX\($NSPACE_REGEX\)_.*$/\1/")
+
+			if [ $JOBNAME_KAPPA = $KAPPA ] && [ $JOBNAME_NSPACE = $NSPACE ] && [ $JOBNAME_NTIME = $NTIME ]; then
+
+				JOBID_ARRAY_LOCAL+=($JOBID)	
 			fi
 
 		done
+
+		if [ ${#JOBID_ARRAY_LOCAL[@]} -eq 0 ]; then
+
+			echo "No jobs queued for the current directory..."
+			printf "================================================================\n\n"
+			exit 0
+		else	
+			for JOBID_LOCAL in ${JOBID_ARRAY_LOCAL[@]}; do
+
+				local JOBNAME_LOCAL=$(llq -l $JOBID_LOCAL | grep "Job Name:" | sed "s/^.*Job Name: \(muiPiT.*$\)/\1/")
+				local STATUS_LOCAL=$(llq -l $JOBID_LOCAL | grep "^[[:blank:]]*Status:" | sed "s/^.*Status: \([[:alpha:]].*$\)/\1/")
+
+				printf "$JOBNAME_LOCAL \t $JOBID_LOCAL \t $STATUS_LOCAL \n"
+			done
+		fi
+			
+		printf "================================================================\n\n"
+	else
+		echo "Fuctionality only implemented for the Juqueen cluster at the moment...terminating"
+		exit -1
+	fi
+}
+
+function ShowQueuedJobsGlobal(){
+#TODO: Generalize user name
+
+	if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
+
+		local JOBID_ARRAY=( $(llq -u hkf806 | grep -o "juqueen[[:alnum:]]\{3\}\.[[:digit:]]\+\.[[:digit:]]") )
+
+		printf "\n================================================================\n\n"
+		if [ ${#JOBID_ARRAY[@]} -eq 0 ]; then
+
+			echo "No jobs queued for the current directory..."
+			printf "================================================================\n\n"
+			exit 0
+		else
+			for i in ${JOBID_ARRAY[@]}; do
+
+				local JOBID=$i
+				local JOBNAME=$(llq -l $JOBID | grep "Job Name:" | sed "s/^.*Job Name: \(muiPiT.*$\)/\1/")
+				local STATUS=$(llq -l $JOBID | grep "^[[:blank:]]*Status:" | sed "s/^.*Status: \([[:alpha:]].*$\)/\1/")
+				
+					printf "$JOBNAME \t $JOBID \t $STATUS \n\n"
+			done
+			printf "================================================================\n\n"
+		fi
+	else
+		echo "Fuctionality only implemented for the Juqueen cluster at the moment...terminating"
+		exit -1
+	fi
+}
+
+function ProduceJobsStatusFile_JobIdLoop(){
+
+	local JOBNAME=""
+
+	for k in ${JOBID_ARRAY[@]}; do
+
+	
+		JOBID=$k
+		#if [ $i = "b5.7500" ]; then 
+		#	echo $JOBID 
+		#fi
+		JOBNAME=$(llq -l $JOBID | grep "Job Name:" | sed "s/^.*Job Name: \(muiPiT.*$\)/\1/")
+		#if [ $i = "b.57500" ]; then echo $JOBNAME 
+		#fi
+		JOBNAME_NTIME=$(echo $JOBNAME | sed "s/^.*_nt\([[:digit:]]\)_.*$/\1/")
+		JOBNAME_NSPACE=$(echo $JOBNAME | sed "s/^.*_n[[:alpha:]]\([[:digit:]]\{2\}\)_.*$/\1/")
+		JOBNAME_KAPPA=$(echo $JOBNAME | sed "s/^.*_k\([[:digit:]]\{4\}\)_.*$/\1/")
+		JOBNAME_BETA=$(echo $JOBNAME | sed "s/^.*\([[:digit:]]\.[[:digit:]]\{4\}$\)/\1/")
+
+
+		if [ $JOBNAME_BETA = $BETA ] && [ $JOBNAME_KAPPA = $KAPPA ] && [ $JOBNAME_NTIME = $NTIME ] && [ $JOBNAME_NSPACE = $NSPACE ]; then
+
+			STATUS=$(llq -l $JOBID | grep "^[[:blank:]]*Status:" | sed "s/^.*Status: \([[:alpha:]].*$\)/\1/")
+			#if [ $i = "b5.7500" ]; then echo "break" 
+			#fi
+			break;
+		fi
+
+	done
 }
 
 function ProduceJobsStatusFile_local(){

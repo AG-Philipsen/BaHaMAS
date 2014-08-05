@@ -32,7 +32,9 @@ function ParseCommandLineOption(){
 		echo -e "  \e[0;34m--continue | --continue=[number]\e[0;32m   ->    Unfinished jobs will be continued up to the nr. of measurements specified in the input file."
 		echo -e "                                     ->    If a number is specified finished jobs will be continued up to the specified number."
 		echo -e "  \e[0;34m--liststatus\e[0;32m                       ->    The local measurement status for all beta will be displayed"
-		echo -e "  \e[0;34m--liststatus_all\e[0;32m                       ->    The global measurement status for all beta will be displayed"
+		echo -e "  \e[0;34m--liststatus_all\e[0;32m                   ->    The global measurement status for all beta will be displayed"
+		echo -e "  \e[0;34m--showjobs\e[0;32m                         ->    The queued jobs for the current directoy will be displayed"
+		echo -e "  \e[0;34m--showjobs_all\e[0;32m                     ->    The queued jobs for all directories will be displayed"
 		echo ""
 		echo -e "\e[0;33mNOTE: The blue options are mutually exclusive and they are all FALSE by default! In other words, if none of them"
 		echo -e "\e[0;33m      is given, the script will create beta-folders with the right files inside, but no job will be submitted."
@@ -69,7 +71,12 @@ function ParseCommandLineOption(){
 	        if [ $SUBMITONLY = "FALSE" ] && [ $CONTINUE = "FALSE" ] && [ $LISTSTATUS = "FALSE" ]; then 
 		    SUBMIT="TRUE"
 		else		
-		    printf "\n\e[0;31m The options --submit, --submitonly, --continue, and --liststatus must not be combined! Aborting...\n\n\e[0m" 
+		    #printf "\n\e[0;31m The options --submit, --submitonly, --continue, and --liststatus must not be combined! Aborting...\n\n\e[0m" 
+		    printf "\n\e[0;31m The options " 
+		    for OPT in ${MUTUALLYEXCLUSIVEOPTS[@]}; do
+			printf "%s, " $OPT	
+		    done
+		    printf "are mutually exclusive and must not be combined! Aborting...\n\n\e[0m" 
 		    exit -1
 		fi;
 		shift;; 
@@ -77,7 +84,12 @@ function ParseCommandLineOption(){
 	        if [ $SUBMIT = "FALSE" ] && [ $CONTINUE = "FALSE" ] && [ $LISTSTATUS = "FALSE" ]; then 
 		    SUBMITONLY="TRUE"
 		else		
-		    printf "\n\e[0;31m The options --submit, --submitonly, --continue, and --liststatus must not be combined! Aborting...\n\n\e[0m" 
+		    #printf "\n\e[0;31m The options --submit, --submitonly, --continue, and --liststatus must not be combined! Aborting...\n\n\e[0m" 
+		    printf "\n\e[0;31m The options " 
+		    for OPT in ${MUTUALLYEXCLUSIVEOPTS[@]}; do
+			printf "%s, " $OPT	
+		    done
+		    printf "are mutually exclusive and must not be combined! Aborting...\n\n\e[0m" 
 		    exit -1
 		fi;
 		shift;; 
@@ -85,7 +97,12 @@ function ParseCommandLineOption(){
 	        if [ $SUBMITONLY = "FALSE" ] && [ $SUBMIT = "FALSE" ] && [ $LISTSTATUS = "FALSE" ]; then
 		    CONTINUE="TRUE"		
 		else 
-		    printf "\n\e[0;31m The options --submit, --submitonly, --continue, and --liststatus must not be combined! Aborting...\n\n\e[0m" 
+		    #printf "\n\e[0;31m The options --submit, --submitonly, --continue, and --liststatus must not be combined! Aborting...\n\n\e[0m" 
+		    printf "\n\e[0;31m The options " 
+		    for OPT in ${MUTUALLYEXCLUSIVEOPTS[@]}; do
+			printf "%s, " $OPT	
+		    done
+		    printf "are mutually exclusive and must not be combined! Aborting...\n\n\e[0m" 
 		    exit -1
 		fi
 		shift;; 
@@ -98,25 +115,68 @@ function ParseCommandLineOption(){
 			exit -1
 		    fi
 		else 
-		    printf "\n\e[0;31m The options --submit, --submitonly, --continue, and --liststatus must not be combined! Aborting...\n\n\e[0m" 
+		    #printf "\n\e[0;31m The options --submit, --submitonly, --continue, and --liststatus must not be combined! Aborting...\n\n\e[0m" 
+		    printf "\n\e[0;31m The options " 
+		    for OPT in ${MUTUALLYEXCLUSIVEOPTS[@]}; do
+			printf "%s, " $OPT	
+		    done
+		    printf "are mutually exclusive and must not be combined! Aborting...\n\n\e[0m" 
 		    exit -1
 		fi
 		shift;; 
 	    --liststatus )
-	        if [ $SUBMITONLY = "FALSE" ] && [ $SUBMIT = "FALSE" ] && [ $CONTINUE = "FALSE" ]; then
+	        if [ $SUBMITONLY = "FALSE" ] && [ $SUBMIT = "FALSE" ] && [ $CONTINUE = "FALSE" ] && [ $LISTSTATUS_ALL = "FALSE" ]; then
 		    LISTSTATUS="TRUE"
 		    LISTSTATUSALL="FALSE"
 		else
-		    printf "\n\e[0;31m The options --submit, --submitonly, --continue, and --liststatus must not be combined! Aborting...\n\n\e[0m" 
+		    #printf "\n\e[0;31m The options --submit, --submitonly, --continue, and --liststatus must not be combined! Aborting...\n\n\e[0m" 
+		    printf "\n\e[0;31m The options " 
+		    for OPT in ${MUTUALLYEXCLUSIVEOPTS[@]}; do
+			printf "%s, " $OPT	
+		    done
+		    printf "are mutually exclusive and must not be combined! Aborting...\n\n\e[0m" 
 		    exit -1
 		fi
 		shift;; 
 	    --liststatus_all )
-	        if [ $SUBMITONLY = "FALSE" ] && [ $SUBMIT = "FALSE" ] && [ $CONTINUE = "FALSE" ]; then
+	        if [ $SUBMITONLY = "FALSE" ] && [ $SUBMIT = "FALSE" ] && [ $CONTINUE = "FALSE" ] && [ $LISTSTATUS = "FALSE" ]; then
 		    LISTSTATUS="TRUE"
 		    LISTSTATUSALL="TRUE"
 		else
-		    printf "\n\e[0;31m The options --submit, --submitonly, --continue, and --liststatus must not be combined! Aborting...\n\n\e[0m" 
+		    #printf "\n\e[0;31m The options --submit, --submitonly, --continue, and --liststatus must not be combined! Aborting...\n\n\e[0m" 
+		    printf "\n\e[0;31m The options " 
+		    for OPT in ${MUTUALLYEXCLUSIVEOPTS[@]}; do
+			printf "%s, " $OPT	
+		    done
+		    printf "are mutually exclusive and must not be combined! Aborting...\n\n\e[0m" 
+		    exit -1
+		fi
+		shift;; 
+	    --showjobs )
+	        if [ $SUBMITONLY = "FALSE" ] && [ $SUBMIT = "FALSE" ] && [ $CONTINUE = "FALSE" ] && [ $LISTSTATUS = "FALSE" ]; then
+		    SHOWJOBS="TRUE"
+		    SHOWJOBSALL="FALSE"
+		else
+		    #printf "\n\e[0;31m The options --submit, --submitonly, --continue, and --liststatus must not be combined! Aborting...\n\n\e[0m" 
+		    printf "\n\e[0;31m The options " 
+		    for OPT in ${MUTUALLYEXCLUSIVEOPTS[@]}; do
+			printf "%s, " $OPT	
+		    done
+		    printf "are mutually exclusive and must not be combined! Aborting...\n\n\e[0m" 
+		    exit -1
+		fi
+		shift;; 
+	    --showjobs_all )
+	        if [ $SUBMITONLY = "FALSE" ] && [ $SUBMIT = "FALSE" ] && [ $CONTINUE = "FALSE" ] && [ $LISTSTATUS = "FALSE" ]; then
+		    SHOWJOBS="TRUE"
+		    SHOWJOBSALL="TRUE"
+		else
+		    #printf "\n\e[0;31m The options --submit, --submitonly, --continue, and --liststatus must not be combined! Aborting...\n\n\e[0m" 
+		    printf "\n\e[0;31m The options " 
+		    for OPT in ${MUTUALLYEXCLUSIVEOPTS[@]}; do
+			printf "%s, " $OPT	
+		    done
+		    printf "are mutually exclusive and must not be combined! Aborting...\n\n\e[0m" 
 		    exit -1
 		fi
 		shift;; 
