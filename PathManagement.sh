@@ -31,6 +31,18 @@ NTIME=0
 PARAMETERS_PATH=""
 PARAMETERS_STRING=""
 
+#----------ADDED BY CHRIS FOR LISTSTATUS FUNCTIONALITY--------
+#TODO: Discuss with Alessandro about leaving it here or not!
+
+BETA_POSITION=4
+
+KAPPA_REGEX='[[:digit:]]\{4\}'
+NTIME_REGEX='[[:digit:]]'
+NSPACE_REGEX='[[:digit:]]\{2\}'
+BETA_REGEX='[[:digit:]]\.[[:digit:]]\{4\}'
+#-------------------------------------------------------------
+
+
 # Global functions
 
 function SetParametersPathAndString(){
