@@ -58,6 +58,7 @@ SUBMITONLY="FALSE"
 CONTINUE="FALSE"
 CONTINUE_NUMBER="0"
 LISTSTATUS="FALSE"
+LISTSTATUSALL="FALSE"
 CLUSTER_NAME="LOEWE"
 LOEWE_PARTITION="parallel"
 
@@ -152,9 +153,9 @@ fi
 
 #-----------------------------------------------------------------------------------------------------------------#
 # TODO: Should not this if be an elif of above!?
-if [ $LISTSTATUS = "TRUE" ]; then #TODO: This option should be reconsidered and improved for Juqueen
+if [ $LISTSTATUS = "TRUE" ] || [ $LISTSTATUSALL = "TRUE" ]; then #TODO: This option should be reconsidered and improved for Juqueen
 
-    ProduceJobStatusFile 
+    ProduceJobStatusFile_Main 
     #TODO: On Juqueen, declare all possible local variable in this function as local! Use PARAMETERS_STRING/PATH where needed!
     #TODO: Test on LOEWE! 
 

@@ -293,34 +293,8 @@ function ProcessBetaValuesForContinue() {
     fi
 }
 
+function ProduceJobsStatusFile_JobIdLoop(){
 
-function ProduceJobStatusFile(){
-     if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
-
-	JOBS_STATUS_FILE="jobs_status_""$CHEMPOT_PREFIX$CHEMPOT"_"$KAPPA_PREFIX$KAPPA"_"$NTIME_PREFIX$NTIME"_"$NSPACE_PREFIX$NSPACE"".txt"
-
-	rm -f $JOBS_STATUS_FILE
-
-	printf "\n\e[0;36m==================================================================================================\n\e[0m"
-	printf "\e[0;34m Listing current measurements status...\n\e[0m"
-
-	#printf "\n\e[0;34mBeta \t Total nr of trajectories \t Trajectories done \t trajectories remaining\n\e[0m"
-	printf "\n\e[0;34m%s  %s  %s  %s %s %s\n\e[0m" "  Beta" "Total nr of trajectories" "Trajectories done" "Trajectories remaining" "Status"
-	printf "%s  %s  %s  %s %s\n" "  Beta" "Total nr of trajectories" "Trajectories done" "Trajectories remaining" "Status" >> $JOBS_STATUS_FILE
-	for i in b*; do
-
-		STATUS="notQueued"	
-
-		#Assigning beta value to BETA variable for readability
-		BETA=$(echo $i | grep -o "[[:digit:]].[[:digit:]]\{4\}")
-
-		if [[ ! $BETA =~ [[:digit:]].[[:digit:]]{4} ]]; then
-				
-			continue;
-		fi
-
-		#JOBID_ARRAY=( $(llq -u hkf806 | grep -o "juqueen[[:alnum:]]\{3\}\.[[:digit:]]\+\.[[:digit:]]") )
-		JOBID_ARRAY=( $(llq -u hkf806 | awk -v lines=$(llq -u hkf806 | wc -l) 'NR>2 && NR<lines-1{print $1}') )
 		for k in ${JOBID_ARRAY[@]}; do
 
 		
@@ -346,6 +320,26 @@ function ProduceJobStatusFile(){
 			fi
 
 		done
+}
+
+function ProduceJobsStatusFile_BetaLoop(){
+
+	for i in b*; do
+
+		STATUS="notQueued"	
+
+		#Assigning beta value to BETA variable for readability
+		BETA=$(echo $i | grep -o "[[:digit:]].[[:digit:]]\{4\}")
+
+		if [[ ! $BETA =~ [[:digit:]].[[:digit:]]{4} ]]; then
+				
+			continue;
+		fi
+
+		#JOBID_ARRAY=( $(llq -u hkf806 | grep -o "juqueen[[:alnum:]]\{3\}\.[[:digit:]]\+\.[[:digit:]]") )
+		JOBID_ARRAY=( $(llq -u hkf806 | awk -v lines=$(llq -u hkf806 | wc -l) 'NR>2 && NR<lines-1{print $1}') )
+
+		ProduceJobsStatusFile_JobIdLoop
 
 		#if [ $i = "b5.7500" ]; then echo "after break" 
 		#fi
@@ -403,8 +397,91 @@ function ProduceJobStatusFile(){
 		fi
 		
 	done
-	printf "\e[0;36m==================================================================================================\n\e[0m"
+}
 
+function BuildRegexPath(){
+
+	PARAMETER_REGEX_ARRAY=([$KAPPA_POSITION]=$KAPPA_PREFIX$KAPPA_REGEX [$NTIME_POSITION]=$NTIME_PREFIX$NTIME_REGEX [$NSPACE_POSITION]=$NSPACE_PREFIX$NSPACE_REGEX)
+
+	for i in ${PARAMETER_REGEX_ARRAY[@]}; do
+
+		REGEX_PATH=$REGEX_PATH"/$i"
+	done
+
+	REGEX_PATH='.*'$REGEX_PATH
+
+	FIND_LOCATION_PATH=$HOME_DIR'/'$SIMULATION_PATH'/'$CHEMPOT_PREFIX$CHEMPOT'/'
+
+	DIRECTORY_ARRAY=( $(find $FIND_LOCATION_PATH -regextype grep -regex $REGEX_PATH) )
+}
+
+function ProduceJobStatusFile_Main(){
+     if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
+
+
+
+	#-----------Prepare array with directories for which a job status file shall be produced---------------#
+	
+	if [ $LISTSTATUS = "TRUE" ] && [ $LISTSTATUSALL = "FALSE" ]; then
+
+		JOBS_STATUS_FILE="jobs_status_""$CHEMPOT_PREFIX$CHEMPOT"_"$KAPPA_PREFIX$KAPPA"_"$NTIME_PREFIX$NTIME"_"$NSPACE_PREFIX$NSPACE"".txt"
+		rm -f $JOBS_STATUS_FILE
+
+		printf "\n\e[0;36m==================================================================================================\n\e[0m"
+		printf "\e[0;34m Listing current local measurements status...\n\e[0m"
+
+		printf "\n\e[0;34m%s  %s  %s  %s %s %s\n\e[0m" "  Beta" "Total nr of trajectories" "Trajectories done" "Trajectories remaining" "Status"
+		printf "%s  %s  %s  %s %s\n" "  Beta" "Total nr of trajectories" "Trajectories done" "Trajectories remaining" "Status" >> $JOBS_STATUS_FILE
+
+		ProduceJobsStatusFile_BetaLoop
+
+	elif [ $LISTSTATUS = "TRUE" ] && [ $LISTSTATUSALL = "TRUE" ]; then
+
+		ORIGINAL_HOME_DIR_WITH_BETAFOLDERS=$HOME_DIR_WITH_BETAFOLDERS
+		ORIGINAL_WORK_DIR_WITH_BETAFOLDERS=$WORK_DIR_WITH_BETAFOLDERS
+
+		local PARAMETER_REGEX_ARRAY=()
+		local DIRECTORY_ARRAY=()
+		#Filling PARAMETER_REGEX_ARRAY and DIRECTORY_ARRAY:
+		BuildRegexPath
+
+		printf "\e[0;34m Listing current global measurements status...\n\e[0m"
+
+		for i in ${DIRECTORY_ARRAY[@]}; do
+			
+			cd $i	
+
+			PARAMETERS_PATH=""
+			PARAMETERS_STRING=""
+
+			ReadParametersFromPath $(pwd)
+
+			HOME_DIR_WITH_BETAFOLDERS="$HOME_DIR/$SIMULATION_PATH$PARAMETERS_PATH"
+
+			if [ "$HOME_DIR_WITH_BETAFOLDERS" != "$(pwd)" ]; then
+				printf "\n\e[0;31m Constructed path to directory containing beta folders does not match the actual position! Aborting...\n\n\e[0m"
+				exit -1
+			fi
+			#echo $HOME_DIR_WITH_BETAFOLDERS
+			WORK_DIR_WITH_BETAFOLDERS="$WORK_DIR/$SIMULATION_PATH$PARAMETERS_PATH"
+			#echo $WORK_DIR_WITH_BETAFOLDERS
+
+			JOBS_STATUS_FILE="jobs_status_""$CHEMPOT_PREFIX$CHEMPOT"_"$KAPPA_PREFIX$KAPPA"_"$NTIME_PREFIX$NTIME"_"$NSPACE_PREFIX$NSPACE"".txt"
+			#echo $JOBS_STATUS_FILE
+			rm -f $JOBS_STATUS_FILE
+
+			printf "\n\e[0;36m==================================================================================================\n\e[0m"
+
+			printf "\n\e[0;34m%s  %s  %s  %s %s %s\n\e[0m" "  Beta" "Total nr of trajectories" "Trajectories done" "Trajectories remaining" "Status"
+			printf "%s  %s  %s  %s %s\n" "  Beta" "Total nr of trajectories" "Trajectories done" "Trajectories remaining" "Status" >> $JOBS_STATUS_FILE
+
+			ProduceJobsStatusFile_BetaLoop
+		done
+
+		cd $ORIGINAL_HOME_DIR_WITH_BETAFOLDERS
+	fi
+
+	printf "\e[0;36m==================================================================================================\n\e[0m"
     else # On LOEWE
 	 
 	 local JOBS_STATUS_FILE="jobs_status_$PARAMETERS_STRING.txt"
