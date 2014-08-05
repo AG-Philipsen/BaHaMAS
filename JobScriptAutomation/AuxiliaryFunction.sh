@@ -309,6 +309,8 @@ function ProduceJobStatusFile(){
 	printf "%s  %s  %s  %s %s\n" "  Beta" "Total nr of trajectories" "Trajectories done" "Trajectories remaining" "Status" >> $JOBS_STATUS_FILE
 	for i in b*; do
 
+		STATUS="notQueued"	
+
 		#Assigning beta value to BETA variable for readability
 		BETA=$(echo $i | grep -o "[[:digit:]].[[:digit:]]\{4\}")
 
@@ -334,7 +336,6 @@ function ProduceJobStatusFile(){
 			JOBNAME_KAPPA=$(echo $JOBNAME | sed "s/^.*_k\([[:digit:]]\{4\}\)_.*$/\1/")
 			JOBNAME_BETA=$(echo $JOBNAME | sed "s/^.*\([[:digit:]]\.[[:digit:]]\{4\}$\)/\1/")
 
-			STATUS="notQueued"	
 
 			if [ $JOBNAME_BETA = $BETA ] && [ $JOBNAME_KAPPA = $KAPPA ] && [ $JOBNAME_NTIME = $NTIME ] && [ $JOBNAME_NSPACE = $NSPACE ]; then
 
