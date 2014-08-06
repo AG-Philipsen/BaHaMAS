@@ -125,7 +125,7 @@ function ParseCommandLineOption(){
 		fi
 		shift;; 
 	    --liststatus )
-	        if [ $SUBMITONLY = "FALSE" ] && [ $SUBMIT = "FALSE" ] && [ $CONTINUE = "FALSE" ] && [ $LISTSTATUS_ALL = "FALSE" ]; then
+	        if [ $SUBMITONLY = "FALSE" ] && [ $SUBMIT = "FALSE" ] && [ $CONTINUE = "FALSE" ] && [ $LISTSTATUSALL = "FALSE" ]; then
 		    LISTSTATUS="TRUE"
 		    LISTSTATUSALL="FALSE"
 		else
