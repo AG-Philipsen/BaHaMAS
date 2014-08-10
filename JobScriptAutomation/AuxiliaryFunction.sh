@@ -408,7 +408,7 @@ function ShowQueuedJobsGlobal(){
 	fi
 }
 
-function ProduceJobsStatusFile_JobIdLoop(){
+function ListJobsStatus_JobIdLoop(){
 
 	local JOBNAME=""
 
@@ -439,11 +439,12 @@ function ProduceJobsStatusFile_JobIdLoop(){
 	done
 }
 
-function ProduceJobsStatusFile_local(){
+function ListJobsStatus_local(){
 
 	printf "\n\e[0;36m==================================================================================================\n\e[0m"
 
-	printf "\n\e[0;34m%s  %s  %s  %s %s %s\n\e[0m" "  Beta" "Total nr of trajectories" "Trajectories done" "Trajectories remaining" "Status"
+	printf "\n\e[0;34m%s  %s  %s\n" $KAPPA_PREFIX$KAPPA $NTIME_PREFIX$NTIME $NSPACE_PREFIX$NSPACE 
+	printf "\n%s  %s  %s  %s %s %s\n\e[0m" "  Beta" "Total nr of trajectories" "Trajectories done" "Trajectories remaining" "Status"
 	printf "%s  %s  %s  %s %s\n" "  Beta" "Total nr of trajectories" "Trajectories done" "Trajectories remaining" "Status" >> $JOBS_STATUS_FILE
 
 	for i in b*; do
@@ -461,7 +462,7 @@ function ProduceJobsStatusFile_local(){
 		#JOBID_ARRAY=( $(llq -u hkf806 | grep -o "juqueen[[:alnum:]]\{3\}\.[[:digit:]]\+\.[[:digit:]]") )
 		JOBID_ARRAY=( $(llq -u hkf806 | awk -v lines=$(llq -u hkf806 | wc -l) 'NR>2 && NR<lines-1{print $1}') )
 
-		ProduceJobsStatusFile_JobIdLoop
+		ListJobsStatus_JobIdLoop
 
 		#if [ $i = "b5.7500" ]; then echo "after break" 
 		#fi
@@ -521,7 +522,7 @@ function ProduceJobsStatusFile_local(){
 	done
 }
 
-function ProduceJobsStatusFile_global(){
+function ListJobsStatus_global(){
 
 		ORIGINAL_HOME_DIR_WITH_BETAFOLDERS=$HOME_DIR_WITH_BETAFOLDERS
 		ORIGINAL_WORK_DIR_WITH_BETAFOLDERS=$WORK_DIR_WITH_BETAFOLDERS
@@ -555,7 +556,7 @@ function ProduceJobsStatusFile_global(){
 			#echo $JOBS_STATUS_FILE
 			rm -f $JOBS_STATUS_FILE
 
-			ProduceJobsStatusFile_local
+			ListJobsStatus_local
 		done
 
 		cd $ORIGINAL_HOME_DIR_WITH_BETAFOLDERS
@@ -603,7 +604,7 @@ function BuildGlobalJobStatusFile(){
 	printf "\n\e[0;34m A global jobs status file has been created: %s\n\e[0m" $JOBS_STATUS_FILE_GLOBAL
 }
 
-function ProduceJobStatusFile_Main(){
+function ListJobStatus_Main(){
      if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
 
 
@@ -618,14 +619,14 @@ function ProduceJobStatusFile_Main(){
 		printf "\n\e[0;36m==================================================================================================\n\e[0m"
 		printf "\e[0;34m Listing current local measurements status...\n\e[0m"
 
-		ProduceJobsStatusFile_local
+		ListJobsStatus_local
 
 	elif [ $LISTSTATUS = "TRUE" ] && [ $LISTSTATUSALL = "TRUE" ]; then
 
 		printf "\n\e[0;36m==================================================================================================\n\e[0m"
 		printf "\e[0;34m Listing current global measurements status...\n\e[0m"
 
-		ProduceJobsStatusFile_global
+		ListJobsStatus_global
 
 		printf "\n\e[0;36m==================================================================================================\n\e[0m"
 		BuildGlobalJobStatusFile
