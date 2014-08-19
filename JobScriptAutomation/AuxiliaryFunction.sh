@@ -202,6 +202,8 @@ function ConstructJobName(){
 
 function CheckIfJobIsInQueue(){
 
+	#echo "In function: CheckIfJobIsInQueue"
+
 	local JOBNAME=$( ConstructJobName )	
 
 	local JOBID_ARRAY=( $(llq -u hkf806 | grep -o "juqueen[[:alnum:]]\{3\}\.[[:digit:]]\+\.[[:digit:]]") )
@@ -209,6 +211,8 @@ function CheckIfJobIsInQueue(){
 	for JOBID in ${JOBID_ARRAY[@]}; do
 
 		GREPPED_JOBNAME=$(llq -l $JOBID | grep "Job Name:" | sed "s/^.*Job Name: \(muiPiT.*$\)/\1/")
+
+		#echo 'GREPPED_JOBNAME:'$GREPPED_JOBNAME', JOBNAME: '$JOBNAME
 
 		if [ $GREPPED_JOBNAME = $JOBNAME ]; then
 			
@@ -444,8 +448,9 @@ function ListJobsStatus_local(){
 	printf "\n\e[0;36m==================================================================================================\n\e[0m"
 
 	printf "\n\e[0;34m%s  %s  %s\n" $KAPPA_PREFIX$KAPPA $NTIME_PREFIX$NTIME $NSPACE_PREFIX$NSPACE 
-	printf "\n%s  %s  %s  %s %s %s\n\e[0m" "  Beta" "Total nr of trajectories" "Trajectories done" "Trajectories remaining" "Status"
-	printf "%s  %s  %s  %s %s\n" "  Beta" "Total nr of trajectories" "Trajectories done" "Trajectories remaining" "Status" >> $JOBS_STATUS_FILE
+	printf "\n      %s  %s  %s\n" $KAPPA_PREFIX$KAPPA $NTIME_PREFIX$NTIME $NSPACE_PREFIX$NSPACE >> $JOBS_STATUS_FILE
+	printf "\n  Beta     Traj. total / done     Status\n\e[0m"
+	printf "  	Beta     Traj. total / done     Status\n" >> $JOBS_STATUS_FILE
 
 	for i in b*; do
 
@@ -515,8 +520,9 @@ function ListJobsStatus_local(){
 
 			#printf "\e[0;34m$BETA \t $TOTAL_NR_TRAJECTORIES \t $TRAJECTORIES_DONE \t $MEASUREMENTS_REMAINING\n\e[0m"
 			#26
-			printf "\e[0;34m%.4f  %24d  %17d  %22d %s\n\e[0m" "$BETA" "$TOTAL_NR_TRAJECTORIES" "$TRAJECTORIES_DONE" "$MEASUREMENTS_REMAINING" "$STATUS"
-			printf "%.4f  %24d  %17d  %22d %s\n" "$BETA" "$TOTAL_NR_TRAJECTORIES" "$TRAJECTORIES_DONE" "$MEASUREMENTS_REMAINING" "$STATUS" >> $JOBS_STATUS_FILE
+			#printf "\e[0;34m%.4f  %24d  %17d  %22d %s\n\e[0m" "$BETA" "$TOTAL_NR_TRAJECTORIES" "$TRAJECTORIES_DONE" "$MEASUREMENTS_REMAINING" "$STATUS"
+			printf "\e[0;34m%.4f  %14d / %5d    %s\n\e[0m" "$BETA" "$TOTAL_NR_TRAJECTORIES" "$TRAJECTORIES_DONE" "$STATUS"
+			printf "      %.4f  %14d / %5d    %s\n" "$BETA" "$TOTAL_NR_TRAJECTORIES" "$TRAJECTORIES_DONE" "$STATUS" >> $JOBS_STATUS_FILE
 		fi
 		
 	done
@@ -596,7 +602,7 @@ function BuildGlobalJobStatusFile(){
 		NTIME_TMP=`echo $LOCAL_FILE | grep -o "$JOBS_STATUS_PREFIX.*" | grep -o "$NTIME_PREFIX$NTIME_REGEX"`
 		NSPACE_TMP=`echo $LOCAL_FILE | grep -o "$JOBS_STATUS_PREFIX.*" | grep -o "$NSPACE_PREFIX$NSPACE_REGEX"`
 
-		echo "$KAPPA_TMP $NTIME_TMP $NSPACE_TMP" >> "$JOBS_STATUS_FILE_GLOBAL"
+		#echo "$KAPPA_TMP $NTIME_TMP $NSPACE_TMP" >> "$JOBS_STATUS_FILE_GLOBAL"
 		cat $LOCAL_FILE >> "$JOBS_STATUS_FILE_GLOBAL"
 		echo "" >> "$JOBS_STATUS_FILE_GLOBAL"
 	done
