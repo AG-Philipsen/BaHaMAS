@@ -454,7 +454,7 @@ function ListJobsStatus_local(){
 
 	for i in b*; do
 
-		STATUS="notQueued"	
+		#STATUS="notQueued"	
 
 		#Assigning beta value to BETA variable for readability
 		BETA=$(echo $i | grep -o "[[:digit:]].[[:digit:]]\{4\}")
@@ -465,12 +465,20 @@ function ListJobsStatus_local(){
 		fi
 
 		#JOBID_ARRAY=( $(llq -u hkf806 | grep -o "juqueen[[:alnum:]]\{3\}\.[[:digit:]]\+\.[[:digit:]]") )
-		JOBID_ARRAY=( $(llq -u hkf806 | awk -v lines=$(llq -u hkf806 | wc -l) 'NR>2 && NR<lines-1{print $1}') )
+		#JOBID_ARRAY=( $(llq -u hkf806 | awk -v lines=$(llq -u hkf806 | wc -l) 'NR>2 && NR<lines-1{print $1}') )
 
-		ListJobsStatus_JobIdLoop
+		STATUS=$(llq -W -f %jn %st -u hkf806 | awk '$1 ~ /^muiPiT_'$KAPPA_PREFIX$KAPPA'_'$NTIME_PREFIX$NTIME'_'$NSPACE_PREFIX$NSPACE'_'$i'$/ {print $2}') 
 
-		#if [ $i = "b5.7500" ]; then echo "after break" 
-		#fi
+		if [ ${#STATUS} -eq 0 ]; then
+			STATUS="notQueued"	
+		elif [ $STATUS = R ]; then
+			STATUS="running"
+		elif [ $STATUS = I ]; then
+			STATUS="idling"
+		fi
+		
+
+		#ListJobsStatus_JobIdLoop
 
 		#----Constructing WORK_BETADIRECTORY, HOME_BETADIRECTORY, JOBSCRIPT_NAME, JOBSCRIPT_GLOBALPATH and INPUTFILE_GLOBALPATH---#
 		WORK_BETADIRECTORY="$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
@@ -489,9 +497,6 @@ function ListJobsStatus_local(){
 
 		if [ -d $HOME_BETADIRECTORY ] && [ -f $INPUTFILE_GLOBALPATH ]; then
 						
-			#if [ $i = "b5.7500" ]; then echo "after break in if" 
-			#fi
-
 			TOTAL_NR_TRAJECTORIES=$(grep "Total number of trajectories" $INPUTFILE_GLOBALPATH | grep -o "[[:digit:]]\+")	
 			TOTAL_NR_TRAJECTORIES=$(expr $TOTAL_NR_TRAJECTORIES - 0)
 
