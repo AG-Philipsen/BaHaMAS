@@ -206,7 +206,7 @@ function CheckIfJobIsInQueue(){
 
 	local JOBNAME=$( ConstructJobName )	
 
-	local JOBID_ARRAY=( $(llq -u hkf806 | grep -o "juqueen[[:alnum:]]\{3\}\.[[:digit:]]\+\.[[:digit:]]") )
+	local JOBID_ARRAY=( $(llq -u $(whoami) | grep -o "juqueen[[:alnum:]]\{3\}\.[[:digit:]]\+\.[[:digit:]]") )
 
 	for JOBID in ${JOBID_ARRAY[@]}; do
 
@@ -338,110 +338,16 @@ function ShowQueuedJobsLocal(){
 
 	if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
 
-		local JOBID_ARRAY=( $(llq -u hkf806 | grep -o "juqueen[[:alnum:]]\{3\}\.[[:digit:]]\+\.[[:digit:]]") )
+	printf "\n\e[0;36m==================================================================================================\n\e[0m"
+		llq -W -f %id %jn %st %c %dq %dd %gl %h -u $(whoami) | awk --posix '$2 ~ /^muiPiT_'$KAPPA_PREFIX$KAPPA'_'$NTIME_PREFIX$NTIME'_'$NSPACE_PREFIX$NSPACE'_'$BETA_PREFIX'[[:digit:]]\.[[:digit:]]{4}$/ || NR <= 2 {print}'
+	printf "\e[0;36m==================================================================================================\n\e[0m"
 
-		printf "\n================================================================\n\n"
-
-		for JOBID in ${JOBID_ARRAY[@]}; do
-
-			local JOBNAME=$(llq -l $JOBID | grep "Job Name:" | sed "s/^.*Job Name: \(muiPiT.*$\)/\1/")
-			local STATUS=$(llq -l $JOBID | grep "^[[:blank:]]*Status:" | sed "s/^.*Status: \([[:alpha:]].*$\)/\1/")
-
-			local JOBNAME_KAPPA=$(echo $JOBNAME | sed "s/^.*_k\([[:digit:]]\{4\}\)_.*$/\1/")
-
-			local JOBNAME_NTIME=$(echo $JOBNAME | sed "s/^.*$NTIME_PREFIX\($NTIME_REGEX\)_.*$/\1/")
-
-			local JOBNAME_NSPACE=$(echo $JOBNAME | sed "s/^.*_$NSPACE_PREFIX\($NSPACE_REGEX\)_.*$/\1/")
-
-			if [ $JOBNAME_KAPPA = $KAPPA ] && [ $JOBNAME_NSPACE = $NSPACE ] && [ $JOBNAME_NTIME = $NTIME ]; then
-
-				JOBID_ARRAY_LOCAL+=($JOBID)	
-			fi
-
-		done
-
-		if [ ${#JOBID_ARRAY_LOCAL[@]} -eq 0 ]; then
-
-			echo "No jobs queued for the current directory..."
-			printf "================================================================\n\n"
-			exit 0
-		else	
-			for JOBID_LOCAL in ${JOBID_ARRAY_LOCAL[@]}; do
-
-				local JOBNAME_LOCAL=$(llq -l $JOBID_LOCAL | grep "Job Name:" | sed "s/^.*Job Name: \(muiPiT.*$\)/\1/")
-				local STATUS_LOCAL=$(llq -l $JOBID_LOCAL | grep "^[[:blank:]]*Status:" | sed "s/^.*Status: \([[:alpha:]].*$\)/\1/")
-
-				printf "$JOBNAME_LOCAL \t $JOBID_LOCAL \t $STATUS_LOCAL \n"
-			done
-		fi
-			
-		printf "================================================================\n\n"
 	else
 		echo "Fuctionality only implemented for the Juqueen cluster at the moment...terminating"
 		exit -1
 	fi
 }
 
-function ShowQueuedJobsGlobal(){
-#TODO: Generalize user name
-
-	if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
-
-		local JOBID_ARRAY=( $(llq -u hkf806 | grep -o "juqueen[[:alnum:]]\{3\}\.[[:digit:]]\+\.[[:digit:]]") )
-
-		printf "\n================================================================\n\n"
-		if [ ${#JOBID_ARRAY[@]} -eq 0 ]; then
-
-			echo "No jobs queued for the current directory..."
-			printf "================================================================\n\n"
-			exit 0
-		else
-			for i in ${JOBID_ARRAY[@]}; do
-
-				local JOBID=$i
-				local JOBNAME=$(llq -l $JOBID | grep "Job Name:" | sed "s/^.*Job Name: \(muiPiT.*$\)/\1/")
-				local STATUS=$(llq -l $JOBID | grep "^[[:blank:]]*Status:" | sed "s/^.*Status: \([[:alpha:]].*$\)/\1/")
-				
-					printf "$JOBNAME \t $JOBID \t $STATUS \n\n"
-			done
-			printf "================================================================\n\n"
-		fi
-	else
-		echo "Fuctionality only implemented for the Juqueen cluster at the moment...terminating"
-		exit -1
-	fi
-}
-
-function ListJobsStatus_JobIdLoop(){
-
-	local JOBNAME=""
-
-	for k in ${JOBID_ARRAY[@]}; do
-
-	
-		JOBID=$k
-		#if [ $i = "b5.7500" ]; then 
-		#	echo $JOBID 
-		#fi
-		JOBNAME=$(llq -l $JOBID | grep "Job Name:" | sed "s/^.*Job Name: \(muiPiT.*$\)/\1/")
-		#if [ $i = "b.57500" ]; then echo $JOBNAME 
-		#fi
-		JOBNAME_NTIME=$(echo $JOBNAME | sed "s/^.*_nt\([[:digit:]]\)_.*$/\1/")
-		JOBNAME_NSPACE=$(echo $JOBNAME | sed "s/^.*_n[[:alpha:]]\([[:digit:]]\{2\}\)_.*$/\1/")
-		JOBNAME_KAPPA=$(echo $JOBNAME | sed "s/^.*_k\([[:digit:]]\{4\}\)_.*$/\1/")
-		JOBNAME_BETA=$(echo $JOBNAME | sed "s/^.*\([[:digit:]]\.[[:digit:]]\{4\}$\)/\1/")
-
-
-		if [ $JOBNAME_BETA = $BETA ] && [ $JOBNAME_KAPPA = $KAPPA ] && [ $JOBNAME_NTIME = $NTIME ] && [ $JOBNAME_NSPACE = $NSPACE ]; then
-
-			STATUS=$(llq -l $JOBID | grep "^[[:blank:]]*Status:" | sed "s/^.*Status: \([[:alpha:]].*$\)/\1/")
-			#if [ $i = "b5.7500" ]; then echo "break" 
-			#fi
-			break;
-		fi
-
-	done
-}
 
 function ListJobsStatus_local(){
 
@@ -454,8 +360,6 @@ function ListJobsStatus_local(){
 
 	for i in b*; do
 
-		#STATUS="notQueued"	
-
 		#Assigning beta value to BETA variable for readability
 		BETA=$(echo $i | grep -o "[[:digit:]].[[:digit:]]\{4\}")
 
@@ -464,10 +368,7 @@ function ListJobsStatus_local(){
 			continue;
 		fi
 
-		#JOBID_ARRAY=( $(llq -u hkf806 | grep -o "juqueen[[:alnum:]]\{3\}\.[[:digit:]]\+\.[[:digit:]]") )
-		#JOBID_ARRAY=( $(llq -u hkf806 | awk -v lines=$(llq -u hkf806 | wc -l) 'NR>2 && NR<lines-1{print $1}') )
-
-		STATUS=$(llq -W -f %jn %st -u hkf806 | awk '$1 ~ /^muiPiT_'$KAPPA_PREFIX$KAPPA'_'$NTIME_PREFIX$NTIME'_'$NSPACE_PREFIX$NSPACE'_'$i'$/ {print $2}') 
+		STATUS=$(llq -W -f %jn %st -u $(whoami) | awk '$1 ~ /^muiPiT_'$KAPPA_PREFIX$KAPPA'_'$NTIME_PREFIX$NTIME'_'$NSPACE_PREFIX$NSPACE'_'$i'$/ {print $2}') 
 
 		if [ ${#STATUS} -eq 0 ]; then
 			STATUS="notQueued"	
@@ -477,9 +378,6 @@ function ListJobsStatus_local(){
 			STATUS="idling"
 		fi
 		
-
-		#ListJobsStatus_JobIdLoop
-
 		#----Constructing WORK_BETADIRECTORY, HOME_BETADIRECTORY, JOBSCRIPT_NAME, JOBSCRIPT_GLOBALPATH and INPUTFILE_GLOBALPATH---#
 		WORK_BETADIRECTORY="$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
 		HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
