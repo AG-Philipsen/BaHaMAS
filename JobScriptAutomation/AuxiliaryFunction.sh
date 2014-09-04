@@ -579,7 +579,7 @@ function ListJobStatus_Main(){
 	 rm -f $JOBS_STATUS_FILE
 	 
 	 printf "\n\e[0;36m==================================================================================================\n\e[0m"
-	 printf "\e[0;34m%s\t\t%s\t\t%s\n\e[0m"   "Beta"   "Trajectories done"   "Status"
+	 printf "\e[0;34m%s\t\t%s\t\t%s\t\t%s\n\e[0m"   "Beta"   "Trajectories done"   "Status"   "Max DS"
 	 printf "%s\t\t%s\t\t%s\n"   "Beta"   "Trajectories done"   "Status" >> $JOBS_STATUS_FILE
 	 for BETA in b*; do
 
@@ -617,20 +617,24 @@ function ListJobStatus_Main(){
 	     fi
 
 	     #----Constructing WORK_BETADIRECTORY, HOME_BETADIRECTORY, JOBSCRIPT_NAME, JOBSCRIPT_GLOBALPATH and INPUTFILE_GLOBALPATH---#
-	     local OUTPUTFILE_GLOBALPATH="$WORK_BETADIRECTORY/$OUTPUTFILE_NAME"
+	     local OUTPUTFILE_GLOBALPATH="$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA/$OUTPUTFILE_NAME"
 	     #-------------------------------------------------------------------------------------------------------------------------#
 
 	     if [ -f $OUTPUTFILE_GLOBALPATH ]; then
 		 
 		 local TRAJECTORIES_DONE=$(( $(awk 'END{print $1}' $OUTPUTFILE_GLOBALPATH) +1 ))
+		 local ACCEPTANCE=$(awk '{ sum+=$11} END {printf "%5.2f", 100*sum/(NR)}' $OUTPUTFILE_GLOBALPATH)
+		 local MAX_DELTAS=$(awk 'BEGIN {max=0} {if(sqrt($8^2)>max){max=sqrt($8^2)}} END {printf "%6g", max}' $OUTPUTFILE_GLOBALPATH)
 		 
 	     else
 		 
 		 local TRAJECTORIES_DONE=0
+		 local ACCEPTANCE=0
+		 local MAX_DELTAS=0
 		 
 	     fi
-	     printf "\e[0;34m%s\t\t%17d\t\t%s\n\e[0m"   "$BETA"   "$TRAJECTORIES_DONE"   "$STATUS"
-	     printf "%s\t%d\t\t%s\n\e[0m"   "$BETA"   "$TRAJECTORIES_DONE"   "$STATUS" >> $JOBS_STATUS_FILE
+	     printf "\e[0;34m%s\t\t%8d (%s %%)\t\t%s\t%s\n\e[0m"   "$BETA"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$STATUS"   "$MAX_DELTAS"
+	     printf "%s\t%d (%s %%)\t\t%s\t\t%s\n"   "$BETA"   "$TRAJECTORIES_DONE"   "ACCEPTANCE"   "$STATUS"   "$MAX_DELTAS" >> $JOBS_STATUS_FILE
 	     
 	 done
 	 printf "\e[0;36m==================================================================================================\n\e[0m"
