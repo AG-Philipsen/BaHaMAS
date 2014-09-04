@@ -126,6 +126,7 @@ else
     echo "num_sources=16" >> $INPUTFILE_GLOBALPATH
     echo "measure_pbp=1" >> $INPUTFILE_GLOBALPATH
     echo "tau=1" >> $INPUTFILE_GLOBALPATH
+    echo "cgmax=8000" >> $INPUTFILE_GLOBALPATH
     echo "num_timescales=2" >> $INPUTFILE_GLOBALPATH
     echo "integrator0=twomn" >> $INPUTFILE_GLOBALPATH
     echo "integrator1=twomn" >> $INPUTFILE_GLOBALPATH
