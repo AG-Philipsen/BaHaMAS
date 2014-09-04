@@ -242,10 +242,10 @@ else
     echo "# todo: this is necessary because the log file is produced in the directoy" >> $JOBSCRIPT_GLOBALPATH
     echo "# of the exec. Copying it later does not guarantee that it is still the same..." >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"Copy executable to working directory...\"" >> $JOBSCRIPT_GLOBALPATH
-    echo "cp -a $HMC_TM_GLOBALPATH $SLURM_SUBMIT_DIR " >> $JOBSCRIPT_GLOBALPATH
+    echo "cp -a $HMC_TM_GLOBALPATH \$SLURM_SUBMIT_DIR " >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "# prepare" >> $JOBSCRIPT_GLOBALPATH
-    echo "echo \$SLURM_JOB_NODELIST > hmc.\$SLURM_JOB_ID.nodelist" >> $JOBSCRIPT_GLOBALPATH
+    echo "echo \$SLURM_JOB_NODELIST > ${HMC_TM_FILENAME}.\$SLURM_JOB_ID.nodelist" >> $JOBSCRIPT_GLOBALPATH
     echo "mkdir -p \$WORKDIR || exit 2" >> $JOBSCRIPT_GLOBALPATH
     echo "cd \$WORKDIR || exit 2" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
@@ -266,7 +266,11 @@ else
     echo "echo \"---------------------------\"" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "# run hmc" >> $JOBSCRIPT_GLOBALPATH
-    echo "srun --gres=gpu:1 ./$HMC_TM_FILENAME --input-file=\$SLURM_SUBMIT_DIR/hmc.input --kappa=0.$KAPPA --ns=$NSPACE --nt=$NTIME --hmcsteps=$MEASUREMENTS --integrationsteps0=$INTSTEPS0 --integrationsteps1=$INTSTEPS1 --savefrequency=$NSAVE --startcondition=hot --beta=$BETA || exit 1" >> $JOBSCRIPT_GLOBALPATH
+    if [[ $STARTCONDITION = "continue" ]]; then
+	echo "srun --gres=gpu:1 \$SLURM_SUBMIT_DIR/$HMC_TM_FILENAME --input-file=\$SLURM_SUBMIT_DIR/$INPUTFILE_NAME --kappa=0.$KAPPA --ns=$NSPACE --nt=$NTIME --hmcsteps=$MEASUREMENTS --integrationsteps0=$INTSTEPS0 --integrationsteps1=$INTSTEPS1 --savefrequency=$NSAVE --startcondition=$STARTCONDITION --sourcefile=\$SLURM_SUBMIT_DIR/$CONFIGURATION_SOURCEFILE --beta=$BETA || exit 1" >> $JOBSCRIPT_GLOBALPATH
+    else
+	echo "srun --gres=gpu:1 \$SLURM_SUBMIT_DIR/$HMC_TM_FILENAME --input-file=\$SLURM_SUBMIT_DIR/$INPUTFILE_NAME --kappa=0.$KAPPA --ns=$NSPACE --nt=$NTIME --hmcsteps=$MEASUREMENTS --integrationsteps0=$INTSTEPS0 --integrationsteps1=$INTSTEPS1 --savefrequency=$NSAVE --startcondition=$STARTCONDITION --beta=$BETA || exit 1" >> $JOBSCRIPT_GLOBALPATH
+    fi
     echo "err=\`echo \$?\`" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"---------------------------\"" >> $JOBSCRIPT_GLOBALPATH
@@ -278,7 +282,7 @@ else
     echo "srun aticonfig --odgc --odgt --adapter=all" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "# backup core results" >> $JOBSCRIPT_GLOBALPATH
-    echo "cp -a hmc.log \$SLURM_SUBMIT_DIR/hmc.\$SLURM_JOB_ID.log || exit 2" >> $JOBSCRIPT_GLOBALPATH
+    echo "cp -a \$SLURM_SUBMIT_DIR/${HMC_TM_FILENAME}.log \$SLURM_SUBMIT_DIR/${HMC_TM_FILENAME}.\$SLURM_JOB_ID.log || exit 2" >> $JOBSCRIPT_GLOBALPATH
     echo "cp -a hmc_output \$SLURM_SUBMIT_DIR/hmc_output.\$SLURM_JOB_ID || exit 2" >> $JOBSCRIPT_GLOBALPATH
     echo "cp -a hmc_output \$SLURM_SUBMIT_DIR || exit 2" >> $JOBSCRIPT_GLOBALPATH
     echo "cp -a *.dat  \$SLURM_SUBMIT_DIR || exit 2" >> $JOBSCRIPT_GLOBALPATH
@@ -287,7 +291,7 @@ else
     echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "# go back and remove executable" >> $JOBSCRIPT_GLOBALPATH
     echo "cd \$SLURM_SUBMIT_DIR" >> $JOBSCRIPT_GLOBALPATH
-    echo "rm  $SLURM_SUBMIT_DIR/$HMC_TM_FILENAME || exit 2 " >> $JOBSCRIPT_GLOBALPATH
+    echo "rm \$SLURM_SUBMIT_DIR/$HMC_TM_FILENAME || exit 2 " >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
 
 fi

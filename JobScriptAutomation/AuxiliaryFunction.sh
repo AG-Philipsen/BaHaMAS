@@ -120,6 +120,23 @@ function ProduceInputFileAndJobScriptForEachBeta(){
 		continue
 	    fi
 	fi
+	
+	#If we are on LOEWE, let us try to use a thermalized configuration
+	if [ "$CLUSTER_NAME" = "LOEWE" ]; then
+	    local STARTCONFIGURATION_NAME="conf.${PARAMETERS_STRING}_$BETA_PREFIX$BETA"
+	    local NUMBER_OF_THERMALIZED_CONFIGURATIONS=$(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "$STARTCONFIGURATION_NAME" | wc -l)
+	    if [ $NUMBER_OF_THERMALIZED_CONFIGURATIONS -eq 0 ]; then
+		local STARTCONDITION="hot"
+	    elif [ $NUMBER_OF_THERMALIZED_CONFIGURATIONS -eq 1 ]; then
+		local STARTCONDITION="continue"
+		local CONFIGURATION_SOURCEFILE="$(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "$STARTCONFIGURATION_NAME")"
+		cp $THERMALIZED_CONFIGURATIONS_PATH/$CONFIGURATION_SOURCEFILE $HOME_BETADIRECTORY
+	    elif [ $NUMBER_OF_THERMALIZED_CONFIGURATIONS -gt 1 ]; then
+		printf "\n\e[0;31m There are more than one thermalized configuration for these parameters. The value beta = $BETA will be skipped!\n\e[0m"
+		PROBLEM_BETA_ARRAY+=( $BETA )
+		continue
+	    fi
+	fi
        
         # Build jobscript and input file and put them together with hmc_tm into the $HOME_BETADIRECTORY	
 	printf "\e[0;34m Producing files inside $HOME_BETADIRECTORY/... \n\e[0m"
@@ -183,9 +200,13 @@ function ProcessBetaValuesForSubmitOnly() {
 		    #Check if there are more than 3 files, this means that there are more files than
 		    #jobscript, input file and hmc_tm which should not be the case
 		    if [ $(ls $HOME_BETADIRECTORY | wc -l) -gt 2 ]; then
-			printf "\n\e[0;31m There are already files in $HOME_BETADIRECTORY. The value beta = $BETA will be skipped!\n\n\e[0m"
-			PROBLEM_BETA_ARRAY+=( $BETA )
-			continue
+			if [ $(ls $HOME_BETADIRECTORY | wc -l) -eq 3 ] && [ $(ls $HOME_BETADIRECTORY | grep "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA}*" | wc -l) -eq 1 ]; then
+			    printf "\n\e[0;32m The simulation with beta = $BETA start from a thermalized configuration!\n\e[0m"
+			else
+			    printf "\n\e[0;31m There are already files in $HOME_BETADIRECTORY. The value beta = $BETA will be skipped!\n\n\e[0m"
+			    PROBLEM_BETA_ARRAY+=( $BETA )
+			    continue
+			fi
 		    fi
     	            #The following will not happen if the previous if-case applied
 		    SUBMIT_BETA_ARRAY+=( $BETA )
