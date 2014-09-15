@@ -580,7 +580,7 @@ function ListJobStatus_Main(){
 	 
 	 printf "\n\e[0;36m==================================================================================================\n\e[0m"
 	 printf "\e[0;34m%s\t\t%s\t\t%s\t\t%s\n\e[0m"   "Beta"   "Trajectories done"   "Status"   "Max DS"
-	 printf "%s\t\t%s\t\t%s\n"   "Beta"   "Trajectories done"   "Status" >> $JOBS_STATUS_FILE
+	 printf "%s\t\t%s\t\t%s\t\t%s\n"   "Beta"   "Trajectories done"   "Status"   "Max DS" >> $JOBS_STATUS_FILE
 	 for BETA in b*; do
 
 	     BETA=$(echo $BETA | grep -o "[[:digit:]].[[:digit:]]\{4\}")
@@ -612,7 +612,7 @@ function ListJobStatus_Main(){
 	     if [ ${#STATUS[@]} -eq 0 ]; then
 		 STATUS="notQueued"
 	     elif [ ${#STATUS[@]} -ne 1 ]; then
-		 printf " \e[1;37;41mWARNING:\e[0;31m \e[4mThere are more than one job with $PARAMETERS_STRING as parameters! Serious problem! Aborting...\e[0m\n"
+		 printf "\n \e[1;37;41mWARNING:\e[0;31m \e[4mThere are more than one job with $PARAMETERS_STRING as parameters! Serious problem! Aborting...\n\n\e[0m\n"
 		 exit -1
 	     fi
 
@@ -622,19 +622,31 @@ function ListJobStatus_Main(){
 
 	     if [ -f $OUTPUTFILE_GLOBALPATH ]; then
 		 
-		 local TRAJECTORIES_DONE=$(( $(awk 'END{print $1}' $OUTPUTFILE_GLOBALPATH) +1 ))
+		 local TO_BE_CLEANED=$(awk 'BEGIN{traj_num = -1; file_to_be_cleaned=0}{if($1>traj_num){traj_num = $1} else {file_to_be_cleaned=1; exit;}}END{print file_to_be_cleaned}' $OUTPUTFILE_GLOBALPATH)
+		 if [ $TO_BE_CLEANED -eq 0 ]; then
+		     local TRAJECTORIES_DONE=$(wc -l $OUTPUTFILE_GLOBALPATH | awk '{print $1}')
+		 else
+		     local TRAJECTORIES_DONE=$(( $(awk 'END{print $1}' $OUTPUTFILE_GLOBALPATH) +1 ))
+		 fi
 		 local ACCEPTANCE=$(awk '{ sum+=$11} END {printf "%5.2f", 100*sum/(NR)}' $OUTPUTFILE_GLOBALPATH)
 		 local MAX_DELTAS=$(awk 'BEGIN {max=0} {if(sqrt($8^2)>max){max=sqrt($8^2)}} END {printf "%6g", max}' $OUTPUTFILE_GLOBALPATH)
 		 
 	     else
 		 
-		 local TRAJECTORIES_DONE=0
-		 local ACCEPTANCE=0
-		 local MAX_DELTAS=0
+		 local TO_BE_CLEANED=0
+		 local TRAJECTORIES_DONE='nan'
+		 local ACCEPTANCE=nan
+		 local MAX_DELTAS=nan
 		 
 	     fi
-	     printf "\e[0;34m%s\t\t%8d (%s %%)\t\t%s\t%s\n\e[0m"   "$BETA"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$STATUS"   "$MAX_DELTAS"
-	     printf "%s\t%d (%s %%)\t\t%s\t\t%s\n"   "$BETA"   "$TRAJECTORIES_DONE"   "ACCEPTANCE"   "$STATUS"   "$MAX_DELTAS" >> $JOBS_STATUS_FILE
+	     if [ $TO_BE_CLEANED -eq 0 ]; then
+		 printf "\e[0;34m%s\t\t%8s (%s %%)\t\t%9s\t%s\n\e[0m"   "$BETA"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$STATUS"   "$MAX_DELTAS"
+		 printf "%s\t\t%s (%s %%)\t\t\t%9s\t%s\n"   "$BETA"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$STATUS"   "$MAX_DELTAS" >> $JOBS_STATUS_FILE
+	     else
+		 printf "\e[0m%s\t\t\e[0;31m%8s (%s %%)\e[0m\t\t%9s\t%s\n\e[0m"   "$BETA"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$STATUS"   "$MAX_DELTAS"
+		 printf "%s\t\t%s (%s %%)\t\t\t%9s\t%s  ---> File to be cleaned!\n"   "$BETA"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$STATUS"   "$MAX_DELTAS" >> $JOBS_STATUS_FILE
+	     fi
+	     
 	     
 	 done
 	 printf "\e[0;36m==================================================================================================\n\e[0m"
