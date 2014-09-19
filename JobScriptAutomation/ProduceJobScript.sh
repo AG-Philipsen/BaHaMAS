@@ -291,7 +291,7 @@ else
     echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "# go back, order files and remove executable" >> $JOBSCRIPT_GLOBALPATH
     echo "cd \$SLURM_SUBMIT_DIR" >> $JOBSCRIPT_GLOBALPATH
-    echo "mkdir Pbp || exit 2" >> $JOBSCRIPT_GLOBALPATH
+    echo "mkdir -p Pbp || exit 2" >> $JOBSCRIPT_GLOBALPATH
     echo "mv conf*pbp* Pbp || exit 2" >> $JOBSCRIPT_GLOBALPATH
     echo "rm \$SLURM_SUBMIT_DIR/$HMC_TM_FILENAME || exit 2 " >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
