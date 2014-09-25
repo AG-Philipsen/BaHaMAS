@@ -33,9 +33,10 @@ function ParseCommandLineOption(){
 		echo -e "                                     ->    If a number is specified finished jobs will be continued up to the specified number."
 		echo -e "  \e[0;34m--liststatus\e[0;32m                       ->    The local measurement status for all beta will be displayed"
 		echo -e "  \e[0;34m--liststatus_all\e[0;32m                   ->    The global measurement status for all beta will be displayed"
-		echo -e "  \e[0;34m--showjobs\e[0;32m                         ->    The queued jobs for the current directoy will be displayed"
-		echo -e "  \e[0;34m--showjobs_all\e[0;32m                     ->    The queued jobs for all directories will be displayed"
-		echo -e "  \e[0;34m--accRateReport\e[0;32m                    ->    default value = 1000 (The acceptance rates will be computed for intervalls of 1000 configurations)"
+		echo -e "  \e[0;34m--showjobs\e[0;32m                         ->    The queued jobs will be displayed for the local parameters (kappa,nt,ns,beta)"
+		echo -e "  \e[0;34m--showjobs_all\e[0;32m                     ->    The queued jobs will be displayed for all parameters (kappa,nt,ns,beta)"
+		echo -e "  \e[0;34m--accRateReport\e[0;32m                    ->    The acceptance rates will be computed for the specified intervalls of configurations)"
+		echo -e "  \e[0;34m--accRateReport_all\e[0;32m                    ->    The acceptance rates will be computed for the specified intervalls of configurations for all parameters (kappa,nt,ns,beta)"
 		echo ""
 		echo -e "\e[0;33mNOTE: The blue options are mutually exclusive and they are all FALSE by default! In other words, if none of them"
 		echo -e "\e[0;33m      is given, the script will create beta-folders with the right files inside, but no job will be submitted."
@@ -183,6 +184,10 @@ function ParseCommandLineOption(){
 		shift;; 
 	    --accRateReport=* )		 INTERVAL=${1#*=}; 
 	   	ACCRATE_REPORT=TRUE
+	    shift ;;
+	    --accRateReport_all=* )		 INTERVAL=${1#*=}; 
+	   	ACCRATE_REPORT=TRUE
+	   	ACCRATE_REPORT_GLOBAL=TRUE
 	    shift ;;
 	    * ) printf "\n\e[0;31mError parsing the options! Aborting...\n\n\e[0m" ; exit -1 ;;
 	esac

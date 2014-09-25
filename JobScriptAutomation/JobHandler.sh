@@ -67,6 +67,7 @@ JOBS_STATUS_PREFIX="jobs_status_"
 SHOWJOBS="FALSE"
 SHOWJOBSALL="FALSE"
 ACCRATE_REPORT="FALSE"
+ACCRATE_REPORT_GLOBAL="FALSE"
 MUTUALLYEXCLUSIVEOPTS=( "--submit" "--submitonly" "--continue" "--liststatus" "--liststatus_all" "--showjobs" "--showjobs_all" )
 
 #-----------------------------------------------------------------------------------------------------------------#

@@ -68,21 +68,30 @@ function CheckParallelizationTmlqcdForJuqueen(){
 
 
 function ReadBetaValuesFromFile(){
+
     if [ ! -e $BETASFILE ]; then
 	printf "\n\e[0;31m  File \"$BETASFILE\" not found in $(pwd). Aborting...\n\n\e[0m"
 	exit -1
     fi
+
     #Write beta values from BETASFILE into BETAVALUES array
     BETAVALUES=( $(grep -o "^[[:blank:]]*[[:digit:]]\.[[:digit:]]\{4\}" $BETASFILE) )
+
     if [ ${#BETAVALUES[@]} -gt "0" ]; then	
+
 	printf "\n\e[0;36m===================================================================================\n\e[0m"
 	printf "\e[0;34m Read beta values:\n\e[0m"
+
 	for i in ${BETAVALUES[@]}; do
 	    echo "  - $i"
 	done
+
 	printf "\e[0;36m===================================================================================\n\e[0m"
+
     else	
+
 	printf "\n\e[0;31m  No beta values in betas file. Aborting...\n\n\e[0m"
+
 	exit -1
     fi
 }
