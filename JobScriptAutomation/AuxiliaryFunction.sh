@@ -690,7 +690,6 @@ function ListJobsStatus_global(){
 		#Filling PARAMETER_REGEX_ARRAY and DIRECTORY_ARRAY:
 		BuildRegexPath
 
-		DATE='D_'$(date +"%d_%m_%Y")'_T_'$(date +"%H_%M")
 
 		for i in ${DIRECTORY_ARRAY[@]}; do
 			
@@ -711,7 +710,7 @@ function ListJobsStatus_global(){
 			WORK_DIR_WITH_BETAFOLDERS="$WORK_DIR/$SIMULATION_PATH$PARAMETERS_PATH"
 			#echo $WORK_DIR_WITH_BETAFOLDERS
 
-			JOBS_STATUS_FILE="jobs_status_""$CHEMPOT_PREFIX$CHEMPOT"_"$KAPPA_PREFIX$KAPPA"_"$NTIME_PREFIX$NTIME"_"$NSPACE_PREFIX$NSPACE_$DATE"".txt"
+			JOBS_STATUS_FILE="jobs_status_"$CHEMPOT_PREFIX$CHEMPOT"_"$KAPPA_PREFIX$KAPPA"_"$NTIME_PREFIX$NTIME"_"$NSPACE_PREFIX$NSPACE"_"$DATE".txt"
 			#echo $JOBS_STATUS_FILE
 			rm -f $JOBS_STATUS_FILE
 
@@ -766,13 +765,15 @@ function BuildGlobalJobStatusFile(){
 function ListJobStatus_Main(){
      if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
 
-
+	DATE='D_'$(date +"%d_%m_%Y")'_T_'$(date +"%H_%M")
 
 	#-----------Prepare array with directories for which a job status file shall be produced---------------#
 	
 	if [ $LISTSTATUS = "TRUE" ] && [ $LISTSTATUSALL = "FALSE" ]; then
 
-		JOBS_STATUS_FILE="jobs_status_""$CHEMPOT_PREFIX$CHEMPOT"_"$KAPPA_PREFIX$KAPPA"_"$NTIME_PREFIX$NTIME"_"$NSPACE_PREFIX$NSPACE"".txt"
+		JOBS_STATUS_FILE="jobs_status_"$CHEMPOT_PREFIX$CHEMPOT"_"$KAPPA_PREFIX$KAPPA"_"$NTIME_PREFIX$NTIME"_"$NSPACE_PREFIX$NSPACE"_"$DATE".txt"
+		echo "NSPACE:$NSPACE"
+		echo "JOBS_STATUS_FILE: $JOBS_STATUS_FILE"
 		rm -f $JOBS_STATUS_FILE
 
 		printf "\n\e[0;36m==================================================================================================\n\e[0m"
