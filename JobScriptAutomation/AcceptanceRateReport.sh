@@ -20,7 +20,14 @@ elif [[ ! $INTERVAL =~ [[:digit:]]+ ]]; then
 	exit
 fi
 
-local BETA_DIR_ARRAY=( $(ls $DIR_WITH_BETAS | grep "b[[:digit:]]\.[[:digit:]]\{4\}") )
+#local BETA_DIR_ARRAY=( $(ls $DIR_WITH_BETAS | grep "b[[:digit:]]\.[[:digit:]]\{4\}") )
+
+ReadBetaValuesFromFile
+local BETA_DIR_ARRAY=()
+for BETA in ${BETAVALUES[@]}; do
+
+	BETA_DIR_ARRAY+=( "b$BETA" )
+done
 
 if [ ${#BETA_DIR_ARRAY[@]} -lt 1 ]; then
 	echo "No beta directories in the specified directory..."
