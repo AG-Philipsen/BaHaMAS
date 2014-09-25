@@ -17,6 +17,7 @@
 # Load auxiliary bash files that will be used.
 source $HOME/Script/PathManagement.sh || exit -2
 source $HOME/Script/JobScriptAutomation/AuxiliaryFunction.sh || exit -2
+source $HOME/Script/JobScriptAutomation/AcceptanceRateReport.sh || exit -2
 #-----------------------------------------------------------------------------------------------------------------#
 
 #-----------------------------------------------------------------------------------------------------------------#
@@ -53,6 +54,7 @@ NSAVE="50"
 INTSTEPS0="7"
 INTSTEPS1="5"
 INTSTEPS2="5"
+INTERVAL="1000"
 SUBMIT="FALSE"
 SUBMITONLY="FALSE"
 CONTINUE="FALSE"
@@ -64,6 +66,7 @@ LOEWE_PARTITION="parallel"
 JOBS_STATUS_PREFIX="jobs_status_"
 SHOWJOBS="FALSE"
 SHOWJOBSALL="FALSE"
+ACCRATE_REPORT="FALSE"
 MUTUALLYEXCLUSIVEOPTS=( "--submit" "--submitonly" "--continue" "--liststatus" "--liststatus_all" "--showjobs" "--showjobs_all" )
 
 #-----------------------------------------------------------------------------------------------------------------#
@@ -116,7 +119,7 @@ WORK_DIR_WITH_BETAFOLDERS="$WORK_DIR/$SIMULATION_PATH$PARAMETERS_PATH"
 
 #-----------------------------------------------------------------------------------------------------------------#
 # Check for correct specification of parallelization parameters, only on JUQUEEN
-if [ $LISTSTATUS = "FALSE" ] && [ $SHOWJOBS = "FALSE" ]; then
+if [ $LISTSTATUS = "FALSE" ] && [ $SHOWJOBS = "FALSE" ] && [ $ACCRATE_REPORT = "FALSE" ]; then
 
     if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then CheckParallelizationTmlqcdForJuqueen; fi
 
@@ -126,7 +129,7 @@ fi
 
 #-----------------------------------------------------------------------------------------------------------------#
 # Read beta values from BETASFILE and write them into BETAVALUES array
-if [ $LISTSTATUS = "FALSE" ] && [ $SHOWJOBS = "FALSE" ]; then
+if [ $LISTSTATUS = "FALSE" ] && [ $SHOWJOBS = "FALSE" ] && [ $ACCRATE_REPORT = "FALSE" ]; then
 
     ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
 
@@ -139,7 +142,9 @@ fi
 SUBMIT_BETA_ARRAY=()
 PROBLEM_BETA_ARRAY=() #Arrays that will contain the beta values that actually will be processed
 
-if [ $SUBMITONLY = "FALSE" ] && [ $CONTINUE = "FALSE" ] && [ $LISTSTATUS = "FALSE" ] && [ $SHOWJOBS = "FALSE" ]; then  ProduceInputFileAndJobScriptForEachBeta
+if [ $SUBMITONLY = "FALSE" ] && [ $CONTINUE = "FALSE" ] && [ $LISTSTATUS = "FALSE" ] && [ $SHOWJOBS = "FALSE" ] && [ $ACCRATE_REPORT = "FALSE" ]; then  
+	
+	ProduceInputFileAndJobScriptForEachBeta
 
 elif [ $SUBMITONLY = "TRUE" ]; then  
 
@@ -190,6 +195,14 @@ fi
 #------------------------------------------------------------------------------------------------------------------------------#
 # Report on eventual problems
 PrintReportForProblematicBeta
+#------------------------------------------------------------------------------------------------------------------------------#
+
+#------------------------------------------------------------------------------------------------------------------------------#
+# Print acceptance rate report
+if [ $ACCRATE_REPORT = "TRUE" ]; then
+
+	AcceptanceRateReport
+fi
 #------------------------------------------------------------------------------------------------------------------------------#
 
 printf "\e[0;34m \n ...done!\n\n\e[0m"
