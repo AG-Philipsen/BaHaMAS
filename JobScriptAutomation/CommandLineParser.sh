@@ -3,6 +3,10 @@
 #       the continue part should be modified or not. 
 
 function ParseCommandLineOption(){
+
+MUTUALLYEXCLUSIVEOPTS=( "--submit" "--submitonly" "--continue" "--liststatus" "--liststatus_all" "--showjobs" "--showjobs_all" "--accRateReport" "--accRateReport_all" )
+local MUTUALLYEXCLUSIVEOPTS_PASSED=( )
+
     while [ "$1" != "" ]; do
 	case $1 in
 	    -h | --help )
@@ -78,61 +82,25 @@ function ParseCommandLineOption(){
 		fi
 		shift ;;
 	    --submit )
-	        if [ $SUBMITONLY = "FALSE" ] && [ $CONTINUE = "FALSE" ] && [ $LISTSTATUS = "FALSE" ]; then 
+		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--submit" )
 		    SUBMIT="TRUE"
-		else		
-		    #printf "\n\e[0;31m The options --submit, --submitonly, --continue, and --liststatus must not be combined! Aborting...\n\n\e[0m" 
-		    printf "\n\e[0;31m The options " 
-		    for OPT in ${MUTUALLYEXCLUSIVEOPTS[@]}; do
-			printf "%s, " $OPT	
-		    done
-		    printf "are mutually exclusive and must not be combined! Aborting...\n\n\e[0m" 
-		    exit -1
-		fi;
 		shift;; 
 	    --submitonly )	 			
-	        if [ $SUBMIT = "FALSE" ] && [ $CONTINUE = "FALSE" ] && [ $LISTSTATUS = "FALSE" ]; then 
+		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--submitonly" )
 		    SUBMITONLY="TRUE"
-		else		
-		    #printf "\n\e[0;31m The options --submit, --submitonly, --continue, and --liststatus must not be combined! Aborting...\n\n\e[0m" 
-		    printf "\n\e[0;31m The options " 
-		    for OPT in ${MUTUALLYEXCLUSIVEOPTS[@]}; do
-			printf "%s, " $OPT	
-		    done
-		    printf "are mutually exclusive and must not be combined! Aborting...\n\n\e[0m" 
-		    exit -1
-		fi;
 		shift;; 
 	    --continue )			 
-	        if [ $SUBMITONLY = "FALSE" ] && [ $SUBMIT = "FALSE" ] && [ $LISTSTATUS = "FALSE" ]; then
+		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--continue" )
 		    CONTINUE="TRUE"		
-		else 
-		    #printf "\n\e[0;31m The options --submit, --submitonly, --continue, and --liststatus must not be combined! Aborting...\n\n\e[0m" 
-		    printf "\n\e[0;31m The options " 
-		    for OPT in ${MUTUALLYEXCLUSIVEOPTS[@]}; do
-			printf "%s, " $OPT	
-		    done
-		    printf "are mutually exclusive and must not be combined! Aborting...\n\n\e[0m" 
-		    exit -1
-		fi
 		shift;; 
 	    --continue=* )		
-	        if [ $SUBMITONLY = "FALSE" ] && [ $SUBMIT = "FALSE" ] && [ $LISTSTATUS = "FALSE" ]; then
+		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--continue" )
 		    CONTINUE="TRUE"
 		    CONTINUE_NUMBER=${1#*=}; 
 		    if [[ ! $CONTINUE_NUMBER =~ ^[[:digit:]]+$ ]];then
 		    	printf "\n\e[0;31m The specified number for --continue=[number] must be an integer containing at least one or more digits! Aborting...\n\n\e[0m" 
 			exit -1
 		    fi
-		else 
-		    #printf "\n\e[0;31m The options --submit, --submitonly, --continue, and --liststatus must not be combined! Aborting...\n\n\e[0m" 
-		    printf "\n\e[0;31m The options " 
-		    for OPT in ${MUTUALLYEXCLUSIVEOPTS[@]}; do
-			printf "%s, " $OPT	
-		    done
-		    printf "are mutually exclusive and must not be combined! Aborting...\n\n\e[0m" 
-		    exit -1
-		fi
 		shift;; 
 	    --resumefrom=* )
 	        if [ $CONTINUE = "TRUE" ]; then
@@ -147,69 +115,45 @@ function ParseCommandLineOption(){
 		fi
 		shift;; 
 	    --liststatus )
-	        if [ $SUBMITONLY = "FALSE" ] && [ $SUBMIT = "FALSE" ] && [ $CONTINUE = "FALSE" ] && [ $LISTSTATUSALL = "FALSE" ]; then
+		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--liststatus" )
 		    LISTSTATUS="TRUE"
 		    LISTSTATUSALL="FALSE"
-		else
-		    #printf "\n\e[0;31m The options --submit, --submitonly, --continue, and --liststatus must not be combined! Aborting...\n\n\e[0m" 
-		    printf "\n\e[0;31m The options " 
-		    for OPT in ${MUTUALLYEXCLUSIVEOPTS[@]}; do
-			printf "%s, " $OPT	
-		    done
-		    printf "are mutually exclusive and must not be combined! Aborting...\n\n\e[0m" 
-		    exit -1
-		fi
 		shift;; 
 	    --liststatus_all )
-	        if [ $SUBMITONLY = "FALSE" ] && [ $SUBMIT = "FALSE" ] && [ $CONTINUE = "FALSE" ] && [ $LISTSTATUS = "FALSE" ]; then
+		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--liststatus_all" )
 		    LISTSTATUS="TRUE"
 		    LISTSTATUSALL="TRUE"
-		else
-		    #printf "\n\e[0;31m The options --submit, --submitonly, --continue, and --liststatus must not be combined! Aborting...\n\n\e[0m" 
-		    printf "\n\e[0;31m The options " 
-		    for OPT in ${MUTUALLYEXCLUSIVEOPTS[@]}; do
-			printf "%s, " $OPT	
-		    done
-		    printf "are mutually exclusive and must not be combined! Aborting...\n\n\e[0m" 
-		    exit -1
-		fi
 		shift;; 
 	    --showjobs )
-	        if [ $SUBMITONLY = "FALSE" ] && [ $SUBMIT = "FALSE" ] && [ $CONTINUE = "FALSE" ] && [ $LISTSTATUS = "FALSE" ]; then
+		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--showjobs" )
 		    SHOWJOBS="TRUE"
 		    SHOWJOBSALL="FALSE"
-		else
-		    #printf "\n\e[0;31m The options --submit, --submitonly, --continue, and --liststatus must not be combined! Aborting...\n\n\e[0m" 
-		    printf "\n\e[0;31m The options " 
-		    for OPT in ${MUTUALLYEXCLUSIVEOPTS[@]}; do
-			printf "%s, " $OPT	
-		    done
-		    printf "are mutually exclusive and must not be combined! Aborting...\n\n\e[0m" 
-		    exit -1
-		fi
 		shift;; 
 	    --showjobs_all )
-	        if [ $SUBMITONLY = "FALSE" ] && [ $SUBMIT = "FALSE" ] && [ $CONTINUE = "FALSE" ] && [ $LISTSTATUS = "FALSE" ]; then
+		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--showjobs_all" )
 		    SHOWJOBS="TRUE"
 		    SHOWJOBSALL="TRUE"
-		else
-		    #printf "\n\e[0;31m The options --submit, --submitonly, --continue, and --liststatus must not be combined! Aborting...\n\n\e[0m" 
-		    printf "\n\e[0;31m The options " 
-		    for OPT in ${MUTUALLYEXCLUSIVEOPTS[@]}; do
-			printf "%s, " $OPT	
-		    done
-		    printf "are mutually exclusive and must not be combined! Aborting...\n\n\e[0m" 
-		    exit -1
-		fi
 		shift;; 
 	    --accRateReport=* )		 INTERVAL=${1#*=}; 
+		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--accRateReport" )
 	   	ACCRATE_REPORT=TRUE
 	    shift ;;
 	    --accRateReport_all=* )		 INTERVAL=${1#*=}; 
+		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--accRateReport_all" )
 	   	ACCRATE_REPORT=TRUE
 	   	ACCRATE_REPORT_GLOBAL=TRUE
 	    shift ;;
 	    * ) printf "\n\e[0;31mError parsing the options! Aborting...\n\n\e[0m" ; exit -1 ;;
 	esac
     done
+
+    if [ ${#MUTUALLYEXCLUSIVEOPTS_PASSED[@]} -gt 1 ]; then
+
+	    printf "\n\e[0;31m The options " 
+	    for OPT in ${MUTUALLYEXCLUSIVEOPTS[@]}; do
+		printf "%s, " $OPT	
+	    done
+	    printf "are mutually exclusive and must not be combined! Aborting...\n\n\e[0m" 
+	    exit -1
+    fi
 }

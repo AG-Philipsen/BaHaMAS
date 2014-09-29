@@ -69,7 +69,6 @@ SHOWJOBS="FALSE"
 SHOWJOBSALL="FALSE"
 ACCRATE_REPORT="FALSE"
 ACCRATE_REPORT_GLOBAL="FALSE"
-MUTUALLYEXCLUSIVEOPTS=( "--submit" "--submitonly" "--continue" "--liststatus" "--liststatus_all" "--showjobs" "--showjobs_all" )
 
 #-----------------------------------------------------------------------------------------------------------------#
 # Set default values for the non-modifyable variables ---> Modify this file to change them!

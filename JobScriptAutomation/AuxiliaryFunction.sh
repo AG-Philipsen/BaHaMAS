@@ -155,6 +155,14 @@ function ProduceInputFileAndJobScriptForEachBeta(){
 	    printf "\n\e[0;31m Aborting...\n\n\e[0m"
 	    exit -1
 	fi
+
+	# Create a File in each new beta dir with the name format bx.xxx_created_d_m_y
+	# From this file one can tell when a directory was created the first time
+	if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
+
+		touch $HOME_BETADIRECTORY"/b"$BETA"/b"$BETA"_created_$(date +"%d_%m_%y")"
+	fi
+
     done
 }
 
@@ -179,7 +187,10 @@ function ProcessBetaValuesForSubmitOnly() {
 		if [ -f "$INPUTFILE_GLOBALPATH" ] && [ -f "$JOBSCRIPT_GLOBALPATH" ] && [ -f "$HOME_BETADIRECTORY/$HMC_TM_FILENAME" ]; then
 		    #Check if there are more than 3 files, this means that there are more files than
 		    #jobscript, input file and hmc_tm which should not be the case
-		    if [ $(ls $HOME_BETADIRECTORY | wc -l) -gt 3 ]; then
+		    #The number of allowed files in the $HOME_BETADIRECTORY directory are no increased to 4 due to the new file
+		    #that is created at creation of the beta directory. The name of the new file shows when the beta directory
+		    #was created the first time
+		    if [ $(ls $HOME_BETADIRECTORY | wc -l) -gt 4 ]; then
 			printf "\n\e[0;31m There are already files in $HOME_BETADIRECTORY. The value beta = $BETA will be skipped!\n\n\e[0m"
 			PROBLEM_BETA_ARRAY+=( $BETA )
 			continue
@@ -358,7 +369,7 @@ function ProcessBetaValuesForContinue() {
 	    if [ $MEASUREMENTS_REMAINING -gt 0 ]; then
 		
 		sed -i "s/\(^Measurements.*$\)/#\1\nMeasurements = $MEASUREMENTS_REMAINING/" $INPUTFILE_GLOBALPATH
-		Submit_BETA_ARRAY+=( $BETA )
+		SUBMIT_BETA_ARRAY+=( $BETA )
 	    else
 		
 		printf "\n\e[0;31m For beta = $BETA the difference between the total nr of trajectories and the trajectories already done\n\e[0m"
@@ -670,9 +681,6 @@ function ListJobsStatus_local(){
 				STATUS="unknown"
 			fi
 
-			#printf "\e[0;34m$BETA \t $TOTAL_NR_TRAJECTORIES \t $TRAJECTORIES_DONE \t $MEASUREMENTS_REMAINING\n\e[0m"
-			#26
-			#printf "\e[0;34m%.4f  %24d  %17d  %22d %s\n\e[0m" "$BETA" "$TOTAL_NR_TRAJECTORIES" "$TRAJECTORIES_DONE" "$MEASUREMENTS_REMAINING" "$STATUS"
 			printf "\e[0;34m%.4f  %14d / %5d    %s\n\e[0m" "$BETA" "$TOTAL_NR_TRAJECTORIES" "$TRAJECTORIES_DONE" "$STATUS"
 			printf "      %.4f  %14d / %5d    %s\n" "$BETA" "$TOTAL_NR_TRAJECTORIES" "$TRAJECTORIES_DONE" "$STATUS" >> $JOBS_STATUS_FILE
 		fi
@@ -755,6 +763,7 @@ function BuildGlobalJobStatusFile(){
 		NSPACE_TMP=`echo $LOCAL_FILE | grep -o "$JOBS_STATUS_PREFIX.*" | grep -o "$NSPACE_PREFIX$NSPACE_REGEX"`
 
 		#echo "$KAPPA_TMP $NTIME_TMP $NSPACE_TMP" >> "$JOBS_STATUS_FILE_GLOBAL"
+		echo "cat $LOCAL_FILE >> $JOBS_STATUS_FILE_GLOBAL"
 		cat $LOCAL_FILE >> "$JOBS_STATUS_FILE_GLOBAL"
 		echo "" >> "$JOBS_STATUS_FILE_GLOBAL"
 	done
@@ -771,7 +780,8 @@ function ListJobStatus_Main(){
 	
 	if [ $LISTSTATUS = "TRUE" ] && [ $LISTSTATUSALL = "FALSE" ]; then
 
-		JOBS_STATUS_FILE="jobs_status_"$CHEMPOT_PREFIX$CHEMPOT"_"$KAPPA_PREFIX$KAPPA"_"$NTIME_PREFIX$NTIME"_"$NSPACE_PREFIX$NSPACE"_"$DATE".txt"
+		#JOBS_STATUS_FILE="jobs_status_"$CHEMPOT_PREFIX$CHEMPOT"_"$KAPPA_PREFIX$KAPPA"_"$NTIME_PREFIX$NTIME"_"$NSPACE_PREFIX$NSPACE"_"$DATE".txt"
+		JOBS_STATUS_FILE="jobs_status_"$CHEMPOT_PREFIX$CHEMPOT"_"$KAPPA_PREFIX$KAPPA"_"$NTIME_PREFIX$NTIME"_"$NSPACE_PREFIX$NSPACE".txt"
 		echo "NSPACE:$NSPACE"
 		echo "JOBS_STATUS_FILE: $JOBS_STATUS_FILE"
 		rm -f $JOBS_STATUS_FILE
