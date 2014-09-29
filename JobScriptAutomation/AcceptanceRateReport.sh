@@ -1,4 +1,4 @@
-function AcceptanceRateReportLocal(){
+function __static__AcceptanceRateReportLocal(){
 
 	PARAMETERS_PATH=""
 	ReadParametersFromPath $(pwd) #defining WORK_DIR_WITH_BETAFOLDERS
@@ -50,7 +50,7 @@ function AcceptanceRateReportLocal(){
 	done
 
 	#FIND LARGEST NUMBER OF INTERVALS
-	LARGEST_INTERVAL=${NRLINES_ARRAY[0]} #Initialize LARGEST_INTERVAL variable
+	local LARGEST_INTERVAL=${NRLINES_ARRAY[0]} #Initialize LARGEST_INTERVAL variable
 
 	for NRLINES in ${NRLINES_ARRAY[@]}; do
 
@@ -65,7 +65,7 @@ function AcceptanceRateReportLocal(){
 	printf "\n      %s  %s  %s\n" $KAPPA_PREFIX$KAPPA $NTIME_PREFIX$NTIME $NSPACE_PREFIX$NSPACE >> $ACCRATE_REPORT
 
 	#PRINT ROW WITH BETAS
-	BETA_COUNTER=0
+	local BETA_COUNTER=0
 
 	printf "Intervals "
 	printf "Intervals " >> $ACCRATE_REPORT
@@ -84,14 +84,14 @@ function AcceptanceRateReportLocal(){
 	printf "\n" >> $ACCRATE_REPORT
 
 	#PRINT ACCEPTANCE RATES
-	COUNTER=1
+	local COUNTER=1
 
 	while [ $COUNTER -lt $(expr $LARGEST_INTERVAL + 1) ];do
 
 		printf "%02d% 8s" $COUNTER $EMPTY
 		printf "%02d% 8s" $COUNTER $EMPTY >> $ACCRATE_REPORT
 
-		POS_INDEX=1
+		local POS_INDEX=1
 
 		for POS in ${POS_BETA_STRING[@]}; do
 			
@@ -132,11 +132,11 @@ function AcceptanceRateReportLocal(){
 
 }
 
-function AcceptanceRateReportGlobal(){
+function __static__AcceptanceRateReportGlobal(){
 
-	ORIGINAL_PATH=$(pwd)
+	local ORIGINAL_PATH=$(pwd)
 
-	JOBS_STATUS_FILE_GLOBAL=$HOME_DIR'/'$SIMULATION_PATH'/global_'$JOBS_STATUS_PREFIX$DATE'.txt'
+	local JOBS_STATUS_FILE_GLOBAL=$HOME_DIR'/'$SIMULATION_PATH'/global_'$JOBS_STATUS_PREFIX$DATE'.txt'
 
 	local ACCRATE_REPORT_PREFIX="$HOME_DIR/$SIMULATION_PATH/global_acceptancerate_report_"
 
@@ -152,7 +152,7 @@ function AcceptanceRateReportGlobal(){
 		
 		cd $DIR_WITH_BETAS
 
-		AcceptanceRateReportLocal
+		__static__AcceptanceRateReportLocal
 
 		cd $ORIGINAL_PATH
 
@@ -179,13 +179,13 @@ function AcceptanceRateReport(){
 
 		rm -f $ACCRATE_REPORT_PREFIX*
 
-		AcceptanceRateReportLocal
+		__static__AcceptanceRateReportLocal
 
 	elif [ $ACCRATE_REPORT_GLOBAL = "TRUE" ]; then 
 
 		printf "Printing global acceptance rate report...\n"
 
-		AcceptanceRateReportGlobal
+		__static__AcceptanceRateReportGlobal
 	fi
 }
 

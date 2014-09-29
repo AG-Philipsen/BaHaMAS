@@ -18,6 +18,8 @@
 source $HOME/Script/PathManagement.sh || exit -2
 source $HOME/Script/JobScriptAutomation/AuxiliaryFunction.sh || exit -2
 source $HOME/Script/JobScriptAutomation/AcceptanceRateReport.sh || exit -2
+source $HOME/Script/JobScriptAutomation/ListJobsStatus.sh || exit -2
+source $HOME/Script/JobScriptAutomation/BuildRegexPath.sh || exit -2
 #-----------------------------------------------------------------------------------------------------------------#
 
 #-----------------------------------------------------------------------------------------------------------------#
