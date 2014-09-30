@@ -82,7 +82,7 @@ function __static__ListJobsStatus_local(){
 				#printf "\e[0;34m%.4f %5d / %5d %.2f    %s/%s  %s\n\e[0m" "$BETA" "$TOTAL_NR_TRAJECTORIES" "$TRAJECTORIES_DONE" $ACCEPTANCE $INT0 $INT1 "$STATUS"
 				printf "\e[0;34m%.4f %5d / %5d $ACCEPTANCE    $INT0/$INT1  %s\n\e[0m" $BETA $TOTAL_NR_TRAJECTORIES $TRAJECTORIES_DONE $STATUS
 				#printf "      %.4f %5d / %5d %.2f    %s/%s  %s\n\e[0m" "$BETA" "$TOTAL_NR_TRAJECTORIES" "$TRAJECTORIES_DONE" $INT0 $INT1 "$STATUS" >> $JOBS_STATUS_FILE
-				printf "      %.4f %5d / %5d $ACCEPTANCE    $INT0/$INT1  %s\n\e[0m" $BETA $TOTAL_NR_TRAJECTORIES $TRAJECTORIES_DONE $STATUS >> $JOBS_STATUS_FILE
+				printf "      %.4f %5d / %5d $ACCEPTANCE    $INT0/$INT1  %s\n" $BETA $TOTAL_NR_TRAJECTORIES $TRAJECTORIES_DONE $STATUS >> $JOBS_STATUS_FILE
 		fi
 		
 	done
