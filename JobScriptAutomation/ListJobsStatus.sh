@@ -36,23 +36,23 @@ function __static__ListJobsStatus_local(){
 
 		local WORKDIRS_EXIST="TBD" #TBD = To be determined
 		local ACCEPTANCE="TBD"
-		local INT0="NA"
-		local INT1="NA"
+		local INT0="N"
+		local INT1="N"
 
 		if [ -d $WORK_BETADIRECTORY ] && [ -f $OUTPUTFILE_GLOBALPATH ]; then
 
 			WORKDIRS_EXIST="true"
-		  	ACCEPTANCE=$(awk '{ sum+=$7} END {printf "%.2f", sum/(NR)}' $OUTPUTFILE_GLOBALPATH)
+			ACCEPTANCE=$(awk '{ sum+=$7} END {if(NR != 0){acc=sum/(NR); printf "%.2f", acc} else {acc="N.NN";printf "%s", acc} }' $OUTPUTFILE_GLOBALPATH)
 		else 
 			WORKDIRS_EXIST="false"
-		 	ACCEPTANCE="NA"
+		 	ACCEPTANCE="N.NN"
 		fi
 
 		if [ -d $HOME_BETADIRECTORY ] && [ -f $INPUTFILE_GLOBALPATH ]; then
 
 			INT0=$(awk '{if (($1 ~ /Integrationsteps0/) || ($1 ~ /IntegrationSteps0/)){print $3}}' $INPUTFILE_GLOBALPATH)
 			INT1=$(awk '{if ($1 ~ /IntegrationSteps1/){print $3}}' $INPUTFILE_GLOBALPATH)
-						
+
 			TOTAL_NR_TRAJECTORIES=$(grep "Total number of trajectories" $INPUTFILE_GLOBALPATH | grep -o "[[:digit:]]\+")	
 			#TOTAL_NR_TRAJECTORIES=$(expr $TOTAL_NR_TRAJECTORIES - 0)
 
@@ -79,8 +79,10 @@ function __static__ListJobsStatus_local(){
 				STATUS="unknown"
 			fi
 
-			printf "\e[0;34m%.4f %5d / %5d %.2f    %d/%d  %s\n\e[0m" "$BETA" "$TOTAL_NR_TRAJECTORIES" "$TRAJECTORIES_DONE" $ACCEPTANCE $INT0 $INT1 "$STATUS"
-			printf "      %.4f %5d / %5d %.2f    %d/%d  %s\n\e[0m" "$BETA" "$TOTAL_NR_TRAJECTORIES" "$TRAJECTORIES_DONE" $ACCEPTANCE $INT0 $INT1 "$STATUS" >> $JOBS_STATUS_FILE
+				#printf "\e[0;34m%.4f %5d / %5d %.2f    %s/%s  %s\n\e[0m" "$BETA" "$TOTAL_NR_TRAJECTORIES" "$TRAJECTORIES_DONE" $ACCEPTANCE $INT0 $INT1 "$STATUS"
+				printf "\e[0;34m%.4f %5d / %5d $ACCEPTANCE    $INT0/$INT1  %s\n\e[0m" $BETA $TOTAL_NR_TRAJECTORIES $TRAJECTORIES_DONE $STATUS
+				#printf "      %.4f %5d / %5d %.2f    %s/%s  %s\n\e[0m" "$BETA" "$TOTAL_NR_TRAJECTORIES" "$TRAJECTORIES_DONE" $INT0 $INT1 "$STATUS" >> $JOBS_STATUS_FILE
+				printf "      %.4f %5d / %5d $ACCEPTANCE    $INT0/$INT1  %s\n\e[0m" $BETA $TOTAL_NR_TRAJECTORIES $TRAJECTORIES_DONE $STATUS >> $JOBS_STATUS_FILE
 		fi
 		
 	done

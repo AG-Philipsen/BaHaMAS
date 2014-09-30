@@ -160,7 +160,7 @@ function ProduceInputFileAndJobScriptForEachBeta(){
 	# From this file one can tell when a directory was created the first time
 	if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
 
-		touch $HOME_BETADIRECTORY"/b"$BETA"/b"$BETA"_created_$(date +"%d_%m_%y")"
+		touch $HOME_BETADIRECTORY"/b"$BETA"_created_$(date +"%d_%m_%y")"
 	fi
 
     done
