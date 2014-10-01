@@ -4,8 +4,8 @@
 
 function ParseCommandLineOption(){
 
-MUTUALLYEXCLUSIVEOPTS=( "--submit" "--submitonly" "--continue" "--liststatus" "--liststatus_all" "--showjobs" "--showjobs_all" "--accRateReport" "--accRateReport_all" )
-local MUTUALLYEXCLUSIVEOPTS_PASSED=( )
+MUTUALLYEXCLUSIVEOPTS=( "--submit" "--submitonly" "--continue" "--liststatus" "--liststatus_all" "--showjobs" "--showjobs_all" "--accRateReport" "--accRateReport_all --emptyBetaDirectories" )
+MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 
     while [ "$1" != "" ]; do
 	case $1 in
@@ -46,9 +46,9 @@ local MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 		echo -e "  \e[0;34m--liststatus\e[0;32m                       ->    The local measurement status for all beta will be displayed"
 		echo -e "  \e[0;34m--liststatus_all\e[0;32m                   ->    The global measurement status for all beta will be displayed"
 		echo -e "  \e[0;34m--showjobs\e[0;32m                         ->    The queued jobs will be displayed for the local parameters (kappa,nt,ns,beta)"
-		echo -e "  \e[0;34m--showjobs_all\e[0;32m                     ->    The queued jobs will be displayed for all parameters (kappa,nt,ns,beta)"
 		echo -e "  \e[0;34m--accRateReport\e[0;32m                    ->    The acceptance rates will be computed for the specified intervalls of configurations)"
-		echo -e "  \e[0;34m--accRateReport_all\e[0;32m                    ->    The acceptance rates will be computed for the specified intervalls of configurations for all parameters (kappa,nt,ns,beta)"
+		echo -e "  \e[0;34m--accRateReport_all\e[0;32m                ->    The acceptance rates will be computed for the specified intervalls of configurations for all parameters (kappa,nt,ns,beta)"
+		echo -e "  \e[0;34m--emptyBetaDirectories\e[0;32m             ->    CAUTION: The beta directories corresponding to the beta values specified in the betas file will be emptied! For each beta value specified there will be a promt for confirmation! After the Confirmation the process cannot bet undone!" 
 		echo ""
 		echo -e "\e[0;33mNOTE: The blue options are mutually exclusive and they are all FALSE by default! In other words, if none of them"
 		echo -e "\e[0;33m      is given, the script will create beta-folders with the right files inside, but no job will be submitted."
@@ -121,27 +121,25 @@ local MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 		shift;; 
 	    --liststatus_all )
 		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--liststatus_all" )
-		    LISTSTATUS="TRUE"
+		    LISTSTATUS="FALSE"
 		    LISTSTATUSALL="TRUE"
 		shift;; 
 	    --showjobs )
 		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--showjobs" )
 		    SHOWJOBS="TRUE"
-		    SHOWJOBSALL="FALSE"
-		shift;; 
-	    --showjobs_all )
-		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--showjobs_all" )
-		    SHOWJOBS="TRUE"
-		    SHOWJOBSALL="TRUE"
 		shift;; 
 	    --accRateReport=* )		 INTERVAL=${1#*=}; 
 		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--accRateReport" )
-	   	ACCRATE_REPORT=TRUE
+	   	ACCRATE_REPORT="TRUE"
 	    shift ;;
 	    --accRateReport_all=* )		 INTERVAL=${1#*=}; 
 		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--accRateReport_all" )
-	   	ACCRATE_REPORT=TRUE
-	   	ACCRATE_REPORT_GLOBAL=TRUE
+	   	ACCRATE_REPORT="TRUE"
+	   	ACCRATE_REPORT_GLOBAL="TRUE"
+	    shift ;;
+	    --emptyBetaDirectories )
+		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--emptyBetaDirectories" )
+		EMPTY_BETA_DIRS="TRUE"
 	    shift ;;
 	    * ) printf "\n\e[0;31mError parsing the options! Aborting...\n\n\e[0m" ; exit -1 ;;
 	esac

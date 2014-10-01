@@ -1,11 +1,73 @@
+#Comment:
+#Pattern used for  functions __static__DetermineCreationDateAndSubmits and function __static__CreateSubmitsFile:
+#date -d @$(date +"%s") +"%d.%m.%y %H:%M"
+#A string %s is passed to date which has the format of seconds and is converted into date and time.
+#see manual page for a detailed description of the options.
+
+
+
+function __static__DetermineCreationDateAndSubmits(){
+
+	if [[ $(ls $HOME_BETADIRECTORY"/" | egrep -o "b[[:digit:]]\.[[:digit:]]{4}_created_[[:digit:]]{2}_[[:digit:]]{2}_[[:digit:]]{2}" | wc -l) = 1 ]]; then
+
+		CREATION_DATE=$(ls $HOME_BETADIRECTORY"/" | egrep -o "b[[:digit:]]\.[[:digit:]]{4}_created_[[:digit:]]{2}_[[:digit:]]{2}_[[:digit:]]{2}" | egrep -o "[[:digit:]]{2}_[[:digit:]]{2}_[[:digit:]]{2}" | sed "s/_/\./g")
+		#CREATION_DATE=$(ls $HOME_BETADIRECTORY"/" | egrep -o "b[[:digit:]]\.[[:digit:]]{4}_created_[[:digit:]]{2}igit:]]{2}_[[:digit:]]{2}" | egrep -o "[[:digit:]]{2}_[[:digit:]]{2}_[[:digit:]]{2}" | sed "s/_/\./g") 
+	else
+		CREATION_DATE="NN.NN.NN"
+	fi
+
+	if [ -f "$WORK_BETADIRECTORY/history_hmc_tm" ]; then	
+
+		NRSUBMITS=$(grep "Timestamp" "$WORK_BETADIRECTORY/history_hmc_tm" | wc -l)	
+		SUBMITFIRST=$(date -d @$(date +"$(grep "Timestamp" $WORK_BETADIRECTORY/history_hmc_tm | egrep -o "[[:digit:]]{10}" | head -n1)") +"%d.%m.%y")
+		SUBMITLAST=$(date -d @$(date +"$(grep "Timestamp" $WORK_BETADIRECTORY/history_hmc_tm | egrep -o "[[:digit:]]{10}" | tail -n1)") +"%d.%m.%y")
+
+#$(date -d @$(date +"$(grep "Timestamp" $WORK_BETADIRECTORY/history_hmc_tm | egrep -o "[[:digit:]]{10}" | tail -n1)") +"%d.%m.%y")
+	else
+		NRSUBMITS="NNN"
+		SUBMITFIRST="NN.NN.NN"
+		SUBMITLAST="NN.NN.NN"
+	fi
+}
+
+
+function __static__CreateSubmitsFile(){
+
+	local SUBMITS_FILE="Submits"
+
+	local TIMESTAMP_ARRAY=( )
+
+	local SUBMITS_ARRAY=( )
+
+	if [ -f "$WORK_BETADIRECTORY/history_hmc_tm" ]; then	
+
+		TIMESTAMP_ARRAY=( $(grep "Timestamp" $WORK_BETADIRECTORY/history_hmc_tm | egrep -o "[[:digit:]]{10}") )
+
+		for i in ${TIMESTAMP_ARRAY[@]}; do
+
+			SUBMITS_ARRAY+=( $(date -d @$(date +"$i") +"%d.%m.%y_%H:%M") )
+		done
+	fi
+
+	if [ -d $HOME_BETADIRECTORY ] && [ ${#SUBMITS_ARRAY[@]} -gt 0 ]; then
+
+		rm -f $HOME_BETADIRECTORY/$SUBMITS_FILE
+
+		for i in ${SUBMITS_ARRAY[@]}; do
+
+			echo $i >> $HOME_BETADIRECTORY/$SUBMITS_FILE
+		done	
+	fi
+}
+
 function __static__ListJobsStatus_local(){
 
 	printf "\n\e[0;36m==================================================================================================\n\e[0m"
 
 	printf "\n\e[0;34m%s  %s  %s\n" $KAPPA_PREFIX$KAPPA $NTIME_PREFIX$NTIME $NSPACE_PREFIX$NSPACE 
 	printf "\n      %s  %s  %s\n" $KAPPA_PREFIX$KAPPA $NTIME_PREFIX$NTIME $NSPACE_PREFIX$NSPACE >> $JOBS_STATUS_FILE
-	printf "\n  Beta Total /  Done  Acc int0/1    Status\n\e[0m"
-	printf "  	Beta Total /  Done  Acc int0/1    Status\n" >> $JOBS_STATUS_FILE
+	printf "\n  Beta Total /  Done  Acc int0/1    Status  Created  Sub. Nr /    First /     Last\n\e[0m"
+	printf "  	Beta Total /  Done  Acc int0/1    Status  Created  Sub. Nr /    First /     Last\n" >> $JOBS_STATUS_FILE
 
 	for i in b*; do
 
@@ -79,10 +141,13 @@ function __static__ListJobsStatus_local(){
 				STATUS="unknown"
 			fi
 
-				#printf "\e[0;34m%.4f %5d / %5d %.2f    %s/%s  %s\n\e[0m" "$BETA" "$TOTAL_NR_TRAJECTORIES" "$TRAJECTORIES_DONE" $ACCEPTANCE $INT0 $INT1 "$STATUS"
-				printf "\e[0;34m%.4f %5d / %5d $ACCEPTANCE    $INT0/$INT1  %s\n\e[0m" $BETA $TOTAL_NR_TRAJECTORIES $TRAJECTORIES_DONE $STATUS
-				#printf "      %.4f %5d / %5d %.2f    %s/%s  %s\n\e[0m" "$BETA" "$TOTAL_NR_TRAJECTORIES" "$TRAJECTORIES_DONE" $INT0 $INT1 "$STATUS" >> $JOBS_STATUS_FILE
-				printf "      %.4f %5d / %5d $ACCEPTANCE    $INT0/$INT1  %s\n" $BETA $TOTAL_NR_TRAJECTORIES $TRAJECTORIES_DONE $STATUS >> $JOBS_STATUS_FILE
+			__static__DetermineCreationDateAndSubmits
+	#			printf "\n  Beta Total /  Done  Acc int0/1    Status  Created Sub:  Nr / First / Last\n\e[0m"
+
+				printf "\e[0;34m%.4f %5d / %5d $ACCEPTANCE    $INT0/$INT1  %8s $CREATION_DATE      %3d / $SUBMITFIRST / $SUBMITLAST\n\e[0m" $BETA $TOTAL_NR_TRAJECTORIES $TRAJECTORIES_DONE $STATUS $NRSUBMITS
+				printf "      %.4f %5d / %5d $ACCEPTANCE    $INT0/$INT1  %8s $CREATION_DATE      %3d / $SUBMITFIRST / $SUBMITLAST\n" $BETA $TOTAL_NR_TRAJECTORIES $TRAJECTORIES_DONE $STATUS $NRSUBMITS >> $JOBS_STATUS_FILE
+
+			__static__CreateSubmitsFile
 		fi
 		
 	done
@@ -162,7 +227,7 @@ function ListJobStatus_Main(){
 
 	#-----------Prepare array with directories for which a job status file shall be produced---------------#
 	
-	if [ $LISTSTATUS = "TRUE" ] && [ $LISTSTATUSALL = "FALSE" ]; then
+	if [ $LISTSTATUS = "TRUE" ]; then
 
 		#JOBS_STATUS_FILE="jobs_status_"$CHEMPOT_PREFIX$CHEMPOT"_"$KAPPA_PREFIX$KAPPA"_"$NTIME_PREFIX$NTIME"_"$NSPACE_PREFIX$NSPACE"_"$DATE".txt"
 		JOBS_STATUS_FILE="jobs_status_"$CHEMPOT_PREFIX$CHEMPOT"_"$KAPPA_PREFIX$KAPPA"_"$NTIME_PREFIX$NTIME"_"$NSPACE_PREFIX$NSPACE".txt"
@@ -175,7 +240,7 @@ function ListJobStatus_Main(){
 
 		__static__ListJobsStatus_local
 
-	elif [ $LISTSTATUS = "TRUE" ] && [ $LISTSTATUSALL = "TRUE" ]; then
+	elif [ $LISTSTATUSALL = "TRUE" ]; then
 
 		printf "\n\e[0;36m==================================================================================================\n\e[0m"
 		printf "\e[0;34m Listing current global measurements status...\n\e[0m"
