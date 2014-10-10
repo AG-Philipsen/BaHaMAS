@@ -66,8 +66,8 @@ function __static__ListJobsStatus_local(){
 
 	printf "\n\e[0;34m%s  %s  %s\n" $KAPPA_PREFIX$KAPPA $NTIME_PREFIX$NTIME $NSPACE_PREFIX$NSPACE 
 	printf "\n      %s  %s  %s\n" $KAPPA_PREFIX$KAPPA $NTIME_PREFIX$NTIME $NSPACE_PREFIX$NSPACE >> $JOBS_STATUS_FILE
-	printf "\n  Beta Total /  Done  Acc int0/1    Status  Created  Sub. Nr /    First /     Last\n\e[0m"
-	printf "  	Beta Total /  Done  Acc int0/1    Status  Created  Sub. Nr /    First /     Last\n" >> $JOBS_STATUS_FILE
+	printf "\n  Beta Total /  Done  Acc int0/1    Status Sub. Nr /    First /     Last\n\e[0m"
+	printf "  	Beta Total /  Done  Acc int0/1    Status Sub. Nr /    First /     Last\n" >> $JOBS_STATUS_FILE
 
 	for i in b*; do
 
@@ -142,10 +142,9 @@ function __static__ListJobsStatus_local(){
 			fi
 
 			__static__DetermineCreationDateAndSubmits
-	#			printf "\n  Beta Total /  Done  Acc int0/1    Status  Created Sub:  Nr / First / Last\n\e[0m"
 
-				printf "\e[0;34m%.4f %5d / %5d $ACCEPTANCE    $INT0/$INT1  %8s $CREATION_DATE      %3d / $SUBMITFIRST / $SUBMITLAST\n\e[0m" $BETA $TOTAL_NR_TRAJECTORIES $TRAJECTORIES_DONE $STATUS $NRSUBMITS
-				printf "      %.4f %5d / %5d $ACCEPTANCE    $INT0/$INT1  %8s $CREATION_DATE      %3d / $SUBMITFIRST / $SUBMITLAST\n" $BETA $TOTAL_NR_TRAJECTORIES $TRAJECTORIES_DONE $STATUS $NRSUBMITS >> $JOBS_STATUS_FILE
+				printf "\e[0;34m%s %5d / %5d $ACCEPTANCE    $INT0/$INT1  %8s     %3s / $SUBMITFIRST / $SUBMITLAST\n\e[0m" $BETA $TOTAL_NR_TRAJECTORIES $TRAJECTORIES_DONE $STATUS $NRSUBMITS
+				printf "      %s %5d / %5d $ACCEPTANCE    $INT0/$INT1  %8s     %3s / $SUBMITFIRST / $SUBMITLAST\n" $BETA $TOTAL_NR_TRAJECTORIES $TRAJECTORIES_DONE $STATUS $NRSUBMITS >> $JOBS_STATUS_FILE
 
 			__static__CreateSubmitsFile
 		fi
@@ -229,7 +228,6 @@ function ListJobStatus_Main(){
 	
 	if [ $LISTSTATUS = "TRUE" ]; then
 
-		#JOBS_STATUS_FILE="jobs_status_"$CHEMPOT_PREFIX$CHEMPOT"_"$KAPPA_PREFIX$KAPPA"_"$NTIME_PREFIX$NTIME"_"$NSPACE_PREFIX$NSPACE"_"$DATE".txt"
 		JOBS_STATUS_FILE="jobs_status_"$CHEMPOT_PREFIX$CHEMPOT"_"$KAPPA_PREFIX$KAPPA"_"$NTIME_PREFIX$NTIME"_"$NSPACE_PREFIX$NSPACE".txt"
 		echo "NSPACE:$NSPACE"
 		echo "JOBS_STATUS_FILE: $JOBS_STATUS_FILE"
