@@ -221,80 +221,115 @@ if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
     
 else
 
+    #-----------------------------------------------------------------#
+    # This piece of script uses the variables
+    #   local BETA_FOR_JOBSCRIPT
+    #   local STARTCONDITION_FOR_JOBSCRIPT
+    #   local CONFIG_FOR_JOBSCRIPT
+    # created in the function from which it is called.
+    # It could be dangerous, but it is the easiest way to pass to a function
+    # several arrays and use them there without knowing the size.
+    if [ ${#BETA_FOR_JOBSCRIPT[@]} -ne ${#STARTCONDITION_FOR_JOBSCRIPT[@]} ] || [ ${#BETA_FOR_JOBSCRIPT[@]} -ne ${#CONFIG_FOR_JOBSCRIPT[@]} ]; then
+	printf "\n\e[0;31m BAD ERROR in ProduceJobScript phase, array to be used not of the same size! Aborting...\n\e[0m"
+	exit -1
+    fi
+    #-----------------------------------------------------------------#
+
     echo "#!/bin/sh" > $JOBSCRIPT_GLOBALPATH
-    echo "#SBATCH --tasks=1" >> $JOBSCRIPT_GLOBALPATH
-    echo "#SBATCH --cpus-per-task=1" >> $JOBSCRIPT_GLOBALPATH
+    echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "#SBATCH --job-name=${JOBSCRIPT_NAME#${JOBSCRIPT_PREFIX}_*}" >> $JOBSCRIPT_GLOBALPATH
     echo "#SBATCH --mail-type=FAIL" >> $JOBSCRIPT_GLOBALPATH
     echo "#SBATCH --mail-user=$USER_MAIL" >> $JOBSCRIPT_GLOBALPATH
-    echo "#SBATCH --output=${HMC_TM_FILENAME}.%j.out" >> $JOBSCRIPT_GLOBALPATH
-    echo "#SBATCH --error=${HMC_TM_FILENAME}.%j.err" >> $JOBSCRIPT_GLOBALPATH
     echo "#SBATCH --time=$WALLTIME" >> $JOBSCRIPT_GLOBALPATH
-    echo "#SBATCH --gres=gpu:1" >> $JOBSCRIPT_GLOBALPATH
+    echo "#SBATCH --output=${HMC_FILENAME}.%j.out" >> $JOBSCRIPT_GLOBALPATH
+    echo "#SBATCH --error=${HMC_FILENAME}.%j.err" >> $JOBSCRIPT_GLOBALPATH
     echo "#SBATCH --partition=$LOEWE_PARTITION" >> $JOBSCRIPT_GLOBALPATH
+    if [[ "$LOEWE_PARTITION" == "parallel" ]]; then
+	echo "#SBATCH --constraint=$LOEWE_CONSTRAINT" >> $JOBSCRIPT_GLOBALPATH
+    fi
+    echo "#SBATCH --tasks=$GPU_PER_NODE" >> $JOBSCRIPT_GLOBALPATH
+    if [[ "$LOEWE_NODE" != "unset" ]]; then
+	echo "#SBATCH -w $LOEWE_NODE" >> $JOBSCRIPT_GLOBALPATH
+    fi
     echo "" >> $JOBSCRIPT_GLOBALPATH
-    echo "WORKDIR=$WORK_DIR/$SIMULATION_PATH$PARAMETERS_PATH/$BETA_PREFIX$BETA" >> $JOBSCRIPT_GLOBALPATH
+
+    for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
+	echo "dir$INDEX=${HOME_DIR_WITH_BETAFOLDERS}/$BETA_PREFIX${BETA_FOR_JOBSCRIPT[$INDEX]}" >> $JOBSCRIPT_GLOBALPATH
+    done
     echo "" >> $JOBSCRIPT_GLOBALPATH
+    for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
+	echo "workdir$INDEX=${WORK_DIR_WITH_BETAFOLDERS}/$BETA_PREFIX${BETA_FOR_JOBSCRIPT[$INDEX]}" >> $JOBSCRIPT_GLOBALPATH
+    done
+    echo "" >> $JOBSCRIPT_GLOBALPATH
+    echo "outFile=hmc.\$SLURM_JOB_ID.out" >> $JOBSCRIPT_GLOBALPATH
+    echo "errFile=hmc.\$SLURM_JOB_ID.err" >> $JOBSCRIPT_GLOBALPATH
+    echo "" >> $JOBSCRIPT_GLOBALPATH
+    echo "# Check if directories exist" >> $JOBSCRIPT_GLOBALPATH
+    for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
+        echo "if [ ! -d \$dir$INDEX ]; then" >> $JOBSCRIPT_GLOBALPATH
+        echo "echo \"Could not find directory \\\"\$dir$INDEX\\\" for runs. Aborting...\""  >> $JOBSCRIPT_GLOBALPATH
+        echo "exit -1"  >> $JOBSCRIPT_GLOBALPATH
+	echo "fi"  >> $JOBSCRIPT_GLOBALPATH
+	echo "" >> $JOBSCRIPT_GLOBALPATH
+    done
+    echo "# Print some information" >> $JOBSCRIPT_GLOBALPATH
+    echo "echo \"${BETA_FOR_JOBSCRIPT[@]}\"" >> $JOBSCRIPT_GLOBALPATH
+    echo "echo \"\"" >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"Host: \$(hostname)\"" >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"GPU:  \$GPU_DEVICE_ORDINAL\"" >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"Date and time: \$(date)\"" >> $JOBSCRIPT_GLOBALPATH
+    echo "echo \$SLURM_JOB_NODELIST > hmc.${BETAS_STRING:1}.\$SLURM_JOB_ID.nodelist" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
-    echo "# todo: this is necessary because the log file is produced in the directoy" >> $JOBSCRIPT_GLOBALPATH
-    echo "# of the exec. Copying it later does not guarantee that it is still the same..." >> $JOBSCRIPT_GLOBALPATH
-    echo "echo \"Copy executable to working directory...\"" >> $JOBSCRIPT_GLOBALPATH
-    echo "cp -a $HMC_TM_GLOBALPATH \$SLURM_SUBMIT_DIR " >> $JOBSCRIPT_GLOBALPATH
-    echo "" >> $JOBSCRIPT_GLOBALPATH
-    echo "# prepare" >> $JOBSCRIPT_GLOBALPATH
-    echo "echo \$SLURM_JOB_NODELIST > ${HMC_TM_FILENAME}.\$SLURM_JOB_ID.nodelist" >> $JOBSCRIPT_GLOBALPATH
-    echo "mkdir -p \$WORKDIR || exit 2" >> $JOBSCRIPT_GLOBALPATH
-    echo "cd \$WORKDIR || exit 2" >> $JOBSCRIPT_GLOBALPATH
+    echo "# TODO: this is necessary because the log file is produced in the directoy" >> $JOBSCRIPT_GLOBALPATH
+    echo "#       of the exec. Copying it later does not guarantee that it is still the same..." >> $JOBSCRIPT_GLOBALPATH
+    echo "echo \"Copy executable to beta directories in ${WORK_DIR_WITH_BETAFOLDERS}/${BETA_PREFIX}x.xxxx...\"" >> $JOBSCRIPT_GLOBALPATH
+    for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
+	echo "cp -a $HMC_GLOBALPATH \$dir$INDEX" >> $JOBSCRIPT_GLOBALPATH
+    done
     echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"---------------------------\"" >> $JOBSCRIPT_GLOBALPATH
-    echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "export DISPLAY=:0" >> $JOBSCRIPT_GLOBALPATH
-    echo "export GPU_MAX_HEAP_SIZE=75" >> $JOBSCRIPT_GLOBALPATH
-    echo "# report where we are" >> $JOBSCRIPT_GLOBALPATH
-    echo "srun hostname" >> $JOBSCRIPT_GLOBALPATH
-    echo "# check gpu" >> $JOBSCRIPT_GLOBALPATH
-    echo "srun aticonfig --odgc --odgt --adapter=all" >> $JOBSCRIPT_GLOBALPATH
-    echo "# blablabla" >> $JOBSCRIPT_GLOBALPATH
-    echo "srun aticonfig --od-enable" >> $JOBSCRIPT_GLOBALPATH
-    echo "# modify gpu clock to factory defaults" >> $JOBSCRIPT_GLOBALPATH
-    echo "srun aticonfig --odsc 850,1200" >> $JOBSCRIPT_GLOBALPATH
-    echo "# check gpu again" >> $JOBSCRIPT_GLOBALPATH
-    echo "srun aticonfig --odgc --odgt --adapter=all" >> $JOBSCRIPT_GLOBALPATH
+    echo "echo \"\\\"export DISPLAY=:0\\\" done!\"" >> $JOBSCRIPT_GLOBALPATH
+    #echo "export GPU_MAX_HEAP_SIZE=75" >> $JOBSCRIPT_GLOBALPATH             #Max amount of total memory of GPU allowed to be used, we do not set it for the moment
     echo "echo \"---------------------------\"" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
-    echo "# run hmc" >> $JOBSCRIPT_GLOBALPATH
-    if [[ $STARTCONDITION = "continue" ]]; then
-	echo "srun --gres=gpu:1 \$SLURM_SUBMIT_DIR/$HMC_TM_FILENAME --input-file=\$SLURM_SUBMIT_DIR/$INPUTFILE_NAME --kappa=0.$KAPPA --ns=$NSPACE --nt=$NTIME --hmcsteps=$MEASUREMENTS --integrationsteps0=$INTSTEPS0 --integrationsteps1=$INTSTEPS1 --savefrequency=$NSAVE --startcondition=$STARTCONDITION --sourcefile=\$SLURM_SUBMIT_DIR/$CONFIGURATION_SOURCEFILE --beta=$BETA || exit 1" >> $JOBSCRIPT_GLOBALPATH
-    else
-	echo "srun --gres=gpu:1 \$SLURM_SUBMIT_DIR/$HMC_TM_FILENAME --input-file=\$SLURM_SUBMIT_DIR/$INPUTFILE_NAME --kappa=0.$KAPPA --ns=$NSPACE --nt=$NTIME --hmcsteps=$MEASUREMENTS --integrationsteps0=$INTSTEPS0 --integrationsteps1=$INTSTEPS1 --savefrequency=$NSAVE --startcondition=$STARTCONDITION --beta=$BETA || exit 1" >> $JOBSCRIPT_GLOBALPATH
-    fi
+    echo "# Run jobs from different directories" >> $JOBSCRIPT_GLOBALPATH
+    for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
+	echo "mkdir -p \$workdir$INDEX || exit 2" >> $JOBSCRIPT_GLOBALPATH
+	echo "cd \$workdir$INDEX" >> $JOBSCRIPT_GLOBALPATH
+	echo "pwd &" >> $JOBSCRIPT_GLOBALPATH
+	if [[ ${STARTCONDITION_FOR_JOBSCRIPT[$INDEX]} = "continue" ]]; then
+	    echo "time srun -n 1 \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$INPUTFILE_NAME --device=$INDEX --kappa=0.$KAPPA --ns=$NSPACE --nt=$NTIME --hmcsteps=$MEASUREMENTS --integrationsteps0=$INTSTEPS0 --integrationsteps1=$INTSTEPS1 --savefrequency=$NSAVE --startcondition=continue --sourcefile=\$dir$INDEX/${CONFIG_FOR_JOBSCRIPT[$INDEX]} --beta=${BETA_FOR_JOBSCRIPT[$INDEX]} > \$outFile 2> \$errFile &" >> $JOBSCRIPT_GLOBALPATH
+	else
+	    echo "time srun -n 1 \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$INPUTFILE_NAME --kappa=0.$KAPPA --ns=$NSPACE --nt=$NTIME --hmcsteps=$MEASUREMENTS --integrationsteps0=$INTSTEPS0 --integrationsteps1=$INTSTEPS1 --savefrequency=$NSAVE --startcondition=${STARTCONDITION_FOR_JOBSCRIPT[$INDEX]} --beta=${BETA_FOR_JOBSCRIPT[$INDEX]} > \$outFile 2> \$errFile &" >> $JOBSCRIPT_GLOBALPATH
+	fi
+	echo "" >> $JOBSCRIPT_GLOBALPATH
+    done
+    echo "wait" >> $JOBSCRIPT_GLOBALPATH
+    echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "err=\`echo \$?\`" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"---------------------------\"" >> $JOBSCRIPT_GLOBALPATH
-    echo "# Reset clocks to default" >> $JOBSCRIPT_GLOBALPATH
-    echo "srun aticonfig --odsc 750,1100" >> $JOBSCRIPT_GLOBALPATH
-    echo "# done messing with clocks" >> $JOBSCRIPT_GLOBALPATH
-    echo "srun aticonfig --od-disable" >> $JOBSCRIPT_GLOBALPATH
-    echo "# check gpu again" >> $JOBSCRIPT_GLOBALPATH
-    echo "srun aticonfig --odgc --odgt --adapter=all" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
-    echo "# backup core results" >> $JOBSCRIPT_GLOBALPATH
-    echo "cp -a \$SLURM_SUBMIT_DIR/${HMC_TM_FILENAME}.log \$SLURM_SUBMIT_DIR/${HMC_TM_FILENAME}.\$SLURM_JOB_ID.log || exit 2" >> $JOBSCRIPT_GLOBALPATH
-    echo "cp -a hmc_output \$SLURM_SUBMIT_DIR/hmc_output.\$SLURM_JOB_ID || exit 2" >> $JOBSCRIPT_GLOBALPATH
-    echo "cp -a hmc_output \$SLURM_SUBMIT_DIR || exit 2" >> $JOBSCRIPT_GLOBALPATH
-    echo "cp -a *.dat  \$SLURM_SUBMIT_DIR || exit 2" >> $JOBSCRIPT_GLOBALPATH
+    echo "echo \"Date and time: \$(date)\"" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
-    echo "echo \"---------------------------\"" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "# go back, order files and remove executable" >> $JOBSCRIPT_GLOBALPATH
-    echo "cd \$SLURM_SUBMIT_DIR" >> $JOBSCRIPT_GLOBALPATH
-    echo "mkdir -p Pbp || exit 2" >> $JOBSCRIPT_GLOBALPATH
-    echo "mv conf*pbp* Pbp || exit 2" >> $JOBSCRIPT_GLOBALPATH
-    echo "rm \$SLURM_SUBMIT_DIR/$HMC_TM_FILENAME || exit 2 " >> $JOBSCRIPT_GLOBALPATH
-    echo "" >> $JOBSCRIPT_GLOBALPATH
-
+    for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
+	echo "cd \$dir$INDEX || exit 2" >> $JOBSCRIPT_GLOBALPATH
+	echo "if [ -d \"Pbp\" ]; then" >> $JOBSCRIPT_GLOBALPATH
+	echo "    cd Pbp || exit 2" >> $JOBSCRIPT_GLOBALPATH
+	echo "    OLD_FOLD=\"Old_\$(date +'%F_%H%M')\"" >> $JOBSCRIPT_GLOBALPATH
+	echo "    mkdir \$OLD_FOLD || exit 2" >> $JOBSCRIPT_GLOBALPATH
+	echo "    mv * \$OLD_FOLD" >> $JOBSCRIPT_GLOBALPATH
+	echo "    cd .. || exit 2" >> $JOBSCRIPT_GLOBALPATH
+	echo "else" >> $JOBSCRIPT_GLOBALPATH
+	echo "    mkdir \"Pbp\" || exit -2" >> $JOBSCRIPT_GLOBALPATH
+	echo "fi" >> $JOBSCRIPT_GLOBALPATH
+	echo "mv \$workdir$INDEX/conf*pbp* \$dir$INDEX/Pbp || exit 2" >> $JOBSCRIPT_GLOBALPATH
+	echo "rm \$dir$INDEX/$HMC_FILENAME || exit 2 " >> $JOBSCRIPT_GLOBALPATH
+	echo "" >> $JOBSCRIPT_GLOBALPATH
+    done
+    
 fi
 

@@ -258,7 +258,7 @@ function ListJobStatus_Main(){
 	 printf "\n\e[0;36m==================================================================================================\n\e[0m"
 	 printf "\e[0;35m%s\t\t%s\t\t%s\t\t%s\n\e[0m"   "Beta"   "Num. Traj. (Acc.) [Last 1000] int0-1"   "Status"   "Max DS"
 	 printf "%s\t\t%s\t\t%s\t\t%s\n"   "Beta"   "Num. Traj. (Acc.) [Last 1000] int0-1"   "Status"   "Max DS" >> $JOBS_STATUS_FILE
-	 for BETA in b*; do
+	 for BETA in b[[:digit:]]*; do
 
 	     BETA=$(echo $BETA | grep -o "[[:digit:]].[[:digit:]]\{4\}")
 	     if [[ ! $BETA =~ [[:digit:]].[[:digit:]]{4} ]]; then continue; fi
@@ -332,9 +332,9 @@ function ListJobStatus_Main(){
 		 local INT0=$( grep -o "\-\-integrationsteps0=[[:digit:]]\+"  $JOBSCRIPT_GLOBALPATH | sed 's/\-\-integrationsteps0=\([[:digit:]]\+\)/\1/' )
 		 local INT1=$( grep -o "\-\-integrationsteps1=[[:digit:]]\+"  $JOBSCRIPT_GLOBALPATH | sed 's/\-\-integrationsteps1=\([[:digit:]]\+\)/\1/' )
 	     else
-		 printf "\n \e[0;31m File $JOBSCRIPT_GLOBALPATH not found. Integration stpes will not be printed!\n\n\e[0m\n"
-		 local INT0=""
-		 local INT1=""		 
+		 #printf "\n \e[0;31m File $JOBSCRIPT_GLOBALPATH not found. Integration stpes will not be printed!\n\n\e[0m\n"
+		 local INT0="="
+		 local INT1="="		 
 	     fi
 
 

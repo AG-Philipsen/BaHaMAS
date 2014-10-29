@@ -57,6 +57,7 @@ NSAVE="50"
 INTSTEPS0="7"
 INTSTEPS1="5"
 INTSTEPS2="5"
+MEASURE_PBP="1"
 INTERVAL="1000"
 SUBMIT="FALSE"
 SUBMITONLY="FALSE"
@@ -67,6 +68,8 @@ LISTSTATUS="FALSE"
 LISTSTATUSALL="FALSE"
 CLUSTER_NAME="LOEWE"
 LOEWE_PARTITION="parallel"
+LOEWE_CONSTRAINT="gpu"
+LOEWE_NODE="unset"
 JOBS_STATUS_PREFIX="jobs_status_"
 SHOWJOBS="FALSE"
 ACCRATE_REPORT="FALSE"
@@ -95,11 +98,11 @@ ParseCommandLineOption $@
 
 #-----------------------------------------------------------------------------------------------------------------#
 # Check if the necessary scripts exist.
-if [ ! -f $PRODUCEJOBSCRIPTSH ] || [ ! -f $PRODUCEINPUTFILESH ] || [ ! -f $HMC_TM_GLOBALPATH ]; then
+if [ ! -f $PRODUCEJOBSCRIPTSH ] || [ ! -f $PRODUCEINPUTFILESH ] || [ ! -f $HMC_GLOBALPATH ]; then
 	printf "\n\e[0;31m One or more of the following files are missing:\n\e[0m"
 	printf "\n\e[0;31m   - $PRODUCEJOBSCRIPTSH\e[0m"
 	printf "\n\e[0;31m   - $PRODUCEINPUTFILESH\e[0m"
-	printf "\n\e[0;31m   - $HMC_TM_GLOBALPATH\e[0m"
+	printf "\n\e[0;31m   - $HMC_GLOBALPATH\e[0m"
 	printf "\n\n\e[0;31m Aborting...\n\n\e[0m"
 	exit -1
 fi
@@ -153,10 +156,10 @@ PROBLEM_BETA_ARRAY=() #Arrays that will contain the beta values that actually wi
 
 if [ ${#MUTUALLYEXCLUSIVEOPTS_PASSED[@]} = 0 ]; then  
 	
-	ProduceInputFileAndJobScriptForEachBeta
+    ProduceInputFileAndJobScriptForEachBeta
 
 elif [ $SUBMITONLY = "TRUE" ]; then  
-
+    
     ProcessBetaValuesForSubmitOnly
 
 elif [ $CONTINUE = "TRUE" ]; then 

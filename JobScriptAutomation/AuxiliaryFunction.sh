@@ -88,6 +88,12 @@ function ReadBetaValuesFromFile(){
 
 	printf "\e[0;36m===================================================================================\n\e[0m"
 
+	if [ "$CLUSTER_NAME" = "LOEWE" ]; then
+	    if [ $(echo "${#BETAVALUES[@]}" | awk '{print $1 % '"$GPU_PER_NODE"'}') -ne 0 ]; then
+		printf "\n\e[0;33m \e[1m\e[4mWARNING\e[24m:\e[0;33m Number of beta values provided not multiple of $GPU_PER_NODE. WASTING computing time...\n\n\e[0m"
+	    fi
+	fi
+
     else	
 
 	printf "\n\e[0;31m  No beta values in betas file. Aborting...\n\n\e[0m"
@@ -98,98 +104,173 @@ function ReadBetaValuesFromFile(){
 
 
 function ProduceInputFileAndJobScriptForEachBeta(){
-    for BETA in ${BETAVALUES[@]}; do
-	
-	#-------------------------------------------------------------------------------------------------------------------------#
-	local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
-	local JOBSCRIPT_NAME="${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}_$BETA_PREFIX$BETA"
-	local JOBSCRIPT_GLOBALPATH="${HOME_BETADIRECTORY}/$JOBSCRIPT_NAME"
-	local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$INPUTFILE_NAME"
-	#-------------------------------------------------------------------------------------------------------------------------#
 
-	if [ ! -d $HOME_BETADIRECTORY ]; then
-	    printf "\e[0;34m Creating directory for beta = $BETA...\e[0m"
-	    mkdir $HOME_BETADIRECTORY || exit -2
-	    printf "\e[0;34m done!\n\e[0m"
-	    SUBMIT_BETA_ARRAY+=( $BETA )
-	else
-	    #$HOME_BETADIRECTORY already exists. Check if there are files in $HOME_BETADIRECTORY. 
-	    if [ $(ls $HOME_BETADIRECTORY | wc -l) -gt 0 ]; then
-		printf "\n\e[0;31m There are already files in $HOME_BETADIRECTORY. The value beta = $BETA will be skipped!\n\e[0m"
-		PROBLEM_BETA_ARRAY+=( $BETA )
-		continue
-	    fi
-	fi
+    if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
 	
-	#If we are on LOEWE, let us try to use a thermalized configuration
-	if [ "$CLUSTER_NAME" = "LOEWE" ]; then
-	    local STARTCONFIGURATION_NAME="conf.${PARAMETERS_STRING}_$BETA_PREFIX$BETA"
+	for BETA in ${BETAVALUES[@]}; do
+	    #-------------------------------------------------------------------------------------------------------------------------#
+	    local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
+	    local JOBSCRIPT_NAME="${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}_$BETA_PREFIX$BETA"
+	    local JOBSCRIPT_GLOBALPATH="${HOME_BETADIRECTORY}/$JOBSCRIPT_NAME"
+	    local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$INPUTFILE_NAME"
+	    #-------------------------------------------------------------------------------------------------------------------------#
+
+	    if [ ! -d $HOME_BETADIRECTORY ]; then
+		printf "\e[0;34m Creating directory for beta = $BETA...\e[0m"
+		mkdir $HOME_BETADIRECTORY || exit -2
+		printf "\e[0;34m done!\n\e[0m"
+		SUBMIT_BETA_ARRAY+=( $BETA )
+	    else
+	        #$HOME_BETADIRECTORY already exists. Check if there are files in $HOME_BETADIRECTORY. 
+		if [ $(ls $HOME_BETADIRECTORY | wc -l) -gt 0 ]; then
+		    printf "\n\e[0;31m There are already files in $HOME_BETADIRECTORY. The value beta = $BETA will be skipped!\n\e[0m"
+		    PROBLEM_BETA_ARRAY+=( $BETA )
+		    continue
+		fi
+	    fi
+	    
+            # Build jobscript and input file and put them together with hmc_tm into the $HOME_BETADIRECTORY	
+	    printf "\e[0;34m Producing files inside $HOME_BETADIRECTORY/... \n\e[0m"
+	    . $PRODUCEJOBSCRIPTSH	
+	    . $PRODUCEINPUTFILESH	
+	    cp $HMC_GLOBALPATH $HOME_BETADIRECTORY || exit -2
+	    
+	    if [ -f "$INPUTFILE_GLOBALPATH" ] && [ -f "$JOBSCRIPT_GLOBALPATH" ]; then
+		printf "\e[0;34m ...files built successfully!\n\n\e[0m"
+	    else
+		printf "\n\e[0;31m One or more of the following files has not been successfully created:\n\e[0m"
+		printf "\n\e[0;31m  - $INPUTFILE_GLOBALPATH\e[0m"
+		printf "\n\e[0;31m  - $JOBSCRIPT_GLOBALPATH\n\e[0m"
+		printf "\n\e[0;31m Aborting...\n\n\e[0m"
+		exit -1
+	    fi
+	    
+	    # Create a File in each new beta dir with the name format bx.xxx_created_d_m_y
+	    # From this file one can tell when a directory was created the first time
+	    touch $HOME_BETADIRECTORY"/b"$BETA"_created_$(date +"%d_%m_%y")"
+	    
+	done #loop on BETA
+	
+    else #on LOEWE
+	
+	#-------------------------------------------------------------------------------------------------------------------------#
+	local BETAVALUES_COPY=(${BETAVALUES[@]})
+	#-------------------------------------------------------------------------------------------------------------------------#
+	for BETA in "${!BETAVALUES_COPY[@]}"; do
+	    local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$BETA]}"
+	    if [ -d "$HOME_BETADIRECTORY" ]; then
+		if [ $(ls $HOME_BETADIRECTORY | wc -l) -gt 0 ]; then
+		    printf "\n\e[0;31m There are already files in $HOME_BETADIRECTORY. The value beta = ${BETAVALUES_COPY[$BETA]} will be skipped!\n\n\e[0m"
+		    PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$BETA]} )
+		    unset BETAVALUES_COPY[$BETA] #Here BETAVALUES_COPY becomes sparse
+		    continue
+		fi
+	    fi
+	done
+	#Make BETAVALUES_COPY not sparse
+	BETAVALUES_COPY=(${BETAVALUES_COPY[@]})
+	#Let's try to start from a thermalized configuration is existing
+	local STARTCONDITION=()
+	local CONFIGURATION_SOURCEFILE=()
+	for BETA in "${!BETAVALUES_COPY[@]}"; do
+	    local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$BETA]}"
+	    local STARTCONFIGURATION_NAME="conf.${PARAMETERS_STRING}_$BETA_PREFIX${BETAVALUES_COPY[$BETA]}"
 	    local NUMBER_OF_THERMALIZED_CONFIGURATIONS=$(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "$STARTCONFIGURATION_NAME" | wc -l)
 	    if [ $NUMBER_OF_THERMALIZED_CONFIGURATIONS -eq 0 ]; then
-		local STARTCONDITION="hot"
+		STARTCONDITION+=( "hot" )
+		CONFIGURATION_SOURCEFILE+=( "---" )
 	    elif [ $NUMBER_OF_THERMALIZED_CONFIGURATIONS -eq 1 ]; then
-		local STARTCONDITION="continue"
-		local CONFIGURATION_SOURCEFILE="$(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "$STARTCONFIGURATION_NAME")"
-		cp $THERMALIZED_CONFIGURATIONS_PATH/$CONFIGURATION_SOURCEFILE $HOME_BETADIRECTORY
+		STARTCONDITION+=( "continue" )
+		CONFIGURATION_SOURCEFILE+=( "$(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "$STARTCONFIGURATION_NAME")" )
 	    elif [ $NUMBER_OF_THERMALIZED_CONFIGURATIONS -gt 1 ]; then
-		printf "\n\e[0;31m There are more than one thermalized configuration for these parameters. The value beta = $BETA will be skipped!\n\e[0m"
-		PROBLEM_BETA_ARRAY+=( $BETA )
+		echo "NUMBER_OF_THERMALIZED_CONFIGURATIONS=$NUMBER_OF_THERMALIZED_CONFIGURATIONS"
+		printf "\n\e[0;31m There are more than one thermalized configuration for these parameters. The value beta = ${BETAVALUES_COPY[$BETA]}  will be skipped!\n\e[0m"
+		PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$BETA]} )
+		unset BETAVALUES_COPY[$BETA] #Here BETAVALUES_COPY becomes sparse
 		continue
 	    fi
-	fi
-       
-        # Build jobscript and input file and put them together with hmc_tm into the $HOME_BETADIRECTORY	
-	printf "\e[0;34m Producing files inside $HOME_BETADIRECTORY/... \n\e[0m"
-	. $PRODUCEJOBSCRIPTSH	
-	. $PRODUCEINPUTFILESH	
-	if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
-	    cp $HMC_TM_GLOBALPATH $HOME_BETADIRECTORY || exit -2
-	fi
-	
-	if [ -f "$INPUTFILE_GLOBALPATH" ] && [ -f "$JOBSCRIPT_GLOBALPATH" ]; then
-	    printf "\e[0;34m ...files built successfully!\n\n\e[0m"
-	else
-	    printf "\n\e[0;31m One or more of the following files has not been successfully created:\n\e[0m"
-	    printf "\n\e[0;31m  - $INPUTFILE_GLOBALPATH\e[0m"
-	    printf "\n\e[0;31m  - $JOBSCRIPT_GLOBALPATH\n\e[0m"
-	    printf "\n\e[0;31m Aborting...\n\n\e[0m"
-	    exit -1
-	fi
-
-	# Create a File in each new beta dir with the name format bx.xxx_created_d_m_y
-	# From this file one can tell when a directory was created the first time
-	if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
-
-		touch $HOME_BETADIRECTORY"/b"$BETA"_created_$(date +"%d_%m_%y")"
-	fi
-
-    done
+	done
+        #If the previous for loop went through, we create the beta folders (just to avoid to create some folders and then abort)
+	BETAVALUES_COPY=(${BETAVALUES_COPY[@]}) #If sparse, make it not sparse otherwise the following while doesn't work!!
+	for BETA in "${!BETAVALUES_COPY[@]}"; do
+	    local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$BETA]}"
+	    printf "\e[0;34m Creating directory for beta = ${BETAVALUES_COPY[$BETA]}...\e[0m"
+            mkdir $HOME_BETADIRECTORY || exit -2
+            printf "\e[0;34m done!\n\e[0m"
+	    if [[ "${STARTCONDITION[$BETA]}" == "continue" ]]; then
+		printf "\e[0;36m    Copying Thermalized configuration in directory for beta = ${BETAVALUES_COPY[$BETA]}...\e[0m"
+		cp $THERMALIZED_CONFIGURATIONS_PATH/${CONFIGURATION_SOURCEFILE[$BETA]} $HOME_BETADIRECTORY
+		printf "\e[0;36m done!\n\e[0m"
+	    else
+		printf "\e[0;36m    No thermalized configuration to be copied for beta = ${BETAVALUES_COPY[$BETA]}, HOT start!\e[0m"
+	    fi
+	    #Call the file to produce the input file
+	    local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$INPUTFILE_NAME"
+	    . $PRODUCEINPUTFILESH	    
+	done
+        # Partition the BETAVALUES_COPY array into group of GPU_PER_NODE and create the JobScript files inside the JOBSCRIPT_FOLDER
+	mkdir -p ${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER || exit -2
+	BETAVALUES_COPY=(${BETAVALUES_COPY[@]}) #If sparse, make it not sparse otherwise the following while doesn't work!!
+	STARTCONDITION=(${STARTCONDITION[@]})   #If sparse, make it not sparse otherwise the following while doesn't work!!
+	CONFIGURATION_SOURCEFILE=(${CONFIGURATION_SOURCEFILE[@]})  #If sparse, make it not sparse otherwise the following while doesn't work!!
+	while [[ "${!BETAVALUES_COPY[@]}" != "" ]]; do # ${!array[@]} gives the list of the valid indeces in the array
+	    local BETA_FOR_JOBSCRIPT=(${BETAVALUES_COPY[@]:0:$GPU_PER_NODE})
+	    BETAVALUES_COPY=(${BETAVALUES_COPY[@]:$GPU_PER_NODE})
+	    local BETAS_STRING=""
+	    local STARTCONDITION_FOR_JOBSCRIPT=(${STARTCONDITION[@]:0:$GPU_PER_NODE})
+	    STARTCONDITION=(${STARTCONDITION[@]:$GPU_PER_NODE})
+	    local CONFIG_FOR_JOBSCRIPT=(${CONFIGURATION_SOURCEFILE[@]:0:$GPU_PER_NODE})
+	    CONFIGURATION_SOURCEFILE=(${CONFIGURATION_SOURCEFILE[@]:$GPU_PER_NODE})
+	    printf "\n\e[0;36m=================================================\n\e[0m"
+	    printf "\e[0;36m  The following beta values have been grouped:\e[0m\n    "
+	    for BETA in "${!BETA_FOR_JOBSCRIPT[@]}"; do
+		printf "${BETA_FOR_JOBSCRIPT[BETA]}     "
+		BETAS_STRING="${BETAS_STRING}_$BETA_PREFIX${BETA_FOR_JOBSCRIPT[BETA]}"
+	    done
+	    printf "\n\e[0;36m=================================================\n\e[0m"
+	    local JOBSCRIPT_NAME="${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}_${BETAS_STRING:1}"
+	    local JOBSCRIPT_GLOBALPATH="${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER/$JOBSCRIPT_NAME"
+	    if [ -e $JOBSCRIPT_GLOBALPATH ]; then
+		mv $JOBSCRIPT_GLOBALPATH ${JOBSCRIPT_GLOBALPATH}_$(date +'%F_%H%M') || exit -2
+	    fi
+	    #Call the file to produce the jobscript file
+	    . $PRODUCEJOBSCRIPTSH
+	    if [ -e $JOBSCRIPT_GLOBALPATH ]; then
+		SUBMIT_BETA_ARRAY+=( "${BETAS_STRING:1}" )
+	    else
+		printf "\n\e[0;31m Jobscript \"$JOBSCRIPT_NAME\" failed to be created! It will be not submitted!!!\n\n\e[0m"
+		PROBLEM_BETA_ARRAY+=( "${BETAS_STRING:1}" )
+	    fi
+	done
+    fi
 }
 
 
 function ProcessBetaValuesForSubmitOnly() {
-    for BETA in ${BETAVALUES[@]}; do
-	
-	#-------------------------------------------------------------------------------------------------------------------------#
-	local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
-	local JOBSCRIPT_NAME="${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}_$BETA_PREFIX$BETA"
-	local JOBSCRIPT_GLOBALPATH="${HOME_BETADIRECTORY}/$JOBSCRIPT_NAME"
-	local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$INPUTFILE_NAME"
-	#-------------------------------------------------------------------------------------------------------------------------#
 
-	if [ ! -d $HOME_BETADIRECTORY ]; then
-	    printf "\e[0;31m Directory $HOME_BETADIRECTORY not existing. The value beta = $BETA will be skipped!\n\e[0m"
-	    PROBLEM_BETA_ARRAY+=( $BETA )
-	    continue
-	else
-	    #$HOME_BETADIRECTORY already exists. Check if there are files in $HOME_BETADIRECTORY. 
-	    if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
-		if [ -f "$INPUTFILE_GLOBALPATH" ] && [ -f "$JOBSCRIPT_GLOBALPATH" ] && [ -f "$HOME_BETADIRECTORY/$HMC_TM_FILENAME" ]; then
-		    #Check if there are more than 3 files, this means that there are more files than
-		    #jobscript, input file and hmc_tm which should not be the case
-		    #The number of allowed files in the $HOME_BETADIRECTORY directory are no increased to 4 due to the new file
-		    #that is created at creation of the beta directory. The name of the new file shows when the beta directory
-		    #was created the first time
+    if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
+
+	for BETA in ${BETAVALUES[@]}; do
+	    
+	    #-------------------------------------------------------------------------------------------------------------------------#
+	    local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
+	    local JOBSCRIPT_NAME="${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}_$BETA_PREFIX$BETA"
+	    local JOBSCRIPT_GLOBALPATH="${HOME_BETADIRECTORY}/$JOBSCRIPT_NAME"
+	    local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$INPUTFILE_NAME"
+	    #-------------------------------------------------------------------------------------------------------------------------#
+
+	    if [ ! -d $HOME_BETADIRECTORY ]; then
+		printf "\e[0;31m Directory $HOME_BETADIRECTORY not existing. The value beta = $BETA will be skipped!\n\e[0m"
+		PROBLEM_BETA_ARRAY+=( $BETA )
+		continue
+	    else
+	        #$HOME_BETADIRECTORY already exists. Check if there are files in $HOME_BETADIRECTORY. 
+		if [ -f "$INPUTFILE_GLOBALPATH" ] && [ -f "$JOBSCRIPT_GLOBALPATH" ] && [ -f "$HOME_BETADIRECTORY/$HMC_FILENAME" ]; then
+		   #Check if there are more than 3 files, this means that there are more files than
+		   #jobscript, input file and hmc_tm which should not be the case
+		   #The number of allowed files in the $HOME_BETADIRECTORY directory are no increased to 4 due to the new file
+		   #that is created at creation of the beta directory. The name of the new file shows when the beta directory
+		   #was created the first time
 		    if [ $(ls $HOME_BETADIRECTORY | wc -l) -gt 4 ]; then
 			printf "\n\e[0;31m There are already files in $HOME_BETADIRECTORY. The value beta = $BETA will be skipped!\n\n\e[0m"
 			PROBLEM_BETA_ARRAY+=( $BETA )
@@ -201,37 +282,76 @@ function ProcessBetaValuesForSubmitOnly() {
 		    printf "\n\e[0;31m One or more of the following files are missing:\n\e[0m"
 		    printf "\n\e[0;31m  - $INPUTFILE_GLOBALPATH\e[0m"
 		    printf "\n\e[0;31m  - $JOBSCRIPT_GLOBALPATH\e[0m"
-		    printf "\n\e[0;31m  - $HOME_BETADIRECTORY/$HMC_TM_FILENAME\n\e[0m"
-		    printf "\n\e[0;31m The value beta = $BETA will be skipped!\n\n\e[0m"
-		    PROBLEM_BETA_ARRAY+=( $BETA )
-		    continue
-		fi
-	    else # On LOEWE
-		if [ -f "$INPUTFILE_GLOBALPATH" ] && [ -f "$JOBSCRIPT_GLOBALPATH" ]; then
-		    #Check if there are more than 3 files, this means that there are more files than
-		    #jobscript, input file and hmc_tm which should not be the case
-		    if [ $(ls $HOME_BETADIRECTORY | wc -l) -gt 2 ]; then
-			if [ $(ls $HOME_BETADIRECTORY | wc -l) -eq 3 ] && [ $(ls $HOME_BETADIRECTORY | grep "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA}*" | wc -l) -eq 1 ]; then
-			    printf "\n\e[0;32m The simulation with beta = $BETA start from a thermalized configuration!\n\e[0m"
-			else
-			    printf "\n\e[0;31m There are already files in $HOME_BETADIRECTORY. The value beta = $BETA will be skipped!\n\n\e[0m"
-			    PROBLEM_BETA_ARRAY+=( $BETA )
-			    continue
-			fi
-		    fi
-    	            #The following will not happen if the previous if-case applied
-		    SUBMIT_BETA_ARRAY+=( $BETA )
-		else
-		    printf "\n\e[0;31m One or more of the following files are missing:\n\e[0m"
-		    printf "\n\e[0;31m  - $INPUTFILE_GLOBALPATH\e[0m"
-		    printf "\n\e[0;31m  - $JOBSCRIPT_GLOBALPATH\n\e[0m"
+		    printf "\n\e[0;31m  - $HOME_BETADIRECTORY/$HMC_FILENAME\n\e[0m"
 		    printf "\n\e[0;31m The value beta = $BETA will be skipped!\n\n\e[0m"
 		    PROBLEM_BETA_ARRAY+=( $BETA )
 		    continue
 		fi
 	    fi
-	fi
-    done
+	done
+	
+    else # on LOEWE
+	
+	#-------------------------------------------------------------------------------------------------------------------------#
+	local BETAVALUES_COPY=(${BETAVALUES[@]})
+	#-------------------------------------------------------------------------------------------------------------------------#
+	for BETA in "${!BETAVALUES_COPY[@]}"; do
+	    local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$BETA]}"
+	    local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$INPUTFILE_NAME"
+	    if [ ! -d $HOME_BETADIRECTORY ]; then
+		printf "\n\e[0;31m Directory $HOME_BETADIRECTORY not existing. The value beta = ${BETAVALUES_COPY[$BETA]} will be skipped!\n\n\e[0m"
+		PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$BETA]} )
+		unset BETAVALUES_COPY[$BETA] #Here BETAVALUES_COPY becomes sparse
+		continue
+	    else
+	        #$HOME_BETADIRECTORY already exists. Check if there are files in $HOME_BETADIRECTORY. 
+		if [ -f "$INPUTFILE_GLOBALPATH" ]; then
+		    # In the home betadirectory there should be the inputfile and sometimes
+		    # the thermalized configuration whose name start with "conf.". 
+		    if [ $(ls $HOME_BETADIRECTORY | wc -l) -eq 1 ]; then
+			printf "\n\e[0;32m The simulation with beta = ${BETAVALUES_COPY[$BETA]} start from a HOT configuration!\n\e[0m"
+		    elif [ $(ls $HOME_BETADIRECTORY | wc -l) -eq 2 ] && [ $(ls $HOME_BETADIRECTORY | grep "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETAVALUES_COPY[$BETA]}*" | wc -l) -eq 1 ]; then
+			printf "\n\e[0;32m The simulation with beta = ${BETAVALUES_COPY[$BETA]} start from a thermalized configuration!\n\e[0m"
+		    else
+			printf "\n\e[0;31m There are already files in $HOME_BETADIRECTORY. The value beta = ${BETAVALUES_COPY[$BETA]} will be skipped!\n\n\e[0m"
+			PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$BETA]} )
+			unset BETAVALUES_COPY[$BETA] #Here BETAVALUES_COPY becomes sparse
+			continue
+		    fi		 
+		else
+		    printf "\n\e[0;31m The following intput-file is missing:\n\e[0m"
+		    printf "\n\e[0;31m    $INPUTFILE_GLOBALPATH\e[0m"
+		    printf "\n\e[0;31m The value beta = ${BETAVALUES_COPY[$BETA]} will be skipped!\n\n\e[0m"
+		    PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$BETA]} )
+		    unset BETAVALUES_COPY[$BETA] #Here BETAVALUES_COPY becomes sparse
+		    continue
+		fi
+	    fi
+	done
+	#Make BETAVALUES_COPY not sparse
+        BETAVALUES_COPY=(${BETAVALUES_COPY[@]})
+	#Here partition beta and check for jobscript existing!
+	while [[ "${!BETAVALUES_COPY[@]}" != "" ]]; do # ${!array[@]} gives the list of the valid indeces in the array
+	    local BETA_FOR_JOBSCRIPT=(${BETAVALUES_COPY[@]:0:$GPU_PER_NODE})
+	    BETAVALUES_COPY=(${BETAVALUES_COPY[@]:$GPU_PER_NODE})
+	    local BETAS_STRING=""
+	    printf "\n\e[0;36m=================================================\n\e[0m"
+	    printf "\e[0;36m  The following beta values have been grouped:\e[0m\n    "
+	    for BETA in "${!BETA_FOR_JOBSCRIPT[@]}"; do
+		printf "${BETA_FOR_JOBSCRIPT[BETA]}     "
+		BETAS_STRING="${BETAS_STRING}_$BETA_PREFIX${BETA_FOR_JOBSCRIPT[BETA]}"
+	    done
+	    printf "\n\e[0;36m=================================================\n\e[0m"
+	    local JOBSCRIPT_NAME="${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}_${BETAS_STRING:1}"
+	    local JOBSCRIPT_GLOBALPATH="${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER/$JOBSCRIPT_NAME"
+	    if [ ! -e $JOBSCRIPT_GLOBALPATH ]; then
+		printf "\n\e[0;31m Jobscript \"$JOBSCRIPT_NAME\" not found! It will be not submitted!!!\n\n\e[0m"
+		PROBLEM_BETA_ARRAY+=( "${BETAS_STRING:1}" )
+	    else
+		SUBMIT_BETA_ARRAY+=( "${BETAS_STRING:1}" )
+	    fi
+	done
+    fi
 }
 
 function CheckIfJobIsInQueue(){
@@ -381,6 +501,7 @@ function ProcessBetaValuesForContinue() {
 
 
 	else # LOEWE
+	    exit
 
 	    #At the moment we do not allow to continue more than one job --> ONLY one beta per time
 	    if [ ${#BETAVALUES[@]} -gt 1 ]; then
@@ -437,6 +558,7 @@ function ProcessBetaValuesForContinue() {
                     #Once the WORK_BETADIRECTORY has been prepared for resuming, delete from the array SPECIFIED_COMMAND_LINE_OPTIONS the --resumefrom option
 		    unset SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]
 		    SPECIFIED_COMMAND_LINE_OPTIONS=( "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}" )
+		    break
 		
 	        #If --resumfrom option has not been given check in the WORK_BETADIRECTORY if conf.save is present: if yes, use it, otherwise use the last checkpoint
 		elif [ -f $WORK_BETADIRECTORY/conf.save ]; then
@@ -616,11 +738,16 @@ function SubmitJobsForValidBetaValues() {
 	for BETA in ${SUBMIT_BETA_ARRAY[@]}; do
 	    
 	    #-------------------------------------------------------------------------------------------------------------------------#
-	    local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
-	    local JOBSCRIPT_NAME="${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}_$BETA_PREFIX$BETA"
+	    if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
+		local SUBMITTING_DIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
+		local JOBSCRIPT_NAME="${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}_$BETA_PREFIX$BETA"
+	    else
+		local SUBMITTING_DIRECTORY="${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER"
+		local JOBSCRIPT_NAME="${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}_$BETA"
+	    fi
 	    #-------------------------------------------------------------------------------------------------------------------------#
 	    
-	    cd $HOME_BETADIRECTORY
+	    cd $SUBMITTING_DIRECTORY
 	    printf "\n\e[0;34m Actual location: \e[0;35m$(pwd) \n\e[0m"
 	    printf "\e[0;34m      Submitting:\e[0m"
 	    if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then

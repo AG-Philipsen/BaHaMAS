@@ -34,6 +34,8 @@ function __static__EmptyBeta(){
 
 function EmptyBetaDirectories(){
 
+    if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
+
 	for BETA in ${BETAVALUES[@]}; do
 
 		echo ""
@@ -69,4 +71,6 @@ function EmptyBetaDirectories(){
 		echo "--------------------------------------------------------------------------------"
 		echo ""
 	done		
+
+    fi
 }

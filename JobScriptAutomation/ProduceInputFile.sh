@@ -121,10 +121,12 @@ else
     echo "chem_pot_im=0.523598775598299" >> $INPUTFILE_GLOBALPATH
     echo "use_eo=1" >> $INPUTFILE_GLOBALPATH
     echo "solver=cg" >> $INPUTFILE_GLOBALPATH
-    echo "sourcetype=volume" >> $INPUTFILE_GLOBALPATH
-    echo "sourcecontent=gaussian" >> $INPUTFILE_GLOBALPATH
-    echo "num_sources=16" >> $INPUTFILE_GLOBALPATH
-    echo "measure_pbp=1" >> $INPUTFILE_GLOBALPATH
+    if [ $MEASURE_PBP -ne 0 ]; then
+	echo "measure_pbp=1" >> $INPUTFILE_GLOBALPATH
+	echo "sourcetype=volume" >> $INPUTFILE_GLOBALPATH
+	echo "sourcecontent=gaussian" >> $INPUTFILE_GLOBALPATH
+	echo "num_sources=16" >> $INPUTFILE_GLOBALPATH
+    fi
     echo "tau=1" >> $INPUTFILE_GLOBALPATH
     echo "cgmax=8000" >> $INPUTFILE_GLOBALPATH
     echo "num_timescales=2" >> $INPUTFILE_GLOBALPATH
