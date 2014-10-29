@@ -32,8 +32,11 @@ done
 for ((j=0; j<${#JOBSUBFROM[@]}; j++)); do
     if [ $(echo "${JOBSUBFROM[$j]}" | grep "$HOME" | wc -l) -eq 1 ]; then
 	JOBSUBFROM[$j]="HOME"${JOBSUBFROM[$j]#$HOME}
+    elif [ $(echo "${JOBSUBFROM[$j]}" | grep "/scratch/hfftheo/sciarra" | wc -l) -eq 1 ]; then
+	JOBSUBFROM[$j]="WORK"${JOBSUBFROM[$j]#"/scratch/hfftheo/sciarra"}
     fi
 done
+
 
 LONGEST_NAME=${JOBNAME[0]}
 for NAME in ${JOBNAME[@]}; do
@@ -93,6 +96,7 @@ while [ ${#JOBNAME[@]} -gt 0 ]; do
     unset JOBSTATUS[$i]; JOBSTATUS=( "${JOBSTATUS[@]}" )
     unset JOBSTARTTIME[$i]; JOBSTARTTIME=( "${JOBSTARTTIME[@]}" )
     unset JOBSUBTIME[$i]; JOBSUBTIME=( "${JOBSUBTIME[@]}" )
+    unset JOBSUBFROM[$i]; JOBSUBFROM=( "${JOBSUBFROM[@]}" )
     unset JOBNUMNODES[$i]; JOBNUMNODES=( "${JOBNUMNODES[@]}" )
     unset JOBFIRSTNODE[$i]; JOBFIRSTNODE=( "${JOBFIRSTNODE[@]}" )
     
