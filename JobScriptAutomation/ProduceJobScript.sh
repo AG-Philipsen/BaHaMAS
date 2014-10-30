@@ -222,17 +222,11 @@ if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
 else
 
     #-----------------------------------------------------------------#
-    # This piece of script uses the variables
+    # This piece of script uses the variable
     #   local BETA_FOR_JOBSCRIPT
-    #   local STARTCONDITION_FOR_JOBSCRIPT
-    #   local CONFIG_FOR_JOBSCRIPT
     # created in the function from which it is called.
     # It could be dangerous, but it is the easiest way to pass to a function
-    # several arrays and use them there without knowing the size.
-    if [ ${#BETA_FOR_JOBSCRIPT[@]} -ne ${#STARTCONDITION_FOR_JOBSCRIPT[@]} ] || [ ${#BETA_FOR_JOBSCRIPT[@]} -ne ${#CONFIG_FOR_JOBSCRIPT[@]} ]; then
-	printf "\n\e[0;31m BAD ERROR in ProduceJobScript phase, array to be used not of the same size! Aborting...\n\e[0m"
-	exit -1
-    fi
+    # several arrays and use them in the function without knowing the size.
     #-----------------------------------------------------------------#
 
     echo "#!/bin/sh" > $JOBSCRIPT_GLOBALPATH
@@ -278,7 +272,7 @@ else
     echo "echo \"Host: \$(hostname)\"" >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"GPU:  \$GPU_DEVICE_ORDINAL\"" >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"Date and time: \$(date)\"" >> $JOBSCRIPT_GLOBALPATH
-    echo "echo \$SLURM_JOB_NODELIST > hmc.${BETAS_STRING:1}.\$SLURM_JOB_ID.nodelist" >> $JOBSCRIPT_GLOBALPATH
+    echo "echo \$SLURM_JOB_NODELIST > $HMC_FILENAME.${BETAS_STRING:1}.\$SLURM_JOB_ID.nodelist" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "# TODO: this is necessary because the log file is produced in the directoy" >> $JOBSCRIPT_GLOBALPATH
     echo "#       of the exec. Copying it later does not guarantee that it is still the same..." >> $JOBSCRIPT_GLOBALPATH
@@ -298,11 +292,7 @@ else
 	echo "mkdir -p \$workdir$INDEX || exit 2" >> $JOBSCRIPT_GLOBALPATH
 	echo "cd \$workdir$INDEX" >> $JOBSCRIPT_GLOBALPATH
 	echo "pwd &" >> $JOBSCRIPT_GLOBALPATH
-	if [[ ${STARTCONDITION_FOR_JOBSCRIPT[$INDEX]} = "continue" ]]; then
-	    echo "time srun -n 1 \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$INPUTFILE_NAME --device=$INDEX --kappa=0.$KAPPA --ns=$NSPACE --nt=$NTIME --hmcsteps=$MEASUREMENTS --integrationsteps0=$INTSTEPS0 --integrationsteps1=$INTSTEPS1 --savefrequency=$NSAVE --startcondition=continue --sourcefile=\$dir$INDEX/${CONFIG_FOR_JOBSCRIPT[$INDEX]} --beta=${BETA_FOR_JOBSCRIPT[$INDEX]} > \$outFile 2> \$errFile &" >> $JOBSCRIPT_GLOBALPATH
-	else
-	    echo "time srun -n 1 \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$INPUTFILE_NAME --kappa=0.$KAPPA --ns=$NSPACE --nt=$NTIME --hmcsteps=$MEASUREMENTS --integrationsteps0=$INTSTEPS0 --integrationsteps1=$INTSTEPS1 --savefrequency=$NSAVE --startcondition=${STARTCONDITION_FOR_JOBSCRIPT[$INDEX]} --beta=${BETA_FOR_JOBSCRIPT[$INDEX]} > \$outFile 2> \$errFile &" >> $JOBSCRIPT_GLOBALPATH
-	fi
+	echo "time srun -n 1 \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$INPUTFILE_NAME --device=$INDEX --beta=${BETA_FOR_JOBSCRIPT[$INDEX]} > \$dir$INDEX/\$outFile 2> \$dir$INDEX/\$errFile &" >> $JOBSCRIPT_GLOBALPATH
 	echo "" >> $JOBSCRIPT_GLOBALPATH
     done
     echo "wait" >> $JOBSCRIPT_GLOBALPATH
@@ -317,16 +307,19 @@ else
     echo "# go back, order files and remove executable" >> $JOBSCRIPT_GLOBALPATH
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
 	echo "cd \$dir$INDEX || exit 2" >> $JOBSCRIPT_GLOBALPATH
-	echo "if [ -d \"Pbp\" ]; then" >> $JOBSCRIPT_GLOBALPATH
-	echo "    cd Pbp || exit 2" >> $JOBSCRIPT_GLOBALPATH
-	echo "    OLD_FOLD=\"Old_\$(date +'%F_%H%M')\"" >> $JOBSCRIPT_GLOBALPATH
-	echo "    mkdir \$OLD_FOLD || exit 2" >> $JOBSCRIPT_GLOBALPATH
-	echo "    mv * \$OLD_FOLD" >> $JOBSCRIPT_GLOBALPATH
-	echo "    cd .. || exit 2" >> $JOBSCRIPT_GLOBALPATH
-	echo "else" >> $JOBSCRIPT_GLOBALPATH
-	echo "    mkdir \"Pbp\" || exit -2" >> $JOBSCRIPT_GLOBALPATH
-	echo "fi" >> $JOBSCRIPT_GLOBALPATH
-	echo "mv \$workdir$INDEX/conf*pbp* \$dir$INDEX/Pbp || exit 2" >> $JOBSCRIPT_GLOBALPATH
+	if [ $MEASURE_PBP -ne 0 ]; then
+	    echo "if [ -d \"Pbp\" ]; then" >> $JOBSCRIPT_GLOBALPATH
+	    echo "    cd Pbp || exit 2" >> $JOBSCRIPT_GLOBALPATH
+	    echo "    OLD_FOLD=\"Old_\$(date +'%F_%H%M')\"" >> $JOBSCRIPT_GLOBALPATH
+	    echo "    mkdir \$OLD_FOLD || exit 2" >> $JOBSCRIPT_GLOBALPATH
+	    echo "    mv * \$OLD_FOLD" >> $JOBSCRIPT_GLOBALPATH
+	    echo "    cd .. || exit 2" >> $JOBSCRIPT_GLOBALPATH
+	    echo "else" >> $JOBSCRIPT_GLOBALPATH
+	    echo "    mkdir \"Pbp\" || exit -2" >> $JOBSCRIPT_GLOBALPATH
+	    echo "fi" >> $JOBSCRIPT_GLOBALPATH
+	    echo "cp \$workdir$INDEX/conf*pbp* \$dir$INDEX/Pbp || exit 2" >> $JOBSCRIPT_GLOBALPATH
+	fi
+	echo "cp \$workdir$INDEX/$OUTPUTFILE_NAME \$dir$INDEX/$OUTPUTFILE_NAME.\$SLURM_JOB_ID" >> $JOBSCRIPT_GLOBALPATH
 	echo "rm \$dir$INDEX/$HMC_FILENAME || exit 2 " >> $JOBSCRIPT_GLOBALPATH
 	echo "" >> $JOBSCRIPT_GLOBALPATH
     done

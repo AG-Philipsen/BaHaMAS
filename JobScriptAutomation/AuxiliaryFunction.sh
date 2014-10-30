@@ -190,8 +190,8 @@ function ProduceInputFileAndJobScriptForEachBeta(){
 		continue
 	    fi
 	done
+	BETAVALUES_COPY=(${BETAVALUES_COPY[@]}) #If sparse, make it not sparse 
         #If the previous for loop went through, we create the beta folders (just to avoid to create some folders and then abort)
-	BETAVALUES_COPY=(${BETAVALUES_COPY[@]}) #If sparse, make it not sparse otherwise the following while doesn't work!!
 	for BETA in "${!BETAVALUES_COPY[@]}"; do
 	    local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$BETA]}"
 	    printf "\e[0;34m Creating directory for beta = ${BETAVALUES_COPY[$BETA]}...\e[0m"
@@ -202,7 +202,7 @@ function ProduceInputFileAndJobScriptForEachBeta(){
 		cp $THERMALIZED_CONFIGURATIONS_PATH/${CONFIGURATION_SOURCEFILE[$BETA]} $HOME_BETADIRECTORY
 		printf "\e[0;36m done!\n\e[0m"
 	    else
-		printf "\e[0;36m    No thermalized configuration to be copied for beta = ${BETAVALUES_COPY[$BETA]}, HOT start!\e[0m"
+		printf "\e[0;36m    No thermalized configuration to be copied for beta = ${BETAVALUES_COPY[$BETA]}, HOT start!\n\e[0m"
 	    fi
 	    #Call the file to produce the input file
 	    local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$INPUTFILE_NAME"
@@ -211,16 +211,10 @@ function ProduceInputFileAndJobScriptForEachBeta(){
         # Partition the BETAVALUES_COPY array into group of GPU_PER_NODE and create the JobScript files inside the JOBSCRIPT_FOLDER
 	mkdir -p ${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER || exit -2
 	BETAVALUES_COPY=(${BETAVALUES_COPY[@]}) #If sparse, make it not sparse otherwise the following while doesn't work!!
-	STARTCONDITION=(${STARTCONDITION[@]})   #If sparse, make it not sparse otherwise the following while doesn't work!!
-	CONFIGURATION_SOURCEFILE=(${CONFIGURATION_SOURCEFILE[@]})  #If sparse, make it not sparse otherwise the following while doesn't work!!
 	while [[ "${!BETAVALUES_COPY[@]}" != "" ]]; do # ${!array[@]} gives the list of the valid indeces in the array
 	    local BETA_FOR_JOBSCRIPT=(${BETAVALUES_COPY[@]:0:$GPU_PER_NODE})
 	    BETAVALUES_COPY=(${BETAVALUES_COPY[@]:$GPU_PER_NODE})
 	    local BETAS_STRING=""
-	    local STARTCONDITION_FOR_JOBSCRIPT=(${STARTCONDITION[@]:0:$GPU_PER_NODE})
-	    STARTCONDITION=(${STARTCONDITION[@]:$GPU_PER_NODE})
-	    local CONFIG_FOR_JOBSCRIPT=(${CONFIGURATION_SOURCEFILE[@]:0:$GPU_PER_NODE})
-	    CONFIGURATION_SOURCEFILE=(${CONFIGURATION_SOURCEFILE[@]:$GPU_PER_NODE})
 	    printf "\n\e[0;36m=================================================\n\e[0m"
 	    printf "\e[0;36m  The following beta values have been grouped:\e[0m\n    "
 	    for BETA in "${!BETA_FOR_JOBSCRIPT[@]}"; do
@@ -238,7 +232,7 @@ function ProduceInputFileAndJobScriptForEachBeta(){
 	    if [ -e $JOBSCRIPT_GLOBALPATH ]; then
 		SUBMIT_BETA_ARRAY+=( "${BETAS_STRING:1}" )
 	    else
-		printf "\n\e[0;31m Jobscript \"$JOBSCRIPT_NAME\" failed to be created! It will be not submitted!!!\n\n\e[0m"
+		printf "\n\e[0;31m Jobscript \"$JOBSCRIPT_NAME\" failed to be created!\n\n\e[0m"
 		PROBLEM_BETA_ARRAY+=( "${BETAS_STRING:1}" )
 	    fi
 	done

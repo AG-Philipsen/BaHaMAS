@@ -132,7 +132,19 @@ else
     echo "num_timescales=2" >> $INPUTFILE_GLOBALPATH
     echo "integrator0=twomn" >> $INPUTFILE_GLOBALPATH
     echo "integrator1=twomn" >> $INPUTFILE_GLOBALPATH
-
+    echo "kappa=0.$KAPPA" >> $INPUTFILE_GLOBALPATH
+    echo "nspace=$NSPACE" >> $INPUTFILE_GLOBALPATH
+    echo "ntime=$NTIME" >> $INPUTFILE_GLOBALPATH
+    echo "hmcsteps=$MEASUREMENTS" >> $INPUTFILE_GLOBALPATH
+    echo "integrationsteps0=$INTSTEPS0" >> $INPUTFILE_GLOBALPATH
+    echo "integrationsteps1=$INTSTEPS1" >> $INPUTFILE_GLOBALPATH
+    echo "savefrequency=$NSAVE" >> $INPUTFILE_GLOBALPATH
+    if [[ "${STARTCONDITION[$BETA]}" == "continue" ]]; then
+	echo "startcondition=continue" >> $INPUTFILE_GLOBALPATH
+	echo "sourcefile=$HOME_BETADIRECTORY/${CONFIGURATION_SOURCEFILE[$BETA]}" >> $INPUTFILE_GLOBALPATH
+    else
+	echo "startcondition=hot" >> $INPUTFILE_GLOBALPATH
+    fi
 fi
 
 
