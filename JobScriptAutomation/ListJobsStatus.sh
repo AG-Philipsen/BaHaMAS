@@ -4,7 +4,7 @@
 #A string %s is passed to date which has the format of seconds and is converted into date and time.
 #see manual page for a detailed description of the options.
 
-
+source $HOME/Script/UtilityFunctions.sh || exit -2
 
 function __static__DetermineCreationDateAndSubmits(){
 
@@ -255,9 +255,10 @@ function ListJobStatus_Main(){
 	 local JOBS_STATUS_FILE="jobs_status_$PARAMETERS_STRING.txt"
 	 rm -f $JOBS_STATUS_FILE
 	 
-	 printf "\n\e[0;36m==================================================================================================\n\e[0m"
-	 printf "\e[0;35m%s\t\t%s\t\t%s\t\t%s\n\e[0m"   "Beta"   "Num. Traj. (Acc.) [Last 1000] int0-1"   "Status"   "Max DS"
+	 printf "\n\e[0;36m=====================================================================================================\n\e[0m"
+	 printf "\e[0;35m%s\t\t%s\t  %s\t%s\t   %s\n\e[0m"   "Beta"   "Num. Traj. (Acc.) [Last 1000] int0-1"   "Status"   "Max DS" "Last tr. finished"
 	 printf "%s\t\t%s\t\t%s\t\t%s\n"   "Beta"   "Num. Traj. (Acc.) [Last 1000] int0-1"   "Status"   "Max DS" >> $JOBS_STATUS_FILE
+
 	 for BETA in b[[:digit:]]*; do
 
 	     BETA=$(echo $BETA | grep -o "[[:digit:]].[[:digit:]]\{4\}")
@@ -276,11 +277,14 @@ function ListJobStatus_Main(){
                                                       | awk '{if(index($0, "_")) {print substr($0, 1, index($0, "_")-1)} else {print $0}}')
 		 local JOBNAME_KAPPA=$(echo $JOBNAME | awk -v pref=$KAPPA_PREFIX -v pref_len=${#KAPPA_PREFIX} '{print substr($0, index($0, pref)+pref_len)}' \
                                                      | awk '{if(index($0, "_")) {print substr($0, 1, index($0, "_")-1)} else {print $0}}')
-		 local JOBNAME_BETA=$(echo $JOBNAME | awk -v pref=$BETA_PREFIX -v pref_len=${#BETA_PREFIX} '{print substr($0, index($0, pref)+pref_len)}' \
-                                                    | awk '{if(index($0, "_")) {print substr($0, 1, index($0, "_")-1)} else {print $0}}')
+		 local JOBNAME_BETAS=$(echo $JOBNAME | awk -v pref=$BETA_PREFIX -v pref_len=${#BETA_PREFIX} '{print substr($0, index($0, pref))}')
+		 if [[ ! $JOBNAME_BETAS =~ b[[:digit:]]{1}[.]{1}[[:digit:]]{4}$ ]]; then
+                     continue
+		 fi
+		 JOBNAME_BETAS=( `echo $JOBNAME_BETAS | sed 's/_/ /g' | sed "s/$BETA_PREFIX//g"` )
 		 
-		 if [ $JOBNAME_BETA = $BETA ] && [ $JOBNAME_KAPPA = $KAPPA ] && [ $JOBNAME_NTIME = $NTIME ] \
-                                              && [ $JOBNAME_NSPACE = $NSPACE ] && [ $JOBNAME_CHEMPOT = $CHEMPOT ]; then
+		 if ElementInArray "$BETA" "${JOBNAME_BETAS[@]}" && [ $JOBNAME_KAPPA = $KAPPA ] && [ $JOBNAME_NTIME = $NTIME ] \
+                                                                 && [ $JOBNAME_NSPACE = $NSPACE ] && [ $JOBNAME_CHEMPOT = $CHEMPOT ]; then
 		     local TMP_STATUS=$(scontrol show job $JOBID | grep "^[[:blank:]]*JobState=" | sed "s/^.*JobState=\([[:alpha:]]*\).*$/\1/")
 		     if [ "$TMP_STATUS" == "RUNNING" ] || [ "$TMP_STATUS" == "PENDING" ]; then
 			 STATUS+=( "$TMP_STATUS" )
@@ -288,18 +292,16 @@ function ListJobStatus_Main(){
 		 fi
 		 
 	     done
-	     
 	     if [ ${#STATUS[@]} -eq 0 ]; then
 		 STATUS="notQueued"
 	     elif [ ${#STATUS[@]} -ne 1 ]; then
-		 printf "\n \e[1;37;41mWARNING:\e[0;31m \e[4mThere are more than one job with $PARAMETERS_STRING as parameters! Serious problem! Aborting...\n\n\e[0m\n"
+		 printf "\n \e[1;37;41mWARNING:\e[0;31m \e[1mThere are more than one job with ${PARAMETERS_STRING} and BETA=$BETA as parameters! CHECK!!! Aborting...\n\n\e[0m\n"
 		 exit -1
 	     fi
 
 	     #----Constructing WORK_BETADIRECTORY, HOME_BETADIRECTORY, JOBSCRIPT_NAME, JOBSCRIPT_GLOBALPATH and INPUTFILE_GLOBALPATH---#
 	     local OUTPUTFILE_GLOBALPATH="$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA/$OUTPUTFILE_NAME"
-	     #Here we assume the prefix of the job is the default on --> TODO: avoid this assumption
-	     local JOBSCRIPT_GLOBALPATH="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA/${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}_$BETA_PREFIX$BETA" 
+	     local INPUTFILE_GLOBALPATH="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA/$INPUTFILE_NAME"
 	     #-------------------------------------------------------------------------------------------------------------------------#
 
 	     if [ -f $OUTPUTFILE_GLOBALPATH ]; then
@@ -317,6 +319,7 @@ function ListJobStatus_Main(){
 		     local ACCEPTANCE_LAST=0
 		 fi
 		 local MAX_DELTAS=$(awk 'BEGIN {max=0} {if(sqrt($8^2)>max){max=sqrt($8^2)}} END {printf "%6g", max}' $OUTPUTFILE_GLOBALPATH)
+		 local TIME_FROM_LAST_MODIFICATION=`expr $(date +%s) - $(date +%s -r $OUTPUTFILE_GLOBALPATH)`
 		 
 	     else
 		 
@@ -325,30 +328,39 @@ function ListJobStatus_Main(){
 		 local ACCEPTANCE=nan
 		 local ACCEPTANCE_LAST=nan
 		 local MAX_DELTAS=nan
+		 local TIME_FROM_LAST_MODIFICATION=nan
 		 
 	     fi
 
-	     if [ -f $JOBSCRIPT_GLOBALPATH ]; then
-		 local INT0=$( grep -o "\-\-integrationsteps0=[[:digit:]]\+"  $JOBSCRIPT_GLOBALPATH | sed 's/\-\-integrationsteps0=\([[:digit:]]\+\)/\1/' )
-		 local INT1=$( grep -o "\-\-integrationsteps1=[[:digit:]]\+"  $JOBSCRIPT_GLOBALPATH | sed 's/\-\-integrationsteps1=\([[:digit:]]\+\)/\1/' )
+	     if [ -f $INPUTFILE_GLOBALPATH ]; then
+		 local INT0=$( grep -o "integrationsteps0=[[:digit:]]\+"  $INPUTFILE_GLOBALPATH | sed 's/integrationsteps0=\([[:digit:]]\+\)/\1/' )
+		 local INT1=$( grep -o "integrationsteps1=[[:digit:]]\+"  $INPUTFILE_GLOBALPATH | sed 's/integrationsteps1=\([[:digit:]]\+\)/\1/' )
 	     else
-		 #printf "\n \e[0;31m File $JOBSCRIPT_GLOBALPATH not found. Integration stpes will not be printed!\n\n\e[0m\n"
-		 local INT0="="
-		 local INT1="="		 
+		 printf "\n \e[0;31m File $INPUTFILE_GLOBALPATH not found. Integration stpes will not be printed!\n\n\e[0m\n"
 	     fi
-
+	     
+	     printf "\e[0;36m%s\t\t\e[0;$((36-$TO_BE_CLEANED*5))m%8s\e[0;36m (\e[0;$(GoodAcc $ACCEPTANCE)m%s %%\e[0;36m) [%s %%] %s-%s\t%9s\t%s\t   \e[0;$(($TIME_FROM_LAST_MODIFICATION>300 ? 31 : 36))m%s\n\e[0m" \
+		 "$BETA" \
+		 "$TRAJECTORIES_DONE" \
+		 "$ACCEPTANCE" \
+		 "$ACCEPTANCE_LAST" \
+                 "$INT0" "$INT1" \
+                 "$STATUS"   "$MAX_DELTAS"\
+	         "$(echo $TIME_FROM_LAST_MODIFICATION | awk '{printf "%4d", $1}') sec. ago"
 
 	     if [ $TO_BE_CLEANED -eq 0 ]; then
-		 printf "\e[0;36m%s\t\t%8s (%s %%) [%s %%] %s-%s\t\t%9s\t%s\n\e[0m"   "$BETA"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$ACCEPTANCE_LAST"   "$INT0" "$INT1"   "$STATUS"   "$MAX_DELTAS"
 		 printf "%s\t\t%s (%s %%) [%s %%] %s-%s\t\t\t%9s\t%s\n"   "$BETA"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$ACCEPTANCE_LAST"   "$INT0" "$INT1"   "$STATUS"   "$MAX_DELTAS" >> $JOBS_STATUS_FILE
 	     else
-		 printf "\e[0m%s\t\t\e[0;31m%8s (%s %%) [%s %%] %s-%s\e[0m\t\t%9s\t%s\n\e[0m"   "$BETA"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$ACCEPTANCE_LAST"   "$INT0" "$INT1"   "$STATUS"   "$MAX_DELTAS"
 		 printf "%s\t\t%s (%s %%) [%s %%]%s-%s\t\t\t%9s\t%s  ---> File to be cleaned!\n"   "$BETA"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$ACCEPTANCE_LAST"   "$INT0" "$INT1"   "$STATUS"   "$MAX_DELTAS" >> $JOBS_STATUS_FILE
 	     fi
 	     
 	     
 	 done
-	 printf "\e[0;36m==================================================================================================\n\e[0m"
+	 printf "\e[0;36m=====================================================================================================\n\e[0m"
 	 
      fi
+}
+
+function GoodAcc(){
+    echo "$1" | awk '{if($1<65){print 31}else if($1>75){print 33}else{print 32}}'
 }
