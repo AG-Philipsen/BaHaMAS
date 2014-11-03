@@ -27,3 +27,10 @@ function FindPositionOfFirstMinimumOfArray(){
 	fi
     done
 }
+
+function ElementInArray() {
+    #Remember in BASH 0 means true and >0 means false
+    local ELEMENT
+    for ELEMENT in "${@:2}"; do [[ "$ELEMENT" == "$1" ]] && return 0; done
+    return 1
+}
