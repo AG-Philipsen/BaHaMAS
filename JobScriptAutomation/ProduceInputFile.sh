@@ -136,16 +136,15 @@ else
     echo "nspace=$NSPACE" >> $INPUTFILE_GLOBALPATH
     echo "ntime=$NTIME" >> $INPUTFILE_GLOBALPATH
     echo "hmcsteps=$MEASUREMENTS" >> $INPUTFILE_GLOBALPATH
-    echo "integrationsteps0=$INTSTEPS0" >> $INPUTFILE_GLOBALPATH
-    echo "integrationsteps1=$INTSTEPS1" >> $INPUTFILE_GLOBALPATH
+    echo "integrationsteps0=${INTSTEPS0_ARRAY[${BETAVALUES[$BETA]}]}" >> $INPUTFILE_GLOBALPATH
+    echo "integrationsteps1=${INTSTEPS1_ARRAY[${BETAVALUES[$BETA]}]}" >> $INPUTFILE_GLOBALPATH
     echo "savefrequency=$NSAVE" >> $INPUTFILE_GLOBALPATH
+    echo "startcondition=${STARTCONDITION[$BETA]}" >> $INPUTFILE_GLOBALPATH
     if [[ "${STARTCONDITION[$BETA]}" == "continue" ]]; then
-	echo "startcondition=continue" >> $INPUTFILE_GLOBALPATH
 	echo "sourcefile=$HOME_BETADIRECTORY/${CONFIGURATION_SOURCEFILE[$BETA]}" >> $INPUTFILE_GLOBALPATH
-    else
-	echo "startcondition=hot" >> $INPUTFILE_GLOBALPATH
     fi
 fi
+
 
 
 

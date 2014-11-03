@@ -46,7 +46,7 @@ source $HOME/Script/JobScriptAutomation/EmptyBetaDirectories.sh || exit -2
 BETA_PREFIX="b"
 BETASFILE="betas"
 KAPPA="1000"
-WALLTIME="00:30:00"
+WALLTIME="7-00:00:00"
 BGSIZE="32"
 MEASUREMENTS="20000"
 NRXPROCS="4"
@@ -89,7 +89,10 @@ source $HOME/Script/JobScriptAutomation/CommandLineParser.sh || exit -2
 #       it can be either LOEWE or JUQUEEN. It is set using whoami. Change this in future if needed!
 if [[ $(whoami) =~ ^hkf[[:digit:]]{3} ]]; then
     CLUSTER_NAME="JUQUEEN"
+    WALLTIME="00:30:00"
 fi
+
+SPECIFIED_COMMAND_LINE_OPTIONS=( $@ )
 
 ParseCommandLineOption $@
 
@@ -143,6 +146,8 @@ fi
 # Read beta values from BETASFILE and write them into BETAVALUES array
 if [ ${#MUTUALLYEXCLUSIVEOPTS_PASSED[@]} = 0 ] || [ $SUBMIT = "TRUE" ] || [ $SUBMITONLY = "TRUE" ] || [ $CONTINUE = "TRUE" ]; then
 
+    declare -A INTSTEPS0_ARRAY
+    declare -A INTSTEPS1_ARRAY
     ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
 
 fi
@@ -183,7 +188,7 @@ fi
 
 #------------------------------------------------------------------------------------------------------------------------------#
 # Submitting jobs
-if [ $SUBMIT = "TRUE" ] || [ $SUBMITONLY = "TRUE" ] || [ $CONTINUE = "TRUE" ] || [[ $CONTINUE =~ [[:digit:]]+ ]]; then #TODO: Check if this condition can be left out
+if [ $SUBMIT = "TRUE" ] || [ $SUBMITONLY = "TRUE" ]; then # || [ $CONTINUE = "TRUE" ] || [[ $CONTINUE =~ [[:digit:]]+ ]]; then #TODO: Check if this condition can be left out
 
     SubmitJobsForValidBetaValues #TODO: Declare all possible local variable in this function as local!
 

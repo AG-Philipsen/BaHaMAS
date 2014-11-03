@@ -74,31 +74,79 @@ function ReadBetaValuesFromFile(){
 	exit -1
     fi
 
-    #Write beta values from BETASFILE into BETAVALUES array
-    BETAVALUES=( $(grep -o "^[[:blank:]]*[[:digit:]]\.[[:digit:]]\{4\}" $BETASFILE) )
+    BETAVALUES=()
+    local INTSTEPS0_ARRAY_TEMP=()
+    local INTSTEPS1_ARRAY_TEMP=()
+    local OLD_IFS=$IFS      # save the field separator           
+    local IFS=$'\n'     # new field separator, the end of line           
+    for LINE in $(cat $BETASFILE); do          
+	if [[ $LINE =~ ^[[:blank:]]*# ]]; then
+	    continue
+	fi
+	LINE=`echo $LINE | awk '{split($0, res, "#"); print res[1]}'`
+	BETAVALUES+=( $(echo $LINE | awk '{print $1}') )
+	INTSTEPS0_ARRAY_TEMP+=( $(echo $LINE | awk '{print $2}') )
+	INTSTEPS1_ARRAY_TEMP+=( $(echo $LINE | awk '{print $3}') )
+    done          
+    IFS=$OLD_IFS     # restore default field separator 
 
-    if [ ${#BETAVALUES[@]} -gt "0" ]; then	
+    #Check whether the entries in the file have the right format, otherwise abort
+    if [ ${#BETAVALUES[@]} -eq 0 ]; then
+	printf "\n\e[0;31m  No beta values in betas file. Aborting...\n\n\e[0m"
+	exit -1
+    fi
 
-	printf "\n\e[0;36m===================================================================================\n\e[0m"
-	printf "\e[0;34m Read beta values:\n\e[0m"
+    for BETA in ${BETAVALUES[@]}; do
+	if [[ ! $BETA =~ ^[[:digit:]].[[:digit:]]{4}$ ]]; then
+	    printf "\n\e[0;31m Invalid beta entry in betas file! Aborting...\n\n\e[0m"
+	    exit -1
+	fi
+    done
 
-	for i in ${BETAVALUES[@]}; do
-	    echo "  - $i"
-	done
-
-	printf "\e[0;36m===================================================================================\n\e[0m"
-
-	if [ "$CLUSTER_NAME" = "LOEWE" ]; then
-	    if [ $(echo "${#BETAVALUES[@]}" | awk '{print $1 % '"$GPU_PER_NODE"'}') -ne 0 ]; then
-		printf "\n\e[0;33m \e[1m\e[4mWARNING\e[24m:\e[0;33m Number of beta values provided not multiple of $GPU_PER_NODE. WASTING computing time...\n\n\e[0m"
+    if [ ${#INTSTEPS0_ARRAY_TEMP[@]} -ne 0 ]; then
+	for STEPS in ${INTSTEPS0_ARRAY_TEMP[@]} ${INTSTEPS1_ARRAY_TEMP[@]}; do
+	    if [[ ! $STEPS =~ ^[[:digit:]]+$ ]]; then
+		printf "\n\e[0;31m Invalid integrator step entry in betas file! Aborting...\n\n\e[0m"
+		exit -1
 	    fi
+	done
+	
+	if [ ${#INTSTEPS0_ARRAY_TEMP[@]} -ne ${#BETAVALUES[@]} ] || [ ${#INTSTEPS1_ARRAY_TEMP[@]} -ne ${#BETAVALUES[@]} ]; then
+	    printf "\n\e[0;31m Integrators steps not specified for ALL beta in betas file! Aborting...\n\n\e[0m"
+            exit -1
 	fi
 
-    else	
+	#Now that all the checks have been done, build associative arrays for later use of integration steps 
+	for INDEX in "${!BETAVALUES[@]}"; do
+	    INTSTEPS0_ARRAY["${BETAVALUES[$INDEX]}"]="${INTSTEPS0_ARRAY_TEMP[$INDEX]}"
+	    INTSTEPS1_ARRAY["${BETAVALUES[$INDEX]}"]="${INTSTEPS1_ARRAY_TEMP[$INDEX]}"
+	done	
+    else
+	#Build associative arrays for later use of integration steps with the same value for all betas
+	for INDEX in "${!BETAVALUES[@]}"; do
+	    INTSTEPS0_ARRAY["${BETAVALUES[$INDEX]}"]=$INTSTEPS0
+	    INTSTEPS1_ARRAY["${BETAVALUES[$INDEX]}"]=$INTSTEPS1
+	done		
+    fi
 
-	printf "\n\e[0;31m  No beta values in betas file. Aborting...\n\n\e[0m"
+    printf "\n\e[0;36m===================================================================================\n\e[0m"
+    printf "\e[0;34m Read beta values:\n\e[0m"
+    
+    for i in ${BETAVALUES[@]}; do
+	printf "  - $i"
+	if [ "${#INTSTEPS0_ARRAY[@]}" -gt 0 ]; then
+	    printf "\t (Integrator steps ${INTSTEPS0_ARRAY[$i]}-${INTSTEPS1_ARRAY[$i]})\n"
+	else
+	    printf "\n"
+	fi
+    done
+    
+    printf "\e[0;36m===================================================================================\n\e[0m"
 
-	exit -1
+    if [ "$CLUSTER_NAME" = "LOEWE" ]; then
+	if [ $(echo "${#BETAVALUES[@]}" | awk '{print $1 % '"$GPU_PER_NODE"'}') -ne 0 ]; then
+	    printf "\n\e[0;33m \e[1m\e[4mWARNING\e[24m:\e[0;33m Number of beta values provided not multiple of $GPU_PER_NODE. WASTING computing time...\n\n\e[0m"
+	fi
     fi
 }
 
@@ -350,49 +398,63 @@ function ProcessBetaValuesForSubmitOnly() {
 
 function CheckIfJobIsInQueue(){
 
-    local JOBNAME=$PARAMETERS_STRING'_'$BETA_PREFIX$BETA
-
     if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
-	local JOBID_ARRAY=( $(llq -u $(whoami) | grep -o "juqueen[[:alnum:]]\{3\}\.[[:digit:]]\+\.[[:digit:]]") )
-    else #LOEWE
-	local JOBID_ARRAY=( $(squeue | awk 'NR>1{print $1}') )
-    fi
-    
-    for JOBID in ${JOBID_ARRAY[@]}; do
-	
-	if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
+	local JOBNAME=$PARAMETERS_STRING'_'$BETA_PREFIX$BETA
+    	local JOBID_ARRAY=( $(llq -u $(whoami) | grep -o "juqueen[[:alnum:]]\{3\}\.[[:digit:]]\+\.[[:digit:]]") )
+	for JOBID in ${JOBID_ARRAY[@]}; do
 	    local GREPPED_JOBNAME=$(llq -l $JOBID | grep "Job Name:" | sed "s/^.*Job Name: \(muiPiT.*$\)/\1/")
-	else #LOEWE
-	    local GREPPED_JOBNAME=$(scontrol show job  $JOBID | grep "Name=" | sed "s/^.*Name=\(.*$\)/\1/")
-	    local JOBSTATUS=$(scontrol show job $JOBID | grep "^[[:blank:]]*JobState=" | sed "s/^.*JobState=\([[:alpha:]]*\)[[:blank:]].*$/\1/") 
-	fi
-	
-	if [ $GREPPED_JOBNAME = $JOBNAME ]; then
-	    
-	    if [ "$CLUSTER_NAME" = "LOEWE" ] && [ "$JOBSTATUS" != "RUNNING" -a "$JOBSTATUS" != "PENDING" ]; then
-		break;
+	    if [ $GREPPED_JOBNAME = $JOBNAME ]; then
+		printf "\e[0;31m Job with name $JOBNAME seems to be already running with id $JOBID.\n"
+		printf " Job cannot be continued...\n\n\e[0m"
+	       	return 0
 	    fi
-	    printf "\e[0;31m Job with name $JOBNAME seems to be already running with id $JOBID.\n"
-	    printf " Job cannot be continued...\n\n\e[0m"
-	    
-	    return 0
-	fi
-	
-    done
-    
-    return 1
+	done
 
+    else #LOEWE
+	
+	local JOBID_ARRAY=( $(squeue | awk 'NR>1{print $1}') )
+	for JOBID in ${JOBID_ARRAY[@]}; do
+	    local GREPPED_JOBNAME=$(scontrol show job  $JOBID | grep "Name=" | sed "s/^.*Name=\(.*$\)/\1/") 
+	    local JOBSTATUS=$(scontrol show job $JOBID | grep "^[[:blank:]]*JobState=" | sed "s/^.*JobState=\([[:alpha:]]*\)[[:blank:]].*$/\1/")
+	    
+	    if [[ ! $GREPPED_JOBNAME =~ b[[:digit:]]{1}[.]{1}[[:digit:]]{4}$ ]]; then
+		continue
+	    fi
+	    
+	    if [ $(echo $GREPPED_JOBNAME | grep -o "$BETA_PREFIX$BETA" | wc -l) -ne 0 ] && [ $(echo $GREPPED_JOBNAME | grep -o "$PARAMETERS_STRING" | wc -l) -ne 0 ]; then
+		
+		if [ "$JOBSTATUS" != "RUNNING" -a "$JOBSTATUS" != "PENDING" ]; then
+		    continue;
+		fi
+		
+		printf "\e[0;31m Job with name $JOBNAME seems to be already running with id $JOBID.\n"
+		printf " Job cannot be continued...\n\n\e[0m"
+	    	return 0
+	    fi
+	done
+    fi
+
+    return 1
 }
 
 function ProcessBetaValuesForContinue() {
     
+    if [ "$CLUSTER_NAME" = "LOEWE" ]; then
+       	local LOCAL_SUBMIT_BETA_ARRAY=()
+	#Remove --continue option from command line
+	for INDEX in "${!SPECIFIED_COMMAND_LINE_OPTIONS[@]}"; do
+	    if [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == --continue* ]]; then
+		unset SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]
+		SPECIFIED_COMMAND_LINE_OPTIONS=( "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}" )
+	    fi
+	done
+    fi
+
     for BETA in ${BETAVALUES[@]}; do
 	
      	#-------------------------------------------------------------------------------------------------------------------------#
 	local WORK_BETADIRECTORY="$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
 	local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
-	local JOBSCRIPT_NAME="${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}_$BETA_PREFIX$BETA"
-	local JOBSCRIPT_GLOBALPATH="${HOME_BETADIRECTORY}/$JOBSCRIPT_NAME"
 	local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$INPUTFILE_NAME"
 	local OUTPUTFILE_GLOBALPATH="${WORK_BETADIRECTORY}/$OUTPUTFILE_NAME"
 	#-------------------------------------------------------------------------------------------------------------------------#
@@ -403,32 +465,39 @@ function ProcessBetaValuesForContinue() {
 	    printf "\e[0;31m Simulation cannot be continued. Leaving out beta = $BETA .\n\n\e[0m"
 	    PROBLEM_BETA_ARRAY+=( $BETA )
 	    continue
-	    
-	elif [ ! -f $OUTPUTFILE_GLOBALPATH ]; then
-	    
-	    printf "\n\e[0;31m $OUTPUTFILE_GLOBALPATH does not exist.\n\e[0m"
-	    printf "\e[0;31m Simulation cannot be continued. Leaving out beta = $BETA .\n\n\e[0m"
-	    PROBLEM_BETA_ARRAY+=( $BETA )
-	    continue
-
-        elif [ ! -f $JOBSCRIPT_GLOBALPATH ]; then
-	
-	    printf "\n\e[0;31m $JOBSCRIPT_GLOBALPATH does not exist.\n\e[0m"
-	    printf "\e[0;31m Simulation cannot be continued. Leaving out beta = $BETA .\n\n\e[0m"
-	    PROBLEM_BETA_ARRAY+=( $BETA )
-	    continue
 
 	fi
-	
+	    
 	echo ""
 	CheckIfJobIsInQueue
 	if [ $? == 0 ]; then
-	    
 	    PROBLEM_BETA_ARRAY+=( $BETA )
 	    continue
 	fi
 	
+
 	if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
+  
+            #-------------------------------------------------------------------------------------------------------------------------#
+	    local JOBSCRIPT_NAME="${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}_$BETA_PREFIX$BETA"
+	    local JOBSCRIPT_GLOBALPATH="${HOME_BETADIRECTORY}/$JOBSCRIPT_NAME"
+            #-------------------------------------------------------------------------------------------------------------------------#
+
+	    if [ ! -f $OUTPUTFILE_GLOBALPATH ]; then
+	    
+		printf "\n\e[0;31m $OUTPUTFILE_GLOBALPATH does not exist.\n\e[0m"
+		printf "\e[0;31m Simulation cannot be continued. Leaving out beta = $BETA .\n\n\e[0m"
+		PROBLEM_BETA_ARRAY+=( $BETA )
+		continue
+
+            elif [ ! -f $JOBSCRIPT_GLOBALPATH ]; then
+		
+		printf "\n\e[0;31m $JOBSCRIPT_GLOBALPATH does not exist.\n\e[0m"
+		printf "\e[0;31m Simulation cannot be continued. Leaving out beta = $BETA .\n\n\e[0m"
+		PROBLEM_BETA_ARRAY+=( $BETA )
+		continue
+	    
+	    fi
 	    
 	    grep -q "^StartCondition = continue" $INPUTFILE_GLOBALPATH
 	    if [ $(echo $?) = 0 ]; then 
@@ -495,22 +564,24 @@ function ProcessBetaValuesForContinue() {
 
 
 	else # LOEWE
-	    exit
+            #-------------------------------------------------------------------------------------------------------------------------# 
+            local BETAVALUES_COPY=(${BETAVALUES[@]})
+            #-------------------------------------------------------------------------------------------------------------------------#
 
-	    #At the moment we do not allow to continue more than one job --> ONLY one beta per time
-	    if [ ${#BETAVALUES[@]} -gt 1 ]; then
-		printf "\e[0;31m At the moment we do not allow to continue more than one job --> ONLY one beta in $BETASFILE file! Aborting...\n\n\e[0m"	
-		exit -1
-	    fi
-
-	    #If the option --resumefrom is given we have to clean the $WORK_BETADIRECTORY
-	    for(( INDEX=0; INDEX<${#SPECIFIED_COMMAND_LINE_OPTIONS[@]}; INDEX++)); do
+	    #If the option --resumefrom is given we have to clean the $WORK_BETADIRECTORY, otherwise just set the name of conf and prng
+	    #NOTE: Since --continue option has been removed at the beginning of this function, it could be there is nothing in the
+	    #      SPECIFIED_COMMAND_LINE_OPTIONS array. Hence in the following for loop we add manually an INDEX (0) in order
+	    #      to set the name of conf and prng always for each beta.
+	    for INDEX in 0 "${!SPECIFIED_COMMAND_LINE_OPTIONS[@]}"; do
 		if [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == --resumefrom=* ]]; then
 		    #If the user wants to resume from CONTINUE_RESUMETRAJ, first check that the conf is available
-		    if [ -f $WORK_BETADIRECTORY/$(printf "conf.%05d" "$CONTINUE_RESUMETRAJ") ]; then
+		    if [ -f $WORK_BETADIRECTORY/$(printf "conf.%05d" "$CONTINUE_RESUMETRAJ") ] &&
+		       [ -f $WORK_BETADIRECTORY/$(printf "prng.%05d" "$CONTINUE_RESUMETRAJ") ]; then
 			local NAME_LAST_CONFIGURATION=$(printf "conf.%05d" "$CONTINUE_RESUMETRAJ")
+			local NAME_LAST_PRNG=$(printf "prng.%05d" "$CONTINUE_RESUMETRAJ")
 		    else
-			printf "\e[0;31m Configuration \"$(printf "conf.%05d" "$CONTINUE_RESUMETRAJ")\" not found in $WORK_BETADIRECTORY folder.\n"
+			printf "\e[0;31m Configuration \"$(printf "conf.%05d" "$CONTINUE_RESUMETRAJ")\""
+			printf " or prng status \"$(printf "prng.%05d" "$CONTINUE_RESUMETRAJ")\" not found in $WORK_BETADIRECTORY folder.\n"
 			printf " Unable to continue the simulation. Leaving out beta = $BETA .\n\n\e[0m" 
 			PROBLEM_BETA_ARRAY+=( $BETA ) 
 			continue 2                                                                                         
@@ -549,44 +620,87 @@ function ProcessBetaValuesForContinue() {
 		    head -n -$(($LINES_TO_BE_CANCELED_IN_OUTPUTFILE-1)) $OUTPUTFILE_GLOBALPATH > ${OUTPUTFILE_GLOBALPATH}.temporaryCopyThatHopefullyDoesNotExist || exit 2
 		    mv ${OUTPUTFILE_GLOBALPATH}.temporaryCopyThatHopefullyDoesNotExist $OUTPUTFILE_GLOBALPATH || exit 2
 		    
-                    #Once the WORK_BETADIRECTORY has been prepared for resuming, delete from the array SPECIFIED_COMMAND_LINE_OPTIONS the --resumefrom option
-		    unset SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]
-		    SPECIFIED_COMMAND_LINE_OPTIONS=( "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}" )
+                    #Once the WORK_BETADIRECTORY has been prepared for resuming, break
+		    echo "Break done"
 		    break
 		
 	        #If --resumfrom option has not been given check in the WORK_BETADIRECTORY if conf.save is present: if yes, use it, otherwise use the last checkpoint
-		elif [ -f $WORK_BETADIRECTORY/conf.save ]; then
+		# NOTE: the following elif and else are done for each command line option before --resume. It doesn't matter since NAME_LAST_* are always set!
+		elif [ -f $WORK_BETADIRECTORY/conf.save ] && [ -f $WORK_BETADIRECTORY/prng.save ]; then
+		    echo "in if save"
 		    local NAME_LAST_CONFIGURATION="conf.save"
+		    local NAME_LAST_PRNG="prng.save"
 		else
+		    echo "in if number"
 		    local NAME_LAST_CONFIGURATION=$(ls $WORK_BETADIRECTORY | grep -o "conf.[[:digit:]]\{5\}$" | tail -n1)
+		    local NAME_LAST_PRNG=$(ls $WORK_BETADIRECTORY | grep -o "prng.[[:digit:]]\{5\}$" | tail -n1)
 		fi
 	    done
 
-
-	    #The variable NAME_LAST_CONFIGURATION should have been set above, if not it means no conf was available!
-	    if [ "$NAME_LAST_CONFIGURATION" == "" ]; then
-		printf "\n\e[0;31m No configuration found in $WORK_BETADIRECTORY.\n\e[0m"
+	    #The variable NAME_LAST_* should have been set above, if not it means no conf was available!
+	    if [ "$NAME_LAST_CONFIGURATION" == "" ] || [ "$NAME_LAST_PRNG" == "" ]; then
+		printf "\n\e[0;31m No configuration or prng state found in $WORK_BETADIRECTORY.\n\e[0m"
 		printf "\e[0;31m Simulation cannot be continued. Leaving out beta = $BETA .\n\n\e[0m"
 		PROBLEM_BETA_ARRAY+=( $BETA )
                 continue
+	    fi
+	    #Check that, in case the continue is done from a "numeric" configuration, the number of conf and prng is the same
+	    if [ "$NAME_LAST_CONFIGURATION" != "conf.save" ] && [ "$NAME_LAST_PRNG" != "prng.save" ]; then
+		if [ `echo ${NAME_LAST_CONFIGURATION#*.} | sed 's/^0*//g'` -ne `echo ${NAME_LAST_PRNG#*.} | sed 's/^0*//g'` ]; then
+		    printf "\n\e[0;31m The numbers of conf.xxxxx and prng.xxxxx are different! Check the respective folder!!\n\e[0m"
+                    printf "\e[0;31m Simulation cannot be continued. Leaving out beta = $BETA .\n\n\e[0m"
+                    PROBLEM_BETA_ARRAY+=( $BETA )
+                    continue
+		fi
 	    fi
 
 	    if [ -f $HOME_BETADIRECTORY/$NAME_LAST_CONFIGURATION ]; then
 		mv $HOME_BETADIRECTORY/$NAME_LAST_CONFIGURATION $HOME_BETADIRECTORY/${NAME_LAST_CONFIGURATION}_$(date +'%F_%H.%M') || exit 2
 	    fi
+	    if [ -f $HOME_BETADIRECTORY/$NAME_LAST_PRNG ]; then
+		mv $HOME_BETADIRECTORY/$NAME_LAST_PRNG $HOME_BETADIRECTORY/${NAME_LAST_PRNG}_$(date +'%F_%H.%M') || exit 2
+	    fi
 	    cp $WORK_BETADIRECTORY/$NAME_LAST_CONFIGURATION $HOME_BETADIRECTORY || exit 2
-	    cp $JOBSCRIPT_GLOBALPATH ${JOBSCRIPT_GLOBALPATH}_$(date +'%F_%H.%M') || exit 2
+	    cp $WORK_BETADIRECTORY/$NAME_LAST_PRNG $HOME_BETADIRECTORY || exit 2
 
-	    #For each command line option, modify it in the jobscript (remove first --continue option(s) from command line)
-	    for(( INDEX=0; INDEX<${#SPECIFIED_COMMAND_LINE_OPTIONS[@]}; INDEX++)); do
-		if [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == --continue* ]]; then
-		    unset SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]
-		    SPECIFIED_COMMAND_LINE_OPTIONS=( "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}" )
+	    #Make a temporary copy of the input file that will be used to restore in case the original input file.
+	    #This is to avoid to modify some parameters and then skip beta because of some error leaving the input file modified!
+	    #If the beta is skipped this temporary file is used to restore the original input file, otherwise it is deleted.
+	    ORIGINAL_INPUTFILE_GLOBALPATH="${INPUTFILE_GLOBALPATH}_original"
+	    cp $INPUTFILE_GLOBALPATH $ORIGINAL_INPUTFILE_GLOBALPATH || exit 2
+	    #If the option --pbp=1 has been given, check and in case add to input file relative piece
+	    for INDEX in "${!SPECIFIED_COMMAND_LINE_OPTIONS[@]}"; do
+		if [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == --pbp* ]]; then
+		    if [ $(grep -o "measure_pbp" $INPUTFILE_GLOBALPATH | wc -l) -eq 0 ]; then
+			echo "measure_pbp=$MEASURE_PBP" >> $INPUTFILE_GLOBALPATH
+			if  [ $(grep -o "sourcetype" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] || [ $(grep -o "sourcecontent" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] ||
+			    [ $(grep -o "num_sources" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ]; then
+			    printf "\e[0;31m The option \"measure_pbp\" is not present in the input file but one or more specification about how to calculate\n"
+			    printf " the chiral condensate are present. Suspicious situation, investigate! Skipping beta = $BETA .\n\n\e[0m"
+			    PROBLEM_BETA_ARRAY+=( $BETA )
+			    mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue 2
+			else
+			    echo "sourcetype=volume" >> $INPUTFILE_GLOBALPATH
+			    echo "sourcecontent=gaussian" >> $INPUTFILE_GLOBALPATH
+			    echo "num_sources=16" >> $INPUTFILE_GLOBALPATH
+			fi
+			printf "\e[0;32m Added options \e[0;35mmeasure_pbp=$MEASURE_PBP\n"
+			printf "\e[0;32m               \e[0;35msourcetype=volume\n"
+			printf "\e[0;32m               \e[0;35msourcecontent=gaussian\n"
+			printf "\e[0;32m               \e[0;35mnum_sources=16"
+			printf "\e[0;32m to the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
+		    else
+			ModifyOptionInInputFile "measure_pbp=$MEASURE_PBP"
+			printf "\e[0;32m Set option \e[0;35mmeasure_pbp=$MEASURE_PBP"
+			printf "\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
+		    fi
 		fi
 	    done
+	    #For each command line option, modify it in the inputfile.
+	    #
 	    #If CONTINUE_NUMBER is given, set automatically the number of remaining measurements.
 	    # NOTE: If --measurements=... is (also) given, then --measurements will be used!
-	    #       Note also that we count the number of the output file as number of "clean"
+	    #       Note also that we count the number of trajectories in the output file as number of "clean"
 	    #       trajectories, i.e. the output file is here read and count the tr. whose number
 	    #       is bigger than the trajectory before.
 	    if [ $CONTINUE_NUMBER -ne 0 ]; then
@@ -596,86 +710,141 @@ function ProcessBetaValuesForContinue() {
 		    printf "\n we got that the number of done measurements is $NUMBER_DONE_TRAJECTORIES > $CONTINUE_NUMBER = CONTINUE_NUMBER."
 		    printf "\n The option \"--continue=$CONTINUE_NUMBER\" cannot be applied. Skipping beta = $BETA .\n\n\e[0m"
                     PROBLEM_BETA_ARRAY+=( $BETA )
-                    continue
+                    mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
 		fi
-		ModifyOptionInJobScript "--measurements=$(($CONTINUE_NUMBER - $NUMBER_DONE_TRAJECTORIES))"
-		[ $? == 1 ] && continue 2
-		printf "\e[0;32m Set option \e[0;35m--measurements=$(($CONTINUE_NUMBER - $NUMBER_DONE_TRAJECTORIES))"
-		printf "\e[0;32m into the \e[0;35m${JOBSCRIPT_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"		
+		ModifyOptionInInputFile "measurements=$(($CONTINUE_NUMBER - $NUMBER_DONE_TRAJECTORIES))"
+		[ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
+		printf "\e[0;32m Set option \e[0;35mmeasurements=$(($CONTINUE_NUMBER - $NUMBER_DONE_TRAJECTORIES))"
+		printf "\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"		
 	    fi
 	    #Always convert startcondition in continue
-	    ModifyOptionInJobScript "--startcondition=continue"
-	    #If --host_seed not present in the job script file, add it, otherwise modify it
-	    local NUMBER_OCCURENCE_HOST_SEED=$(grep -o "\-\-host_seed=[[:digit:]]\{4\}" $JOBSCRIPT_GLOBALPATH | wc -l)
-	    if [ $NUMBER_OCCURENCE_HOST_SEED -eq 0 ]; then
-		ModifyOptionInJobScript "--host_seed=${BETA#*.} --beta=$BETA"
-		[ $? == 1 ] && continue
-		printf "\e[0;32m Added option \e[0;35m--host_seed=${BETA#*.}\e[0;32m to the \e[0;35m${JOBSCRIPT_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
-	    elif [ $NUMBER_OCCURENCE_HOST_SEED -eq 1 ]; then
-		local VALUE_HOST_SEED=$(grep -o "\-\-host_seed=[[:digit:]]\{4\}" $JOBSCRIPT_GLOBALPATH | sed "s/^--host_seed=\(.*$\)/\1/" | sed 's/^0*//')
-		ModifyOptionInJobScript "--host_seed=$( printf "%04d" $(($VALUE_HOST_SEED + 1)) )"
-		[ $? == 1 ] && continue
-		printf "\e[0;32m Set option \e[0;35m--host_seed=$( printf "%04d" $(($VALUE_HOST_SEED + 1)) )"
-		printf "\e[0;32m into the \e[0;35m${JOBSCRIPT_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
-	    else
-		printf "\n\e[0;31m String --host_seed=[[:digit:]]{4} occurs more than 1 time in file $JOBSCRIPT_GLOBALPATH! Skipping beta = $BETA .\n\n\e[0m"
-		PROBLEM_BETA_ARRAY+=( $BETA )
-		continue
-	    fi
-	    #If --sourcefile not present in the job script file, add it, otherwise modify it
-	    local NUMBER_OCCURENCE_SOURCEFILE=$(grep -o "\-\-sourcefile=[[:alnum:][:punct:]]*" $JOBSCRIPT_GLOBALPATH | wc -l)
+	    ModifyOptionInInputFile "startcondition=continue"
+
+#	    #If host_seed not present in the input file, add it, otherwise modify it
+#	    local NUMBER_OCCURENCE_HOST_SEED=$(grep -o "host_seed=[[:digit:]]\{4\}" $INPUTFILE_GLOBALPATH | wc -l)
+#	    if [ $NUMBER_OCCURENCE_HOST_SEED -eq 0 ]; then
+#		echo "host_seed=${BETA#*.}" >> $INPUTFILE_GLOBALPATH
+#		printf "\e[0;32m Added option \e[0;35mhost_seed=${BETA#*.}\e[0;32m to the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
+#	    elif [ $NUMBER_OCCURENCE_HOST_SEED -eq 1 ]; then
+#		local VALUE_HOST_SEED=$(grep -o "host_seed=[[:digit:]]\{4\}" $INPUTFILE_GLOBALPATH | sed "s/^host_seed=\(.*$\)/\1/" | sed 's/^0*//')
+#		ModifyOptionInInputFile "host_seed=$( printf "%04d" $(($VALUE_HOST_SEED + 1)) )"
+#		[ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
+#		printf "\e[0;32m Set option \e[0;35mhost_seed=$( printf "%04d" $(($VALUE_HOST_SEED + 1)) )"
+#		printf "\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
+#	    else
+#		printf "\n\e[0;31m String host_seed=[[:digit:]]{4} occurs more than 1 time in file $INPUTFILE_GLOBALPATH! Skipping beta = $BETA .\n\n\e[0m"
+#		PROBLEM_BETA_ARRAY+=( $BETA )
+#		mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
+#	    fi
+
+	    #If sourcefile not present in the input file, add it, otherwise modify it
+	    local NUMBER_OCCURENCE_SOURCEFILE=$(grep -o "sourcefile=[[:alnum:][:punct:]]*" $INPUTFILE_GLOBALPATH | wc -l)
 	    if [ $NUMBER_OCCURENCE_SOURCEFILE -eq 0 ]; then
-		ModifyOptionInJobScript "--sourcefile=\$SLURM_SUBMIT_DIR\/${NAME_LAST_CONFIGURATION} --host_seed"
-		[ $? == 1 ] && continue
-		printf "\e[0;32m Added option \e[0;35m--sourcefile=\$SLURM_SUBMIT_DIR/${NAME_LAST_CONFIGURATION}"
-		printf "\e[0;32m to the \e[0;35m${JOBSCRIPT_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
+		echo "sourcefile=$HOME_BETADIRECTORY/${NAME_LAST_CONFIGURATION}" >> $INPUTFILE_GLOBALPATH
+		printf "\e[0;32m Added option \e[0;35msourcefile=$HOME_BETADIRECTORY/${NAME_LAST_CONFIGURATION}"
+		printf "\e[0;32m to the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
 	    elif [ $NUMBER_OCCURENCE_SOURCEFILE -eq 1 ]; then
-		ModifyOptionInJobScript "--sourcefile=\$SLURM_SUBMIT_DIR\/${NAME_LAST_CONFIGURATION}"
-		[ $? == 1 ] && continue
-		printf "\e[0;32m Set option \e[0;35m--sourcefile=\$SLURM_SUBMIT_DIR/${NAME_LAST_CONFIGURATION}"
-		printf "\e[0;32m into the \e[0;35m${JOBSCRIPT_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
+		ModifyOptionInInputFile "sourcefile=$(echo $HOME_BETADIRECTORY | sed 's/\//\\\//g')\/$NAME_LAST_CONFIGURATION"
+		[ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
+		printf "\e[0;32m Set option \e[0;35msourcefile=$HOME_BETADIRECTORY/${NAME_LAST_CONFIGURATION}"
+		printf "\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
 	    else
-		printf "\n\e[0;31m String --sourcefile=[[:alnum:][:punct:]]* occurs more than 1 time in file $JOBSCRIPT_GLOBALPATH! Skipping beta = $BETA .\n\n\e[0m"
+		printf "\n\e[0;31m String sourcefile=[[:alnum:][:punct:]]* occurs more than 1 time in file $INPUTFILE_GLOBALPATH! Skipping beta = $BETA .\n\n\e[0m"
 		PROBLEM_BETA_ARRAY+=( $BETA )
-		continue
+		mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
 	    fi
+	    #If prng_state not present in the input file, add it, otherwise modify it
+	    local NUMBER_OCCURENCE_PRNG_STATE=$(grep -o "initial_prng_state=[[:alnum:][:punct:]]*" $INPUTFILE_GLOBALPATH | wc -l)
+	    if [ $NUMBER_OCCURENCE_PRNG_STATE -eq 0 ]; then
+		echo "initial_prng_state=$HOME_BETADIRECTORY/${NAME_LAST_PRNG}" >> $INPUTFILE_GLOBALPATH
+		printf "\e[0;32m Added option \e[0;35minitial_prng_state=$HOME_BETADIRECTORY/${NAME_LAST_PRNG}"
+		printf "\e[0;32m to the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
+	    elif [ $NUMBER_OCCURENCE_PRNG_STATE -eq 1 ]; then
+		ModifyOptionInInputFile "initial_prng_state=$(echo $HOME_BETADIRECTORY | sed 's/\//\\\//g')\/${NAME_LAST_PRNG}"
+		[ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
+		printf "\e[0;32m Set option \e[0;35minitial_prng_state=$HOME_BETADIRECTORY/${NAME_LAST_PRNG}"
+		printf "\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
+	    else
+		printf "\n\e[0;31m String initial_prng_state=[[:alnum:][:punct:]]* occurs more than 1 time in file $INPUTFILE_GLOBALPATH! Skipping beta = $BETA .\n\n\e[0m"
+		PROBLEM_BETA_ARRAY+=( $BETA )
+		mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
+	    fi
+	    #Always set the integrator steps, that could have been given or not
+	    ModifyOptionInInputFile "intsteps0=${INTSTEPS0_ARRAY[$BETA]}"
+	    printf "\e[0;32m Set option \e[0;35mintsteps0=${INTSTEPS0_ARRAY[$BETA]}"
+            printf "\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
+	    ModifyOptionInInputFile "intsteps1=${INTSTEPS1_ARRAY[$BETA]}"
+	    printf "\e[0;32m Set option \e[0;35mintsteps1=${INTSTEPS1_ARRAY[$BETA]}"
+            printf "\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
 	    #Modify remaining command line specified options
 	    for OPT in ${SPECIFIED_COMMAND_LINE_OPTIONS[@]}; do
-		ModifyOptionInJobScript $OPT
-		[ $? == 1 ] && continue 2
-		printf "\e[0;32m Set option \e[0;35m$OPT\e[0;32m into the \e[0;35m${JOBSCRIPT_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"		
+		if [[ "$OPT" != --walltime* ]] && [[ "$OPT" != --pbp* ]] && [[ "$OPT" != --intsteps0* ]] && [[ "$OPT" != --intsteps1* ]] && [[ "$OPT" != --resumefrom* ]]; then
+		    ModifyOptionInInputFile ${OPT#"--"*}
+		    [ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue 2
+		    printf "\e[0;32m Set option \e[0;35m$OPT\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
+		fi
 	    done
 
 	    #If the script runs fine and it arrives here, it means no continue was done --> we can add BETA to the jobs to be submitted
-	    SUBMIT_BETA_ARRAY+=( $BETA )
+	    rm $ORIGINAL_INPUTFILE_GLOBALPATH
+	    LOCAL_SUBMIT_BETA_ARRAY+=( $BETA )
 
 	fi # cluster name
 
     done # loop on BETA
 
+    if [ "$CLUSTER_NAME" = "LOEWE" ]; then
+	#Partition of the LOCAL_SUBMIT_BETA_ARRAY into group of GPU_PER_NODE and create the JobScript files inside the JOBSCRIPT_FOLDER
+	mkdir -p ${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER || exit -2
+	LOCAL_SUBMIT_BETA_ARRAY=(${LOCAL_SUBMIT_BETA_ARRAY[@]}) #If sparse, make it not sparse otherwise the following while doesn't work!!
+	while [[ "${!LOCAL_SUBMIT_BETA_ARRAY[@]}" != "" ]]; do # ${!array[@]} gives the list of the valid indeces in the array
+	    local BETA_FOR_JOBSCRIPT=(${LOCAL_SUBMIT_BETA_ARRAY[@]:0:$GPU_PER_NODE})
+	    LOCAL_SUBMIT_BETA_ARRAY=(${LOCAL_SUBMIT_BETA_ARRAY[@]:$GPU_PER_NODE})
+	    local BETAS_STRING=""
+	    printf "\n\e[0;36m=================================================\n\e[0m"
+	    printf "\e[0;36m  The following beta values have been grouped:\e[0m\n    "
+	    for BETA in "${!BETA_FOR_JOBSCRIPT[@]}"; do
+		printf "${BETA_FOR_JOBSCRIPT[BETA]}     "
+		BETAS_STRING="${BETAS_STRING}_$BETA_PREFIX${BETA_FOR_JOBSCRIPT[BETA]}"
+	    done
+	    printf "\n\e[0;36m=================================================\n\e[0m"
+	    local JOBSCRIPT_NAME="${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}_${BETAS_STRING:1}"
+	    local JOBSCRIPT_GLOBALPATH="${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER/$JOBSCRIPT_NAME"
+	    if [ -e $JOBSCRIPT_GLOBALPATH ]; then
+		mv $JOBSCRIPT_GLOBALPATH ${JOBSCRIPT_GLOBALPATH}_$(date +'%F_%H%M') || exit -2
+	    fi
+	    #Call the file to produce the jobscript file
+	    . $PRODUCEJOBSCRIPTSH
+	    if [ -e $JOBSCRIPT_GLOBALPATH ]; then
+		SUBMIT_BETA_ARRAY+=( "${BETAS_STRING:1}" )
+	    else
+		printf "\n\e[0;31m Jobscript \"$JOBSCRIPT_NAME\" failed to be created!\n\n\e[0m"
+		PROBLEM_BETA_ARRAY+=( "${BETAS_STRING:1}" )
+	    fi
+	done
+    fi
 
+    exit
 }
 
-function ModifyOptionInJobScript(){
+function ModifyOptionInInputFile(){
     if [ $# -ne 1 ]; then
-	printf "\n\e[0;31m The function ModifyOptionInJobScript() has been wrongly called! Aborting...\n\n\e[0m"
+	printf "\n\e[0;31m The function ModifyOptionInInputFile() has been wrongly called! Aborting...\n\n\e[0m"
 	exit -1
     fi
     
     case $1 in
-	--startcondition=* )        FindAndReplaceSingleOccurenceInFile $JOBSCRIPT_GLOBALPATH "\-\-startcondition=[[:alpha:]]\+" "--startcondition=${1#*=}" ;;
-	--sourcefile=*--host_seed ) FindAndReplaceSingleOccurenceInFile $JOBSCRIPT_GLOBALPATH "\-\-host_seed" \
-                                                                                           "--sourcefile=$(echo $1 | sed 's/\-\-sourcefile=\(.*\) --host_seed/\1/') --host_seed" ;;
-	--sourcefile=* )            FindAndReplaceSingleOccurenceInFile $JOBSCRIPT_GLOBALPATH "\-\-sourcefile=[[:alnum:][:punct:]]*" "--sourcefile=${1#*=}" ;;
-	--host_seed=*--beta=* )     FindAndReplaceSingleOccurenceInFile $JOBSCRIPT_GLOBALPATH "\-\-beta=$BETA" \
-	                                                                                      "--host_seed=$(echo $1 | sed 's/\-\-host_seed=\(.*\) --beta.*$/\1/') --beta=$BETA" ;;
-	--host_seed=* )             FindAndReplaceSingleOccurenceInFile $JOBSCRIPT_GLOBALPATH "\-\-host_seed=[[:digit:]]\+" "--host_seed=${1#*=}" ;;
-	--intsteps0=* )             FindAndReplaceSingleOccurenceInFile $JOBSCRIPT_GLOBALPATH "\-\-integrationsteps0=[[:digit:]]\+" "--integrationsteps0=${1#*=}" ;;
-	--intsteps1=* )             FindAndReplaceSingleOccurenceInFile $JOBSCRIPT_GLOBALPATH "\-\-integrationsteps1=[[:digit:]]\+" "--integrationsteps1=${1#*=}" ;;
-	--nsave=* )                 FindAndReplaceSingleOccurenceInFile $JOBSCRIPT_GLOBALPATH "\-\-savefrequency=[[:digit:]]\+" "--savefrequency=${1#*=}" ;;
-	--measurements=* )          FindAndReplaceSingleOccurenceInFile $JOBSCRIPT_GLOBALPATH "\-\-hmcsteps=[[:digit:]]\+" "--hmcsteps=${1#*=}" ;;
-        --walltime=* )              FindAndReplaceSingleOccurenceInFile $JOBSCRIPT_GLOBALPATH "\-\-time=[[:digit:]]*-\{0,1\}\([[:digit:]]\{2\}:\)\{2\}[[:digit:]]\{2\}"\
-                                                                                           "--time=${1#*=}" ;;
+
+	startcondition=* )        FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "startcondition=[[:alpha:]]\+" "startcondition=${1#*=}" ;;
+	sourcefile=* )            FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "sourcefile=[[:alnum:][:punct:]]*" "sourcefile=${1#*=}" ;;
+	initial_prng_state=* )    FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "initial_prng_state=[[:alnum:][:punct:]]*" "initial_prng_state=${1#*=}" ;;
+	host_seed=* )             FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "host_seed=[[:digit:]]\+" "host_seed=${1#*=}" ;;
+	intsteps0=* )             FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "integrationsteps0=[[:digit:]]\+" "integrationsteps0=${1#*=}" ;;
+	intsteps1=* )             FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "integrationsteps1=[[:digit:]]\+" "integrationsteps1=${1#*=}" ;;
+	nsave=* )                 FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "savefrequency=[[:digit:]]\+" "savefrequency=${1#*=}" ;;
+	measurements=* )          FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "hmcsteps=[[:digit:]]\+" "hmcsteps=${1#*=}" ;;
+        measure_pbp=* )           FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "measure_pbp=[[:digit:]]\+" "measure_pbp=${1#*=}" ;;
+
         * ) printf "\n\e[0;31m The option \"$1\" cannot be handled in the continue scenario.\n\e[0m"
         printf "\e[0;31m Simulation cannot be continued. Leaving out beta = $BETA .\n\n\e[0m"
         PROBLEM_BETA_ARRAY+=( $BETA )
@@ -731,6 +900,25 @@ function SubmitJobsForValidBetaValues() {
 	
 	for BETA in ${SUBMIT_BETA_ARRAY[@]}; do
 	    
+	    if [ "$CLUSTER_NAME" = "LOEWE" ]; then
+		local TEMP_ARRAY=( $(echo $BETA | sed 's/_/ /g') )
+		if [ ${#TEMP_ARRAY[@]} -ne $GPU_PER_NODE ]; then
+		    printf "\n\e[0;33m \e[1m\e[4mWARNING\e[24m:\e[0;33m At least one job is being submitted with less than\n"
+		    printf "          $GPU_PER_NODE runs inside. Would you like to submit in any case (Y/N)? \e[0m"
+		    local CONFIRM="";
+		    while read CONFIRM; do
+			if [ $CONFIRM = "Y" ]; then
+			    break;
+			elif [ $CONFIRM = "N" ]; then
+			    printf "\n\e[1;37;41mNo jobs will be submitted.\e[0m\n"
+			    return
+			else
+			    printf "\n\e[0;33m Please enter Y (yes) or N (no): \e[0m"
+			fi
+		done
+		fi
+	    fi
+
 	    #-------------------------------------------------------------------------------------------------------------------------#
 	    if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
 		local SUBMITTING_DIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
