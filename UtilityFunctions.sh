@@ -1,4 +1,6 @@
 #Collections of common operations
+#
+# TODO: Implement checks on parameters to functions
 
 function TimeToSeconds(){
     local T=$1; shift
@@ -33,4 +35,17 @@ function ElementInArray() {
     local ELEMENT
     for ELEMENT in "${@:2}"; do [[ "$ELEMENT" == "$1" ]] && return 0; done
     return 1
+}
+
+function KeyInArray() {
+    #ATTENTION: the array has to be passed as name, not as ${name[@]};
+    #           the following function does not work if there are spaces in KEY
+    #Remember in BASH 0 means true and >0 means false
+    local ARRAY=$2
+    local KEY=$1
+    if eval '[ ${'$ARRAY'[$KEY]+isSet} ]'; then
+	return 0;
+    else
+	return 1;
+    fi
 }
