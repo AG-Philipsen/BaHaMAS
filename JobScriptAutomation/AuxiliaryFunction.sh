@@ -77,6 +77,7 @@ function ReadBetaValuesFromFile(){
     BETAVALUES=()
     local INTSTEPS0_ARRAY_TEMP=()
     local INTSTEPS1_ARRAY_TEMP=()
+    local CONTINUE_RESUMETRAJ_TEMP=()
     local OLD_IFS=$IFS      # save the field separator           
     local IFS=$'\n'     # new field separator, the end of line           
     for LINE in $(cat $BETASFILE); do          
@@ -84,6 +85,12 @@ function ReadBetaValuesFromFile(){
 	    continue
 	fi
 	LINE=`echo $LINE | awk '{split($0, res, "#"); print res[1]}'`
+	if [[ $(echo $LINE | grep -o "resumefrom=[[:digit:]]\+") != "" ]]; then
+	    CONTINUE_RESUMETRAJ_TEMP+=( $(echo $LINE | grep -o "resumefrom=[[:digit:]]\+") )
+	else
+	    CONTINUE_RESUMETRAJ_TEMP+=( "notFound" )
+	fi
+	LINE=$( echo $LINE | sed 's/resumefrom=[[:digit:]]\+//g' )
 	BETAVALUES+=( $(echo $LINE | awk '{print $1}') )
 	INTSTEPS0_ARRAY_TEMP+=( $(echo $LINE | awk '{print $2}') )
 	INTSTEPS1_ARRAY_TEMP+=( $(echo $LINE | awk '{print $3}') )
@@ -128,6 +135,20 @@ function ReadBetaValuesFromFile(){
 	    INTSTEPS1_ARRAY["${BETAVALUES[$INDEX]}"]=$INTSTEPS1
 	done		
     fi
+
+    for INDEX in "${!CONTINUE_RESUMETRAJ_TEMP[@]}"; do
+	local TEMP_STR=${CONTINUE_RESUMETRAJ_TEMP[$INDEX]}
+	if [[ $TEMP_STR == "notFound" ]]; then
+	    continue
+	fi
+	TEMP_STR=${TEMP_STR#"resumefrom="}
+	if [[ ! $TEMP_STR =~ ^[1-9][[:digit:]]*$ ]]; then
+	    printf "\n\e[0;31m Invalid resume trajectory number in betasfile! Aborting...\n\n\e[0m"
+            exit -1
+	fi
+	#Build associative array for later use 
+	CONTINUE_RESUMETRAJ_ARRAY["${BETAVALUES[$INDEX]}"]="$TEMP_STR"
+    done
 
     printf "\n\e[0;36m===================================================================================\n\e[0m"
     printf "\e[0;34m Read beta values:\n\e[0m"
@@ -568,84 +589,92 @@ function ProcessBetaValuesForContinue() {
             local BETAVALUES_COPY=(${BETAVALUES[@]})
             #-------------------------------------------------------------------------------------------------------------------------#
 
-	    #If the option --resumefrom is given we have to clean the $WORK_BETADIRECTORY, otherwise just set the name of conf and prng
-	    #NOTE: Since --continue option has been removed at the beginning of this function, it could be there is nothing in the
-	    #      SPECIFIED_COMMAND_LINE_OPTIONS array. Hence in the following for loop we add manually an INDEX (0) in order
-	    #      to set the name of conf and prng always for each beta.
-	    for INDEX in 0 "${!SPECIFIED_COMMAND_LINE_OPTIONS[@]}"; do
-		if [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == --resumefrom=* ]]; then
-		    #If the user wants to resume from CONTINUE_RESUMETRAJ, first check that the conf is available
-		    if [ -f $WORK_BETADIRECTORY/$(printf "conf.%05d" "$CONTINUE_RESUMETRAJ") ] &&
-		       [ -f $WORK_BETADIRECTORY/$(printf "prng.%05d" "$CONTINUE_RESUMETRAJ") ]; then
-			local NAME_LAST_CONFIGURATION=$(printf "conf.%05d" "$CONTINUE_RESUMETRAJ")
-			local NAME_LAST_PRNG=$(printf "prng.%05d" "$CONTINUE_RESUMETRAJ")
+	    #If the option resumefrom is given in the betasfile we have to clean the $WORK_BETADIRECTORY, otherwise just set the name of conf and prng
+	    if KeyInArray $BETA CONTINUE_RESUMETRAJ_ARRAY; then
+		printf "\e[0;35m\e[1m\e[4mATTENTION\e[24m: The simulation for beta = $BETA will be resumed from trajectory"
+		printf " ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}. Is it what you would like to do (Y/N)? \e[0m"
+		local CONFIRM="";
+		while read CONFIRM; do
+		    if [ "$CONFIRM" = "Y" ]; then
+			break;
+		    elif [ "$CONFIRM" = "N" ]; then
+			printf "\n\e[1;31m Leaving out beta = $BETA\e[0m\n\n"
+			continue 2
 		    else
-			printf "\e[0;31m Configuration \"$(printf "conf.%05d" "$CONTINUE_RESUMETRAJ")\""
-			printf " or prng status \"$(printf "prng.%05d" "$CONTINUE_RESUMETRAJ")\" not found in $WORK_BETADIRECTORY folder.\n"
-			printf " Unable to continue the simulation. Leaving out beta = $BETA .\n\n\e[0m" 
-			PROBLEM_BETA_ARRAY+=( $BETA ) 
-			continue 2                                                                                         
+			printf "\e[0;36m\e[1m Please enter Y (yes) or N (no): \e[0m"
 		    fi
-		    #If the OUTPUTFILE_NAME is not in the WORK_BETADIRECTORY stop and not do anything
-		    if [ ! -f $OUTPUTFILE_GLOBALPATH ]; then 
-			printf "\e[0;31m File \"$OUTPUTFILE_NAME\" not found in $WORK_BETADIRECTORY folder.\n"
-			printf " Unable to continue the simulation from trajectory. Leaving out beta = $BETA .\n\n\e[0m"
-			PROBLEM_BETA_ARRAY+=( $BETA )
-			continue 2
+		done
+		#If the user wants to resume from a given trajectory, first check that the conf is available
+		if [ -f $WORK_BETADIRECTORY/$(printf "conf.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}") ] &&
+		   [ -f $WORK_BETADIRECTORY/$(printf "prng.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}") ]; then
+		    local NAME_LAST_CONFIGURATION=$(printf "conf.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}")
+		    local NAME_LAST_PRNG=$(printf "prng.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}")
+		else
+		    printf "\e[0;31m Configuration \"$(printf "conf.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}")\""
+		    printf " or prng status \"$(printf "prng.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}")\" not found in $WORK_BETADIRECTORY folder.\n"
+		    printf " Unable to continue the simulation. Leaving out beta = $BETA .\n\n\e[0m" 
+		    PROBLEM_BETA_ARRAY+=( $BETA ) 
+		    continue
+		fi
+		#If the OUTPUTFILE_NAME is not in the WORK_BETADIRECTORY stop and not do anything
+		if [ ! -f $OUTPUTFILE_GLOBALPATH ]; then 
+		    printf "\e[0;31m File \"$OUTPUTFILE_NAME\" not found in $WORK_BETADIRECTORY folder.\n"
+		    printf " Unable to continue the simulation from trajectory. Leaving out beta = $BETA .\n\n\e[0m"
+		    PROBLEM_BETA_ARRAY+=( $BETA )
+		    continue
+		fi
+		#Now it should be feasable to resume simulation ---> clean WORK_BETADIRECTORY
+		#Create in WORK_BETADIRECTORY a folder named Trash_$(date) where to mv all the file produced after the traj. ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}
+		local TRASH_NAME="$WORK_BETADIRECTORY/Trash_$(date +'%F_%H%M')"
+		mkdir $TRASH_NAME || exit 2
+		for FILE in $WORK_BETADIRECTORY/conf.* $WORK_BETADIRECTORY/prng.*; do
+		    #Move to trash only conf.xxxxx prng.xxxxx files or conf.xxxxx_pbp.dat files where xxxxx are digits
+		    local NUMBER_FROM_FILE=$(echo "$FILE" | grep -o "\(\(conf.\)\|\(prng.\)\)[[:digit:]]\{5\}\(_pbp.dat\)\?$" | sed 's/\(\(conf.\)\|\(prng.\)\)\([[:digit:]]\+\).*/\4/' | sed 's/^0*//')
+		    if [ "$NUMBER_FROM_FILE" != "" ] && [ $NUMBER_FROM_FILE -gt ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} ]; then
+			mv $FILE $TRASH_NAME
 		    fi
-		    #Now it should be feasable to resume simulation ---> clean WORK_BETADIRECTORY
-		    #Create in WORK_BETADIRECTORY a folder named Trash_$(date) where to mv all the file produced after the traj. CONTINUE_RESUMETRAJ
-		    local TRASH_NAME="$WORK_BETADIRECTORY/Trash_$(date +'%F_%H%M')"
-		    mkdir $TRASH_NAME || exit 2
-		    for FILE in $WORK_BETADIRECTORY/conf.* $WORK_BETADIRECTORY/prng.*; do
-			#Move to trash only conf.xxxxx files or conf.xxxxx_pbp.dat files
-			local NUMBER_FROM_FILE=$(echo "$FILE" | grep -o "\(\(conf.\)\|\(prng.\)\)[[:digit:]]\{5\}\(_pbp.dat\)\?$" | sed 's/\(\(conf.\)\|\(prng.\)\)\([[:digit:]]\+\).*/\4/' | sed 's/^0*//')
-			if [ "$NUMBER_FROM_FILE" != "" ] && [ $NUMBER_FROM_FILE -gt $CONTINUE_RESUMETRAJ ]; then
-			    mv $FILE $TRASH_NAME
-			fi
-		    done
-		    #Move to trash conf.save and prng.save files if existing
-		    if [ -f $WORK_BETADIRECTORY/conf.save ]; then mv $WORK_BETADIRECTORY/conf.save $TRASH_NAME; fi
-		    if [ -f $WORK_BETADIRECTORY/prng.save ]; then mv $WORK_BETADIRECTORY/prng.save $TRASH_NAME; fi
-		    #Copy the hmc_output file to Trash and edit it leaving out all the trajectories after CONTINUE_RESUMETRAJ
-		    cp $OUTPUTFILE_GLOBALPATH $TRASH_NAME || exit 2 
-		    local LINES_TO_BE_CANCELED_IN_OUTPUTFILE=$(tac $OUTPUTFILE_GLOBALPATH | awk -v resumeFrom=$CONTINUE_RESUMETRAJ 'BEGIN{found=0}{if($1==resumeFrom){found=1; print NR; exit}}END{if(found==0){print -1}}')
-		    if [ $LINES_TO_BE_CANCELED_IN_OUTPUTFILE -eq -1 ]; then
-			printf "\n\e[0;31m The number of lines to be removedMeasurement for trajectory $CONTINUE_RESUMETRAJ not found in outputfile.\n\e[0m"
-			printf "\e[0;31m Simulation cannot be continued. Leaving out beta = $BETA .\n\n\e[0m"
-			PROBLEM_BETA_ARRAY+=( $BETA )
-			continue 2
-		    fi
-		    #The -1 in the following line is not a typo, it has to be -1 since the number was recovered with tac backwards
-		    head -n -$(($LINES_TO_BE_CANCELED_IN_OUTPUTFILE-1)) $OUTPUTFILE_GLOBALPATH > ${OUTPUTFILE_GLOBALPATH}.temporaryCopyThatHopefullyDoesNotExist || exit 2
-		    mv ${OUTPUTFILE_GLOBALPATH}.temporaryCopyThatHopefullyDoesNotExist $OUTPUTFILE_GLOBALPATH || exit 2
-		    
-                    #Once the WORK_BETADIRECTORY has been prepared for resuming, break
-		    echo "Break done"
-		    break
-		
-	        #If --resumfrom option has not been given check in the WORK_BETADIRECTORY if conf.save is present: if yes, use it, otherwise use the last checkpoint
-		# NOTE: the following elif and else are done for each command line option before --resume. It doesn't matter since NAME_LAST_* are always set!
-		elif [ -f $WORK_BETADIRECTORY/conf.save ] && [ -f $WORK_BETADIRECTORY/prng.save ]; then
-		    echo "in if save"
-		    local NAME_LAST_CONFIGURATION="conf.save"
+		done
+		#Move to trash conf.save and prng.save files if existing
+		if [ -f $WORK_BETADIRECTORY/conf.save ]; then mv $WORK_BETADIRECTORY/conf.save $TRASH_NAME; fi
+		if [ -f $WORK_BETADIRECTORY/prng.save ]; then mv $WORK_BETADIRECTORY/prng.save $TRASH_NAME; fi
+		#Copy the hmc_output file to Trash and edit it leaving out all the trajectories after ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}
+		cp $OUTPUTFILE_GLOBALPATH $TRASH_NAME || exit 2 
+		local LINES_TO_BE_CANCELED_IN_OUTPUTFILE=$(tac $OUTPUTFILE_GLOBALPATH | awk -v resumeFrom=${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} 'BEGIN{found=0}{if($1==resumeFrom){found=1; print NR; exit}}END{if(found==0){print -1}}')
+		if [ $LINES_TO_BE_CANCELED_IN_OUTPUTFILE -eq -1 ]; then
+		    printf "\n\e[0;31m Measurement for trajectory ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} not found in outputfile.\n\e[0m"
+		    printf "\e[0;31m Simulation cannot be continued. Leaving out beta = $BETA .\n\n\e[0m"
+		    PROBLEM_BETA_ARRAY+=( $BETA )
+		    continue
+		fi
+		#The -1 in the following line is not a typo, it has to be -1 since the number was recovered with tac backwards
+		head -n -$(($LINES_TO_BE_CANCELED_IN_OUTPUTFILE-1)) $OUTPUTFILE_GLOBALPATH > ${OUTPUTFILE_GLOBALPATH}.temporaryCopyThatHopefullyDoesNotExist || exit 2
+		mv ${OUTPUTFILE_GLOBALPATH}.temporaryCopyThatHopefullyDoesNotExist $OUTPUTFILE_GLOBALPATH || exit 2
+	    #If resumefrom has not been given in the betasfile check in the WORK_BETADIRECTORY if conf.save is present: if yes, use it, otherwise use the last checkpoint
+	    elif [ -f $WORK_BETADIRECTORY/conf.save ]; then
+		local NAME_LAST_CONFIGURATION="conf.save"
+		#If conf.save is found then prng.save should be there, if not I will use a random seed
+		if [ -f $WORK_BETADIRECTORY/prng.save ]; then
 		    local NAME_LAST_PRNG="prng.save"
 		else
-		    echo "in if number"
-		    local NAME_LAST_CONFIGURATION=$(ls $WORK_BETADIRECTORY | grep -o "conf.[[:digit:]]\{5\}$" | tail -n1)
-		    local NAME_LAST_PRNG=$(ls $WORK_BETADIRECTORY | grep -o "prng.[[:digit:]]\{5\}$" | tail -n1)
+		    local NAME_LAST_PRNG=""
 		fi
-	    done
+	    else
+		local NAME_LAST_CONFIGURATION=$(ls $WORK_BETADIRECTORY | grep -o "conf.[[:digit:]]\{5\}$" | tail -n1)
+		local NAME_LAST_PRNG=$(ls $WORK_BETADIRECTORY | grep -o "prng.[[:digit:]]\{5\}$" | tail -n1)
+	    fi
 
-	    #The variable NAME_LAST_* should have been set above, if not it means no conf was available!
-	    if [ "$NAME_LAST_CONFIGURATION" == "" ] || [ "$NAME_LAST_PRNG" == "" ]; then
-		printf "\n\e[0;31m No configuration or prng state found in $WORK_BETADIRECTORY.\n\e[0m"
+	    #The variable NAME_LAST_CONFIGURATION should have been set above, if not it means no conf was available!
+	    if [ "$NAME_LAST_CONFIGURATION" == "" ]; then
+		printf "\n\e[0;31m No configuration found in $WORK_BETADIRECTORY.\n\e[0m"
 		printf "\e[0;31m Simulation cannot be continued. Leaving out beta = $BETA .\n\n\e[0m"
 		PROBLEM_BETA_ARRAY+=( $BETA )
                 continue
 	    fi
+	    if [ "$NAME_LAST_PRNG" == "" ]; then
+		printf "\n\e[0;33m \e[1m\e[4mWARNING\e[24m:\e[0;33m No prng state found in $WORK_BETADIRECTORY, using a random host_seed...\n\n\e[0m"
+	    fi
 	    #Check that, in case the continue is done from a "numeric" configuration, the number of conf and prng is the same
-	    if [ "$NAME_LAST_CONFIGURATION" != "conf.save" ] && [ "$NAME_LAST_PRNG" != "prng.save" ]; then
+	    if [ "$NAME_LAST_CONFIGURATION" != "conf.save" ] && [ "$NAME_LAST_PRNG" != "prng.save" ] && [ "$NAME_LAST_PRNG" != "" ]; then
 		if [ `echo ${NAME_LAST_CONFIGURATION#*.} | sed 's/^0*//g'` -ne `echo ${NAME_LAST_PRNG#*.} | sed 's/^0*//g'` ]; then
 		    printf "\n\e[0;31m The numbers of conf.xxxxx and prng.xxxxx are different! Check the respective folder!!\n\e[0m"
                     printf "\e[0;31m Simulation cannot be continued. Leaving out beta = $BETA .\n\n\e[0m"
@@ -661,7 +690,9 @@ function ProcessBetaValuesForContinue() {
 		mv $HOME_BETADIRECTORY/$NAME_LAST_PRNG $HOME_BETADIRECTORY/${NAME_LAST_PRNG}_$(date +'%F_%H.%M') || exit 2
 	    fi
 	    cp $WORK_BETADIRECTORY/$NAME_LAST_CONFIGURATION $HOME_BETADIRECTORY || exit 2
-	    cp $WORK_BETADIRECTORY/$NAME_LAST_PRNG $HOME_BETADIRECTORY || exit 2
+	    if [ "$NAME_LAST_PRNG" != "" ]; then
+		cp $WORK_BETADIRECTORY/$NAME_LAST_PRNG $HOME_BETADIRECTORY || exit 2
+	    fi
 
 	    #Make a temporary copy of the input file that will be used to restore in case the original input file.
 	    #This is to avoid to modify some parameters and then skip beta because of some error leaving the input file modified!
@@ -704,7 +735,11 @@ function ProcessBetaValuesForContinue() {
 	    #       trajectories, i.e. the output file is here read and count the tr. whose number
 	    #       is bigger than the trajectory before.
 	    if [ $CONTINUE_NUMBER -ne 0 ]; then
-		local NUMBER_DONE_TRAJECTORIES=$(awk 'BEGIN{traj_num = -1; count=0}{if($1>traj_num){traj_num = $1; count++}}END{print count}' $OUTPUTFILE_GLOBALPATH)
+		if [ -f $OUTPUTFILE_GLOBALPATH ]; then
+		    local NUMBER_DONE_TRAJECTORIES=$(awk 'BEGIN{traj_num = -1; count=0}{if($1>traj_num){traj_num = $1; count++}}END{print count}' $OUTPUTFILE_GLOBALPATH)
+		else
+		    local NUMBER_DONE_TRAJECTORIES=0
+		fi
 		if [ $NUMBER_DONE_TRAJECTORIES -gt $CONTINUE_NUMBER ]; then
 		    printf "\e[0;31m From the output file $OUTPUTFILE_GLOBALPATH"
 		    printf "\n we got that the number of done measurements is $NUMBER_DONE_TRAJECTORIES > $CONTINUE_NUMBER = CONTINUE_NUMBER."
@@ -719,24 +754,6 @@ function ProcessBetaValuesForContinue() {
 	    fi
 	    #Always convert startcondition in continue
 	    ModifyOptionInInputFile "startcondition=continue"
-
-#	    #If host_seed not present in the input file, add it, otherwise modify it
-#	    local NUMBER_OCCURENCE_HOST_SEED=$(grep -o "host_seed=[[:digit:]]\{4\}" $INPUTFILE_GLOBALPATH | wc -l)
-#	    if [ $NUMBER_OCCURENCE_HOST_SEED -eq 0 ]; then
-#		echo "host_seed=${BETA#*.}" >> $INPUTFILE_GLOBALPATH
-#		printf "\e[0;32m Added option \e[0;35mhost_seed=${BETA#*.}\e[0;32m to the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
-#	    elif [ $NUMBER_OCCURENCE_HOST_SEED -eq 1 ]; then
-#		local VALUE_HOST_SEED=$(grep -o "host_seed=[[:digit:]]\{4\}" $INPUTFILE_GLOBALPATH | sed "s/^host_seed=\(.*$\)/\1/" | sed 's/^0*//')
-#		ModifyOptionInInputFile "host_seed=$( printf "%04d" $(($VALUE_HOST_SEED + 1)) )"
-#		[ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
-#		printf "\e[0;32m Set option \e[0;35mhost_seed=$( printf "%04d" $(($VALUE_HOST_SEED + 1)) )"
-#		printf "\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
-#	    else
-#		printf "\n\e[0;31m String host_seed=[[:digit:]]{4} occurs more than 1 time in file $INPUTFILE_GLOBALPATH! Skipping beta = $BETA .\n\n\e[0m"
-#		PROBLEM_BETA_ARRAY+=( $BETA )
-#		mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
-#	    fi
-
 	    #If sourcefile not present in the input file, add it, otherwise modify it
 	    local NUMBER_OCCURENCE_SOURCEFILE=$(grep -o "sourcefile=[[:alnum:][:punct:]]*" $INPUTFILE_GLOBALPATH | wc -l)
 	    if [ $NUMBER_OCCURENCE_SOURCEFILE -eq 0 ]; then
@@ -753,21 +770,46 @@ function ProcessBetaValuesForContinue() {
 		PROBLEM_BETA_ARRAY+=( $BETA )
 		mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
 	    fi
-	    #If prng_state not present in the input file, add it, otherwise modify it
+	    #If we have a prng_state put it in the file, otherwise set a random host seed (using shuf, see shuf --hellp for info)
+	    local NUMBER_OCCURENCE_HOST_SEED=$(grep -o "host_seed=[[:digit:]]\{4\}" $INPUTFILE_GLOBALPATH | wc -l)
 	    local NUMBER_OCCURENCE_PRNG_STATE=$(grep -o "initial_prng_state=[[:alnum:][:punct:]]*" $INPUTFILE_GLOBALPATH | wc -l)
-	    if [ $NUMBER_OCCURENCE_PRNG_STATE -eq 0 ]; then
-		echo "initial_prng_state=$HOME_BETADIRECTORY/${NAME_LAST_PRNG}" >> $INPUTFILE_GLOBALPATH
-		printf "\e[0;32m Added option \e[0;35minitial_prng_state=$HOME_BETADIRECTORY/${NAME_LAST_PRNG}"
-		printf "\e[0;32m to the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
-	    elif [ $NUMBER_OCCURENCE_PRNG_STATE -eq 1 ]; then
-		ModifyOptionInInputFile "initial_prng_state=$(echo $HOME_BETADIRECTORY | sed 's/\//\\\//g')\/${NAME_LAST_PRNG}"
-		[ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
-		printf "\e[0;32m Set option \e[0;35minitial_prng_state=$HOME_BETADIRECTORY/${NAME_LAST_PRNG}"
-		printf "\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
+	    if [ "$NAME_LAST_PRNG" == "" ]; then
+		if [ $NUMBER_OCCURENCE_PRNG_STATE -ne 0 ]; then
+		    sed '/initial_prng_state/d' $INPUTFILE_GLOBALPATH #If no prng valid state has been found, delete eventual line from input file with initial_prng_state
+		fi
+		if [ $NUMBER_OCCURENCE_HOST_SEED -eq 0 ]; then
+		    local HOST_SEED=`shuf -i 1000-9999 -n1`
+		    echo "host_seed=$HOST_SEED" >> $INPUTFILE_GLOBALPATH
+		    printf "\e[0;32m Added option \e[0;35mhost_seed=$HOST_SEED\e[0;32m to the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
+		elif [ $NUMBER_OCCURENCE_HOST_SEED -eq 1 ]; then
+		    local HOST_SEED=`shuf -i 1000-9999 -n1`
+		    ModifyOptionInInputFile "host_seed=$HOST_SEED"
+		    [ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
+		    printf "\e[0;32m Set option \e[0;35mhost_seed=$HOST_SEED"
+		    printf "\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
+		else
+		    printf "\n\e[0;31m String host_seed=[[:digit:]]{4} occurs more than 1 time in file $INPUTFILE_GLOBALPATH! Skipping beta = $BETA .\n\n\e[0m"
+		    PROBLEM_BETA_ARRAY+=( $BETA )
+		    mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
+		fi
 	    else
-		printf "\n\e[0;31m String initial_prng_state=[[:alnum:][:punct:]]* occurs more than 1 time in file $INPUTFILE_GLOBALPATH! Skipping beta = $BETA .\n\n\e[0m"
-		PROBLEM_BETA_ARRAY+=( $BETA )
-		mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
+		if [ $NUMBER_OCCURENCE_HOST_SEED -ne 0 ]; then
+                    sed '/host_seed/d' $INPUTFILE_GLOBALPATH #If a prng valid state has been found, delete eventual line from input file with host_seed
+                fi
+		if [ $NUMBER_OCCURENCE_PRNG_STATE -eq 0 ]; then
+		    echo "initial_prng_state=$HOME_BETADIRECTORY/${NAME_LAST_PRNG}" >> $INPUTFILE_GLOBALPATH
+		    printf "\e[0;32m Added option \e[0;35minitial_prng_state=$HOME_BETADIRECTORY/${NAME_LAST_PRNG}"
+		    printf "\e[0;32m to the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
+		elif [ $NUMBER_OCCURENCE_PRNG_STATE -eq 1 ]; then
+		    ModifyOptionInInputFile "initial_prng_state=$(echo $HOME_BETADIRECTORY | sed 's/\//\\\//g')\/${NAME_LAST_PRNG}"
+		    [ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
+		    printf "\e[0;32m Set option \e[0;35minitial_prng_state=$HOME_BETADIRECTORY/${NAME_LAST_PRNG}"
+		    printf "\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
+		else
+		    printf "\n\e[0;31m String initial_prng_state=[[:alnum:][:punct:]]* occurs more than 1 time in file $INPUTFILE_GLOBALPATH! Skipping beta = $BETA .\n\n\e[0m"
+		    PROBLEM_BETA_ARRAY+=( $BETA )
+		    mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
+		fi
 	    fi
 	    #Always set the integrator steps, that could have been given or not
 	    ModifyOptionInInputFile "intsteps0=${INTSTEPS0_ARRAY[$BETA]}"
@@ -823,8 +865,19 @@ function ProcessBetaValuesForContinue() {
 	    fi
 	done
     fi
-
-    exit
+    #Ask the user if he want to continue submitting job
+    printf "\n\e[0;33m Check if the continue option did its job correctly. Would you like to submit the jobs (Y/N)? \e[0m"
+    local CONFIRM="";
+    while read CONFIRM; do
+	if [ "$CONFIRM" = "Y" ]; then
+	    break;
+	elif [ "$CONFIRM" = "N" ]; then
+	    printf "\n\e[1;37;41mNo jobs will be submitted.\e[0m\n\n"
+	    exit
+	else
+	    printf "\n\e[0;33m Please enter Y (yes) or N (no): \e[0m"
+	fi
+    done
 }
 
 function ModifyOptionInInputFile(){
@@ -907,15 +960,15 @@ function SubmitJobsForValidBetaValues() {
 		    printf "          $GPU_PER_NODE runs inside. Would you like to submit in any case (Y/N)? \e[0m"
 		    local CONFIRM="";
 		    while read CONFIRM; do
-			if [ $CONFIRM = "Y" ]; then
+			if [ "$CONFIRM" = "Y" ]; then
 			    break;
-			elif [ $CONFIRM = "N" ]; then
+			elif [ "$CONFIRM" = "N" ]; then
 			    printf "\n\e[1;37;41mNo jobs will be submitted.\e[0m\n"
 			    return
 			else
 			    printf "\n\e[0;33m Please enter Y (yes) or N (no): \e[0m"
 			fi
-		done
+		    done
 		fi
 	    fi
 

@@ -63,7 +63,6 @@ SUBMIT="FALSE"
 SUBMITONLY="FALSE"
 CONTINUE="FALSE"
 CONTINUE_NUMBER="0"
-CONTINUE_RESUMETRAJ="0"
 LISTSTATUS="FALSE"
 LISTSTATUSALL="FALSE"
 CLUSTER_NAME="LOEWE"
@@ -148,6 +147,7 @@ if [ ${#MUTUALLYEXCLUSIVEOPTS_PASSED[@]} = 0 ] || [ $SUBMIT = "TRUE" ] || [ $SUB
 
     declare -A INTSTEPS0_ARRAY
     declare -A INTSTEPS1_ARRAY
+    declare -A CONTINUE_RESUMETRAJ_ARRAY
     ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
 
 fi
@@ -188,7 +188,7 @@ fi
 
 #------------------------------------------------------------------------------------------------------------------------------#
 # Submitting jobs
-if [ $SUBMIT = "TRUE" ] || [ $SUBMITONLY = "TRUE" ]; then # || [ $CONTINUE = "TRUE" ] || [[ $CONTINUE =~ [[:digit:]]+ ]]; then #TODO: Check if this condition can be left out
+if [ $SUBMIT = "TRUE" ] || [ $SUBMITONLY = "TRUE" ] || [ $CONTINUE = "TRUE" ] || [[ $CONTINUE =~ [[:digit:]]+ ]]; then #TODO: Check if this condition can be left out
 
     SubmitJobsForValidBetaValues #TODO: Declare all possible local variable in this function as local!
 

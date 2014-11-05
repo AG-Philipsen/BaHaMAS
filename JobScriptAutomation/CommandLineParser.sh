@@ -45,7 +45,7 @@ MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 		echo -e "  \e[0;34m--continue | --continue=[number]\e[0;32m   ->    Unfinished jobs will be continued up to the nr. of measurements specified in the input file."
 		echo -e "                                     ->    If a number is specified, finished jobs will be continued up to the specified number."
                 if [ "$CLUSTER_NAME" = "LOEWE" ]; then
-		    echo -e "                                     ->    If the option \e[0;34m--resumefrom=[number]\e[0;32m is specified, jobs will be resumed from the specified trajectory."
+		    echo -e "                                     ->    To resume a simulation from a given trajectory, add \e[0;34mresumefrom=[number]\e[0;32m in the betasfile."
 		fi
 		echo -e "  \e[0;34m--liststatus\e[0;32m                       ->    The local measurement status for all beta will be displayed"
 		echo -e "  \e[0;34m--liststatus_all\e[0;32m                   ->    The global measurement status for all beta will be displayed"
@@ -119,18 +119,6 @@ MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 		    	printf "\n\e[0;31m The specified number for --continue=[number] must be an integer containing at least one or more digits! Aborting...\n\n\e[0m" 
 			exit -1
 		    fi
-		shift;; 
-	    --resumefrom=* )
-	        if [ $CONTINUE = "TRUE" ]; then
-		    CONTINUE_RESUMETRAJ=${1#*=}; 
-		    if [[ ! $CONTINUE_RESUMETRAJ =~ ^[[:digit:]]+$ ]];then
-		    	printf "\n\e[0;31m The specified number for --resumefrom=[number] must be an integer containing at least one or more digits! Aborting...\n\n\e[0m" 
-			exit -1
-		    fi
-		else 
-		    printf "\n\e[0;31m The option \"--resumefrom=[number]\" can be specified only after the --continue* option! Aborting...\n\n\e[0m" 
-		    exit -1
-		fi
 		shift;; 
 	    --liststatus )
 		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--liststatus" )
