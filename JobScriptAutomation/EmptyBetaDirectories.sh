@@ -49,7 +49,7 @@ function EmptyBetaDirectories(){
 
 		while read CONFIRM; do
 
-			if [ $CONFIRM = "YES" ]; then
+			if [ "$CONFIRM" = "YES" ]; then
 
 				echo ""
 				echo "emptying $BETA..."
@@ -57,7 +57,7 @@ function EmptyBetaDirectories(){
 				__static__EmptyBeta
 				break
 
-			elif [ $CONFIRM = "NO" ]; then
+			elif [ "$CONFIRM" = "NO" ]; then
 
 				echo ""
 				echo "Maintaining $BETA..."
