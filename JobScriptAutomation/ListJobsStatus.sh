@@ -256,7 +256,7 @@ function ListJobStatus_Main(){
 	 rm -f $JOBS_STATUS_FILE
 	 
 	 printf "\n\e[0;36m=====================================================================================================\n\e[0m"
-	 printf "\e[0;35m%s\t\t%s\t  %s\t%s\t   %s\n\e[0m"   "Beta"   "Num. Traj. (Acc.) [Last 1000] int0-1"   "Status"   "Max DS" "Last tr. finished"
+	 printf "\e[0;35m%s\t\t%s\t  %s\t%s\t  %s\n\e[0m"   "Beta"   "Num. Traj. (Acc.) [Last 1000] int0-1"   "Status"   "Max DS" "Last tr. finished"
 	 printf "%s\t\t%s\t\t%s\t\t%s\n"   "Beta"   "Num. Traj. (Acc.) [Last 1000] int0-1"   "Status"   "Max DS" >> $JOBS_STATUS_FILE
 
 	 for BETA in b[[:digit:]]*; do
@@ -319,7 +319,11 @@ function ListJobStatus_Main(){
 		     local ACCEPTANCE_LAST=0
 		 fi
 		 local MAX_DELTAS=$(awk 'BEGIN {max=0} {if(sqrt($8^2)>max){max=sqrt($8^2)}} END {printf "%6g", max}' $OUTPUTFILE_GLOBALPATH)
-		 local TIME_FROM_LAST_MODIFICATION=`expr $(date +%s) - $(date +%s -r $OUTPUTFILE_GLOBALPATH)`
+		 if [[ $STATUS == "RUNNING" ]]; then
+		     local TIME_FROM_LAST_MODIFICATION=`expr $(date +%s) - $(date +%s -r $OUTPUTFILE_GLOBALPATH)`
+		 else
+		     local TIME_FROM_LAST_MODIFICATION="------"
+		 fi
 		 
 	     else
 		 
@@ -335,18 +339,22 @@ function ListJobStatus_Main(){
 	     if [ -f $INPUTFILE_GLOBALPATH ]; then
 		 local INT0=$( grep -o "integrationsteps0=[[:digit:]]\+"  $INPUTFILE_GLOBALPATH | sed 's/integrationsteps0=\([[:digit:]]\+\)/\1/' )
 		 local INT1=$( grep -o "integrationsteps1=[[:digit:]]\+"  $INPUTFILE_GLOBALPATH | sed 's/integrationsteps1=\([[:digit:]]\+\)/\1/' )
+		 if [[ ! $INT0 =~ ^[[:digit:]]+$ ]] || [[ ! $INT1 =~ ^[[:digit:]]+$ ]]; then
+		     INT0="--"
+		     INT1="--"
+		 fi
 	     else
 		 printf "\n \e[0;31m File $INPUTFILE_GLOBALPATH not found. Integration stpes will not be printed!\n\n\e[0m\n"
 	     fi
 	     
-	     printf "\e[0;36m%s\t\t\e[0;$((36-$TO_BE_CLEANED*5))m%8s\e[0;36m (\e[0;$(GoodAcc $ACCEPTANCE)m%s %%\e[0;36m) [%s %%] %s-%s\t%9s\t%s\t   \e[0;$(($TIME_FROM_LAST_MODIFICATION>300 ? 31 : 36))m%s\n\e[0m" \
+	     printf "\e[0;36m%s\t\t\e[0;$((36-$TO_BE_CLEANED*5))m%8s\e[0;36m (\e[0;$(GoodAcc $ACCEPTANCE)m%s %%\e[0;36m) [%s %%] %s-%s\t \e[0;$(ColorStatus $STATUS)m%9s\e[0;36m\t%s\t   \e[0;$(ColorTime $TIME_FROM_LAST_MODIFICATION)m%s\n\e[0m" \
 		 "$BETA" \
 		 "$TRAJECTORIES_DONE" \
 		 "$ACCEPTANCE" \
 		 "$ACCEPTANCE_LAST" \
                  "$INT0" "$INT1" \
                  "$STATUS"   "$MAX_DELTAS"\
-	         "$(echo $TIME_FROM_LAST_MODIFICATION | awk '{printf "%4d", $1}') sec. ago"
+	         "$(echo $TIME_FROM_LAST_MODIFICATION | awk '{if($1 ~ /^[[:digit:]]+$/){printf "%6d", $1}else{print $1}}') sec. ago"
 
 	     if [ $TO_BE_CLEANED -eq 0 ]; then
 		 printf "%s\t\t%s (%s %%) [%s %%] %s-%s\t\t\t%9s\t%s\n"   "$BETA"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$ACCEPTANCE_LAST"   "$INT0" "$INT1"   "$STATUS"   "$MAX_DELTAS" >> $JOBS_STATUS_FILE
@@ -363,4 +371,22 @@ function ListJobStatus_Main(){
 
 function GoodAcc(){
     echo "$1" | awk '{if($1<65){print 31}else if($1>75){print 33}else{print 32}}'
+}
+
+function ColorStatus(){
+    if [[ $1 == "RUNNING" ]]; then
+	echo "32"
+    elif [[ $1 == "PENDING" ]]; then
+	echo "33"
+    else
+	echo "36"
+    fi
+}
+
+function ColorTime(){
+    if [[ ! $1 =~ ^[[:digit:]]+$ ]]; then
+	echo "36"
+    else
+	echo $(($1 > 300 ? 31 : 32 ))
+    fi
 }
