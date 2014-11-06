@@ -775,7 +775,7 @@ function ProcessBetaValuesForContinue() {
 	    local NUMBER_OCCURENCE_PRNG_STATE=$(grep -o "initial_prng_state=[[:alnum:][:punct:]]*" $INPUTFILE_GLOBALPATH | wc -l)
 	    if [ "$NAME_LAST_PRNG" == "" ]; then
 		if [ $NUMBER_OCCURENCE_PRNG_STATE -ne 0 ]; then
-		    sed '/initial_prng_state/d' $INPUTFILE_GLOBALPATH #If no prng valid state has been found, delete eventual line from input file with initial_prng_state
+		    sed -i '/initial_prng_state/d' $INPUTFILE_GLOBALPATH #If no prng valid state has been found, delete eventual line from input file with initial_prng_state
 		fi
 		if [ $NUMBER_OCCURENCE_HOST_SEED -eq 0 ]; then
 		    local HOST_SEED=`shuf -i 1000-9999 -n1`
@@ -794,7 +794,7 @@ function ProcessBetaValuesForContinue() {
 		fi
 	    else
 		if [ $NUMBER_OCCURENCE_HOST_SEED -ne 0 ]; then
-                    sed '/host_seed/d' $INPUTFILE_GLOBALPATH #If a prng valid state has been found, delete eventual line from input file with host_seed
+                    sed -i '/host_seed/d' $INPUTFILE_GLOBALPATH #If a prng valid state has been found, delete eventual line from input file with host_seed
                 fi
 		if [ $NUMBER_OCCURENCE_PRNG_STATE -eq 0 ]; then
 		    echo "initial_prng_state=$HOME_BETADIRECTORY/${NAME_LAST_PRNG}" >> $INPUTFILE_GLOBALPATH
@@ -820,7 +820,7 @@ function ProcessBetaValuesForContinue() {
             printf "\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
 	    #Modify remaining command line specified options
 	    for OPT in ${SPECIFIED_COMMAND_LINE_OPTIONS[@]}; do
-		if [[ "$OPT" != --walltime* ]] && [[ "$OPT" != --pbp* ]] && [[ "$OPT" != --intsteps0* ]] && [[ "$OPT" != --intsteps1* ]] && [[ "$OPT" != --resumefrom* ]]; then
+		if [[ "$OPT" != --walltime* ]] && [[ "$OPT" != --pbp* ]] && [[ "$OPT" != --intsteps0* ]] && [[ "$OPT" != --intsteps1* ]]; then
 		    ModifyOptionInInputFile ${OPT#"--"*}
 		    [ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue 2
 		    printf "\e[0;32m Set option \e[0;35m$OPT\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
@@ -952,7 +952,6 @@ function SubmitJobsForValidBetaValues() {
 	done
 	
 	for BETA in ${SUBMIT_BETA_ARRAY[@]}; do
-	    
 	    if [ "$CLUSTER_NAME" = "LOEWE" ]; then
 		local TEMP_ARRAY=( $(echo $BETA | sed 's/_/ /g') )
 		if [ ${#TEMP_ARRAY[@]} -ne $GPU_PER_NODE ]; then
@@ -971,6 +970,9 @@ function SubmitJobsForValidBetaValues() {
 		    done
 		fi
 	    fi
+	done
+
+	for BETA in ${SUBMIT_BETA_ARRAY[@]}; do
 
 	    #-------------------------------------------------------------------------------------------------------------------------#
 	    if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
