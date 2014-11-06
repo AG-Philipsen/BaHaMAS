@@ -255,8 +255,8 @@ function ListJobStatus_Main(){
 	 local JOBS_STATUS_FILE="jobs_status_$PARAMETERS_STRING.txt"
 	 rm -f $JOBS_STATUS_FILE
 	 
-	 printf "\n\e[0;36m=====================================================================================================\n\e[0m"
-	 printf "\e[0;35m%s\t\t%s\t  %s\t%s\t  %s\n\e[0m"   "Beta"   "Num. Traj. (Acc.) [Last 1000] int0-1"   "Status"   "Max DS" "Last tr. finished"
+	 printf "\n\e[0;36m=====================================================================================================================\n\e[0m"
+	 printf "\e[0;35m%s\t\t%s\t  %s\t%s\t  %s\t%s\n\e[0m"   "Beta"   "Num. Traj. (Acc.) [Last 1000] int0-1"   "Status"   "Max DS" "Last tr. finished" "Last tr. in"
 	 printf "%s\t\t%s\t\t%s\t\t%s\n"   "Beta"   "Num. Traj. (Acc.) [Last 1000] int0-1"   "Status"   "Max DS" >> $JOBS_STATUS_FILE
 
 	 for BETA in b[[:digit:]]*; do
@@ -302,7 +302,24 @@ function ListJobStatus_Main(){
 	     #----Constructing WORK_BETADIRECTORY, HOME_BETADIRECTORY, JOBSCRIPT_NAME, JOBSCRIPT_GLOBALPATH and INPUTFILE_GLOBALPATH---#
 	     local OUTPUTFILE_GLOBALPATH="$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA/$OUTPUTFILE_NAME"
 	     local INPUTFILE_GLOBALPATH="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA/$INPUTFILE_NAME"
+	     local STDOUTPUT_FILE=`ls -lt $BETA_PREFIX$BETA | awk '{if($9 ~ /^hmc.[[:digit:]]+.out$/){print $9}}' | head -n1`
+	     local STDOUTPUT_GLOBALPATH="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA/$STDOUTPUT_FILE"
 	     #-------------------------------------------------------------------------------------------------------------------------#
+
+	     if [ -f $STDOUTPUT_GLOBALPATH ]; then
+		 if [[ $STATUS == "RUNNING" ]] || [[ $STATUS == "PENDING" ]]; then
+		     local START_TIME_SEC=$(TimeToSeconds `grep "saving current prng state to file" $STDOUTPUT_GLOBALPATH | tail -n2 | awk '{print substr($1,2,8)}' | head -n1`)
+		     local END_TIME_SEC=$(TimeToSeconds `grep "saving current prng state to file" $STDOUTPUT_GLOBALPATH | tail -n2 | awk '{print substr($1,2,8)}' | tail -n1`)
+		     local DURATION_LAST_TR=$(( $END_TIME_SEC - $START_TIME_SEC ))
+		     if [[ ! $DURATION_LAST_TR =~ [[:digit:]]+ ]]; then
+			 DURATION_LAST_TR="---"
+		     fi
+		 else
+		     DURATION_LAST_TR="---"
+		 fi
+	     else
+		 local DURATION_LAST_TR="nan"
+	     fi
 
 	     if [ -f $OUTPUTFILE_GLOBALPATH ]; then
 		 
@@ -347,14 +364,15 @@ function ListJobStatus_Main(){
 		 printf "\n \e[0;31m File $INPUTFILE_GLOBALPATH not found. Integration stpes will not be printed!\n\n\e[0m\n"
 	     fi
 	     
-	     printf "\e[0;36m%s\t\t\e[0;$((36-$TO_BE_CLEANED*5))m%8s\e[0;36m (\e[0;$(GoodAcc $ACCEPTANCE)m%s %%\e[0;36m) [%s %%] %s-%s\t \e[0;$(ColorStatus $STATUS)m%9s\e[0;36m\t%s\t   \e[0;$(ColorTime $TIME_FROM_LAST_MODIFICATION)m%s\n\e[0m" \
+	     printf "\e[0;36m%s\t\t\e[0;$((36-$TO_BE_CLEANED*5))m%8s\e[0;36m (\e[0;$(GoodAcc $ACCEPTANCE)m%s %%\e[0;36m) [%s %%] %s-%s\t \e[0;$(ColorStatus $STATUS)m%9s\e[0;36m\t%s\t   \e[0;$(ColorTime $TIME_FROM_LAST_MODIFICATION)m%s\e[0;36m\t    %s\n\e[0m" \
 		 "$BETA" \
 		 "$TRAJECTORIES_DONE" \
 		 "$ACCEPTANCE" \
 		 "$ACCEPTANCE_LAST" \
                  "$INT0" "$INT1" \
                  "$STATUS"   "$MAX_DELTAS"\
-	         "$(echo $TIME_FROM_LAST_MODIFICATION | awk '{if($1 ~ /^[[:digit:]]+$/){printf "%6d", $1}else{print $1}}') sec. ago"
+	         "$(echo $TIME_FROM_LAST_MODIFICATION | awk '{if($1 ~ /^[[:digit:]]+$/){printf "%6d", $1}else{print $1}}') sec. ago" \
+	         "$DURATION_LAST_TR sec."
 
 	     if [ $TO_BE_CLEANED -eq 0 ]; then
 		 printf "%s\t\t%s (%s %%) [%s %%] %s-%s\t\t\t%9s\t%s\n"   "$BETA"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$ACCEPTANCE_LAST"   "$INT0" "$INT1"   "$STATUS"   "$MAX_DELTAS" >> $JOBS_STATUS_FILE
@@ -364,7 +382,7 @@ function ListJobStatus_Main(){
 	     
 	     
 	 done
-	 printf "\e[0;36m=====================================================================================================\n\e[0m"
+	 printf "\e[0;36m=====================================================================================================================\n\e[0m"
 	 
      fi
 }
