@@ -310,15 +310,49 @@ function ListJobStatus_Main(){
 		 if [[ $STATUS == "RUNNING" ]] || [[ $STATUS == "PENDING" ]]; then
 		     local START_TIME_SEC=$(TimeToSeconds `grep "saving current prng state to file" $STDOUTPUT_GLOBALPATH | tail -n2 | awk '{print substr($1,2,8)}' | head -n1`)
 		     local END_TIME_SEC=$(TimeToSeconds `grep "saving current prng state to file" $STDOUTPUT_GLOBALPATH | tail -n2 | awk '{print substr($1,2,8)}' | tail -n1`)
+		     if [ $START_TIME_SEC -gt $END_TIME_SEC ]; then
+			 END_TIME_SEC=$(( $END_TIME_SEC + 24*3600 ))
+		     fi
 		     local DURATION_LAST_TR=$(( $END_TIME_SEC - $START_TIME_SEC ))
 		     if [[ ! $DURATION_LAST_TR =~ [[:digit:]]+ ]]; then
 			 DURATION_LAST_TR="---"
+			 local AV_DURATION_LAST_TR=0
+		     elif [ "$DURATION_LAST_TR" -lt 840 ]; then #If the last traj. took less than 14min, then in one day probably 100 traj. can be done
+			 local NUMBER_DONE_TR_STDOUTPUT=`grep "saving current prng state to file" $STDOUTPUT_GLOBALPATH | wc -l`
+			 if [ "$NUMBER_DONE_TR_STDOUTPUT" -ge 100 ]; then
+			     START_TIME_SEC=$(TimeToSeconds `grep "saving current prng state to fil" $STDOUTPUT_GLOBALPATH | tail -n100 | awk '{print substr($1,2,8)}' | head -n1`)
+			     END_TIME_SEC=$(TimeToSeconds `grep "saving current prng state to fil" $STDOUTPUT_GLOBALPATH | tail -n100 | awk '{print substr($1,2,8)}' | tail -n1`)
+			     if [ $START_TIME_SEC -gt $END_TIME_SEC ]; then
+				 END_TIME_SEC=$(( $END_TIME_SEC + 24*3600 ))
+			     fi
+			     DURATION_LAST_TR=$(( ($END_TIME_SEC - $START_TIME_SEC)/100 ))
+			     local AV_DURATION_LAST_TR=1
+			 elif [ "$NUMBER_DONE_TR_STDOUTPUT" -lt 100 ]; then
+			     START_TIME_SEC=$(TimeToSeconds `grep "saving current prng state to fil" $STDOUTPUT_GLOBALPATH | head -n1 | awk '{print substr($1,2,8)}'`)
+			     END_TIME_SEC=$(TimeToSeconds `grep "saving current prng state to fil" $STDOUTPUT_GLOBALPATH | tail -n1 | awk '{print substr($1,2,8)}'`)
+			     if [ $START_TIME_SEC -gt $END_TIME_SEC ]; then
+				 END_TIME_SEC=$(( $END_TIME_SEC + 24*3600 ))
+			     fi
+			     DURATION_LAST_TR=$(( ($END_TIME_SEC - $START_TIME_SEC)/$NUMBER_DONE_TR_STDOUTPUT ))
+			     local AV_DURATION_LAST_TR=1
+			 else
+			     printf "\n \e[0;31m Error recovering the number of trajectories done from std output file! Aborting...\n\n\e[0m\n"
+			     exit -1
+			 fi
+		     else
+			 local AV_DURATION_LAST_TR=0
 		     fi
+#		     local START_TIME_SEC=$(TimeToSeconds `grep "saving current prng state to file" $STDOUTPUT_GLOBALPATH | head -n1 | awk '{print substr($1,2,8)}'`)
+#		     local END_TIME_SEC=$(TimeToSeconds `grep "saving current prng state to file" $STDOUTPUT_GLOBALPATH | tail -n2 | awk '{print substr($1,2,8)}'`)
+#		     local NUMBER_OF_TR_IN_STDOUTPUT=$(grep "saving current prng state to file" $STDOUTPUT_GLOBALPATH | wc -l)
+#		     local AVERAGE_DURATION_LAST_TR=$(( ($END_TIME_SEC - $START_TIME_SEC)/$NUMBER_OF_TR_IN_STDOUTPUT ))
 		 else
 		     DURATION_LAST_TR="---"
+		     local AV_DURATION_LAST_TR="0"
 		 fi
 	     else
 		 local DURATION_LAST_TR="nan"
+		 local AV_DURATION_LAST_TR=0
 	     fi
 
 	     if [ -f $OUTPUTFILE_GLOBALPATH ]; then
@@ -364,7 +398,7 @@ function ListJobStatus_Main(){
 		 printf "\n \e[0;31m File $INPUTFILE_GLOBALPATH not found. Integration stpes will not be printed!\n\n\e[0m\n"
 	     fi
 	     
-	     printf "\e[0;36m%s\t\t\e[0;$((36-$TO_BE_CLEANED*5))m%8s\e[0;36m (\e[0;$(GoodAcc $ACCEPTANCE)m%s %%\e[0;36m) [%s %%] %s-%s\t \e[0;$(ColorStatus $STATUS)m%9s\e[0;36m\t%s\t   \e[0;$(ColorTime $TIME_FROM_LAST_MODIFICATION)m%s\e[0;36m\t    %s\n\e[0m" \
+	     printf "\e[0;36m%s\t\t\e[0;$((36-$TO_BE_CLEANED*5))m%8s\e[0;36m (\e[0;$(GoodAcc $ACCEPTANCE)m%s %%\e[0;36m) [%s %%] %s-%s\t \e[0;$(ColorStatus $STATUS)m%9s\e[0;36m\t%s\t   \e[0;$(ColorTime $TIME_FROM_LAST_MODIFICATION)m%s\e[0;36m\t   \e[0;$(( $AV_DURATION_LAST_TR==0 ? 33 : 32 ))m%s\n\e[0m" \
 		 "$BETA" \
 		 "$TRAJECTORIES_DONE" \
 		 "$ACCEPTANCE" \
@@ -372,7 +406,7 @@ function ListJobStatus_Main(){
                  "$INT0" "$INT1" \
                  "$STATUS"   "$MAX_DELTAS"\
 	         "$(echo $TIME_FROM_LAST_MODIFICATION | awk '{if($1 ~ /^[[:digit:]]+$/){printf "%6d", $1}else{print $1}}') sec. ago" \
-	         "$DURATION_LAST_TR sec."
+	         "$(echo $DURATION_LAST_TR | awk '{if($1 ~ /^[[:digit:]]+$/){printf "%3d", $1}else{print $1}}') sec."
 
 	     if [ $TO_BE_CLEANED -eq 0 ]; then
 		 printf "%s\t\t%s (%s %%) [%s %%] %s-%s\t\t\t%9s\t%s\n"   "$BETA"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$ACCEPTANCE_LAST"   "$INT0" "$INT1"   "$STATUS"   "$MAX_DELTAS" >> $JOBS_STATUS_FILE
@@ -408,3 +442,12 @@ function ColorTime(){
 	echo $(($1 > 300 ? 31 : 32 ))
     fi
 }
+
+function ColorDuration(){
+    if [[ $AV_DURATION_LAST_TR = "" ]]; then
+	echo "33"
+    else
+	echo "32"
+    fi
+}
+
