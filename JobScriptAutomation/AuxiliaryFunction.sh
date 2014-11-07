@@ -605,16 +605,19 @@ function ProcessBetaValuesForContinue() {
 		    fi
 		done
 		#If the user wants to resume from a given trajectory, first check that the conf is available
-		if [ -f $WORK_BETADIRECTORY/$(printf "conf.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}") ] &&
-		   [ -f $WORK_BETADIRECTORY/$(printf "prng.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}") ]; then
+		if [ -f $WORK_BETADIRECTORY/$(printf "conf.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}") ];then
 		    local NAME_LAST_CONFIGURATION=$(printf "conf.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}")
-		    local NAME_LAST_PRNG=$(printf "prng.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}")
 		else
 		    printf "\e[0;31m Configuration \"$(printf "conf.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}")\""
 		    printf " or prng status \"$(printf "prng.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}")\" not found in $WORK_BETADIRECTORY folder.\n"
 		    printf " Unable to continue the simulation. Leaving out beta = $BETA .\n\n\e[0m" 
 		    PROBLEM_BETA_ARRAY+=( $BETA ) 
 		    continue
+		fi
+		if [ -f $WORK_BETADIRECTORY/$(printf "prng.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}") ]; then
+		    local NAME_LAST_PRNG=$(printf "prng.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}")
+		else
+		    local NAME_LAST_PRNG="" #If the prng.xxxxx is not found, use random seed
 		fi
 		#If the OUTPUTFILE_NAME is not in the WORK_BETADIRECTORY stop and not do anything
 		if [ ! -f $OUTPUTFILE_GLOBALPATH ]; then 
