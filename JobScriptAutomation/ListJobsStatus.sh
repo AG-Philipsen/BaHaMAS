@@ -307,7 +307,7 @@ function ListJobStatus_Main(){
 	     #-------------------------------------------------------------------------------------------------------------------------#
 
 	     if [ -f $STDOUTPUT_GLOBALPATH ]; then
-		 if [[ $STATUS == "RUNNING" ]] || [[ $STATUS == "PENDING" ]]; then
+		 if [[ $STATUS == "RUNNING" ]]; then
 		     local START_TIME_SEC=$(TimeToSeconds `grep "saving current prng state to file" $STDOUTPUT_GLOBALPATH | tail -n2 | awk '{print substr($1,2,8)}' | head -n1`)
 		     local END_TIME_SEC=$(TimeToSeconds `grep "saving current prng state to file" $STDOUTPUT_GLOBALPATH | tail -n2 | awk '{print substr($1,2,8)}' | tail -n1`)
 		     if [ $START_TIME_SEC -gt $END_TIME_SEC ]; then
@@ -319,9 +319,9 @@ function ListJobStatus_Main(){
 			 local AV_DURATION_LAST_TR=0
 		     elif [ "$DURATION_LAST_TR" -lt 840 ]; then #If the last traj. took less than 14min, then in one day probably 100 traj. can be done
 			 local NUMBER_DONE_TR_STDOUTPUT=`grep "saving current prng state to file" $STDOUTPUT_GLOBALPATH | wc -l`
-			 if [ "$NUMBER_DONE_TR_STDOUTPUT" -ge 100 ]; then
-			     START_TIME_SEC=$(TimeToSeconds `grep "saving current prng state to fil" $STDOUTPUT_GLOBALPATH | tail -n100 | awk '{print substr($1,2,8)}' | head -n1`)
-			     END_TIME_SEC=$(TimeToSeconds `grep "saving current prng state to fil" $STDOUTPUT_GLOBALPATH | tail -n100 | awk '{print substr($1,2,8)}' | tail -n1`)
+			 if [ "$NUMBER_DONE_TR_STDOUTPUT" -ge 101 ]; then
+			     START_TIME_SEC=$(TimeToSeconds `grep "saving current prng state to fil" $STDOUTPUT_GLOBALPATH | tail -n101 | awk '{print substr($1,2,8)}' | head -n1`)
+			     END_TIME_SEC=$(TimeToSeconds `grep "saving current prng state to fil" $STDOUTPUT_GLOBALPATH | tail -n101 | awk '{print substr($1,2,8)}' | tail -n1`)
 			     if [ $START_TIME_SEC -gt $END_TIME_SEC ]; then
 				 END_TIME_SEC=$(( $END_TIME_SEC + 24*3600 ))
 			     fi
@@ -333,7 +333,11 @@ function ListJobStatus_Main(){
 			     if [ $START_TIME_SEC -gt $END_TIME_SEC ]; then
 				 END_TIME_SEC=$(( $END_TIME_SEC + 24*3600 ))
 			     fi
-			     DURATION_LAST_TR=$(( ($END_TIME_SEC - $START_TIME_SEC)/$NUMBER_DONE_TR_STDOUTPUT ))
+			     if [ "$NUMBER_DONE_TR_STDOUTPUT" -gt 2 ]; then
+				 DURATION_LAST_TR=$(( ($END_TIME_SEC - $START_TIME_SEC)/($NUMBER_DONE_TR_STDOUTPUT-1) ))
+			     else
+				 DURATION_LAST_TR="..."
+			     fi
 			     local AV_DURATION_LAST_TR=1
 			 else
 			     printf "\n \e[0;31m Error recovering the number of trajectories done from std output file! Aborting...\n\n\e[0m\n"
@@ -439,7 +443,7 @@ function ColorTime(){
     if [[ ! $1 =~ ^[[:digit:]]+$ ]]; then
 	echo "36"
     else
-	echo $(($1 > 300 ? 31 : 32 ))
+	echo $(($1 > 450 ? 31 : 32 ))
     fi
 }
 
