@@ -7,6 +7,22 @@ function TimeToSeconds(){
     echo $((10#${T:0:2} * 3600 + 10#${T:3:2} * 60 + 10#${T:6:2})) 
 }
 
+function SecondsToTime(){
+    local T=$1; shift
+    local hours=$(( $T/3600 ))
+    local minutes=$(( ($T - $hours*3600)/60 ))
+    local seconds=$( echo $T | awk 'END{print $1 % 60}')
+    printf "%02d:%02d:%02d" "${hours}" "${minutes}" "${seconds}"
+}
+
+function SecondsToTimeString(){
+    local T=$1; shift
+    local hours=$(( $T/3600 ))
+    local minutes=$(( ($T - $hours*3600)/60 ))
+    local seconds=$( echo $T | awk 'END{print $1 % 60}')
+    printf "%02dh %02dm %02ds"  "${hours}" "${minutes}" "${seconds}"
+}
+
 function MinimumOfArray(){
     local MIN=$1; shift
     while [ "$1" != "" ]; do
