@@ -734,12 +734,9 @@ function ProcessBetaValuesForContinue() {
 	    #
 	    #If CONTINUE_NUMBER is given, set automatically the number of remaining measurements.
 	    # NOTE: If --measurements=... is (also) given, then --measurements will be used!
-	    #       Note also that we count the number of trajectories in the output file as number of "clean"
-	    #       trajectories, i.e. the output file is here read and count the tr. whose number
-	    #       is bigger than the trajectory before.
 	    if [ $CONTINUE_NUMBER -ne 0 ]; then
 		if [ -f $OUTPUTFILE_GLOBALPATH ]; then
-		    local NUMBER_DONE_TRAJECTORIES=$(awk 'BEGIN{traj_num = -1; count=0}{if($1>traj_num){traj_num = $1; count++}}END{print count}' $OUTPUTFILE_GLOBALPATH)
+		    local NUMBER_DONE_TRAJECTORIES=$(awk 'END{print $1}' $OUTPUTFILE_GLOBALPATH)
 		else
 		    local NUMBER_DONE_TRAJECTORIES=0
 		fi
