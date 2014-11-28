@@ -159,7 +159,7 @@ fi
 SUBMIT_BETA_ARRAY=()
 PROBLEM_BETA_ARRAY=() #Arrays that will contain the beta values that actually will be processed
 
-if [ ${#MUTUALLYEXCLUSIVEOPTS_PASSED[@]} = 0 ]; then  
+if [ ${#MUTUALLYEXCLUSIVEOPTS_PASSED[@]} = 0 ] || [ $SUBMIT = "TRUE" ]; then  
 	
     ProduceInputFileAndJobScriptForEachBeta
 
