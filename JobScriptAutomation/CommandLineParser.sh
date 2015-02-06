@@ -25,6 +25,7 @@ MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 		echo "  --nsave                            ->    default value = $NSAVE"
 		echo "  --intsteps0                        ->    default value = $INTSTEPS0"
 		echo "  --intsteps1                        ->    default value = $INTSTEPS1"
+		echo -e "  --useMultipleChains                ->    if given, use multiple chain \e[1;32m(this implies that in the betas file the seed column is present)\e[0;32m"
 		if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
 		    echo "  --intsteps2                        ->    default value = $INTSTEPS2"
 		    echo "  --walltime                         ->    default value = $WALLTIME [hours:min:sec]"
@@ -81,6 +82,14 @@ MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 	    --intsteps1=* )		 INTSTEPS1=${1#*=}; shift ;;
 	    --intsteps2=* )		 INTSTEPS2=${1#*=}; shift ;;
 	    --pbp=* )		         MEASURE_PBP=${1#*=}; shift ;;
+	    --useMultipleChains )
+	        if [[ $CLUSTER_NAME != "LOEWE" ]]; then
+                    printf "\n\e[0;31m The options --useMultipleChains can be used only on the LOEWE yet!! Aborting...\n\n\e[0m"
+                    exit -1
+		else
+		    USE_MULTIPLE_CHAINS="TRUE"
+                fi
+                shift ;;
 	    --partition=* )		 LOEWE_PARTITION=${1#*=}; 
 	        if [[ $CLUSTER_NAME != "LOEWE" ]]; then
 		    printf "\n\e[0;31m The options --partition can be used only on the LOEWE! Aborting...\n\n\e[0m"

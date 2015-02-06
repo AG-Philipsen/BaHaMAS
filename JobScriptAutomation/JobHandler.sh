@@ -43,7 +43,6 @@ source $HOME/Script/JobScriptAutomation/EmptyBetaDirectories.sh || exit -2
 #-----------------------------------------------------------------------------------------------------------------#
 # Set default values for the command line parameters
 
-BETA_PREFIX="b"
 BETASFILE="betas"
 KAPPA="1000"
 WALLTIME="7-00:00:00"
@@ -59,6 +58,7 @@ INTSTEPS1="5"
 INTSTEPS2="5"
 MEASURE_PBP="1"
 INTERVAL="1000"
+USE_MULTIPLE_CHAINS="FALSE"
 SUBMIT="FALSE"
 SUBMITONLY="FALSE"
 CONTINUE="FALSE"

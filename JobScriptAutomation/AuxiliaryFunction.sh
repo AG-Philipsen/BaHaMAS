@@ -75,6 +75,7 @@ function ReadBetaValuesFromFile(){
     fi
 
     BETAVALUES=()
+    local SEED_ARRAY_TEMP=()
     local INTSTEPS0_ARRAY_TEMP=()
     local INTSTEPS1_ARRAY_TEMP=()
     local CONTINUE_RESUMETRAJ_TEMP=()
@@ -92,8 +93,14 @@ function ReadBetaValuesFromFile(){
 	fi
 	LINE=$( echo $LINE | sed 's/resumefrom=[[:digit:]]\+//g' )
 	BETAVALUES+=( $(echo $LINE | awk '{print $1}') )
-	INTSTEPS0_ARRAY_TEMP+=( $(echo $LINE | awk '{print $2}') )
-	INTSTEPS1_ARRAY_TEMP+=( $(echo $LINE | awk '{print $3}') )
+	if [ $USE_MULTIPLE_CHAINS == "FALSE" ]; then
+	    INTSTEPS0_ARRAY_TEMP+=( $(echo $LINE | awk '{print $2}') )
+	    INTSTEPS1_ARRAY_TEMP+=( $(echo $LINE | awk '{print $3}') )
+	else
+	    SEED_ARRAY_TEMP+=( $(echo $LINE | awk '{print $2}') )
+	    INTSTEPS0_ARRAY_TEMP+=( $(echo $LINE | awk '{print $3}') )
+	    INTSTEPS1_ARRAY_TEMP+=( $(echo $LINE | awk '{print $4}') )
+	fi
     done          
     IFS=$OLD_IFS     # restore default field separator 
 
@@ -110,7 +117,38 @@ function ReadBetaValuesFromFile(){
 	fi
     done
 
-    if [ ${#INTSTEPS0_ARRAY_TEMP[@]} -ne 0 ]; then
+    if [ $USE_MULTIPLE_CHAINS == "TRUE" ]; then
+	if [ ${#SEED_ARRAY_TEMP[@]} -ne ${#BETAVALUES[@]} ]; then
+	    printf "\n\e[0;31m  Number of provided seeds differ from the number of provided beta values in betas file. Aborting...\n\n\e[0m"
+	    exit -1
+	fi
+	
+	for SEED in ${SEED_ARRAY_TEMP[@]}; do
+	    if [[ ! $SEED =~ ^[[:digit:]]{4}$ ]]; then
+		printf "\n\e[0;31m Invalid seed entry in betas file! Aborting...\n\n\e[0m"
+		exit -1
+	    fi
+	done
+	
+	#Check whether same seed is provided multiple times for same beta --> do it with an associative array in awk after having removed resumefrom and EMPTYLINES with sed
+	if [ "$(sed -e 's/resumefrom=[[:digit:]]\+//g' -e '/^$/d' $BETASFILE | awk '{array[$1,$2]++}END{for(ind in array){if(array[ind]>1){print -1; exit}}}')" == -1 ]; then
+	    printf "\n\e[0;31m Same seed provided multiple times for same beta!! Aborting...\n\n\e[0m"
+            exit -1
+        fi
+
+	#NOTE: If one uses the option --useMultipleChains and forgets the seeds column and the second integrator steps column
+	#      in the betas file, then the first column of integrator steps is used as seed and the default integrators steps
+	#      are used. In the case in which the first integrator steps is a 4-digit number, the script will do its job without
+	#      throwing any exception. We didn't cure this case since it is a very remote case................
+
+        #Modify the content of BETAVALUES[@] from x.xxxx to x.xxxx_syyyy in order to use this new label in the associative arrays everyehere!
+	for INDEX in "${!BETAVALUES[@]}"; do
+	    BETAVALUES[$INDEX]="${BETAVALUES[$INDEX]}_s${SEED_ARRAY_TEMP[$INDEX]}$BETA_POSTFIX"
+	    echo ${BETAVALUES[$INDEX]}
+	done
+    fi
+
+    if [ ${#INTSTEPS0_ARRAY_TEMP[@]} -ne 0 ]; then #If the first intsteps array is empty the second CANNOT be not empt (because of how I read them with awk from file)
 	for STEPS in ${INTSTEPS0_ARRAY_TEMP[@]} ${INTSTEPS1_ARRAY_TEMP[@]}; do
 	    if [[ ! $STEPS =~ ^[[:digit:]]+$ ]]; then
 		printf "\n\e[0;31m Invalid integrator step entry in betas file! Aborting...\n\n\e[0m"
@@ -153,10 +191,10 @@ function ReadBetaValuesFromFile(){
     printf "\n\e[0;36m===================================================================================\n\e[0m"
     printf "\e[0;34m Read beta values:\n\e[0m"
     
-    for i in ${BETAVALUES[@]}; do
-	printf "  - $i"
+    for BETA in ${BETAVALUES[@]}; do
+	printf "  - $BETA"
 	if [ "${#INTSTEPS0_ARRAY[@]}" -gt 0 ]; then
-	    printf "\t (Integrator steps ${INTSTEPS0_ARRAY[$i]}-${INTSTEPS1_ARRAY[$i]})\n"
+	    printf "\t (Integrator steps ${INTSTEPS0_ARRAY[$BETA]}-${INTSTEPS1_ARRAY[$BETA]})\n"
 	else
 	    printf "\n"
 	fi
@@ -169,6 +207,8 @@ function ReadBetaValuesFromFile(){
 	    printf "\n\e[0;33m \e[1m\e[4mWARNING\e[24m:\e[0;33m Number of beta values provided not multiple of $GPU_PER_NODE. WASTING computing time...\n\n\e[0m"
 	fi
     fi
+
+    exit
 }
 
 
@@ -223,6 +263,11 @@ function ProduceInputFileAndJobScriptForEachBeta(){
     else #on LOEWE
 	
 	#-------------------------------------------------------------------------------------------------------------------------#
+	#NOTE: Since this function has to iterate over the betas either doing something and putting the value into
+	#      SUBMIT_BETA_ARRAY or putting the beta value into PROBLEM_BETA_ARRAY, it is better to make a local copy
+	#      of BETAVALUES in order not to alter the original global array. Actually on the LOEWE the jobs are packed
+	#      and this implies that whenever a problematic beta is encoutered it MUST be removed from the betavalues array
+	#      (otherwise the authomatic packing would fail in the sense that it would include a problematic beta).
 	local BETAVALUES_COPY=(${BETAVALUES[@]})
 	#-------------------------------------------------------------------------------------------------------------------------#
 	for BETA in "${!BETAVALUES_COPY[@]}"; do
