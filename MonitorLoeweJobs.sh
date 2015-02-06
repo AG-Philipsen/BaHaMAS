@@ -34,6 +34,8 @@ for ((j=0; j<${#JOBSUBFROM[@]}; j++)); do
 	JOBSUBFROM[$j]="HOME"${JOBSUBFROM[$j]#$HOME}
     elif [ $(echo "${JOBSUBFROM[$j]}" | grep "/scratch/hfftheo/sciarra" | wc -l) -eq 1 ]; then
 	JOBSUBFROM[$j]="WORK"${JOBSUBFROM[$j]#"/scratch/hfftheo/sciarra"}
+    elif [ $(echo "${JOBSUBFROM[$j]}" | grep "/data01/hfftheo/sciarra" | wc -l) -eq 1 ]; then
+	JOBSUBFROM[$j]="DATA01"${JOBSUBFROM[$j]#"/data01/hfftheo/sciarra"}
     fi
 done
 
