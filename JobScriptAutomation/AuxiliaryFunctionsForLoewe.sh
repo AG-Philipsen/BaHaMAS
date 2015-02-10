@@ -63,7 +63,7 @@ function ProduceInputFileAndJobScriptForEachBeta_Loewe(){
     done
     # Partition the BETAVALUES_COPY array into group of GPU_PER_NODE and create the JobScript files inside the JOBSCRIPT_FOLDER
     mkdir -p ${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER || exit -2
-    PackBetaValuesPerGpuAndCreateJobScriptFiles "${BETAVALUES_COPY[@]}"
+    __static__PackBetaValuesPerGpuAndCreateJobScriptFiles "${BETAVALUES_COPY[@]}"
 }
 
 #=======================================================================================================================#
@@ -105,7 +105,7 @@ function ProcessBetaValuesForSubmitOnly_Loewe() {
 	    fi
 	fi
     done
-    PackBetaValuesPerGpuAndCreateJobScriptFiles "${BETAVALUES_COPY[@]}"
+    __static__PackBetaValuesPerGpuAndCreateJobScriptFiles "${BETAVALUES_COPY[@]}"
 }
 
 #=======================================================================================================================#
@@ -461,7 +461,7 @@ function ProcessBetaValuesForContinue_Loewe() {
 
     #Partition of the LOCAL_SUBMIT_BETA_ARRAY into group of GPU_PER_NODE and create the JobScript files inside the JOBSCRIPT_FOLDER
     mkdir -p ${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER || exit -2
-    PackBetaValuesPerGpuAndCreateJobScriptFiles "${LOCAL_SUBMIT_BETA_ARRAY[@]}"
+    __static__PackBetaValuesPerGpuAndCreateJobScriptFiles "${LOCAL_SUBMIT_BETA_ARRAY[@]}"
     
     #Ask the user if he want to continue submitting job
     printf "\n\e[0;33m Check if the continue option did its job correctly. Would you like to submit the jobs (Y/N)? \e[0m"
@@ -540,20 +540,18 @@ function SubmitJobsForValidBetaValues_Loewe() {
 #============================ STATIC FUNCTIONS USED MORE THAN IN ONE OTHER FUNCTION ====================================#
 #=======================================================================================================================#
 
-function PackBetaValuesPerGpuAndCreateJobScriptFiles(){
+function __static__PackBetaValuesPerGpuAndCreateJobScriptFiles(){
     local BETAVALUES_ARRAY_TO_BE_SPLIT=( $@ )
-    printf "\n\e[0;36m=================================================\n\e[0m"
-    printf "\e[0;36m  The following beta values have been grouped:\e[0m\n"
+    printf "\n\e[0;36m================================================================================\n\e[0m"
+    printf "\e[0;36m  The following beta values have been grouped (together with the seed if used):\e[0m\n"
     while [[ "${!BETAVALUES_ARRAY_TO_BE_SPLIT[@]}" != "" ]]; do # ${!array[@]} gives the list of the valid indeces in the array
 	local BETA_FOR_JOBSCRIPT=(${BETAVALUES_ARRAY_TO_BE_SPLIT[@]:0:$GPU_PER_NODE})
 	BETAVALUES_ARRAY_TO_BE_SPLIT=(${BETAVALUES_ARRAY_TO_BE_SPLIT[@]:$GPU_PER_NODE})
-	local BETAS_STRING=""
-	for BETA in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-	    printf "     ${BETA_FOR_JOBSCRIPT[BETA]}"
-	    BETAS_STRING="${BETAS_STRING}_$BETA_PREFIX${BETA_FOR_JOBSCRIPT[BETA]}"
+	for BETA in "${BETA_FOR_JOBSCRIPT[@]}"; do
+	    printf "      ${BETA%_*}"
 	done
 	echo ""
-	local JOBSCRIPT_NAME="${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}_${BETAS_STRING:1}"
+	local JOBSCRIPT_NAME="$(__static__GetJobScriptNameUsing ${BETA_FOR_JOBSCRIPT[@]})"
 	local JOBSCRIPT_GLOBALPATH="${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER/$JOBSCRIPT_NAME"
 	if [ -e $JOBSCRIPT_GLOBALPATH ]; then
 	    mv $JOBSCRIPT_GLOBALPATH ${JOBSCRIPT_GLOBALPATH}_$(date +'%F_%H%M') || exit -2
@@ -567,7 +565,24 @@ function PackBetaValuesPerGpuAndCreateJobScriptFiles(){
 	    PROBLEM_BETA_ARRAY+=( "${BETAS_STRING:1}" )
 	fi
     done
-    printf "\e[0;36m=================================================\n\e[0m"
+    printf "\e[0;36m================================================================================\n\e[0m"
 }
 
+
+function __static__GetJobScriptNameUsing(){
+    local BETAVALUES_TO_BE_USED=( $@ )
+    declare -A BETAS_WITH_SEED
+    for INDEX in "${BETAVALUES_TO_BE_USED[@]}"; do
+	BETAS_WITH_SEED[${INDEX%%_*}]="${BETAS_WITH_SEED[${INDEX%%_*}]}_$(echo $INDEX | awk '{split($0, res, "_"); print res[2]}')"
+    done
+    local BETAS_STRING=""
+    for BETA in "${!BETAS_WITH_SEED[@]}"; do
+	BETAS_STRING="${BETAS_STRING}__${BETA_PREFIX}${BETA}${BETAS_WITH_SEED[$BETA]}"
+    done
+    if [ $USE_MULTIPLE_CHAINS == "FALSE" ]; then
+	BETAS_STRING="$( echo ${BETAS_STRING} | sed -e 's/___/_/g' -e 's/_$//')"
+    fi
+
+    echo "${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}${BETAS_STRING}"
+}
 
