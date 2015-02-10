@@ -155,8 +155,6 @@ function ReadBetaValuesFromFile(){
 	    printf "\n\e[0;33m \e[1m\e[4mWARNING\e[24m:\e[0;33m Number of beta values provided not multiple of $GPU_PER_NODE. WASTING computing time...\n\n\e[0m"
 	fi
     fi
-
-    if [ $USE_MULTIPLE_CHAINS == "TRUE" ]; then exit; fi
 }
 
 
