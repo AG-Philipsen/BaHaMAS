@@ -63,33 +63,7 @@ function ProduceInputFileAndJobScriptForEachBeta_Loewe(){
     done
     # Partition the BETAVALUES_COPY array into group of GPU_PER_NODE and create the JobScript files inside the JOBSCRIPT_FOLDER
     mkdir -p ${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER || exit -2
-    BETAVALUES_COPY=(${BETAVALUES_COPY[@]}) #If sparse, make it not sparse otherwise the following while doesn't work!!
-    printf "\n\e[0;36m=================================================\n\e[0m"
-    printf "\e[0;36m  The following beta values have been grouped:\e[0m\n"
-    while [[ "${!BETAVALUES_COPY[@]}" != "" ]]; do # ${!array[@]} gives the list of the valid indeces in the array
-	local BETA_FOR_JOBSCRIPT=(${BETAVALUES_COPY[@]:0:$GPU_PER_NODE})
-	BETAVALUES_COPY=(${BETAVALUES_COPY[@]:$GPU_PER_NODE})
-	local BETAS_STRING=""
-	for BETA in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-	    printf "     ${BETA_FOR_JOBSCRIPT[BETA]}"
-	    BETAS_STRING="${BETAS_STRING}_$BETA_PREFIX${BETA_FOR_JOBSCRIPT[BETA]}"
-	done
-	echo ""
-	local JOBSCRIPT_NAME="${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}_${BETAS_STRING:1}"
-	local JOBSCRIPT_GLOBALPATH="${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER/$JOBSCRIPT_NAME"
-	if [ -e $JOBSCRIPT_GLOBALPATH ]; then
-	    mv $JOBSCRIPT_GLOBALPATH ${JOBSCRIPT_GLOBALPATH}_$(date +'%F_%H%M') || exit -2
-	fi
-	#Call the file to produce the jobscript file
-	. $PRODUCEJOBSCRIPTSH
-	if [ -e $JOBSCRIPT_GLOBALPATH ]; then
-	    SUBMIT_BETA_ARRAY+=( "${BETAS_STRING:1}" )
-	else
-	    printf "\n\e[0;31m Jobscript \"$JOBSCRIPT_NAME\" failed to be created!\n\n\e[0m"
-	    PROBLEM_BETA_ARRAY+=( "${BETAS_STRING:1}" )
-	fi
-    done
-    printf "\e[0;36m=================================================\n\e[0m"	
+    PackBetaValuesPerGpuAndCreateJobScriptFiles "${BETAVALUES_COPY[@]}"
 }
 
 #=======================================================================================================================#
@@ -131,30 +105,7 @@ function ProcessBetaValuesForSubmitOnly_Loewe() {
 	    fi
 	fi
     done
-    #Make BETAVALUES_COPY not sparse
-    BETAVALUES_COPY=(${BETAVALUES_COPY[@]})
-    #Here partition beta and check for jobscript existing!
-    printf "\n\e[0;36m=================================================\n\e[0m"
-    printf "\e[0;36m  The following beta values have been grouped:\e[0m\n"
-    while [[ "${!BETAVALUES_COPY[@]}" != "" ]]; do # ${!array[@]} gives the list of the valid indeces in the array
-	local BETA_FOR_JOBSCRIPT=(${BETAVALUES_COPY[@]:0:$GPU_PER_NODE})
-	BETAVALUES_COPY=(${BETAVALUES_COPY[@]:$GPU_PER_NODE})
-	local BETAS_STRING=""
-	for BETA in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-	    printf "     ${BETA_FOR_JOBSCRIPT[BETA]}"
-	    BETAS_STRING="${BETAS_STRING}_$BETA_PREFIX${BETA_FOR_JOBSCRIPT[BETA]}"
-	done
-	echo ""
-	local JOBSCRIPT_NAME="${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}_${BETAS_STRING:1}"
-	local JOBSCRIPT_GLOBALPATH="${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER/$JOBSCRIPT_NAME"
-	if [ ! -e $JOBSCRIPT_GLOBALPATH ]; then
-	    printf "\n\e[0;31m Jobscript \"$JOBSCRIPT_NAME\" not found! It will be not submitted!!!\n\n\e[0m"
-	    PROBLEM_BETA_ARRAY+=( "${BETAS_STRING:1}" )
-	else
-	    SUBMIT_BETA_ARRAY+=( "${BETAS_STRING:1}" )
-	fi
-    done
-    printf "\e[0;36m=================================================\n\e[0m"
+    PackBetaValuesPerGpuAndCreateJobScriptFiles "${BETAVALUES_COPY[@]}"
 }
 
 #=======================================================================================================================#
@@ -199,8 +150,7 @@ function __static__FindAndReplaceSingleOccurenceInFile(){
 
     sed -i "s/$2/$3/g" $1 || exit 2
 
-    return 0
-    
+    return 0    
 }
 
 function __static__ModifyOptionInInputFile(){
@@ -511,33 +461,7 @@ function ProcessBetaValuesForContinue_Loewe() {
 
     #Partition of the LOCAL_SUBMIT_BETA_ARRAY into group of GPU_PER_NODE and create the JobScript files inside the JOBSCRIPT_FOLDER
     mkdir -p ${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER || exit -2
-    LOCAL_SUBMIT_BETA_ARRAY=(${LOCAL_SUBMIT_BETA_ARRAY[@]}) #If sparse, make it not sparse otherwise the following while doesn't work!!
-    printf "\n\e[0;36m=================================================\n\e[0m"
-    printf "\e[0;36m  The following beta values have been grouped:\e[0m\n"
-    while [[ "${!LOCAL_SUBMIT_BETA_ARRAY[@]}" != "" ]]; do # ${!array[@]} gives the list of the valid indeces in the array
-	local BETA_FOR_JOBSCRIPT=(${LOCAL_SUBMIT_BETA_ARRAY[@]:0:$GPU_PER_NODE})
-	LOCAL_SUBMIT_BETA_ARRAY=(${LOCAL_SUBMIT_BETA_ARRAY[@]:$GPU_PER_NODE})
-	local BETAS_STRING=""
-	for BETA in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-	    printf "     ${BETA_FOR_JOBSCRIPT[BETA]}"
-	    BETAS_STRING="${BETAS_STRING}_$BETA_PREFIX${BETA_FOR_JOBSCRIPT[BETA]}"
-	done
-	echo ""
-	local JOBSCRIPT_NAME="${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}_${BETAS_STRING:1}"
-	local JOBSCRIPT_GLOBALPATH="${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER/$JOBSCRIPT_NAME"
-	if [ -e $JOBSCRIPT_GLOBALPATH ]; then
-	    mv $JOBSCRIPT_GLOBALPATH ${JOBSCRIPT_GLOBALPATH}_$(date +'%F_%H%M') || exit -2
-	fi
-	#Call the file to produce the jobscript file
-	. $PRODUCEJOBSCRIPTSH
-	if [ -e $JOBSCRIPT_GLOBALPATH ]; then
-	    SUBMIT_BETA_ARRAY+=( "${BETAS_STRING:1}" )
-	else
-	    printf "\n\e[0;31m Jobscript \"$JOBSCRIPT_NAME\" failed to be created!\n\n\e[0m"
-	    PROBLEM_BETA_ARRAY+=( "${BETAS_STRING:1}" )
-	fi
-    done
-    printf "\e[0;36m=================================================\n\e[0m"
+    PackBetaValuesPerGpuAndCreateJobScriptFiles "${LOCAL_SUBMIT_BETA_ARRAY[@]}"
     
     #Ask the user if he want to continue submitting job
     printf "\n\e[0;33m Check if the continue option did its job correctly. Would you like to submit the jobs (Y/N)? \e[0m"
@@ -601,4 +525,49 @@ function SubmitJobsForValidBetaValues_Loewe() {
 }
 
 #=======================================================================================================================#
+
+
+
+
+
+
+
+
+
+
+
+#=======================================================================================================================#
+#============================ STATIC FUNCTIONS USED MORE THAN IN ONE OTHER FUNCTION ====================================#
+#=======================================================================================================================#
+
+function PackBetaValuesPerGpuAndCreateJobScriptFiles(){
+    local BETAVALUES_ARRAY_TO_BE_SPLIT=( $@ )
+    printf "\n\e[0;36m=================================================\n\e[0m"
+    printf "\e[0;36m  The following beta values have been grouped:\e[0m\n"
+    while [[ "${!BETAVALUES_ARRAY_TO_BE_SPLIT[@]}" != "" ]]; do # ${!array[@]} gives the list of the valid indeces in the array
+	local BETA_FOR_JOBSCRIPT=(${BETAVALUES_ARRAY_TO_BE_SPLIT[@]:0:$GPU_PER_NODE})
+	BETAVALUES_ARRAY_TO_BE_SPLIT=(${BETAVALUES_ARRAY_TO_BE_SPLIT[@]:$GPU_PER_NODE})
+	local BETAS_STRING=""
+	for BETA in "${!BETA_FOR_JOBSCRIPT[@]}"; do
+	    printf "     ${BETA_FOR_JOBSCRIPT[BETA]}"
+	    BETAS_STRING="${BETAS_STRING}_$BETA_PREFIX${BETA_FOR_JOBSCRIPT[BETA]}"
+	done
+	echo ""
+	local JOBSCRIPT_NAME="${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}_${BETAS_STRING:1}"
+	local JOBSCRIPT_GLOBALPATH="${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER/$JOBSCRIPT_NAME"
+	if [ -e $JOBSCRIPT_GLOBALPATH ]; then
+	    mv $JOBSCRIPT_GLOBALPATH ${JOBSCRIPT_GLOBALPATH}_$(date +'%F_%H%M') || exit -2
+	fi
+	#Call the file to produce the jobscript file
+	. $PRODUCEJOBSCRIPTSH
+	if [ -e $JOBSCRIPT_GLOBALPATH ]; then
+	    SUBMIT_BETA_ARRAY+=( "${BETAS_STRING:1}" )
+	else
+	    printf "\n\e[0;31m Jobscript \"$JOBSCRIPT_NAME\" failed to be created!\n\n\e[0m"
+	    PROBLEM_BETA_ARRAY+=( "${BETAS_STRING:1}" )
+	fi
+    done
+    printf "\e[0;36m=================================================\n\e[0m"
+}
+
 
