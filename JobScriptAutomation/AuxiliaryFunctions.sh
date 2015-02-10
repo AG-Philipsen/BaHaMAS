@@ -12,6 +12,14 @@ function ReadBetaValuesFromFile(){
 	exit -1
     fi
 
+    #For syncronization reason the betas file MUST contain the beta value in the first column! Check:
+    for ENTRY in $(awk '{split($0, res, "#"); print res[1]}' $BETASFILE |  awk '{print $1}'); do
+	if [[ ! "$ENTRY" =~ ^[[:digit:]][.][[:digit:]]{4}$ ]]; then
+            printf "\n\e[0;31m The betas file MUST contain the beta value in the first column! Aborting...\n\n\e[0m"
+            exit -1
+	fi
+    done
+
     BETAVALUES=()
     local SEED_ARRAY_TEMP=()
     local INTSTEPS0_ARRAY_TEMP=()
@@ -48,6 +56,7 @@ function ReadBetaValuesFromFile(){
 	exit -1
     fi
 
+    #NOTE: The following check on beta is redundant ---> TODO: Think deeply about and in case remove it!
     for BETA in ${BETAVALUES[@]}; do
 	if [[ ! $BETA =~ ^[[:digit:]].[[:digit:]]{4}$ ]]; then
 	    printf "\n\e[0;31m Invalid beta entry in betas file! Aborting...\n\n\e[0m"
