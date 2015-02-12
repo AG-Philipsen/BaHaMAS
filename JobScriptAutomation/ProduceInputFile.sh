@@ -142,7 +142,9 @@ else
     if [[ "${STARTCONDITION[$INDEX]}" == "continue" ]]; then
 	echo "sourcefile=$HOME_BETADIRECTORY/${CONFIGURATION_SOURCEFILE[$INDEX]}" >> $INPUTFILE_GLOBALPATH
     fi
-    echo "host_seed=$(echo ${BETAVALUES_COPY[$INDEX]} | awk '{split($1, result, "_"); print substr(result[2],2)}')" >> $INPUTFILE_GLOBALPATH
+    if [ $USE_MULTIPLE_CHAINS == "TRUE" ]; then
+	echo "host_seed=$(echo ${BETAVALUES_COPY[$INDEX]} | awk '{split($1, result, "_"); print substr(result[2],2)}')" >> $INPUTFILE_GLOBALPATH
+    fi
 fi
 
 
