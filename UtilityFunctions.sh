@@ -55,7 +55,9 @@ function ElementInArray() {
 
 function KeyInArray() {
     #ATTENTION: the array has to be passed as name, not as ${name[@]};
-    #           the following function does not work if there are spaces in KEY
+    #           the following function does not work if there are spaces in KEY;
+    #           the following function does not work if there are spaces in ARRAY
+    #           but it would be really strange.....
     #Remember in BASH 0 means true and >0 means false
     local ARRAY=$2
     local KEY=$1
