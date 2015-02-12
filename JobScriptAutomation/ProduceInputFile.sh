@@ -114,7 +114,6 @@ if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
 else
 
     echo "use_cpu=false" > $INPUTFILE_GLOBALPATH
-    echo "device=0" >> $INPUTFILE_GLOBALPATH
     echo "theta_fermion_spatial=0" >> $INPUTFILE_GLOBALPATH
     echo "theta_fermion_temporal=1" >> $INPUTFILE_GLOBALPATH
     echo "use_chem_pot_im=1" >> $INPUTFILE_GLOBALPATH
@@ -136,13 +135,14 @@ else
     echo "nspace=$NSPACE" >> $INPUTFILE_GLOBALPATH
     echo "ntime=$NTIME" >> $INPUTFILE_GLOBALPATH
     echo "hmcsteps=$MEASUREMENTS" >> $INPUTFILE_GLOBALPATH
-    echo "integrationsteps0=${INTSTEPS0_ARRAY[${BETAVALUES[$BETA]}]}" >> $INPUTFILE_GLOBALPATH
-    echo "integrationsteps1=${INTSTEPS1_ARRAY[${BETAVALUES[$BETA]}]}" >> $INPUTFILE_GLOBALPATH
+    echo "integrationsteps0=${INTSTEPS0_ARRAY[${BETAVALUES_COPY[$INDEX]}]}" >> $INPUTFILE_GLOBALPATH
+    echo "integrationsteps1=${INTSTEPS1_ARRAY[${BETAVALUES_COPY[$INDEX]}]}" >> $INPUTFILE_GLOBALPATH
     echo "savefrequency=$NSAVE" >> $INPUTFILE_GLOBALPATH
-    echo "startcondition=${STARTCONDITION[$BETA]}" >> $INPUTFILE_GLOBALPATH
-    if [[ "${STARTCONDITION[$BETA]}" == "continue" ]]; then
-	echo "sourcefile=$HOME_BETADIRECTORY/${CONFIGURATION_SOURCEFILE[$BETA]}" >> $INPUTFILE_GLOBALPATH
+    echo "startcondition=${STARTCONDITION[$INDEX]}" >> $INPUTFILE_GLOBALPATH
+    if [[ "${STARTCONDITION[$INDEX]}" == "continue" ]]; then
+	echo "sourcefile=$HOME_BETADIRECTORY/${CONFIGURATION_SOURCEFILE[$INDEX]}" >> $INPUTFILE_GLOBALPATH
     fi
+    echo "host_seed=$(echo ${BETAVALUES_COPY[$INDEX]} | awk '{split($1, result, "_"); print substr(result[2],2)}')" >> $INPUTFILE_GLOBALPATH
 fi
 
 
