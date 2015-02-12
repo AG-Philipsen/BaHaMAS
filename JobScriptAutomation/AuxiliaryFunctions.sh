@@ -3,6 +3,8 @@
 # Load auxiliary bash files that will be used.
 source $HOME/Script/JobScriptAutomation/AuxiliaryFunctionsForLoewe.sh || exit -2
 source $HOME/Script/JobScriptAutomation/AuxiliaryFunctionsForJuqueen.sh || exit -2
+source $HOME/Script/JobScriptAutomation/ListJobsStatusForLoewe.sh || exit -2
+source $HOME/Script/JobScriptAutomation/ListJobsStatusForJuqueen.sh || exit -2
 #------------------------------------------------------------------------------------#
 
 function ReadBetaValuesFromFile(){
@@ -78,7 +80,7 @@ function ReadBetaValuesFromFile(){
 	done
 	
 	#Check whether same seed is provided multiple times for same beta --> do it with an associative array in awk after having removed "resumefrom=", EMPTYLINES and comments
-	if [ "$(awk '{split($0, res, "\#"); print res[1]}' $BETASFILE |\
+	if [ "$(awk '{split($0, res, "'#'"); print res[1]}' $BETASFILE |\
                 sed -e 's/resumefrom=[[:digit:]]\+//g' -e '/^$/d' |\
                 awk '{array[$1,$2]++}END{for(ind in array){if(array[ind]>1){print -1; exit}}}')" == -1 ]; then
 	    printf "\n\e[0;31m Same seed provided multiple times for same beta!! Aborting...\n\n\e[0m"
@@ -223,5 +225,16 @@ function PrintReportForProblematicBeta() {
 	    printf "  - \e[1m$BETA\e[0;31m\n"
 	done
 	printf "\e[0;31m===================================================================================\n\e[0m"
+    fi
+}
+
+
+function ListJobStatus()
+{
+    if [ "$CLUSTER_NAME" = "JUQUEEN" ]
+    then
+	ListJobStatus_Juqueen
+    else
+	ListJobStatus_Loewe
     fi
 }
