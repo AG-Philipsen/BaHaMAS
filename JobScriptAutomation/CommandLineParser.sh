@@ -48,7 +48,7 @@ MUTUALLYEXCLUSIVEOPTS_PASSED=( )
                 if [ "$CLUSTER_NAME" = "LOEWE" ]; then
 		    echo -e "                                     ->    To resume a simulation from a given trajectory, add \e[0;34mresumefrom=[number]\e[0;32m in the betasfile."
 		fi
-		echo -e "  \e[0;34m--liststatus\e[0;32m                       ->    The local measurement status for all beta will be displayed"
+		echo -e "  \e[0;34m-l | --liststatus\e[0;32m                       ->    The local measurement status for all beta will be displayed"
 		echo -e "  \e[0;34m--liststatus_all\e[0;32m                   ->    The global measurement status for all beta will be displayed"
 		echo -e "  \e[0;34m--showjobs\e[0;32m                         ->    The queued jobs will be displayed for the local parameters (kappa,nt,ns,beta)"
 		echo -e "  \e[0;34m--accRateReport\e[0;32m                    ->    The acceptance rates will be computed for the specified intervalls of configurations)"
@@ -129,7 +129,7 @@ MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 			exit -1
 		    fi
 		shift;; 
-	    --liststatus )
+	    -l | --liststatus )
 		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--liststatus" )
 		    LISTSTATUS="TRUE"
 		    LISTSTATUSALL="FALSE"
