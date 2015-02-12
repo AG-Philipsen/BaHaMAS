@@ -18,7 +18,6 @@
 source $HOME/Script/PathManagement.sh || exit -2
 source $HOME/Script/JobScriptAutomation/AuxiliaryFunctions.sh || exit -2
 source $HOME/Script/JobScriptAutomation/AcceptanceRateReport.sh || exit -2
-source $HOME/Script/JobScriptAutomation/ListJobsStatus.sh || exit -2
 source $HOME/Script/JobScriptAutomation/BuildRegexPath.sh || exit -2
 source $HOME/Script/JobScriptAutomation/EmptyBetaDirectories.sh || exit -2
 #-----------------------------------------------------------------------------------------------------------------#
@@ -169,7 +168,7 @@ elif [ $CONTINUE = "TRUE" ]; then
 
 elif [ $LISTSTATUS = "TRUE" ] || [ $LISTSTATUSALL = "TRUE" ]; then
 
-    ListJobStatus_Main   #TODO: On Juqueen, declare all possible local variable in this function as local! Use PARAMETERS_STRING/PATH where needed!
+    ListJobStatus   #TODO: On Juqueen, declare all possible local variable in this function as local! Use PARAMETERS_STRING/PATH where needed!
 
 elif [ $SHOWJOBS = "TRUE" ]; then
 
