@@ -45,19 +45,19 @@ function ProduceInputFileAndJobScriptForEachBeta_Loewe(){
     done
     BETAVALUES_COPY=(${BETAVALUES_COPY[@]}) #If sparse, make it not sparse 
     #If the previous for loop went through, we create the beta folders (just to avoid to create some folders and then abort)
-    for BETA in "${!BETAVALUES_COPY[@]}"; do
-	local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$BETA]}"
-	printf "\e[0;34m Creating directory for beta = ${BETAVALUES_COPY[$BETA]}...\e[0m"
+    for INDEX in "${!BETAVALUES_COPY[@]}"; do
+	local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$INDEX]}"
+	printf "\e[0;34m Creating directory for beta = ${BETAVALUES_COPY[$INDEX]}...\e[0m"
         mkdir $HOME_BETADIRECTORY || exit -2
         printf "\e[0;34m done!\n\e[0m"
-	if [[ "${STARTCONDITION[$BETA]}" == "continue" ]]; then
-	    printf "\e[0;36m    Copying Thermalized configuration in directory for beta = ${BETAVALUES_COPY[$BETA]}...\e[0m"
-	    cp $THERMALIZED_CONFIGURATIONS_PATH/${CONFIGURATION_SOURCEFILE[$BETA]} $HOME_BETADIRECTORY
+	if [[ "${STARTCONDITION[$INDEX]}" == "continue" ]]; then
+	    printf "\e[0;36m    Copying Thermalized configuration in directory for beta = ${BETAVALUES_COPY[$INDEX]}...\e[0m"
+	    cp $THERMALIZED_CONFIGURATIONS_PATH/${CONFIGURATION_SOURCEFILE[$INDEX]} $HOME_BETADIRECTORY || exit -2
 	    printf "\e[0;36m done!\n\e[0m"
 	else
-	    printf "\e[0;36m    No thermalized configuration to be copied for beta = ${BETAVALUES_COPY[$BETA]}, HOT start!\n\e[0m"
+	    printf "\e[0;36m    No thermalized configuration to be copied for beta = ${BETAVALUES_COPY[$INDEX]}, HOT start!\n\e[0m"
 	fi
-	    #Call the file to produce the input file
+	#Call the file to produce the input file
 	local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$INPUTFILE_NAME"
 	. $PRODUCEINPUTFILESH	    
     done
@@ -489,23 +489,26 @@ function SubmitJobsForValidBetaValues_Loewe() {
 	done
 	
 	for BETA in ${SUBMIT_BETA_ARRAY[@]}; do
-	    if [ "$CLUSTER_NAME" = "LOEWE" ]; then
-		local TEMP_ARRAY=( $(echo $BETA | sed 's/_/ /g') )
-		if [ ${#TEMP_ARRAY[@]} -ne $GPU_PER_NODE ]; then
-		    printf "\n\e[0;33m \e[1m\e[4mWARNING\e[24m:\e[0;33m At least one job is being submitted with less than\n"
-		    printf "          $GPU_PER_NODE runs inside. Would you like to submit in any case (Y/N)? \e[0m"
-		    local CONFIRM="";
-		    while read CONFIRM; do
-			if [ "$CONFIRM" = "Y" ]; then
-			    break;
-			elif [ "$CONFIRM" = "N" ]; then
-			    printf "\n\e[1;37;41mNo jobs will be submitted.\e[0m\n"
-			    return
-			else
-			    printf "\n\e[0;33m Please enter Y (yes) or N (no): \e[0m"
-			fi
-		    done
-		fi
+	    if [ $USE_MULTIPLE_CHAINS == "FALSE" ]; then
+		local PREFIX_TO_BE_GREPPED_FOR="$BETA_PREFIX"
+	    else
+		local PREFIX_TO_BE_GREPPED_FOR="$SEED_PREFIX"
+	    fi
+	    local TEMP_ARRAY=( $(echo $BETA | sed 's/_/ /g') )
+	    if [ $(echo $BETA | grep -o "${PREFIX_TO_BE_GREPPED_FOR}\([[:digit:]][.]\)\?[[:digit:]]\{4\}" | wc -l) -ne $GPU_PER_NODE ]; then
+		printf "\n\e[0;33m \e[1m\e[4mWARNING\e[24m:\e[0;33m At least one job is being submitted with less than\n"
+		printf "          $GPU_PER_NODE runs inside. Would you like to submit in any case (Y/N)? \e[0m"
+		local CONFIRM="";
+		while read CONFIRM; do
+		    if [ "$CONFIRM" = "Y" ]; then
+			break;
+		    elif [ "$CONFIRM" = "N" ]; then
+			printf "\n\e[1;37;41mNo jobs will be submitted.\e[0m\n"
+			return
+		    else
+			printf "\n\e[0;33m Please enter Y (yes) or N (no): \e[0m"
+		    fi
+		done
 	    fi
 	done
 
@@ -542,16 +545,18 @@ function SubmitJobsForValidBetaValues_Loewe() {
 
 function __static__PackBetaValuesPerGpuAndCreateJobScriptFiles(){
     local BETAVALUES_ARRAY_TO_BE_SPLIT=( $@ )
-    printf "\n\e[0;36m================================================================================\n\e[0m"
+    printf "\n\e[0;36m=================================================================================\n\e[0m"
     printf "\e[0;36m  The following beta values have been grouped (together with the seed if used):\e[0m\n"
     while [[ "${!BETAVALUES_ARRAY_TO_BE_SPLIT[@]}" != "" ]]; do # ${!array[@]} gives the list of the valid indeces in the array
 	local BETA_FOR_JOBSCRIPT=(${BETAVALUES_ARRAY_TO_BE_SPLIT[@]:0:$GPU_PER_NODE})
 	BETAVALUES_ARRAY_TO_BE_SPLIT=(${BETAVALUES_ARRAY_TO_BE_SPLIT[@]:$GPU_PER_NODE})
+	printf "   ->"
 	for BETA in "${BETA_FOR_JOBSCRIPT[@]}"; do
-	    printf "      ${BETA%_*}"
+	    printf "    ${BETA_PREFIX}${BETA%_*}"
 	done
 	echo ""
-	local JOBSCRIPT_NAME="$(__static__GetJobScriptNameUsing ${BETA_FOR_JOBSCRIPT[@]})"
+	local BETAS_STRING="$(__static__GetJobBetasStringUsing ${BETA_FOR_JOBSCRIPT[@]})"
+	local JOBSCRIPT_NAME="${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}__${BETAS_STRING}"
 	local JOBSCRIPT_GLOBALPATH="${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER/$JOBSCRIPT_NAME"
 	if [ -e $JOBSCRIPT_GLOBALPATH ]; then
 	    mv $JOBSCRIPT_GLOBALPATH ${JOBSCRIPT_GLOBALPATH}_$(date +'%F_%H%M') || exit -2
@@ -559,30 +564,37 @@ function __static__PackBetaValuesPerGpuAndCreateJobScriptFiles(){
 	#Call the file to produce the jobscript file
 	. $PRODUCEJOBSCRIPTSH
 	if [ -e $JOBSCRIPT_GLOBALPATH ]; then
-	    SUBMIT_BETA_ARRAY+=( "${BETAS_STRING:1}" )
+	    SUBMIT_BETA_ARRAY+=( "${BETAS_STRING}" )
 	else
 	    printf "\n\e[0;31m Jobscript \"$JOBSCRIPT_NAME\" failed to be created!\n\n\e[0m"
-	    PROBLEM_BETA_ARRAY+=( "${BETAS_STRING:1}" )
+	    PROBLEM_BETA_ARRAY+=( "${BETAS_STRING}" )
 	fi
     done
-    printf "\e[0;36m================================================================================\n\e[0m"
+    printf "\e[0;36m=================================================================================\n\e[0m"
 }
 
 
-function __static__GetJobScriptNameUsing(){
+function __static__GetJobBetasStringUsing(){
     local BETAVALUES_TO_BE_USED=( $@ )
     declare -A BETAS_WITH_SEED
     for INDEX in "${BETAVALUES_TO_BE_USED[@]}"; do
 	BETAS_WITH_SEED[${INDEX%%_*}]="${BETAS_WITH_SEED[${INDEX%%_*}]}_$(echo $INDEX | awk '{split($0, res, "_"); print res[2]}')"
     done
-    local BETAS_STRING=""
-    for BETA in "${!BETAS_WITH_SEED[@]}"; do
-	BETAS_STRING="${BETAS_STRING}__${BETA_PREFIX}${BETA}${BETAS_WITH_SEED[$BETA]}"
+    local BETAS_STRING_TO_BE_RETURNED=""
+    #Here I iterate again on BETAVALUES_TO_BE_USED and not on ${!BETAS_WITH_SEED[@]} in order to guarantee an order in BETAS_STRING
+    #(remember that associative arrays keys are not sorted in general, if it is, it is by coincidence). Note that now I have to use
+    #the same BETA only once and this is easily achieved unsetting the BETAS_WITH_SEED array entry once used it
+    for BETA in "${BETAVALUES_TO_BE_USED[@]}"; do
+	BETA=${BETA%%_*}
+	if KeyInArray $BETA BETAS_WITH_SEED; then
+	    BETAS_STRING_TO_BE_RETURNED="${BETAS_STRING_TO_BE_RETURNED}__${BETA_PREFIX}${BETA}${BETAS_WITH_SEED[${BETA}]}"
+     	    unset 'BETAS_WITH_SEED[${BETA}]'
+	fi
     done
     if [ $USE_MULTIPLE_CHAINS == "FALSE" ]; then
-	BETAS_STRING="$( echo ${BETAS_STRING} | sed -e 's/___/_/g' -e 's/_$//')"
+	BETAS_STRING_TO_BE_RETURNED="$( echo ${BETAS_STRING_TO_BE_RETURNED} | sed -e 's/___/_/g' -e 's/_$//')"
     fi
 
-    echo "${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}${BETAS_STRING}"
+    echo "${BETAS_STRING_TO_BE_RETURNED:2}" #I cut here the two initial underscores
 }
 
