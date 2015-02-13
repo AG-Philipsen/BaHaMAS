@@ -67,3 +67,13 @@ function KeyInArray() {
 	return 1;
     fi
 }
+
+function FindValueOfClosestElementInArrayToGivenValue(){
+    local VALUE=$1
+    shift
+    local ARRAY=( $@ )
+    echo ${ARRAY[@]} | awk -v value="$VALUE" 'BEGIN{RS=" "} \
+                                              NR==1{result=$1; difference=sqrt(($1-value)^2)} \
+                                              NR>1{if(sqrt(($1-value)^2)<difference){result=$1; difference=sqrt(($1-value)^2)}} \
+                                              END{print result}'
+}
