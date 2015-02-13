@@ -514,10 +514,10 @@ function SubmitJobsForValidBetaValues_Loewe() {
 
 	for BETA in ${SUBMIT_BETA_ARRAY[@]}; do
 	    local SUBMITTING_DIRECTORY="${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER"
-	    local JOBSCRIPT_NAME="${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}_$BETA"
+	    local JOBSCRIPT_NAME="$(__static__GetJobScriptName ${BETA})"
 	    cd $SUBMITTING_DIRECTORY
 	    printf "\n\e[0;34m Actual location: \e[0;35m$(pwd) \n\e[0m"
-	    printf "\e[0;34m      Submitting:\e[0m"
+	    printf "\e[1;34m      Submitting:\e[0m"
 		printf "\e[0;32m \e[4msbatch $JOBSCRIPT_NAME\n\e[0m"
 		sbatch $JOBSCRIPT_NAME
 	done
@@ -556,7 +556,7 @@ function __static__PackBetaValuesPerGpuAndCreateJobScriptFiles(){
 	done
 	echo ""
 	local BETAS_STRING="$(__static__GetJobBetasStringUsing ${BETA_FOR_JOBSCRIPT[@]})"
-	local JOBSCRIPT_NAME="${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}__${BETAS_STRING}"
+	local JOBSCRIPT_NAME="$(__static__GetJobScriptName ${BETAS_STRING})"
 	local JOBSCRIPT_GLOBALPATH="${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER/$JOBSCRIPT_NAME"
 	if [ -e $JOBSCRIPT_GLOBALPATH ]; then
 	    mv $JOBSCRIPT_GLOBALPATH ${JOBSCRIPT_GLOBALPATH}_$(date +'%F_%H%M') || exit -2
@@ -598,3 +598,8 @@ function __static__GetJobBetasStringUsing(){
     echo "${BETAS_STRING_TO_BE_RETURNED:2}" #I cut here the two initial underscores
 }
 
+
+function __static__GetJobScriptName(){
+    local STRING_WITH_BETAVALUES="$1"
+    echo "${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}__${STRING_WITH_BETAVALUES}"
+}
