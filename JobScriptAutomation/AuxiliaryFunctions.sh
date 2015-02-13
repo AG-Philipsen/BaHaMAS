@@ -152,10 +152,50 @@ function ReadBetaValuesFromFile(){
     
     printf "\e[0;36m===================================================================================\n\e[0m"
 
-    if [ "$CLUSTER_NAME" = "LOEWE" ]; then
-	if [ $(echo "${#BETAVALUES[@]}" | awk '{print $1 % '"$GPU_PER_NODE"'}') -ne 0 ]; then
-	    printf "\n\e[0;33m \e[1m\e[4mWARNING\e[24m:\e[0;33m Number of beta values provided not multiple of $GPU_PER_NODE. WASTING computing time...\n\n\e[0m"
-	fi
+    #If we are not in the continue scenario, look for the correct configuration to start from and set the global path
+    if [ $CONTINUE = "FALSE" ]; then
+	for BETA in "${BETAVALUES[@]}"; do
+	    if [ "$BETA_POSTFIX" == "" ]; then
+		local FOUND_CONFIGURATIONS=( $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA}.*") )
+		if [ ${#FOUND_CONFIGURATIONS[@]} -eq 0 ]; then
+		    STARTCONFIGURATION_GLOBALPATH[$BETA]="notFoundHenceStartFromHot"
+		elif [ ${#FOUND_CONFIGURATIONS[@]} -eq 1 ]; then
+		    STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERMALIZED_CONFIGURATIONS_PATH}/${FOUND_CONFIGURATIONS[0]}"
+		else
+		    printf "\n\e[0;31m No valid starting configuration found for beta = ${BETA%%_*} in \"$THERMALIZED_CONFIGURATIONS_PATH\"\n"
+		    printf " Zero or more than 1 configurations match the following name: \"conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%%_*}_fromConf*\"! Aborting...\n\n\e[0m"
+		    exit -1
+		fi		
+	    elif [ $BETA_POSTFIX == "_continueWithNewChain" ]; then
+		local FOUND_CONFIGURATIONS=( $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%%_*}_fromConf[[:digit:]]\+.*") )
+		if [ ${#FOUND_CONFIGURATIONS[@]} -ne 1 ]; then
+		    printf "\n\e[0;31m No valid starting configuration found for beta = ${BETA%%_*} in \"$THERMALIZED_CONFIGURATIONS_PATH\"\n"
+		    printf " Zero or more than 1 configurations match the following name: \"conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%%_*}_fromConf*\"! Aborting...\n\n\e[0m"
+		    exit -1
+		else
+		    STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERMALIZED_CONFIGURATIONS_PATH}/${FOUND_CONFIGURATIONS[0]}"
+		fi
+	    elif [ $BETA_POSTFIX == "_thermalizeFromConf" ]; then
+		if [ $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%%_*}_fromConf[[:digit:]]\+.*" | wc -l) -ne 0 ]; then
+		    printf "\n\e[0;31m It seems that there is already a thermalized configuration for beta = ${BETA%%_*}\n"
+		    printf " in \"$THERMALIZED_CONFIGURATIONS_PATH\"! Aborting...\n\n\e[0m"
+                    exit -1
+		fi
+		local FOUND_CONFIGURATIONS=( $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "conf.${PARAMETERS_STRING}_${BETA_PREFIX}[[:digit:]][.][[:digit:]]\{4\}_fromHot[[:digit:]]\+.*") )
+		declare -A FOUND_CONFIGURATIONS_WITH_BETA_AS_KEY
+		for CONFNAME in "${FOUND_CONFIGURATIONS[@]}"; do
+		    local BETAVALUE_RECOVERED_FROM_NAME=$(echo $CONFNAME | awk '{split($1, res, "_fromHot"); print res[1]}' | sed 's/.*\([[:digit:]][.][[:digit:]]\{4\}\).*/\1/')
+		    FOUND_CONFIGURATIONS_WITH_BETA_AS_KEY["$BETAVALUE_RECOVERED_FROM_NAME"]=$CONFNAME
+		done
+		local CLOSEST_BETA=$(FindValueOfClosestElementInArrayToGivenValue ${BETA%%_*} "${!FOUND_CONFIGURATIONS_WITH_BETA_AS_KEY[@]}")
+		STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERMALIZED_CONFIGURATIONS_PATH}/${FOUND_CONFIGURATIONS_WITH_BETA_AS_KEY[$CLOSEST_BETA]}"
+	    elif [ $BETA_POSTFIX == "_thermalizeFromHot" ]; then
+		STARTCONFIGURATION_GLOBALPATH[$BETA]="notFoundHenceStartFromHot"
+	    else
+		printf "\n\e[0;31m Something really strange happened! BETA_POSTFIX set to unknown value (${BETA_POSTFIX})! Aborting...\n\n\e[0m"
+                exit -1
+	    fi
+	done
     fi
 }
 
@@ -199,7 +239,7 @@ function ShowQueuedJobsLocal()
     then
 	ShowQueuedJobsLocal_Juqueen
     else
-	printf "\e[0;31mOption --showjobs not yet implemented on the LOEWE! Aborting...\e[0m"; exit -1
+	printf "\n\e[0;31mOption --showjobs not yet implemented on the LOEWE! Aborting...\n\n\e[0m"; exit -1
     fi
 }
 

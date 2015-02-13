@@ -22,41 +22,13 @@ function ProduceInputFileAndJobScriptForEachBeta_Loewe(){
     done
     #Make BETAVALUES_COPY not sparse
     BETAVALUES_COPY=(${BETAVALUES_COPY[@]})
-    #Let's try to start from a thermalized configuration is existing
-    local STARTCONDITION=()
-    local CONFIGURATION_SOURCEFILE=()
-    for BETA in "${!BETAVALUES_COPY[@]}"; do
-	local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$BETA]}"
-	local STARTCONFIGURATION_NAME="conf.${PARAMETERS_STRING}_$BETA_PREFIX${BETAVALUES_COPY[$BETA]}"
-	local NUMBER_OF_THERMALIZED_CONFIGURATIONS=$(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "$STARTCONFIGURATION_NAME" | wc -l)
-	if [ $NUMBER_OF_THERMALIZED_CONFIGURATIONS -eq 0 ]; then
-	    STARTCONDITION+=( "hot" )
-	    CONFIGURATION_SOURCEFILE+=( "---" )
-	elif [ $NUMBER_OF_THERMALIZED_CONFIGURATIONS -eq 1 ]; then
-	    STARTCONDITION+=( "continue" )
-	    CONFIGURATION_SOURCEFILE+=( "$(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "$STARTCONFIGURATION_NAME")" )
-	elif [ $NUMBER_OF_THERMALIZED_CONFIGURATIONS -gt 1 ]; then
-	    echo "NUMBER_OF_THERMALIZED_CONFIGURATIONS=$NUMBER_OF_THERMALIZED_CONFIGURATIONS"
-	    printf "\n\e[0;31m There are more than one thermalized configuration for these parameters. The value beta = ${BETAVALUES_COPY[$BETA]}  will be skipped!\n\e[0m"
-	    PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$BETA]} )
-	    unset BETAVALUES_COPY[$BETA] #Here BETAVALUES_COPY becomes sparse
-	    continue
-	fi
-    done
-    BETAVALUES_COPY=(${BETAVALUES_COPY[@]}) #If sparse, make it not sparse 
     #If the previous for loop went through, we create the beta folders (just to avoid to create some folders and then abort)
     for INDEX in "${!BETAVALUES_COPY[@]}"; do
 	local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$INDEX]}"
-	printf "\e[0;34m Creating directory for beta = ${BETAVALUES_COPY[$INDEX]}...\e[0m"
+	printf "\e[0;34m Creating directory \e[1m$BETA_PREFIX${BETAVALUES_COPY[$INDEX]}\e[0;34m..."
         mkdir $HOME_BETADIRECTORY || exit -2
         printf "\e[0;34m done!\n\e[0m"
-	if [[ "${STARTCONDITION[$INDEX]}" == "continue" ]]; then
-	    printf "\e[0;36m    Copying Thermalized configuration in directory for beta = ${BETAVALUES_COPY[$INDEX]}...\e[0m"
-	    cp $THERMALIZED_CONFIGURATIONS_PATH/${CONFIGURATION_SOURCEFILE[$INDEX]} $HOME_BETADIRECTORY || exit -2
-	    printf "\e[0;36m done!\n\e[0m"
-	else
-	    printf "\e[0;36m    No thermalized configuration to be copied for beta = ${BETAVALUES_COPY[$INDEX]}, HOT start!\n\e[0m"
-	fi
+	printf "\e[0;36m   Configuration used: \"${STARTCONFIGURATION_GLOBALPATH[${BETAVALUES_COPY[$INDEX]}]}\"\n\e[0m"
 	#Call the file to produce the input file
 	local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$INPUTFILE_NAME"
 	. $PRODUCEINPUTFILESH	    
@@ -116,13 +88,15 @@ function __static__CheckIfJobIsInQueue_Loewe(){
 	local GREPPED_JOBNAME=$(scontrol show job  $JOBID | grep "Name=" | sed "s/^.*Name=\(.*$\)/\1/") 
 	local JOBSTATUS=$(scontrol show job $JOBID | grep "^[[:blank:]]*JobState=" | sed "s/^.*JobState=\([[:alpha:]]*\)[[:blank:]].*$/\1/")
 	
-	if [[ ! $GREPPED_JOBNAME =~ b[[:digit:]]{1}[.]{1}[[:digit:]]{4}$ ]]; then
-	    continue
-	fi
+	#if [[ ! $GREPPED_JOBNAME =~ b[[:digit:]]{1}[.]{1}[[:digit:]]{4}$ ]]; then
+	#    continue
+	#fi
 	
-	if [ $(echo $GREPPED_JOBNAME | grep -o "$BETA_PREFIX$BETA" | wc -l) -ne 0 ] && [ $(echo $GREPPED_JOBNAME | grep -o "$PARAMETERS_STRING" | wc -l) -ne 0 ]; then
+	if [ $(echo $GREPPED_JOBNAME | grep -o "$BETA_PREFIX${BETA%%_*}" | wc -l) -ne 0 ] && 
+	   [ $(echo $GREPPED_JOBNAME | grep -o "$(echo $BETA | awk '{split($1, res, "_"); print res[2]}')" | wc -l) -ne 0 ] && 
+	   [ $(echo $GREPPED_JOBNAME | grep -o "$PARAMETERS_STRING" | wc -l) -ne 0 ]; then
 	    
-	    if [ "$JOBSTATUS" != "RUNNING" -a "$JOBSTATUS" != "PENDING" ]; then
+	    if [ "$JOBSTATUS" != "RUNNING" ] && [ "$JOBSTATUS" != "PENDING" ]; then
 		continue;
 	    fi
 	    
@@ -198,9 +172,22 @@ function ProcessBetaValuesForContinue_Loewe() {
 	local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
 	local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$INPUTFILE_NAME"
 	local OUTPUTFILE_GLOBALPATH="${WORK_BETADIRECTORY}/$OUTPUTFILE_NAME"
-        local BETAVALUES_COPY=(${BETAVALUES[@]})
 	#-------------------------------------------------------------------------#
 	
+	if [ ! -d $WORK_BETADIRECTORY ]; then
+	    printf "\n\e[0;31m Directory $WORK_BETADIRECTORY does not exist.\n\e[0m"
+	    printf "\e[0;31m Simulation cannot be continued. Leaving out beta = $BETA .\n\n\e[0m"
+	    PROBLEM_BETA_ARRAY+=( $BETA )
+	    continue
+	fi
+
+	if [ ! -d $HOME_BETADIRECTORY ]; then
+	    printf "\n\e[0;31m Directory $HOME_BETADIRECTORY does not exist.\n\e[0m"
+	    printf "\e[0;31m Simulation cannot be continued. Leaving out beta = $BETA .\n\n\e[0m"
+	    PROBLEM_BETA_ARRAY+=( $BETA )
+	    continue
+	fi
+
 	if [ ! -f $INPUTFILE_GLOBALPATH ]; then
 	    printf "\n\e[0;31m $INPUTFILE_GLOBALPATH does not exist.\n\e[0m"
 	    printf "\e[0;31m Simulation cannot be continued. Leaving out beta = $BETA .\n\n\e[0m"
@@ -217,7 +204,7 @@ function ProcessBetaValuesForContinue_Loewe() {
 
 	#If the option resumefrom is given in the betasfile we have to clean the $WORK_BETADIRECTORY, otherwise just set the name of conf and prng
 	if KeyInArray $BETA CONTINUE_RESUMETRAJ_ARRAY; then
-	    printf "\e[0;35m\e[1m\e[4mATTENTION\e[24m: The simulation for beta = $BETA will be resumed from trajectory"
+	    printf "\e[0;35m\e[1m\e[4mATTENTION\e[24m: The simulation for beta = ${BETA%_*} will be resumed from trajectory"
 	    printf " ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}. Is it what you would like to do (Y/N)? \e[0m"
 	    local CONFIRM="";
 	    while read CONFIRM; do
@@ -234,8 +221,7 @@ function ProcessBetaValuesForContinue_Loewe() {
 	    if [ -f $WORK_BETADIRECTORY/$(printf "conf.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}") ];then
 		local NAME_LAST_CONFIGURATION=$(printf "conf.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}")
 	    else
-		printf "\e[0;31m Configuration \"$(printf "conf.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}")\""
-		printf " or prng status \"$(printf "prng.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}")\" not found in $WORK_BETADIRECTORY folder.\n"
+		printf "\e[0;31m Configuration \"$(printf "conf.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}") not found in $WORK_BETADIRECTORY folder.\n"
 		printf " Unable to continue the simulation. Leaving out beta = $BETA .\n\n\e[0m" 
 		PROBLEM_BETA_ARRAY+=( $BETA ) 
 		continue
@@ -263,7 +249,6 @@ function ProcessBetaValuesForContinue_Loewe() {
 		    if [ $NUMBER_FROM_FILE -gt ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} ]; then
 			mv $FILE $TRASH_NAME
 		    elif [ $NUMBER_FROM_FILE -eq ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} ] && [ $(echo "$FILE" | grep -o "conf[.][[:digit:]]\{5\}_pbp[.]dat$" | wc -l) -eq 1 ]; then
-			echo "HERE"
 			mv $FILE $TRASH_NAME
 		    fi
 		fi
@@ -271,7 +256,7 @@ function ProcessBetaValuesForContinue_Loewe() {
 	    #Move to trash conf.save and prng.save files if existing
 	    if [ -f $WORK_BETADIRECTORY/conf.save ]; then mv $WORK_BETADIRECTORY/conf.save $TRASH_NAME; fi
 	    if [ -f $WORK_BETADIRECTORY/prng.save ]; then mv $WORK_BETADIRECTORY/prng.save $TRASH_NAME; fi
-	    #Copy the hmc_output file to Trash and edit it leaving out all the trajectories after ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}, including ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}
+	    #Copy the hmc_output file to Trash, edit it leaving out all the trajectories after ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}, including ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}
 	    cp $OUTPUTFILE_GLOBALPATH $TRASH_NAME || exit 2 
 	    local LINES_TO_BE_CANCELED_IN_OUTPUTFILE=$(tac $OUTPUTFILE_GLOBALPATH | awk -v resumeFrom=${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} 'BEGIN{found=0}{if($1==resumeFrom){found=1; print NR; exit}}END{if(found==0){print -1}}')
 	    if [ $LINES_TO_BE_CANCELED_IN_OUTPUTFILE -eq -1 ]; then
@@ -316,18 +301,6 @@ function ProcessBetaValuesForContinue_Loewe() {
                 continue
 	    fi
 	fi
-	
-	if [ -f $HOME_BETADIRECTORY/$NAME_LAST_CONFIGURATION ]; then
-	    mv $HOME_BETADIRECTORY/$NAME_LAST_CONFIGURATION $HOME_BETADIRECTORY/${NAME_LAST_CONFIGURATION}_$(date +'%F_%H.%M') || exit 2
-	fi
-	if [ -f $HOME_BETADIRECTORY/$NAME_LAST_PRNG ]; then
-	    mv $HOME_BETADIRECTORY/$NAME_LAST_PRNG $HOME_BETADIRECTORY/${NAME_LAST_PRNG}_$(date +'%F_%H.%M') || exit 2
-	fi
-	cp $WORK_BETADIRECTORY/$NAME_LAST_CONFIGURATION $HOME_BETADIRECTORY || exit 2
-	if [ "$NAME_LAST_PRNG" != "" ]; then
-	    cp $WORK_BETADIRECTORY/$NAME_LAST_PRNG $HOME_BETADIRECTORY || exit 2
-	fi
-	
 	#Make a temporary copy of the input file that will be used to restore in case the original input file.
 	#This is to avoid to modify some parameters and then skip beta because of some error leaving the input file modified!
 	#If the beta is skipped this temporary file is used to restore the original input file, otherwise it is deleted.
@@ -356,6 +329,7 @@ function ProcessBetaValuesForContinue_Loewe() {
 		    printf "\e[0;32m to the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
 		else
 		    __static__ModifyOptionInInputFile "measure_pbp=$MEASURE_PBP"
+		    [ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
 		    printf "\e[0;32m Set option \e[0;35mmeasure_pbp=$MEASURE_PBP"
 		    printf "\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
 		fi
@@ -388,13 +362,13 @@ function ProcessBetaValuesForContinue_Loewe() {
 	#If sourcefile not present in the input file, add it, otherwise modify it
 	local NUMBER_OCCURENCE_SOURCEFILE=$(grep -o "sourcefile=[[:alnum:][:punct:]]*" $INPUTFILE_GLOBALPATH | wc -l)
 	if [ $NUMBER_OCCURENCE_SOURCEFILE -eq 0 ]; then
-	    echo "sourcefile=$HOME_BETADIRECTORY/${NAME_LAST_CONFIGURATION}" >> $INPUTFILE_GLOBALPATH
-	    printf "\e[0;32m Added option \e[0;35msourcefile=$HOME_BETADIRECTORY/${NAME_LAST_CONFIGURATION}"
+	    echo "sourcefile=$WORK_BETADIRECTORY/${NAME_LAST_CONFIGURATION}" >> $INPUTFILE_GLOBALPATH
+	    printf "\e[0;32m Added option \e[0;35msourcefile=$WORK_BETADIRECTORY/${NAME_LAST_CONFIGURATION}"
 	    printf "\e[0;32m to the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
-	elif [ $NUMBER_OCCURENCE_SOURCEFILE -eq 1 ]; then
-	    __static__ModifyOptionInInputFile "sourcefile=$(echo $HOME_BETADIRECTORY | sed 's/\//\\\//g')\/$NAME_LAST_CONFIGURATION"
+	elif [ $NUMBER_OCCURENCE_SOURCEFILE -eq 1 ]; then #In order to use __static__ModifyOptionInInputFile I have to escape the slashes in the path (for sed)
+	    __static__ModifyOptionInInputFile "sourcefile=$(echo $WORK_BETADIRECTORY | sed 's/\//\\\//g')\/$NAME_LAST_CONFIGURATION"
 	    [ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
-	    printf "\e[0;32m Set option \e[0;35msourcefile=$HOME_BETADIRECTORY/${NAME_LAST_CONFIGURATION}"
+	    printf "\e[0;32m Set option \e[0;35msourcefile=$WORK_BETADIRECTORY/${NAME_LAST_CONFIGURATION}"
 	    printf "\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
 	else
 	    printf "\n\e[0;31m String sourcefile=[[:alnum:][:punct:]]* occurs more than 1 time in file $INPUTFILE_GLOBALPATH! Skipping beta = $BETA .\n\n\e[0m"
@@ -428,13 +402,13 @@ function ProcessBetaValuesForContinue_Loewe() {
                 sed -i '/host_seed/d' $INPUTFILE_GLOBALPATH #If a prng valid state has been found, delete eventual line from input file with host_seed
             fi
 	    if [ $NUMBER_OCCURENCE_PRNG_STATE -eq 0 ]; then
-		echo "initial_prng_state=$HOME_BETADIRECTORY/${NAME_LAST_PRNG}" >> $INPUTFILE_GLOBALPATH
-		printf "\e[0;32m Added option \e[0;35minitial_prng_state=$HOME_BETADIRECTORY/${NAME_LAST_PRNG}"
+		echo "initial_prng_state=$WORK_BETADIRECTORY/${NAME_LAST_PRNG}" >> $INPUTFILE_GLOBALPATH
+		printf "\e[0;32m Added option \e[0;35minitial_prng_state=$WORK_BETADIRECTORY/${NAME_LAST_PRNG}"
 		printf "\e[0;32m to the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
-	    elif [ $NUMBER_OCCURENCE_PRNG_STATE -eq 1 ]; then
-		__static__ModifyOptionInInputFile "initial_prng_state=$(echo $HOME_BETADIRECTORY | sed 's/\//\\\//g')\/${NAME_LAST_PRNG}"
+	    elif [ $NUMBER_OCCURENCE_PRNG_STATE -eq 1 ]; then #In order to use __static__ModifyOptionInInputFile I have to escape the slashes in the path (for sed)
+		__static__ModifyOptionInInputFile "initial_prng_state=$(echo $WORK_BETADIRECTORY | sed 's/\//\\\//g')\/${NAME_LAST_PRNG}"
 		[ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
-		printf "\e[0;32m Set option \e[0;35minitial_prng_state=$HOME_BETADIRECTORY/${NAME_LAST_PRNG}"
+		printf "\e[0;32m Set option \e[0;35minitial_prng_state=$WORK_BETADIRECTORY/${NAME_LAST_PRNG}"
 		printf "\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
 	    else
 		printf "\n\e[0;31m String initial_prng_state=[[:alnum:][:punct:]]* occurs more than 1 time in file $INPUTFILE_GLOBALPATH! Skipping beta = $BETA .\n\n\e[0m"
@@ -606,5 +580,11 @@ function __static__GetJobBetasStringUsing(){
 
 function __static__GetJobScriptName(){
     local STRING_WITH_BETAVALUES="$1"
-    echo "${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}__${STRING_WITH_BETAVALUES}"
+    if [ "$BETA_POSTFIX" == "_thermalizeFromConf" ]; then
+	echo "${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}__${STRING_WITH_BETAVALUES}_TC"
+    elif [ "$BETA_POSTFIX" == "_thermalizeFromHot" ]; then
+	echo "${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}__${STRING_WITH_BETAVALUES}_TH"
+    else
+	echo "${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}__${STRING_WITH_BETAVALUES}"
+    fi
 }

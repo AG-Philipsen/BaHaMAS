@@ -32,7 +32,7 @@ PARAMETERS_PATH=""
 PARAMETERS_STRING=""
 BETA_PREFIX="b"
 SEED_PREFIX="s"
-BETA_POSTFIX="_continueWithNewChain"
+BETA_POSTFIX=""
 
 #----------ADDED BY CHRIS FOR LISTSTATUS FUNCTIONALITY--------
 #TODO: Discuss with Alessandro about leaving it here or not!

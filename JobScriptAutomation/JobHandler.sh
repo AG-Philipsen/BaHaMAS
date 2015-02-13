@@ -60,6 +60,7 @@ INTERVAL="1000"
 USE_MULTIPLE_CHAINS="FALSE"
 SUBMIT="FALSE"
 SUBMITONLY="FALSE"
+THERMALIZE="FALSE"
 CONTINUE="FALSE"
 CONTINUE_NUMBER="0"
 LISTSTATUS="FALSE"
@@ -91,7 +92,6 @@ if [[ $(whoami) =~ ^hkf[[:digit:]]{3} ]]; then
 fi
 
 SPECIFIED_COMMAND_LINE_OPTIONS=( $@ )
-
 ParseCommandLineOption $@
 #-----------------------------------------------------------------------------------------------------------------#
 
@@ -116,7 +116,9 @@ if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
 else
     CheckSingleOccurrenceInPath $(echo $HOME_DIR | sed 's/\// /g') "$CHEMPOT_PREFIX" "${KAPPA_PREFIX}[[:digit:]]\+" "${NTIME_PREFIX}[[:digit:]]\+" "${NSPACE_PREFIX}[[:digit:]]\+"
 fi
+
 ReadParametersFromPath $(pwd)
+
 HOME_DIR_WITH_BETAFOLDERS="$HOME_DIR/$SIMULATION_PATH$PARAMETERS_PATH"
 WORK_DIR_WITH_BETAFOLDERS="$WORK_DIR/$SIMULATION_PATH$PARAMETERS_PATH"
 
@@ -136,8 +138,9 @@ SUBMIT_BETA_ARRAY=()
 PROBLEM_BETA_ARRAY=() #Arrays that will contain the beta values that actually will be processed
 declare -A INTSTEPS0_ARRAY
 declare -A INTSTEPS1_ARRAY
-declare -A CONTINUE_RESUMETRAJ_ARRAY #NOTE: Before bash 4.2 associative array are LOCAL by default (from bash 4.2 one can do "declare -g ARRAY" to make it global).
-                                     #      This is the reason why they are declared here and not in ReadBetaValuesFromFile where it would be natural!!
+declare -A CONTINUE_RESUMETRAJ_ARRAY 
+declare -A STARTCONFIGURATION_GLOBALPATH #NOTE: Before bash 4.2 associative array are LOCAL by default (from bash 4.2 one can do "declare -g ARRAY" to make it global).
+                                         #      This is the reason why they are declared here and not in ReadBetaValuesFromFile where it would be natural!!
 
 if [ ${#MUTUALLYEXCLUSIVEOPTS_PASSED[@]} = 0 ]; then
 
@@ -155,6 +158,19 @@ elif [ $SUBMITONLY = "TRUE" ]; then
 elif [ $SUBMIT = "TRUE" ]; then
 
     if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then CheckParallelizationTmlqcdForJuqueen; fi
+    ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
+    ProduceInputFileAndJobScriptForEachBeta
+    SubmitJobsForValidBetaValues #TODO: Declare all possible local variable in this function as local!
+
+elif [ $THERMALIZE = "TRUE" ]; then
+
+    if [ $USE_MULTIPLE_CHAINS = "FALSE" ]; then
+	printf "\n\e[0;31mOption --thermalize implemented ONLY combined with --useMultipleChains option! Aborting...\n\n\e[0m"; exit -1
+    fi
+    if [ $MEASURE_PBP = "1" ]; then
+	printf "\n\e[1;33;4mMeasurement of PBP switched off during thermalization!!\n\e[0m"
+	MEASURE_PBP=0
+    fi
     ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
     ProduceInputFileAndJobScriptForEachBeta
     SubmitJobsForValidBetaValues #TODO: Declare all possible local variable in this function as local!

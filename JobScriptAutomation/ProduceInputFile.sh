@@ -138,9 +138,11 @@ else
     echo "integrationsteps0=${INTSTEPS0_ARRAY[${BETAVALUES_COPY[$INDEX]}]}" >> $INPUTFILE_GLOBALPATH
     echo "integrationsteps1=${INTSTEPS1_ARRAY[${BETAVALUES_COPY[$INDEX]}]}" >> $INPUTFILE_GLOBALPATH
     echo "savefrequency=$NSAVE" >> $INPUTFILE_GLOBALPATH
-    echo "startcondition=${STARTCONDITION[$INDEX]}" >> $INPUTFILE_GLOBALPATH
-    if [[ "${STARTCONDITION[$INDEX]}" == "continue" ]]; then
-	echo "sourcefile=$HOME_BETADIRECTORY/${CONFIGURATION_SOURCEFILE[$INDEX]}" >> $INPUTFILE_GLOBALPATH
+    if [ ${STARTCONFIGURATION_GLOBALPATH[${BETAVALUES_COPY[$INDEX]}]} == "notFoundHenceStartFromHot" ]; then
+	echo "startcondition=hot" >> $INPUTFILE_GLOBALPATH
+    else
+	echo "startcondition=continue" >> $INPUTFILE_GLOBALPATH
+	echo "sourcefile=${STARTCONFIGURATION_GLOBALPATH[${BETAVALUES_COPY[$INDEX]}]}" >> $INPUTFILE_GLOBALPATH
     fi
     if [ $USE_MULTIPLE_CHAINS == "TRUE" ]; then
 	echo "host_seed=$(echo ${BETAVALUES_COPY[$INDEX]} | awk '{split($1, result, "_"); print substr(result[2],2)}')" >> $INPUTFILE_GLOBALPATH
