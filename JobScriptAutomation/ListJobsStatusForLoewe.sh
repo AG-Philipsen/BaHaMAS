@@ -2,6 +2,17 @@
 source $HOME/Script/UtilityFunctions.sh || exit -2
 #------------------------------------------------------------------------------------#
 
+function __static__ExtractParameterFromJOBNAME(){
+    local PREFIX=$1
+    #Here it is supposed that the name of the job is ${PARAMETERS_STRING}_(...)
+    if [ "$(echo $JOBNAME | grep -o "_\?${PREFIX}[^_]*_" | wc -l)" -gt 1 ]; then
+	printf "\n \e[0;31m Parameter \"$PREFIX\" appears more than once in one queued jobname (\"$JOBNAME\")! Aborting...\n\n\e[0m\n"
+        exit -1
+    fi
+    PARAMETERS=$(echo $JOBNAME | grep -o "_\?${PREFIX}[^_]*_" | sed -e 's/_//g' | sed 's/'$PREFIX'//g')
+    echo "$PARAMETERS"
+}
+
 function ListJobStatus_Loewe(){
     	 
 	 local JOBS_STATUS_FILE="jobs_status_$PARAMETERS_STRING.txt"
@@ -19,24 +30,21 @@ function ListJobStatus_Loewe(){
 	     local JOBID_ARRAY=( $(squeue | awk 'NR>1{print $1}') )
 	     local STATUS=( )
 	     for JOBID in ${JOBID_ARRAY[@]}; do
-		 
+
 		 local JOBNAME=$(scontrol show job $JOBID | grep "Name=" | sed "s/^.*Name=\(.*$\)/\1/")
-		 local JOBNAME_CHEMPOT=$(echo $JOBNAME | awk -v pref=$CHEMPOT_PREFIX -v pref_len=${#CHEMPOT_PREFIX} '{print substr($0, index($0, pref)+pref_len)}' \
-                                                       | awk '{if(index($0, "_")) {print substr($0, 1, index($0, "_")-1)} else {print $0}}')
- 		 local JOBNAME_NTIME=$(echo $JOBNAME | awk -v pref=$NTIME_PREFIX -v pref_len=${#NTIME_PREFIX} '{print substr($0, index($0, pref)+pref_len)}' \
-                                                     | awk '{if(index($0, "_")) {print substr($0, 1, index($0, "_")-1)} else {print $0}}')
-		 local JOBNAME_NSPACE=$(echo $JOBNAME | awk -v pref=$NSPACE_PREFIX -v pref_len=${#NSPACE_PREFIX} '{print substr($0, index($0, pref)+pref_len)}' \
-                                                      | awk '{if(index($0, "_")) {print substr($0, 1, index($0, "_")-1)} else {print $0}}')
-		 local JOBNAME_KAPPA=$(echo $JOBNAME | awk -v pref=$KAPPA_PREFIX -v pref_len=${#KAPPA_PREFIX} '{print substr($0, index($0, pref)+pref_len)}' \
-                                                     | awk '{if(index($0, "_")) {print substr($0, 1, index($0, "_")-1)} else {print $0}}')
+		 local JOBNAME_CHEMPOT=$(__static__ExtractParameterFromJOBNAME $CHEMPOT_PREFIX)
+		 local JOBNAME_NTIME=$(__static__ExtractParameterFromJOBNAME $NTIME_PREFIX)
+		 local JOBNAME_NSPACE=$(__static__ExtractParameterFromJOBNAME $NSPACE_PREFIX)
+		 local JOBNAME_KAPPA=$(__static__ExtractParameterFromJOBNAME $KAPPA_PREFIX)
+
 		 local JOBNAME_BETAS=$(echo $JOBNAME | awk -v pref=$BETA_PREFIX -v pref_len=${#BETA_PREFIX} '{print substr($0, index($0, pref))}')
 		 if [[ ! $JOBNAME_BETAS =~ b[[:digit:]]{1}[.]{1}[[:digit:]]{4}$ ]]; then
                      continue
 		 fi
 		 JOBNAME_BETAS=( `echo $JOBNAME_BETAS | sed 's/_/ /g' | sed "s/$BETA_PREFIX//g"` )
 		 
-		 if ElementInArray "$BETA" "${JOBNAME_BETAS[@]}" && [ $JOBNAME_KAPPA = $KAPPA ] && [ $JOBNAME_NTIME = $NTIME ] \
-                                                                 && [ $JOBNAME_NSPACE = $NSPACE ] && [ $JOBNAME_CHEMPOT = $CHEMPOT ]; then
+		 if ElementInArray "$BETA" "${JOBNAME_BETAS[@]}" && [ "$JOBNAME_KAPPA" = $KAPPA ] && [ "$JOBNAME_NTIME" = $NTIME ] \
+                                                                 && [ "$JOBNAME_NSPACE" = $NSPACE ] && [ "$JOBNAME_CHEMPOT" = $CHEMPOT ]; then
 		     local TMP_STATUS=$(scontrol show job $JOBID | grep "^[[:blank:]]*JobState=" | sed "s/^.*JobState=\([[:alpha:]]*\).*$/\1/")
 		     if [ "$TMP_STATUS" == "RUNNING" ] || [ "$TMP_STATUS" == "PENDING" ]; then
 			 STATUS+=( "$TMP_STATUS" )
@@ -57,7 +65,6 @@ function ListJobStatus_Loewe(){
 	     local STDOUTPUT_FILE=`ls -lt $BETA_PREFIX$BETA | awk '{if($9 ~ /^hmc.[[:digit:]]+.out$/){print $9}}' | head -n1`
 	     local STDOUTPUT_GLOBALPATH="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA/$STDOUTPUT_FILE"
 	     #-------------------------------------------------------------------------------------------------------------------------#
-
 	     if [ -f $STDOUTPUT_GLOBALPATH ]; then
 		 if [[ $STATUS == "RUNNING" ]]; then
 		     local START_TIME_SEC=$(TimeToSeconds `grep "saving current prng state to file" $STDOUTPUT_GLOBALPATH | tail -n2 | awk '{print substr($1,2,8)}' | head -n1`)
@@ -110,12 +117,14 @@ function ListJobStatus_Loewe(){
 	     if [ -f $OUTPUTFILE_GLOBALPATH ]; then
 		 
 		 local TO_BE_CLEANED=$(awk 'BEGIN{traj_num = -1; file_to_be_cleaned=0}{if($1>traj_num){traj_num = $1} else {file_to_be_cleaned=1; exit;}}END{print file_to_be_cleaned}' $OUTPUTFILE_GLOBALPATH)
+
 		 if [ $TO_BE_CLEANED -eq 0 ]; then
 		     local TRAJECTORIES_DONE=$(wc -l $OUTPUTFILE_GLOBALPATH | awk '{print $1}')
 		 else
 		     local TRAJECTORIES_DONE=$(awk 'NR==1{startTr=$1}END{print $1 - startTr + 1}' $OUTPUTFILE_GLOBALPATH)
 		 fi
 		 local ACCEPTANCE=$(awk '{ sum+=$11} END {printf "%5.2f", 100*sum/(NR)}' $OUTPUTFILE_GLOBALPATH)
+
 		 if [ $TRAJECTORIES_DONE -ge 1000 ]; then
 		     local ACCEPTANCE_LAST=$(tail -n1000 $OUTPUTFILE_GLOBALPATH | awk '{ sum+=$11} END {printf "%5.2f", 100*sum/(NR)}')
 		 else
