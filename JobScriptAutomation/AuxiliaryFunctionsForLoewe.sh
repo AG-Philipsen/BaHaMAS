@@ -259,14 +259,19 @@ function ProcessBetaValuesForContinue_Loewe() {
 	    for FILE in $WORK_BETADIRECTORY/conf.* $WORK_BETADIRECTORY/prng.*; do
 		#Move to trash only conf.xxxxx prng.xxxxx files or conf.xxxxx_pbp.dat files where xxxxx are digits
 		local NUMBER_FROM_FILE=$(echo "$FILE" | grep -o "\(\(conf.\)\|\(prng.\)\)[[:digit:]]\{5\}\(_pbp.dat\)\?$" | sed 's/\(\(conf.\)\|\(prng.\)\)\([[:digit:]]\+\).*/\4/' | sed 's/^0*//')
-		if [ "$NUMBER_FROM_FILE" != "" ] && [ $NUMBER_FROM_FILE -gt ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} ]; then
-		    mv $FILE $TRASH_NAME
+		if [ "$NUMBER_FROM_FILE" != "" ]; then
+		    if [ $NUMBER_FROM_FILE -gt ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} ]; then
+			mv $FILE $TRASH_NAME
+		    elif [ $NUMBER_FROM_FILE -eq ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} ] && [ $(echo "$FILE" | grep -o "conf[.][[:digit:]]\{5\}_pbp[.]dat$" | wc -l) -eq 1 ]; then
+			echo "HERE"
+			mv $FILE $TRASH_NAME
+		    fi
 		fi
 	    done
 	    #Move to trash conf.save and prng.save files if existing
 	    if [ -f $WORK_BETADIRECTORY/conf.save ]; then mv $WORK_BETADIRECTORY/conf.save $TRASH_NAME; fi
 	    if [ -f $WORK_BETADIRECTORY/prng.save ]; then mv $WORK_BETADIRECTORY/prng.save $TRASH_NAME; fi
-	    #Copy the hmc_output file to Trash and edit it leaving out all the trajectories after ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}
+	    #Copy the hmc_output file to Trash and edit it leaving out all the trajectories after ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}, including ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}
 	    cp $OUTPUTFILE_GLOBALPATH $TRASH_NAME || exit 2 
 	    local LINES_TO_BE_CANCELED_IN_OUTPUTFILE=$(tac $OUTPUTFILE_GLOBALPATH | awk -v resumeFrom=${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} 'BEGIN{found=0}{if($1==resumeFrom){found=1; print NR; exit}}END{if(found==0){print -1}}')
 	    if [ $LINES_TO_BE_CANCELED_IN_OUTPUTFILE -eq -1 ]; then
@@ -275,8 +280,8 @@ function ProcessBetaValuesForContinue_Loewe() {
 		PROBLEM_BETA_ARRAY+=( $BETA )
 		continue
 	    fi
-	    #The -1 in the following line is not a typo, it has to be -1 since the number was recovered with tac backwards
-	    head -n -$(($LINES_TO_BE_CANCELED_IN_OUTPUTFILE-1)) $OUTPUTFILE_GLOBALPATH > ${OUTPUTFILE_GLOBALPATH}.temporaryCopyThatHopefullyDoesNotExist || exit 2
+	    #By doing head -n -$LINES_TO_BE_CANCELED_IN_OUTPUTFILE also the line number ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}
+	    head -n -$LINES_TO_BE_CANCELED_IN_OUTPUTFILE $OUTPUTFILE_GLOBALPATH > ${OUTPUTFILE_GLOBALPATH}.temporaryCopyThatHopefullyDoesNotExist || exit 2
 	    mv ${OUTPUTFILE_GLOBALPATH}.temporaryCopyThatHopefullyDoesNotExist $OUTPUTFILE_GLOBALPATH || exit 2
 	#If resumefrom has not been given in the betasfile check in the WORK_BETADIRECTORY if conf.save is present: if yes, use it, otherwise use the last checkpoint
 	elif [ -f $WORK_BETADIRECTORY/conf.save ]; then
@@ -362,7 +367,7 @@ function ProcessBetaValuesForContinue_Loewe() {
 	# NOTE: If --measurements=... is (also) given, then --measurements will be used!
 	if [ $CONTINUE_NUMBER -ne 0 ]; then
 	    if [ -f $OUTPUTFILE_GLOBALPATH ]; then
-		local NUMBER_DONE_TRAJECTORIES=$(awk 'END{print $1}' $OUTPUTFILE_GLOBALPATH)
+		local NUMBER_DONE_TRAJECTORIES=$(awk 'END{print $1 + 1}' $OUTPUTFILE_GLOBALPATH) #The +1 is here necessary because the first tr. is supposed to be the number 0.
 	    else
 		local NUMBER_DONE_TRAJECTORIES=0
 	    fi
