@@ -55,14 +55,10 @@ function ProcessBetaValuesForSubmitOnly_Loewe() {
 	else
 	    #$HOME_BETADIRECTORY already exists. Check if there are files in $HOME_BETADIRECTORY. 
 	    if [ -f "$INPUTFILE_GLOBALPATH" ]; then
-		# In the home betadirectory there should be the inputfile and sometimes
-		# the thermalized configuration whose name start with "conf.". 
-		if [ $(ls $HOME_BETADIRECTORY | wc -l) -eq 1 ]; then
-		    printf "\n\e[0;32m The simulation with beta = ${BETAVALUES_COPY[$BETA]} start from a HOT configuration!\n\e[0m"
-		elif [ $(ls $HOME_BETADIRECTORY | wc -l) -eq 2 ] && [ $(ls $HOME_BETADIRECTORY | grep "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETAVALUES_COPY[$BETA]}*" | wc -l) -eq 1 ]; then
-		    printf "\n\e[0;32m The simulation with beta = ${BETAVALUES_COPY[$BETA]} start from a thermalized configuration!\n\e[0m"
-		else
-		    printf "\n\e[0;31m There are already files in $HOME_BETADIRECTORY. The value beta = ${BETAVALUES_COPY[$BETA]} will be skipped!\n\n\e[0m"
+		# In the home betadirectory there should be ONLY the inputfile
+		if [ $(ls $HOME_BETADIRECTORY | wc -l) -ne 1 ]; then
+		    printf "\n\e[0;31m There are already files in $HOME_BETADIRECTORY beyond the input file."
+		    printf " The value beta = ${BETAVALUES_COPY[$BETA]} will be skipped!\n\n\e[0m"
 		    PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$BETA]} )
 		    unset BETAVALUES_COPY[$BETA] #Here BETAVALUES_COPY becomes sparse
 		    continue
