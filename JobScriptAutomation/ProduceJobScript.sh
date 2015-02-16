@@ -328,5 +328,23 @@ else
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
 	echo "rm \$dir$INDEX/$HMC_FILENAME || exit -2 " >> $JOBSCRIPT_GLOBALPATH
     done
+    echo "" >> $JOBSCRIPT_GLOBALPATH
+    if [ $THERMALIZE = "TRUE" ]; then
+	echo "# Copy last configuration to Thermalized Configurations folder" >> $JOBSCRIPT_GLOBALPATH
+	if [ $BETA_POSTFIX == "_thermalizeFromHot" ]; then
+	    for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
+		echo "cp \$workdir$INDEX/conf.save " \
+                         "${THERMALIZED_CONFIGURATIONS_PATH}/conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA_FOR_JOBSCRIPT[$INDEX]%%_*}_fromHot${MEASUREMENTS} " \
+                         "|| exit -2" >> $JOBSCRIPT_GLOBALPATH
+	    done
+	elif [ $BETA_POSTFIX == "_thermalizeFromConf" ]; then
+	    for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
+		echo "cp \$workdir$INDEX/conf.save " \
+                         "${THERMALIZED_CONFIGURATIONS_PATH}/conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA_FOR_JOBSCRIPT[$INDEX]%%_*}_fromConf${MEASUREMENTS} " \
+                         "|| exit -2" >> $JOBSCRIPT_GLOBALPATH		
+	    done
+	fi
+    fi
+
 fi
 
