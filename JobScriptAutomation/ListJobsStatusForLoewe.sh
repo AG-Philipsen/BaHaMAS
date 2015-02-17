@@ -39,11 +39,11 @@ function __static__ExtractBetasFromJOBNAME(){
 function __static__ExtractPostfixFromJOBNAME(){
     local POSTFIX=${JOBNAME##*_}
     if [ "$POSTFIX" == "TC" ]; then
-	echo "_thermalizeFromConf"
+	echo "thermalizeFromConf"
     elif [ "$POSTFIX" == "TH" ]; then
-	echo "_thermalizeFromHot"
+	echo "thermalizeFromHot"
     elif [ $(echo $JOBNAME | grep -o "_${SEED_PREFIX}[[:digit:]]\{4\}" | wc -l) -ne 0 ]; then
-	echo "_continueWithNewChain"
+	echo "continueWithNewChain"
     else
 	echo ""
     fi
@@ -57,7 +57,7 @@ function ListJobStatus_Loewe(){
     rm -f $JOBS_STATUS_FILE
     
     printf "\n\e[0;36m=====================================================================================================================\n\e[0m"
-    printf "\e[0;35m%s\t\t%s\t  %s\t%s\t  %s\t%s\n\e[0m"   "Beta"   "Num. Traj. (Acc.) [Last 1000] int0-1"   "Status"   "Max DS" "Last tr. finished" "Last tr. in"
+    printf "\e[0;35m%s\t\t  %s\t  %s\t%s\t  %s\t%s\n\e[0m"   "Beta"   "Num. Traj. (Acc.) [Last 1000] int0-1"   "Status"   "Max DS" "Last tr. finished" "Last tr. in"
     printf "%s\t\t%s\t\t%s\t\t%s\n"   "Beta"   "Num. Traj. (Acc.) [Last 1000] int0-1"   "Status"   "Max DS" >> $JOBS_STATUS_FILE
     
     for BETA in ${BETA_PREFIX}[[:digit:]]*; do
@@ -68,7 +68,9 @@ function ListJobStatus_Loewe(){
 	   [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}_"$SEED_PREFIX"[[:digit:]]{4}_continueWithNewChain$ ]] &&
 	   [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}_"$SEED_PREFIX"[[:digit:]]{4}_thermalizeFromHot$ ]] &&
 	   [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}_"$SEED_PREFIX"[[:digit:]]{4}_thermalizeFromConf$ ]]; then continue; fi
-	
+
+	local POSTFIX_FROM_FOLDER=$(echo ${BETA##*_} | grep -o "[[:alpha:]]\+\$")
+
 	#Check if the $BETA run is in the queue or not
 	local JOBID_ARRAY=( $(squeue | awk 'NR>1{print $1}') )
 	local STATUS=( )
@@ -81,7 +83,6 @@ function ListJobStatus_Loewe(){
 	    local JOBNAME_KAPPA=$(__static__ExtractParameterFromJOBNAME $KAPPA_PREFIX)
       	    local JOBNAME_BETAS=( $(__static__ExtractBetasFromJOBNAME) )
 	    local JOBNAME_POSTFIX=$(__static__ExtractPostfixFromJOBNAME)
-	    local POSTFIX_FROM_FOLDER=$(echo ${BETA##*_} | grep -o "[[:alpha:]]\+\$")
 
 
 	    #echo "$JOBNAME_CHEMPOT   $JOBNAME_NTIME   $JOBNAME_NSPACE   $JOBNAME_KAPPA"
@@ -95,7 +96,7 @@ function ListJobStatus_Loewe(){
 	    #echo ""
 	    #echo ""
 
-	    if ElementInArray "${BETA_PREFIX}${BETA%_*}" "${JOBNAME_BETAS[@]}" && [ "$JOBNAME_POSTFIX" == "_$POSTFIX_FROM_FOLDER" ] \
+	    if ElementInArray "${BETA_PREFIX}${BETA%_*}" "${JOBNAME_BETAS[@]}" && [ "$JOBNAME_POSTFIX" == "$POSTFIX_FROM_FOLDER" ] \
 		&& [ "$JOBNAME_KAPPA" = $KAPPA ] && [ "$JOBNAME_NTIME" = $NTIME ] \
                 && [ "$JOBNAME_NSPACE" = $NSPACE ] && [ "$JOBNAME_CHEMPOT" = $CHEMPOT ]; then
 		local TMP_STATUS=$(scontrol show job $JOBID | grep "^[[:blank:]]*JobState=" | sed "s/^.*JobState=\([[:alpha:]]*\).*$/\1/")
@@ -181,7 +182,7 @@ function ListJobStatus_Loewe(){
 	    if [ $TRAJECTORIES_DONE -ge 1000 ]; then
 		local ACCEPTANCE_LAST=$(tail -n1000 $OUTPUTFILE_GLOBALPATH | awk '{ sum+=$11} END {printf "%5.2f", 100*sum/(NR)}')
 	    else
-		local ACCEPTANCE_LAST=0
+		local ACCEPTANCE_LAST=" --- "
 	    fi
 	    local MAX_DELTAS=$(awk 'BEGIN {max=0} {if(sqrt($8^2)>max){max=sqrt($8^2)}} END {printf "%6g", max}' $OUTPUTFILE_GLOBALPATH)
 	    if [[ $STATUS == "RUNNING" ]]; then
@@ -214,7 +215,7 @@ function ListJobStatus_Loewe(){
 	
 #	     printf "\e[0;36m%s\t\t\e[0;$((36-$TO_BE_CLEANED*5))m%8s\e[0;36m (\e[0;$(GoodAcc $ACCEPTANCE)m%s %%\e[0;36m) [%s %%] %s-%s\t \e[0;$(ColorStatus $STATUS)m%9s\e[0;36m\t%s\t   \e[0;$(ColorTime $TIME_FROM_LAST_MODIFICATION)m%s\e[0;36m\t   \e[0;$(( $AV_DURATION_LAST_TR==0 ? 33 : 32 ))m%s\n\e[0m" \
 	printf \
-"\e[0;36m%-9s\t\
+"\e[0;36m%-15s\t  \
 \e[0;$((36-$TO_BE_CLEANED*5))m%8s\e[0;36m \
 (\e[0;$(GoodAcc $ACCEPTANCE)m%s %%\e[0;36m) \
 [%s %%] \
@@ -223,7 +224,7 @@ function ListJobStatus_Loewe(){
 \t%s\t   \
 \e[0;$(ColorTime $TIME_FROM_LAST_MODIFICATION)m%s\e[0;36m\t   \
 \e[0;$(( $AV_DURATION_LAST_TR==0 ? 33 : 32 ))m%s\n\e[0m" \
-	    "${BETA%_*}" \
+	    "$(GetShortenedBetaString)" \
 	    "$TRAJECTORIES_DONE" \
 	    "$ACCEPTANCE" \
 	    "$ACCEPTANCE_LAST" \
@@ -241,6 +242,18 @@ function ListJobStatus_Loewe(){
 	
     done #Loop on BETA
     printf "\e[0;36m=====================================================================================================================\n\e[0m"
+}
+
+function GetShortenedBetaString(){
+    if [ "$POSTFIX_FROM_FOLDER" == "continueWithNewChain" ]; then
+	echo "${BETA%_*}_NC"
+    elif [ "$POSTFIX_FROM_FOLDER" == "thermalizeFromHot" ]; then
+	echo "${BETA%_*}_fH"
+    elif [ "$POSTFIX_FROM_FOLDER" == "thermalizeFromConf" ]; then
+	echo "${BETA%_*}_fC"
+    else 
+	echo "${BETA%_*}"
+    fi
 }
 
 function GoodAcc(){
