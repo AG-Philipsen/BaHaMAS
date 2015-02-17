@@ -13,7 +13,7 @@ function ProduceInputFileAndJobScriptForEachBeta_Loewe(){
 	local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$BETA]}"
 	if [ -d "$HOME_BETADIRECTORY" ]; then
 	    if [ $(ls $HOME_BETADIRECTORY | wc -l) -gt 0 ]; then
-		printf "\n\e[0;31m There are already files in $HOME_BETADIRECTORY. The value beta = ${BETAVALUES_COPY[$BETA]} will be skipped!\n\n\e[0m"
+		printf "\n\e[0;31m There are already files in $HOME_BETADIRECTORY.\n The value beta = ${BETAVALUES_COPY[$BETA]} will be skipped!\n\n\e[0m"
 		PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$BETA]} )
 		unset BETAVALUES_COPY[$BETA] #Here BETAVALUES_COPY becomes sparse
 		continue
@@ -533,16 +533,27 @@ function __static__PackBetaValuesPerGpuAndCreateJobScriptFiles(){
 	local BETAS_STRING="$(__static__GetJobBetasStringUsing ${BETA_FOR_JOBSCRIPT[@]})"
 	local JOBSCRIPT_NAME="$(__static__GetJobScriptName ${BETAS_STRING})"
 	local JOBSCRIPT_GLOBALPATH="${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER/$JOBSCRIPT_NAME"
-	if [ -e $JOBSCRIPT_GLOBALPATH ]; then
-	    mv $JOBSCRIPT_GLOBALPATH ${JOBSCRIPT_GLOBALPATH}_$(date +'%F_%H%M') || exit -2
-	fi
-	#Call the file to produce the jobscript file
-	. $PRODUCEJOBSCRIPTSH
-	if [ -e $JOBSCRIPT_GLOBALPATH ]; then
-	    SUBMIT_BETA_ARRAY+=( "${BETAS_STRING}" )
+	if [ $SUBMITONLY = "FALSE" ]; then
+	    if [ -e $JOBSCRIPT_GLOBALPATH ]; then
+		mv $JOBSCRIPT_GLOBALPATH ${JOBSCRIPT_GLOBALPATH}_$(date +'%F_%H%M') || exit -2
+	    fi
+	    #Call the file to produce the jobscript file
+	    . $PRODUCEJOBSCRIPTSH
+	    if [ -e $JOBSCRIPT_GLOBALPATH ]; then
+		SUBMIT_BETA_ARRAY+=( "${BETAS_STRING}" )
+	    else
+		printf "\n\e[0;31m Jobscript \"$JOBSCRIPT_NAME\" failed to be created!\n\n\e[0m"
+		PROBLEM_BETA_ARRAY+=( "${BETAS_STRING}" )
+		continue
+	    fi
 	else
-	    printf "\n\e[0;31m Jobscript \"$JOBSCRIPT_NAME\" failed to be created!\n\n\e[0m"
-	    PROBLEM_BETA_ARRAY+=( "${BETAS_STRING}" )
+	    if [ -e $JOBSCRIPT_GLOBALPATH ]; then
+		SUBMIT_BETA_ARRAY+=( "${BETAS_STRING}" )
+	    else
+		printf "\n\e[0;31m Jobscript \"$JOBSCRIPT_NAME\" not existing with --submitonly option given!! Situation to be checked...\n\n\e[0m"
+		PROBLEM_BETA_ARRAY+=( "${BETAS_STRING}" )
+		continue
+	    fi
 	fi
     done
     printf "\e[0;36m=================================================================================\n\e[0m"
