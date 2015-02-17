@@ -298,6 +298,7 @@ else
     echo "wait" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "err=\`echo \$?\`" >> $JOBSCRIPT_GLOBALPATH
+    echo "echo \"error_code=\$err\"" >> $JOBSCRIPT_GLOBALPATH    
     echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"---------------------------\"" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
