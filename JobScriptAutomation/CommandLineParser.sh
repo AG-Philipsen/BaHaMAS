@@ -89,7 +89,9 @@ MUTUALLYEXCLUSIVEOPTS_PASSED=( )
                     exit -1
 		else
 		    USE_MULTIPLE_CHAINS="TRUE"
-		    BETA_POSTFIX="_continueWithNewChain"
+		    if [ $THERMALIZE = "FALSE" ]; then
+		    	BETA_POSTFIX="_continueWithNewChain"
+		    fi
                 fi
                 shift ;;
 	    --partition=* )		 LOEWE_PARTITION=${1#*=}; 
