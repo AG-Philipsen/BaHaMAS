@@ -101,7 +101,13 @@ function ReadBetaValuesFromFile(){
     if [ ${#INTSTEPS0_ARRAY_TEMP[@]} -ne 0 ]; then #If the first intsteps array is empty the second CANNOT be not empt (because of how I read them with awk from file)
 	for STEPS in ${INTSTEPS0_ARRAY_TEMP[@]} ${INTSTEPS1_ARRAY_TEMP[@]}; do
 	    if [[ ! $STEPS =~ ^[[:digit:]]{1,2}$ ]]; then
-		printf "\n\e[0;31m Invalid integrator step entry in betas file (only one or two digits admitted)! Aborting...\n\n\e[0m"
+		printf "\n\e[0;31m Invalid integrator step entry in betas file (only one or two digits admitted)! Aborting...\n\e[0m"
+	        if [[ $STEPS =~ ^[[:digit:]]{4}$ ]]; then
+		    printf "\e[0;31m   \e[4mHINT\e[0;31m: Maybe your intention was to use the \e[1m--useMultipleChains\e[0;31m option...\n\n\e[0m"
+		    exit -1
+	    	else
+		    printf "\n"
+		fi
 		exit -1
 	    fi
 	done
