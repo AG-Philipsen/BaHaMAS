@@ -421,7 +421,7 @@ function ProcessBetaValuesForContinue_Loewe() {
         printf "\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
 	#Modify remaining command line specified options
 	for OPT in ${SPECIFIED_COMMAND_LINE_OPTIONS[@]}; do
-	    if [[ "$OPT" != --walltime* ]] && [[ "$OPT" != --pbp* ]] && [[ "$OPT" != --intsteps0* ]] && [[ "$OPT" != --intsteps1* ]]; then
+	    if [[ "$OPT" != --useMultipleChains ]] && [[ "$OPT" != --walltime* ]] && [[ "$OPT" != --pbp* ]] && [[ "$OPT" != --intsteps0* ]] && [[ "$OPT" != --intsteps1* ]]; then
 		__static__ModifyOptionInInputFile ${OPT#"--"*}
 		[ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue 2
 		printf "\e[0;32m Set option \e[0;35m$OPT\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
