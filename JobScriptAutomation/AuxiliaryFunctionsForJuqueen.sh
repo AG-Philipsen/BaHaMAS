@@ -1,3 +1,8 @@
+# Load auxiliary bash files that will be used.
+source $HOME/Script/JobScriptAutomation/ProduceInputFileForJuqueen.sh || exit -2
+source $HOME/Script/JobScriptAutomation/ProduceJobScriptForJuqueen.sh || exit -2
+#------------------------------------------------------------------------------------#
+
 # Collection of function needed in the job handler script (mostly in AuxiliaryFunctions).
 
 function CheckParallelizationTmlqcdForJuqueen(){
@@ -93,8 +98,8 @@ function ProduceInputFileAndJobScriptForEachBeta_Juqueen(){
 	
         # Build jobscript and input file and put them together with hmc_tm into the $HOME_BETADIRECTORY	
 	printf "\e[0;34m Producing files inside $HOME_BETADIRECTORY/... \n\e[0m"
-	. $PRODUCEJOBSCRIPTSH	
-	. $PRODUCEINPUTFILESH	
+	ProduceJobscript_Juqueen
+	ProduceInputFile_Juqueen
 	cp $HMC_GLOBALPATH $HOME_BETADIRECTORY || exit -2
 	
 	if [ -f "$INPUTFILE_GLOBALPATH" ] && [ -f "$JOBSCRIPT_GLOBALPATH" ]; then

@@ -1,3 +1,8 @@
+# Load auxiliary bash files that will be used.
+source $HOME/Script/JobScriptAutomation/ProduceInputFileForLoewe.sh || exit -2
+source $HOME/Script/JobScriptAutomation/ProduceJobScriptForLoewe.sh || exit -2
+#------------------------------------------------------------------------------------#
+
 # Collection of function needed in the job handler script (mostly in AuxiliaryFunctions).
 
 function ProduceInputFileAndJobScriptForEachBeta_Loewe(){
@@ -31,7 +36,7 @@ function ProduceInputFileAndJobScriptForEachBeta_Loewe(){
 	printf "\e[0;36m   Configuration used: \"${STARTCONFIGURATION_GLOBALPATH[${BETAVALUES_COPY[$INDEX]}]}\"\n\e[0m"
 	#Call the file to produce the input file
 	local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$INPUTFILE_NAME"
-	. $PRODUCEINPUTFILESH	    
+	ProduceInputFile_Loewe
     done
     # Partition the BETAVALUES_COPY array into group of GPU_PER_NODE and create the JobScript files inside the JOBSCRIPT_FOLDER
     mkdir -p ${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER || exit -2
@@ -548,7 +553,7 @@ function __static__PackBetaValuesPerGpuAndCreateJobScriptFiles(){
 		mv $JOBSCRIPT_GLOBALPATH ${JOBSCRIPT_GLOBALPATH}_$(date +'%F_%H%M') || exit -2
 	    fi
 	    #Call the file to produce the jobscript file
-	    . $PRODUCEJOBSCRIPTSH
+	    ProduceJobscript_Loewe
 	    if [ -e $JOBSCRIPT_GLOBALPATH ]; then
 		SUBMIT_BETA_ARRAY+=( "${BETAS_STRING}" )
 	    else
