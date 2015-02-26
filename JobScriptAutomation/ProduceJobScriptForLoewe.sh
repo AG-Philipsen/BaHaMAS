@@ -85,7 +85,7 @@ function ProduceJobscript_Loewe(){
 	echo "# Backup files" >> $JOBSCRIPT_GLOBALPATH
 	for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
 	    echo "cd \$dir$INDEX || exit 2" >> $JOBSCRIPT_GLOBALPATH
-	    if [ $MEASURE_PBP -ne 0 ]; then
+	    if [ $MEASURE_PBP = "FALSE" ]; then
 		echo "rsync -quavz \$workdir$INDEX/conf*pbp* \$dir$INDEX/Pbp || exit 2" >> $JOBSCRIPT_GLOBALPATH
 	    fi
 	    echo "cp \$workdir$INDEX/$OUTPUTFILE_NAME \$dir$INDEX/$OUTPUTFILE_NAME.\$SLURM_JOB_ID" >> $JOBSCRIPT_GLOBALPATH

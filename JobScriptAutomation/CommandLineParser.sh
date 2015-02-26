@@ -25,28 +25,28 @@ MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 		echo "  -f | --confSaveFrequency           ->    default value = $NSAVE"
 		echo "  --intsteps0                        ->    default value = $INTSTEPS0"
 		echo "  --intsteps1                        ->    default value = $INTSTEPS1"
-		echo -e "  -u | --useMultipleChains             ->    if given, use multiple chain \e[1;32m(this implies that in the betas file the seed column is present)\e[0;32m"
+		echo -e "  -u | --useMultipleChains           ->    if given, use multiple chain \e[1;32m(this implies that in the betas file the seed column is present)\e[0;32m"
 		if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
 		    echo "  --intsteps2                        ->    default value = $INTSTEPS2"
-		    echo "  -w | --walltime                         ->    default value = $WALLTIME [hours:min:sec]"
+		    echo "  -w | --walltime                    ->    default value = $WALLTIME [hours:min:sec]"
 		    echo "  --bgsize                           ->    default value = $BGSIZE"
 		    echo "  --nrxprocs                         ->    default value = $NRXPROCS"
 		    echo "  --nryprocs                         ->    default value = $NRYPROCS"
 		    echo "  --nrzprocs                         ->    default value = $NRZPROCS"
 		    echo "  --ompnumthreads                    ->    default value = $OMPNUMTHREADS"
 		else
-		    echo "  -w | --walltime                         ->    default value = $WALLTIME [days-hours:min:sec]"
+		    echo "  -w | --walltime                    ->    default value = $WALLTIME [days-hours:min:sec]"
 			echo "  -p | --doNotMeasurePbp             ->    default value = $MEASURE_PBP"
 		    echo "  --partition                        ->    default value = $LOEWE_PARTITION"
 		    echo "  --constraint                       ->    default value = $LOEWE_CONSTRAINT"
 		    echo "  --node                             ->    default value = automatically assigned"
 		fi
-		echo -e "  \e[0;34m -s | --submit\e[0;32m                           ->    jobs will be submitted"
+		echo -e "  \e[0;34m-s | --submit\e[0;32m                      ->    jobs will be submitted"
 		echo -e "  \e[0;34m--submitonly\e[0;32m                       ->    jobs will be submitted (no files are created)"
-		echo -e "  \e[0;34m-t | --thermalize\e[0;32m                       ->    The thermalization is done." #TODO: Explain how!
-		echo -e "  \e[0;34m--c | --continue\e[0;32m   ->    Unfinished jobs will be continued up to the nr. of measurements specified in the input file."
-		echo -e "  \e[0;34m-c=[number] | --continue=[number]\e[0;32m   ->    If a number is specified, finished jobs will be continued up to the specified number."
-                if [ "$CLUSTER_NAME" = "LOEWE" ]; then
+		echo -e "  \e[0;34m-t | --thermalize\e[0;32m                  ->    The thermalization is done." #TODO: Explain how!
+		echo -e "  \e[0;34m-c | --continue\e[0;32m                    ->    Unfinished jobs will be continued up to the nr. of measurements specified in the input file."
+		echo -e "  \e[0;34m-c=[number] | --continue=[number]\e[0;32m  ->    If a number is specified, finished jobs will be continued up to the specified number."
+        if [ "$CLUSTER_NAME" = "LOEWE" ]; then
 		    echo -e "                                     ->    To resume a simulation from a given trajectory, add \e[0;34mresumefrom=[number]\e[0;32m in the betasfile."
 		fi
 		echo -e "  \e[0;34m-l | --liststatus\e[0;32m                  ->    The local measurement status for all beta will be displayed"

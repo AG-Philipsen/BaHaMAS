@@ -166,7 +166,7 @@ function ProcessBetaValuesForContinue_Loewe() {
     local LOCAL_SUBMIT_BETA_ARRAY=()
     #Remove -c | --continue option from command line
     for INDEX in "${!SPECIFIED_COMMAND_LINE_OPTIONS[@]}"; do
-	if [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == --continue* ]] && [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == -c* ]]; then
+	if [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == --continue* ]] || [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == -c* ]]; then
 	    unset SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]
 	    SPECIFIED_COMMAND_LINE_OPTIONS=( "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}" )
 	fi
@@ -529,10 +529,10 @@ function ProcessBetaValuesForContinue_Loewe() {
 	    local EXCLUDE_COMMAND_LINE_OPTIONS=( "-u" "--useMultipleChains" "-w" "--walltime" "-p" "--doNotMeasurePbp" "--intsteps0" "--intsteps1" )
 	    
 	    for OPT in ${SPECIFIED_COMMAND_LINE_OPTIONS[@]}; do
-		    if ElementInArray $OPT 	${EXCLUDE_COMMAND_LINE_OPTIONS[@]}; then
+		    if ElementInArray ${OPT%"="*} 	${EXCLUDE_COMMAND_LINE_OPTIONS[@]}; then
 			    continue
 		    fi
-		    __static__ModifyOptionInInputFile ${OPT#"--"*}
+		    __static__ModifyOptionInInputFile ${OPT##*"-"}
 		    [ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue 2
 		    printf "\e[0;32m Set option \e[0;35m$OPT\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
 	    done
@@ -540,7 +540,6 @@ function ProcessBetaValuesForContinue_Loewe() {
 	    #If the script runs fine and it arrives here, it means no bash continue command was done --> we can add BETA to the jobs to be submitted
 	    rm $ORIGINAL_INPUTFILE_GLOBALPATH
 	    LOCAL_SUBMIT_BETA_ARRAY+=( $BETA )
-	    
     done #loop on BETA
 
     #Partition of the LOCAL_SUBMIT_BETA_ARRAY into group of GPU_PER_NODE and create the JobScript files inside the JOBSCRIPT_FOLDER
