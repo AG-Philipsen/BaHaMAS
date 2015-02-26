@@ -86,16 +86,7 @@ function ProduceJobscript_Loewe(){
 	for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
 	    echo "cd \$dir$INDEX || exit 2" >> $JOBSCRIPT_GLOBALPATH
 	    if [ $MEASURE_PBP -ne 0 ]; then
-		echo "if [ -d \"Pbp\" ]; then" >> $JOBSCRIPT_GLOBALPATH
-		echo "    cd Pbp || exit 2" >> $JOBSCRIPT_GLOBALPATH
-		echo "    OLD_FOLD=\"Old_\$(date +'%F_%H%M')\"" >> $JOBSCRIPT_GLOBALPATH
-		echo "    mkdir \$OLD_FOLD || exit 2" >> $JOBSCRIPT_GLOBALPATH
-		echo "    mv * \$OLD_FOLD" >> $JOBSCRIPT_GLOBALPATH
-		echo "    cd .. || exit 2" >> $JOBSCRIPT_GLOBALPATH
-		echo "else" >> $JOBSCRIPT_GLOBALPATH
-		echo "    mkdir \"Pbp\" || exit -2" >> $JOBSCRIPT_GLOBALPATH
-		echo "fi" >> $JOBSCRIPT_GLOBALPATH
-		echo "cp \$workdir$INDEX/conf*pbp* \$dir$INDEX/Pbp || exit 2" >> $JOBSCRIPT_GLOBALPATH
+		echo "rsync -quavz \$workdir$INDEX/conf*pbp* \$dir$INDEX/Pbp || exit 2" >> $JOBSCRIPT_GLOBALPATH
 	    fi
 	    echo "cp \$workdir$INDEX/$OUTPUTFILE_NAME \$dir$INDEX/$OUTPUTFILE_NAME.\$SLURM_JOB_ID" >> $JOBSCRIPT_GLOBALPATH
 	    echo "" >> $JOBSCRIPT_GLOBALPATH
