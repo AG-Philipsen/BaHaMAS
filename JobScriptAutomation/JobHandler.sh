@@ -6,7 +6,7 @@
 #Important: Unlike executing a script as a normal shell command, executing a script with the source builtin results in the second script executing within the same 
 #overall context as the first script. Any variables that are modified by the second script will be seen by the calling script.
 
-#COMMENT about --submit and --submitonly: ...############### INSERT COMMENT HERE ###################
+#COMMENT about -s | --submit and --submitonly: ...############### INSERT COMMENT HERE ###################
 
 # NOTE: Usually in this script, if an error occurs, a short description is given to the user.
 #       Nevertheless, it is annoying and not really necessary to check every single operation.
@@ -55,7 +55,7 @@ NSAVE="50"
 INTSTEPS0="7"
 INTSTEPS1="5"
 INTSTEPS2="5"
-MEASURE_PBP="1"
+MEASURE_PBP="TRUE"
 INTERVAL="1000"
 USE_MULTIPLE_CHAINS="FALSE"
 SUBMIT="FALSE"
@@ -165,11 +165,11 @@ elif [ $SUBMIT = "TRUE" ]; then
 elif [ $THERMALIZE = "TRUE" ]; then
 
     if [ $USE_MULTIPLE_CHAINS = "FALSE" ]; then
-	printf "\n\e[0;31mOption --thermalize implemented ONLY combined with --useMultipleChains option! Aborting...\n\n\e[0m"; exit -1
+	printf "\n\e[0;31mOption -t | --thermalize implemented ONLY combined with -u | --useMultipleChains option! Aborting...\n\n\e[0m"; exit -1
     fi
-    if [ $MEASURE_PBP = "1" ]; then
+    if [ $MEASURE_PBP = "TRUE" ]; then
 	printf "\n\e[1;33;4mMeasurement of PBP switched off during thermalization!!\n\e[0m"
-	MEASURE_PBP=0
+	MEASURE_PBP="FALSE"
     fi
     ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
     ProduceInputFileAndJobScriptForEachBeta

@@ -309,7 +309,7 @@ else
 	echo "# Backup files" >> $JOBSCRIPT_GLOBALPATH
 	for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
 	    echo "cd \$dir$INDEX || exit 2" >> $JOBSCRIPT_GLOBALPATH
-	    if [ $MEASURE_PBP -ne 0 ]; then
+	    if [ $MEASURE_PBP != "FALSE" ]; then
 		echo "if [ -d \"Pbp\" ]; then" >> $JOBSCRIPT_GLOBALPATH
 		echo "    cd Pbp || exit 2" >> $JOBSCRIPT_GLOBALPATH
 		echo "    OLD_FOLD=\"Old_\$(date +'%F_%H%M')\"" >> $JOBSCRIPT_GLOBALPATH

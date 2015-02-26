@@ -137,8 +137,8 @@ function __static__ModifyOptionInInputFile(){
 	host_seed=* )             __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "host_seed=[[:digit:]]\+" "host_seed=${1#*=}" ;;
 	intsteps0=* )             __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "integrationsteps0=[[:digit:]]\+" "integrationsteps0=${1#*=}" ;;
 	intsteps1=* )             __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "integrationsteps1=[[:digit:]]\+" "integrationsteps1=${1#*=}" ;;
-	nsave=* )                 __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "savefrequency=[[:digit:]]\+" "savefrequency=${1#*=}" ;;
-	measurements=* )          __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "hmcsteps=[[:digit:]]\+" "hmcsteps=${1#*=}" ;;
+	f=* | confSaveFrequency=* )                 __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "savefrequency=[[:digit:]]\+" "savefrequency=${1#*=}" ;;
+	m=* | measurements=* )          __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "hmcsteps=[[:digit:]]\+" "hmcsteps=${1#*=}" ;;
         measure_pbp=* )           __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "measure_pbp=[[:digit:]]\+" "measure_pbp=${1#*=}" ;;
 
         * ) printf "\n\e[0;31m The option \"$1\" cannot be handled in the continue scenario.\n\e[0m"
@@ -154,9 +154,9 @@ function __static__ModifyOptionInInputFile(){
 
 function ProcessBetaValuesForContinue_Loewe() {
     local LOCAL_SUBMIT_BETA_ARRAY=()
-    #Remove --continue option from command line
+    #Remove -c | --continue option from command line
     for INDEX in "${!SPECIFIED_COMMAND_LINE_OPTIONS[@]}"; do
-	if [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == --continue* ]]; then
+	if [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == --continue* ]] && [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == -c* ]]; then
 	    unset SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]
 	    SPECIFIED_COMMAND_LINE_OPTIONS=( "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}" )
 	fi
@@ -303,34 +303,41 @@ function ProcessBetaValuesForContinue_Loewe() {
 	ORIGINAL_INPUTFILE_GLOBALPATH="${INPUTFILE_GLOBALPATH}_original"
 	cp $INPUTFILE_GLOBALPATH $ORIGINAL_INPUTFILE_GLOBALPATH || exit 2
 	#If the option --pbp=1 has been given, check and in case add to input file relative piece
-	for INDEX in "${!SPECIFIED_COMMAND_LINE_OPTIONS[@]}"; do
-	    if [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == --pbp* ]]; then
-		if [ $(grep -o "measure_pbp" $INPUTFILE_GLOBALPATH | wc -l) -eq 0 ]; then
-		    echo "measure_pbp=$MEASURE_PBP" >> $INPUTFILE_GLOBALPATH
-		    if  [ $(grep -o "sourcetype" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] || [ $(grep -o "sourcecontent" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] ||
+
+	#DISCUSS_WITH_ALESSANDRO
+	#Since now when -p | --doNotMeasurePbp is specified the measurement of chiral condensate is ruled out from beginning on.
+	#Before the decision was left to the user whether he specified pbp=0 or pbp=1
+	#Hence the following out commented for loop and the following if test have to be abandoned.
+
+	if [ $MEASURE_PBP = "FALSE" ]; then
+		local measure_pbp=0
+	elif [ $MEASURE_PBP = "TRUE" ]; then
+		local measure_pbp=1
+	fi
+	if [ $(grep -o "measure_pbp" $INPUTFILE_GLOBALPATH | wc -l) -eq 0 ]; then
+		if  [ $(grep -o "sourcetype" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] || [ $(grep -o "sourcecontent" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] ||
 			[ $(grep -o "num_sources" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ]; then
 			printf "\e[0;31m The option \"measure_pbp\" is not present in the input file but one or more specification about how to calculate\n"
 			printf " the chiral condensate are present. Suspicious situation, investigate! Skipping beta = $BETA .\n\n\e[0m"
 			PROBLEM_BETA_ARRAY+=( $BETA )
 			mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue 2
-		    else
+		else
+			echo "measure_pbp=$measure_pbp" >> $INPUTFILE_GLOBALPATH
 			echo "sourcetype=volume" >> $INPUTFILE_GLOBALPATH
 			echo "sourcecontent=gaussian" >> $INPUTFILE_GLOBALPATH
 			echo "num_sources=16" >> $INPUTFILE_GLOBALPATH
-		    fi
-		    printf "\e[0;32m Added options \e[0;35mmeasure_pbp=$MEASURE_PBP\n"
-		    printf "\e[0;32m               \e[0;35msourcetype=volume\n"
-		    printf "\e[0;32m               \e[0;35msourcecontent=gaussian\n"
-		    printf "\e[0;32m               \e[0;35mnum_sources=16"
-		    printf "\e[0;32m to the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
-		else
-		    __static__ModifyOptionInInputFile "measure_pbp=$MEASURE_PBP"
-		    [ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
-		    printf "\e[0;32m Set option \e[0;35mmeasure_pbp=$MEASURE_PBP"
-		    printf "\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
 		fi
-	    fi
-	done
+		printf "\e[0;32m Added options \e[0;35mmeasure_pbp=$measure_pbp\n"
+		printf "\e[0;32m               \e[0;35msourcetype=volume\n"
+		printf "\e[0;32m               \e[0;35msourcecontent=gaussian\n"
+		printf "\e[0;32m               \e[0;35mnum_sources=16"
+		printf "\e[0;32m to the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
+	else
+		__static__ModifyOptionInInputFile "measure_pbp=$measure_pbp"
+		[ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
+		printf "\e[0;32m Set option \e[0;35mmeasure_pbp=$measure_pbp"
+		printf "\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
+	fi
 	#For each command line option, modify it in the inputfile.
 	#
 	#If CONTINUE_NUMBER is given, set automatically the number of remaining measurements.
@@ -420,12 +427,15 @@ function ProcessBetaValuesForContinue_Loewe() {
 	printf "\e[0;32m Set option \e[0;35mintsteps1=${INTSTEPS1_ARRAY[$BETA]}"
         printf "\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
 	#Modify remaining command line specified options
+	local EXCLUDE_COMMAND_LINE_OPTIONS=( "-u" "--useMultipleChains" "-w" "--walltime" "-p" "--doNotMeasurePbp" "--intsteps0" "--intsteps1" )
+	
 	for OPT in ${SPECIFIED_COMMAND_LINE_OPTIONS[@]}; do
-	    if [[ "$OPT" != --useMultipleChains ]] && [[ "$OPT" != --walltime* ]] && [[ "$OPT" != --pbp* ]] && [[ "$OPT" != --intsteps0* ]] && [[ "$OPT" != --intsteps1* ]]; then
+		if ElementInArray $OPT 	${EXCLUDE_COMMAND_LINE_OPTIONS[@]}; then
+			continue
+		fi
 		__static__ModifyOptionInInputFile ${OPT#"--"*}
 		[ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue 2
 		printf "\e[0;32m Set option \e[0;35m$OPT\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
-	    fi
 	done
 	
 	#If the script runs fine and it arrives here, it means no bash continue command was done --> we can add BETA to the jobs to be submitted

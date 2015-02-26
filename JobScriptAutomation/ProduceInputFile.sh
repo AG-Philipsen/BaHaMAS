@@ -121,7 +121,7 @@ else
     echo "use_eo=1" >> $INPUTFILE_GLOBALPATH
     echo "solver=cg" >> $INPUTFILE_GLOBALPATH
     echo "measure_correlators=0" >> $INPUTFILE_GLOBALPATH
-    if [ $MEASURE_PBP -ne 0 ]; then
+    if [ $MEASURE_PBP != "FALSE" ]; then
 	echo "measure_pbp=1" >> $INPUTFILE_GLOBALPATH
 	echo "sourcetype=volume" >> $INPUTFILE_GLOBALPATH
 	echo "sourcecontent=gaussian" >> $INPUTFILE_GLOBALPATH

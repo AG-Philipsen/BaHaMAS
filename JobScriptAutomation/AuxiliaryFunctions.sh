@@ -87,7 +87,7 @@ function ReadBetaValuesFromFile(){
             exit -1
         fi
 
-	#NOTE: If one uses the option --useMultipleChains and forgets the seeds column and the second integrator steps column
+	#NOTE: If one uses the option -u | --useMultipleChains and forgets the seeds column and the second integrator steps column
 	#      in the betas file, then the first column of integrator steps is used as seed and the default integrators steps
 	#      are used. In the case in which the first integrator steps is a 4-digit number, the script will do its job without
 	#      throwing any exception. We didn't cure this case since it is a very remote case................
@@ -103,7 +103,7 @@ function ReadBetaValuesFromFile(){
 	    if [[ ! $STEPS =~ ^[[:digit:]]{1,2}$ ]]; then
 		printf "\n\e[0;31m Invalid integrator step entry in betas file (only one or two digits admitted)! Aborting...\n\e[0m"
 	        if [[ $STEPS =~ ^[[:digit:]]{4}$ ]]; then
-		    printf "\e[0;31m   \e[4mHINT\e[0;31m: Maybe your intention was to use the \e[1m--useMultipleChains\e[0;31m option...\n\n\e[0m"
+		    printf "\e[0;31m   \e[4mHINT\e[0;31m: Maybe your intention was to use the \e[1m-u | --useMultipleChains\e[0;31m option...\n\n\e[0m"
 		    exit -1
 	    	else
 		    printf "\n"
