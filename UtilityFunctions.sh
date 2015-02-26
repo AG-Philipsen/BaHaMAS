@@ -46,6 +46,18 @@ function FindPositionOfFirstMinimumOfArray(){
     done
 }
 
+function LengthOfLongestEntryInArray(){
+    local LENGTH_MAX=${#1}; shift
+    while [ "$1" != "" ]; do
+	if [ ${#1} -gt $LENGTH_MAX ]; then
+	    LENGTH_MAX=${#1}
+	fi
+	shift
+    done
+    echo "$LENGTH_MAX"
+}
+
+
 function ElementInArray() {
     #Remember in BASH 0 means true and >0 means false
     local ELEMENT
@@ -77,3 +89,12 @@ function FindValueOfClosestElementInArrayToGivenValue(){
                                               NR>1{if(sqrt(($1-value)^2)<difference){result=$1; difference=sqrt(($1-value)^2)}} \
                                               END{print result}'
 }
+
+function PrintArray(){
+    local NAME_OF_THE_ARRAY=$1
+    local INDEX=""
+    for INDEX in $(eval echo "\${!$NAME_OF_THE_ARRAY[@]}"); do
+	echo "$NAME_OF_THE_ARRAY[$INDEX]=$(eval echo "\${$NAME_OF_THE_ARRAY[$INDEX]}")"
+    done
+}
+
