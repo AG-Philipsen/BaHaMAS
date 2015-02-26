@@ -93,6 +93,7 @@ function FindValueOfClosestElementInArrayToGivenValue(){
 function PrintArray(){
     local NAME_OF_THE_ARRAY=$1
     local INDEX=""
+    [ $(eval echo "\${#$NAME_OF_THE_ARRAY[@]}") -eq 0 ] && echo "Array $NAME_OF_THE_ARRAY is empty!" && return
     for INDEX in $(eval echo "\${!$NAME_OF_THE_ARRAY[@]}"); do
 	echo "$NAME_OF_THE_ARRAY[$INDEX]=$(eval echo "\${$NAME_OF_THE_ARRAY[$INDEX]}")"
     done
