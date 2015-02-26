@@ -42,7 +42,12 @@ function __static__ExtractPostfixFromJOBNAME(){
 	echo "thermalizeFromConf"
     elif [ "$POSTFIX" == "TH" ]; then
 	echo "thermalizeFromHot"
-    elif [ $(echo $JOBNAME | grep -o "_${SEED_PREFIX}[[:digit:]]\{4\}" | wc -l) -ne 0 ]; then
+    elif [ "$POSTFIX" == "Thermalize" ]; then
+	echo "thermalize_old"
+    elif [ "$POSTFIX" == "Tuning" ]; then
+	echo "tuning"
+    #Also in the "TC" and "TH" cases we have seeds in the name, but such a cases are exluded from the elif
+    elif [ $(echo $JOBNAME | grep -o "_${SEED_PREFIX}[[:digit:]]\{4\}" | wc -l) -ne 0 ]; then 
 	echo "continueWithNewChain"
     else
 	echo ""
@@ -56,9 +61,9 @@ function ListJobStatus_Loewe(){
     local JOBS_STATUS_FILE="jobs_status_$PARAMETERS_STRING.txt"
     rm -f $JOBS_STATUS_FILE
     
-    printf "\n\e[0;36m=====================================================================================================================\n\e[0m"
-    printf "\e[0;35m%s\t\t  %s\t  %s\t%s\t  %s\t%s\n\e[0m"   "Beta"   "Num. Traj. (Acc.) [Last 1000] int0-1"   "Status"   "Max DS" "Last tr. finished" "Last tr. in"
-    printf "%s\t\t%s\t\t%s\t\t%s\n"   "Beta"   "Num. Traj. (Acc.) [Last 1000] int0-1"   "Status"   "Max DS" >> $JOBS_STATUS_FILE
+    printf "\n\e[0;36m=================================================================================================================================\n\e[0m"
+    printf "\e[0;35m%s\t\t  %s\t  %s\t%s\t  %s\t%s\n\e[0m"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" "Last tr. finished" "Tr: # (av. time)"
+    printf "%s\t\t\t  %s\t  %s\t%s\t  %s\t%s\n"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" >> $JOBS_STATUS_FILE
     
     for BETA in ${BETA_PREFIX}[[:digit:]]*; do
 	
@@ -160,23 +165,24 @@ function ListJobStatus_Loewe(){
 		    local AV_DURATION_LAST_TR=0
 		fi
 	    else
-		DURATION_LAST_TR="---"
+		DURATION_LAST_TR="----"
 		local AV_DURATION_LAST_TR="0"
 	    fi
 	else
-	    local DURATION_LAST_TR="nan"
+	    local DURATION_LAST_TR="----"
 	    local AV_DURATION_LAST_TR=0
 	fi
 	
-	if [ -f $OUTPUTFILE_GLOBALPATH ]; then
+	if [ -f $OUTPUTFILE_GLOBALPATH ] && [ $(wc -l < $OUTPUTFILE_GLOBALPATH) -gt 0 ]; then
 	    
 	    local TO_BE_CLEANED=$(awk 'BEGIN{traj_num = -1; file_to_be_cleaned=0}{if($1>traj_num){traj_num = $1} else {file_to_be_cleaned=1; exit;}}END{print file_to_be_cleaned}' $OUTPUTFILE_GLOBALPATH)
 	    
 	    if [ $TO_BE_CLEANED -eq 0 ]; then
-		local TRAJECTORIES_DONE=$(wc -l $OUTPUTFILE_GLOBALPATH | awk '{print $1}')
+		local TRAJECTORIES_DONE=$(wc -l < $OUTPUTFILE_GLOBALPATH)
 	    else
 		local TRAJECTORIES_DONE=$(awk 'NR==1{startTr=$1}END{print $1 - startTr + 1}' $OUTPUTFILE_GLOBALPATH)
 	    fi
+	    local NUMBER_LAST_TRAJECTORY=$(awk 'END{print $1}' $OUTPUTFILE_GLOBALPATH)
 	    local ACCEPTANCE=$(awk '{ sum+=$11} END {printf "%5.2f", 100*sum/(NR)}' $OUTPUTFILE_GLOBALPATH)
 	    
 	    if [ $TRAJECTORIES_DONE -ge 1000 ]; then
@@ -194,11 +200,12 @@ function ListJobStatus_Loewe(){
 	else
 	    
 	    local TO_BE_CLEANED=0
-	    local TRAJECTORIES_DONE="nan"
-	    local ACCEPTANCE="nan"
-	    local ACCEPTANCE_LAST="nan"
-	    local MAX_DELTAS="nan"
-	    local TIME_FROM_LAST_MODIFICATION="nan"
+	    local TRAJECTORIES_DONE="-----"
+	    local NUMBER_LAST_TRAJECTORY="----"
+	    local ACCEPTANCE=" ----"
+	    local ACCEPTANCE_LAST=" ----"
+	    local MAX_DELTAS=" ----"
+	    local TIME_FROM_LAST_MODIFICATION="------"
 	    
 	fi
 	
@@ -209,39 +216,55 @@ function ListJobStatus_Loewe(){
 		INT0="--"
 		INT1="--"
 	    fi
+	    if [ $(grep -o "use_mp=1" $INPUTFILE_GLOBALPATH | wc -l) -eq 1 ]; then
+		local INT2="-$( grep -o "integrationsteps2=[[:digit:]]\+"  $INPUTFILE_GLOBALPATH | sed 's/integrationsteps2=\([[:digit:]]\+\)/\1/' )"
+		local K_MP="-$( grep -o "kappa_mp=[[:digit:]]\+[.][[:digit:]]\+"  $INPUTFILE_GLOBALPATH | sed 's/kappa_mp=\(.*\)/\1/' )"
+		if [[ ! $INT2 =~ ^-[[:digit:]]+$ ]] || [[ ! $K_MP =~ ^-[[:digit:]]+[.][[:digit:]]+$ ]]; then
+		    INT2="--"
+                    K_MP="--"
+		fi
+	    else 
+		local INT2="  "
+		local K_MP="      "
+	    fi
 	else
-	    printf "\n \e[0;31m File $INPUTFILE_GLOBALPATH not found. Integration stpes will not be printed!\n\n\e[0m\n"
+	    #printf "\n \e[0;31m File $INPUTFILE_GLOBALPATH not found. Integration stpes will not be printed!\n\n\e[0m\n"
+	    local INT0="--"
+	    local INT1="--"
+	    local INT2="--"
+	    local K_MP="-----"
 	fi
 	
-#	     printf "\e[0;36m%s\t\t\e[0;$((36-$TO_BE_CLEANED*5))m%8s\e[0;36m (\e[0;$(GoodAcc $ACCEPTANCE)m%s %%\e[0;36m) [%s %%] %s-%s\t \e[0;$(ColorStatus $STATUS)m%9s\e[0;36m\t%s\t   \e[0;$(ColorTime $TIME_FROM_LAST_MODIFICATION)m%s\e[0;36m\t   \e[0;$(( $AV_DURATION_LAST_TR==0 ? 33 : 32 ))m%s\n\e[0m" \
 	printf \
 "\e[0;36m%-15s\t  \
 \e[0;$((36-$TO_BE_CLEANED*5))m%8s\e[0;36m \
 (\e[0;$(GoodAcc $ACCEPTANCE)m%s %%\e[0;36m) \
-[%s %%] \
-%s-%s\t \
+[\e[0;$(GoodAcc $ACCEPTANCE)m%s %%\e[0;36m]  \
+%s-%s%s%s\t \
 \e[0;$(ColorStatus $STATUS)m%9s\e[0;36m\
 \t%s\t   \
-\e[0;$(ColorTime $TIME_FROM_LAST_MODIFICATION)m%s\e[0;36m\t   \
+\e[0;$(ColorTime $TIME_FROM_LAST_MODIFICATION)m%s\e[0;36m      \
+%6s \
 \e[0;$(( $AV_DURATION_LAST_TR==0 ? 33 : 32 ))m%s\n\e[0m" \
 	    "$(GetShortenedBetaString)" \
 	    "$TRAJECTORIES_DONE" \
 	    "$ACCEPTANCE" \
 	    "$ACCEPTANCE_LAST" \
-            "$INT0" "$INT1" \
+            "$INT0" "$INT1" "$INT2" "$K_MP" \
             "$STATUS"   "$MAX_DELTAS" \
 	    "$(echo $TIME_FROM_LAST_MODIFICATION | awk '{if($1 ~ /^[[:digit:]]+$/){printf "%6d", $1}else{print $1}}') sec. ago" \
-	    "$(echo $DURATION_LAST_TR | awk '{if($1 ~ /^[[:digit:]]+$/){printf "%3d", $1}else{print $1}}') sec."
+	    "$NUMBER_LAST_TRAJECTORY" \
+	    "( $(echo $DURATION_LAST_TR | awk '{if($1 ~ /^[[:digit:]]+$/){printf "%3ds", $1}else{print $1}}') )"
 	
 	if [ $TO_BE_CLEANED -eq 0 ]; then
-	    printf "%s\t\t%s (%s %%) [%s %%] %s-%s\t\t\t%9s\t%s\n"   "$BETA"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$ACCEPTANCE_LAST"   "$INT0" "$INT1"   "$STATUS"   "$MAX_DELTAS" >> $JOBS_STATUS_FILE
+	    printf "%s\t\t%8s (%s %%) [%s %%]  %s-%s%s%s\t%9s\t%s\n"   "$(GetShortenedBetaString)"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$ACCEPTANCE_LAST"   "$INT0" "$INT1" "$INT2" "$K_MP"   "$STATUS"   "$MAX_DELTAS" >> $JOBS_STATUS_FILE
 	else
-	    printf "%s\t\t%s (%s %%) [%s %%]%s-%s\t\t\t%9s\t%s  ---> File to be cleaned!\n"   "$BETA"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$ACCEPTANCE_LAST"   "$INT0" "$INT1"   "$STATUS"   "$MAX_DELTAS" >> $JOBS_STATUS_FILE
+	    printf "%s\t\t%8s (%s %%) [%s %%]  %s-%s%s%s\t%9s\t%s\t ---> File to be cleaned!\n"   "$(GetShortenedBetaString)"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$ACCEPTANCE_LAST"   "$INT0" "$INT1" "$INT2" "$K_MP"   "$STATUS"   "$MAX_DELTAS" >> $JOBS_STATUS_FILE
 	fi
 	
 	
     done #Loop on BETA
-    printf "\e[0;36m=====================================================================================================================\n\e[0m"
+    printf "\e[0;36m=================================================================================================================================\n\e[0m"
 }
 
 function GetShortenedBetaString(){
@@ -257,7 +280,7 @@ function GetShortenedBetaString(){
 }
 
 function GoodAcc(){
-    echo "$1" | awk '{if($1<65){print 31}else if($1>75){print 33}else{print 32}}'
+    echo "$1" | awk '{if($1<68){print 31}else if($1>78 || $1<70){print 33}else{print 32}}'
 }
 
 function ColorStatus(){

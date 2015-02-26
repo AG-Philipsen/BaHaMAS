@@ -136,6 +136,7 @@ PROBLEM_BETA_ARRAY=() #Arrays that will contain the beta values that actually wi
 declare -A INTSTEPS0_ARRAY
 declare -A INTSTEPS1_ARRAY
 declare -A CONTINUE_RESUMETRAJ_ARRAY 
+declare -A MASS_PRECONDITIONING_ARRAY 
 declare -A STARTCONFIGURATION_GLOBALPATH #NOTE: Before bash 4.2 associative array are LOCAL by default (from bash 4.2 one can do "declare -g ARRAY" to make it global).
                                          #      This is the reason why they are declared here and not in ReadBetaValuesFromFile where it would be natural!!
 

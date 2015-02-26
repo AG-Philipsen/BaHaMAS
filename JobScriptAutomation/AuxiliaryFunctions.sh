@@ -27,19 +27,32 @@ function ReadBetaValuesFromFile(){
     local INTSTEPS0_ARRAY_TEMP=()
     local INTSTEPS1_ARRAY_TEMP=()
     local CONTINUE_RESUMETRAJ_TEMP=()
+    local MASS_PRECONDITIONING_TEMP=()
+    local RESUME_REGEXPR="resumefrom=[[:digit:]]\+"
+    local MP_REGEXPR="MP=(.*)"
+    local SEARCH_RESULT=""  # Auxiliary variable to help to parse the file
     local OLD_IFS=$IFS      # save the field separator           
-    local IFS=$'\n'     # new field separator, the end of line           
+    local IFS=$'\n'         # new field separator, the end of line           
     for LINE in $(cat $BETASFILE); do          
-	if [[ $LINE =~ ^[[:blank:]]*# ]]; then
+       	if [[ $LINE =~ ^[[:blank:]]*# ]]; then
 	    continue
 	fi
 	LINE=`echo $LINE | awk '{split($0, res, "#"); print res[1]}'`
-	if [[ $(echo $LINE | grep -o "resumefrom=[[:digit:]]\+") != "" ]]; then
-	    CONTINUE_RESUMETRAJ_TEMP+=( $(echo $LINE | grep -o "resumefrom=[[:digit:]]\+") )
-	else
-	    CONTINUE_RESUMETRAJ_TEMP+=( "notFound" )
-	fi
-	LINE=$( echo $LINE | sed 's/resumefrom=[[:digit:]]\+//g' )
+	#Look for "resumefrom=*" check it, save the content and delete it
+	SEARCH_RESULT=( $(echo $LINE | grep -o "$RESUME_REGEXPR") )
+	case ${#SEARCH_RESULT[@]} in
+	    0 ) CONTINUE_RESUMETRAJ_TEMP+=( "notFound" );;
+	    1 ) CONTINUE_RESUMETRAJ_TEMP+=( ${SEARCH_RESULT[0]}); LINE=$( echo $LINE | sed 's/'$RESUME_REGEXPR'//g' );;
+	    * ) printf "\n\e[0;31m String \"resumefrom=*\" specified multiple times per line in betasfile! Aborting...\n\n\e[0m"; exit -1;;
+	esac
+	#Look for "MP=(*,*)" check it, save the content and delete it
+	SEARCH_RESULT=( $(echo $LINE | grep -o "$MP_REGEXPR") )
+	case ${#SEARCH_RESULT[@]} in
+	    0 ) MASS_PRECONDITIONING_TEMP+=( "notFound" );;
+	    1 ) MASS_PRECONDITIONING_TEMP+=( ${SEARCH_RESULT[0]}); LINE=$( echo $LINE | sed 's/'$MP_REGEXPR'//g' );;
+	    * ) printf "\n\e[0;31m String \"MP=(*,*)\" specified multiple times per line in betasfile! Aborting...\n\n\e[0m"; exit -1;;
+	esac
+	#Read the rest
 	BETAVALUES+=( $(echo $LINE | awk '{print $1}') )
 	if [ $USE_MULTIPLE_CHAINS == "FALSE" ]; then
 	    INTSTEPS0_ARRAY_TEMP+=( $(echo $LINE | awk '{print $2}') )
@@ -81,7 +94,7 @@ function ReadBetaValuesFromFile(){
 	
 	#Check whether same seed is provided multiple times for same beta --> do it with an associative array in awk after having removed "resumefrom=", EMPTYLINES and comments
 	if [ "$(awk '{split($0, res, "'#'"); print res[1]}' $BETASFILE |\
-                sed -e 's/resumefrom=[[:digit:]]\+//g' -e '/^$/d' |\
+                sed -e 's/'$RESUME_REGEXPR'//g' -e 's/'$MP_REGEXPR'//g' -e '/^$/d' |\
                 awk '{array[$1,$2]++}END{for(ind in array){if(array[ind]>1){print -1; exit}}}')" == -1 ]; then
 	    printf "\n\e[0;31m Same seed provided multiple times for same beta!! Aborting...\n\n\e[0m"
             exit -1
@@ -130,33 +143,48 @@ function ReadBetaValuesFromFile(){
 	done		
     fi
 
-    for INDEX in "${!CONTINUE_RESUMETRAJ_TEMP[@]}"; do
+    for INDEX in "${!BETAVALUES[@]}"; do
 	local TEMP_STR=${CONTINUE_RESUMETRAJ_TEMP[$INDEX]}
-	if [[ $TEMP_STR == "notFound" ]]; then
-	    continue
+	if [[ $TEMP_STR != "notFound" ]]; then
+	    TEMP_STR=${TEMP_STR#"resumefrom="}
+	    if [[ ! $TEMP_STR =~ ^[1-9][[:digit:]]*$ ]]; then
+		printf "\n\e[0;31m Invalid resume trajectory number in betasfile! Aborting...\n\n\e[0m"
+		exit -1
+	    fi
+	    #Build associative array for later use 
+	    CONTINUE_RESUMETRAJ_ARRAY["${BETAVALUES[$INDEX]}"]="$TEMP_STR"
 	fi
-	TEMP_STR=${TEMP_STR#"resumefrom="}
-	if [[ ! $TEMP_STR =~ ^[1-9][[:digit:]]*$ ]]; then
-	    printf "\n\e[0;31m Invalid resume trajectory number in betasfile! Aborting...\n\n\e[0m"
-            exit -1
+	TEMP_STR=${MASS_PRECONDITIONING_TEMP[$INDEX]}
+	if [[ $TEMP_STR != "notFound" ]]; then
+	    TEMP_STR=$(echo ${TEMP_STR#"MP=("})
+	    TEMP_STR=${TEMP_STR%")"}
+	    #Build associative array for later use
+	    if [[ ! $TEMP_STR =~ ^[[:digit:]]{1,2},[[:digit:]]{3,4}$ ]]; then
+                printf "\n\e[0;31m Invalid Mass Preconditioning parameters in betasfile! The string must match the regular\n"
+		printf " expression \e[1m^MP=([[:digit:]]{1,2},[[:digit:]]{3,4})\$\e[0;31m but it doesn't! Aborting...\n\n\e[0m"
+                exit -1
+            fi
+	    MASS_PRECONDITIONING_ARRAY["${BETAVALUES[$INDEX]}"]="$TEMP_STR"
 	fi
-	#Build associative array for later use 
-	CONTINUE_RESUMETRAJ_ARRAY["${BETAVALUES[$INDEX]}"]="$TEMP_STR"
     done
 
-    printf "\n\e[0;36m===================================================================================\n\e[0m"
+    printf "\n\e[0;36m============================================================================================================\n\e[0m"
     printf "\e[0;34m Read beta values:\n\e[0m"
     
     for BETA in ${BETAVALUES[@]}; do
-	printf "  - $BETA"
-	if [ "${#INTSTEPS0_ARRAY[@]}" -gt 0 ]; then
-	    printf "\t (Integrator steps ${INTSTEPS0_ARRAY[$BETA]}-${INTSTEPS1_ARRAY[$BETA]})\n"
+	printf "  - $BETA\t [Integrator steps ${INTSTEPS0_ARRAY[$BETA]}-${INTSTEPS1_ARRAY[$BETA]}]"
+	if KeyInArray $BETA CONTINUE_RESUMETRAJ_ARRAY; then
+	    printf "   [resume from tr. %5d]" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}"
 	else
-	    printf "\n"
+	    printf "                          "
 	fi
+	if KeyInArray $BETA MASS_PRECONDITIONING_ARRAY; then
+	    printf "   MP=(%d-0.%4d)" "${MASS_PRECONDITIONING_ARRAY[$BETA]%,*}" "${MASS_PRECONDITIONING_ARRAY[$BETA]#*,}"
+	fi
+	printf "\n"
     done
     
-    printf "\e[0;36m===================================================================================\n\e[0m"
+    printf "\e[0;36m============================================================================================================\n\e[0m"
 
     #If we are not in the continue scenario, look for the correct configuration to start from and set the global path
     if [ $CONTINUE = "FALSE" ]; then

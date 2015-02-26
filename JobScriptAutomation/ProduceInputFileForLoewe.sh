@@ -16,10 +16,20 @@ function ProduceInputFile_Loewe() {
     fi
     echo "tau=1" >> $INPUTFILE_GLOBALPATH
     echo "cgmax=8000" >> $INPUTFILE_GLOBALPATH
-    echo "cg_iteration_block_size=50" >> $INPUTFILE_GLOBALPATH
     echo "iter_refresh=2000" >> $INPUTFILE_GLOBALPATH
     echo "use_merge_kernels_fermion=1" >> $INPUTFILE_GLOBALPATH
-    echo "num_timescales=2" >> $INPUTFILE_GLOBALPATH
+    if KeyInArray "${BETAVALUES_COPY[$INDEX]}" MASS_PRECONDITIONING_ARRAY; then
+	echo "cg_iteration_block_size=10" >> $INPUTFILE_GLOBALPATH
+	echo "use_mp=1" >> $INPUTFILE_GLOBALPATH
+	echo "solver_mp=cg" >> $INPUTFILE_GLOBALPATH
+	echo "kappa_mp=0.${MASS_PRECONDITIONING_ARRAY[${BETAVALUES_COPY[$INDEX]}]#*,}" >> $INPUTFILE_GLOBALPATH
+	echo "num_timescales=3" >> $INPUTFILE_GLOBALPATH
+	echo "integrator2=twomn" >> $INPUTFILE_GLOBALPATH
+	echo "integrationsteps2=${MASS_PRECONDITIONING_ARRAY[${BETAVALUES_COPY[$INDEX]}]%,*}" >> $INPUTFILE_GLOBALPATH
+    else
+	echo "cg_iteration_block_size=50" >> $INPUTFILE_GLOBALPATH
+	echo "num_timescales=2" >> $INPUTFILE_GLOBALPATH
+    fi
     echo "integrator0=twomn" >> $INPUTFILE_GLOBALPATH
     echo "integrator1=twomn" >> $INPUTFILE_GLOBALPATH
     echo "kappa=0.$KAPPA" >> $INPUTFILE_GLOBALPATH
@@ -39,3 +49,5 @@ function ProduceInputFile_Loewe() {
 	echo "host_seed=$(echo ${BETAVALUES_COPY[$INDEX]} | awk '{split($1, result, "_"); print substr(result[2],2)}')" >> $INPUTFILE_GLOBALPATH
     fi
 }
+
+
