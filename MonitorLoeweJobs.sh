@@ -15,6 +15,7 @@ JOBSUBTIME=()
 JOBSUBFROM=()
 JOBNUMNODES=()
 JOBFIRSTNODE=()
+JOBWALLTIME=()
 
 for JOBID in ${JOBID_ARRAY[@]}; do
 	
@@ -24,6 +25,7 @@ for JOBID in ${JOBID_ARRAY[@]}; do
     JOBSUBTIME+=( $(scontrol show job $JOBID | grep "^[[:blank:]]*SubmitTime=" | sed "s/^.*SubmitTime=\(.*[[:blank:]]\).*$/\1/") )
     JOBSUBFROM+=( $(scontrol show job $JOBID | grep "WorkDir=" | sed "s/^.*WorkDir=\(.*$\)/\1/") )
     JOBNUMNODES+=( $(scontrol show job $JOBID | grep "NumNodes=" | sed "s/^.*NumNodes=\([[:digit:]]*\).*$/\1/") )
+    JOBWALLTIME+=( $(scontrol show job $JOBID | grep "TimeLimit=" | sed "s/^.*TimeLimit=\([[:digit:]]*-\?\([[:digit:]]\{2\}[:]\)\{2\}[[:digit:]]\{2\}\).*$/\1/") )
     #I do not know if this work for jobs on several nodes
     JOBFIRSTNODE+=( $(scontrol show job $JOBID | grep "[[:blank:]]\+NodeList=" | sed "s/^.*NodeList=\(.*[[:blank:]]*\).*$/\1/") ) 
    
@@ -57,12 +59,12 @@ for ((j=0; j<${#JOBSTATUS[@]}; j++)); do
     fi
 done
 
-TABLE_FORMAT="%-8s%-5s%-$((2+${#LONGEST_NAME}))s%-5s%-20s%-5s%-19s%-5s%-s"
+TABLE_FORMAT="%-8s%-5s%-$((2+${#LONGEST_NAME}))s%-5s%-20s%-5s%-19s%-5s%+12s%-5s%-s"
 
 printf "\n\e[0;36m"
 for (( c=1; c<=$(($(tput cols)-3)); c++ )); do printf "="; done
 printf "\e[0m\n"
-printf "\e[0;34m\e[2m$TABLE_FORMAT\e[0m\n"   "JOBID:" ""   "  JOB NAME:" ""   "STATUS:" ""   "START TIME:" ""   "SUBMITTED FROM:"
+printf "\e[0;34m\e[2m$TABLE_FORMAT\e[0m\n"   "JOBID:" ""   "  JOB NAME:" ""   "STATUS:" ""   "START TIME:" ""   "WALLTIME:" ""   "SUBMITTED FROM:"
 
 while [ ${#JOBNAME[@]} -gt 0 ]; do
     i=$(FindPositionOfFirstMinimumOfArray "${JOBNAME[@]}")
@@ -84,12 +86,14 @@ while [ ${#JOBNAME[@]} -gt 0 ]; do
                                     "  ${JOBNAME[$i]}" ""\
                                     "${JOBSTATUS[$i]} on ${JOBFIRSTNODE[$i]}" ""\
                                     "${JOBSTARTTIME[$i]}" ""\
+                                    "${JOBWALLTIME[$i]}" ""\
                                     "${JOBSUBFROM[$i]}"
     else
 	printf "$TABLE_FORMAT\e[0m\n"   "${JOBID_ARRAY[$i]}" ""\
                                     "  ${JOBNAME[$i]}" ""\
                                     "${JOBSTATUS[$i]}" ""\
                                     "${JOBSTARTTIME[$i]}" ""\
+                                    "${JOBWALLTIME[$i]}" ""\
                                     "${JOBSUBFROM[$i]} on ${JOBSUBTIME[$i]}"
     fi
 
@@ -101,6 +105,7 @@ while [ ${#JOBNAME[@]} -gt 0 ]; do
     unset JOBSUBFROM[$i]; JOBSUBFROM=( "${JOBSUBFROM[@]}" )
     unset JOBNUMNODES[$i]; JOBNUMNODES=( "${JOBNUMNODES[@]}" )
     unset JOBFIRSTNODE[$i]; JOBFIRSTNODE=( "${JOBFIRSTNODE[@]}" )
+    unset JOBWALLTIME[$i]; JOBWALLTIME=( "${JOBWALLTIME[@]}" )
     
 done
 
