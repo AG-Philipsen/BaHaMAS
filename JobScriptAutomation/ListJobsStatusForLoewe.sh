@@ -54,19 +54,44 @@ function __static__ExtractPostfixFromJOBNAME(){
     fi
 }
 
-
+function __static__ExtractMetaInformationFromJOBNAME(){
+    local METAINFORMATION_ARRAY=()
+    local JOBID_ARRAY=( $(squeue | awk 'NR>1{print $1}') )
+    for JOBID in ${JOBID_ARRAY[@]}; do
+	local JOBNAME=$(scontrol show job $JOBID | grep "Name=" | sed "s/^.*Name=\(.*$\)/\1/")
+	local JOBNAME_CHEMPOT=$(__static__ExtractParameterFromJOBNAME $CHEMPOT_PREFIX)
+	local JOBNAME_NTIME=$(__static__ExtractParameterFromJOBNAME $NTIME_PREFIX)
+	local JOBNAME_NSPACE=$(__static__ExtractParameterFromJOBNAME $NSPACE_PREFIX)
+	local JOBNAME_KAPPA=$(__static__ExtractParameterFromJOBNAME $KAPPA_PREFIX)
+      	local JOBNAME_BETAS=( $(__static__ExtractBetasFromJOBNAME) )
+	local JOBNAME_POSTFIX=$(__static__ExtractPostfixFromJOBNAME)
+	local JOB_STATUS=$(scontrol show job $JOBID | grep "^[[:blank:]]*JobState=" | sed "s/^.*JobState=\([[:alpha:]]*\).*$/\1/")
+	#Retrieved the information add an unique string to array of meta information
+	local PREFIXES=([$CHEMPOT_POSITION]=$CHEMPOT_PREFIX [$KAPPA_POSITION]=$KAPPA_PREFIX [$NTIME_POSITION]=$NTIME_PREFIX [$NSPACE_POSITION]=$NSPACE_PREFIX)
+	local JOB_PARAMETERS_VALUE=([$CHEMPOT_POSITION]=$JOBNAME_CHEMPOT [$KAPPA_POSITION]=$JOBNAME_KAPPA [$NTIME_POSITION]=$JOBNAME_NTIME [$NSPACE_POSITION]=$JOBNAME_NSPACE)
+	local JOB_PARAMETERS_STRING=""
+	for ((i=0; i<${#PREFIXES[@]}; i++)); do    
+	    JOB_PARAMETERS_STRING="$JOB_PARAMETERS_STRING${PREFIXES[$i]}${JOB_PARAMETERS_VALUE[$i]}_"
+	done
+	JOB_PARAMETERS_STRING=${JOB_PARAMETERS_STRING%?} #Remove last underscore
+	METAINFORMATION_ARRAY+=( $(echo "${JOB_PARAMETERS_STRING} | $( echo "${JOBNAME_BETAS[@]}" | sed 's/ /_/g') | ${JOBNAME_POSTFIX} | ${JOB_STATUS}" | sed 's/ //g') )
+    done
+    echo "${METAINFORMATION_ARRAY[@]}"
+}
 
 function ListJobStatus_Loewe(){
     	 
     local JOBS_STATUS_FILE="jobs_status_$PARAMETERS_STRING.txt"
     rm -f $JOBS_STATUS_FILE
     
-    printf "\n\e[0;36m=================================================================================================================================\n\e[0m"
-    printf "\e[0;35m%s\t\t  %s\t  %s\t%s\t  %s\t%s\n\e[0m"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" "Last tr. finished" "Tr: # (av. time)"
+    printf "\n\e[0;36m=======================================================================================================================================\n\e[0m"
+    printf "\e[0;35m%s\t\t  %s\t  %s\t%s\t  %s\t%s\n\e[0m"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" "Last tr. finished" " Tr: # (time last|av.)"
     printf "%s\t\t\t  %s\t  %s\t%s\t  %s\t%s\n"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" >> $JOBS_STATUS_FILE
     
+    JOB_METAINFORMATION_ARRAY=( $(__static__ExtractMetaInformationFromJOBNAME) )
+
     for BETA in ${BETA_PREFIX}[[:digit:]]*; do
-	
+
 	#Select only folders with old or new names
 	BETA=${BETA#$BETA_PREFIX}
 	if [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}$ ]] &&
@@ -76,42 +101,12 @@ function ListJobStatus_Loewe(){
 
 	local POSTFIX_FROM_FOLDER=$(echo ${BETA##*_} | grep -o "[[:alpha:]]\+\$")
 
-	#Check if the $BETA run is in the queue or not
-	local JOBID_ARRAY=( $(squeue | awk 'NR>1{print $1}') )
 	local STATUS=( )
-	for JOBID in ${JOBID_ARRAY[@]}; do
-	    
-	    local JOBNAME=$(scontrol show job $JOBID | grep "Name=" | sed "s/^.*Name=\(.*$\)/\1/")
-	    local JOBNAME_CHEMPOT=$(__static__ExtractParameterFromJOBNAME $CHEMPOT_PREFIX)
-	    local JOBNAME_NTIME=$(__static__ExtractParameterFromJOBNAME $NTIME_PREFIX)
-	    local JOBNAME_NSPACE=$(__static__ExtractParameterFromJOBNAME $NSPACE_PREFIX)
-	    local JOBNAME_KAPPA=$(__static__ExtractParameterFromJOBNAME $KAPPA_PREFIX)
-      	    local JOBNAME_BETAS=( $(__static__ExtractBetasFromJOBNAME) )
-	    local JOBNAME_POSTFIX=$(__static__ExtractPostfixFromJOBNAME)
-
-
-	    #echo "$JOBNAME_CHEMPOT   $JOBNAME_NTIME   $JOBNAME_NSPACE   $JOBNAME_KAPPA"
-	    #echo "${BETA%_*} -----> ( ${JOBNAME_BETAS[@]} )"
-	    #echo "JOBNAME_POSTFIX=$JOBNAME_POSTFIX"
-	    #echo "POSTFIX_FROM_FOLDER=\"$POSTFIX_FROM_FOLDER\""
-	    #echo "BETA=$BETA"
-	    #echo "JOBNAME=$JOBNAME"
-	    #ElementInArray "${BETA%_*}" "${JOBNAME_BETAS[@]}"
-	    #echo "$?"
-	    #echo ""
-	    #echo ""
-
-	    if ElementInArray "${BETA_PREFIX}${BETA%_*}" "${JOBNAME_BETAS[@]}" && [ "$JOBNAME_POSTFIX" == "$POSTFIX_FROM_FOLDER" ] \
-		&& [ "$JOBNAME_KAPPA" = $KAPPA ] && [ "$JOBNAME_NTIME" = $NTIME ] \
-                && [ "$JOBNAME_NSPACE" = $NSPACE ] && [ "$JOBNAME_CHEMPOT" = $CHEMPOT ]; then
-		local TMP_STATUS=$(scontrol show job $JOBID | grep "^[[:blank:]]*JobState=" | sed "s/^.*JobState=\([[:alpha:]]*\).*$/\1/")
-		if [ "$TMP_STATUS" == "RUNNING" ] || [ "$TMP_STATUS" == "PENDING" ]; then
-		    STATUS+=( "$TMP_STATUS" )
-		fi
-	    fi
-	    
+	for JOB_MATCHING in $(echo ${JOB_METAINFORMATION_ARRAY[@]} | sed 's/ /\n/g' | grep "${PARAMETERS_STRING}" | grep "${BETA_PREFIX}${BETA%_*}" | grep "${POSTFIX_FROM_FOLDER}"); do
+	    STATUS+=( "${JOB_MATCHING##*|}" )
 	done
 	if [ ${#STATUS[@]} -eq 0 ]; then
+	    [ $LISTSTATUS_SHOW_ONLY_QUEUED = "TRUE" ] && continue
 	    STATUS="notQueued"
 	elif [ ${#STATUS[@]} -ne 1 ]; then
 	    printf "\n \e[1;37;41mWARNING:\e[0;31m \e[1mThere are more than one job with ${PARAMETERS_STRING} and BETA=$BETA as parameters! CHECK!!! Aborting...\n\n\e[0m\n"
@@ -124,53 +119,39 @@ function ListJobStatus_Loewe(){
 	local STDOUTPUT_FILE=`ls -lt $BETA_PREFIX$BETA | awk '{if($9 ~ /^hmc.[[:digit:]]+.out$/){print $9}}' | head -n1`
 	local STDOUTPUT_GLOBALPATH="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA/$STDOUTPUT_FILE"
 	#-------------------------------------------------------------------------------------------------------------------------#
-	if [ -f $STDOUTPUT_GLOBALPATH ]; then
-	    if [[ $STATUS == "RUNNING" ]]; then
-		local START_TIME_SEC=$(TimeToSeconds `grep "saving current prng state to file" $STDOUTPUT_GLOBALPATH | tail -n2 | awk '{print substr($1,2,8)}' | head -n1`)
-		local END_TIME_SEC=$(TimeToSeconds `grep "saving current prng state to file" $STDOUTPUT_GLOBALPATH | tail -n2 | awk '{print substr($1,2,8)}' | tail -n1`)
-		if [ $START_TIME_SEC -gt $END_TIME_SEC ]; then
-		    END_TIME_SEC=$(( $END_TIME_SEC + 24*3600 ))
-		fi
-		local DURATION_LAST_TR=$(( $END_TIME_SEC - $START_TIME_SEC ))
-		if [[ ! $DURATION_LAST_TR =~ [[:digit:]]+ ]]; then
-		    DURATION_LAST_TR="---"
-		    local AV_DURATION_LAST_TR=0
-		elif [ "$DURATION_LAST_TR" -lt 840 ]; then #If the last traj. took less than 14min, then in one day probably 100 traj. can be done
-		    local NUMBER_DONE_TR_STDOUTPUT=`grep "saving current prng state to file" $STDOUTPUT_GLOBALPATH | wc -l`
-		    if [ "$NUMBER_DONE_TR_STDOUTPUT" -ge 101 ]; then
-			START_TIME_SEC=$(TimeToSeconds `grep "saving current prng state to fil" $STDOUTPUT_GLOBALPATH | tail -n101 | awk '{print substr($1,2,8)}' | head -n1`)
-			END_TIME_SEC=$(TimeToSeconds `grep "saving current prng state to fil" $STDOUTPUT_GLOBALPATH | tail -n101 | awk '{print substr($1,2,8)}' | tail -n1`)
-			if [ $START_TIME_SEC -gt $END_TIME_SEC ]; then
-			    END_TIME_SEC=$(( $END_TIME_SEC + 24*3600 ))
-			fi
-			DURATION_LAST_TR=$(( ($END_TIME_SEC - $START_TIME_SEC)/100 ))
-			local AV_DURATION_LAST_TR=1
-		    elif [ "$NUMBER_DONE_TR_STDOUTPUT" -lt 100 ]; then
-			START_TIME_SEC=$(TimeToSeconds `grep "saving current prng state to fil" $STDOUTPUT_GLOBALPATH | head -n1 | awk '{print substr($1,2,8)}'`)
-			END_TIME_SEC=$(TimeToSeconds `grep "saving current prng state to fil" $STDOUTPUT_GLOBALPATH | tail -n1 | awk '{print substr($1,2,8)}'`)
-			if [ $START_TIME_SEC -gt $END_TIME_SEC ]; then
-			    END_TIME_SEC=$(( $END_TIME_SEC + 24*3600 ))
-			fi
-			if [ "$NUMBER_DONE_TR_STDOUTPUT" -gt 2 ]; then
-			    DURATION_LAST_TR=$(( ($END_TIME_SEC - $START_TIME_SEC)/($NUMBER_DONE_TR_STDOUTPUT-1) ))
-			else
-			    DURATION_LAST_TR="..."
-			fi
-			local AV_DURATION_LAST_TR=1
-		    else
-			printf "\n \e[0;31m Error recovering the number of trajectories done from std output file! Aborting...\n\n\e[0m\n"
-			exit -1
-		    fi
+	if [ $LISTSTATUS_MEASURE_TIME = "TRUE" ]; then
+	    if [ -f $STDOUTPUT_GLOBALPATH ] && [[ $STATUS == "RUNNING" ]]; then
+    	        #Since in CL2QCD std. output there is only the time of saving and not the day, I have to go through the std. output and count the
+	        #number of days (done looking at the hours). One could sum up all the tr. times as done in the TimeTrajectoryCL2QCD.sh but it is
+	        #not really efficient!
+		local TIMES_ARRAY=( $(grep "saving current prng state to file" $STDOUTPUT_GLOBALPATH | awk '{print substr($1,2,8)}') )
+		local UNIQUE_HOURS_ARRAY=( $(grep "saving current prng state to file" $STDOUTPUT_GLOBALPATH | awk '{print substr($1,2,2)}' | uniq -d) )
+	        #local =( $(echo ${TIMES_ARRAY[@]} | awk 'BEGIN{RS=" "}{print substr($1,1,2)}' | uniq -d) )
+	        #I use the number of occurences of the second hours in order to get the almost correct number of days,
+	        #then I correct in the case the last hour is equal to the first.
+		if [ ${#UNIQUE_HOURS_ARRAY[@]} -lt 2 ]; then
+		    local NUMBER_OF_DAYS=0
 		else
-		    local AV_DURATION_LAST_TR=0
+		    local NUMBER_OF_DAYS=$(echo ${UNIQUE_HOURS_ARRAY[@]} | awk 'BEGIN{RS=" "}NR==2{secondHour=$1}{hours[$1]++}END{print hours[secondHour]-1}')
+		    if [ ${UNIQUE_HOURS_ARRAY[0]} -eq ${UNIQUE_HOURS_ARRAY[@]:(-1)} ]; then
+			[ $(TimeToSeconds ${TIMES_ARRAY[0]}) -le $(TimeToSeconds ${TIMES_ARRAY[@]:(-1)}) ] && NUMBER_OF_DAYS=$(($NUMBER_OF_DAYS + 1))
+		    fi
 		fi
+	        #Now we can calculate the total time and then the average time
+		local TOTAL_TIME_OF_SIMULATION=$(( $(date -d "${TIMES_ARRAY[@]:(-1)}" +%s) - $(date -d "${TIMES_ARRAY[0]}" +%s) ))
+		[ $TOTAL_TIME_OF_SIMULATION -lt 0 ] && TOTAL_TIME_OF_SIMULATION=$(( $TOTAL_TIME_OF_SIMULATION + 86400 ))
+		TOTAL_TIME_OF_SIMULATION=$(( $TOTAL_TIME_OF_SIMULATION + $NUMBER_OF_DAYS*86400 ))
+		local AVERAGE_TIME_PER_TRAJECTORY=$(( $TOTAL_TIME_OF_SIMULATION / (${#TIMES_ARRAY[@]}-1) +1)) #The +1 is to round to the following integer
+	        #Calculate also last trajectory time
+		local TIME_LAST_TRAJECTORY=$(( $(date -d "${TIMES_ARRAY[@]:(-1)}" +%s) - $(date -d "${TIMES_ARRAY[$((${#TIMES_ARRAY[@]}-2))]}" +%s) ))
+		[ $TIME_LAST_TRAJECTORY -lt 0 ] && TIME_LAST_TRAJECTORY=$(( $TIME_LAST_TRAJECTORY + 86400 ))
 	    else
-		DURATION_LAST_TR="----"
-		local AV_DURATION_LAST_TR="0"
+		local AVERAGE_TIME_PER_TRAJECTORY="----"
+		local TIME_LAST_TRAJECTORY="----"
 	    fi
 	else
-	    local DURATION_LAST_TR="----"
-	    local AV_DURATION_LAST_TR=0
+		local AVERAGE_TIME_PER_TRAJECTORY="OFF"
+		local TIME_LAST_TRAJECTORY="OFF"	    
 	fi
 	
 	if [ -f $OUTPUTFILE_GLOBALPATH ] && [ $(wc -l < $OUTPUTFILE_GLOBALPATH) -gt 0 ]; then
@@ -239,13 +220,14 @@ function ListJobStatus_Loewe(){
 "\e[0;36m%-15s\t  \
 \e[0;$((36-$TO_BE_CLEANED*5))m%8s\e[0;36m \
 (\e[0;$(GoodAcc $ACCEPTANCE)m%s %%\e[0;36m) \
-[\e[0;$(GoodAcc $ACCEPTANCE)m%s %%\e[0;36m]  \
+[\e[0;$(GoodAcc $ACCEPTANCE_LAST)m%s %%\e[0;36m]  \
 %s-%s%s%s\t \
 \e[0;$(ColorStatus $STATUS)m%9s\e[0;36m\
 \t%s\t   \
 \e[0;$(ColorTime $TIME_FROM_LAST_MODIFICATION)m%s\e[0;36m      \
 %6s \
-\e[0;$(( $AV_DURATION_LAST_TR==0 ? 33 : 32 ))m%s\n\e[0m" \
+( %s ) \
+\n\e[0m" \
 	    "$(GetShortenedBetaString)" \
 	    "$TRAJECTORIES_DONE" \
 	    "$ACCEPTANCE" \
@@ -254,7 +236,7 @@ function ListJobStatus_Loewe(){
             "$STATUS"   "$MAX_DELTAS" \
 	    "$(echo $TIME_FROM_LAST_MODIFICATION | awk '{if($1 ~ /^[[:digit:]]+$/){printf "%6d", $1}else{print $1}}') sec. ago" \
 	    "$NUMBER_LAST_TRAJECTORY" \
-	    "( $(echo $DURATION_LAST_TR | awk '{if($1 ~ /^[[:digit:]]+$/){printf "%3ds", $1}else{print $1}}') )"
+	    "$(echo "$TIME_LAST_TRAJECTORY $AVERAGE_TIME_PER_TRAJECTORY" | awk '{if($1 ~ /^[[:digit:]]+$/ && $2 ~ /^[[:digit:]]+$/){printf "%3ds | %3ds", $1, $2}else{print "notMeasured"}}')" 
 	
 	if [ $TO_BE_CLEANED -eq 0 ]; then
 	    printf "%s\t\t%8s (%s %%) [%s %%]  %s-%s%s%s\t%9s\t%s\n"   "$(GetShortenedBetaString)"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$ACCEPTANCE_LAST"   "$INT0" "$INT1" "$INT2" "$K_MP"   "$STATUS"   "$MAX_DELTAS" >> $JOBS_STATUS_FILE
@@ -264,7 +246,7 @@ function ListJobStatus_Loewe(){
 	
 	
     done #Loop on BETA
-    printf "\e[0;36m=================================================================================================================================\n\e[0m"
+    printf "\e[0;36m=======================================================================================================================================\n\e[0m"
 }
 
 function GetShortenedBetaString(){

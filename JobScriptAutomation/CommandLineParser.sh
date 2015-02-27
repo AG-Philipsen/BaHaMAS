@@ -45,11 +45,15 @@ MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 		echo -e "  \e[0;34m--submitonly\e[0;32m                       ->    jobs will be submitted (no files are created)"
 		echo -e "  \e[0;34m-t | --thermalize\e[0;32m                  ->    The thermalization is done." #TODO: Explain how!
 		echo -e "  \e[0;34m-c | --continue\e[0;32m                    ->    Unfinished jobs will be continued up to the nr. of measurements specified in the input file."
-		echo -e "  \e[0;34m-c=[number] | --continue=[number]\e[0;32m  ->    If a number is specified, finished jobs will be continued up to the specified number."
-        if [ "$CLUSTER_NAME" = "LOEWE" ]; then
-		    echo -e "                                     ->    To resume a simulation from a given trajectory, add \e[0;34mresumefrom=[number]\e[0;32m in the betasfile."
+		echo -e "  \e[0;34m-c=[number] | --continue=[number]\e[0;32m        If a number is specified, finished jobs will be continued up to the specified number."
+		if [ "$CLUSTER_NAME" = "LOEWE" ]; then
+		    echo -e "                                           To resume a simulation from a given trajectory, add \e[0;34mresumefrom=[number]\e[0;32m in the betasfile."
 		fi
 		echo -e "  \e[0;34m-l | --liststatus\e[0;32m                  ->    The local measurement status for all beta will be displayed"
+		if [ "$CLUSTER_NAME" = "LOEWE" ]; then
+		    echo -e "  \e[0;34m                 \e[0;32m                        Secondary options: \e[0;34m--measureTime\e[0;32m to get information about the trajectory time"
+		    echo -e "  \e[0;34m                 \e[0;32m                                           \e[0;34m--showOnlyQueued\e[0;32m not to show status about not queued jobs"
+		fi
 		echo -e "  \e[0;34m--liststatus_all\e[0;32m                   ->    The global measurement status for all beta will be displayed"
 		echo -e "  \e[0;34m--showjobs\e[0;32m                         ->    The queued jobs will be displayed for the local parameters (kappa,nt,ns,beta)"
 		echo -e "  \e[0;34m--accRateReport\e[0;32m                    ->    The acceptance rates will be computed for the specified intervalls of configurations)"
@@ -149,7 +153,15 @@ MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--liststatus" )
 		    LISTSTATUS="TRUE"
 		    LISTSTATUSALL="FALSE"
-		shift;; 
+		shift;;
+	    --measureTime )
+	            [ $LISTSTATUS = "FALSE" ] && printf "\n\e[0;31mSecondary option --measureTime must be given after the primary one \"-l | --liststatus\"! Aborting...\n\n\e[0m" && exit -1
+		    LISTSTATUS_MEASURE_TIME="TRUE"
+		shift;;
+	    --showOnlyQueued )
+	            [ $LISTSTATUS = "FALSE" ] && printf "\n\e[0;31mSecondary option --showOnlyQueued must be given after the primary one \"-l | --liststatus\"! Aborting...\n\n\e[0m" && exit -1
+		    LISTSTATUS_SHOW_ONLY_QUEUED="TRUE"
+		shift;;
 	    --liststatus_all )
 		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--liststatus_all" )
 		    LISTSTATUS="FALSE"
