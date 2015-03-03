@@ -24,7 +24,7 @@ function __static__ExtractBetasFromJOBNAME(){
     local BETAVALUES_ARRAY=()
     for ELEMENT in "${TEMPORAL_ARRAY[@]}"; do
 	local BETAVALUE=${ELEMENT%%_*}
-	local SEEDS_ARRAY=( $(echo ${ELEMENT#*_} | grep -o "${SEED_PREFIX}[[:digit:]]\{4\}") )
+	local SEEDS_ARRAY=( $(echo ${ELEMENT#*_} | grep -o "${SEED_PREFIX}[[:digit:]x]\{4\}") )
 	if [ ${#SEEDS_ARRAY[@]} -gt 0 ]; then
 	    for SEED in "${SEEDS_ARRAY[@]}"; do
 		BETAVALUES_ARRAY+=( "${BETA_PREFIX}${BETAVALUE}_${SEED}" )
@@ -95,7 +95,7 @@ function ListJobStatus_Loewe(){
 	#Select only folders with old or new names
 	BETA=${BETA#$BETA_PREFIX}
 	if [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}$ ]] &&
-	   [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}_"$SEED_PREFIX"[[:digit:]]{4}_continueWithNewChain$ ]] &&
+	   [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}_"$SEED_PREFIX"[[:digit:]x]{4}_continueWithNewChain$ ]] &&
 	   [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}_"$SEED_PREFIX"[[:digit:]]{4}_thermalizeFromHot$ ]] &&
 	   [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}_"$SEED_PREFIX"[[:digit:]]{4}_thermalizeFromConf$ ]]; then continue; fi
 
@@ -262,7 +262,7 @@ function GetShortenedBetaString(){
 }
 
 function GoodAcc(){
-    echo "$1" | awk '{if($1<68){print 31}else if($1>78 || $1<70){print 33}else{print 32}}'
+    echo "$1" | awk '{if($1<70 || $1>90){print 31}else if($1>78){print 33}else{print 32}}'
 }
 
 function ColorStatus(){
