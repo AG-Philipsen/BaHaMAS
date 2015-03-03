@@ -93,7 +93,13 @@ if [[ $(whoami) =~ ^hkf[[:digit:]]{3} ]]; then
 fi
 
 SPECIFIED_COMMAND_LINE_OPTIONS=( $@ )
-ParseCommandLineOption $@
+#If the help is asked, it doesn't matter which other options are given to the script
+if ElementInArray "-h" ${SPECIFIED_COMMAND_LINE_OPTIONS[@]} || ElementInArray "--help" ${SPECIFIED_COMMAND_LINE_OPTIONS[@]}; then
+    SPECIFIED_COMMAND_LINE_OPTIONS=( "--help" )
+fi
+
+ParseCommandLineOption "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}"
+ReadParametersFromPath $(pwd)
 #-----------------------------------------------------------------------------------------------------------------#
 
 
@@ -167,6 +173,14 @@ elif [ $THERMALIZE = "TRUE" ]; then
     if [ $USE_MULTIPLE_CHAINS = "FALSE" ]; then
 	printf "\n\e[0;31mOption -t | --thermalize implemented ONLY combined with -u | --useMultipleChains option! Aborting...\n\n\e[0m"; exit -1
     fi
+    #Here we fix the beta postfix just looking for thermalized conf from hot at the actual parameters (no matter at which beta);
+    #if at least one configuration thermalized from hot is present, it means the thermalization has to be done from conf (the
+    #correct beta to be used is selected then later in the script ---> see where the array STARTCONFIGURATION_GLOBALPATH is filled
+    if [ $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "conf.${PARAMETERS_STRING}_${BETA_PREFIX}[[:digit:]][.][[:digit:]]\{4\}_fromHot[[:digit:]]\+.*" | wc -l) -eq 0 ]; then
+	BETA_POSTFIX="_thermalizeFromHot"
+    else
+	BETA_POSTFIX="_thermalizeFromConf"
+    fi	
     if [ $MEASURE_PBP = "TRUE" ]; then
 	printf "\n\e[1;33;4mMeasurement of PBP switched off during thermalization!!\n\e[0m"
 	MEASURE_PBP="FALSE"

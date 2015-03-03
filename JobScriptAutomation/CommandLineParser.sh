@@ -127,14 +127,6 @@ MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 	    -t | --thermalize )			 
 		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "$1" )
 		    THERMALIZE="TRUE"
-		    #Here we fix the beta postfix just looking for thermalized conf from hot at the actual parameters (no matter at which beta);
-		    #if at least one configuration thermalized from hot is present, it means the thermalization has to be done from conf (the
-		    #correct beta to be used is selected then later in the script ---> see where the array STARTCONFIGURATION_GLOBALPATH is filled
-		    if [ $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "conf.${PARAMETERS_STRING}_${BETA_PREFIX}[[:digit:]][.][[:digit:]]\{4\}_fromHot[[:digit:]]\+.*" | wc -l) -eq 0 ]; then
-			BETA_POSTFIX="_thermalizeFromHot"
-		    else
-			BETA_POSTFIX="_thermalizeFromConf"
-		    fi	
 		shift;; 
 	    -c | --continue )			 
 		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "$1" )
@@ -184,7 +176,7 @@ MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--emptyBetaDirectories" )
 		EMPTY_BETA_DIRS="TRUE"
 	    shift ;;
-	    * ) printf "\n\e[0;31mError parsing the options! Aborting...\n\n\e[0m" ; exit -1 ;;
+	    * ) printf "\n\e[0;31m Invalid option \e[1m$1\e[0;31m (see help for further information)! Aborting...\n\n\e[0m" ; exit -1 ;;
 	esac
     done
 
