@@ -74,7 +74,7 @@ function __static__ExtractMetaInformationFromJOBNAME(){
 	    JOB_PARAMETERS_STRING="$JOB_PARAMETERS_STRING${PREFIXES[$i]}${JOB_PARAMETERS_VALUE[$i]}_"
 	done
 	JOB_PARAMETERS_STRING=${JOB_PARAMETERS_STRING%?} #Remove last underscore
-	METAINFORMATION_ARRAY+=( $(echo "${JOB_PARAMETERS_STRING} | $( echo "${JOBNAME_BETAS[@]}" | sed 's/ /_/g') | ${JOBNAME_POSTFIX} | ${JOB_STATUS}" | sed 's/ //g') )
+	METAINFORMATION_ARRAY+=( $(echo "${JOB_PARAMETERS_STRING} | $( echo "${JOBNAME_BETAS[@]}" | sed 's/ /_/g') | postfix=${JOBNAME_POSTFIX} | ${JOB_STATUS}" | sed 's/ //g') )
     done
     echo "${METAINFORMATION_ARRAY[@]}"
 }
@@ -102,7 +102,7 @@ function ListJobStatus_Loewe(){
 	local POSTFIX_FROM_FOLDER=$(echo ${BETA##*_} | grep -o "[[:alpha:]]\+\$")
 
 	local STATUS=( )
-	for JOB_MATCHING in $(echo ${JOB_METAINFORMATION_ARRAY[@]} | sed 's/ /\n/g' | grep "${PARAMETERS_STRING}" | grep "${BETA_PREFIX}${BETA%_*}" | grep "${POSTFIX_FROM_FOLDER}"); do
+	for JOB_MATCHING in $(echo ${JOB_METAINFORMATION_ARRAY[@]} | sed 's/ /\n/g' | grep "${PARAMETERS_STRING}" | grep "${BETA_PREFIX}${BETA%_*}" | grep "postfix=${POSTFIX_FROM_FOLDER}|"); do
 	    STATUS+=( "${JOB_MATCHING##*|}" )
 	done
 	if [ ${#STATUS[@]} -eq 0 ]; then
