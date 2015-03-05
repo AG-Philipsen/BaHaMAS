@@ -316,7 +316,7 @@ function ListJobStatus()
 
 function CleanOutputFiles()
 {
-    printf "\n\e[1;36m \e[4mCleaning\e[0m\e[1;36m:\n\n"
+    printf "\n\e[1;36m \e[4mCleaning\e[0m\e[1;36m:\n\n\e[0m"
     for BETA in ${BETAVALUES[@]}; do
         #-------------------------------------------------------------------------#
 	local WORK_BETADIRECTORY="$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
@@ -327,16 +327,23 @@ function CleanOutputFiles()
             PROBLEM_BETA_ARRAY+=( $BETA )
 	    continue
 	fi
-	
-	if $(sort --numeric-sort --unique --check=silent ${OUTPUTFILE_GLOBALPATH}); then
+
+	if $(sort --numeric-sort --unique --check=silent --key 1,1 ${OUTPUTFILE_GLOBALPATH}); then
 	    printf "\e[38;5;13m    The file \"${BETA_PREFIX}${OUTPUTFILE_GLOBALPATH##*/$BETA_PREFIX}\" has not to be cleaned!\n\e[0m"
 	else
             #Do a backup of the file
 	    local OUTPUTFILE_BACKUP="${OUTPUTFILE_GLOBALPATH}_$(date +'%F_%H%M')"
 	    cp $OUTPUTFILE_GLOBALPATH $OUTPUTFILE_BACKUP || exit -2
+	    #Check whether there is any trajectory repeated but with different observables
+	    #TODO: Adjust the following line for JUQUEEN where there is the time in the output file!
+	    local SUSPICIOUS_TRAJECTORY=$(awk '{val=$1; $1=""; array[val]++; if(array[val]>1 && $0 != lineRest[val]){print val; exit}; lineRest[val]=$0}' $OUTPUTFILE_GLOBALPATH)
+	    if [ "$SUSPICIOUS_TRAJECTORY" != "" ]; then
+		printf "    \e[38;5;202mFound different observables for same trajectory number! First occurence at trajectory $SUSPICIOUS_TRAJECTORY. The file will be cleaned anyway,\n"
+		printf "    use the backup file \"$OUTPUTFILE_BACKUP\" in case of need.\n\e[0m"
+	    fi
             #Use sort command to clean the file: note that it is safe to give same input
             #and output since the input file is read and THEN overwritten
-	    sort --numeric-sort --unique --output=${OUTPUTFILE_GLOBALPATH} ${OUTPUTFILE_GLOBALPATH}
+	    sort --numeric-sort --unique --key 1,1 --output=${OUTPUTFILE_GLOBALPATH} ${OUTPUTFILE_GLOBALPATH}
 	    if [ $? -ne 0 ]; then
 		printf "\e[0;31m    Problem occurred cleaning file \"$OUTPUTFILE_GLOBALPATH\"! Leaving out beta = ${BETA%_*} .\n\n\e[0m"
 		PROBLEM_BETA_ARRAY+=( $BETA )
