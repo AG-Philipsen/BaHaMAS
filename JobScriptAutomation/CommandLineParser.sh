@@ -4,7 +4,7 @@
 
 function ParseCommandLineOption(){
 
-MUTUALLYEXCLUSIVEOPTS=( "-s" "--submit" "--submitonly" "-c" "--continue" "-t" "--thermalize" "--liststatus" "--liststatus_all" "--showjobs" "--showjobs_all" "--accRateReport" "--accRateReport_all --emptyBetaDirectories" )
+MUTUALLYEXCLUSIVEOPTS=( "-s | --submit" "-c | --continue" "-t | --thermalize" "-l | --liststatus" "--liststatus_all" "--submitonly" "--showjobs" "--showjobs_all" "--accRateReport" "--accRateReport_all" "--emptyBetaDirectories" "--cleanOutputFiles")
 MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 
     while [ "$1" != "" ]; do
@@ -35,15 +35,15 @@ MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 		    echo "  --nrzprocs                         ->    default value = $NRZPROCS"
 		    echo "  --ompnumthreads                    ->    default value = $OMPNUMTHREADS"
 		else
+		    echo "  -p | --doNotMeasurePbp             ->    if given, the chiral condensate measurement is switched off"
 		    echo "  -w | --walltime                    ->    default value = $WALLTIME [days-hours:min:sec]"
-			echo "  -p | --doNotMeasurePbp             ->    default value = $MEASURE_PBP"
 		    echo "  --partition                        ->    default value = $LOEWE_PARTITION"
 		    echo "  --constraint                       ->    default value = $LOEWE_CONSTRAINT"
 		    echo "  --node                             ->    default value = automatically assigned"
 		fi
 		echo -e "  \e[0;34m-s | --submit\e[0;32m                      ->    jobs will be submitted"
 		echo -e "  \e[0;34m--submitonly\e[0;32m                       ->    jobs will be submitted (no files are created)"
-		echo -e "  \e[0;34m-t | --thermalize\e[0;32m                  ->    The thermalization is done." #TODO: Explain how!
+		echo -e "  \e[0;34m-t | --thermalize\e[0;32m                  ->    The thermalization is done." #TODO: Explain how
 		echo -e "  \e[0;34m-c | --continue\e[0;32m                    ->    Unfinished jobs will be continued up to the nr. of measurements specified in the input file."
 		echo -e "  \e[0;34m-c=[number] | --continue=[number]\e[0;32m        If a number is specified, finished jobs will be continued up to the specified number."
 		if [ "$CLUSTER_NAME" = "LOEWE" ]; then
@@ -51,18 +51,21 @@ MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 		fi
 		echo -e "  \e[0;34m-l | --liststatus\e[0;32m                  ->    The local measurement status for all beta will be displayed"
 		if [ "$CLUSTER_NAME" = "LOEWE" ]; then
-		    echo -e "  \e[0;34m                 \e[0;32m                        Secondary options: \e[0;34m--measureTime\e[0;32m to get information about the trajectory time"
-		    echo -e "  \e[0;34m                 \e[0;32m                                           \e[0;34m--showOnlyQueued\e[0;32m not to show status about not queued jobs"
+		    echo -e "                                           Secondary options: \e[0;34m--measureTime\e[0;32m to get information about the trajectory time"
+		    echo -e "                                                              \e[0;34m--showOnlyQueued\e[0;32m not to show status about not queued jobs"
 		fi
 		echo -e "  \e[0;34m--liststatus_all\e[0;32m                   ->    The global measurement status for all beta will be displayed"
 		echo -e "  \e[0;34m--showjobs\e[0;32m                         ->    The queued jobs will be displayed for the local parameters (kappa,nt,ns,beta)"
-		echo -e "  \e[0;34m--accRateReport\e[0;32m                    ->    The acceptance rates will be computed for the specified intervalls of configurations)"
-		echo -e "  \e[0;34m--accRateReport_all\e[0;32m                ->    The acceptance rates will be computed for the specified intervalls of configurations for all parameters (kappa,nt,ns,beta)"
-		echo -e "  \e[0;34m--emptyBetaDirectories\e[0;32m             ->    CAUTION: The beta directories corresponding to the beta values specified in the betas file will be emptied!"
-		echo -e "                                     ->    For each beta value specified there will be a promt for confirmation! After the Confirmation the process cannot bet undone!" 
+		echo -e "  \e[0;34m--accRateReport\e[0;32m                    ->    The acceptance rates will be computed for the specified intervals of configurations"
+		echo -e "  \e[0;34m--accRateReport_all\e[0;32m                ->    The acceptance rates will be computed for the specified intervals of configurations for all parameters (kappa,nt,ns,beta)"
+		echo -e "  \e[0;34m--cleanOutputFiles\e[0;32m                 ->    The output files referred to the betas contained in the betas file are cleaned (repeated lines are eliminated)"
+		echo -e "                                           For safety reason, a backup of the output file is done (it is left in the output file folder with the name outputfilename_date)" 
+		echo -e "                                           Secondary options: \e[0;34m--all\e[0;32m to clean output files for all betas in WORK_DIR referred to the actual path parameters"
+		echo -e "  \e[0;34m--emptyBetaDirectories\e[0;32m             ->    The beta directories corresponding to the beta values specified in the file \"\e[4memptybetas\e[0;32m\" will be emptied!"
+		echo -e "                                           For each beta value specified there will be a promt for confirmation! \e[1mATTENTION\e[0;32m: After the Confirmation the process cannot be undone!" 
 		echo ""
-		echo -e "\e[0;33mNOTE: The blue options are mutually exclusive and they are all FALSE by default! In other words, if none of them"
-		echo -e "\e[0;33m      is given, the script will create beta-folders with the right files inside, but no job will be submitted."
+		echo -e "\e[0;93mNOTE: The blue options are mutually exclusive and they are all FALSE by default! In other words, if none of them"
+		echo -e "\e[0;93m      is given, the script will create beta-folders with the right files inside, but no job will be submitted."
 		printf "\n\e[0m"
 		exit
 		shift;;
@@ -172,21 +175,30 @@ MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 	   	ACCRATE_REPORT="TRUE"
 	   	ACCRATE_REPORT_GLOBAL="TRUE"
 	    shift ;;
+	    --cleanOutputFiles )
+		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--cleanOutputFiles" )
+		CLEAN_OUTPUT_FILES="TRUE"
+	    shift ;;
 	    --emptyBetaDirectories )
 		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--emptyBetaDirectories" )
 		EMPTY_BETA_DIRS="TRUE"
 	    shift ;;
+	    --all )
+	            [ $CLEAN_OUTPUT_FILES = "FALSE" ] && printf "\n\e[0;31mSecondary option --all must be given after the primary one! Aborting...\n\n\e[0m" && exit -1
+		    SECONDARY_OPTION_ALL="TRUE"
+		shift;;
 	    * ) printf "\n\e[0;31m Invalid option \e[1m$1\e[0;31m (see help for further information)! Aborting...\n\n\e[0m" ; exit -1 ;;
 	esac
     done
 
     if [ ${#MUTUALLYEXCLUSIVEOPTS_PASSED[@]} -gt 1 ]; then
 
-	    printf "\n\e[0;31m The options " 
-	    for OPT in ${MUTUALLYEXCLUSIVEOPTS[@]}; do
-		printf "%s, " $OPT	
+	    printf "\n\e[0;31m The options\n\n\e[1m" 
+	    for OPT in "${MUTUALLYEXCLUSIVEOPTS[@]}"; do
+		#echo "  $OPT"
+		printf "  %s\n" "$OPT"
 	    done
-	    printf "are mutually exclusive and must not be combined! Aborting...\n\n\e[0m" 
+	    printf "\n\e[0;31m are mutually exclusive and must not be combined! Aborting...\n\n\e[0m" 
 	    exit -1
     fi
 }

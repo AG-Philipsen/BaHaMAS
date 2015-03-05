@@ -75,6 +75,8 @@ SHOWJOBS="FALSE"
 ACCRATE_REPORT="FALSE"
 ACCRATE_REPORT_GLOBAL="FALSE"
 EMPTY_BETA_DIRS="FALSE"
+CLEAN_OUTPUT_FILES="FALSE"
+SECONDARY_OPTION_ALL="FALSE"
 
 #-----------------------------------------------------------------------------------------------------------------#
 # Set default values for the non-modifyable variables ---> Modify this file to change them!
@@ -208,7 +210,16 @@ elif [ $ACCRATE_REPORT = "TRUE" ]; then
 
     AcceptanceRateReport
 
-elif [ $EMPTY_BETA_DIRS == "TRUE" ]; then
+elif [ $CLEAN_OUTPUT_FILES = "TRUE" ]; then
+    
+    if [ $SECONDARY_OPTION_ALL = "TRUE" ]; then
+	BETAVALUES=( $( ls $WORK_DIR_WITH_BETAFOLDERS | grep "^$BETA_PREFIX[[:digit:]][.][[:digit:]]\{4\}" | awk '{print substr($1,2)}') )
+    else
+	ReadBetaValuesFromFile
+    fi
+    CleanOutputFiles
+
+elif [ $EMPTY_BETA_DIRS = "TRUE" ]; then
     
     BETASFILE="emptybetas"
     ReadBetaValuesFromFile

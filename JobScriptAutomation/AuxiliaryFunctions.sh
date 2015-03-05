@@ -312,3 +312,37 @@ function ListJobStatus()
 	ListJobStatus_Loewe
     fi
 }
+
+
+function CleanOutputFiles()
+{
+    printf "\n\e[1;36m \e[4mCleaning\e[0m\e[1;36m:\n\n"
+    for BETA in ${BETAVALUES[@]}; do
+        #-------------------------------------------------------------------------#
+	local WORK_BETADIRECTORY="$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
+	local OUTPUTFILE_GLOBALPATH="${WORK_BETADIRECTORY}/$OUTPUTFILE_NAME"
+        #-------------------------------------------------------------------------#
+	if [ ! -f $OUTPUTFILE_GLOBALPATH ]; then
+	    printf "\e[0;31m    File \"$OUTPUTFILE_GLOBALPATH\" not existing! Leaving out beta = ${BETA%_*} .\n\n\e[0m"
+            PROBLEM_BETA_ARRAY+=( $BETA )
+	    continue
+	fi
+	
+	if $(sort --numeric-sort --unique --check=silent ${OUTPUTFILE_GLOBALPATH}); then
+	    printf "\e[38;5;13m    The file \"${BETA_PREFIX}${OUTPUTFILE_GLOBALPATH##*/$BETA_PREFIX}\" has not to be cleaned!\n\e[0m"
+	else
+            #Do a backup of the file
+	    local OUTPUTFILE_BACKUP="${OUTPUTFILE_GLOBALPATH}_$(date +'%F_%H%M')"
+	    cp $OUTPUTFILE_GLOBALPATH $OUTPUTFILE_BACKUP || exit -2
+            #Use sort command to clean the file: note that it is safe to give same input
+            #and output since the input file is read and THEN overwritten
+	    sort --numeric-sort --unique --output=${OUTPUTFILE_GLOBALPATH} ${OUTPUTFILE_GLOBALPATH}
+	    if [ $? -ne 0 ]; then
+		printf "\e[0;31m    Problem occurred cleaning file \"$OUTPUTFILE_GLOBALPATH\"! Leaving out beta = ${BETA%_*} .\n\n\e[0m"
+		PROBLEM_BETA_ARRAY+=( $BETA )
+	    fi
+	    printf "\e[0;92m    The file \"${BETA_PREFIX}${OUTPUTFILE_GLOBALPATH##*/$BETA_PREFIX}\" has been successfully cleaned!"
+	    printf " [removed $(($(wc -l < $OUTPUTFILE_BACKUP) - $(wc -l < $OUTPUTFILE_GLOBALPATH))) line(s)]!\n\e[0m"
+	fi
+    done
+}
