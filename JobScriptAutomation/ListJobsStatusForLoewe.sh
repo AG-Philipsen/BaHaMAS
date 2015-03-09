@@ -219,8 +219,8 @@ function ListJobStatus_Loewe(){
 	printf \
 "\e[0;36m%-15s\t  \
 \e[0;$((36-$TO_BE_CLEANED*5))m%8s\e[0;36m \
-(\e[0;$(GoodAcc $ACCEPTANCE)m%s %%\e[0;36m) \
-[\e[0;$(GoodAcc $ACCEPTANCE_LAST)m%s %%\e[0;36m]  \
+(\e[38;5;$(GoodAcc $ACCEPTANCE)m%s %%\e[0;36m) \
+[\e[38;5;$(GoodAcc $ACCEPTANCE_LAST)m%s %%\e[0;36m]  \
 %s-%s%s%s\t \
 \e[0;$(ColorStatus $STATUS)m%9s\e[0;36m\
 \t%s\t   \
@@ -262,7 +262,7 @@ function GetShortenedBetaString(){
 }
 
 function GoodAcc(){
-    echo "$1" | awk '{if($1<70 || $1>90){print 31}else if($1>78){print 33}else{print 32}}'
+    echo "$1" | awk '{if($1<68){print 9}else if($1<70){print 208}else if($1>78){print 11}else if($1>90){print 202}else{print 10}}'
 }
 
 function ColorStatus(){
