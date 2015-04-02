@@ -76,6 +76,8 @@ function __static__ExtractMetaInformationFromJOBNAME(){
 	JOB_PARAMETERS_STRING=${JOB_PARAMETERS_STRING%?} #Remove last underscore
 	#If JOB_PARAMETERS_STRING is not at the beginning of the jobname, skip job
 	[ $(echo "$JOBNAME" | grep "^${JOB_PARAMETERS_STRING}" | wc -l) -eq 0 ] && continue
+	#If the status is COMPLETING, skip job
+	[ $JOB_STATUS == "COMPLETING" ] && continue
 	METAINFORMATION_ARRAY+=( $(echo "${JOB_PARAMETERS_STRING} | $( echo "${JOBNAME_BETAS[@]}" | sed 's/ /_/g') | postfix=${JOBNAME_POSTFIX} | ${JOB_STATUS}" | sed 's/ //g') )
     done
     echo "${METAINFORMATION_ARRAY[@]}"
@@ -148,6 +150,8 @@ function ListJobStatus_Loewe(){
 	            #Calculate also last trajectory time
 		    local TIME_LAST_TRAJECTORY=$(( $(date -d "${TIMES_ARRAY[@]:(-1)}" +%s) - $(date -d "${TIMES_ARRAY[$((${#TIMES_ARRAY[@]}-2))]}" +%s) ))
 		    [ $TIME_LAST_TRAJECTORY -lt 0 ] && TIME_LAST_TRAJECTORY=$(( $TIME_LAST_TRAJECTORY + 86400 ))
+		    #The following line is to avoid that the time is 0s because the last two lines found in the file are for the daving to prng.save and prng.xxxx
+		    [ $TIME_LAST_TRAJECTORY -lt 1 ] && TIME_LAST_TRAJECTORY=$(( $(date -d "${TIMES_ARRAY[@]:(-1)}" +%s) - $(date -d "${TIMES_ARRAY[$((${#TIMES_ARRAY[@]}-3))]}" +%s) ))
 		else
 		    local AVERAGE_TIME_PER_TRAJECTORY="----"
 		    local TIME_LAST_TRAJECTORY="----"
