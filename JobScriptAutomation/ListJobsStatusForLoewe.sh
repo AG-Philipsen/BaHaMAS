@@ -24,7 +24,7 @@ function __static__ExtractBetasFromJOBNAME(){
     local BETAVALUES_ARRAY=()
     for ELEMENT in "${TEMPORAL_ARRAY[@]}"; do
 	local BETAVALUE=${ELEMENT%%_*}
-	local SEEDS_ARRAY=( $(echo ${ELEMENT#*_} | grep -o "${SEED_PREFIX}[[:digit:]x]\{4\}") )
+	local SEEDS_ARRAY=( $(echo ${ELEMENT#*_} | grep -o "${SEED_PREFIX}[[:alnum:]]\{4\}") )
 	if [ ${#SEEDS_ARRAY[@]} -gt 0 ]; then
 	    for SEED in "${SEEDS_ARRAY[@]}"; do
 		BETAVALUES_ARRAY+=( "${BETA_PREFIX}${BETAVALUE}_${SEED}" )
@@ -47,7 +47,7 @@ function __static__ExtractPostfixFromJOBNAME(){
     elif [ "$POSTFIX" == "Tuning" ]; then
 	echo "tuning"
     #Also in the "TC" and "TH" cases we have seeds in the name, but such a cases are exluded from the elif
-    elif [ $(echo $JOBNAME | grep -o "_${SEED_PREFIX}[[:digit:]]\{4\}" | wc -l) -ne 0 ]; then 
+    elif [ $(echo $JOBNAME | grep -o "_${SEED_PREFIX}[[:alnum:]]\{4\}" | wc -l) -ne 0 ]; then 
 	echo "continueWithNewChain"
     else
 	echo ""
@@ -99,7 +99,7 @@ function ListJobStatus_Loewe(){
 	#Select only folders with old or new names
 	BETA=${BETA#$BETA_PREFIX}
 	if [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}$ ]] &&
-	   [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}_"$SEED_PREFIX"[[:digit:]x]{4}_continueWithNewChain$ ]] &&
+	   [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}_"$SEED_PREFIX"[[:alnum:]]{4}_continueWithNewChain$ ]] &&
 	   [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}_"$SEED_PREFIX"[[:digit:]]{4}_thermalizeFromHot$ ]] &&
 	   [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}_"$SEED_PREFIX"[[:digit:]]{4}_thermalizeFromConf$ ]]; then continue; fi
 

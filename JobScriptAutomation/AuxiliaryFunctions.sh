@@ -86,7 +86,7 @@ function ReadBetaValuesFromFile(){
 	fi
 	
 	for SEED in ${SEED_ARRAY_TEMP[@]}; do
-	    if [[ ! $SEED =~ ^[[:digit:]]{4}$ ]]; then
+	    if [[ ! $SEED =~ ^[[:alnum:]]{4}$ ]]; then
 		printf "\n\e[0;31m Invalid seed entry in betas file! Aborting...\n\n\e[0m"
 		exit -1
 	    fi

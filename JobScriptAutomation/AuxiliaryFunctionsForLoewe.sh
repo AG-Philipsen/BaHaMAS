@@ -200,7 +200,7 @@ function ProcessBetaValuesForContinue_Loewe() {
 	        PROBLEM_BETA_ARRAY+=( $BETA )
 	        continue
 	    fi
-	    
+
 	    echo ""
 	    __static__CheckIfJobIsInQueue_Loewe
 	    if [ $? == 0 ]; then
@@ -578,7 +578,7 @@ function SubmitJobsForValidBetaValues_Loewe() {
 		local PREFIX_TO_BE_GREPPED_FOR="$SEED_PREFIX"
 	    fi
 	    local TEMP_ARRAY=( $(echo $BETA | sed 's/_/ /g') )
-	    if [ $(echo $BETA | grep -o "${PREFIX_TO_BE_GREPPED_FOR}\([[:digit:]][.]\)\?[[:digit:]]\{4\}" | wc -l) -ne $GPU_PER_NODE ]; then
+	    if [ $(echo $BETA | grep -o "${PREFIX_TO_BE_GREPPED_FOR}\([[:digit:]][.]\)\?[[:alnum:]]\{4\}" | wc -l) -ne $GPU_PER_NODE ]; then
 		printf "\n\e[0;33m \e[1m\e[4mWARNING\e[24m:\e[0;33m At least one job is being submitted with less than\n"
 		printf "          $GPU_PER_NODE runs inside. Would you like to submit in any case (Y/N)? \e[0m"
 		local CONFIRM="";
