@@ -23,10 +23,11 @@ source $HOME/Script/JobScriptAutomation/EmptyBetaDirectories.sh || exit -2
 
 #-----------------------------------------------------------------------------------------------------------------#
 # Global variables declared in other scripts
+#   STAGGERED="TRUE" or WILSON="TRUE"
 #   CHEMPOT_PREFIX="mui"
 #   NTIME_PREFIX="nt"
 #   NSPACE_PREFIX="ns"
-#   KAPPA_PREFIX="k"
+#   KAPPA_PREFIX="k" or KAPPA_PREFIX="mass"
 #   CHEMPOT_POSITION=0
 #   KAPPA_POSITION=1
 #   NTIME_POSITION=2
@@ -35,14 +36,13 @@ source $HOME/Script/JobScriptAutomation/EmptyBetaDirectories.sh || exit -2
 #   KAPPA
 #   NSPACE
 #   NTIME
-#   PARAMETERS_PATH    <---This is the string in the path with the 4 parameters with slash in front, e.g. /muiPiT/k1550/nt6/ns12
-#   PARAMETERS_STRING  <---This is the string in the path with the 4 parameters with underscores, e.g. muiPiT_k1550_nt6_ns12
+#   PARAMETERS_PATH    <---This is the string in the path with the 4 parameters with slash in front, e.g. /muiPiT/k1550/nt6/ns12   or   /mui0/mass0250/nt4/ns8
+#   PARAMETERS_STRING  <---This is the string in the path with the 4 parameters with underscores, e.g. muiPiT_k1550_nt6_ns12   or   mui0_mass0250_nt4_ns8
 
 #-----------------------------------------------------------------------------------------------------------------#
 # Set default values for the command line parameters
 
 BETASFILE="betas"
-KAPPA="1000"
 WALLTIME="7-00:00:00"
 BGSIZE="32"
 MEASUREMENTS="20000"
@@ -50,7 +50,7 @@ NRXPROCS="4"
 NRYPROCS="2"
 NRZPROCS="2"
 OMPNUMTHREADS="64"
-NSAVE="50"
+NSAVE="100"
 INTSTEPS0="7"
 INTSTEPS1="5"
 INTSTEPS2="5"
@@ -77,6 +77,11 @@ ACCRATE_REPORT_GLOBAL="FALSE"
 EMPTY_BETA_DIRS="FALSE"
 CLEAN_OUTPUT_FILES="FALSE"
 SECONDARY_OPTION_ALL="FALSE"
+if [ $STAGGERED = "TRUE" ]; then
+    NUM_TASTES="3"
+    USE_RATIONAL_APPROXIMATION_FILE="TRUE"
+fi
+
 
 #-----------------------------------------------------------------------------------------------------------------#
 # Set default values for the non-modifyable variables ---> Modify this file to change them!
@@ -101,6 +106,7 @@ if ElementInArray "-h" ${SPECIFIED_COMMAND_LINE_OPTIONS[@]} || ElementInArray "-
 fi
 
 ParseCommandLineOption "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}"
+CheckWilsonStaggeredVariables
 ReadParametersFromPath $(pwd)
 #-----------------------------------------------------------------------------------------------------------------#
 
@@ -213,9 +219,9 @@ elif [ $ACCRATE_REPORT = "TRUE" ]; then
 elif [ $CLEAN_OUTPUT_FILES = "TRUE" ]; then
     
     if [ $SECONDARY_OPTION_ALL = "TRUE" ]; then
-	BETAVALUES=( $( ls $WORK_DIR_WITH_BETAFOLDERS | grep "^$BETA_PREFIX[[:digit:]][.][[:digit:]]\{4\}" | awk '{print substr($1,2)}') )
+        BETAVALUES=( $( ls $WORK_DIR_WITH_BETAFOLDERS | grep "^$BETA_PREFIX[[:digit:]][.][[:digit:]]\{4\}" | awk '{print substr($1,2)}') )
     else
-	ReadBetaValuesFromFile
+        ReadBetaValuesFromFile
     fi
     CleanOutputFiles
 
