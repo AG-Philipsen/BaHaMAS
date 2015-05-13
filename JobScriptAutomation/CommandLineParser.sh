@@ -16,7 +16,8 @@ MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 		echo "  -h | --help"
 		echo "  --jobscript_prefix                 ->    default value = $JOBSCRIPT_PREFIX"
 		echo "  --chempot_prefix                   ->    default value = $CHEMPOT_PREFIX"
-		echo "  --kappa_prefix                     ->    default value = $KAPPA_PREFIX"
+        echo -e "  --kappa_prefix                     ->    default value = k \e[1;32m(Wilson Case ONLY)\e[0;32m"
+        echo -e "  --mass_prefix                      ->    default value = mass \e[1;32m(Staggered Case ONLY)\e[0;32m"
 		echo "  --ntime_prefix                     ->    default value = $NTIME_PREFIX"
 		echo "  --nspace_prefix                    ->    default value = $NSPACE_PREFIX"
 		echo "  --beta_prefix                      ->    default value = $BETA_PREFIX"
@@ -41,6 +42,7 @@ MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 		    echo "  --constraint                       ->    default value = $LOEWE_CONSTRAINT"
 		    echo "  --node                             ->    default value = automatically assigned"
 		fi
+		echo -e "  --doNotUseRAfiles                  ->    if given, the Rational Approximations are evaluated \e[1;32m(Staggered Case ONLY)\e[0;32m"
 		echo -e "  \e[0;34m-s | --submit\e[0;32m                      ->    jobs will be submitted"
 		echo -e "  \e[0;34m--submitonly\e[0;32m                       ->    jobs will be submitted (no files are created)"
 		echo -e "  \e[0;34m-t | --thermalize\e[0;32m                  ->    The thermalization is done." #TODO: Explain how
@@ -69,27 +71,35 @@ MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 		printf "\n\e[0m"
 		exit
 		shift;;
-	    --jobscript_prefix=* )       JOBSCRIPT_PREFIX=${1#*=}; shift ;;
-            --chempot_prefix=* )    	 CHEMPOT_PREFIX=${1#*=}; shift ;;
-	    --kappa_prefix=* )           KAPPA_PREFIX=${1#*=}; shift ;;
-	    --ntime_prefix=* )           NTIME_PREFIX=${1#*=}; shift ;;
-	    --nspace_prefix=* )          NSPACE_PREFIX=${1#*=}; shift ;;
-	    --beta_prefix=* )          	 BETA_PREFIX=${1#*=}; shift ;;
-	    --betasfile=* )  		 BETASFILE=${1#*=}; shift ;;
-	    --chempot=* )		 CHEMPOT=${1#*=}; shift ;;
-	    --kappa=* )			 KAPPA=${1#*=}; shift ;;
-	    -w=* | --walltime=* )               WALLTIME=${1#*=}; shift ;;
-	    --bgsize=* )                 BGSIZE=${1#*=}; shift ;;
-	    -m=* | --measurements=* )		 MEASUREMENTS=${1#*=}; shift ;;
-	    --nrxprocs=* )		 NRXPROCS=${1#*=}; shift ;;
-	    --nryprocs=* )		 NRYPROCS=${1#*=}; shift ;;
-	    --nrzprocs=* )		 NRZPROCS=${1#*=}; shift ;;
-	    --ompnumthreads=* )		 OMPNUMTHREADS=${1#*=}; shift ;;
-	    -f=* | --confSaveFrequency=* )		 	 NSAVE=${1#*=}; shift ;;
-	    --intsteps0=* )		 INTSTEPS0=${1#*=}; shift ;;
-	    --intsteps1=* )		 INTSTEPS1=${1#*=}; shift ;;
-	    --intsteps2=* )		 INTSTEPS2=${1#*=}; shift ;;
-	    -p | --doNotMeasurePbp )	 MEASURE_PBP="FALSE"; shift ;;
+        --jobscript_prefix=* )          JOBSCRIPT_PREFIX=${1#*=}; shift ;;
+        --chempot_prefix=* )            CHEMPOT_PREFIX=${1#*=}; shift ;;
+	    --kappa_prefix=* )
+            [ $STAGGERED = "TRUE" ] && printf "\n\e[0;31m The option --kappa_prefix can be used only in WILSON simulations! Aborting...\n\n\e[0m" && exit -1
+            KAPPA_PREFIX=${1#*=}; shift ;;
+	    --mass_prefix=* )
+            [ $WILSON = "TRUE" ] && printf "\n\e[0;31m The option --kappa_prefix can be used only in STAGGERED simulations! Aborting...\n\n\e[0m" && exit -1
+            KAPPA_PREFIX=${1#*=}; shift ;;
+	    --ntime_prefix=* )              NTIME_PREFIX=${1#*=}; shift ;;
+	    --nspace_prefix=* )             NSPACE_PREFIX=${1#*=}; shift ;;
+	    --beta_prefix=* )               BETA_PREFIX=${1#*=}; shift ;;
+	    --betasfile=* )                 BETASFILE=${1#*=}; shift ;;
+	    --chempot=* )                   CHEMPOT=${1#*=}; shift ;;
+	    --kappa=* )                     KAPPA=${1#*=}; shift ;;
+	    -w=* | --walltime=* )           WALLTIME=${1#*=}; shift ;;
+	    --bgsize=* )                    BGSIZE=${1#*=}; shift ;;
+	    -m=* | --measurements=* )       MEASUREMENTS=${1#*=}; shift ;;
+	    --nrxprocs=* )                  NRXPROCS=${1#*=}; shift ;;
+	    --nryprocs=* )                  NRYPROCS=${1#*=}; shift ;;
+	    --nrzprocs=* )                  NRZPROCS=${1#*=}; shift ;;
+	    --ompnumthreads=* )             OMPNUMTHREADS=${1#*=}; shift ;;
+	    -f=* | --confSaveFrequency=* )  NSAVE=${1#*=}; shift ;;
+	    --intsteps0=* )                 INTSTEPS0=${1#*=}; shift ;;
+	    --intsteps1=* )                 INTSTEPS1=${1#*=}; shift ;;
+	    --intsteps2=* )                 INTSTEPS2=${1#*=}; shift ;;
+	    -p | --doNotMeasurePbp )        MEASURE_PBP="FALSE"; shift ;;
+	    --doNotUseRAfiles )
+            [ $WILSON = "TRUE" ] && printf "\n\e[0;31m The option --doNotUseRAfiles can be used only in STAGGERED simulations! Aborting...\n\n\e[0m" && exit -1
+            USE_RATIONAL_APPROXIMATION_FILE="FALSE"; shift ;;
 	    -u | --useMultipleChains )
 	        if [[ $CLUSTER_NAME != "LOEWE" ]]; then
                     printf "\n\e[0;31m The options -u | --useMultipleChains can be used only on the LOEWE yet!! Aborting...\n\n\e[0m"
