@@ -14,10 +14,24 @@
 # NOTE: Variables are written with capital letters and underscores, name
 #       of functions with only capital initial letter of each word and no
 #       underscores.
+# 
+# ATTENTION: The path management should be such that both Wilson and Staggered
+#            code can be handled at the same time. This is achieved anywhere
+#            according to the variables WILSON and STAGGERED set respectively
+#            to "TRUE" or "FALSE". It can be thought that this is an overhead
+#            since in principle a single variable would be enough, but actually
+#            it increases readability of the code and this approach is open to
+#            future new cases.
+
+#Setting of the correct case based on the path.
+STAGGERED="FALSE"
+WILSON="FALSE"
+[ $(grep "Staggered" <<< "$PWD" | wc -l) -gt 0 ] && STAGGERED="TRUE"
+[ $(grep "Wilson" <<< "$PWD" | wc -l) -gt 0 ] && WILSON="TRUE"
 
 # Global variables:
 CHEMPOT_PREFIX="mui"
-KAPPA_PREFIX="k"
+[ $WILSON = "TRUE" ] && KAPPA_PREFIX="k" || KAPPA_PREFIX="mass"
 NTIME_PREFIX="nt"
 NSPACE_PREFIX="ns"
 CHEMPOT_POSITION=0
@@ -38,7 +52,6 @@ BETA_POSTFIX=""
 #TODO: Discuss with Alessandro about leaving it here or not!
 
 BETA_POSITION=4
-
 KAPPA_REGEX='[[:digit:]]\{4\}'
 NTIME_REGEX='[[:digit:]]'
 NSPACE_REGEX='[[:digit:]]\{2\}'
@@ -47,6 +60,14 @@ BETA_REGEX='[[:digit:]]\.[[:digit:]]\{4\}'
 
 
 # Global functions
+
+function CheckWilsonStaggeredVariables(){
+    if [ "$WILSON" == "$STAGGERED" ]; then
+        printf "\n\e[0;31m Variables WILSON and STAGGERED both set to the same value (please check the position from where the script was run)! Aborting...\n\n\e[0m"
+        exit -1
+    fi
+}
+
 
 function SetParametersPathAndString(){
     if [ $KAPPA -eq 0 ] || [ $NSPACE -eq 0 ] || [ $NTIME -eq 0 ] || [[ $CHEMPOT == "" ]]; then
@@ -87,7 +108,7 @@ function ReadParametersFromPath(){
     elif [[ ! $NTIME =~ ^[[:digit:]]{1}$ ]]; then
 	printf "\n\e[0;31m Parameter \"$NTIME_PREFIX\" from the path \"$1\" not allowed! Aborting...\n\n\e[0m"
 	exit -1
-    elif [[ ! $NSPACE =~ ^[[:digit:]]{2}$ ]]; then
+    elif [[ ! $NSPACE =~ ^[[:digit:]]{1,2}$ ]]; then
 	printf "\n\e[0;31m Parameter \"$NSPACE_PREFIX\" from the path \"$1\" not allowed! Aborting...\n\n\e[0m"
 	exit -1
     fi
