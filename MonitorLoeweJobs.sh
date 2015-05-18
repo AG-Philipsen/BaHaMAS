@@ -1,13 +1,53 @@
 #!/bin/bash
 
 # This script is intended to parse the result of the command
-# squeue on the LOEWE together to scontrol show job, in order
-# to give to the user a more readable status of the submitted
-# jobs.
+# squeue on the LOEWE and or L-CSC together to scontrol show job, in order
+# to give to the user a more readable status of the submitted jobs.
 
 source $HOME/Script/UtilityFunctions.sh || exit -2
 
-JOBID_ARRAY=( $(squeue | awk 'NR>1{print $1}') )
+function ParseCommandLineOptions(){
+
+    while [ "$1" != "" ]; do
+        case $1 in
+        -h | --help )
+            printf "\n\e[0;32m"
+            echo "Call the script $0 with the following optional arguments:"
+            echo "  -h | --help"
+            echo "  -u | --user      ->    user for which jobs should be displayed (DEFAULT = $(whoami))"
+            echo "  -a | --allUsers  ->    display jobs information for all users"
+            echo -e "\n\e[0;35mNOTE: If the option -a is given, then the -u one is ignored!\e[0m"
+            printf "\n\e[0m"
+            exit
+            shift;;
+        -u=* | --user=* )         SELECTED_USER=${1#*=}; shift ;;
+        -a | --allUsers )         DISPLAY_ALL_JOBS="TRUE"; shift ;;
+        * ) printf "\n\e[0;31mError parsing the options! Aborting...\n\n\e[0m" ; exit -1 ;;
+        esac
+    done
+
+}
+
+function ExtractParameterFromJobInformations(){
+    local JOB_ID_NUMBER="$1"
+    local PARAMETER_NAME="$2"
+    PARAMETER_VALUE=$(scontrol show job $JOBID | grep -o "${PARAMETER_NAME}=[^[:space:]]*" | sed 's/'${PARAMETER_NAME}'=//')
+    echo "$PARAMETER_VALUE"
+}
+
+
+#-----------------------------------------------------------------------------------------------#
+
+SELECTED_USER="$(whoami)"
+DISPLAY_ALL_JOBS="FALSE"
+
+ParseCommandLineOptions $@
+
+if [ $DISPLAY_ALL_JOBS = "FALSE" ]; then
+    JOBID_ARRAY=( $(squeue | awk -v aaa="$SELECTED_USER" 'NR>1{if($4 == aaa){print $1}}') )
+else
+    JOBID_ARRAY=( $(squeue | awk 'NR>1{print $1}') )
+fi
 JOBNAME=()
 JOBSTATUS=()
 JOBSTARTTIME=()
@@ -18,34 +58,34 @@ JOBFIRSTNODE=()
 JOBWALLTIME=()
 
 for JOBID in ${JOBID_ARRAY[@]}; do
-	
-    JOBNAME+=( $(scontrol show job $JOBID | grep "Name=" | sed "s/^.*Name=\(.*$\)/\1/") )
-    JOBSTATUS+=( $(scontrol show job $JOBID | grep "^[[:blank:]]*JobState=" | sed "s/^.*JobState=\([[:alpha:]]*[[:blank:]]\).*$/\1/") )
-    JOBSTARTTIME+=( $(scontrol show job $JOBID | grep "^[[:blank:]]*StartTime=" | sed "s/^.*StartTime=\(.*[[:blank:]]\).*$/\1/") )
-    JOBSUBTIME+=( $(scontrol show job $JOBID | grep "^[[:blank:]]*SubmitTime=" | sed "s/^.*SubmitTime=\(.*[[:blank:]]\).*$/\1/") )
-    JOBSUBFROM+=( $(scontrol show job $JOBID | grep "WorkDir=" | sed "s/^.*WorkDir=\(.*$\)/\1/") )
-    JOBNUMNODES+=( $(scontrol show job $JOBID | grep "NumNodes=" | sed "s/^.*NumNodes=\([[:digit:]]*\).*$/\1/") )
-    JOBWALLTIME+=( $(scontrol show job $JOBID | grep "TimeLimit=" | sed "s/^.*TimeLimit=\([[:digit:]]*-\?\([[:digit:]]\{2\}[:]\)\{2\}[[:digit:]]\{2\}\).*$/\1/") )
+
+    JOBNAME+=( $(ExtractParameterFromJobInformations $JOBID "Name") )
+    JOBSTATUS+=( $(ExtractParameterFromJobInformations $JOBID "JobState") )
+    JOBSTARTTIME+=( $(ExtractParameterFromJobInformations $JOBID "StartTime") )
+    JOBSUBTIME+=( $(ExtractParameterFromJobInformations $JOBID "SubmitTime") )
+    JOBSUBFROM+=( $(ExtractParameterFromJobInformations $JOBID "WorkDir") )
+    JOBNUMNODES+=( $(ExtractParameterFromJobInformations $JOBID "NumNodes") )
+    JOBWALLTIME+=( $(ExtractParameterFromJobInformations $JOBID "TimeLimit") )
     #I do not know if this work for jobs on several nodes
-    JOBFIRSTNODE+=( $(scontrol show job $JOBID | grep "[[:blank:]]\+NodeList=" | sed "s/^.*NodeList=\(.*[[:blank:]]*\).*$/\1/") ) 
-   
+    JOBFIRSTNODE+=( $(ExtractParameterFromJobInformations $JOBID "[[:space:]]NodeList") ) #Space before NodeList is crucial because there are also ReqNodeList and ExcNodeList
+
 done
 
 for ((j=0; j<${#JOBSUBFROM[@]}; j++)); do
     if [ $(echo "${JOBSUBFROM[$j]}" | grep "$HOME" | wc -l) -eq 1 ]; then
-	JOBSUBFROM[$j]="HOME"${JOBSUBFROM[$j]#$HOME}
+        JOBSUBFROM[$j]="HOME"${JOBSUBFROM[$j]#$HOME}
     elif [ $(echo "${JOBSUBFROM[$j]}" | grep "/scratch/hfftheo/sciarra" | wc -l) -eq 1 ]; then
-	JOBSUBFROM[$j]="WORK"${JOBSUBFROM[$j]#"/scratch/hfftheo/sciarra"}
+        JOBSUBFROM[$j]="WORK"${JOBSUBFROM[$j]#"/scratch/hfftheo/sciarra"}
     elif [ $(echo "${JOBSUBFROM[$j]}" | grep "/data01/hfftheo/sciarra" | wc -l) -eq 1 ]; then
-	JOBSUBFROM[$j]="DATA01"${JOBSUBFROM[$j]#"/data01/hfftheo/sciarra"}
+        JOBSUBFROM[$j]="DATA01"${JOBSUBFROM[$j]#"/data01/hfftheo/sciarra"}
     fi
 done
 
-
+#Some counting for the table 
 LONGEST_NAME=${JOBNAME[0]}
 for NAME in ${JOBNAME[@]}; do
     if [ ${#NAME} -gt ${#LONGEST_NAME} ]; then
-	LONGEST_NAME=$NAME
+        LONGEST_NAME=$NAME
     fi
 done
 RUNNING_JOBS=0
@@ -53,19 +93,21 @@ PENDING_JOBS=0
 TOTAL_JOBS=${#JOBID_ARRAY[@]}
 for ((j=0; j<${#JOBSTATUS[@]}; j++)); do
     if [[ ${JOBSTATUS[$j]} == "RUNNING" ]]; then
-	RUNNING_JOBS=$(($RUNNING_JOBS + 1))
+        RUNNING_JOBS=$(($RUNNING_JOBS + 1))
     elif [[ ${JOBSTATUS[$j]} == "PENDING" ]]; then
-	PENDING_JOBS=$(($PENDING_JOBS + 1))
+        PENDING_JOBS=$(($PENDING_JOBS + 1))
     fi
-done
+done && unset -v 'j'
+OTHER_JOBS=$(($TOTAL_JOBS-$RUNNING_JOBS-$PENDING_JOBS))
 
+#Table header
 TABLE_FORMAT="%-8s%-5s%-$((2+${#LONGEST_NAME}))s%-5s%-20s%-5s%-19s%-5s%+12s%-5s%-s"
-
-printf "\n\e[0;36m"
-for (( c=1; c<=$(($(tput cols)-3)); c++ )); do printf "="; done
+printf "\n\e[1;36m"
+for (( c=1; c<=$(($(tput cols)-3)); c++ )); do printf "="; done && unset -v 'c'
 printf "\e[0m\n"
-printf "\e[0;34m\e[2m$TABLE_FORMAT\e[0m\n"   "JOBID:" ""   "  JOB NAME:" ""   "STATUS:" ""   "START TIME:" ""   "WALLTIME:" ""   "SUBMITTED FROM:"
+printf "\e[38;5;202m$TABLE_FORMAT\e[0m\n"   "JOBID:" ""   "  JOB NAME:" ""   "STATUS:" ""   "START TIME:" ""   "WALLTIME:" ""   "SUBMITTED FROM:"
 
+#Print table sorting according jobname
 while [ ${#JOBNAME[@]} -gt 0 ]; do
     i=$(FindPositionOfFirstMinimumOfArray "${JOBNAME[@]}")
     
@@ -109,9 +151,8 @@ while [ ${#JOBNAME[@]} -gt 0 ]; do
     
 done
 
-printf "\n\e[2;34m  Total number of submitted jobs: $TOTAL_JOBS"
-printf " (\e[2;32m\e[2mRunning: $RUNNING_JOBS  \e[0m - \e[2;31m\e[1m  Pending: $PENDING_JOBS  \e[0m - \e[0;35m\e[2m"
-printf "  Others: $(($TOTAL_JOBS-$RUNNING_JOBS-$PENDING_JOBS))\e[2;34m)\n"
-printf "\e[0;36m"
+printf "\n\e[38;5;202m  Total number of submitted jobs: $TOTAL_JOBS"
+printf " (\e[1;32mRunning: $RUNNING_JOBS  \e[0m - \e[1;31m  Pending: $PENDING_JOBS  \e[0m - \e[1;35m  Others: $OTHER_JOBS\e[38;5;202m)\n"
+printf "\e[1;36m"
 for (( c=1; c<=$(($(tput cols)-3)); c++ )); do printf "="; done
 printf "\e[0m\n\n"
