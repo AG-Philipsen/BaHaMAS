@@ -85,7 +85,7 @@ fi
 
 #-----------------------------------------------------------------------------------------------------------------#
 # Set default values for the non-modifyable variables ---> Modify this file to change them!
-source $HOME/Script/JobScriptAutomation/UserSpecificVariables_$(whoami).sh || exit -2
+source $HOME/Script/JobScriptAutomation/UserSpecificVariables.sh || exit -2
 #-----------------------------------------------------------------------------------------------------------------#
 
 
