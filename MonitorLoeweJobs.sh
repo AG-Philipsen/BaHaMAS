@@ -44,7 +44,7 @@ DISPLAY_ALL_JOBS="FALSE"
 ParseCommandLineOptions $@
 
 if [ $DISPLAY_ALL_JOBS = "FALSE" ]; then
-    JOBID_ARRAY=( $(squeue | awk -v aaa="$SELECTED_USER" 'NR>1{if($4 == aaa){print $1}}') )
+    JOBID_ARRAY=( $(squeue | awk -v username="$SELECTED_USER" 'NR>1{if($4 == username){print $1}}') )
 else
     JOBID_ARRAY=( $(squeue | awk 'NR>1{print $1}') )
 fi

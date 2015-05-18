@@ -6,7 +6,7 @@ function __static__ExtractParameterFromJOBNAME(){
     local PREFIX=$1
     #Here it is supposed that the name of the job is ${PARAMETERS_STRING}_(...)
     if [ "$(echo $JOBNAME | grep -o "_\?${PREFIX}[^_]*_" | wc -l)" -gt 1 ]; then
-	printf "\n \e[0;31m Parameter \"$PREFIX\" appears more than once in one queued jobname (\"$JOBNAME\")! Aborting...\n\n\e[0m\n"
+        printf "\n \e[0;31m Parameter \"$PREFIX\" appears more than once in one queued jobname (\"$JOBNAME\")! Aborting...\n\n\e[0m\n"
         exit -1
     fi
     PARAMETERS=$(echo $JOBNAME | grep -o "_\?${PREFIX}[^_]*_" | sed -e 's/_//g' | sed 's/'$PREFIX'//g')
@@ -23,15 +23,15 @@ function __static__ExtractBetasFromJOBNAME(){
     #  3) we take the value of the beta and of the seeds building up the final array
     local BETAVALUES_ARRAY=()
     for ELEMENT in "${TEMPORAL_ARRAY[@]}"; do
-	local BETAVALUE=${ELEMENT%%_*}
-	local SEEDS_ARRAY=( $(echo ${ELEMENT#*_} | grep -o "${SEED_PREFIX}[[:alnum:]]\{4\}") )
-	if [ ${#SEEDS_ARRAY[@]} -gt 0 ]; then
-	    for SEED in "${SEEDS_ARRAY[@]}"; do
-		BETAVALUES_ARRAY+=( "${BETA_PREFIX}${BETAVALUE}_${SEED}" )
-	    done
-	else
-	    BETAVALUES_ARRAY+=( "${BETA_PREFIX}${BETAVALUE}" )
-	fi
+        local BETAVALUE=${ELEMENT%%_*}
+        local SEEDS_ARRAY=( $(echo ${ELEMENT#*_} | grep -o "${SEED_PREFIX}[[:alnum:]]\{4\}") )
+        if [ ${#SEEDS_ARRAY[@]} -gt 0 ]; then
+            for SEED in "${SEEDS_ARRAY[@]}"; do
+                BETAVALUES_ARRAY+=( "${BETA_PREFIX}${BETAVALUE}_${SEED}" )
+            done
+        else
+            BETAVALUES_ARRAY+=( "${BETA_PREFIX}${BETAVALUE}" )
+        fi
     done
     echo "${BETAVALUES_ARRAY[@]}"
 }
@@ -39,52 +39,52 @@ function __static__ExtractBetasFromJOBNAME(){
 function __static__ExtractPostfixFromJOBNAME(){
     local POSTFIX=${JOBNAME##*_}
     if [ "$POSTFIX" == "TC" ]; then
-	echo "thermalizeFromConf"
+        echo "thermalizeFromConf"
     elif [ "$POSTFIX" == "TH" ]; then
-	echo "thermalizeFromHot"
+        echo "thermalizeFromHot"
     elif [ "$POSTFIX" == "Thermalize" ]; then
-	echo "thermalize_old"
+        echo "thermalize_old"
     elif [ "$POSTFIX" == "Tuning" ]; then
-	echo "tuning"
+        echo "tuning"
     #Also in the "TC" and "TH" cases we have seeds in the name, but such a cases are exluded from the elif
     elif [ $(echo $JOBNAME | grep -o "_${SEED_PREFIX}[[:alnum:]]\{4\}" | wc -l) -ne 0 ]; then 
-	echo "continueWithNewChain"
+        echo "continueWithNewChain"
     else
-	echo ""
+        echo ""
     fi
 }
 
 function __static__ExtractMetaInformationFromJOBNAME(){
     local METAINFORMATION_ARRAY=()
-    local JOBID_ARRAY=( $(squeue | awk 'NR>1{print $1}') )
+    local JOBID_ARRAY=( $(squeue | awk -v username="$(whoami)" 'NR>1{if($4 == username){print $1}}') )
     for JOBID in ${JOBID_ARRAY[@]}; do
-	local JOBNAME=$(scontrol show job $JOBID | grep "Name=" | sed "s/^.*Name=\(.*$\)/\1/")
-	local JOBNAME_CHEMPOT=$(__static__ExtractParameterFromJOBNAME $CHEMPOT_PREFIX)
-	local JOBNAME_NTIME=$(__static__ExtractParameterFromJOBNAME $NTIME_PREFIX)
-	local JOBNAME_NSPACE=$(__static__ExtractParameterFromJOBNAME $NSPACE_PREFIX)
-	local JOBNAME_KAPPA=$(__static__ExtractParameterFromJOBNAME $KAPPA_PREFIX)
-      	local JOBNAME_BETAS=( $(__static__ExtractBetasFromJOBNAME) )
-	local JOBNAME_POSTFIX=$(__static__ExtractPostfixFromJOBNAME)
-	local JOB_STATUS=$(scontrol show job $JOBID | grep "^[[:blank:]]*JobState=" | sed "s/^.*JobState=\([[:alpha:]]*\).*$/\1/")
-	#Retrieved the information add an unique string to array of meta information
-	local PREFIXES=([$CHEMPOT_POSITION]=$CHEMPOT_PREFIX [$KAPPA_POSITION]=$KAPPA_PREFIX [$NTIME_POSITION]=$NTIME_PREFIX [$NSPACE_POSITION]=$NSPACE_PREFIX)
-	local JOB_PARAMETERS_VALUE=([$CHEMPOT_POSITION]=$JOBNAME_CHEMPOT [$KAPPA_POSITION]=$JOBNAME_KAPPA [$NTIME_POSITION]=$JOBNAME_NTIME [$NSPACE_POSITION]=$JOBNAME_NSPACE)
-	local JOB_PARAMETERS_STRING=""
-	for ((i=0; i<${#PREFIXES[@]}; i++)); do    
-	    JOB_PARAMETERS_STRING="$JOB_PARAMETERS_STRING${PREFIXES[$i]}${JOB_PARAMETERS_VALUE[$i]}_"
-	done
-	JOB_PARAMETERS_STRING=${JOB_PARAMETERS_STRING%?} #Remove last underscore
-	#If JOB_PARAMETERS_STRING is not at the beginning of the jobname, skip job
-	[ $(echo "$JOBNAME" | grep "^${JOB_PARAMETERS_STRING}" | wc -l) -eq 0 ] && continue
-	#If the status is COMPLETING, skip job
-	[ $JOB_STATUS == "COMPLETING" ] && continue
-	METAINFORMATION_ARRAY+=( $(echo "${JOB_PARAMETERS_STRING} | $( echo "${JOBNAME_BETAS[@]}" | sed 's/ /_/g') | postfix=${JOBNAME_POSTFIX} | ${JOB_STATUS}" | sed 's/ //g') )
+        local JOBNAME=$(scontrol show job $JOBID | grep "Name=" | sed "s/^.*Name=\(.*$\)/\1/")
+        local JOBNAME_CHEMPOT=$(__static__ExtractParameterFromJOBNAME $CHEMPOT_PREFIX)
+        local JOBNAME_NTIME=$(__static__ExtractParameterFromJOBNAME $NTIME_PREFIX)
+        local JOBNAME_NSPACE=$(__static__ExtractParameterFromJOBNAME $NSPACE_PREFIX)
+        local JOBNAME_KAPPA=$(__static__ExtractParameterFromJOBNAME $KAPPA_PREFIX)
+        local JOBNAME_BETAS=( $(__static__ExtractBetasFromJOBNAME) )
+        local JOBNAME_POSTFIX=$(__static__ExtractPostfixFromJOBNAME)
+        local JOB_STATUS=$(scontrol show job $JOBID | grep "^[[:blank:]]*JobState=" | sed "s/^.*JobState=\([[:alpha:]]*\).*$/\1/")
+        #Retrieved the information add an unique string to array of meta information
+        local PREFIXES=([$CHEMPOT_POSITION]=$CHEMPOT_PREFIX [$KAPPA_POSITION]=$KAPPA_PREFIX [$NTIME_POSITION]=$NTIME_PREFIX [$NSPACE_POSITION]=$NSPACE_PREFIX)
+        local JOB_PARAMETERS_VALUE=([$CHEMPOT_POSITION]=$JOBNAME_CHEMPOT [$KAPPA_POSITION]=$JOBNAME_KAPPA [$NTIME_POSITION]=$JOBNAME_NTIME [$NSPACE_POSITION]=$JOBNAME_NSPACE)
+        local JOB_PARAMETERS_STRING=""
+        for ((i=0; i<${#PREFIXES[@]}; i++)); do
+            JOB_PARAMETERS_STRING="$JOB_PARAMETERS_STRING${PREFIXES[$i]}${JOB_PARAMETERS_VALUE[$i]}_"
+        done
+        JOB_PARAMETERS_STRING=${JOB_PARAMETERS_STRING%?} #Remove last underscore
+        #If JOB_PARAMETERS_STRING is not at the beginning of the jobname, skip job
+        [ $(echo "$JOBNAME" | grep "^${JOB_PARAMETERS_STRING}" | wc -l) -eq 0 ] && continue
+        #If the status is COMPLETING, skip job
+        [ $JOB_STATUS == "COMPLETING" ] && continue
+        METAINFORMATION_ARRAY+=( $(echo "${JOB_PARAMETERS_STRING} | $( echo "${JOBNAME_BETAS[@]}" | sed 's/ /_/g') | postfix=${JOBNAME_POSTFIX} | ${JOB_STATUS}" | sed 's/ //g') )
     done
     echo "${METAINFORMATION_ARRAY[@]}"
 }
 
 function ListJobStatus_Loewe(){
-    	 
+
     local JOBS_STATUS_FILE="jobs_status_$PARAMETERS_STRING.txt"
     rm -f $JOBS_STATUS_FILE
     
