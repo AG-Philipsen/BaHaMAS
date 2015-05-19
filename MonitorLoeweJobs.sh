@@ -31,7 +31,7 @@ function ParseCommandLineOptions(){
 function ExtractParameterFromJobInformations(){
     local JOB_ID_NUMBER="$1"
     local PARAMETER_NAME="$2"
-    PARAMETER_VALUE=$(scontrol show job $JOBID | grep -o "${PARAMETER_NAME}=[^[:space:]]*" | sed 's/'${PARAMETER_NAME}'=//')
+    PARAMETER_VALUE=$(scontrol show job $JOBID | sed -n 's@.*'${PARAMETER_NAME}'=\([^[:space:]]*\).*@\1@p')
     echo "$PARAMETER_VALUE"
 }
 
