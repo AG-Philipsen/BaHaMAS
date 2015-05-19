@@ -51,11 +51,13 @@ fi
 JOBNAME=()
 JOBSTATUS=()
 JOBSTARTTIME=()
+JOBENDTIME=()
 JOBSUBTIME=()
 JOBSUBFROM=()
 JOBNUMNODES=()
 JOBFIRSTNODE=()
 JOBWALLTIME=()
+JOBRUNTIME=()
 
 for JOBID in ${JOBID_ARRAY[@]}; do
 
@@ -63,23 +65,27 @@ for JOBID in ${JOBID_ARRAY[@]}; do
     JOBSTATUS+=( $(ExtractParameterFromJobInformations $JOBID "JobState") )
     JOBSTARTTIME+=( $(ExtractParameterFromJobInformations $JOBID "StartTime") )
     JOBSUBTIME+=( $(ExtractParameterFromJobInformations $JOBID "SubmitTime") )
+    JOBENDTIME+=( $(ExtractParameterFromJobInformations $JOBID "EndTime") )
     JOBSUBFROM+=( $(ExtractParameterFromJobInformations $JOBID "WorkDir") )
     JOBNUMNODES+=( $(ExtractParameterFromJobInformations $JOBID "NumNodes") )
     JOBWALLTIME+=( $(ExtractParameterFromJobInformations $JOBID "TimeLimit") )
+    JOBRUNTIME+=( $(ExtractParameterFromJobInformations $JOBID "RunTime") )
     #I do not know if this work for jobs on several nodes
     JOBFIRSTNODE+=( $(ExtractParameterFromJobInformations $JOBID "[[:space:]]NodeList") ) #Space before NodeList is crucial because there are also ReqNodeList and ExcNodeList
 
 done
 
+HOME_DIR=${HOME}
+WORK_DIR="/home/hfftheo/$(whoami)"
+DATA1_DIR="/data01/hfftheo/$(whoami)"
+DATA2_DIR="/data02/hfftheo/$(whoami)"
 for ((j=0; j<${#JOBSUBFROM[@]}; j++)); do
-    if [ $(echo "${JOBSUBFROM[$j]}" | grep "$HOME" | wc -l) -eq 1 ]; then
-        JOBSUBFROM[$j]="HOME"${JOBSUBFROM[$j]#$HOME}
-    elif [ $(echo "${JOBSUBFROM[$j]}" | grep "/scratch/hfftheo/sciarra" | wc -l) -eq 1 ]; then
-        JOBSUBFROM[$j]="WORK"${JOBSUBFROM[$j]#"/scratch/hfftheo/sciarra"}
-    elif [ $(echo "${JOBSUBFROM[$j]}" | grep "/data01/hfftheo/sciarra" | wc -l) -eq 1 ]; then
-        JOBSUBFROM[$j]="DATA01"${JOBSUBFROM[$j]#"/data01/hfftheo/sciarra"}
-    fi
+    JOBSUBFROM[$j]=${JOBSUBFROM[$j]/$HOME_DIR/HOME}
+    JOBSUBFROM[$j]=${JOBSUBFROM[$j]/$WORK_DIR/WORK}
+    JOBSUBFROM[$j]=${JOBSUBFROM[$j]/$DATA1_DIR/DATA01}
+    JOBSUBFROM[$j]=${JOBSUBFROM[$j]/$DATA2_DIR/DATA02}
 done
+unset -v 'HOME_DIR' 'WORK_DIR' 'DATA1_DIR' 'DATA2_DIR'
 
 #Some counting for the table 
 LONGEST_NAME=${JOBNAME[0]}
@@ -101,53 +107,55 @@ done && unset -v 'j'
 OTHER_JOBS=$(($TOTAL_JOBS-$RUNNING_JOBS-$PENDING_JOBS))
 
 #Table header
-TABLE_FORMAT="%-8s%-5s%-$((2+${#LONGEST_NAME}))s%-5s%-20s%-5s%-19s%-5s%+12s%-5s%-s"
+TABLE_FORMAT="%-8s%-5s%-$((2+${#LONGEST_NAME}))s%-5s%-20s%-5s%-19s%-5s%+14s%-5s%-s"
 printf "\n\e[1;36m"
 for (( c=1; c<=$(($(tput cols)-3)); c++ )); do printf "="; done && unset -v 'c'
 printf "\e[0m\n"
-printf "\e[38;5;202m$TABLE_FORMAT\e[0m\n"   "JOBID:" ""   "  JOB NAME:" ""   "STATUS:" ""   "START TIME:" ""   "WALLTIME:" ""   "SUBMITTED FROM:"
+printf "\e[38;5;202m$TABLE_FORMAT\e[0m\n"   "JOBID:" ""   "  JOB NAME:" ""   "STATUS:" ""   "START/END TIME:" ""   "WALL/RUN TIME:" ""   "SUBMITTED FROM:"
 
 #Print table sorting according jobname
 while [ ${#JOBNAME[@]} -gt 0 ]; do
     i=$(FindPositionOfFirstMinimumOfArray "${JOBNAME[@]}")
-    
+
     if [[ ${JOBSTATUS[$i]} == "RUNNING" ]]; then
-	printf "\e[0;32m"
+        printf "\e[0;32m"
     elif [[ ${JOBSTATUS[$i]} == "PENDING" ]]; then
-	if [[ ${JOBSTARTTIME[$i]} != "Unknown" ]]; then
-	    printf "\e[0;33m"
-	else
-	    printf "\e[0;31m"
-	fi
+        if [[ ${JOBSTARTTIME[$i]} != "Unknown" ]]; then
+            printf "\e[0;33m"
+        else
+            printf "\e[0;31m"
+        fi
     else
-	printf "\e[0;35m"
+        printf "\e[0;35m"
     fi
-    
+
     if [[ ${JOBSTATUS[$i]} == "RUNNING" ]]; then
-	printf "$TABLE_FORMAT\e[0m\n"   "${JOBID_ARRAY[$i]}" ""\
-                                    "  ${JOBNAME[$i]}" ""\
-                                    "${JOBSTATUS[$i]} on ${JOBFIRSTNODE[$i]}" ""\
-                                    "${JOBSTARTTIME[$i]}" ""\
-                                    "${JOBWALLTIME[$i]}" ""\
-                                    "${JOBSUBFROM[$i]}"
+        printf "$TABLE_FORMAT\e[0m\n"   "${JOBID_ARRAY[$i]}" ""\
+                                        "  ${JOBNAME[$i]}" ""\
+                                        "${JOBSTATUS[$i]} on ${JOBFIRSTNODE[$i]}" ""\
+                                        "${JOBENDTIME[$i]}" ""\
+                                        "${JOBRUNTIME[$i]}" ""\
+                                        "${JOBSUBFROM[$i]}"
     else
-	printf "$TABLE_FORMAT\e[0m\n"   "${JOBID_ARRAY[$i]}" ""\
-                                    "  ${JOBNAME[$i]}" ""\
-                                    "${JOBSTATUS[$i]}" ""\
-                                    "${JOBSTARTTIME[$i]}" ""\
-                                    "${JOBWALLTIME[$i]}" ""\
-                                    "${JOBSUBFROM[$i]} on ${JOBSUBTIME[$i]}"
+        printf "$TABLE_FORMAT\e[0m\n"   "${JOBID_ARRAY[$i]}" ""\
+                                        "  ${JOBNAME[$i]}" ""\
+                                        "${JOBSTATUS[$i]}" ""\
+                                        "${JOBSTARTTIME[$i]}" ""\
+                                        "${JOBWALLTIME[$i]}" ""\
+                                        "${JOBSUBFROM[$i]} on ${JOBSUBTIME[$i]}"
     fi
 
     unset JOBID_ARRAY[$i]; JOBID_ARRAY=( "${JOBID_ARRAY[@]}" )
     unset JOBNAME[$i]; JOBNAME=( "${JOBNAME[@]}" )
     unset JOBSTATUS[$i]; JOBSTATUS=( "${JOBSTATUS[@]}" )
     unset JOBSTARTTIME[$i]; JOBSTARTTIME=( "${JOBSTARTTIME[@]}" )
+    unset JOBENDTIME[$i]; JOBENDTIME=( "${JOBENDTIME[@]}" )
     unset JOBSUBTIME[$i]; JOBSUBTIME=( "${JOBSUBTIME[@]}" )
     unset JOBSUBFROM[$i]; JOBSUBFROM=( "${JOBSUBFROM[@]}" )
     unset JOBNUMNODES[$i]; JOBNUMNODES=( "${JOBNUMNODES[@]}" )
     unset JOBFIRSTNODE[$i]; JOBFIRSTNODE=( "${JOBFIRSTNODE[@]}" )
     unset JOBWALLTIME[$i]; JOBWALLTIME=( "${JOBWALLTIME[@]}" )
+    unset JOBRUNTIME[$i]; JOBRUNTIME=( "${JOBRUNTIME[@]}" )
     
 done
 
