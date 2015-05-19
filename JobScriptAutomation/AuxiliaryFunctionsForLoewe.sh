@@ -84,7 +84,7 @@ function ProcessBetaValuesForSubmitOnly_Loewe() {
 #=======================================================================================================================#
 
 function __static__CheckIfJobIsInQueue_Loewe(){
-    local JOBID_ARRAY=( $(squeue | awk 'NR>1{print $1}') )
+    local JOBID_ARRAY=( $(squeue | awk -v username="$(whoami)" 'NR>1{if($4 == username){print $1}}') )
     for JOBID in ${JOBID_ARRAY[@]}; do
         local GREPPED_JOBNAME=$(scontrol show job  $JOBID | grep "Name=" | sed "s/^.*Name=\(.*$\)/\1/") 
         local JOBSTATUS=$(scontrol show job $JOBID | grep "^[[:blank:]]*JobState=" | sed "s/^.*JobState=\([[:alpha:]]*\)[[:blank:]].*$/\1/")
