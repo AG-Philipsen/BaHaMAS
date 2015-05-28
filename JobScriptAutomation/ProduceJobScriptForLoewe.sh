@@ -13,16 +13,20 @@ function ProduceJobscript_Loewe(){
     echo "#SBATCH --time=$WALLTIME" >> $JOBSCRIPT_GLOBALPATH
     echo "#SBATCH --output=${HMC_FILENAME}.%j.out" >> $JOBSCRIPT_GLOBALPATH
     echo "#SBATCH --error=${HMC_FILENAME}.%j.err" >> $JOBSCRIPT_GLOBALPATH
-    echo "#SBATCH --partition=$LOEWE_PARTITION" >> $JOBSCRIPT_GLOBALPATH
-    if [[ "$LOEWE_PARTITION" == "parallel" ]]; then
-        echo "#SBATCH --constraint=$LOEWE_CONSTRAINT" >> $JOBSCRIPT_GLOBALPATH
+    if [ $CLUSTER_NAME = "LOEWE" ]; then
+        echo "#SBATCH --partition=$LOEWE_PARTITION" >> $JOBSCRIPT_GLOBALPATH
+        if [[ "$LOEWE_PARTITION" == "parallel" ]]; then
+            echo "#SBATCH --constraint=$LOEWE_CONSTRAINT" >> $JOBSCRIPT_GLOBALPATH
+        fi
+        if [[ "$LOEWE_NODE" != "unset" ]]; then
+            echo "#SBATCH -w $LOEWE_NODE" >> $JOBSCRIPT_GLOBALPATH
+        fi
+    elif [ $CLUSTER_NAME = "LCSC" ]; then
+        echo "#SBATCH --partition=lcsc_lqcd" >> $JOBSCRIPT_GLOBALPATH
+        echo "#SBATCH --exclude=lcsc-r04n01,lcsc-r04n02,lcsc-r04n03,lcsc-r04n04,lcsc-r05n01,lcsc-r05n02,lcsc-r05n03,lcsc-r05n04,lcsc-r06n01,lcsc-r06n02,lcsc-r06n03,lcsc-r06n04,lcsc-r07n01,lcsc-r07n02,lcsc-r07n03,lcsc-r07n04,lcsc-r08n01,lcsc-r08n02,lcsc-r08n03,lcsc-r08n04,lcsc-r02n01,lcsc-r02n02,lcsc-r02n03,lcsc-r02n04,lcsc-r03n01,lcsc-r03n02,lcsc-r03n07,lcsc-r03n08,lcsc-r09n16" >> $JOBSCRIPT_GLOBALPATH
     fi
     echo "#SBATCH --tasks=$GPU_PER_NODE" >> $JOBSCRIPT_GLOBALPATH
-    if [[ "$LOEWE_NODE" != "unset" ]]; then
-        echo "#SBATCH -w $LOEWE_NODE" >> $JOBSCRIPT_GLOBALPATH
-    fi
     echo "" >> $JOBSCRIPT_GLOBALPATH
-
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
         echo "dir$INDEX=${HOME_DIR_WITH_BETAFOLDERS}/$BETA_PREFIX${BETA_FOR_JOBSCRIPT[$INDEX]}" >> $JOBSCRIPT_GLOBALPATH
     done

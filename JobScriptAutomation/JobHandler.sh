@@ -93,10 +93,12 @@ source $HOME/Script/JobScriptAutomation/UserSpecificVariables.sh || exit -2
 # Extract options and their arguments into variables, saving a copy of the specified options in an array for later use.
 source $HOME/Script/JobScriptAutomation/CommandLineParser.sh || exit -2
 # NOTE: The CLUSTER_NAME variable has not been so far put in the parser since
-#       it can be either LOEWE or JUQUEEN. It is set using whoami. Change this in future if needed!
+#       it can be either LOEWE or LCSC or JUQUEEN. It is set using whoami/hostname. Change this in future if needed!
 if [[ $(whoami) =~ ^hkf[[:digit:]]{3} ]]; then
     CLUSTER_NAME="JUQUEEN"
     WALLTIME="00:30:00"
+elif [ "$(hostname)" = "lqcd-login" ]; then
+    CLUSTER_NAME="LCSC"
 fi
 
 SPECIFIED_COMMAND_LINE_OPTIONS=( $@ )
