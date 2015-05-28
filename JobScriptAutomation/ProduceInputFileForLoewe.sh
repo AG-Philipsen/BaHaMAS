@@ -20,7 +20,7 @@ function ProduceInputFile_Loewe() {
     echo "theta_fermion_spatial=0" >> $INPUTFILE_GLOBALPATH
     echo "theta_fermion_temporal=1" >> $INPUTFILE_GLOBALPATH
     echo "use_eo=1" >> $INPUTFILE_GLOBALPATH
-    if [ $CHEMPOT -eq 0 ]; then
+    if [ $CHEMPOT = "0" ]; then
         echo "use_chem_pot_im=0" >> $INPUTFILE_GLOBALPATH
     else
         echo "use_chem_pot_im=1" >> $INPUTFILE_GLOBALPATH
@@ -44,9 +44,9 @@ function ProduceInputFile_Loewe() {
         elif [ $STAGGERED = "TRUE" ]; then
             echo "num_sources=1" >> $INPUTFILE_GLOBALPATH
             echo "pbp_measurements=16" >> $INPUTFILE_GLOBALPATH
-            echo "ferm_obs_to_single_file=1" >> $INPUTFILE_GLOBALPATH
-            echo "ferm_obs_pbp_prefix=${OUTPUTFILE_NAME}" >> $INPUTFILE_GLOBALPATH
         fi
+        echo "ferm_obs_to_single_file=1" >> $INPUTFILE_GLOBALPATH
+        echo "ferm_obs_pbp_prefix=${OUTPUTFILE_NAME}" >> $INPUTFILE_GLOBALPATH
     fi
     #Information about integrators
     if [ $WILSON = "TRUE" ]; then    
