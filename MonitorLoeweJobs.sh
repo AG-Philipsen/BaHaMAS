@@ -107,11 +107,11 @@ done && unset -v 'j'
 OTHER_JOBS=$(($TOTAL_JOBS-$RUNNING_JOBS-$PENDING_JOBS))
 
 #Table header
-TABLE_FORMAT="%-8s%-5s%-$((2+${#LONGEST_NAME}))s%-5s%-20s%-5s%-19s%-5s%+14s%-5s%-s"
+TABLE_FORMAT="%-8s%-5s%-$((2+${#LONGEST_NAME}))s%-5s%-25s%-5s%-19s%-5s%+14s%-5s%-s"
 printf "\n\e[1;36m"
 for (( c=1; c<=$(($(tput cols)-3)); c++ )); do printf "="; done && unset -v 'c'
 printf "\e[0m\n"
-printf "\e[38;5;202m$TABLE_FORMAT\e[0m\n"   "JOBID:" ""   "  JOB NAME:" ""   "STATUS:" ""   "START/END TIME:" ""   "WALL/RUN TIME:" ""   "SUBMITTED FROM:"
+printf "\e[38;5;202m$TABLE_FORMAT\e[0m\n"   "JOBID:" ""   "  JOB NAME:" ""   "STATUS:" ""   "START/END TIME:" ""   "WALL/RUNTIME:" ""   "SUBMITTED FROM:"
 
 #Print table sorting according jobname
 while [ ${#JOBNAME[@]} -gt 0 ]; do
