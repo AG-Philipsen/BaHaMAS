@@ -185,8 +185,8 @@ function ReadBetaValuesFromFile(){
     done
     printf "\e[0;36m============================================================================================================\n\e[0m"
 
-    #If we are not in the continue scenario, look for the correct configuration to start from and set the global path
-    if [ $CONTINUE = "FALSE" ]; then
+    #If we are not in the continue scenario (and not in other script use cases), look for the correct configuration to start from and set the global path
+    if [ $CONTINUE = "FALSE" ] && [ $CLEAN_OUTPUT_FILES = "FALSE" ] && [ $EMPTY_BETA_DIRS = "FALSE" ]; then
         for BETA in "${BETAVALUES[@]}"; do
             if [ "$BETA_POSTFIX" == "" ]; then
                 local FOUND_CONFIGURATIONS=( $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA}.*") )
