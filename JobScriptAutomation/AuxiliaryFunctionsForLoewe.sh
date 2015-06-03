@@ -452,7 +452,7 @@ function ProcessBetaValuesForContinue_Loewe() {
         #            actual configuration. In this case setting the number of measurements to be done using the output file would mean
         #            to do one trajectory less since the configuration from which the run would be resumed would be the last but one!!
         if [ $CONTINUE_NUMBER -ne 0 ]; then
-            local STDOUTPUT_FILE=`ls -lt $BETA_PREFIX$BETA | awk '{if($9 ~ /^hmc.[[:digit:]]+.out$/){print $9}}' | head -n1`
+            local STDOUTPUT_FILE=`ls -lt $BETA_PREFIX$BETA | awk -v filename="$HMC_FILENAME" 'BEGIN{regexp="^"filename".[[:digit:]]+.out$"}{if($9 ~ regexp){print $9}}' | head -n1`
             local STDOUTPUT_GLOBALPATH="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA/$STDOUTPUT_FILE"
             if [ -f $STDOUTPUT_GLOBALPATH ] && [ $(grep "writing gaugefield at tr. [[:digit:]]\+" $STDOUTPUT_GLOBALPATH | wc -l) -ne 0 ]; then
                 local NUMBER_DONE_TRAJECTORIES=$(grep -o "writing gaugefield at tr. [[:digit:]]\+" $STDOUTPUT_GLOBALPATH | grep -o "[[:digit:]]\+" | tail -n1)
