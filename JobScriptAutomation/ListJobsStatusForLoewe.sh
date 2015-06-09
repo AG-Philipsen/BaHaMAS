@@ -88,8 +88,8 @@ function ListJobStatus_Loewe(){
     local JOBS_STATUS_FILE="jobs_status_$PARAMETERS_STRING.txt"
     rm -f $JOBS_STATUS_FILE
     
-    printf "\n\e[0;36m=======================================================================================================================================\n\e[0m"
-    printf "\e[0;35m%s\t\t  %s\t  %s\t%s\t  %s\t%s\n\e[0m"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" "Last tr. finished" " Tr: # (time last|av.)"
+    printf "\n\e[0;36m===============================================================================================================================================\n\e[0m"
+    printf "\e[0;35m%s\t\t  %s\t  %s\t   %s\t  %s\t%s\n\e[0m"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" "Last tr. finished" " Tr: # (time last|av.)"
     printf "%s\t\t\t  %s\t  %s\t%s\t  %s\t%s\n"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" >> $JOBS_STATUS_FILE
     
     JOB_METAINFORMATION_ARRAY=( $(__static__ExtractMetaInformationFromJOBNAME) )
@@ -234,7 +234,7 @@ function ListJobStatus_Loewe(){
 [\e[38;5;$(GoodAcc $ACCEPTANCE_LAST)m%s %%\e[0;36m]  \
 %s-%s%s%s\t \
 \e[0;$(ColorStatus $STATUS)m%9s\e[0;36m\
-\t%s\t   \
+\t%9s\t   \
 \e[0;$(ColorTime $TIME_FROM_LAST_MODIFICATION)m%s\e[0;36m      \
 %6s \
 ( %s ) \
@@ -257,7 +257,7 @@ function ListJobStatus_Loewe(){
 	
 	
     done #Loop on BETA
-    printf "\e[0;36m=======================================================================================================================================\n\e[0m"
+    printf "\e[0;36m===============================================================================================================================================\n\e[0m"
 }
 
 function GetShortenedBetaString(){
