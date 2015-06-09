@@ -134,20 +134,21 @@ function __static__ModifyOptionInInputFile(){
     fi
     
     case $1 in
-        startcondition=* )             __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "startcondition=[[:alpha:]]\+" "startcondition=${1#*=}" ;;
-        sourcefile=* )                 __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "sourcefile=[[:alnum:][:punct:]]*" "sourcefile=${1#*=}" ;;
-        initial_prng_state=* )         __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "initial_prng_state=[[:alnum:][:punct:]]*" "initial_prng_state=${1#*=}" ;;
-        host_seed=* )                  __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "host_seed=[[:digit:]]\+" "host_seed=${1#*=}" ;;
-        intsteps0=* )                  __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "integrationsteps0=[[:digit:]]\+" "integrationsteps0=${1#*=}" ;;
-        intsteps1=* )                  __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "integrationsteps1=[[:digit:]]\+" "integrationsteps1=${1#*=}" ;;
-        f=* | confSaveFrequency=* )    __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "savefrequency=[[:digit:]]\+" "savefrequency=${1#*=}" ;;
-        m=* | measurements=* )         __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "hmcsteps=[[:digit:]]\+" "hmcsteps=${1#*=}" ;;
-        measure_pbp=* )                __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "measure_pbp=[[:digit:]]\+" "measure_pbp=${1#*=}" ;;
-        use_mp=* )                     __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "use_mp=[[:digit:]]\+" "use_mp=${1#*=}" ;;
-        kappa_mp=* )                   __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "kappa_mp=[[:digit:]]\+[.][[:digit:]]\+" "kappa_mp=${1#*=}" ;;
-        intsteps2=* )                  __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "integrationsteps2=[[:digit:]]\+" "integrationsteps2=${1#*=}" ;;
-        cg_iteration_block_size=* )    __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "cg_iteration_block_size=[[:digit:]]\+" "cg_iteration_block_size=${1#*=}" ;;
-        num_timescales=* )             __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "num_timescales=[[:digit:]]\+" "num_timescales=${1#*=}" ;;
+        startcondition=* )                  __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "startcondition=[[:alpha:]]\+" "startcondition=${1#*=}" ;;
+        sourcefile=* )                      __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "sourcefile=[[:alnum:][:punct:]]*" "sourcefile=${1#*=}" ;;
+        initial_prng_state=* )              __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "initial_prng_state=[[:alnum:][:punct:]]*" "initial_prng_state=${1#*=}" ;;
+        host_seed=* )                       __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "host_seed=[[:digit:]]\+" "host_seed=${1#*=}" ;;
+        intsteps0=* )                       __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "integrationsteps0=[[:digit:]]\+" "integrationsteps0=${1#*=}" ;;
+        intsteps1=* )                       __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "integrationsteps1=[[:digit:]]\+" "integrationsteps1=${1#*=}" ;;
+        f=* | confSaveFrequency=* )         __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "savefrequency=[[:digit:]]\+" "savefrequency=${1#*=}" ;;
+        F=* | confSavePointFrequency=* )    __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "savepointfrequency=[[:digit:]]\+" "savepointfrequency=${1#*=}" ;;
+        m=* | measurements=* )              __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "hmcsteps=[[:digit:]]\+" "hmcsteps=${1#*=}" ;;
+        measure_pbp=* )                     __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "measure_pbp=[[:digit:]]\+" "measure_pbp=${1#*=}" ;;
+        use_mp=* )                          __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "use_mp=[[:digit:]]\+" "use_mp=${1#*=}" ;;
+        kappa_mp=* )                        __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "kappa_mp=[[:digit:]]\+[.][[:digit:]]\+" "kappa_mp=${1#*=}" ;;
+        intsteps2=* )                       __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "integrationsteps2=[[:digit:]]\+" "integrationsteps2=${1#*=}" ;;
+        cg_iteration_block_size=* )         __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "cg_iteration_block_size=[[:digit:]]\+" "cg_iteration_block_size=${1#*=}" ;;
+        num_timescales=* )                  __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "num_timescales=[[:digit:]]\+" "num_timescales=${1#*=}" ;;
 
         * ) printf "\n\e[0;31m The option \"$1\" cannot be handled in the continue scenario.\n\e[0m"
             printf "\e[0;31m Simulation cannot be continued. Leaving out beta = $BETA .\n\n\e[0m"

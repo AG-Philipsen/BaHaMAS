@@ -84,6 +84,7 @@ function ProduceInputFile_Loewe() {
         echo "rhmcsteps=$MEASUREMENTS" >> $INPUTFILE_GLOBALPATH
     fi
     echo "savefrequency=$NSAVE" >> $INPUTFILE_GLOBALPATH
+    echo "savepointfrequency=$NSAVEPOINT" >> $INPUTFILE_GLOBALPATH
     if [ ${STARTCONFIGURATION_GLOBALPATH[${BETAVALUES_COPY[$INDEX]}]} == "notFoundHenceStartFromHot" ]; then
         echo "startcondition=hot" >> $INPUTFILE_GLOBALPATH
     else

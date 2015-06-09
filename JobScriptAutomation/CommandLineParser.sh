@@ -24,6 +24,7 @@ MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 		echo "  --betasfile                        ->    default value = $BETASFILE"
 		echo "  -m | --measurements                ->    default value = $MEASUREMENTS"
 		echo "  -f | --confSaveFrequency           ->    default value = $NSAVE"
+		echo "  -F | --confSavePointFrequency      ->    default value = $NSAVEPOINT"
 		echo "  --intsteps0                        ->    default value = $INTSTEPS0"
 		echo "  --intsteps1                        ->    default value = $INTSTEPS1"
 		echo -e "  -u | --useMultipleChains           ->    if given, use multiple chain \e[1;32m(this implies that in the betas file the seed column is present)\e[0;32m"
@@ -93,6 +94,7 @@ MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 	    --nrzprocs=* )                  NRZPROCS=${1#*=}; shift ;;
 	    --ompnumthreads=* )             OMPNUMTHREADS=${1#*=}; shift ;;
 	    -f=* | --confSaveFrequency=* )  NSAVE=${1#*=}; shift ;;
+	    -F=* | --confSavePointFrequency=* )  NSAVEPOINT=${1#*=}; shift ;;
 	    --intsteps0=* )                 INTSTEPS0=${1#*=}; shift ;;
 	    --intsteps1=* )                 INTSTEPS1=${1#*=}; shift ;;
 	    --intsteps2=* )                 INTSTEPS2=${1#*=}; shift ;;
