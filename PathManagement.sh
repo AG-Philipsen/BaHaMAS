@@ -26,8 +26,8 @@
 #Setting of the correct case based on the path.
 STAGGERED="FALSE"
 WILSON="FALSE"
-[ $(grep "Staggered" <<< "$PWD" | wc -l) -gt 0 ] && STAGGERED="TRUE"
-[ $(grep "Wilson" <<< "$PWD" | wc -l) -gt 0 ] && WILSON="TRUE"
+[ $(grep "[sS]taggered" <<< "$PWD" | wc -l) -gt 0 ] && STAGGERED="TRUE"
+[ $(grep "[wW]ilson" <<< "$PWD" | wc -l) -gt 0 ] && WILSON="TRUE"
 
 # Global variables:
 CHEMPOT_PREFIX="mui"
