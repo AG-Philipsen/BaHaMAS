@@ -318,6 +318,10 @@ function ProcessBetaValuesForContinue_Loewe() {
             local MEASURE_PBP_VALUE_FOR_INPUTFILE=0
         elif [ $MEASURE_PBP = "TRUE" ]; then
             local MEASURE_PBP_VALUE_FOR_INPUTFILE=1
+            #If the pbp file already exists, append a line to it to be sure the prompt is at the beginning to the line
+            if [ -f ${OUTPUTFILE_GLOBALPATH}_pbp.dat ]; then
+                echo "" >> ${OUTPUTFILE_GLOBALPATH}_pbp.dat
+            fi
         fi
         if [ $(grep -o "measure_pbp" $INPUTFILE_GLOBALPATH | wc -l) -eq 0 ]; then
             if  [ $(grep -o "sourcetype" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] ||
