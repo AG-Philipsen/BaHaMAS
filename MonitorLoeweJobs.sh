@@ -107,9 +107,10 @@ done && unset -v 'j'
 OTHER_JOBS=$(($TOTAL_JOBS-$RUNNING_JOBS-$PENDING_JOBS))
 
 #Table header
+COLUMNS_OF_THE_SHELL=$(tput cols)
 TABLE_FORMAT="%-8s%-5s%-$((2+${#LONGEST_NAME}))s%-5s%-25s%-5s%-19s%-5s%+14s%-5s%-s"
 printf "\n\e[1;36m"
-for (( c=1; c<=$(($(tput cols)-3)); c++ )); do printf "="; done && unset -v 'c'
+for (( c=1; c<=$(($COLUMNS_OF_THE_SHELL-3)); c++ )); do printf "="; done && unset -v 'c'
 printf "\e[0m\n"
 printf "\e[38;5;202m$TABLE_FORMAT\e[0m\n"   "JOBID:" ""   "  JOB NAME:" ""   "STATUS:" ""   "START/END TIME:" ""   "WALL/RUNTIME:" ""   "SUBMITTED FROM:"
 
@@ -162,5 +163,5 @@ done
 printf "\n\e[38;5;202m  Total number of submitted jobs: $TOTAL_JOBS"
 printf " (\e[1;32mRunning: $RUNNING_JOBS  \e[0m - \e[1;31m  Pending: $PENDING_JOBS  \e[0m - \e[1;35m  Others: $OTHER_JOBS\e[38;5;202m)\n"
 printf "\e[1;36m"
-for (( c=1; c<=$(($(tput cols)-3)); c++ )); do printf "="; done
+for (( c=1; c<=$(($COLUMNS_OF_THE_SHELL-3)); c++ )); do printf "="; done && unset -v 'c'
 printf "\e[0m\n\n"
