@@ -103,7 +103,7 @@ MUTUALLYEXCLUSIVEOPTS_PASSED=( )
             [ $WILSON = "TRUE" ] && printf "\n\e[0;31m The option --doNotUseRAfiles can be used only in STAGGERED simulations! Aborting...\n\n\e[0m" && exit -1
             USE_RATIONAL_APPROXIMATION_FILE="FALSE"; shift ;;
 	    -u | --useMultipleChains )
-	        if [[ $CLUSTER_NAME != "LOEWE" ]] && [[ $CLUSTER_NAME != "LCSC" ]]; then
+	        if [[ $CLUSTER_NAME != "LOEWE" ]] && [[ $CLUSTER_NAME != "LCSC" ]] && [[ $CLUSTER_NAME != "LCSC_OLD" ]]; then
                     printf "\n\e[0;31m The options -u | --useMultipleChains can be used only on CSC clusters yet!! Aborting...\n\n\e[0m"
                     exit -1
 		else

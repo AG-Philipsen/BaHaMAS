@@ -98,8 +98,10 @@ source $HOME/Script/JobScriptAutomation/CommandLineParser.sh || exit -2
 if [[ $(whoami) =~ ^hkf[[:digit:]]{3} ]]; then
     CLUSTER_NAME="JUQUEEN"
     WALLTIME="00:30:00"
-elif [ "$(hostname)" = "lqcd-login" ]; then
+elif [ "$(hostname)" = "lxbk0197" ]; then
     CLUSTER_NAME="LCSC"
+elif [ "$(hostname)" = "lqcd-login" ]; then
+    CLUSTER_NAME="LCSC_OLD" #Temporary, until all nodes will be moved to gsi
 fi
 
 SPECIFIED_COMMAND_LINE_OPTIONS=( $@ )
