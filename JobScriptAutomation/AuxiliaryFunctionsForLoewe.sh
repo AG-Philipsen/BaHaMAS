@@ -318,8 +318,8 @@ function ProcessBetaValuesForContinue_Loewe() {
             local MEASURE_PBP_VALUE_FOR_INPUTFILE=0
         elif [ $MEASURE_PBP = "TRUE" ]; then
             local MEASURE_PBP_VALUE_FOR_INPUTFILE=1
-            #If the pbp file already exists, append a line to it to be sure the prompt is at the beginning to the line
-            if [ -f ${OUTPUTFILE_GLOBALPATH}_pbp.dat ]; then
+            #If the pbp file already exists non empty, append a line to it to be sure the prompt is at the beginning of a new line
+            if [ -f ${OUTPUTFILE_GLOBALPATH}_pbp.dat ] && [ $(wc -l < ${OUTPUTFILE_GLOBALPATH}_pbp.dat) -ne 0 ]; then
                 echo "" >> ${OUTPUTFILE_GLOBALPATH}_pbp.dat
             fi
         fi
@@ -457,25 +457,32 @@ function ProcessBetaValuesForContinue_Loewe() {
         #            could happen that the simulation is interrupted after having updated the output file but before having stored the
         #            actual configuration. In this case setting the number of measurements to be done using the output file would mean
         #            to do one trajectory less since the configuration from which the run would be resumed would be the last but one!!
+        # 
+        # NOTE: If the configuration from which we are starting, i.e. NAME_LAST_CONFIGURATION, contains digits then it is
+        #       better to deduce the number of measurements to be done from there.
+        #
         if [ $CONTINUE_NUMBER -ne 0 ]; then
-            local STDOUTPUT_FILE=`ls -lt $BETA_PREFIX$BETA | awk -v filename="$HMC_FILENAME" 'BEGIN{regexp="^"filename".[[:digit:]]+.out$"}{if($9 ~ regexp){print $9}}' | head -n1`
-            local STDOUTPUT_GLOBALPATH="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA/$STDOUTPUT_FILE"
-            if [ -f $STDOUTPUT_GLOBALPATH ] && [ $(grep "writing gaugefield at tr. [[:digit:]]\+" $STDOUTPUT_GLOBALPATH | wc -l) -ne 0 ]; then
-                local NUMBER_DONE_TRAJECTORIES=$(grep -o "writing gaugefield at tr. [[:digit:]]\+" $STDOUTPUT_GLOBALPATH | grep -o "[[:digit:]]\+" | tail -n1)
-                #If the simulation was resumed from a previous configuration, here NUMBER_DONE_TRAJECTORIES is wrong, correct it.
-                #Note than it is better to correct it with the following check rather than see if the simulation is beeing resumed,
-                #because sometimes a simulation is resumed but not submitted, and just continued later
-                if [ $NUMBER_DONE_TRAJECTORIES -gt $(awk 'END{print $1 + 1}' $OUTPUTFILE_GLOBALPATH) ]; then
-                    NUMBER_DONE_TRAJECTORIES=$(awk 'END{print $1 + 1}' $OUTPUTFILE_GLOBALPATH)
-                fi
-            elif [ -f $OUTPUTFILE_GLOBALPATH ]; then
-                local NUMBER_DONE_TRAJECTORIES=$(awk 'END{print $1 + 1}' $OUTPUTFILE_GLOBALPATH) #The +1 is here necessary because the first tr. is supposed to be the number 0.
+            if [ $(grep -o "[[:digit:]]\+" <<< "$NAME_LAST_CONFIGURATION" | wc -l) -ne 0 ]; then
+                local NUMBER_DONE_TRAJECTORIES=$(grep -o "[[:digit:]]\+" <<< "$NAME_LAST_CONFIGURATION" | sed 's/^0*//g')
             else
-                local NUMBER_DONE_TRAJECTORIES=0
+                local STDOUTPUT_FILE=`ls -lt $BETA_PREFIX$BETA | awk -v filename="$HMC_FILENAME" 'BEGIN{regexp="^"filename".[[:digit:]]+.out$"}{if($9 ~ regexp){print $9}}' | head -n1`
+                local STDOUTPUT_GLOBALPATH="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA/$STDOUTPUT_FILE"
+                if [ -f $STDOUTPUT_GLOBALPATH ] && [ $(grep "writing gaugefield at tr. [[:digit:]]\+" $STDOUTPUT_GLOBALPATH | wc -l) -ne 0 ]; then
+                    local NUMBER_DONE_TRAJECTORIES=$(grep -o "writing gaugefield at tr. [[:digit:]]\+" $STDOUTPUT_GLOBALPATH | grep -o "[[:digit:]]\+" | tail -n1)
+                    #If the simulation was resumed from a previous configuration, here NUMBER_DONE_TRAJECTORIES is wrong, correct it.
+                    #Note than it is better to correct it with the following check rather than see if the simulation is beeing resumed,
+                    #because sometimes a simulation is resumed but not submitted, and just continued later
+                    if [ $NUMBER_DONE_TRAJECTORIES -gt $(awk 'END{print $1 + 1}' $OUTPUTFILE_GLOBALPATH) ]; then
+                        NUMBER_DONE_TRAJECTORIES=$(awk 'END{print $1 + 1}' $OUTPUTFILE_GLOBALPATH)
+                    fi
+                elif [ -f $OUTPUTFILE_GLOBALPATH ]; then
+                    local NUMBER_DONE_TRAJECTORIES=$(awk 'END{print $1 + 1}' $OUTPUTFILE_GLOBALPATH) #The +1 is here necessary because the first tr. is supposed to be the number 0.
+                else
+                    local NUMBER_DONE_TRAJECTORIES=0
+                fi
             fi
             if [ $NUMBER_DONE_TRAJECTORIES -ge $CONTINUE_NUMBER ]; then
-                printf "\e[0;31m From the output file $OUTPUTFILE_GLOBALPATH"
-                printf "\n we got that the number of done measurements is $NUMBER_DONE_TRAJECTORIES >= $CONTINUE_NUMBER = CONTINUE_NUMBER."
+                printf "\e[0;31m We got that the number of done measurements is $NUMBER_DONE_TRAJECTORIES >= $CONTINUE_NUMBER = CONTINUE_NUMBER."
                 printf "\n The option \"--continue=$CONTINUE_NUMBER\" cannot be applied. Skipping beta = $BETA .\n\n\e[0m"
                 PROBLEM_BETA_ARRAY+=( $BETA )
                 mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue

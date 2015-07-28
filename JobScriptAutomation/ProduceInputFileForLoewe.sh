@@ -15,6 +15,7 @@ function ProduceInputFile_Loewe() {
         else
             echo "read_rational_approximations_from_file=0" >> $INPUTFILE_GLOBALPATH
         fi
+        echo "findminmax_max=10000" >> $INPUTFILE_GLOBALPATH
     fi
     echo "use_cpu=false" >> $INPUTFILE_GLOBALPATH
     echo "theta_fermion_spatial=0" >> $INPUTFILE_GLOBALPATH

@@ -27,7 +27,8 @@ function ProduceJobscript_Loewe(){
 	echo "#SBATCH --gres=gpu:$GPU_PER_NODE" >> $JOBSCRIPT_GLOBALPATH
     elif [ $CLUSTER_NAME = "LCSC_OLD" ]; then
         echo "#SBATCH --partition=lcsc_lqcd" >> $JOBSCRIPT_GLOBALPATH
-        echo "#SBATCH --exclude=lcsc-r04n01,lcsc-r04n02,lcsc-r04n03,lcsc-r04n04,lcsc-r05n01,lcsc-r05n02,lcsc-r05n03,lcsc-r05n04,lcsc-r06n01,lcsc-r06n02,lcsc-r06n03,lcsc-r06n04,lcsc-r07n01,lcsc-r07n02,lcsc-r07n03,lcsc-r07n04,lcsc-r08n01,lcsc-r08n02,lcsc-r08n03,lcsc-r08n04,lcsc-r02n01,lcsc-r02n02,lcsc-r02n03,lcsc-r02n04,lcsc-r03n01,lcsc-r03n02,lcsc-r03n07,lcsc-r03n08,lcsc-r09n16,lcsc-r06n17,lcsc-r07n08,lcsc-r06n14,lcsc-r07n14,lcsc-r04n12,lcsc-r06n18,lcsc-r09n18" >> $JOBSCRIPT_GLOBALPATH
+        echo "#SBATCH --exclude=lcsc-r03n01,lcsc-r06n17,lcsc-r06n10,lcsc-r03n12,lcsc-r03n13,lcsc-r06n02,lcsc-r06n03" >> $JOBSCRIPT_GLOBALPATH
+        #echo "#SBATCH --exclude=lcsc-r04n01,lcsc-r04n02,lcsc-r04n03,lcsc-r04n04,lcsc-r05n01,lcsc-r05n02,lcsc-r05n03,lcsc-r05n04,lcsc-r06n01,lcsc-r06n02,lcsc-r06n03,lcsc-r06n04,lcsc-r07n01,lcsc-r07n02,lcsc-r07n03,lcsc-r07n04,lcsc-r08n01,lcsc-r08n02,lcsc-r08n03,lcsc-r08n04,lcsc-r02n01,lcsc-r02n02,lcsc-r02n03,lcsc-r02n04,lcsc-r03n01,lcsc-r03n02,lcsc-r03n07,lcsc-r03n08,lcsc-r09n16,lcsc-r06n17,lcsc-r07n08,lcsc-r06n14,lcsc-r07n14,lcsc-r04n12,lcsc-r06n18,lcsc-r09n18" >> $JOBSCRIPT_GLOBALPATH
     fi
     echo "#SBATCH --ntasks=$GPU_PER_NODE" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
