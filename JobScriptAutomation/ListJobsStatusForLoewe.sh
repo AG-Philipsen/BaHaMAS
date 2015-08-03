@@ -184,7 +184,7 @@ function ListJobStatus_Loewe(){
 	    fi
 	    local MAX_DELTAS=$(awk 'BEGIN {max=0} {if(sqrt($8^2)>max){max=sqrt($8^2)}} END {printf "%6g", max}' $OUTPUTFILE_GLOBALPATH)
 	    if [[ $STATUS == "RUNNING" ]]; then
-		local TIME_FROM_LAST_MODIFICATION=`expr $(date +%s) - $(date +%s -r $OUTPUTFILE_GLOBALPATH)`
+		local TIME_FROM_LAST_MODIFICATION=`expr $(date +%s) - $(stat -c %Y $OUTPUTFILE_GLOBALPATH)`
 	    else
 		local TIME_FROM_LAST_MODIFICATION="------"
 	    fi
