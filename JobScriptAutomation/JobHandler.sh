@@ -78,6 +78,8 @@ ACCRATE_REPORT_GLOBAL="FALSE"
 EMPTY_BETA_DIRS="FALSE"
 CLEAN_OUTPUT_FILES="FALSE"
 SECONDARY_OPTION_ALL="FALSE"
+COMPLETE_BETAS_FILE="FALSE"
+NUMBER_OF_CHAINS_TO_BE_IN_THE_BETAS_FILE="4"
 if [ $STAGGERED = "TRUE" ]; then
     NUM_TASTES="2"
     USE_RATIONAL_APPROXIMATION_FILE="TRUE"
@@ -98,7 +100,7 @@ source $HOME/Script/JobScriptAutomation/CommandLineParser.sh || exit -2
 if [[ $(whoami) =~ ^hkf[[:digit:]]{3} ]]; then
     CLUSTER_NAME="JUQUEEN"
     WALLTIME="00:30:00"
-elif [ "$(hostname)" = "lxbk0197" ]; then
+elif [ "$(hostname)" = "lxlcsc0001" ]; then
     CLUSTER_NAME="LCSC"
 elif [ "$(hostname)" = "lqcd-login" ]; then
     CLUSTER_NAME="LCSC_OLD" #Temporary, until all nodes will be moved to gsi
@@ -239,7 +241,12 @@ elif [ $EMPTY_BETA_DIRS = "TRUE" ]; then
     ReadBetaValuesFromFile
     EmptyBetaDirectories
     
+elif [ $COMPLETE_BETAS_FILE = "TRUE" ]; then
+
+    CompleteBetasFile
+    
 fi
+
 
 
 #------------------------------------------------------------------------------------------------------------------------------#

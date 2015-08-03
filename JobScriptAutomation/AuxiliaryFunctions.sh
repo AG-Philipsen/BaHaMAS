@@ -95,7 +95,7 @@ function ReadBetaValuesFromFile(){
         
         #Check whether same seed is provided multiple times for same beta --> do it with an associative array in awk after having removed "resumefrom=", EMPTYLINES and comments
         if [ "$(awk '{split($0, res, "'#'"); print res[1]}' $BETASFILE |\
-                sed -e 's/'$RESUME_REGEXPR'//g' -e 's/'$MP_REGEXPR'//g' -e '/^$/d' |\
+                sed -e 's/'$RESUME_REGEXPR'//g' -e 's/'$MP_REGEXPR'//g' -e '/^[[:space:]]*$/d' |\
                 awk '{array[$1,$2]++}END{for(ind in array){if(array[ind]>1){print -1; exit}}}')" == -1 ]; then
             printf "\n\e[0;31m Same seed provided multiple times for same beta!! Aborting...\n\n\e[0m"
             exit -1
@@ -231,6 +231,129 @@ function ReadBetaValuesFromFile(){
         done
     fi
 }
+
+
+#TODO: After having refactored the function ReadBetaValuesFromFile, one could reuse some functionality of there.
+function __static__PrintOldLineToBetasFileAndShiftArrays(){
+    if [ $USE_MULTIPLE_CHAINS == "TRUE" ]; then
+        printf "${BETA_ARRAY[0]}\t${SEED_ARRAY[0]}\t${REST_OF_THE_LINE_ARRAY[0]}\n"  >> $BETASFILE
+        SEED_JUST_PRINTED_TO_FILE="${SEED_ARRAY[0]}"
+        SEED_ARRAY=("${SEED_ARRAY[@]:1}")
+    else
+        printf "${BETA_ARRAY[0]}\t${REST_OF_THE_LINE_ARRAY[0]}\n" >> $BETASFILE
+    fi
+    BETA_JUST_PRINTED_TO_FILE="${BETA_ARRAY[0]}"
+    REST_OF_THE_LINE_JUST_PRINTED_TO_FILE="${REST_OF_THE_LINE_ARRAY[0]}"
+    BETA_ARRAY=("${BETA_ARRAY[@]:1}")
+    REST_OF_THE_LINE_ARRAY=("${REST_OF_THE_LINE_ARRAY[@]:1}")
+}
+
+function __static__PrintNewLineToBetasFile(){
+    printf "$BETA_JUST_PRINTED_TO_FILE\t$NEW_SEED\t$REST_OF_THE_LINE_JUST_PRINTED_TO_FILE\n" >> $BETASFILE
+}
+
+function CompleteBetasFile(){
+    local OLD_IFS=$IFS      # save the field separator
+    local IFS=$'\n'         # new field separator, the end of line
+    local BETA=""
+    local BETA_ARRAY=()
+    local REST_OF_THE_LINE=""
+    local REST_OF_THE_LINE_ARRAY=()
+    local COMMENTED_LINE_ARRAY=()
+    [ $USE_MULTIPLE_CHAINS == "TRUE" ] && local SEED="" && local SEED_ARRAY=()
+    for LINE in $(sort -k1n $BETASFILE); do #the for loop with cat remove empty lines
+        if [[ $LINE =~ ^[[:blank:]]*# ]]; then
+            COMMENTED_LINE_ARRAY+=( "$LINE" )
+            continue
+        fi
+        LINE=`echo $LINE | awk '{split($0, res, "#"); print res[1]}'`
+        BETA=$(awk '{print $1}' <<< "$LINE")
+        REST_OF_THE_LINE=$(awk '{$1=""; print $0}' <<< "$LINE")
+        if [ $USE_MULTIPLE_CHAINS == "TRUE" ]; then
+            SEED=$(awk '{print $1}' <<< "$REST_OF_THE_LINE")
+            REST_OF_THE_LINE=$(awk '{$1=""; print $0}' <<< "$REST_OF_THE_LINE")
+        else
+            if [[ $(awk '{print $1}' <<< "$REST_OF_THE_LINE") =~ ^[[:digit:]]{4}$ ]]; then
+                printf "\n\e[0;33m \e[1m\e[4mWARNING\e[24m:\e[0;33m It seems you put seeds in betas file but you invoked\n"
+                printf "          this script without \"-u\" option. Would you like to continue (Y/N)? \e[0m"
+                local CONFIRM="";
+                while read CONFIRM; do
+                    if [ "$CONFIRM" = "Y" ]; then
+                        break;
+                    elif [ "$CONFIRM" = "N" ]; then
+                        return
+                    else
+                        printf "\n\e[0;33m Please enter Y (yes) or N (no): \e[0m"
+                    fi
+                done
+            fi
+        fi
+        #Check each entry
+        if [[ ! $BETA =~ ^[[:digit:]].[[:digit:]]{4}$ ]]; then
+            printf "\n\e[0;31m Invalid beta entry in betas file! Aborting...\n\n\e[0m"
+            exit -1
+        fi
+        if [ $USE_MULTIPLE_CHAINS == "TRUE" ]; then
+            if [[ ! $SEED =~ ^[[:digit:]]{4}$ ]]; then
+                printf "\n\e[0;31m Invalid seed entry in betas file! Aborting...\n\n\e[0m"
+                exit -1
+            fi
+        fi
+        #Checks done, fill arrays
+        BETA_ARRAY+=( $BETA )
+        [ $USE_MULTIPLE_CHAINS == "TRUE" ] && SEED_ARRAY+=( $SEED )
+        REST_OF_THE_LINE_ARRAY+=( "$REST_OF_THE_LINE" )
+    done
+    IFS=$OLD_IFS     # restore default field separator
+
+    #Produce complete betas file
+    local BETASFILE_BACKUP="${BETASFILE}_backup"
+    mv $BETASFILE $BETASFILE_BACKUP || exit -2
+    while [ "${#BETA_ARRAY[@]}" -ne 0 ]; do
+        local BETA_JUST_PRINTED_TO_FILE=""
+        local SEED_JUST_PRINTED_TO_FILE=""
+        local REST_OF_THE_LINE_JUST_PRINTED_TO_FILE=""
+        local NUMBER_OF_BETA_PRINTED_TO_FILE=0
+        #In case multiple chains are used, the betas with already a seed are copied to file
+        if [ $USE_MULTIPLE_CHAINS == "TRUE" ]; then
+            __static__PrintOldLineToBetasFileAndShiftArrays
+            (( NUMBER_OF_BETA_PRINTED_TO_FILE++ ))
+            while [ "${BETA_ARRAY[0]}" = $BETA_JUST_PRINTED_TO_FILE ]; do #This while works because above we read the betasfile sorted!
+                __static__PrintOldLineToBetasFileAndShiftArrays
+                (( NUMBER_OF_BETA_PRINTED_TO_FILE++ ))
+            done
+        fi
+        #Then complete file
+        if [ $USE_MULTIPLE_CHAINS == "TRUE" ]; then
+            local SEED_TO_GENERATE_NEW_SEED_FROM="$SEED_JUST_PRINTED_TO_FILE"
+        else
+            local SEED_TO_GENERATE_NEW_SEED_FROM="${BETA_ARRAY[0]##*[.]}"
+            #Unset arrays pretending to have written to file to uniform __static__PrintNewLineToBetasFile function
+            BETA_JUST_PRINTED_TO_FILE="${BETA_ARRAY[0]}"
+            REST_OF_THE_LINE_JUST_PRINTED_TO_FILE="${REST_OF_THE_LINE_ARRAY[0]}"
+            BETA_ARRAY=("${BETA_ARRAY[@]:1}")
+            REST_OF_THE_LINE_ARRAY=("${REST_OF_THE_LINE_ARRAY[@]:1}")
+            #Print first line with starting seed
+            NEW_SEED=$SEED_TO_GENERATE_NEW_SEED_FROM
+            __static__PrintNewLineToBetasFile
+            (( NUMBER_OF_BETA_PRINTED_TO_FILE++ ))
+        fi
+        for((INDEX=$NUMBER_OF_BETA_PRINTED_TO_FILE; INDEX<$NUMBER_OF_CHAINS_TO_BE_IN_THE_BETAS_FILE; INDEX++)); do
+            local NEW_SEED=$(sed -e 's/\(.\)/\n\1/g' <<< "$SEED_TO_GENERATE_NEW_SEED_FROM"  | awk 'BEGIN{ORS=""}NR>1{print ($1+1)%10}')
+            __static__PrintNewLineToBetasFile
+            SEED_TO_GENERATE_NEW_SEED_FROM=$NEW_SEED
+        done
+        echo "" >> $BETASFILE
+    done
+    #Print commented lines
+    for LINE in "${COMMENTED_LINE_ARRAY[@]}"; do
+        echo $LINE >> $BETASFILE
+    done
+    rm $BETASFILE_BACKUP
+
+    printf "\n\e[38;5;13m New betasfile successfully created!\e[0m\n"
+}
+
 
 
 function ProduceInputFileAndJobScriptForEachBeta()

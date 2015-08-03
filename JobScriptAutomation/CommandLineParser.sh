@@ -4,7 +4,7 @@
 
 function ParseCommandLineOption(){
 
-MUTUALLYEXCLUSIVEOPTS=( "-s | --submit" "-c | --continue" "-t | --thermalize" "-l | --liststatus" "--liststatus_all" "--submitonly" "--showjobs" "--showjobs_all" "--accRateReport" "--accRateReport_all" "--emptyBetaDirectories" "--cleanOutputFiles")
+MUTUALLYEXCLUSIVEOPTS=( "-s | --submit" "-c | --continue" "-t | --thermalize" "-l | --liststatus" "--liststatus_all" "--submitonly" "--showjobs" "--showjobs_all" "--accRateReport" "--accRateReport_all" "--emptyBetaDirectories" "--cleanOutputFiles" "--completeBetasFile")
 MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 
     while [ "$1" != "" ]; do
@@ -66,6 +66,9 @@ MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 		echo -e "                                           Secondary options: \e[0;34m--all\e[0;32m to clean output files for all betas in WORK_DIR referred to the actual path parameters"
 		echo -e "  \e[0;34m--emptyBetaDirectories\e[0;32m             ->    The beta directories corresponding to the beta values specified in the file \"\e[4memptybetas\e[0;32m\" will be emptied!"
 		echo -e "                                           For each beta value specified there will be a promt for confirmation! \e[1mATTENTION\e[0;32m: After the Confirmation the process cannot be undone!" 
+		echo -e "  \e[0;34m--completeBetasFile[=number]\e[0;32m       ->    The beta file is completed adding for each beta new chains in order to have as many chain as specified. "
+		echo -e "                                           If no number is specified, 4 is used. This option, if \"-u\" has been given, uses the seed in the second field to generate new chains." 
+		echo -e "                                           Otherwise one new field containing the seed is inserted in second position." 
 		echo ""
 		echo -e "\e[0;93mNOTE: The blue options are mutually exclusive and they are all FALSE by default! In other words, if none of them"
 		echo -e "\e[0;93m      is given, the script will create beta-folders with the right files inside, but no job will be submitted."
@@ -178,27 +181,41 @@ MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--showjobs" )
 		    SHOWJOBS="TRUE"
 		shift;; 
-	    --accRateReport=* )		 INTERVAL=${1#*=}; 
-		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--accRateReport" )
-	   	ACCRATE_REPORT="TRUE"
-	    shift ;;
-	    --accRateReport_all=* )		 INTERVAL=${1#*=}; 
-		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--accRateReport_all" )
-	   	ACCRATE_REPORT="TRUE"
-	   	ACCRATE_REPORT_GLOBAL="TRUE"
-	    shift ;;
+	    --accRateReport=* )
+            INTERVAL=${1#*=} 
+		    MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--accRateReport" )
+	   	    ACCRATE_REPORT="TRUE"
+	        shift ;;
+	    --accRateReport_all=* )
+            INTERVAL=${1#*=}
+		    MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--accRateReport_all" )
+	   	    ACCRATE_REPORT="TRUE"
+	   	    ACCRATE_REPORT_GLOBAL="TRUE"
+	        shift ;;
 	    --cleanOutputFiles )
-		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--cleanOutputFiles" )
-		CLEAN_OUTPUT_FILES="TRUE"
-	    shift ;;
-	    --emptyBetaDirectories )
-		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--emptyBetaDirectories" )
-		EMPTY_BETA_DIRS="TRUE"
-	    shift ;;
+		    MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--cleanOutputFiles" )
+		    CLEAN_OUTPUT_FILES="TRUE"
+	        shift ;;
 	    --all )
-	            [ $CLEAN_OUTPUT_FILES = "FALSE" ] && printf "\n\e[0;31mSecondary option --all must be given after the primary one! Aborting...\n\n\e[0m" && exit -1
+	        [ $CLEAN_OUTPUT_FILES = "FALSE" ] && printf "\n\e[0;31mSecondary option --all must be given after the primary one! Aborting...\n\n\e[0m" && exit -1
 		    SECONDARY_OPTION_ALL="TRUE"
-		shift;;
+		    shift;;
+	    --emptyBetaDirectories )
+		    MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--emptyBetaDirectories" )
+		    EMPTY_BETA_DIRS="TRUE"
+	        shift ;;
+	    --completeBetasFile* )
+		    MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--completeBetasFile" )
+		    COMPLETE_BETAS_FILE="TRUE"
+            local TMP_STRING=${1#*File}
+            if [ "$TMP_STRING" != "" ]; then
+                if [ ${TMP_STRING:0:1} == "=" ]; then
+                    CHAINS_TO_BE_ADDED_IN_THE_BETAS_FILE=${1#*=}
+                else
+                    printf "\n\e[0;31m Invalid option \e[1m$1\e[0;31m (see help for further information)! Aborting...\n\n\e[0m"
+                fi
+            fi
+	        shift ;;
 	    * ) printf "\n\e[0;31m Invalid option \e[1m$1\e[0;31m (see help for further information)! Aborting...\n\n\e[0m" ; exit -1 ;;
 	esac
     done
