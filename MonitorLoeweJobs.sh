@@ -14,18 +14,39 @@ function ParseCommandLineOptions(){
             printf "\n\e[0;32m"
             echo "Call the script $0 with the following optional arguments:"
             echo "  -h | --help"
-            echo "  -u | --user      ->    user for which jobs should be displayed (DEFAULT = $(whoami))"
-            echo "  -a | --allUsers  ->    display jobs information for all users"
+            echo "  -u | --user       ->    user for which jobs should be displayed (DEFAULT = $(whoami))"
+            echo "  -a | --allUsers   ->    display jobs information for all users"
+            if [ $CLUSTER_NAME = "LCSC" ]; then
+                echo "  -n | --nodeUsage  ->    display information ONLY about which nodes are used"
+                echo "  -g | --groupBetas ->    display partial information grouping betas used"
+            fi
             echo -e "\n\e[0;35mNOTE: If the option -a is given, then the -u one is ignored!\e[0m"
             printf "\n\e[0m"
             exit
             shift;;
-        -u=* | --user=* )         SELECTED_USER=${1#*=}; shift ;;
-        -a | --allUsers )         DISPLAY_ALL_JOBS="TRUE"; shift ;;
+        -u=* | --user=* )    SELECTED_USER=${1#*=}; shift ;;
+        -a | --allUsers )    DISPLAY_ALL_JOBS="TRUE"; shift ;;
+	    -n | --nodeUsage )   MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--nodeUsage" ); NODE_USAGE="TRUE"; shift;;
+	    -g | --groupBetas )  MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--groupBetas" ); GROUP_BETAS="TRUE"; shift;;
         * ) printf "\n\e[0;31mError parsing the options! Aborting...\n\n\e[0m" ; exit -1 ;;
         esac
     done
 
+    if [ ${#MUTUALLYEXCLUSIVEOPTS_PASSED[@]} -gt 0 ] && [ $CLUSTER_NAME != "LCSC" ]; then
+        printf "\n\e[0;31mError parsing the options (see --help)! Aborting...\n\n\e[0m"
+        exit -1
+    fi
+    
+    if [ ${#MUTUALLYEXCLUSIVEOPTS_PASSED[@]} -gt 1 ]; then
+	    printf "\n\e[0;31m The options\n\n\e[1m"
+	    for OPT in "${MUTUALLYEXCLUSIVEOPTS[@]}"; do
+	        #echo "  $OPT"
+	        printf "  %s\n" "$OPT"
+	    done
+	    printf "\n\e[0;31m are mutually exclusive and must not be combined! Aborting...\n\n\e[0m"
+	    exit -1
+    fi
+        
 }
 
 function ExtractParameterFromJobInformations(){
@@ -38,8 +59,14 @@ function ExtractParameterFromJobInformations(){
 
 #-----------------------------------------------------------------------------------------------#
 
+CLUSTER_NAME="LOEWE"
+[ "$(hostname)" = "lxlcsc0001" ] && CLUSTER_NAME="LCSC"
+MUTUALLYEXCLUSIVEOPTS=( "-n | --nodeUsage" "-g | --groupBetas" )
+MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 SELECTED_USER="$(whoami)"
 DISPLAY_ALL_JOBS="FALSE"
+NODE_USAGE="FALSE"
+GROUP_BETAS="FALSE"
 
 ParseCommandLineOptions $@
 
@@ -105,6 +132,76 @@ for ((j=0; j<${#JOBSTATUS[@]}; j++)); do
     fi
 done && unset -v 'j'
 OTHER_JOBS=$(($TOTAL_JOBS-$RUNNING_JOBS-$PENDING_JOBS))
+
+
+#------------------------------------------------------------------------------------------------------------------------------------------------#
+# If node usage is required just execute this code and exit
+
+if [ $NODE_USAGE = "TRUE" ]; then
+    declare -A USED_NODES
+    #Counting
+    for NODE in ${JOBFIRSTNODE[@]}; do
+	USED_NODES[$NODE]="${USED_NODES[$NODE]}+"
+    done
+    #Printing
+    printf "\n\e[1;36m"
+    for (( c=1; c<=85; c++ )); do printf "="; done && unset -v 'c'
+    printf "\e[0m\n"
+
+    printf "\e[38;5;13m%-15s%-10s\n\e[0m" "NODE" "RUNNING_JOBS"
+    for NODE in ${!USED_NODES[@]}; do
+	printf "\e[38;5;39m%-15s\e[38;5;10m%-10s\e[38;5;49m%d\e[0m\n" "${NODE}" "${USED_NODES[$NODE]}" "$(grep -o '+' <<< "${USED_NODES[$NODE]}" | wc -l)"
+    done | sort -h
+    
+    printf "\n\e[38;5;202m  Total number of submitted jobs: $TOTAL_JOBS"
+    printf " (\e[1;32mRunning: $RUNNING_JOBS  \e[0m - \e[1;31m  Pending: $PENDING_JOBS  \e[0m - \e[1;35m  Others: $OTHER_JOBS\e[38;5;202m)\n"
+    printf "\e[1;36m"
+    for (( c=1; c<=85; c++ )); do printf "="; done && unset -v 'c'
+    printf "\e[0m\n\n"
+    exit
+fi
+
+#------------------------------------------------------------------------------------------------------------------------------------------------#
+
+#------------------------------------------------------------------------------------------------------------------------------------------------#
+# If group betas is required just execute this code and exit
+
+if [ $GROUP_BETAS = "TRUE" ]; then
+    declare -A JOB_PARAMETERS
+    declare -A SEEDS_STATUS
+    #Counting
+    for INDEX in ${!JOBNAME[@]}; do
+	NAME=${JOBNAME[$INDEX]}
+	JOB_PARAMETERS[${NAME%%_s*}]="${JOB_PARAMETERS[${NAME%%_s*}]} ${NAME##*_s}"
+	if [ ${JOBSTATUS[$INDEX]} = "RUNNING" ]; then
+	    SEEDS_STATUS[${NAME%%_s*}]="${SEEDS_STATUS[${NAME%%_s*}]} \e[38;5;10m${JOBSTATUS[$INDEX]:0:1}\e[0m"
+	elif [ ${JOBSTATUS[$INDEX]} = "PENDING" ]; then
+	    if [ ${JOBSTARTTIME[$i]} != "Unknown" ]; then
+		SEEDS_STATUS[${NAME%%_s*}]="${SEEDS_STATUS[${NAME%%_s*}]} \e[38;5;11m${JOBSTATUS[$INDEX]:0:1}\e[0m"
+	    else
+		SEEDS_STATUS[${NAME%%_s*}]="${SEEDS_STATUS[${NAME%%_s*}]} \e[38;5;9m${JOBSTATUS[$INDEX]:0:1}\e[0m"
+	    fi
+	fi
+    done
+    #Printing
+    printf "\n\e[1;36m"
+    for (( c=1; c<=85; c++ )); do printf "="; done && unset -v 'c'
+    printf "\e[0m\n"
+
+    printf "\e[38;5;4m%-40s%-30s%s\n\e[0m" "JOB_PARAMETERS" "QUEUED_SEEDS" "STATUS"
+    for NAME in ${!JOB_PARAMETERS[@]}; do
+	printf "\e[38;5;14m%-40s\e[38;5;13m%-30s${SEEDS_STATUS[$NAME]:1}\e[0m\n" "${NAME}" "${JOB_PARAMETERS[$NAME]:1}"
+    done | sort -h
+    
+    printf "\n\e[38;5;202m  Total number of submitted jobs: $TOTAL_JOBS"
+    printf " (\e[1;32mRunning: $RUNNING_JOBS  \e[0m - \e[1;31m  Pending: $PENDING_JOBS  \e[0m - \e[1;35m  Others: $OTHER_JOBS\e[38;5;202m)\n"
+    printf "\e[1;36m"
+    for (( c=1; c<=85; c++ )); do printf "="; done && unset -v 'c'
+    printf "\e[0m\n\n"
+    exit
+fi
+
+#------------------------------------------------------------------------------------------------------------------------------------------------#
 
 #Table header
 COLUMNS_OF_THE_SHELL=$(tput cols)
