@@ -44,7 +44,7 @@ function ProduceInputFile_Loewe() {
             echo "num_sources=16" >> $INPUTFILE_GLOBALPATH
         elif [ $STAGGERED = "TRUE" ]; then
             echo "num_sources=1" >> $INPUTFILE_GLOBALPATH
-            echo "pbp_measurements=16" >> $INPUTFILE_GLOBALPATH
+            echo "pbp_measurements=8" >> $INPUTFILE_GLOBALPATH
         fi
         echo "ferm_obs_to_single_file=1" >> $INPUTFILE_GLOBALPATH
         echo "ferm_obs_pbp_prefix=${OUTPUTFILE_NAME}" >> $INPUTFILE_GLOBALPATH
