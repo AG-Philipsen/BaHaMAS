@@ -158,7 +158,7 @@ if [ $NODE_USAGE = "TRUE" ]; then
     printf "\e[1;36m"
     for (( c=1; c<=85; c++ )); do printf "="; done && unset -v 'c'
     printf "\e[0m\n\n"
-    exit
+    exit 0
 fi
 
 #------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -177,10 +177,12 @@ if [ $GROUP_BETAS = "TRUE" ]; then
 	    SEEDS_STATUS[${NAME%%_s*}]="${SEEDS_STATUS[${NAME%%_s*}]} \e[38;5;10m${JOBSTATUS[$INDEX]:0:1}\e[0m"
 	elif [ ${JOBSTATUS[$INDEX]} = "PENDING" ]; then
 	    if [ ${JOBSTARTTIME[$i]} != "Unknown" ]; then
-		SEEDS_STATUS[${NAME%%_s*}]="${SEEDS_STATUS[${NAME%%_s*}]} \e[38;5;11m${JOBSTATUS[$INDEX]:0:1}\e[0m"
+		    SEEDS_STATUS[${NAME%%_s*}]="${SEEDS_STATUS[${NAME%%_s*}]} \e[38;5;11m${JOBSTATUS[$INDEX]:0:1}\e[0m"
 	    else
-		SEEDS_STATUS[${NAME%%_s*}]="${SEEDS_STATUS[${NAME%%_s*}]} \e[38;5;9m${JOBSTATUS[$INDEX]:0:1}\e[0m"
+		    SEEDS_STATUS[${NAME%%_s*}]="${SEEDS_STATUS[${NAME%%_s*}]} \e[38;5;9m${JOBSTATUS[$INDEX]:0:1}\e[0m"
 	    fi
+    else
+        SEEDS_STATUS[${NAME%%_s*}]="${SEEDS_STATUS[${NAME%%_s*}]} \e[38;5;13m${JOBSTATUS[$INDEX]:0:1}\e[0m"
 	fi
     done
     #Printing
@@ -198,7 +200,7 @@ if [ $GROUP_BETAS = "TRUE" ]; then
     printf "\e[1;36m"
     for (( c=1; c<=85; c++ )); do printf "="; done && unset -v 'c'
     printf "\e[0m\n\n"
-    exit
+    exit 0
 fi
 
 #------------------------------------------------------------------------------------------------------------------------------------------------#
