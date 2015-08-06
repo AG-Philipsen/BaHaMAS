@@ -77,10 +77,10 @@ function ProduceJobscript_Loewe(){
         echo "mkdir -p \$workdir$INDEX || exit 2" >> $JOBSCRIPT_GLOBALPATH
         echo "cd \$workdir$INDEX" >> $JOBSCRIPT_GLOBALPATH
         echo "pwd &" >> $JOBSCRIPT_GLOBALPATH
-        if [ $CLUSTER_NAME = "LOEWE" ]; then
+        if [ $CLUSTER_NAME = "LOEWE" ] || [ $CLUSTER_NAME = "LCSC" ]; then
             echo "time srun -n 1 \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$INPUTFILE_NAME --device=$INDEX --beta=${BETA_FOR_JOBSCRIPT[$INDEX]%%_*} > \$dir$INDEX/\$outFile 2> \$dir$INDEX/\$errFile &" >> $JOBSCRIPT_GLOBALPATH
-        elif [ $CLUSTER_NAME = "LCSC" ] || [ $CLUSTER_NAME = "LCSC_OLD" ]; then
-            echo "time srun -n 1 \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$INPUTFILE_NAME --device=$INDEX --beta=${BETA_FOR_JOBSCRIPT[$INDEX]%%_*} 2> \$dir$INDEX/\$errFile | mbuffer -q -m1M > \$dir$INDEX/\$outFile &" >> $JOBSCRIPT_GLOBALPATH
+	elif [ $CLUSTER_NAME = "LCSC_OLD" ]; then
+	    echo "time srun -n 1 \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$INPUTFILE_NAME --device=$INDEX --beta=${BETA_FOR_JOBSCRIPT[$INDEX]%%_*} 2> \$dir$INDEX/\$errFile | mbuffer -q -m1M > \$dir$INDEX/\$outFile &" >> $JOBSCRIPT_GLOBALPATH
         fi
         echo "" >> $JOBSCRIPT_GLOBALPATH
     done
