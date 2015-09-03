@@ -49,11 +49,11 @@ MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 		echo -e "  \e[0;34m-t | --thermalize\e[0;32m                  ->    The thermalization is done." #TODO: Explain how
 		echo -e "  \e[0;34m-c | --continue\e[0;32m                    ->    Unfinished jobs will be continued up to the nr. of measurements specified in the input file."
 		echo -e "  \e[0;34m-c=[number] | --continue=[number]\e[0;32m        If a number is specified, finished jobs will be continued up to the specified number."
-		if [ "$CLUSTER_NAME" = "LOEWE" ]; then
+		if [ "$CLUSTER_NAME" = "LOEWE" ] || [ "$CLUSTER_NAME" = "LCSC" ]; then
 		    echo -e "                                           To resume a simulation from a given trajectory, add \e[0;34mresumefrom=[number]\e[0;32m in the betasfile."
 		fi
 		echo -e "  \e[0;34m-l | --liststatus\e[0;32m                  ->    The local measurement status for all beta will be displayed"
-		if [ "$CLUSTER_NAME" = "LOEWE" ]; then
+		if [ "$CLUSTER_NAME" = "LOEWE" ] || [ "$CLUSTER_NAME" = "LCSC" ]; then
 		    echo -e "                                           Secondary options: \e[0;34m--measureTime\e[0;32m to get information about the trajectory time"
 		    echo -e "                                                              \e[0;34m--showOnlyQueued\e[0;32m not to show status about not queued jobs"
 		fi
