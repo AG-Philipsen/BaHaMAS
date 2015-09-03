@@ -71,6 +71,7 @@ function ProduceJobscript_Loewe(){
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
         echo "cp -a $HMC_GLOBALPATH \$dir$INDEX" >> $JOBSCRIPT_GLOBALPATH
     done
+    echo "echo \"...done!\"" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"---------------------------\"" >> $JOBSCRIPT_GLOBALPATH
     echo "export DISPLAY=:0" >> $JOBSCRIPT_GLOBALPATH

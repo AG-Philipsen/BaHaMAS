@@ -457,6 +457,10 @@ function ProcessBetaValuesForContinue_Loewe() {
         #            could happen that the simulation is interrupted after having updated the output file but before having stored the
         #            actual configuration. In this case setting the number of measurements to be done using the output file would mean
         #            to do one trajectory less since the configuration from which the run would be resumed would be the last but one!!
+        #            Nevertheless, doing so could lead to wrong number of measurements as well in the case in which the last standard
+        #            output is wrong (for example: a simulation runs for 20k trajectories, it is stopped and by accident it is restarted
+        #            from the beginning for 5k trajectorie; then the last standard output will give a wrong number of measurements).
+        #            This case is left out here and it should be the user to avoid it.
         # 
         # NOTE: If the configuration from which we are starting, i.e. NAME_LAST_CONFIGURATION, contains digits then it is
         #       better to deduce the number of measurements to be done from there.
