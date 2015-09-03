@@ -13,6 +13,7 @@ function ProduceJobscript_Loewe(){
     echo "#SBATCH --time=$WALLTIME" >> $JOBSCRIPT_GLOBALPATH
     echo "#SBATCH --output=${HMC_FILENAME}.%j.out" >> $JOBSCRIPT_GLOBALPATH
     echo "#SBATCH --error=${HMC_FILENAME}.%j.err" >> $JOBSCRIPT_GLOBALPATH
+    echo "#SBATCH --no-requeue" >> $JOBSCRIPT_GLOBALPATH
     if [ $CLUSTER_NAME = "LOEWE" ]; then
         echo "#SBATCH --partition=$LOEWE_PARTITION" >> $JOBSCRIPT_GLOBALPATH
         if [[ "$LOEWE_PARTITION" == "parallel" ]]; then
@@ -22,9 +23,13 @@ function ProduceJobscript_Loewe(){
             echo "#SBATCH -w $LOEWE_NODE" >> $JOBSCRIPT_GLOBALPATH
         fi
     elif [ $CLUSTER_NAME = "LCSC" ]; then
-	echo "#SBATCH --partition=lcsc" >> $JOBSCRIPT_GLOBALPATH
-	echo "#SBATCH --mem=64000" >> $JOBSCRIPT_GLOBALPATH
-	echo "#SBATCH --gres=gpu:$GPU_PER_NODE" >> $JOBSCRIPT_GLOBALPATH
+	    echo "#SBATCH --partition=lcsc" >> $JOBSCRIPT_GLOBALPATH
+	    echo "#SBATCH --mem=64000" >> $JOBSCRIPT_GLOBALPATH
+	    echo "#SBATCH --gres=gpu:$GPU_PER_NODE" >> $JOBSCRIPT_GLOBALPATH
+        #Option to choose only a node with 'hawaii' GPU hardware
+        echo "#SBATCH --constrain=hawaii" >> $JOBSCRIPT_GLOBALPATH
+        #The following nodes of L-CSC are using tahiti as GPU hardware (sinfo -o "%4c %10z %8d %8m %10f %10G %D %N"), CL2QCD fails on them.
+        #echo "#SBATCH --exclude=lxlcsc0043,lxlcsc0044,lxlcsc0045,lxlcsc0046,lxlcsc0047,lxlcsc0049,lxlcsc0050,lxlcsc0052,lxlcsc0053" >> $JOBSCRIPT_GLOBALPATH
     elif [ $CLUSTER_NAME = "LCSC_OLD" ]; then
         echo "#SBATCH --partition=lcsc_lqcd" >> $JOBSCRIPT_GLOBALPATH
         echo "#SBATCH --exclude=lcsc-r03n01,lcsc-r06n17,lcsc-r06n10,lcsc-r03n12,lcsc-r03n13,lcsc-r06n02,lcsc-r06n03" >> $JOBSCRIPT_GLOBALPATH
