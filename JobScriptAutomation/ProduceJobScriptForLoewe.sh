@@ -28,6 +28,7 @@ function ProduceJobscript_Loewe(){
 	    echo "#SBATCH --gres=gpu:$GPU_PER_NODE" >> $JOBSCRIPT_GLOBALPATH
         #Option to choose only a node with 'hawaii' GPU hardware
         echo "#SBATCH --constrain=hawaii" >> $JOBSCRIPT_GLOBALPATH
+        echo "#SBATCH --exclude=lxlcsc0011" >> $JOBSCRIPT_GLOBALPATH
         #The following nodes of L-CSC are using tahiti as GPU hardware (sinfo -o "%4c %10z %8d %8m %10f %10G %D %N"), CL2QCD fails on them.
         #echo "#SBATCH --exclude=lxlcsc0043,lxlcsc0044,lxlcsc0045,lxlcsc0046,lxlcsc0047,lxlcsc0049,lxlcsc0050,lxlcsc0052,lxlcsc0053" >> $JOBSCRIPT_GLOBALPATH
 		echo "#SBATCH --exclude=lxlcsc0055,lxlcsc0105,lxlcsc0153" >> $JOBSCRIPT_GLOBALPATH
@@ -53,7 +54,7 @@ function ProduceJobscript_Loewe(){
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
         echo "if [ ! -d \$dir$INDEX ]; then" >> $JOBSCRIPT_GLOBALPATH
         echo "echo \"Could not find directory \\\"\$dir$INDEX\\\" for runs. Aborting...\""  >> $JOBSCRIPT_GLOBALPATH
-        echo "exit -1"  >> $JOBSCRIPT_GLOBALPATH
+        echo "exit 2"  >> $JOBSCRIPT_GLOBALPATH
         echo "fi"  >> $JOBSCRIPT_GLOBALPATH
         echo "" >> $JOBSCRIPT_GLOBALPATH
     done
@@ -69,7 +70,7 @@ function ProduceJobscript_Loewe(){
     echo "#       of the exec. Copying it later does not guarantee that it is still the same..." >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"Copy executable to beta directories in ${WORK_DIR_WITH_BETAFOLDERS}/${BETA_PREFIX}x.xxxx...\"" >> $JOBSCRIPT_GLOBALPATH
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-        echo "cp -a $HMC_GLOBALPATH \$dir$INDEX" >> $JOBSCRIPT_GLOBALPATH
+        echo "cp -a $HMC_GLOBALPATH \$dir$INDEX || exit 2" >> $JOBSCRIPT_GLOBALPATH
     done
     echo "echo \"...done!\"" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
@@ -86,15 +87,22 @@ function ProduceJobscript_Loewe(){
         echo "pwd &" >> $JOBSCRIPT_GLOBALPATH
         if [ $CLUSTER_NAME = "LOEWE" ] || [ $CLUSTER_NAME = "LCSC" ]; then
             echo "time srun -n 1 \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$INPUTFILE_NAME --device=$INDEX --beta=${BETA_FOR_JOBSCRIPT[$INDEX]%%_*} > \$dir$INDEX/\$outFile 2> \$dir$INDEX/\$errFile &" >> $JOBSCRIPT_GLOBALPATH
-	elif [ $CLUSTER_NAME = "LCSC_OLD" ]; then
-	    echo "time srun -n 1 \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$INPUTFILE_NAME --device=$INDEX --beta=${BETA_FOR_JOBSCRIPT[$INDEX]%%_*} 2> \$dir$INDEX/\$errFile | mbuffer -q -m1M > \$dir$INDEX/\$outFile &" >> $JOBSCRIPT_GLOBALPATH
+	    elif [ $CLUSTER_NAME = "LCSC_OLD" ]; then
+	        echo "time srun -n 1 \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$INPUTFILE_NAME --device=$INDEX --beta=${BETA_FOR_JOBSCRIPT[$INDEX]%%_*} 2> \$dir$INDEX/\$errFile | mbuffer -q -m1M > \$dir$INDEX/\$outFile &" >> $JOBSCRIPT_GLOBALPATH
         fi
+        echo "PID_SRUN_$INDEX=\${!}" >> $JOBSCRIPT_GLOBALPATH
         echo "" >> $JOBSCRIPT_GLOBALPATH
     done
-    echo "wait" >> $JOBSCRIPT_GLOBALPATH
+    echo "#Execute wait \$PID job after job" >> $JOBSCRIPT_GLOBALPATH
+    for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
+        echo "wait \$PID_SRUN_$INDEX || { printf \"\nError occurred in simulation at b${BETA_FOR_JOBSCRIPT[$INDEX]%%_*}. Please check (process pid \${PID_SRUN_$INDEX})...\n\" && ERROR_OCCURRED=\"TRUE\"; }" >> $JOBSCRIPT_GLOBALPATH
+    done
     echo "" >> $JOBSCRIPT_GLOBALPATH
-    echo "err=\`echo \$?\`" >> $JOBSCRIPT_GLOBALPATH
-    echo "echo \"error_code=\$err\"" >> $JOBSCRIPT_GLOBALPATH    
+    echo "# Terminating job manually to get an email in case of failure of any run" >> $JOBSCRIPT_GLOBALPATH
+    echo "if [ \"\$ERROR_OCCURRED\" = \"TRUE\" ]; then" >> $JOBSCRIPT_GLOBALPATH
+    echo "   printf \"\nTerminating job with non zero exit code... (\$(date))\n\"" >> $JOBSCRIPT_GLOBALPATH
+    echo "   exit 255" >> $JOBSCRIPT_GLOBALPATH
+    echo "fi" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"---------------------------\"" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
@@ -104,21 +112,21 @@ function ProduceJobscript_Loewe(){
     if [ "$HOME_DIR" != "$WORK_DIR" ]; then
         echo "# Backup files" >> $JOBSCRIPT_GLOBALPATH
         for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-            echo "cd \$dir$INDEX || exit -2" >> $JOBSCRIPT_GLOBALPATH
+            echo "cd \$dir$INDEX || exit 2" >> $JOBSCRIPT_GLOBALPATH
             if [ $MEASURE_PBP = "TRUE" ]; then
                 if [ $WILSON = "TRUE" ]; then
                     echo "rsync -quavz \$workdir$INDEX/conf*pbp* \$dir$INDEX/Pbp || exit 2" >> $JOBSCRIPT_GLOBALPATH
                 elif [ $STAGGERED = "TRUE" ]; then
-                    echo "cp \$workdir$INDEX/${OUTPUTFILE_NAME}_pbp.dat \$dir$INDEX/${OUTPUTFILE_NAME}_pbp.\$SLURM_JOB_ID || exit -2" >> $JOBSCRIPT_GLOBALPATH
+                    echo "cp \$workdir$INDEX/${OUTPUTFILE_NAME}_pbp.dat \$dir$INDEX/${OUTPUTFILE_NAME}_pbp.\$SLURM_JOB_ID || exit 2" >> $JOBSCRIPT_GLOBALPATH
                 fi
             fi
-            echo "cp \$workdir$INDEX/$OUTPUTFILE_NAME \$dir$INDEX/$OUTPUTFILE_NAME.\$SLURM_JOB_ID || exit -2" >> $JOBSCRIPT_GLOBALPATH
+            echo "cp \$workdir$INDEX/$OUTPUTFILE_NAME \$dir$INDEX/$OUTPUTFILE_NAME.\$SLURM_JOB_ID || exit 2" >> $JOBSCRIPT_GLOBALPATH
             echo "" >> $JOBSCRIPT_GLOBALPATH
         done
     fi
     echo "# Remove executable" >> $JOBSCRIPT_GLOBALPATH
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-        echo "rm \$dir$INDEX/$HMC_FILENAME || exit -2 " >> $JOBSCRIPT_GLOBALPATH
+        echo "rm \$dir$INDEX/$HMC_FILENAME || exit 2 " >> $JOBSCRIPT_GLOBALPATH
     done
     echo "" >> $JOBSCRIPT_GLOBALPATH
     if [ $THERMALIZE = "TRUE" ]; then
@@ -126,12 +134,12 @@ function ProduceJobscript_Loewe(){
         if [ $BETA_POSTFIX == "_thermalizeFromHot" ]; then
             for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
                 echo "cp \$workdir$INDEX/conf.save ${THERMALIZED_CONFIGURATIONS_PATH}/conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA_FOR_JOBSCRIPT[$INDEX]%%_*}_fromHot${MEASUREMENTS}" \
-                     "|| exit -2" >> $JOBSCRIPT_GLOBALPATH
+                     "|| exit 2" >> $JOBSCRIPT_GLOBALPATH
             done
         elif [ $BETA_POSTFIX == "_thermalizeFromConf" ]; then
             for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
                 echo "cp \$workdir$INDEX/conf.save ${THERMALIZED_CONFIGURATIONS_PATH}/conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA_FOR_JOBSCRIPT[$INDEX]%%_*}_fromConf${MEASUREMENTS} " \
-                     "|| exit -2" >> $JOBSCRIPT_GLOBALPATH
+                     "|| exit 2" >> $JOBSCRIPT_GLOBALPATH
             done
         fi
     fi
