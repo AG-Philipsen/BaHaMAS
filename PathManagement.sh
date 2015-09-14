@@ -105,7 +105,7 @@ function ReadParametersFromPath(){
     if [[ ! $KAPPA =~ ^[[:digit:]]{4}$ ]]; then
 	printf "\n\e[0;31m Parameter \"$KAPPA_PREFIX\" from the path \"$1\" not allowed! Aborting...\n\n\e[0m"
 	exit -1
-    elif [[ ! $NTIME =~ ^[[:digit:]]{1}$ ]]; then
+    elif [[ ! $NTIME =~ ^[[:digit:]]{1,2}$ ]]; then
 	printf "\n\e[0;31m Parameter \"$NTIME_PREFIX\" from the path \"$1\" not allowed! Aborting...\n\n\e[0m"
 	exit -1
     elif [[ ! $NSPACE =~ ^[[:digit:]]{1,2}$ ]]; then
