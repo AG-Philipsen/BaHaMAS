@@ -357,29 +357,58 @@ function CompleteBetasFile(){
 
 function UncommentEntriesInBetasFile()
 {
-	#at first comment all lines
-	sed -i "s/^\([^#].*\)/#\1/" $BETASFILE
+    if [ $UNCOMMENT_BETAS = "TRUE" ]
+    then
+        #at first comment all lines
+        sed -i "s/^\([^#].*\)/#\1/" $BETASFILE
 
-	local IFS=' '
-	local OLD_IFS=$IFS
-	for i in ${UNCOMMENT_BETAS_SEED_ARRAY[@]}
-	do
-        #echo entry: $i
-		IFS='_'
-		local U_ARRAY=( $i )
-		local U_BETA=${U_ARRAY[0]}
-		local U_SEED=${U_ARRAY[1]}
-		local U_SEED=${U_SEED#s}
+        local IFS=' '
+        local OLD_IFS=$IFS
+        for i in ${UNCOMMENT_BETAS_SEED_ARRAY[@]}
+        do
+            #echo entry: $i
+            IFS='_'
+            local U_ARRAY=( $i )
+            local U_BETA=${U_ARRAY[0]}
+            local U_SEED=${U_ARRAY[1]}
+            local U_SEED=${U_SEED#s}
 
-		sed -i "s/^#\(.*$U_BETA.*$U_SEED.*\)$/\1/" $BETASFILE #If there is a "#" in front of the line, remove it
-	done
-	IFS=$OLD_IFS
+            sed -i "s/^#\(.*$U_BETA.*$U_SEED.*\)$/\1/" $BETASFILE #If there is a "#" in front of the line, remove it
+        done
+        IFS=$OLD_IFS
 
-	for i in ${UNCOMMENT_BETAS_ARRAY[@]}
-	do
-		U_BETA=$i
-		sed -i "s/^#\(.*$U_BETA.*\)$/\1/" $BETASFILE #If there is a "#" in front of the line, remove it
-	done
+        for i in ${UNCOMMENT_BETAS_ARRAY[@]}
+        do
+            U_BETA=$i
+            sed -i "s/^#\(.*$U_BETA.*\)$/\1/" $BETASFILE #If there is a "#" in front of the line, remove it
+        done
+
+    elif [ $COMMENT_BETAS = "TRUE" ] #Basically the reverse case of the above
+    then
+        #at first uncomment all lines
+        sed -i "s/^#\(.*\)/\1/" $BETASFILE
+
+        local IFS=' '
+        local OLD_IFS=$IFS
+        for i in ${UNCOMMENT_BETAS_SEED_ARRAY[@]}
+        do
+            #echo entry: $i
+            IFS='_'
+            local U_ARRAY=( $i )
+            local U_BETA=${U_ARRAY[0]}
+            local U_SEED=${U_ARRAY[1]}
+            local U_SEED=${U_SEED#s}
+
+            sed -i "s/^\($U_BETA.*$U_SEED.*\)$/#\1/" $BETASFILE #If there is no "#" in front of the line, put one
+        done
+        IFS=$OLD_IFS
+
+        for i in ${UNCOMMENT_BETAS_ARRAY[@]}
+        do
+            U_BETA=$i
+            sed -i "s/^\($U_BETA.*\)$/#\1/" $BETASFILE #If there is no "#" in front of the line, put one
+        done
+    fi
 
     less $BETASFILE
 }

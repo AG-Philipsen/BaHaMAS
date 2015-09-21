@@ -91,6 +91,7 @@ function ParseCommandLineOption(){
         echo -e "                                           The betas can be specified either with a seed or without."
         echo -e "                                           The format of the specified string can either contain the output of the --liststatus option, e.g. 5.4380_s5491_NC" 
         echo -e "                                           or simply beta values like 5.4380 or a mix of both. If pure beta values are given then all seeds of the given beta value will be uncommented."
+        echo -e "  \e[0;34m--commentBetas\e[0;32m                 ->    Is the reverse option of the \"--uncommentBetas\" option"
 		echo ""
 		echo -e "\e[0;93mNOTE: The blue options are mutually exclusive and they are all FALSE by default! In other words, if none of them"
 		echo -e "\e[0;93m      is given, the script will create beta-folders with the right files inside, but no job will be submitted."
@@ -255,8 +256,26 @@ function ParseCommandLineOption(){
             fi
 	        shift ;;
 		-U | --uncommentBetas)   	
-				MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--uncommentedBetas" )
+				MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--uncommentBetas" )
+				COMMENT_BETAS="FALSE"
 				UNCOMMENT_BETAS="TRUE"
+				while [[ "$2" =~ ^[[:digit:]]\.[[:digit:]]{4}_s[[:digit:]]{4}_(NC|fC|fH)$ ]] || [[ "$2" =~ ^[[:digit:]]\.[[:digit:]]{4}$ ]]
+				do
+					if [[ "$2" =~ ^[[:digit:]]\.[[:digit:]]{4}_s[[:digit:]]{4}_(NC|fC|fH)$ ]]
+					then
+						UNCOMMENT_BETAS_SEED_ARRAY+=( $2 )
+					elif [[ "$2" =~ ^[[:digit:]]\.[[:digit:]]{4}$ ]]
+					then 
+						UNCOMMENT_BETAS_ARRAY+=( $2 )
+					fi
+				    shift
+				done
+                shift
+				;;
+        --commentBetas)
+				MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--commentBetas" )
+				UNCOMMENT_BETAS="FALSE"
+				COMMENT_BETAS="TRUE"
 				while [[ "$2" =~ ^[[:digit:]]\.[[:digit:]]{4}_s[[:digit:]]{4}_(NC|fC|fH)$ ]] || [[ "$2" =~ ^[[:digit:]]\.[[:digit:]]{4}$ ]]
 				do
 					if [[ "$2" =~ ^[[:digit:]]\.[[:digit:]]{4}_s[[:digit:]]{4}_(NC|fC|fH)$ ]]
