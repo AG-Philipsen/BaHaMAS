@@ -165,7 +165,8 @@ function ProcessBetaValuesForContinue_Loewe() {
     local LOCAL_SUBMIT_BETA_ARRAY=()
     #Remove -c | --continue option from command line
     for INDEX in "${!SPECIFIED_COMMAND_LINE_OPTIONS[@]}"; do
-        if [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == --continue* ]] || [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == -c* ]]; then
+        if [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == --continue* ]] || [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == -c* ]] ||
+           [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == --continueThermalization* ]] || [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == -C* ]]; then
             unset SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]
             SPECIFIED_COMMAND_LINE_OPTIONS=( "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}" )
         fi

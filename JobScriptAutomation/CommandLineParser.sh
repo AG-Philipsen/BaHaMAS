@@ -4,9 +4,22 @@
 
 function ParseCommandLineOption(){
 
-MUTUALLYEXCLUSIVEOPTS=( "-s | --submit" "-c | --continue" "-t | --thermalize" "-l | --liststatus" "--liststatus_all" "--submitonly" "--showjobs" "--showjobs_all" "--accRateReport" "--accRateReport_all" "--emptyBetaDirectories" "--cleanOutputFiles" "--completeBetasFile")
-MUTUALLYEXCLUSIVEOPTS_PASSED=( )
-
+    MUTUALLYEXCLUSIVEOPTS=( "-s | --submit"
+                            "-c | --continue"
+                            "-C | --continueThermalization"
+                            "-t | --thermalize"
+                            "-l | --liststatus"
+                            "--liststatus_all"
+                            "--submitonly"
+                            "--showjobs"
+                            "--showjobs_all"
+                            "--accRateReport"
+                            "--accRateReport_all"
+                            "--emptyBetaDirectories"
+                            "--cleanOutputFiles"
+                            "--completeBetasFile")
+    MUTUALLYEXCLUSIVEOPTS_PASSED=( )
+    
     while [ "$1" != "" ]; do
 	case $1 in
 	    -h | --help )
@@ -47,10 +60,15 @@ MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 		echo -e "  \e[0;34m-s | --submit\e[0;32m                      ->    jobs will be submitted"
 		echo -e "  \e[0;34m--submitonly\e[0;32m                       ->    jobs will be submitted (no files are created)"
 		echo -e "  \e[0;34m-t | --thermalize\e[0;32m                  ->    The thermalization is done." #TODO: Explain how
-		echo -e "  \e[0;34m-c | --continue\e[0;32m                    ->    Unfinished jobs will be continued up to the nr. of measurements specified in the input file."
-		echo -e "  \e[0;34m-c=[number] | --continue=[number]\e[0;32m        If a number is specified, finished jobs will be continued up to the specified number."
+		echo -e "  \e[0;34m-c | --continue\e[0;32m                    ->    Unfinished jobs will be continued doing the nr. of measurements specified in the input file."
+		echo -e "  \e[0;34m-c=[#] | --continue=[#]\e[0;32m                  If a number is specified, jobs will be continued up to the specified number."
 		if [ "$CLUSTER_NAME" = "LOEWE" ] || [ "$CLUSTER_NAME" = "LCSC" ]; then
 		    echo -e "                                           To resume a simulation from a given trajectory, add \e[0;34mresumefrom=[number]\e[0;32m in the betasfile."
+		fi
+        echo -e "  \e[0;34m-C | --continueThermalization\e[0;32m      ->    Unfinished thermalizations will be continued doing the nr. of measurements specified in the input file."
+		echo -e "  \e[0;34m-C=[#] | --continueThermalization=[#]\e[0;32m    If a number is specified, thermalizations will be continued up to the specified number."        
+		if [ "$CLUSTER_NAME" = "LOEWE" ] || [ "$CLUSTER_NAME" = "LCSC" ]; then
+		    echo -e "                                           To resume a thermalization from a given trajectory, add \e[0;34mresumefrom=[number]\e[0;32m in the betasfile."
 		fi
 		echo -e "  \e[0;34m-l | --liststatus\e[0;32m                  ->    The local measurement status for all beta will be displayed"
 		if [ "$CLUSTER_NAME" = "LOEWE" ] || [ "$CLUSTER_NAME" = "LCSC" ]; then
@@ -111,80 +129,96 @@ MUTUALLYEXCLUSIVEOPTS_PASSED=( )
             USE_RATIONAL_APPROXIMATION_FILE="FALSE"; shift ;;
 	    -u | --useMultipleChains )
 	        if [[ $CLUSTER_NAME != "LOEWE" ]] && [[ $CLUSTER_NAME != "LCSC" ]] && [[ $CLUSTER_NAME != "LCSC_OLD" ]]; then
-                    printf "\n\e[0;31m The options -u | --useMultipleChains can be used only on CSC clusters yet!! Aborting...\n\n\e[0m"
-                    exit -1
-		else
-		    USE_MULTIPLE_CHAINS="TRUE"
-		    if [ $THERMALIZE = "FALSE" ]; then
-		    	BETA_POSTFIX="_continueWithNewChain"
+                printf "\n\e[0;31m The options -u | --useMultipleChains can be used only on CSC clusters yet!! Aborting...\n\n\e[0m"
+                exit -1
+		    else
+		        USE_MULTIPLE_CHAINS="TRUE"
+		        if [ $THERMALIZE = "FALSE" ]; then #Here we set the BETA_POSTFIX supposing it is not a thermalization. If indeed it is, the postfix will be overwritten in the thermalize case in the main!
+		    	    BETA_POSTFIX="_continueWithNewChain"
+		        fi
+            fi
+            shift ;;
+	    --partition=* )
+		    LOEWE_PARTITION=${1#*=}; 
+	        if [[ $CLUSTER_NAME != "LOEWE" ]]; then
+		        printf "\n\e[0;31m The options --partition can be used only on the LOEWE! Aborting...\n\n\e[0m"
+                exit -1
 		    fi
-                fi
-                shift ;;
-	    --partition=* )		 LOEWE_PARTITION=${1#*=}; 
+		    shift ;;
+	    --constraint=* )
+		    LOEWE_CONSTRAINT=${1#*=}; 
 	        if [[ $CLUSTER_NAME != "LOEWE" ]]; then
-		    printf "\n\e[0;31m The options --partition can be used only on the LOEWE! Aborting...\n\n\e[0m"
-                    exit -1
-		fi
-		shift ;;
-	    --constraint=* )		 LOEWE_CONSTRAINT=${1#*=}; 
+		        printf "\n\e[0;31m The options --constraint can be used only on the LOEWE! Aborting...\n\n\e[0m"
+                exit -1
+		    fi
+		    shift ;;
+	    --node=* )
+            LOEWE_NODE=${1#*=}; 
 	        if [[ $CLUSTER_NAME != "LOEWE" ]]; then
-		    printf "\n\e[0;31m The options --constraint can be used only on the LOEWE! Aborting...\n\n\e[0m"
-                    exit -1
-		fi
-		shift ;;
-	    --node=* )	                 LOEWE_NODE=${1#*=}; 
-	        if [[ $CLUSTER_NAME != "LOEWE" ]]; then
-		    printf "\n\e[0;31m The options --node can be used only on the LOEWE! Aborting...\n\n\e[0m"
-                    exit -1
-		fi
-		shift ;;
+		        printf "\n\e[0;31m The options --node can be used only on the LOEWE! Aborting...\n\n\e[0m"
+                exit -1
+		    fi
+		    shift ;;
 	    -s | --submit )
-		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "$1" )
+		    MUTUALLYEXCLUSIVEOPTS_PASSED+=( "$1" )
 		    SUBMIT="TRUE"
-		shift;; 
+		    shift;; 
 	    --submitonly )	 			
-		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--submitonly" )
+		    MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--submitonly" )
 		    SUBMITONLY="TRUE"
-		shift;; 
+		    shift;; 
 	    -t | --thermalize )			 
-		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "$1" )
+		    MUTUALLYEXCLUSIVEOPTS_PASSED+=( "$1" )
 		    THERMALIZE="TRUE"
-		shift;; 
+		    shift;; 
 	    -c | --continue )			 
-		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "$1" )
+		    MUTUALLYEXCLUSIVEOPTS_PASSED+=( "$1" )
 		    CONTINUE="TRUE"		
-		shift;; 
+		    shift;; 
 	    -c=* | --continue=* )		
-		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "$1" )
+		    MUTUALLYEXCLUSIVEOPTS_PASSED+=( "$1" )
 		    CONTINUE="TRUE"
 		    CONTINUE_NUMBER=${1#*=}; 
 		    if [[ ! $CONTINUE_NUMBER =~ ^[[:digit:]]+$ ]];then
 		    	printf "\n\e[0;31m The specified number for --continue=[number] must be an integer containing at least one or more digits! Aborting...\n\n\e[0m" 
-			exit -1
+			    exit -1
 		    fi
-		shift;; 
+		    shift;; 
+	    -C | --continueThermalization )			 
+		    MUTUALLYEXCLUSIVEOPTS_PASSED+=( "$1" )
+		    CONTINUE_THERMALIZATION="TRUE"		
+		    shift;; 
+	    -C=* | --continueThermalization=* )		
+		    MUTUALLYEXCLUSIVEOPTS_PASSED+=( "$1" )
+		    CONTINUE_THERMALIZATION="TRUE"
+		    CONTINUE_NUMBER=${1#*=}; 
+		    if [[ ! $CONTINUE_NUMBER =~ ^[[:digit:]]+$ ]];then
+		    	printf "\n\e[0;31m The specified number for --continueThermalization=[number] must be an integer containing at least one or more digits! Aborting...\n\n\e[0m" 
+			    exit -1
+		    fi
+		    shift;; 
 	    -l | --liststatus )
-		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--liststatus" )
+		    MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--liststatus" )
 		    LISTSTATUS="TRUE"
 		    LISTSTATUSALL="FALSE"
-		shift;;
+		    shift;;
 	    --measureTime )
-	            [ $LISTSTATUS = "FALSE" ] && printf "\n\e[0;31mSecondary option --measureTime must be given after the primary one \"-l | --liststatus\"! Aborting...\n\n\e[0m" && exit -1
+	        [ $LISTSTATUS = "FALSE" ] && printf "\n\e[0;31mSecondary option --measureTime must be given after the primary one \"-l | --liststatus\"! Aborting...\n\n\e[0m" && exit -1
 		    LISTSTATUS_MEASURE_TIME="TRUE"
-		shift;;
+		    shift;;
 	    --showOnlyQueued )
-	            [ $LISTSTATUS = "FALSE" ] && printf "\n\e[0;31mSecondary option --showOnlyQueued must be given after the primary one \"-l | --liststatus\"! Aborting...\n\n\e[0m" && exit -1
+	        [ $LISTSTATUS = "FALSE" ] && printf "\n\e[0;31mSecondary option --showOnlyQueued must be given after the primary one \"-l | --liststatus\"! Aborting...\n\n\e[0m" && exit -1
 		    LISTSTATUS_SHOW_ONLY_QUEUED="TRUE"
-		shift;;
+		    shift;;
 	    --liststatus_all )
-		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--liststatus_all" )
+		    MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--liststatus_all" )
 		    LISTSTATUS="FALSE"
 		    LISTSTATUSALL="TRUE"
-		shift;; 
+		    shift;; 
 	    --showjobs )
-		MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--showjobs" )
+		    MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--showjobs" )
 		    SHOWJOBS="TRUE"
-		shift;; 
+		    shift;; 
 	    --accRateReport=* )
             INTERVAL=${1#*=} 
 		    MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--accRateReport" )

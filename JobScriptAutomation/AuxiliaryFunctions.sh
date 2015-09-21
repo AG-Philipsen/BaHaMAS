@@ -188,7 +188,7 @@ function ReadBetaValuesFromFile(){
     #If we are not in the continue scenario (and not in other script use cases), look for the correct configuration to start from and set the global path
     if [ $CONTINUE = "FALSE" ] && [ $CLEAN_OUTPUT_FILES = "FALSE" ] && [ $EMPTY_BETA_DIRS = "FALSE" ]; then
         for BETA in "${BETAVALUES[@]}"; do
-            if [ "$BETA_POSTFIX" == "" ]; then
+            if [ "$BETA_POSTFIX" == "" ]; then #Old nomenclature case: no beta postfix!
                 local FOUND_CONFIGURATIONS=( $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA}.*") )
                 if [ ${#FOUND_CONFIGURATIONS[@]} -eq 0 ]; then
                     STARTCONFIGURATION_GLOBALPATH[$BETA]="notFoundHenceStartFromHot"
@@ -196,7 +196,7 @@ function ReadBetaValuesFromFile(){
                     STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERMALIZED_CONFIGURATIONS_PATH}/${FOUND_CONFIGURATIONS[0]}"
                 else
                     printf "\n\e[0;31m No valid starting configuration found for beta = ${BETA%%_*} in \"$THERMALIZED_CONFIGURATIONS_PATH\"\n"
-                    printf " Zero or more than 1 configurations match the following name: \"conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%%_*}_fromConf*\"! Aborting...\n\n\e[0m"
+                    printf " Zero or more than 1 configurations match the following name: \"conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA}.*\"! Aborting...\n\n\e[0m"
                     exit -1
                 fi
             elif [ $BETA_POSTFIX == "_continueWithNewChain" ]; then

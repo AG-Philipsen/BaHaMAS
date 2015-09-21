@@ -63,6 +63,7 @@ SUBMITONLY="FALSE"
 THERMALIZE="FALSE"
 CONTINUE="FALSE"
 CONTINUE_NUMBER="0"
+CONTINUE_THERMALIZATION="FALSE"
 LISTSTATUS="FALSE"
 LISTSTATUS_MEASURE_TIME="FALSE"
 LISTSTATUS_SHOW_ONLY_QUEUED="FALSE"
@@ -191,34 +192,40 @@ elif [ $SUBMIT = "TRUE" ]; then
     ProduceInputFileAndJobScriptForEachBeta
     SubmitJobsForValidBetaValues #TODO: Declare all possible local variable in this function as local!
 
-elif [ $THERMALIZE = "TRUE" ]; then
+elif [ $THERMALIZE = "TRUE" ] || [ $CONTINUE_THERMALIZATION = "TRUE" ]; then
 
     if [ $USE_MULTIPLE_CHAINS = "FALSE" ]; then
-	printf "\n\e[0;31mOption -t | --thermalize implemented ONLY combined with -u | --useMultipleChains option! Aborting...\n\n\e[0m"; exit -1
+        [ $THERMALIZE = "TRUE" ] && printf "\n\e[0;31m Option -t | --thermalize implemented ONLY combined with -u | --useMultipleChains option! Aborting...\n\n\e[0m"
+	    [ $CONTINUE_THERMALIZATION = "TRUE" ] && printf "\n\e[0;31m Option -C | --continueThermalization implemented ONLY combined with -u | --useMultipleChains option! Aborting...\n\n\e[0m"
+        exit -1
     fi
     #Here we fix the beta postfix just looking for thermalized conf from hot at the actual parameters (no matter at which beta);
     #if at least one configuration thermalized from hot is present, it means the thermalization has to be done from conf (the
     #correct beta to be used is selected then later in the script ---> see where the array STARTCONFIGURATION_GLOBALPATH is filled
     if [ $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "conf.${PARAMETERS_STRING}_${BETA_PREFIX}[[:digit:]][.][[:digit:]]\{4\}_fromHot[[:digit:]]\+.*" | wc -l) -eq 0 ]; then
-	BETA_POSTFIX="_thermalizeFromHot"
+	    BETA_POSTFIX="_thermalizeFromHot"
     else
-	BETA_POSTFIX="_thermalizeFromConf"
+	    BETA_POSTFIX="_thermalizeFromConf"
     fi	
     if [ $MEASURE_PBP = "TRUE" ]; then
-	printf "\n\e[1;33;4mMeasurement of PBP switched off during thermalization!!\n\e[0m"
-	MEASURE_PBP="FALSE"
+	    printf "\n \e[1;33;4mMeasurement of PBP switched off during thermalization!!\n\e[0m"
+	    MEASURE_PBP="FALSE"
     fi
     ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
-    ProduceInputFileAndJobScriptForEachBeta
+    if [ $THERMALIZE = "TRUE" ]; then
+        ProduceInputFileAndJobScriptForEachBeta
+    elif [ $CONTINUE_THERMALIZATION = "TRUE" ]; then
+        ProcessBetaValuesForContinue
+    fi
     SubmitJobsForValidBetaValues #TODO: Declare all possible local variable in this function as local!
-
+    
 elif [ $CONTINUE = "TRUE" ]; then
 
     if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then CheckParallelizationTmlqcdForJuqueen; fi
     ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
     ProcessBetaValuesForContinue #TODO: Declare all possible local variable in this function as local! Use also only capital letters!
     SubmitJobsForValidBetaValues #TODO: Declare all possible local variable in this function as local!
-
+    
 elif [ $LISTSTATUS = "TRUE" ] || [ $LISTSTATUSALL = "TRUE" ]; then
 
     ListJobStatus   #TODO: On Juqueen, declare all possible local variable in this function as local! Use PARAMETERS_STRING/PATH where needed!
