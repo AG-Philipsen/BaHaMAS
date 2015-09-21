@@ -29,7 +29,7 @@ function ReadBetaValuesFromFile(){
     local INTSTEPS1_ARRAY_TEMP=()
     local CONTINUE_RESUMETRAJ_TEMP=()
     local MASS_PRECONDITIONING_TEMP=()
-    local RESUME_REGEXPR="resumefrom=[[:digit:]]\+"
+    local RESUME_REGEXPR="resumefrom=\([[:digit:]]\+\|last\)"
     local MP_REGEXPR="MP=(.*)"
     local SEARCH_RESULT=""  # Auxiliary variable to help to parse the file
     local OLD_IFS=$IFS      # save the field separator           
@@ -148,7 +148,7 @@ function ReadBetaValuesFromFile(){
         local TEMP_STR=${CONTINUE_RESUMETRAJ_TEMP[$INDEX]}
         if [[ $TEMP_STR != "notFound" ]]; then
             TEMP_STR=${TEMP_STR#"resumefrom="}
-            if [[ ! $TEMP_STR =~ ^[1-9][[:digit:]]*$ ]]; then
+            if [[ ! $TEMP_STR =~ ^[1-9][[:digit:]]*$ ]] && [ $TEMP_STR != "last" ]; then
                 printf "\n\e[0;31m Invalid resume trajectory number in betasfile! Aborting...\n\n\e[0m"
                 exit -1
             fi
@@ -174,7 +174,7 @@ function ReadBetaValuesFromFile(){
     for BETA in ${BETAVALUES[@]}; do
         printf "  - $BETA\t [Integrator steps ${INTSTEPS0_ARRAY[$BETA]}-${INTSTEPS1_ARRAY[$BETA]}]"
         if KeyInArray $BETA CONTINUE_RESUMETRAJ_ARRAY; then
-            printf "   [resume from tr. %5d]" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}"
+            printf "   [resume from tr. %+6s]" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}"
         else
             printf "                          "
         fi

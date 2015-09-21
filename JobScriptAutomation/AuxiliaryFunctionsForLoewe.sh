@@ -210,6 +210,15 @@ function ProcessBetaValuesForContinue_Loewe() {
 
         #If the option resumefrom is given in the betasfile we have to clean the $WORK_BETADIRECTORY, otherwise just set the name of conf and prng
         if KeyInArray $BETA CONTINUE_RESUMETRAJ_ARRAY; then
+            #If the user wishes to resume from the last avialable trajectory, then find here which number is "last"
+            if [ ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} = "last" ]; then
+                CONTINUE_RESUMETRAJ_ARRAY[$BETA]=$(ls $WORK_BETADIRECTORY/conf.* | grep "/conf.[[:digit:]]\+$" | grep -o "[[:digit:]]\+" | sort -n | tail -n1)
+                if [[ ! ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} =~ ^[[:digit:]]+$ ]]; then
+                    printf "\e[0;31m Unable to find last configuration for resumefrom! Leaving out beta = $BETA .\n\n\e[0m"
+                    PROBLEM_BETA_ARRAY+=( $BETA )
+                    continue
+                fi
+            fi
             printf "\e[0;35m\e[1m\e[4mATTENTION\e[24m: The simulation for beta = ${BETA%_*} will be resumed from trajectory"
             printf " ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}. Is it what you would like to do (Y/N)? \e[0m"
             local CONFIRM="";
