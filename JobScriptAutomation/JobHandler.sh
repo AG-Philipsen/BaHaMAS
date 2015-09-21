@@ -79,11 +79,16 @@ EMPTY_BETA_DIRS="FALSE"
 CLEAN_OUTPUT_FILES="FALSE"
 SECONDARY_OPTION_ALL="FALSE"
 COMPLETE_BETAS_FILE="FALSE"
+UNCOMMENT_BETAS="FALSE"
 NUMBER_OF_CHAINS_TO_BE_IN_THE_BETAS_FILE="4"
 if [ $STAGGERED = "TRUE" ]; then
     NUM_TASTES="2"
     USE_RATIONAL_APPROXIMATION_FILE="TRUE"
 fi
+
+#Important arrays for uncomment functionality. PUT THEM ELSEWHERE?
+UNCOMMENT_BETAS_SEED_ARRAY=()
+UNCOMMENT_BETAS_ARRAY=()
 
 
 #-----------------------------------------------------------------------------------------------------------------#
@@ -245,6 +250,10 @@ elif [ $COMPLETE_BETAS_FILE = "TRUE" ]; then
 
     CompleteBetasFile
     
+    #echo $UNCOMMENT_BETAS
+elif [ $UNCOMMENT_BETAS = "TRUE" ]; then
+
+	UncommentEntriesInBetasFile
 fi
 
 
