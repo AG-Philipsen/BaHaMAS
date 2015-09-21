@@ -254,7 +254,7 @@ function ParseCommandLineOption(){
                 fi
             fi
 	        shift ;;
-		--uncommentBetas )   	
+		-U | --uncommentBetas)   	
 				MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--uncommentedBetas" )
 				UNCOMMENT_BETAS="TRUE"
 				while [[ "$2" =~ ^[[:digit:]]\.[[:digit:]]{4}_s[[:digit:]]{4}_(NC|fC|fH)$ ]] || [[ "$2" =~ ^[[:digit:]]\.[[:digit:]]{4}$ ]]

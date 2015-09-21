@@ -380,6 +380,8 @@ function UncommentEntriesInBetasFile()
 		U_BETA=$i
 		sed -i "s/^#\(.*$U_BETA.*\)$/\1/" $BETASFILE #If there is a "#" in front of the line, remove it
 	done
+
+    less $BETASFILE
 }
 
 
