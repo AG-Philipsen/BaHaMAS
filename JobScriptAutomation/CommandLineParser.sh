@@ -87,7 +87,7 @@ function ParseCommandLineOption(){
 		echo -e "  \e[0;34m--completeBetasFile[=number]\e[0;32m       ->    The beta file is completed adding for each beta new chains in order to have as many chain as specified. "
 		echo -e "                                           If no number is specified, 4 is used. This option, if \"-u\" has been given, uses the seed in the second field to generate new chains." 
 		echo -e "                                           Otherwise one new field containing the seed is inserted in second position." 
-        echo -e "  \e[0;34m--uncommentBetas\e[0;32m                   ->    This option uncomments the specified betas (All remaining entries will be commented)." 
+        echo -e "  \e[0;34m-U | --uncommentBetas\e[0;32m                   ->    This option uncomments the specified betas (All remaining entries will be commented)." 
         echo -e "                                           The betas can be specified either with a seed or without."
         echo -e "                                           The format of the specified string can either contain the output of the --liststatus option, e.g. 5.4380_s5491_NC" 
         echo -e "                                           or simply beta values like 5.4380 or a mix of both. If pure beta values are given then all seeds of the given beta value will be uncommented."
