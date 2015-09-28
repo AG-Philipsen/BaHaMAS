@@ -1,4 +1,7 @@
-function ProduceJobscript_Loewe(){
+function ProduceInverterJobscript_Loewe(){
+
+    echo "Producing inverter jobscript..."
+
     #-----------------------------------------------------------------#
     # This piece of script uses the variable
     #   local BETA_FOR_JOBSCRIPT
@@ -11,8 +14,8 @@ function ProduceJobscript_Loewe(){
     echo "#SBATCH --mail-type=FAIL" >> $JOBSCRIPT_GLOBALPATH
     echo "#SBATCH --mail-user=$USER_MAIL" >> $JOBSCRIPT_GLOBALPATH
     echo "#SBATCH --time=$WALLTIME" >> $JOBSCRIPT_GLOBALPATH
-    echo "#SBATCH --output=${HMC_FILENAME}.%j.out" >> $JOBSCRIPT_GLOBALPATH
-    echo "#SBATCH --error=${HMC_FILENAME}.%j.err" >> $JOBSCRIPT_GLOBALPATH
+    echo "#SBATCH --output=${INVERTER_FILENAME}.%j.out" >> $JOBSCRIPT_GLOBALPATH
+    echo "#SBATCH --error=${INVERTER_FILENAME}.%j.err" >> $JOBSCRIPT_GLOBALPATH
     echo "#SBATCH --no-requeue" >> $JOBSCRIPT_GLOBALPATH
     if [ $CLUSTER_NAME = "LOEWE" ]; then
         echo "#SBATCH --partition=$LOEWE_PARTITION" >> $JOBSCRIPT_GLOBALPATH
@@ -46,8 +49,8 @@ function ProduceJobscript_Loewe(){
         echo "workdir$INDEX=${WORK_DIR_WITH_BETAFOLDERS}/$BETA_PREFIX${BETA_FOR_JOBSCRIPT[$INDEX]}" >> $JOBSCRIPT_GLOBALPATH
     done
     echo "" >> $JOBSCRIPT_GLOBALPATH
-    echo "outFile=$HMC_FILENAME.\$SLURM_JOB_ID.out" >> $JOBSCRIPT_GLOBALPATH
-    echo "errFile=$HMC_FILENAME.\$SLURM_JOB_ID.err" >> $JOBSCRIPT_GLOBALPATH
+    echo "outFile=$INVERTER_FILENAME.\$SLURM_JOB_ID.out" >> $JOBSCRIPT_GLOBALPATH
+    echo "errFile=$INVERTER_FILENAME.\$SLURM_JOB_ID.err" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "# Check if directories exist" >> $JOBSCRIPT_GLOBALPATH
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
@@ -63,13 +66,13 @@ function ProduceJobscript_Loewe(){
     echo "echo \"Host: \$(hostname)\"" >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"GPU:  \$GPU_DEVICE_ORDINAL\"" >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"Date and time: \$(date)\"" >> $JOBSCRIPT_GLOBALPATH
-    echo "echo \$SLURM_JOB_NODELIST > $HMC_FILENAME.${BETAS_STRING:1}.\$SLURM_JOB_ID.nodelist" >> $JOBSCRIPT_GLOBALPATH
+    echo "echo \$SLURM_JOB_NODELIST > $INVERTER_FILENAME.${BETAS_STRING:1}.\$SLURM_JOB_ID.nodelist" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "# TODO: this is necessary because the log file is produced in the directoy" >> $JOBSCRIPT_GLOBALPATH
     echo "#       of the exec. Copying it later does not guarantee that it is still the same..." >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"Copy executable to beta directories in ${WORK_DIR_WITH_BETAFOLDERS}/${BETA_PREFIX}x.xxxx...\"" >> $JOBSCRIPT_GLOBALPATH
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-        echo "cp -a $HMC_GLOBALPATH \$dir$INDEX || exit 2" >> $JOBSCRIPT_GLOBALPATH
+        echo "cp -a $INVERTER_GLOBALPATH \$dir$INDEX || exit 2" >> $JOBSCRIPT_GLOBALPATH
     done
     echo "echo \"...done!\"" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
@@ -83,25 +86,28 @@ function ProduceJobscript_Loewe(){
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
         echo "mkdir -p \$workdir$INDEX || exit 2" >> $JOBSCRIPT_GLOBALPATH
         echo "cd \$workdir$INDEX" >> $JOBSCRIPT_GLOBALPATH
-        echo "pwd &" >> $JOBSCRIPT_GLOBALPATH
+        echo "pwd" >> $JOBSCRIPT_GLOBALPATH
         if [ $CLUSTER_NAME = "LOEWE" ] || [ $CLUSTER_NAME = "LCSC" ]; then
-            echo "time srun -n 1 \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$INPUTFILE_NAME --device=$INDEX --beta=${BETA_FOR_JOBSCRIPT[$INDEX]%%_*} > \$dir$INDEX/\$outFile 2> \$dir$INDEX/\$errFile &" >> $JOBSCRIPT_GLOBALPATH
+            echo "while read line; do" >> $JOBSCRIPT_GLOBALPATH
+            echo "  time srun -n 1 \$dir$INDEX/$INVERTER_FILENAME \$line --device=$INDEX > \$dir$INDEX/\$outFile 2> \$dir$INDEX/\$errFile" >> $JOBSCRIPT_GLOBALPATH
+            echo "  if [ \$? -ne 0 ]; then" >> $JOBSCRIPT_GLOBALPATH
+            echo "       printf \"\nError occurred in simulation at b${BETA_FOR_JOBSCRIPT[$INDEX]%_*}.\"" >> $JOBSCRIPT_GLOBALPATH
+            echo "       CONFIGURATION_$INDEX=\$(echo \$line | grep -o \"conf.[[:digit:]]\{5\}\")" >> $JOBSCRIPT_GLOBALPATH
+            echo "       CORRELATOR_POSTFIX_$INDEX=\$(echo \$line | grep -o \"_[[:digit:]]\+_[[:digit:]]\+_[[:digit:]]\+_[[:digit:]]\+_corr\")" >> $JOBSCRIPT_GLOBALPATH
+            echo "       echo \$CONFIGURATION_$INDEX\$CORRELATOR_POSTFIX_$INDEX >> \$dir$INDEX/failed_inversions_tmp_file" >> $JOBSCRIPT_GLOBALPATH
+            echo "  fi" >> $JOBSCRIPT_GLOBALPATH
+            echo "done < $WORK_BETADIRECTORY/$SRUN_COMMANDSFILE_FOR_INVERSION &"  >> $JOBSCRIPT_GLOBALPATH
+            #PUT PID_WHILE ASSIGNMENT HERE
+            echo "PID_WHILE_$INDEX=\${!}" >> $JOBSCRIPT_GLOBALPATH
 	    elif [ $CLUSTER_NAME = "LCSC_OLD" ]; then
-	        echo "time srun -n 1 \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$INPUTFILE_NAME --device=$INDEX --beta=${BETA_FOR_JOBSCRIPT[$INDEX]%%_*} 2> \$dir$INDEX/\$errFile | mbuffer -q -m1M > \$dir$INDEX/\$outFile &" >> $JOBSCRIPT_GLOBALPATH
+	        echo "time srun -n 1 \$dir$INDEX/$INVERTER_FILENAME --input-file=\$dir$INDEX/$INPUTFILE_NAME --device=$INDEX --beta=${BETA_FOR_JOBSCRIPT[$INDEX]%%_*} 2> \$dir$INDEX/\$errFile | mbuffer -q -m1M > \$dir$INDEX/\$outFile &" >> $JOBSCRIPT_GLOBALPATH
         fi
-        echo "PID_SRUN_$INDEX=\${!}" >> $JOBSCRIPT_GLOBALPATH
         echo "" >> $JOBSCRIPT_GLOBALPATH
     done
-    echo "#Execute wait \$PID job after job" >> $JOBSCRIPT_GLOBALPATH
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-        echo "wait \$PID_SRUN_$INDEX || { printf \"\nError occurred in simulation at b${BETA_FOR_JOBSCRIPT[$INDEX]%%_*}. Please check (process id \${PID_SRUN_$INDEX})...\n\" && ERROR_OCCURRED=\"TRUE\"; }" >> $JOBSCRIPT_GLOBALPATH
+        echo "wait \$PID_WHILE_$INDEX || { printf \"\nError occurred in simulation at b${BETA_FOR_JOBSCRIPT[$INDEX]%_*}. Please check (process id \${PID_WHILE_$INDEX})...\n\" && ERROR_OCCURRED=\"TRUE\"; }" >> $JOBSCRIPT_GLOBALPATH
     done
     echo "" >> $JOBSCRIPT_GLOBALPATH
-    echo "# Terminating job manually to get an email in case of failure of any run" >> $JOBSCRIPT_GLOBALPATH
-    echo "if [ \"\$ERROR_OCCURRED\" = \"TRUE\" ]; then" >> $JOBSCRIPT_GLOBALPATH
-    echo "   printf \"\nTerminating job with non zero exit code... (\$(date))\n\"" >> $JOBSCRIPT_GLOBALPATH
-    echo "   exit 255" >> $JOBSCRIPT_GLOBALPATH
-    echo "fi" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"---------------------------\"" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
@@ -125,7 +131,7 @@ function ProduceJobscript_Loewe(){
     fi
     echo "# Remove executable" >> $JOBSCRIPT_GLOBALPATH
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-        echo "rm \$dir$INDEX/$HMC_FILENAME || exit 2 " >> $JOBSCRIPT_GLOBALPATH
+        echo "rm \$dir$INDEX/$INVERTER_FILENAME || exit 2 " >> $JOBSCRIPT_GLOBALPATH
     done
     echo "" >> $JOBSCRIPT_GLOBALPATH
     if [ $THERMALIZE = "TRUE" ]; then
@@ -142,4 +148,17 @@ function ProduceJobscript_Loewe(){
             done
         fi
     fi
+
+    for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
+        echo "if [ -e \$dir$INDEX/failed_inversions_tmp_file ]; then" >> $JOBSCRIPT_GLOBALPATH
+        echo "  echo \"Failed inversions at b${BETA_FOR_JOBSCRIPT[$INDEX]%_*}:\" >> \$dir$INDEX/\$errFile" >> $JOBSCRIPT_GLOBALPATH
+        echo "  cat \$dir$INDEX/failed_inversions_tmp_file >> \$dir$INDEX/\$errFile" >> $JOBSCRIPT_GLOBALPATH
+        echo "  rm \$dir$INDEX/failed_inversions_tmp_file" >> $JOBSCRIPT_GLOBALPATH
+        echo "fi" >> $JOBSCRIPT_GLOBALPATH
+    done
+
+    echo "if [ \"\$ERROR_OCCURED\" = \"TRUE\" ]; then" >> $JOBSCRIPT_GLOBALPATH
+        echo "  printf \"\nTerminating job with non zero exit code... (\$(date))\n\"" >> $JOBSCRIPT_GLOBALPATH
+        echo "  exit 255" >> $JOBSCRIPT_GLOBALPATH
+    echo "fi" >> $JOBSCRIPT_GLOBALPATH
 }

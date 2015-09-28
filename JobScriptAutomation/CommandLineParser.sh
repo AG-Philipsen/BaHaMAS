@@ -94,6 +94,7 @@ function ParseCommandLineOption(){
         echo -e "                                           The format of the specified string can either contain the output of the --liststatus option, e.g. 5.4380_s5491_NC" 
         echo -e "                                           or simply beta values like 5.4380 or a mix of both. If pure beta values are given then all seeds of the given beta value will be uncommented."
         echo -e "  \e[0;34m--commentBetas\e[0;32m                     ->    Is the reverse option of the \"--uncommentBetas\" option"
+        echo -e "  \e[0;34m-i | --invertConfigurations\e[0;32m        ->    Invert configurations and produce correlator files for betas and seed specified in the betas file."
 		echo ""
 		echo -e "\e[0;93mNOTE: The blue options are mutually exclusive and they are all FALSE by default! In other words, if none of them"
 		echo -e "\e[0;93m      is given, the script will create beta-folders with the right files inside, but no job will be submitted."
@@ -291,6 +292,11 @@ function ParseCommandLineOption(){
 				done
                 shift
 				;;
+        -i | --invertConfigurations)
+				MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--invertConfigurations" )
+                INVERT_CONFIGURATIONS="TRUE"
+                shift
+                ;;
 	    * ) printf "\n\e[0;31m Invalid option \e[1m$1\e[0;31m (see help for further information)! Aborting...\n\n\e[0m" ; exit -1 ;;
 	esac
     done

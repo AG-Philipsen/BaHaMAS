@@ -186,7 +186,7 @@ function ReadBetaValuesFromFile(){
     printf "\e[0;36m============================================================================================================\n\e[0m"
 
     #If we are not in the continue scenario (and not in other script use cases), look for the correct configuration to start from and set the global path
-    if [ $CONTINUE = "FALSE" ] && [ $CLEAN_OUTPUT_FILES = "FALSE" ] && [ $EMPTY_BETA_DIRS = "FALSE" ]; then
+    if [ $CONTINUE = "FALSE" ] && [ $CLEAN_OUTPUT_FILES = "FALSE" ] && [ $EMPTY_BETA_DIRS = "FALSE" ] && [ $INVERT_CONFIGURATIONS = "FALSE" ]; then
         for BETA in "${BETAVALUES[@]}"; do
             if [ "$BETA_POSTFIX" == "" ]; then #Old nomenclature case: no beta postfix!
                 local FOUND_CONFIGURATIONS=( $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA}.*") )
@@ -444,6 +444,17 @@ function ProcessBetaValuesForContinue()
         ProcessBetaValuesForContinue_Juqueen
     else
         ProcessBetaValuesForContinue_Loewe
+    fi
+}
+
+
+function ProcessBetaValuesForInversion()
+{    
+    if [ "$CLUSTER_NAME" = "JUQUEEN" ]
+    then
+        printf "\n\e[0;31mOption --invertConfigurations not yet implemented on the Juqueen! Aborting...\n\n\e[0m"; exit -1
+    else
+        ProcessBetaValuesForInversion_Loewe
     fi
 }
 

@@ -82,11 +82,18 @@ SECONDARY_OPTION_ALL="FALSE"
 COMPLETE_BETAS_FILE="FALSE"
 UNCOMMENT_BETAS="FALSE"
 COMMENT_BETAS="FALSE"
+INVERT_CONFIGURATIONS="FALSE"
 NUMBER_OF_CHAINS_TO_BE_IN_THE_BETAS_FILE="4"
 if [ $STAGGERED = "TRUE" ]; then
     NUM_TASTES="2"
     USE_RATIONAL_APPROXIMATION_FILE="TRUE"
 fi
+
+#####################################CREATE OPTIONS FOR COMMAND-LINE-PARSER######################################
+#Inverter Options
+CORRELATOR_DIRECTION="0" 
+NUMBER_SOURCES_FOR_CORRELATORS="8"
+
 
 #Important arrays for uncomment functionality. PUT THEM ELSEWHERE?
 UNCOMMENT_BETAS_SEED_ARRAY=()
@@ -261,6 +268,12 @@ elif [ $COMPLETE_BETAS_FILE = "TRUE" ]; then
 elif [ $UNCOMMENT_BETAS = "TRUE" ] || [ $COMMENT_BETAS = "TRUE" ]; then
 
 	UncommentEntriesInBetasFile
+
+elif [ $INVERT_CONFIGURATIONS = "TRUE" ]; then
+
+    ReadBetaValuesFromFile
+    ProcessBetaValuesForInversion 
+    #SubmitJobsForValidBetaValues
 fi
 
 
