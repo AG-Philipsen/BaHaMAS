@@ -212,7 +212,7 @@ function ProcessBetaValuesForContinue_Loewe() {
         if KeyInArray $BETA CONTINUE_RESUMETRAJ_ARRAY; then
             #If the user wishes to resume from the last avialable trajectory, then find here which number is "last"
             if [ ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} = "last" ]; then
-                CONTINUE_RESUMETRAJ_ARRAY[$BETA]=$(ls $WORK_BETADIRECTORY/conf.* | grep "/conf.[[:digit:]]\+$" | grep -o "[[:digit:]]\+" | sort -n | tail -n1)
+                CONTINUE_RESUMETRAJ_ARRAY[$BETA]=$(ls $WORK_BETADIRECTORY/conf.* | grep -o "/conf.[[:digit:]]\+$" | grep -o "[[:digit:]]\+" | sort -n | tail -n1 | sed 's/^0*//')
                 if [[ ! ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} =~ ^[[:digit:]]+$ ]]; then
                     printf "\e[0;31m Unable to find last configuration for resumefrom! Leaving out beta = $BETA .\n\n\e[0m"
                     PROBLEM_BETA_ARRAY+=( $BETA )

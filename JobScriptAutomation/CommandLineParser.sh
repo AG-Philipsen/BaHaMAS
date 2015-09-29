@@ -64,11 +64,13 @@ function ParseCommandLineOption(){
 		echo -e "  \e[0;34m-c=[#] | --continue=[#]\e[0;32m                  If a number is specified, jobs will be continued up to the specified number."
 		if [ "$CLUSTER_NAME" = "LOEWE" ] || [ "$CLUSTER_NAME" = "LCSC" ]; then
 		    echo -e "                                           To resume a simulation from a given trajectory, add \e[0;34mresumefrom=[number]\e[0;32m in the betasfile."
+		    echo -e "                                           Use \e[0;34mresumefrom=last\e[0;32m in the betasfile to resume a simulation from the last saved conf.[[:digit:]]+ file."
 		fi
         echo -e "  \e[0;34m-C | --continueThermalization\e[0;32m      ->    Unfinished thermalizations will be continued doing the nr. of measurements specified in the input file."
 		echo -e "  \e[0;34m-C=[#] | --continueThermalization=[#]\e[0;32m    If a number is specified, thermalizations will be continued up to the specified number."        
 		if [ "$CLUSTER_NAME" = "LOEWE" ] || [ "$CLUSTER_NAME" = "LCSC" ]; then
 		    echo -e "                                           To resume a thermalization from a given trajectory, add \e[0;34mresumefrom=[number]\e[0;32m in the betasfile."
+            echo -e "                                           Use \e[0;34mresumefrom=last\e[0;32m in the betasfile to resume a thermalization from the last saved conf.[[:digit:]]+ file."
 		fi
 		echo -e "  \e[0;34m-l | --liststatus\e[0;32m                  ->    The local measurement status for all beta will be displayed"
 		if [ "$CLUSTER_NAME" = "LOEWE" ] || [ "$CLUSTER_NAME" = "LCSC" ]; then
@@ -87,11 +89,11 @@ function ParseCommandLineOption(){
 		echo -e "  \e[0;34m--completeBetasFile[=number]\e[0;32m       ->    The beta file is completed adding for each beta new chains in order to have as many chain as specified. "
 		echo -e "                                           If no number is specified, 4 is used. This option, if \"-u\" has been given, uses the seed in the second field to generate new chains." 
 		echo -e "                                           Otherwise one new field containing the seed is inserted in second position." 
-        echo -e "  \e[0;34m-U | --uncommentBetas\e[0;32m                   ->    This option uncomments the specified betas (All remaining entries will be commented)." 
+        echo -e "  \e[0;34m-U | --uncommentBetas\e[0;32m              ->    This option uncomments the specified betas (All remaining entries will be commented)." 
         echo -e "                                           The betas can be specified either with a seed or without."
         echo -e "                                           The format of the specified string can either contain the output of the --liststatus option, e.g. 5.4380_s5491_NC" 
         echo -e "                                           or simply beta values like 5.4380 or a mix of both. If pure beta values are given then all seeds of the given beta value will be uncommented."
-        echo -e "  \e[0;34m--commentBetas\e[0;32m                 ->    Is the reverse option of the \"--uncommentBetas\" option"
+        echo -e "  \e[0;34m--commentBetas\e[0;32m                     ->    Is the reverse option of the \"--uncommentBetas\" option"
 		echo ""
 		echo -e "\e[0;93mNOTE: The blue options are mutually exclusive and they are all FALSE by default! In other words, if none of them"
 		echo -e "\e[0;93m      is given, the script will create beta-folders with the right files inside, but no job will be submitted."

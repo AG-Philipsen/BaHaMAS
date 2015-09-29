@@ -258,7 +258,6 @@ elif [ $COMPLETE_BETAS_FILE = "TRUE" ]; then
 
     CompleteBetasFile
     
-    #echo $UNCOMMENT_BETAS
 elif [ $UNCOMMENT_BETAS = "TRUE" ] || [ $COMMENT_BETAS = "TRUE" ]; then
 
 	UncommentEntriesInBetasFile
