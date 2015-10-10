@@ -620,7 +620,7 @@ function ProcessBetaValuesForInversion_Loewe(){
         #-------------------------------------------------------------------------#
         local WORK_BETADIRECTORY="$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
         #-------------------------------------------------------------------------#
-        echo ${BETAVALUES[@]}
+        #echo ${BETAVALUES[@]}
 
         ProduceSrunCommandsFileForInversionsPerBeta
 
@@ -721,7 +721,6 @@ function __static__PackBetaValuesPerGpuAndCreateJobScriptFiles(){
             fi
             #Call the file to produce the jobscript file
             if [ $INVERT_CONFIGURATIONS = "TRUE" ]; then
-                echo "Arrived here..."
                 ProduceInverterJobscript_Loewe
             else
                 ProduceJobscript_Loewe 

@@ -19,7 +19,7 @@ function ProduceSrunCommandsFileForInversionsPerBeta(){
         {
             split($1,corr_name_array,"_"); 
             conf_count[corr_name_array[1]]++;
-            if(corr_name_array[2] != "")
+            if(corr_name_array[2] ~ /^[[:digit:]]{1,2}$/)
             {
                 conf_x_y_z_t_corr_key[$1];
             }

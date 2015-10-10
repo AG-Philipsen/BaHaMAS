@@ -66,6 +66,7 @@ THERMALIZED_CONFIGURATIONS_PATH=""
 #     APPROX_METROPOLIS_NAME                rational approximation used for the metropolis test
 #     HMC_GLOBALPATH                        executable global path
 #     THERMALIZED_CONFIGURATIONS_PATH       global path to the folder containing the thermalized configurations
+#     SRUN_COMMANDSFILE_FOR_INVERSION       name of the file where the execution commands for the inversions are being stored
 #
 # Some further information:
 #
