@@ -252,7 +252,7 @@ function ParseCommandLineOption(){
             local TMP_STRING=${1#*File}
             if [ "$TMP_STRING" != "" ]; then
                 if [ ${TMP_STRING:0:1} == "=" ]; then
-                    CHAINS_TO_BE_ADDED_IN_THE_BETAS_FILE=${1#*=}
+                    NUMBER_OF_CHAINS_TO_BE_IN_THE_BETAS_FILE=${1#*=}
                 else
                     printf "\n\e[0;31m Invalid option \e[1m$1\e[0;31m (see help for further information)! Aborting...\n\n\e[0m"
                 fi

@@ -354,7 +354,7 @@ function ProcessBetaValuesForContinue_Loewe() {
                 echo "num_sources=16" >> $INPUTFILE_GLOBALPATH
             elif [ $STAGGERED = "TRUE" ]; then
                 echo "num_sources=1" >> $INPUTFILE_GLOBALPATH
-                echo "pbp_measurements=16" >> $INPUTFILE_GLOBALPATH
+                echo "pbp_measurements=8" >> $INPUTFILE_GLOBALPATH
                 echo "ferm_obs_to_single_file=1" >> $INPUTFILE_GLOBALPATH
                 echo "ferm_obs_pbp_prefix=${OUTPUTFILE_NAME}" >> $INPUTFILE_GLOBALPATH
             fi
@@ -365,7 +365,7 @@ function ProcessBetaValuesForContinue_Loewe() {
                 printf "\e[0;32m               \e[0;35mnum_sources=16"
             else
                 printf "\e[0;32m               \e[0;35mnum_sources=1\n"
-                printf "\e[0;32m               \e[0;35mpbp_measurements=16\n"
+                printf "\e[0;32m               \e[0;35mpbp_measurements=8\n"
                 printf "\e[0;32m               \e[0;35mferm_obs_to_single_file=1\n"
                 printf "\e[0;32m               \e[0;35mferm_obs_pbp_prefix=${OUTPUTFILE_NAME}"
             fi
