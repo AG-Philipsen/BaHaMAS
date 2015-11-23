@@ -1,5 +1,8 @@
 function ProduceSrunCommandsFileForInversionsPerBeta(){
 
+		echo Confs in $WORK_BETADIRECTORY :
+		ls $WORK_BETADIRECTORY | grep "conf\.[[:digit:]]\{5\}"
+
         ls $WORK_BETADIRECTORY | grep "conf\.[[:digit:]]\{5\}" | awk -v ns="$NSPACE" \
                                                                      -v nt="$NTIME" \
                                                                      -v useCpu="false"   \
@@ -12,9 +15,15 @@ function ProduceSrunCommandsFileForInversionsPerBeta(){
                                                                      -v cgmax="30000" \
                                                                      -v cgIterationBlockSize="50" \
                                                                      -v thetaFermionTemporal="1" \
-                                                                     -v maxNrCorrs="$NUMBER_SOURCES_FOR_CORRELATORS" '
+                                                                     -v maxNrCorrs="$NUMBER_SOURCES_FOR_CORRELATORS" \
+																	 -v chemPot="$CHEMPOT" '
         BEGIN{
                 srand();
+				if(chemPot == 0){
+					chemPotString="--use_chem_pot_im=0";
+				}else if(chemPot == "PiT"){
+					chemPotString="--use_chem_pot_im=1 --chem_pot_im=0.523598775598299";
+				}
         }
         {
             split($1,corr_name_array,"_"); 
@@ -48,10 +57,12 @@ function ProduceSrunCommandsFileForInversionsPerBeta(){
                    if(match(j,conf_count_sorted[i]))
                    {
                        split(j,corr_name_array,"_"); 
-                       print "--sourcefile=" conf_count_sorted[i] " --use_cpu=" useCpu " --startcondition=" startcondition " --log-level=" logLevel " --ns=" ns " --nt=" nt " --source_x=" corr_name_array[2] " --source_y=" corr_name_array[3] " --source_z=" corr_name_array[4] " --source_t=" corr_name_array[5] " --beta=" beta " --kappa=" kappa " --corr_dir=" corrDir " --solver=" solver " --cgmax=" cgmax " --cg_iteration_block_size=" cgIterationBlockSize " --theta_fermion_temporal=" thetaFermionTemporal " --ferm_obs_corr_postfix=" "_" corr_name_array[2] "_" corr_name_array[3] "_" corr_name_array[4] "_" corr_name_array[5] "_corr";
+                       print "--sourcefile=" conf_count_sorted[i] " --use_cpu=" useCpu " --startcondition=" startcondition " --log-level=" logLevel " --ns=" ns " --nt=" nt " --source_x=" corr_name_array[2] " --source_y=" corr_name_array[3] " --source_z=" corr_name_array[4] " --source_t=" corr_name_array[5] " --beta=" beta " --kappa=" kappa " --corr_dir=" corrDir " --solver=" solver " --cgmax=" cgmax " --cg_iteration_block_size=" cgIterationBlockSize " --theta_fermion_temporal=" thetaFermionTemporal " --ferm_obs_corr_postfix=" "_" corr_name_array[2] "_" corr_name_array[3] "_" corr_name_array[4] "_" corr_name_array[5] "_corr" " " chemPotString;
                    }
                }
             }
         }' > $WORK_BETADIRECTORY/$SRUN_COMMANDSFILE_FOR_INVERSION
+
+		echo End of function
 }
 
