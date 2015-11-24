@@ -1,8 +1,5 @@
 function ProduceSrunCommandsFileForInversionsPerBeta(){
 
-		echo Confs in $WORK_BETADIRECTORY :
-		ls $WORK_BETADIRECTORY | grep "conf\.[[:digit:]]\{5\}"
-
         ls $WORK_BETADIRECTORY | grep "conf\.[[:digit:]]\{5\}" | awk -v ns="$NSPACE" \
                                                                      -v nt="$NTIME" \
                                                                      -v useCpu="false"   \
@@ -62,7 +59,5 @@ function ProduceSrunCommandsFileForInversionsPerBeta(){
                }
             }
         }' > $WORK_BETADIRECTORY/$SRUN_COMMANDSFILE_FOR_INVERSION
-
-		echo End of function
 }
 
