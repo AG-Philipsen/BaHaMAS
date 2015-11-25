@@ -96,25 +96,26 @@ function ProduceInverterJobscript_Loewe(){
         echo "  echo "File \$workdir$INDEX/$SRUN_COMMANDSFILE_FOR_INVERSION with execution commands for the inversion does not exist...aborting"" >> $JOBSCRIPT_GLOBALPATH
         echo "  exit 30" >> $JOBSCRIPT_GLOBALPATH
         echo "fi" >> $JOBSCRIPT_GLOBALPATH
-        if [ $CLUSTER_NAME = "LOEWE" ] || [ $CLUSTER_NAME = "LCSC" ]; then
-            echo "OLD_IFS=\$IFS" >> $JOBSCRIPT_GLOBALPATH
-            echo "IFS=\$'\n'" >> $JOBSCRIPT_GLOBALPATH
-            echo "for line in \$(cat \$workdir$INDEX/$SRUN_COMMANDSFILE_FOR_INVERSION); do" >> $JOBSCRIPT_GLOBALPATH
-            echo "IFS=\$OLD_IFS" >> $JOBSCRIPT_GLOBALPATH
-            echo "  time srun -n 1 \$dir$INDEX/$INVERTER_FILENAME \$line --device=$INDEX >> \$dir$INDEX/\$outFile 2>> \$dir$INDEX/\$errFile" >> $JOBSCRIPT_GLOBALPATH
-            echo "  if [ \$? -ne 0 ]; then" >> $JOBSCRIPT_GLOBALPATH
-            echo "       printf \"\nError occurred in simulation at b${BETA_FOR_JOBSCRIPT[$INDEX]%_*}.\n\"" >> $JOBSCRIPT_GLOBALPATH
-            echo "       CONFIGURATION_$INDEX=\$(echo \$line | grep -o \"conf.[[:digit:]]\{5\}\")" >> $JOBSCRIPT_GLOBALPATH
-            echo "       CORRELATOR_POSTFIX_$INDEX=\$(echo \$line | grep -o \"_[[:digit:]]\+_[[:digit:]]\+_[[:digit:]]\+_[[:digit:]]\+_corr\")" >> $JOBSCRIPT_GLOBALPATH
-            echo "       echo \$CONFIGURATION_$INDEX\$CORRELATOR_POSTFIX_$INDEX >> \$dir$INDEX/failed_inversions_tmp_file" >> $JOBSCRIPT_GLOBALPATH
-            echo "  fi" >> $JOBSCRIPT_GLOBALPATH
-            echo "done &" >> $JOBSCRIPT_GLOBALPATH
-            echo "IFS=\$OLD_IFS" >> $JOBSCRIPT_GLOBALPATH
-            #PUT PID_FOR ASSIGNMENT HERE
-            echo "PID_FOR_$INDEX=\${!}" >> $JOBSCRIPT_GLOBALPATH
-	    elif [ $CLUSTER_NAME = "LCSC_OLD" ]; then
-	        echo "time srun -n 1 \$dir$INDEX/$INVERTER_FILENAME --input-file=\$dir$INDEX/$INPUTFILE_NAME --device=$INDEX --beta=${BETA_FOR_JOBSCRIPT[$INDEX]%%_*} 2> \$dir$INDEX/\$errFile | mbuffer -q -m1M > \$dir$INDEX/\$outFile &" >> $JOBSCRIPT_GLOBALPATH
+        echo "OLD_IFS=\$IFS" >> $JOBSCRIPT_GLOBALPATH
+        echo "IFS=\$'\n'" >> $JOBSCRIPT_GLOBALPATH
+        echo "for line in \$(cat \$workdir$INDEX/$SRUN_COMMANDSFILE_FOR_INVERSION); do" >> $JOBSCRIPT_GLOBALPATH
+        echo "IFS=\$OLD_IFS" >> $JOBSCRIPT_GLOBALPATH
+        if [ $CLUSTER_NAME = "LOEWE" ]; then
+            echo "  time srun -n 1 \$dir$INDEX/$INVERTER_FILENAME \$line --device=$INDEX 2>> \$dir$INDEX/\$errFile >> \$dir$INDEX/\$outFile &" >> $JOBSCRIPT_GLOBALPATH
+        elif [ $CLUSTER_NAME = "LCSC" ]; then
+            echo "  time srun -n 1 \$dir$INDEX/$INVERTER_FILENAME \$line --device=$INDEX 2>> \$dir$INDEX/\$errFile | mbuffer -q -m2M >> \$dir$INDEX/\$outFile &" >> $JOBSCRIPT_GLOBALPATH
         fi
+        echo "  if [ \$? -ne 0 ]; then" >> $JOBSCRIPT_GLOBALPATH
+        echo "       printf \"\nError occurred in simulation at b${BETA_FOR_JOBSCRIPT[$INDEX]%_*}.\n\"" >> $JOBSCRIPT_GLOBALPATH
+        echo "       CONFIGURATION_$INDEX=\$(echo \$line | grep -o \"conf.[[:digit:]]\{5\}\")" >> $JOBSCRIPT_GLOBALPATH
+        echo "       CORRELATOR_POSTFIX_$INDEX=\$(echo \$line | grep -o \"_[[:digit:]]\+_[[:digit:]]\+_[[:digit:]]\+_[[:digit:]]\+_corr\")" >> $JOBSCRIPT_GLOBALPATH
+        echo "       echo \$CONFIGURATION_$INDEX\$CORRELATOR_POSTFIX_$INDEX >> \$dir$INDEX/failed_inversions_tmp_file" >> $JOBSCRIPT_GLOBALPATH
+        echo "  fi" >> $JOBSCRIPT_GLOBALPATH
+        echo "  sleep 1 #This sleep is neccessary for the mbuffer used above in the srun command. Since mbuffer is used in a loop many times in a row, it produces problems if there is no pause put inbetween the consecutive mbuffer calls." >> $JOBSCRIPT_GLOBALPATH
+        echo "done &" >> $JOBSCRIPT_GLOBALPATH
+        echo "IFS=\$OLD_IFS" >> $JOBSCRIPT_GLOBALPATH
+        #PUT PID_FOR ASSIGNMENT HERE
+        echo "PID_FOR_$INDEX=\${!}" >> $JOBSCRIPT_GLOBALPATH
         echo "" >> $JOBSCRIPT_GLOBALPATH
     done
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
