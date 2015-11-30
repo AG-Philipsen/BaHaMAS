@@ -101,9 +101,9 @@ function ProduceInverterJobscript_Loewe(){
         echo "for line in \$(cat \$workdir$INDEX/$SRUN_COMMANDSFILE_FOR_INVERSION); do" >> $JOBSCRIPT_GLOBALPATH
         echo "IFS=\$OLD_IFS" >> $JOBSCRIPT_GLOBALPATH
         if [ $CLUSTER_NAME = "LOEWE" ]; then
-            echo "  time srun -n 1 \$dir$INDEX/$INVERTER_FILENAME \$line --device=$INDEX 2>> \$dir$INDEX/\$errFile >> \$dir$INDEX/\$outFile &" >> $JOBSCRIPT_GLOBALPATH
+            echo "  time srun -n 1 \$dir$INDEX/$INVERTER_FILENAME \$line --device=$INDEX 2>> \$dir$INDEX/\$errFile >> \$dir$INDEX/\$outFile " >> $JOBSCRIPT_GLOBALPATH
         elif [ $CLUSTER_NAME = "LCSC" ]; then
-            echo "  time srun -n 1 \$dir$INDEX/$INVERTER_FILENAME \$line --device=$INDEX 2>> \$dir$INDEX/\$errFile | mbuffer -q -m2M >> \$dir$INDEX/\$outFile &" >> $JOBSCRIPT_GLOBALPATH
+            echo "  time srun -n 1 \$dir$INDEX/$INVERTER_FILENAME \$line --device=$INDEX 2>> \$dir$INDEX/\$errFile | mbuffer -q -m2M >> \$dir$INDEX/\$outFile " >> $JOBSCRIPT_GLOBALPATH
         fi
         echo "  if [ \$? -ne 0 ]; then" >> $JOBSCRIPT_GLOBALPATH
         echo "       printf \"\nError occurred in simulation at b${BETA_FOR_JOBSCRIPT[$INDEX]%_*}.\n\"" >> $JOBSCRIPT_GLOBALPATH
@@ -111,7 +111,7 @@ function ProduceInverterJobscript_Loewe(){
         echo "       CORRELATOR_POSTFIX_$INDEX=\$(echo \$line | grep -o \"_[[:digit:]]\+_[[:digit:]]\+_[[:digit:]]\+_[[:digit:]]\+_corr\")" >> $JOBSCRIPT_GLOBALPATH
         echo "       echo \$CONFIGURATION_$INDEX\$CORRELATOR_POSTFIX_$INDEX >> \$dir$INDEX/failed_inversions_tmp_file" >> $JOBSCRIPT_GLOBALPATH
         echo "  fi" >> $JOBSCRIPT_GLOBALPATH
-        echo "  sleep 1 #This sleep is neccessary for the mbuffer used above in the srun command. Since mbuffer is used in a loop many times in a row, it produces problems if there is no pause put inbetween the consecutive mbuffer calls." >> $JOBSCRIPT_GLOBALPATH
+        #echo "  sleep 3 #This sleep is neccessary for the mbuffer used above in the srun command. Since mbuffer is used in a loop many times in a row, it produces problems if there is no pause put inbetween the consecutive mbuffer calls." >> $JOBSCRIPT_GLOBALPATH
         echo "done &" >> $JOBSCRIPT_GLOBALPATH
         echo "IFS=\$OLD_IFS" >> $JOBSCRIPT_GLOBALPATH
         #PUT PID_FOR ASSIGNMENT HERE
