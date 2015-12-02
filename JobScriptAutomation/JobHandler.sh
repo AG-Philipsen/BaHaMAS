@@ -210,6 +210,9 @@ elif [ $THERMALIZE = "TRUE" ] || [ $CONTINUE_THERMALIZATION = "TRUE" ]; then
     #Here we fix the beta postfix just looking for thermalized conf from hot at the actual parameters (no matter at which beta);
     #if at least one configuration thermalized from hot is present, it means the thermalization has to be done from conf (the
     #correct beta to be used is selected then later in the script ---> see where the array STARTCONFIGURATION_GLOBALPATH is filled
+    #
+    # TODO: If a thermalization from hot is finished but one other crashed and one wishes to resume it, the postfix should be
+    #       from Hot but it is from conf since in $THERMALIZED_CONFIGURATIONS_PATH a conf from hot is found. Think about how to fix this.
     if [ $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "conf.${PARAMETERS_STRING}_${BETA_PREFIX}[[:digit:]][.][[:digit:]]\{4\}_fromHot[[:digit:]]\+.*" | wc -l) -eq 0 ]; then
 	    BETA_POSTFIX="_thermalizeFromHot"
     else
