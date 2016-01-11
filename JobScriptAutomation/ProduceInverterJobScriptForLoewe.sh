@@ -128,21 +128,22 @@ function ProduceInverterJobscript_Loewe(){
     echo "echo \"Date and time: \$(date)\"" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
-    if [ "$HOME_DIR" != "$WORK_DIR" ]; then
-        echo "# Backup files" >> $JOBSCRIPT_GLOBALPATH
-        for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-            echo "cd \$dir$INDEX || exit 2" >> $JOBSCRIPT_GLOBALPATH
-            if [ $MEASURE_PBP = "TRUE" ]; then
-                if [ $WILSON = "TRUE" ]; then
-                    echo "rsync -quavz \$workdir$INDEX/conf*pbp* \$dir$INDEX/Pbp || exit 2" >> $JOBSCRIPT_GLOBALPATH
-                elif [ $STAGGERED = "TRUE" ]; then
-                    echo "cp \$workdir$INDEX/${OUTPUTFILE_NAME}_pbp.dat \$dir$INDEX/${OUTPUTFILE_NAME}_pbp.\$SLURM_JOB_ID || exit 2" >> $JOBSCRIPT_GLOBALPATH
-                fi
-            fi
-            echo "cp \$workdir$INDEX/$OUTPUTFILE_NAME \$dir$INDEX/$OUTPUTFILE_NAME.\$SLURM_JOB_ID || exit 2" >> $JOBSCRIPT_GLOBALPATH
-            echo "" >> $JOBSCRIPT_GLOBALPATH
-        done
-    fi
+	#The following section makes no sense in the case of an inversion job and hece is outcommented. Probably it should be removed. 
+    #if [ "$HOME_DIR" != "$WORK_DIR" ]; then
+    #    echo "# Backup files" >> $JOBSCRIPT_GLOBALPATH
+    #    for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
+    #        echo "cd \$dir$INDEX || exit 2" >> $JOBSCRIPT_GLOBALPATH
+    #        if [ $MEASURE_PBP = "TRUE" ]; then
+    #            if [ $WILSON = "TRUE" ]; then
+    #                echo "rsync -quavz \$workdir$INDEX/conf*pbp* \$dir$INDEX/Pbp || exit 2" >> $JOBSCRIPT_GLOBALPATH
+    #            elif [ $STAGGERED = "TRUE" ]; then
+    #                echo "cp \$workdir$INDEX/${OUTPUTFILE_NAME}_pbp.dat \$dir$INDEX/${OUTPUTFILE_NAME}_pbp.\$SLURM_JOB_ID || exit 2" >> $JOBSCRIPT_GLOBALPATH
+    #            fi
+    #        fi
+    #        echo "cp \$workdir$INDEX/$OUTPUTFILE_NAME \$dir$INDEX/$OUTPUTFILE_NAME.\$SLURM_JOB_ID || exit 2" >> $JOBSCRIPT_GLOBALPATH
+    #        echo "" >> $JOBSCRIPT_GLOBALPATH
+    #    done
+    #fi
     echo "# Remove executable" >> $JOBSCRIPT_GLOBALPATH
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
         echo "rm \$dir$INDEX/$INVERTER_FILENAME || exit 2 " >> $JOBSCRIPT_GLOBALPATH
