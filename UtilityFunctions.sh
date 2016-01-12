@@ -23,6 +23,15 @@ function SecondsToTimeString(){
     printf "%02dh %02dm %02ds"  "${hours}" "${minutes}" "${seconds}"
 }
 
+function SecondsToTimeStringWithDays(){
+    local T=$1; shift
+    local days=$(( $T/86400))
+    local hours=$(( ($T - $days*86400)/3600 ))
+    local minutes=$(( ($T - $days*86400 - $hours*3600)/60 ))
+    local seconds=$( echo $T | awk 'END{print $1 % 60}')
+    printf "%d-%02d:%02d:%02d" "${days}" "${hours}" "${minutes}" "${seconds}"
+}
+
 function MinimumOfArray(){
     local MIN=$1; shift
     while [ "$1" != "" ]; do
