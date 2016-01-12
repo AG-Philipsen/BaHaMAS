@@ -28,7 +28,7 @@ function ProduceJobscript_Loewe(){
 	    echo "#SBATCH --gres=gpu:$GPU_PER_NODE" >> $JOBSCRIPT_GLOBALPATH
         #Option to choose only a node with 'hawaii' GPU hardware
         echo "#SBATCH --constrain=hawaii" >> $JOBSCRIPT_GLOBALPATH
-        echo "#SBATCH --exclude=lxlcsc[0010,0014,0027,0030,0037,0058,0061,0064,0068,0070,0071,0079,0082,0086,0089-0091,0095-0098,0100-0101,0138,0141-0142]" >> $JOBSCRIPT_GLOBALPATH
+        echo "#SBATCH --exclude=lxlcsc[0005-0011,0055,0058-0059,0121,0128,0135,0139,0148-0149]" >> $JOBSCRIPT_GLOBALPATH
         #The following nodes of L-CSC are using tahiti as GPU hardware (sinfo -o "%4c %10z %8d %8m %10f %10G %D %N"), CL2QCD fails on them.
         #echo "#SBATCH --exclude=lxlcsc0043,lxlcsc0044,lxlcsc0045,lxlcsc0046,lxlcsc0047,lxlcsc0049,lxlcsc0050,lxlcsc0052,lxlcsc0053" >> $JOBSCRIPT_GLOBALPATH
     elif [ $CLUSTER_NAME = "LCSC_OLD" ]; then
@@ -87,7 +87,7 @@ function ProduceJobscript_Loewe(){
         if [ $CLUSTER_NAME = "LOEWE" ]; then
             echo "time srun -n 1 \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$INPUTFILE_NAME --device=$INDEX --beta=${BETA_FOR_JOBSCRIPT[$INDEX]%%_*} > \$dir$INDEX/\$outFile 2> \$dir$INDEX/\$errFile &" >> $JOBSCRIPT_GLOBALPATH
 	    elif [ $CLUSTER_NAME = "LCSC" ]; then
-	        echo "time srun -n 1 \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$INPUTFILE_NAME --device=$INDEX --beta=${BETA_FOR_JOBSCRIPT[$INDEX]%%_*} 2> \$dir$INDEX/\$errFile | mbuffer -q -m2M > \$dir$INDEX/\$outFile &" >> $JOBSCRIPT_GLOBALPATH
+	        echo "time \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$INPUTFILE_NAME --device=$INDEX --beta=${BETA_FOR_JOBSCRIPT[$INDEX]%%_*} 2> \$dir$INDEX/\$errFile | mbuffer -q -m2M > \$dir$INDEX/\$outFile &" >> $JOBSCRIPT_GLOBALPATH
         fi
         echo "PID_SRUN_$INDEX=\${!}" >> $JOBSCRIPT_GLOBALPATH
         echo "" >> $JOBSCRIPT_GLOBALPATH

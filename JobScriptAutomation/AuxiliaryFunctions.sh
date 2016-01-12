@@ -35,7 +35,7 @@ function ReadBetaValuesFromFile(){
     local OLD_IFS=$IFS      # save the field separator           
     local IFS=$'\n'         # new field separator, the end of line           
     for LINE in $(cat $BETASFILE); do          
-        if [[ $LINE =~ ^[[:blank:]]*# ]]; then
+        if [[ $LINE =~ ^[[:blank:]]*# ]] || [[ $LINE =~ ^[[:blank:]]*$ ]]; then
             continue
         fi
         LINE=`echo $LINE | awk '{split($0, res, "#"); print res[1]}'`
@@ -261,7 +261,10 @@ function CompleteBetasFile(){
     local REST_OF_THE_LINE_ARRAY=()
     local COMMENTED_LINE_ARRAY=()
     [ $USE_MULTIPLE_CHAINS == "TRUE" ] && local SEED="" && local SEED_ARRAY=()
-    for LINE in $(sort -k1n $BETASFILE); do #the for loop with cat remove empty lines
+    for LINE in $(sort -k1n $BETASFILE); do
+        if [[ $LINE =~ ^[[:blank:]]*$ ]]; then
+            continue
+        fi
         if [[ $LINE =~ ^[[:blank:]]*# ]]; then
             COMMENTED_LINE_ARRAY+=( "$LINE" )
             continue
