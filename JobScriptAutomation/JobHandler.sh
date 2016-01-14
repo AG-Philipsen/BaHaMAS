@@ -43,6 +43,7 @@ source $HOME/Script/JobScriptAutomation/EmptyBetaDirectories.sh || exit -2
 # Set default values for the command line parameters
 
 BETASFILE="betas"
+BETA_POSTFIX="_continueWithNewChain" #Here we set the BETA_POSTFIX supposing it is not a thermalization. If indeed it is, the postfix will be overwritten in the thermalize case in the main!
 WALLTIME="7-00:00:00"
 BGSIZE="32"
 MEASUREMENTS="20000"
@@ -57,7 +58,7 @@ INTSTEPS1="5"
 INTSTEPS2="5"
 MEASURE_PBP="TRUE"
 INTERVAL="1000"
-USE_MULTIPLE_CHAINS="FALSE"
+USE_MULTIPLE_CHAINS="TRUE"
 SUBMIT="FALSE"
 SUBMITONLY="FALSE"
 THERMALIZE="FALSE"
@@ -202,8 +203,8 @@ elif [ $SUBMIT = "TRUE" ]; then
 elif [ $THERMALIZE = "TRUE" ] || [ $CONTINUE_THERMALIZATION = "TRUE" ]; then
 
     if [ $USE_MULTIPLE_CHAINS = "FALSE" ]; then
-        [ $THERMALIZE = "TRUE" ] && printf "\n\e[0;31m Option -t | --thermalize implemented ONLY combined with -u | --useMultipleChains option! Aborting...\n\n\e[0m"
-	    [ $CONTINUE_THERMALIZATION = "TRUE" ] && printf "\n\e[0;31m Option -C | --continueThermalization implemented ONLY combined with -u | --useMultipleChains option! Aborting...\n\n\e[0m"
+        [ $THERMALIZE = "TRUE" ] && printf "\n\e[0;31m Option -t | --thermalize implemented ONLY combined not with --doNotUseMultipleChains option! Aborting...\n\n\e[0m"
+	    [ $CONTINUE_THERMALIZATION = "TRUE" ] && printf "\n\e[0;31m Option -C | --continueThermalization implemented ONLY combined not with --doNotUseMultipleChains option! Aborting...\n\n\e[0m"
         exit -1
     fi
     #Here we fix the beta postfix just looking for thermalized conf from hot at the actual parameters (no matter at which beta);
