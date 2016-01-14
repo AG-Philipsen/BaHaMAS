@@ -70,8 +70,8 @@ function CheckWilsonStaggeredVariables(){
 
 
 function SetParametersPathAndString(){
-    if [ $KAPPA -eq 0 ] || [ $NSPACE -eq 0 ] || [ $NTIME -eq 0 ] || [[ $CHEMPOT == "" ]]; then
-	echo "Unable to SetParametersPath! Aborting..."
+    if [ $NSPACE -eq 0 ] || [ $NTIME -eq 0 ] || [[ $CHEMPOT == "" ]] || { [ $KAPPA -eq 0 ] && [ $WILSON = "FALSE" ]; }; then
+	    echo "Unable to SetParametersPath! Aborting..."
         exit -1
     fi
     local PREFIXES=([$CHEMPOT_POSITION]=$CHEMPOT_PREFIX [$KAPPA_POSITION]=$KAPPA_PREFIX [$NTIME_POSITION]=$NTIME_PREFIX [$NSPACE_POSITION]=$NSPACE_PREFIX)
