@@ -62,7 +62,7 @@ function ProduceInputFile_Loewe() {
             echo "integrator2=twomn" >> $INPUTFILE_GLOBALPATH
             echo "integrationsteps2=${MASS_PRECONDITIONING_ARRAY[${BETAVALUES_COPY[$INDEX]}]%,*}" >> $INPUTFILE_GLOBALPATH
         else
-            echo "cg_iteration_block_size=50" >> $INPUTFILE_GLOBALPATH
+            echo "cg_iteration_block_size=$CGBS" >> $INPUTFILE_GLOBALPATH
             echo "num_timescales=2" >> $INPUTFILE_GLOBALPATH
         fi
     elif [ $STAGGERED = "TRUE" ]; then

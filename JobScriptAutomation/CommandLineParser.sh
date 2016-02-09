@@ -48,6 +48,7 @@ function ParseCommandLineOption(){
 		        echo "  -F | --confSavePointFrequency      ->    default value = $NSAVEPOINT"
 		        echo "  --intsteps0                        ->    default value = $INTSTEPS0"
 		        echo "  --intsteps1                        ->    default value = $INTSTEPS1"
+				echo "  --cgbs							   ->	 default value = $CGBS (cg_iteration_block_size)"
 		        echo -e "  --doNotUseMultipleChains           ->    if given, multiple chain usage and nomenclature are disabled \e[1;32m(this implies that in the betas file the seed column is NOT present)\e[0;32m"
 		        if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
 		            echo "  --intsteps2                        ->    default value = $INTSTEPS2"
@@ -137,6 +138,7 @@ function ParseCommandLineOption(){
 	        --intsteps0=* )                 INTSTEPS0=${1#*=}; shift ;;
 	        --intsteps1=* )                 INTSTEPS1=${1#*=}; shift ;;
 	        --intsteps2=* )                 INTSTEPS2=${1#*=}; shift ;;
+			--cgbs=* )                      CGBS=${1#*=}; shift ;;
 	        -p | --doNotMeasurePbp )        MEASURE_PBP="FALSE"; shift ;;
 	        --doNotUseRAfiles )
                 [ $WILSON = "TRUE" ] && printf "\n\e[0;31m The option --doNotUseRAfiles can be used only in STAGGERED simulations! Aborting...\n\n\e[0m" && exit -1
