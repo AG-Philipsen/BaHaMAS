@@ -1,5 +1,12 @@
 #!/bin/bash
 
+#TODO: 
+#*If a filtering option is specified wrongly, should the program exit or not? If not, should the error message rather be printed in the end?
+#*Is it necessary to implement the functionality where the script uses find the update the database?
+#*Coloured output?
+#*Other options?
+#*User specific variables?
+#*Putting the command line parser into another file in order to remove the cluttering - right now the parser makes up ~50% of the script.
 
 function join { local IFS="$1"; shift; echo "$*"; }
 
@@ -26,23 +33,18 @@ HEADER_PRINTF_FORMAT_SPECIFIER_STRING=""
 HEADER_PRINTF_PARAMETER_STRING=""
 HEADER_ROW_SEPARATOR=""
 
-MU_FORMAT_SPECIFIER_NUMBER="7"
-MU_FORMAT_SPECIFIER_NUMBER="8"
-MU_FORMAT_SPECIFIER_NUMBER="6"
-MU_FORMAT_SPECIFIER_NUMBER="6"
-MU_FORMAT_SPECIFIER_NUMBER="19"
-MU_FORMAT_SPECIFIER_NUMBER="11"
-MU_FORMAT_SPECIFIER_NUMBER="8"
-MU_FORMAT_SPECIFIER_NUMBER="13"
-
 declare -A COLUMNS=( [muC]=$MU_C [kC]=$K_C [ntC]=$NT_C [nsC]=$NS_C [betaC]=$BETA_C [trajNoC]=$TRAJNO_C [accRateC]=$ACCRATE_C [statusC]=$STATUS_C )
 
 #FSNA = FORMAT_SPECIFIER_NUMBER_ARRAY
 declare -A FSNA=( [muC]="7" [kC]="8" [ntC]="6" [nsC]="6" [betaC]="19" [trajNoC]="11" [accRateC]="8" [statusC]="13" )
-declare -A PRINTF_FORMAT_SPECIFIER_ARRAY=( [muC]="%-${FSNA[muC]}s" [kC]="%-${FSNA[kC]}s" [ntC]="%-${FSNA[ntC]}d" [nsC]="%-${FSNA[nsC]}d" [betaC]="%-${FSNA[betaC]}s" [trajNoC]="%-${FSNA[trajNoC]}d" [accRateC]="%-${FSNA[accRateC]}s" [statusC]="%-${FSNA[statusC]}s" )
+
+declare -A PRINTF_FORMAT_SPECIFIER_ARRAY=( [muC]="%-${FSNA[muC]}s" [kC]="%-${FSNA[kC]}s" [ntC]="%-${FSNA[ntC]}d" [nsC]="%-${FSNA[nsC]}d" [betaC]="%-${FSNA[betaC]}s" \
+											[trajNoC]="%-${FSNA[trajNoC]}d" [accRateC]="%-${FSNA[accRateC]}s" [statusC]="%-${FSNA[statusC]}s" )
 
 declare -A HEADER_PRINTF_FORMAT_SPECIFIER_ARRAY=( [muC]="%-7s" [kC]="%-8s" [ntC]="%-6s" [nsC]="%-6s" [betaC]="%-19s" [trajNoC]="%-11s" [accRateC]="%-8s" [statusC]="%-13s" )
-declare -A HEADER_PRINTF_PARAMETER_ARRAY=( [muC]="\"mu\"" [kC]="\"kappa\"" [ntC]="\"nt\"" [nsC]="\"ns\"" [betaC]="\"beta_chain_type\"" [trajNoC]="\"trajNo\"" [accRateC]="\"acc\"" [statusC]="\"status\"" )
+
+declare -A HEADER_PRINTF_PARAMETER_ARRAY=( [muC]="\"mu\"" [kC]="\"kappa\"" [ntC]="\"nt\"" [nsC]="\"ns\"" [betaC]="\"beta_chain_type\"" [trajNoC]="\"trajNo\"" \
+											[accRateC]="\"acc\"" [statusC]="\"status\"" )
 
 declare -a DISPLAY_COLUMNS
 
@@ -344,12 +346,12 @@ for COLUMN_NUMBER in ${DISPLAY_COLUMNS[@]}; do
 	for QUANTITY in ${!COLUMNS[@]}; do
 		if [ $COLUMN_NUMBER = ${COLUMNS[$QUANTITY]} ]; then
 
-			PRINTF_FORMAT_SPECIFIER_STRING=$PRINTF_FORMAT_SPECIFIER_STRING${PRINTF_FORMAT_SPECIFIER_ARRAY[$QUANTITY]}
-			PRINTF_PARAMETER_STRING=$PRINTF_PARAMETER_STRING,\$${COLUMNS[$QUANTITY]}
-
 			HEADER_PRINTF_FORMAT_SPECIFIER_STRING=$HEADER_PRINTF_FORMAT_SPECIFIER_STRING${HEADER_PRINTF_FORMAT_SPECIFIER_ARRAY[$QUANTITY]}
 			HEADER_PRINTF_PARAMETER_STRING=$HEADER_PRINTF_PARAMETER_STRING,${HEADER_PRINTF_PARAMETER_ARRAY[$QUANTITY]}
 			
+			PRINTF_FORMAT_SPECIFIER_STRING=$PRINTF_FORMAT_SPECIFIER_STRING${PRINTF_FORMAT_SPECIFIER_ARRAY[$QUANTITY]}
+			PRINTF_PARAMETER_STRING=$PRINTF_PARAMETER_STRING,\$${COLUMNS[$QUANTITY]}
+
 			for ((i=0;i<${FSNA[$QUANTITY]};i++)); do
 				HEADER_ROW_SEPARATOR=$HEADER_ROW_SEPARATOR"-"
 			done
@@ -359,58 +361,42 @@ done
 
 HEADER_ROW_SEPARATOR="\"$HEADER_ROW_SEPARATOR\""
 
-
-#This loop is necessary in case the user chooses a different arrangement of the columns. It gets the column number for each quantity right. The resulting
-#associative array NEW_COLUMNS is then used to pass on the correct column numbers to awk. 
-declare -A NEW_COLUMNS
-for ((i=0;i<${#DISPLAY_COLUMNS[@]};i++)); do
-
-	for QUANTITY in ${!COLUMNS[@]}; do
-		if [ ${DISPLAY_COLUMNS[$i]} = ${COLUMNS[$QUANTITY]} ]; then		
-			
-			NEW_COLUMNS+=( [$QUANTITY]=$(($i+1)) )	
-		fi
-	done
-done
-
 [ "$UPDATE" = "FALSE" ] && [ ! -f $PROJECT_STATISTICS_FILE ] && echo "$PROJECT_STATISTICS_FILE does not exist. Call $0 -u to create it...exiting." && exit
 if [ "$UPDATE" = "FALSE" ]; then
-	awk --posix '
-				BEGIN{
-						printf("'$HEADER_PRINTF_FORMAT_SPECIFIER_STRING'\n"'$HEADER_PRINTF_PARAMETER_STRING');
-						printf("%s\n",'$HEADER_ROW_SEPARATOR');
-					 }
-					 {
-						printf("'$PRINTF_FORMAT_SPECIFIER_STRING'\n"'$PRINTF_PARAMETER_STRING');
-					 }
-				' $PROJECT_STATISTICS_FILE | \
-				awk --posix -v filterMu=$FILTER_MU -v filterKappa=$FILTER_KAPPA -v filterNt=$FILTER_NT -v filterNs=$FILTER_NS -v filterBeta=$FILTER_BETA -v filterType=$FILTER_TYPE \
-			   				-v filterTrajNo=$FILTER_TRAJNO -v filterAccRate=$FILTER_ACCRATE -v filterStatus=$FILTER_STATUS \
-							-v muString="$MU_STRING" -v kappaString="$KAPPA_STRING" -v nsString="$NS_STRING" -v ntString="$NT_STRING" -v betaString="$BETA_STRING" \
-							-v typeString=$TYPE_STRING -v statusString="$STATUS_STRING" \
-							-v trajLowValue=$TRAJ_LOW_VALUE -v trajHighValue=$TRAJ_HIGH_VALUE -v accRateLowValue=$ACCRATE_LOW_VALUE -v accRateHighValue=$ACCRATE_HIGH_VALUE \
-							-v muColumn=${NEW_COLUMNS[muC]} -v kappaColumn=${NEW_COLUMNS[kC]} -v ntColumn=${NEW_COLUMNS[ntC]} -v nsColumn=${NEW_COLUMNS[nsC]} \
-							-v betaColumn=${NEW_COLUMNS[betaC]} -v trajNoColumn=${NEW_COLUMNS[trajNoC]} -v accRateColumn=${NEW_COLUMNS[accRateC]} -v statusColumn=${NEW_COLUMNS[statusC]} '
+		awk --posix -v filterMu=$FILTER_MU -v filterKappa=$FILTER_KAPPA -v filterNt=$FILTER_NT -v filterNs=$FILTER_NS -v filterBeta=$FILTER_BETA -v filterType=$FILTER_TYPE \
+					-v filterTrajNo=$FILTER_TRAJNO -v filterAccRate=$FILTER_ACCRATE -v filterStatus=$FILTER_STATUS \
+					-v muString="$MU_STRING" -v kappaString="$KAPPA_STRING" -v nsString="$NS_STRING" -v ntString="$NT_STRING" -v betaString="$BETA_STRING" \
+					-v typeString=$TYPE_STRING -v statusString="$STATUS_STRING" \
+					-v trajLowValue=$TRAJ_LOW_VALUE -v trajHighValue=$TRAJ_HIGH_VALUE -v accRateLowValue=$ACCRATE_LOW_VALUE -v accRateHighValue=$ACCRATE_HIGH_VALUE \
+					-v muColumn=${COLUMNS[muC]} -v kappaColumn=${COLUMNS[kC]} -v ntColumn=${COLUMNS[ntC]} -v nsColumn=${COLUMNS[nsC]} \
+					-v betaColumn=${COLUMNS[betaC]} -v trajNoColumn=${COLUMNS[trajNoC]} -v accRateColumn=${COLUMNS[accRateC]} -v statusColumn=${COLUMNS[statusC]} '
 
-								 {critFailedCounter=0}
-								 NR == 1 {print}
-								 NR == 2 {print}
+						 {critFailedCounter=0}
 
-								 NR > 2 && filterMu == "TRUE" {if($(muColumn) !~ muString) {critFailedCounter--;}}
-								 NR > 2 && filterKappa == "TRUE" {if($(kappaColumn) !~ kappaString) {critFailedCounter--;}}
-								 NR > 2 && filterNs == "TRUE" {if($(nsColumn) !~ nsString) {critFailedCounter--;}}
-								 NR > 2 && filterNt == "TRUE" {if($(ntColumn) !~ ntString) {critFailedCounter--;}}
-								 NR > 2 && filterBeta == "TRUE" {if($(betaColumn) !~ betaString) {critFailedCounter--;}}
-								 NR > 2 && filterType == "TRUE" {if($(betaColumn) !~ typeString) {critFailedCounter--;}}
-								 NR > 2 && filterStatus == "TRUE" {if($(statusColumn) !~ statusString) {critFailedCounter--;}}
+						 filterMu == "TRUE" {if($(muColumn) !~ muString) {critFailedCounter--;}}
+						 filterKappa == "TRUE" {if($(kappaColumn) !~ kappaString) {critFailedCounter--;}}
+						 filterNs == "TRUE" {if($(nsColumn) !~ nsString) {critFailedCounter--;}}
+						 filterNt == "TRUE" {if($(ntColumn) !~ ntString) {critFailedCounter--;}}
+						 filterBeta == "TRUE" {if($(betaColumn) !~ betaString) {critFailedCounter--;}}
+						 filterType == "TRUE" {if($(betaColumn) !~ typeString) {critFailedCounter--;}}
+						 filterStatus == "TRUE" {if($(statusColumn) !~ statusString) {critFailedCounter--;}}
 
-								 NR > 2 && filterTrajNo == "TRUE" {if(length(trajLowValue) == 0 ? "0" : trajLowValue > $(trajNoColumn)){critFailedCounter--;}}
-								 NR > 2 && filterTrajNo == "TRUE" {if(length(trajHighValue) == 0 ? "999999" : trajHighValue < $(trajNoColumn)){critFailedCounter--;}}
+						 filterTrajNo == "TRUE" {if(length(trajLowValue) == 0 ? "0" : trajLowValue > $(trajNoColumn)){critFailedCounter--;}}
+						 filterTrajNo == "TRUE" {if(length(trajHighValue) == 0 ? "999999" : trajHighValue < $(trajNoColumn)){critFailedCounter--;}}
 
-								 NR > 2 && filterAccRate == "TRUE" {if(length(accRateLowValue) == 0 ? "0" : accRateLowValue > $(accRateColumn)){critFailedCounter--;}}
-								 NR > 2 && filterAccRate == "TRUE" {if(length(accRateHighValue) == 0 ? "100.00" : accRateHighValue < $(accRateColumn)){critFailedCounter--;}}
-								 
-								 critFailedCounter == 0 && NR > 2 {print $0}
+						 filterAccRate == "TRUE" {if(length(accRateLowValue) == 0 ? "0" : accRateLowValue > $(accRateColumn)){critFailedCounter--;}}
+						 filterAccRate == "TRUE" {if(length(accRateHighValue) == 0 ? "100.00" : accRateHighValue < $(accRateColumn)){critFailedCounter--;}}
+						 
+						 critFailedCounter == 0 {print $0}
+			' $PROJECT_STATISTICS_FILE | \
+		awk --posix '
+					BEGIN{
+							printf("'$HEADER_PRINTF_FORMAT_SPECIFIER_STRING'\n"'$HEADER_PRINTF_PARAMETER_STRING');
+							printf("%s\n",'$HEADER_ROW_SEPARATOR');
+						 }
+						 {
+							printf("'$PRINTF_FORMAT_SPECIFIER_STRING'\n"'$PRINTF_PARAMETER_STRING');
+						 }
 					'
 fi
 
