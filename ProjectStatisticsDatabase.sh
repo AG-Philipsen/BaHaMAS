@@ -7,6 +7,8 @@
 #*Other options?
 #*User specific variables?
 #*Putting the command line parser into another file in order to remove the cluttering - right now the parser makes up ~50% of the script.
+#*Everytime the database is updated, actually create a new file with the date and time in the name? This way it possible to track how the statistics
+# grow over longer periods.
 
 function join { local IFS="$1"; shift; echo "$*"; }
 
@@ -49,6 +51,8 @@ declare -A HEADER_PRINTF_PARAMETER_ARRAY=( [muC]="\"mu\"" [kC]="\"kappa\"" [ntC]
 declare -a DISPLAY_COLUMNS
 
 CUSTOMIZE_COLUMNS="FALSE"
+
+STATISTICS_SUMMARY="FALSE"
 
 UPDATE="FALSE"
 
@@ -124,6 +128,9 @@ while [ $# -gt 0 ]; do
 						;;
 				esac	
 			done
+			;;
+		--sum)
+			STATISTICS_SUMMARY="TRUE"
 			;;
 		--mu)
 			UPDATE="FALSE"
@@ -275,7 +282,9 @@ while [ $# -gt 0 ]; do
 		   	echo "               --> Possible columns are: mu, kappa, nt, ns, beta_chain_type, trajNo, acc, status."
 		   	echo "               --> Example: -c kappa nt ns beta_chain_type trajNo."
 			echo "               --> If no columns are specified, all of the above columns will be printed by default."
-			echo "--color        --> Specifiy this option for displaying coloured output."
+			echo "--color        --> Specifiy this option for displaying coloured output.(NOT YET IMPLEMENTED)"
+			echo "--sum          --> Summing up the trajectory numbers of each parameter set."
+			echo ""
 			echo "Filtering:"
 			echo ""
 			echo "--mu           --> Specify a filtering values for mu."
@@ -359,12 +368,25 @@ for COLUMN_NUMBER in ${DISPLAY_COLUMNS[@]}; do
 	done
 done
 
+NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN=""
+for COLUMN_NUMBER in ${DISPLAY_COLUMNS[@]}; do 
+	for QUANTITY in ${!COLUMNS[@]}; do
+		if [ $COLUMN_NUMBER = ${COLUMNS[$QUANTITY]} ]; then
+			[ "$QUANTITY" = "trajNoC" ] && break 2
+			NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN=$(($NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN+${FSNA[$QUANTITY]}))
+		fi
+	done
+done
+
+STATISTICS_PRINTF_FORMAT_SPECIFIER_STRING="%${NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN}s"
+#echo nr of whitespaces $NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN
+
 HEADER_ROW_SEPARATOR="\"$HEADER_ROW_SEPARATOR\""
 
 [ "$UPDATE" = "FALSE" ] && [ ! -f $PROJECT_STATISTICS_FILE ] && echo "$PROJECT_STATISTICS_FILE does not exist. Call $0 -u to create it...exiting." && exit
 if [ "$UPDATE" = "FALSE" ]; then
 		awk --posix -v filterMu=$FILTER_MU -v filterKappa=$FILTER_KAPPA -v filterNt=$FILTER_NT -v filterNs=$FILTER_NS -v filterBeta=$FILTER_BETA -v filterType=$FILTER_TYPE \
-					-v filterTrajNo=$FILTER_TRAJNO -v filterAccRate=$FILTER_ACCRATE -v filterStatus=$FILTER_STATUS \
+					-v filterTrajNo=$FILTER_TRAJNO -v filterAccRate=$FILTER_ACCRATE -v filterStatus=$FILTER_STATUS -v statisticsSummary=$STATISTICS_SUMMARY \
 					-v muString="$MU_STRING" -v kappaString="$KAPPA_STRING" -v nsString="$NS_STRING" -v ntString="$NT_STRING" -v betaString="$BETA_STRING" \
 					-v typeString=$TYPE_STRING -v statusString="$STATUS_STRING" \
 					-v trajLowValue=$TRAJ_LOW_VALUE -v trajHighValue=$TRAJ_HIGH_VALUE -v accRateLowValue=$ACCRATE_LOW_VALUE -v accRateHighValue=$ACCRATE_HIGH_VALUE \
@@ -387,16 +409,42 @@ if [ "$UPDATE" = "FALSE" ]; then
 						 filterAccRate == "TRUE" {if(length(accRateLowValue) == 0 ? "0" : accRateLowValue > $(accRateColumn)){critFailedCounter--;}}
 						 filterAccRate == "TRUE" {if(length(accRateHighValue) == 0 ? "100.00" : accRateHighValue < $(accRateColumn)){critFailedCounter--;}}
 						 
-						 critFailedCounter == 0 {print $0}
+						 statisticsSummary == "FALSE" && critFailedCounter == 0 {print $0}
+						 statisticsSummary == "TRUE" && critFailedCounter == 0 {lineCounter++;dataRow=sprintf("%s",$0);dataRowArray[lineCounter]=dataRow}
+
+						 #SUMMARY OF STATISTICS
+						 statisticsSummary == "TRUE" {
+							split($(betaColumn),betaChainType,"_");
+							if(betaChainType[3] == "NC"){statisticsSummaryArray[$(muColumn) "_" $(kappaColumn) "_" $(ntColumn) "_" $(nsColumn) "_" betaChainType[1] "_" betaChainType[3]]+=$(trajNoColumn);}
+						}
+						END{
+							if(statisticsSummary == "TRUE"){
+								split(dataRowArray[1],fieldsArray," ");
+								split(fieldsArray[betaColumn],betaChainType,"_");
+								if(betaChainType[3] == "NC"){oldKey = fieldsArray[muColumn] "_" fieldsArray[kappaColumn] "_" fieldsArray[ntColumn] "_" fieldsArray[nsColumn] "_" betaChainType[1] "_" betaChainType[3];}
+								for(i=1;i<=lineCounter;i++){
+									split(dataRowArray[i],fieldsArray," ");	
+									split(fieldsArray[betaColumn],betaChainType,"_");
+									if(betaChainType[3] == "NC"){newKey = fieldsArray[muColumn] "_" fieldsArray[kappaColumn] "_" fieldsArray[ntColumn] "_" fieldsArray[nsColumn] "_" betaChainType[1] "_" betaChainType[3]}
+									if(betaChainType[3] == "NC"){if(newKey != oldKey){printf("sum: %d\n",statisticsSummaryArray[oldKey]); oldKey=newKey}}
+									print dataRowArray[i]
+								}
+								printf("sum: %d\n",statisticsSummaryArray[newKey]);
+							}
+						}
 			' $PROJECT_STATISTICS_FILE | \
-		awk --posix '
+		awk --posix -v betaColumn=${COLUMNS[betaC]} -v trajNoColumn=${COLUMNS[trajNoC]} -v statisticsSummary="TRUE" '
 					BEGIN{
 							printf("'$HEADER_PRINTF_FORMAT_SPECIFIER_STRING'\n"'$HEADER_PRINTF_PARAMETER_STRING');
 							printf("%s\n",'$HEADER_ROW_SEPARATOR');
 						 }
-						 {
-							printf("'$PRINTF_FORMAT_SPECIFIER_STRING'\n"'$PRINTF_PARAMETER_STRING');
+						 $0 !~ /^sum/{
+							 
+								printf("'$PRINTF_FORMAT_SPECIFIER_STRING'\n"'$PRINTF_PARAMETER_STRING');
 						 }
+						 $0 ~ /^sum/{
+						 	printf("%'$(($NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN+5))'s\n",$0)
+					 	 }
 					'
 fi
 
