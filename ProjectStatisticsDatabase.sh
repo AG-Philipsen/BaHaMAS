@@ -19,14 +19,15 @@ CURRENT_DIRECTORY=$(pwd)
 
 rm -f $TEMPORARY_STATISTICS_FILE
 
-MU_C=1 
-K_C=2 
-NT_C=3 
-NS_C=4 
-BETA_C=5 
-TRAJNO_C=6 
-ACCRATE_C=7 
-STATUS_C=8 
+MU_C=$((2*1)) 
+K_C=$((2*2)) 
+NT_C=$((2*3)) 
+NS_C=$((2*4)) 
+BETA_C=$((2*5)) 
+TRAJNO_C=$((2*6)) 
+ACCRATE_C=$((2*7)) 
+STATUS_C=$((2*8)) 
+LASTTRAJ_C=$((2*9))
 
 PRINTF_FORMAT_SPECIFIER_STRING=""
 PRINTF_PARAMETER_STRING=""
@@ -35,18 +36,18 @@ HEADER_PRINTF_FORMAT_SPECIFIER_STRING=""
 HEADER_PRINTF_PARAMETER_STRING=""
 HEADER_ROW_SEPARATOR=""
 
-declare -A COLUMNS=( [muC]=$MU_C [kC]=$K_C [ntC]=$NT_C [nsC]=$NS_C [betaC]=$BETA_C [trajNoC]=$TRAJNO_C [accRateC]=$ACCRATE_C [statusC]=$STATUS_C )
+declare -A COLUMNS=( [muC]=$MU_C [kC]=$K_C [ntC]=$NT_C [nsC]=$NS_C [betaC]=$BETA_C [trajNoC]=$TRAJNO_C [accRateC]=$ACCRATE_C [statusC]=$STATUS_C [lastTrajC]=$LASTTRAJ_C )
 
 #FSNA = FORMAT_SPECIFIER_NUMBER_ARRAY
-declare -A FSNA=( [muC]="7" [kC]="8" [ntC]="6" [nsC]="6" [betaC]="19" [trajNoC]="11" [accRateC]="8" [statusC]="13" )
+declare -A FSNA=( [muC]="7" [kC]="8" [ntC]="6" [nsC]="6" [betaC]="19" [trajNoC]="11" [accRateC]="8" [statusC]="13" [lastTrajC]="11" )
 
 declare -A PRINTF_FORMAT_SPECIFIER_ARRAY=( [muC]="%-${FSNA[muC]}s" [kC]="%-${FSNA[kC]}s" [ntC]="%-${FSNA[ntC]}d" [nsC]="%-${FSNA[nsC]}d" [betaC]="%-${FSNA[betaC]}s" \
-											[trajNoC]="%-${FSNA[trajNoC]}d" [accRateC]="%-${FSNA[accRateC]}s" [statusC]="%-${FSNA[statusC]}s" )
+											[trajNoC]="%-${FSNA[trajNoC]}d" [accRateC]="%-${FSNA[accRateC]}s" [statusC]="%-${FSNA[statusC]}s" [lastTrajC]="%-${FSNA[lastTrajC]}s" )
 
-declare -A HEADER_PRINTF_FORMAT_SPECIFIER_ARRAY=( [muC]="%-7s" [kC]="%-8s" [ntC]="%-6s" [nsC]="%-6s" [betaC]="%-19s" [trajNoC]="%-11s" [accRateC]="%-8s" [statusC]="%-13s" )
+declare -A HEADER_PRINTF_FORMAT_SPECIFIER_ARRAY=( [muC]="%-7s" [kC]="%-8s" [ntC]="%-6s" [nsC]="%-6s" [betaC]="%-19s" [trajNoC]="%-11s" [accRateC]="%-8s" [statusC]="%-13s" [lastTrajC]="%-11s" )
 
 declare -A HEADER_PRINTF_PARAMETER_ARRAY=( [muC]="\"mu\"" [kC]="\"kappa\"" [ntC]="\"nt\"" [nsC]="\"ns\"" [betaC]="\"beta_chain_type\"" [trajNoC]="\"trajNo\"" \
-											[accRateC]="\"acc\"" [statusC]="\"status\"" )
+											[accRateC]="\"acc\"" [statusC]="\"status\"" [lastTrajC]="\"l.T.[s]\"" )
 
 declare -a DISPLAY_COLUMNS
 
@@ -65,6 +66,7 @@ FILTER_TYPE="FALSE"
 FILTER_TRAJNO="FALSE"	
 FILTER_ACCRATE="FALSE"	
 FILTER_STATUS="FALSE"	
+FILTER_LASTTRAJ="FALSE"
 
 declare -a MU_ARRAY
 declare -a KAPPA_ARRAY
@@ -79,6 +81,8 @@ TRAJ_HIGH_VALUE=""
 
 ACCRATE_LOW_VALUE=""
 ACCRATE_HIGH_VALUE=""
+
+LAST_TRAJ_TIME=""
 
 UPDATE_FREQUENCY=""
 
@@ -120,6 +124,10 @@ while [ $# -gt 0 ]; do
 						;;
 					status)
 						DISPLAY_COLUMNS+=( ${COLUMNS[statusC]} )
+						shift
+						;;
+					lastTraj)
+						DISPLAY_COLUMNS+=( ${COLUMNS[lastTrajC]} )
 						shift
 						;;
 					*)
@@ -256,6 +264,15 @@ while [ $# -gt 0 ]; do
 			done
 			[ ${#STATUS_ARRAY[@]} -eq 0 ] && echo "You did not correctly specify filtering values, hence no filtering on the status will be applied." && FILTER_STATUS="FALSE"
 			;;
+		--lastTraj)
+			UPDATE="FALSE"
+			FILTER_LASTTRAJ="TRUE"
+			if [[ "$2" =~ ^[[:digit:]]+ ]]; then
+				LAST_TRAJ_TIME=$2
+				shift
+			fi
+			[ "$LAST_TRAJ_TIME" = "" ] && echo "You did not correctly specify the time value, hence no filtering on the last trajectory time will be applied...exiting." && exit 
+			;;
 		-u | --update)
 			if [[ $2 =~ [[:digit:]]+[s|m|h|d] ]]; then
 				UPDATE_FREQUENCY=$2
@@ -279,7 +296,7 @@ while [ $# -gt 0 ]; do
 			echo "Displaying options:"
 			echo ""
 			echo "-c | --columns --> Specify the columns to be displayed."
-		   	echo "               --> Possible columns are: mu, kappa, nt, ns, beta_chain_type, trajNo, acc, status."
+		   	echo "               --> Possible columns are: mu, kappa, nt, ns, beta_chain_type, trajNo, acc, status, lastTraj."
 		   	echo "               --> Example: -c kappa nt ns beta_chain_type trajNo."
 			echo "               --> If no columns are specified, all of the above columns will be printed by default."
 			echo "--color        --> Specifiy this option for displaying coloured output.(NOT YET IMPLEMENTED)"
@@ -287,18 +304,20 @@ while [ $# -gt 0 ]; do
 			echo ""
 			echo "Filtering:"
 			echo ""
-			echo "--mu           --> Specify a filtering values for mu."
-			echo "--kappa        --> Specify a filtering values for kappa."
-			echo "--nt           --> Specify a filtering values for nt."
-			echo "--ns           --> Specify a filtering values for ns."
-			echo "--beta         --> Specify a filtering values for beta."
-			echo "--type         --> Specify a filtering values for the type of the simulation, i.e whether it is NC, fC or fH"
+			echo "--mu           --> Specify filtering values for mu."
+			echo "--kappa        --> Specify filtering values for kappa."
+			echo "--nt           --> Specify filtering values for nt."
+			echo "--ns           --> Specify filtering values for ns."
+			echo "--beta         --> Specify filtering values for beta."
+			echo "--type         --> Specify filtering values for the type of the simulation, i.e whether it is NC, fC or fH"
 			echo "--traj         --> Specify either a minimal or a maximal value or both for the trajectory number to be filtered for."
 			echo "               --> E.g. --traj \">10000\" \"<50000\" (DON'T FORGET THE QUOTES.)"
 			echo "--acc          --> Specify either a minimal or a maximal value or both for the acceptance rate to be filtered for."
 			echo "               --> E.g. --acc \">50.23\" \"<80.1\" (The value is in percentage. DON'T FORGET THE QUOTES.)"
 			echo "--status       --> Specify status value for the corresponding simulation."
 			echo "               --> Possible values are: RUNNING, PENDING, notQueued."
+			echo "--lastTraj     --> Specify a value in seconds. If the specified value exceeds the value of the field, the record is not printed."
+			echo "               --> Use this when you want to scan for crashed simulations."
 			echo ""
 			echo "Updating database:"
 			echo ""
@@ -347,8 +366,10 @@ STATUS_STRING=$(join "|" "${STATUS_ARRAY[@]}")
 
 
 if [ "$CUSTOMIZE_COLUMNS" = "FALSE" ]; then
-	DISPLAY_COLUMNS=( ${COLUMNS[muC]} ${COLUMNS[kC]} ${COLUMNS[ntC]} ${COLUMNS[nsC]} ${COLUMNS[betaC]} ${COLUMNS[trajNoC]} ${COLUMNS[accRateC]} ${COLUMNS[statusC]} )
+	DISPLAY_COLUMNS=( ${COLUMNS[muC]} ${COLUMNS[kC]} ${COLUMNS[ntC]} ${COLUMNS[nsC]} ${COLUMNS[betaC]} ${COLUMNS[trajNoC]} ${COLUMNS[accRateC]} ${COLUMNS[statusC]} ${COLUMNS[lastTrajC]} )
 fi
+
+#HERE INSERT FUNCTION TO EXTRACT THE COLORCODE INFORMATION FROM THE DATABASE FILE. IT HAS TO BE IMPLEMENTED INTO PRINTF_FORMAT_SPECIFIER_STRING .
 
 #This loop is necessary in order build the format specified and parameter string for the printf function invoked in awk.
 for COLUMN_NUMBER in ${DISPLAY_COLUMNS[@]}; do 
@@ -384,14 +405,20 @@ STATISTICS_PRINTF_FORMAT_SPECIFIER_STRING="%${NUMBER_OF_WHITESPACES_TILL_TRAJECT
 HEADER_ROW_SEPARATOR="\"$HEADER_ROW_SEPARATOR\""
 
 [ "$UPDATE" = "FALSE" ] && [ ! -f $PROJECT_STATISTICS_FILE ] && echo "$PROJECT_STATISTICS_FILE does not exist. Call $0 -u to create it...exiting." && exit
+
+
 if [ "$UPDATE" = "FALSE" ]; then
-		awk --posix -v filterMu=$FILTER_MU -v filterKappa=$FILTER_KAPPA -v filterNt=$FILTER_NT -v filterNs=$FILTER_NS -v filterBeta=$FILTER_BETA -v filterType=$FILTER_TYPE \
-					-v filterTrajNo=$FILTER_TRAJNO -v filterAccRate=$FILTER_ACCRATE -v filterStatus=$FILTER_STATUS -v statisticsSummary=$STATISTICS_SUMMARY \
+		awk --posix -v filterMu=$FILTER_MU -v filterKappa=$FILTER_KAPPA -v filterNt=$FILTER_NT -v filterNs=$FILTER_NS \
+					-v filterBeta=$FILTER_BETA -v filterType=$FILTER_TYPE \
+					-v filterTrajNo=$FILTER_TRAJNO -v filterAccRate=$FILTER_ACCRATE -v filterStatus=$FILTER_STATUS -v filterLastTrajTime=$FILTER_LASTTRAJ \
+					-v statisticsSummary=$STATISTICS_SUMMARY \
 					-v muString="$MU_STRING" -v kappaString="$KAPPA_STRING" -v nsString="$NS_STRING" -v ntString="$NT_STRING" -v betaString="$BETA_STRING" \
 					-v typeString=$TYPE_STRING -v statusString="$STATUS_STRING" \
-					-v trajLowValue=$TRAJ_LOW_VALUE -v trajHighValue=$TRAJ_HIGH_VALUE -v accRateLowValue=$ACCRATE_LOW_VALUE -v accRateHighValue=$ACCRATE_HIGH_VALUE \
+					-v trajLowValue=$TRAJ_LOW_VALUE -v trajHighValue=$TRAJ_HIGH_VALUE -v accRateLowValue=$ACCRATE_LOW_VALUE \
+					-v accRateHighValue=$ACCRATE_HIGH_VALUE -v lastTrajTime=$LAST_TRAJ_TIME \
 					-v muColumn=${COLUMNS[muC]} -v kappaColumn=${COLUMNS[kC]} -v ntColumn=${COLUMNS[ntC]} -v nsColumn=${COLUMNS[nsC]} \
-					-v betaColumn=${COLUMNS[betaC]} -v trajNoColumn=${COLUMNS[trajNoC]} -v accRateColumn=${COLUMNS[accRateC]} -v statusColumn=${COLUMNS[statusC]} '
+					-v betaColumn=${COLUMNS[betaC]} -v trajNoColumn=${COLUMNS[trajNoC]} -v accRateColumn=${COLUMNS[accRateC]} \
+					-v statusColumn=${COLUMNS[statusC]} -v lastTrajColumn=${COLUMNS[lastTrajC]} '
 
 						 {critFailedCounter=0}
 
@@ -408,6 +435,8 @@ if [ "$UPDATE" = "FALSE" ]; then
 
 						 filterAccRate == "TRUE" {if(length(accRateLowValue) == 0 ? "0" : accRateLowValue > $(accRateColumn)){critFailedCounter--;}}
 						 filterAccRate == "TRUE" {if(length(accRateHighValue) == 0 ? "100.00" : accRateHighValue < $(accRateColumn)){critFailedCounter--;}}
+
+						 filterLastTrajTime == "TRUE" {if(lastTrajTime > $(lastTrajColumn) || $(lastTrajColumn) == "------"){critFailedCounter--;}}
 						 
 						 statisticsSummary == "FALSE" && critFailedCounter == 0 {print $0}
 						 statisticsSummary == "TRUE" && critFailedCounter == 0 {lineCounter++;dataRow=sprintf("%s",$0);dataRowArray[lineCounter]=dataRow}
@@ -433,7 +462,7 @@ if [ "$UPDATE" = "FALSE" ]; then
 							}
 						}
 			' $PROJECT_STATISTICS_FILE | \
-		awk --posix -v betaColumn=${COLUMNS[betaC]} -v trajNoColumn=${COLUMNS[trajNoC]} -v statisticsSummary="TRUE" '
+		awk --posix '
 					BEGIN{
 							printf("'$HEADER_PRINTF_FORMAT_SPECIFIER_STRING'\n"'$HEADER_PRINTF_PARAMETER_STRING');
 							printf("%s\n",'$HEADER_ROW_SEPARATOR');
@@ -455,7 +484,11 @@ if [ "$UPDATE" = "TRUE" ]; then
 	do
 		while read line
 		do
-			PARAMS=( $(echo $line | awk 'BEGIN{FS="/"}{print $(NF-3) " " $(NF-2) " " $(NF-1) " " $(NF)}') )
+			if [[ "$line" =~ ^[^#] ]]; then 
+				PARAMS=( $(echo $line | awk 'BEGIN{FS="/"}{print $(NF-3) " " $(NF-2) " " $(NF-1) " " $(NF)}') )
+			else
+				continue 
+			fi
 			
 			if [ -d $line ]; then
 				echo updating $line ...
@@ -464,12 +497,14 @@ if [ "$UPDATE" = "TRUE" ]; then
 				continue
 			fi
 			${HOME}/Script/JobScriptAutomation/JobHandler.sh -l | \
-			sed -r "s:\x1B\[[0-9;]*[mK]::g" | \
-			sed -r 's/(\[|\]|\)|\(|%)//g' | \
+			sed -r 's/[^(\x1b)]\[|\]|\(|\)|%//g' | \
+			sed -r 's/(\x1B\[[[:digit:]]{1,2};[[:digit:]]{0,2};[[:digit:]]{0,2}m)(.)/\1 \2/g' | \
+			sed -r 's/(.)(\x1B\[.{1,2};.{1,2}m)/\1 \2/g' | \
+			sed -r 's/(\x1B\[.{1,2};.{1,2}m)(.)/\1 \2/g' |
 			awk --posix -v mu=${PARAMS[0]#mui*} -v k=${PARAMS[1]#k*} -v nt=${PARAMS[2]#nt*} -v ns=${PARAMS[3]#*ns} '
 
-							$0 ~ /^[[:digit:]]\.[[:digit:]]{4}/{
-								print mu " " k " " nt " " ns " " $1 " " $2 " " $3 " " $6
+							$3 ~ /^[[:digit:]]\.[[:digit:]]{4}/{
+								print $(3-1) " " mu " " $(3-1) " " k " " $(3-1) " " nt " " $(3-1) " " ns " " $(3-1) " " $3 " " $(5-1) " " $5 " " $(8-1) " " $8 " " $(15-1) " " $15 " " $(19-1) " " $19 " " "\033[0m"
 							}
 
 						' >> $CURRENT_DIRECTORY/$TEMPORARY_STATISTICS_FILE
