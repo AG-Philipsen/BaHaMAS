@@ -44,10 +44,12 @@ declare -A FSNA=( [muC]="7" [kC]="8" [ntC]="6" [nsC]="6" [betaC]="19" [trajNoC]=
 declare -A PRINTF_FORMAT_SPECIFIER_ARRAY=( [muC]="%-${FSNA[muC]}s" [kC]="%-${FSNA[kC]}s" [ntC]="%-${FSNA[ntC]}d" [nsC]="%-${FSNA[nsC]}d" [betaC]="%-${FSNA[betaC]}s" \
 											[trajNoC]="%-${FSNA[trajNoC]}d" [accRateC]="%-${FSNA[accRateC]}s" [statusC]="%-${FSNA[statusC]}s" [lastTrajC]="%-${FSNA[lastTrajC]}s" )
 
-declare -A HEADER_PRINTF_FORMAT_SPECIFIER_ARRAY=( [muC]="%-7s" [kC]="%-8s" [ntC]="%-6s" [nsC]="%-6s" [betaC]="%-19s" [trajNoC]="%-11s" [accRateC]="%-8s" [statusC]="%-13s" [lastTrajC]="%-11s" )
+declare -A HEADER_PRINTF_FORMAT_SPECIFIER_ARRAY=( [muC]="%-8s" [kC]="%-9s" [ntC]="%-7s" [nsC]="%-7s" [betaC]="%-20s" [trajNoC]="%-12s" [accRateC]="%-9s" [statusC]="%-14s" [lastTrajC]="%-12s" )
 
-declare -A HEADER_PRINTF_PARAMETER_ARRAY=( [muC]="\"mu\"" [kC]="\"kappa\"" [ntC]="\"nt\"" [nsC]="\"ns\"" [betaC]="\"beta_chain_type\"" [trajNoC]="\"trajNo\"" \
-											[accRateC]="\"acc\"" [statusC]="\"status\"" [lastTrajC]="\"l.T.[s]\"" )
+#declare -A HEADER_PRINTF_PARAMETER_ARRAY=( [muC]="\"mu\"" [kC]="\"kappa\"" [ntC]="\"nt\"" [nsC]="\"ns\"" [betaC]="\"beta_chain_type\"" [trajNoC]="\"trajNo\"" \
+#											[accRateC]="\"acc\"" [statusC]="\"status\"" [lastTrajC]="\"l.T.[s]\"" )
+declare -A HEADER_PRINTF_PARAMETER_ARRAY=( [muC]="mu" [kC]="kappa" [ntC]="nt" [nsC]="ns" [betaC]="beta_chain_type" [trajNoC]="trajNo" \
+											[accRateC]="acc" [statusC]="status" [lastTrajC]="l.T.[s]" )
 
 declare -a NR_OF_COLUMNS_TO_DISPLAY_IN_ORDER
 declare -a NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER
@@ -380,52 +382,40 @@ if [ "$CUSTOMIZE_COLUMNS" = "FALSE" ]; then
 	NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=( muC kC ntC nsC betaC trajNoC accRateC statusC lastTrajC )
 fi
 
-
-#This loop is necessary in order build the format specified and parameter string for the printf function invoked in awk.
-for COLUMN_NUMBER in ${NR_OF_COLUMNS_TO_DISPLAY_IN_ORDER[@]}; do 
-	for QUANTITY in ${!COLUMNS[@]}; do
-		if [ $COLUMN_NUMBER = ${COLUMNS[$QUANTITY]} ]; then
-
-			HEADER_PRINTF_FORMAT_SPECIFIER_STRING=$HEADER_PRINTF_FORMAT_SPECIFIER_STRING${HEADER_PRINTF_FORMAT_SPECIFIER_ARRAY[$QUANTITY]}
-			HEADER_PRINTF_PARAMETER_STRING=$HEADER_PRINTF_PARAMETER_STRING,${HEADER_PRINTF_PARAMETER_ARRAY[$QUANTITY]}
-			
-			PRINTF_FORMAT_SPECIFIER_STRING=$PRINTF_FORMAT_SPECIFIER_STRING${PRINTF_FORMAT_SPECIFIER_ARRAY[$QUANTITY]}
-			PRINTF_PARAMETER_STRING=$PRINTF_PARAMETER_STRING,\$${COLUMNS[$QUANTITY]}
-
-			for ((i=0;i<${FSNA[$QUANTITY]};i++)); do
-				HEADER_ROW_SEPARATOR=$HEADER_ROW_SEPARATOR"-"
-			done
-		fi
-	done
-done
-
-NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN=""
-for COLUMN_NUMBER in ${NR_OF_COLUMNS_TO_DISPLAY_IN_ORDER[@]}; do 
-	for QUANTITY in ${!COLUMNS[@]}; do
-		if [ $COLUMN_NUMBER = ${COLUMNS[$QUANTITY]} ]; then
-			[ "$QUANTITY" = "trajNoC" ] && break 2
-			NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN=$(($NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN+${FSNA[$QUANTITY]}))
-		fi
-	done
-done
-
-STATISTICS_PRINTF_FORMAT_SPECIFIER_STRING="%${NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN}s"
-#echo nr of whitespaces $NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN
-
 HEADER_ROW_SEPARATOR="\"$HEADER_ROW_SEPARATOR\""
 
 [ "$UPDATE" = "FALSE" ] && [ ! -f $PROJECT_STATISTICS_FILE ] && echo "$PROJECT_STATISTICS_FILE does not exist. Call $0 -u to create it...exiting." && exit
 
 if [ "$UPDATE" = "FALSE" ]; then
 
-	#NR_OF_COLUMNS_TO_DISPLAY_IN_ORDER_STRING=$(join "|" "${NR_OF_COLUMNS_TO_DISPLAY_IN_ORDER[@]}")	
+	
+	for NAME_OF_COLUMN in ${!COLUMNS[@]}; do
+		NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL=$NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL$NAME_OF_COLUMN-${COLUMNS[$NAME_OF_COLUMN]}"|"
+	done
+
 	for NAME_OF_COLUMN in ${NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER[@]}; do
 		NAME_OF_COLUMN_NR_OF_COLUMN_STRING=$NAME_OF_COLUMN_NR_OF_COLUMN_STRING$NAME_OF_COLUMN-${COLUMNS[$NAME_OF_COLUMN]}"|"
 		NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING=$NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING$NAME_OF_COLUMN--${PRINTF_FORMAT_SPECIFIER_ARRAY[$NAME_OF_COLUMN]}"|"
+		NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING=$NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING$NAME_OF_COLUMN-${HEADER_PRINTF_PARAMETER_ARRAY[$NAME_OF_COLUMN]}"|"
+		NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING=$NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING$NAME_OF_COLUMN--${HEADER_PRINTF_FORMAT_SPECIFIER_ARRAY[$NAME_OF_COLUMN]}"|"
+		LENGTH_OF_HEADER_SEPERATOR=$(($LENGTH_OF_HEADER_SEPERATOR+${FSNA[$NAME_OF_COLUMN]}+1))
 	done
 
+	NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN=""
+	for NAME_OF_COLUMN in ${NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER[@]}; do
+			[ "$NAME_OF_COLUMN" = "trajNoC" ] && break
+			NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN=$(($NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN+${FSNA[$NAME_OF_COLUMN]}+1))
+	done
+	NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN=$((NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN+7))
+	STATISTICS_PRINTF_FORMAT_SPECIFIER_STRING="%${NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN}s\n"
+	echo nr of whitespaces $NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN
+
+	#STRIPPING OF THE LAST | SYMBOL FROM THE STRING
+	NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL=$(echo ${NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL%"|"})
 	NAME_OF_COLUMN_NR_OF_COLUMN_STRING=$(echo ${NAME_OF_COLUMN_NR_OF_COLUMN_STRING%"|"})
 	NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING=$(echo ${NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING%"|"})
+	NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING=$(echo ${NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING%"|"})
+	NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING=$(echo ${NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING%"|"})
 
 	awk --posix -v filterMu=$FILTER_MU -v filterKappa=$FILTER_KAPPA -v filterNt=$FILTER_NT -v filterNs=$FILTER_NS \
 				-v filterBeta=$FILTER_BETA -v filterType=$FILTER_TYPE \
@@ -435,91 +425,130 @@ if [ "$UPDATE" = "FALSE" ]; then
 				-v typeString=$TYPE_STRING -v statusString="$STATUS_STRING" \
 				-v trajLowValue=$TRAJ_LOW_VALUE -v trajHighValue=$TRAJ_HIGH_VALUE -v accRateLowValue=$ACCRATE_LOW_VALUE \
 				-v accRateHighValue=$ACCRATE_HIGH_VALUE -v lastTrajTime=$LAST_TRAJ_TIME \
-				-v muColumn=${COLUMNS[muC]} -v kappaColumn=${COLUMNS[kC]} -v ntColumn=${COLUMNS[ntC]} -v nsColumn=${COLUMNS[nsC]} \
-				-v betaColumn=${COLUMNS[betaC]} -v trajNoColumn=${COLUMNS[trajNoC]} -v accRateColumn=${COLUMNS[accRateC]} \
-				-v statusColumn=${COLUMNS[statusC]} -v lastTrajColumn=${COLUMNS[lastTrajC]} \
-				-v nameOfColumnsAndNrOfColumnString=$NAME_OF_COLUMN_NR_OF_COLUMN_STRING \
-				-v nameOfColumnsAndSpecOfColumnString=$NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING '
+				-v nameOfColumnsAndNumberOfColumnsString=$NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL \
+				-v nameOfDisplayedColumnsAndnrOfDisplayedColumnsString=$NAME_OF_COLUMN_NR_OF_COLUMN_STRING \
+				-v nameOfDisplayedColumnsAndSpecOfColumnsString=$NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING \
+				-v nameOfColumnsAndHeaderOfColumnsString=$NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING \
+				-v nameOfColumnsAndHeaderSpecOfColumnsString=$NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING \
+				-v statisticsFormatSpecString=$STATISTICS_PRINTF_FORMAT_SPECIFIER_STRING \
+				-v lengthOfHeaderSeperator=$LENGTH_OF_HEADER_SEPERATOR '
 
 					 BEGIN{
-						nrOfColumns=split(nameOfColumnsAndNrOfColumnString,columnNamesAndNumbersArray,"|")
-						split(nameOfColumnsAndSpecOfColumnString,columnNamesAndSpecssArray,"|")
-						for(i=1;i<=nrOfColumns;i++){
-							split(columnNamesAndNumbersArray[i],columnNameAndNumber,"-")
-							columnName=columnNameAndNumber[1]
-							columnNumber=columnNameAndNumber[2]
-							columnNamesInOrder[i]=columnName
-							columnNameColumnNumber[columnName]=columnNumber
-							split(columnNamesAndSpecssArray[i],columnNameAndSpec,"--")
-							columnSpec=columnNameAndSpec[2]
-							specForColorCode="%s"
-							columnNameColumnSpec[columnName]=specForColorCode columnSpec
+					 print statisticsFormatSpecString
+					 	nrOfTotalColumns=split(nameOfColumnsAndNumberOfColumnsString,columnNamesAndNumbersArray,"|");
+
+						for(i=1;i<=nrOfTotalColumns;i++){
+							split(columnNamesAndNumbersArray[i],columnNameAndNumber,"-");
+							columnName=columnNameAndNumber[1];
+							columnNumber=columnNameAndNumber[2];
+							columnNameColumnNumber[columnName]=columnNumber;
 						}
+						nrOfDisplayedColumns=split(nameOfDisplayedColumnsAndnrOfDisplayedColumnsString,columnNamesAndNumbersArray,"|");
+						split(nameOfDisplayedColumnsAndSpecOfColumnsString,columnNamesAndSpecsArray,"|");
+
+						for(i=1;i<=nrOfDisplayedColumns;i++){
+							split(columnNamesAndNumbersArray[i],columnNameAndNumber,"-");
+							columnName=columnNameAndNumber[1];
+							columnNumber=columnNameAndNumber[2];
+							columnNamesInOrder[i]=columnName;
+							split(columnNamesAndSpecsArray[i],columnNameAndSpec,"--");
+							columnSpec=columnNameAndSpec[2];
+							specForColorCode="%-s";
+							columnNameColumnSpec[columnName]=specForColorCode " " columnSpec;
+						}
+						split(nameOfColumnsAndHeaderOfColumnsString,columnNamesAndHeaderArray,"|");
+						split(nameOfColumnsAndHeaderSpecOfColumnsString,columnNamesAndHeaderSpecArray,"|");
+						printf(" "); #THIS PRINTF IS IMPORTANT TO GET THE HEADER IN TO THE RIGHT PLACE
+						for(i=1;i<=nrOfDisplayedColumns;i++){
+							split(columnNamesAndHeaderArray[i],columnAndHeader,"-");
+							split(columnNamesAndHeaderSpecArray[i],columnAndHeaderSpec,"--");
+							specifierString=columnAndHeaderSpec[2];
+							printf(specifierString,columnAndHeader[2]);
+						}
+						printf("\n");
+						for(i=1;i<=lengthOfHeaderSeperator;i++){
+							printf("-");
+						}
+						printf("\n");
 					 }
 					 {critFailedCounter=0}
 
-					 filterMu == "TRUE" {if($(muColumn) !~ muString) {critFailedCounter--;}}
-					 filterKappa == "TRUE" {if($(kappaColumn) !~ kappaString) {critFailedCounter--;}}
-					 filterNs == "TRUE" {if($(nsColumn) !~ nsString) {critFailedCounter--;}}
-					 filterNt == "TRUE" {if($(ntColumn) !~ ntString) {critFailedCounter--;}}
-					 filterBeta == "TRUE" {if($(betaColumn) !~ betaString) {critFailedCounter--;}}
-					 filterType == "TRUE" {if($(betaColumn) !~ typeString) {critFailedCounter--;}}
-					 filterStatus == "TRUE" {if($(statusColumn) !~ statusString) {critFailedCounter--;}}
+					 filterMu == "TRUE" {if($(columnNameColumnNumber["muC"]) !~ muString) {critFailedCounter--;}}
+					 filterKappa == "TRUE" {if($(columnNameColumnNumber["kC"]) !~ kappaString) {critFailedCounter--;}}
+					 filterNs == "TRUE" {if($(columnNameColumnNumber["nsC"]) !~ nsString) {critFailedCounter--;}}
+					 filterNt == "TRUE" {if($(columnNameColumnNumber["ntC"]) !~ ntString) {critFailedCounter--;}}
+					 filterBeta == "TRUE" {if($(columnNameColumnNumber["betaC"]) !~ betaString) {critFailedCounter--;}}
+					 filterType == "TRUE" {if($(columnNameColumnNumber["betaC"]) !~ typeString) {critFailedCounter--;}}
+					 filterStatus == "TRUE" {if($(columnNameColumnNumber["statusC"]) !~ statusString) {critFailedCounter--;}}
 
-					 filterTrajNo == "TRUE" {if(length(trajLowValue) == 0 ? "0" : trajLowValue > $(trajNoColumn)){critFailedCounter--;}}
-					 filterTrajNo == "TRUE" {if(length(trajHighValue) == 0 ? "999999" : trajHighValue < $(trajNoColumn)){critFailedCounter--;}}
+					 filterTrajNo == "TRUE" {if(length(trajLowValue) == 0 ? "0" : trajLowValue > $(columnNameColumnNumber["trajNoC"])){critFailedCounter--;}}
+					 filterTrajNo == "TRUE" {if(length(trajHighValue) == 0 ? "999999" : trajHighValue < $(columnNameColumnNumber["trajNoC"])){critFailedCounter--;}}
 
-					 filterAccRate == "TRUE" {if(length(accRateLowValue) == 0 ? "0" : accRateLowValue > $(accRateColumn)){critFailedCounter--;}}
-					 filterAccRate == "TRUE" {if(length(accRateHighValue) == 0 ? "100.00" : accRateHighValue < $(accRateColumn)){critFailedCounter--;}}
+					 filterAccRate == "TRUE" {if(length(accRateLowValue) == 0 ? "0" : accRateLowValue > $(columnNameColumnNumber["accRateC"])){critFailedCounter--;}}
+					 filterAccRate == "TRUE" {if(length(accRateHighValue) == 0 ? "100.00" : accRateHighValue < $(columnNameColumnNumber["accRateC"])){critFailedCounter--;}}
 
-					 filterLastTrajTime == "TRUE" {if(lastTrajTime > $(lastTrajColumn) || $(lastTrajColumn) == "------"){critFailedCounter--;}}
+					 filterLastTrajTime == "TRUE" {if(lastTrajTime > $(columnNameColumnNumber["lastTrajC"]) || $(columnNameColumnNumber["lastTrajC"]) == "------"){critFailedCounter--;}}
 					 
 					 statisticsSummary == "FALSE" && critFailedCounter == 0 {
-						for(i=1;i<=nrOfColumns;i++){
-							nameOfColumn=columnNamesInOrder[i]
-							specifierString=columnNameColumnSpec[nameOfColumn]
-							columnOfColorCode=columnNameColumnNumber[nameOfColumn]-1
-							columnOfColumnName=columnNameColumnNumber[nameOfColumn]
-							printf(specifierString,$(columnOfColorCode),$(columnOfColumnName))
+						for(i=1;i<=nrOfDisplayedColumns;i++){
+							nameOfColumn=columnNamesInOrder[i];
+							specifierString=columnNameColumnSpec[nameOfColumn];
+							columnOfColorCode=columnNameColumnNumber[nameOfColumn]-1;
+							columnOfColumnName=columnNameColumnNumber[nameOfColumn];
+							printf(specifierString,$(columnOfColorCode),$(columnOfColumnName));
 						}
-						printf("\n")
+						printf("\n");
 					 }
 					 statisticsSummary == "TRUE" && critFailedCounter == 0 {lineCounter++;dataRow=sprintf("%s",$0);dataRowArray[lineCounter]=dataRow}
 
 					 #SUMMARY OF STATISTICS
 					 statisticsSummary == "TRUE" {
-						split($(betaColumn),betaChainType,"_");
-						if(betaChainType[3] == "NC"){statisticsSummaryArray[$(muColumn) "_" $(kappaColumn) "_" $(ntColumn) "_" $(nsColumn) "_" betaChainType[1] "_" betaChainType[3]]+=$(trajNoColumn);}
+						split($(columnNameColumnNumber["betaC"]),betaChainType,"_");
+						if(betaChainType[3] == "NC"){
+							statisticsSummaryArray[$(columnNameColumnNumber["muC"]) "_" $(columnNameColumnNumber["kC"]) "_" $(columnNameColumnNumber["ntC"]) "_" $(columnNameColumnNumber["nsC"]) "_" betaChainType[1] "_" betaChainType[3]]+=$(columnNameColumnNumber["trajNoC"]);
+						}
 					}
+
 					END{
 						if(statisticsSummary == "TRUE"){
 							split(dataRowArray[1],fieldsArray," ");
-							split(fieldsArray[betaColumn],betaChainType,"_");
-							if(betaChainType[3] == "NC"){oldKey = fieldsArray[muColumn] "_" fieldsArray[kappaColumn] "_" fieldsArray[ntColumn] "_" fieldsArray[nsColumn] "_" betaChainType[1] "_" betaChainType[3];}
+							split(fieldsArray[columnNameColumnNumber["betaC"]],betaChainType,"_");
+
+							if(betaChainType[3] == "NC"){
+								oldKey = fieldsArray[columnNameColumnNumber["muC"]] "_" fieldsArray[columnNameColumnNumber["kC"]] "_" fieldsArray[columnNameColumnNumber["ntC"]] "_" \
+								fieldsArray[columnNameColumnNumber["nsC"]] "_" betaChainType[1] "_" betaChainType[3];
+							}
+
 							for(i=1;i<=lineCounter;i++){
 								split(dataRowArray[i],fieldsArray," ");	
-								split(fieldsArray[betaColumn],betaChainType,"_");
-								if(betaChainType[3] == "NC"){newKey = fieldsArray[muColumn] "_" fieldsArray[kappaColumn] "_" fieldsArray[ntColumn] "_" fieldsArray[nsColumn] "_" betaChainType[1] "_" betaChainType[3]}
-								if(betaChainType[3] == "NC"){if(newKey != oldKey){printf("sum: %d\n",statisticsSummaryArray[oldKey]); oldKey=newKey}}
-								print dataRowArray[i]
+								split(fieldsArray[columnNameColumnNumber["betaC"]],betaChainType,"_");
+								if(betaChainType[3] == "NC"){
+									newKey = fieldsArray[columnNameColumnNumber["muC"]] "_" fieldsArray[columnNameColumnNumber["kC"]] "_" fieldsArray[columnNameColumnNumber["ntC"]] "_" \
+									fieldsArray[columnNameColumnNumber["nsC"]] "_" betaChainType[1] "_" betaChainType[3]
+								}
+
+								if(betaChainType[3] == "NC"){
+									if(newKey != oldKey){
+										printf(statisticsFormatSpecString,statisticsSummaryArray[oldKey]); 
+										oldKey=newKey;
+									}
+								}
+
+								split(dataRowArray[i],columnsArray," ")
+								for(columnEntry=1;columnEntry<=nrOfDisplayedColumns;columnEntry++){
+									nameOfColumn=columnNamesInOrder[columnEntry];
+									specifierString=columnNameColumnSpec[nameOfColumn];
+									columnOfColorCode=columnNameColumnNumber[nameOfColumn]-1;
+									columnOfColumnName=columnNameColumnNumber[nameOfColumn];
+									printf(specifierString,columnsArray[columnOfColorCode],columnsArray[columnOfColumnName]);
+								}
+								printf(" \033[0;m")
+								printf("\n");
 							}
-							printf("sum: %d\n",statisticsSummaryArray[newKey]);
+							printf(statisticsFormatSpecString,statisticsSummaryArray[newKey]);
 						}
 					}
-		' $PROJECT_STATISTICS_FILE #| \
-	#awk --posix '
-	#			BEGIN{
-	#					printf("'$HEADER_PRINTF_FORMAT_SPECIFIER_STRING'\n"'$HEADER_PRINTF_PARAMETER_STRING');
-	#					printf("%s\n",'$HEADER_ROW_SEPARATOR');
-	#				 }
-	#				 $0 !~ /^sum/{
-	#					 
-	#						printf("'$PRINTF_FORMAT_SPECIFIER_STRING'\n"'$PRINTF_PARAMETER_STRING');
-	#				 }
-	#				 $0 ~ /^sum/{
-	#				 	printf("%'$(($NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN+5))'s\n",$0)
-	#			 	 }
-	#			'
+		' $PROJECT_STATISTICS_FILE
 fi
 
 
