@@ -107,7 +107,7 @@ while [ $# -gt 0 ]; do
 						NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER+=( muC )
 						shift
 						;;
-					kappa)
+					$MASS_PARAMETER)
 						NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER+=( kC )
 						shift
 						;;
@@ -169,14 +169,14 @@ while [ $# -gt 0 ]; do
 			done
 			[ ${#MU_ARRAY[@]} -eq 0 ] && echo "You did not correctly specify filtering values, hence no filtering on mu will be applied." && FILTER_MU="FALSE" && return
 			;;
-		--kappa)
+		--$MASS_PARAMETER)
 			UPDATE="FALSE"
 			FILTER_KAPPA="TRUE"
 			while [[ $2 =~ ^[[:digit:]]{4}$ ]]; do 
 				KAPPA_ARRAY+=( $2 )
 				shift
 			done
-			[ ${#KAPPA_ARRAY[@]} -eq 0 ] && echo "You did not correctly specify filtering values, hence no filtering on kappa will be applied." && FILTER_KAPPA="FALSE" && return
+			[ ${#KAPPA_ARRAY[@]} -eq 0 ] && echo "You did not correctly specify filtering values, hence no filtering on $MASS_PARAMETER will be applied." && FILTER_KAPPA="FALSE" && return
 			;;
 		--nt)
 			UPDATE="FALSE"
@@ -307,8 +307,8 @@ while [ $# -gt 0 ]; do
 			echo "Displaying options:"
 			echo ""
 			echo "-c | --columns --> Specify the columns to be displayed."
-		   	echo "               --> Possible columns are: mu, kappa, nt, ns, beta_chain_type, trajNo, acc, status, lastTraj."
-		   	echo "               --> Example: -c kappa nt ns beta_chain_type trajNo."
+		   	echo "               --> Possible columns are: mu, $MASS_PARAMETER, nt, ns, beta_chain_type, trajNo, acc, status, lastTraj."
+		   	echo "               --> Example: -c $MASS_PARAMETER nt ns beta_chain_type trajNo."
 			echo "               --> If no columns are specified, all of the above columns will be printed by default."
 			echo "--color        --> Specifiy this option for displaying coloured output.(NOT YET IMPLEMENTED)"
 			echo "--sum          --> Summing up the trajectory numbers of each parameter set."
@@ -316,7 +316,7 @@ while [ $# -gt 0 ]; do
 			echo "Filtering:"
 			echo ""
 			echo "--mu           --> Specify filtering values for mu."
-			echo "--kappa        --> Specify filtering values for kappa."
+			echo "--$MASS_PARAMETER        --> Specify filtering values for $MASS_PARAMETER."
 			echo "--nt           --> Specify filtering values for nt."
 			echo "--ns           --> Specify filtering values for ns."
 			echo "--beta         --> Specify filtering values for beta."
