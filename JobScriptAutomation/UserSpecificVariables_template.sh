@@ -20,13 +20,13 @@ if [ $WILSON = "TRUE" ]; then
     
     SIMULATION_PATH=""
     HMC_FILENAME=""
-    INVERTER_FILENAME=""
     INPUTFILE_NAME=""
     JOBSCRIPT_PREFIX=""
     OUTPUTFILE_NAME=""
-    SRUN_COMMANDSFILE_FOR_INVERSION=""
     PROJECT_DATABASE_FILENAME=""
     PROJECT_DATABASE_DIRECTORY=""
+    SRUN_COMMANDSFILE_FOR_INVERSION=""
+    INVERTER_FILENAME=""
 fi
 
 if [ $STAGGERED = "TRUE" ]; then
@@ -44,6 +44,8 @@ if [ $STAGGERED = "TRUE" ]; then
     APPROX_METROPOLIS_NAME=""
     PROJECT_DATABASE_FILENAME=""
     PROJECT_DATABASE_DIRECTORY=""
+    SRUN_COMMANDSFILE_FOR_INVERSION=""
+    INVERTER_FILENAME=""
 fi
 
 HMC_GLOBALPATH="${HOME}/$HMC_BUILD_PATH/$HMC_FILENAME"
@@ -70,6 +72,7 @@ THERMALIZED_CONFIGURATIONS_PATH=""
 #     APPROX_METROPOLIS_NAME                rational approximation used for the metropolis test
 #     HMC_GLOBALPATH                        executable global path
 #     THERMALIZED_CONFIGURATIONS_PATH       global path to the folder containing the thermalized configurations
+#     INVERTER_FILENAME                     Name of the inverter executable that comes with the cl2qcd code	  
 #     SRUN_COMMANDSFILE_FOR_INVERSION       name of the file where the execution commands for the inversions are being stored
 #     PROJECT_DATABASE_DIRECTORY            directory where the the simulation status files are stored (it MUST be a GLOBALPATH)
 #     PROJECT_DATABASE_FILENAME             name of the file containing the database
