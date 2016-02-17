@@ -19,6 +19,7 @@ source $HOME/Script/JobScriptAutomation/AuxiliaryFunctions.sh || exit -2
 source $HOME/Script/JobScriptAutomation/AcceptanceRateReport.sh || exit -2
 source $HOME/Script/JobScriptAutomation/BuildRegexPath.sh || exit -2
 source $HOME/Script/JobScriptAutomation/EmptyBetaDirectories.sh || exit -2
+source $HOME/Script/ProjectStatisticsDatabase.sh || exit -2
 #-----------------------------------------------------------------------------------------------------------------#
 
 #-----------------------------------------------------------------------------------------------------------------#
@@ -84,6 +85,7 @@ COMPLETE_BETAS_FILE="FALSE"
 UNCOMMENT_BETAS="FALSE"
 COMMENT_BETAS="FALSE"
 INVERT_CONFIGURATIONS="FALSE"
+CALL_DATABASE="FALSE"
 NUMBER_OF_CHAINS_TO_BE_IN_THE_BETAS_FILE="4"
 if [ $STAGGERED = "TRUE" ]; then
     NUM_TASTES="2"
@@ -100,6 +102,8 @@ NUMBER_SOURCES_FOR_CORRELATORS="8"
 UNCOMMENT_BETAS_SEED_ARRAY=()
 UNCOMMENT_BETAS_ARRAY=()
 
+#Array for the options string 
+DATABASE_OPTIONS=()
 
 #-----------------------------------------------------------------------------------------------------------------#
 # Set default values for the non-modifyable variables ---> Modify this file to change them!
@@ -125,10 +129,19 @@ SPECIFIED_COMMAND_LINE_OPTIONS=( $@ )
 #If the help is asked, it doesn't matter which other options are given to the script
 if ElementInArray "-h" ${SPECIFIED_COMMAND_LINE_OPTIONS[@]} || ElementInArray "--help" ${SPECIFIED_COMMAND_LINE_OPTIONS[@]}; then
     SPECIFIED_COMMAND_LINE_OPTIONS=( "--help" )
+elif ElementInArray "-D" ${SPECIFIED_COMMAND_LINE_OPTIONS[@]} && ElementInArray "--helpDatabase" ${SPECIFIED_COMMAND_LINE_OPTIONS[@]}; then
+	SPECIFIED_COMMAND_LINE_OPTIONS=( "-D" "-h" )
 fi
 
 ParseCommandLineOption "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}"
 CheckWilsonStaggeredVariables
+
+if [ "$CALL_DATABASE" = "TRUE" ]; then
+	echo Calling Database...
+	projectStatisticsDatabase ${DATABASE_OPTIONS[@]}	
+	exit
+fi
+
 ReadParametersFromPath $(pwd)
 #-----------------------------------------------------------------------------------------------------------------#
 

@@ -47,14 +47,19 @@ PARAMETERS_STRING=""
 BETA_PREFIX="b"
 SEED_PREFIX="s"
 BETA_POSTFIX=""
+PARAMETER_PREFIXES=([$CHEMPOT_POSITION]=$CHEMPOT_PREFIX [$KAPPA_POSITION]=$KAPPA_PREFIX [$NTIME_POSITION]=$NTIME_PREFIX [$NSPACE_POSITION]=$NSPACE_PREFIX)
 
 #----------ADDED BY CHRIS FOR LISTSTATUS FUNCTIONALITY--------
 #TODO: Discuss with Alessandro about leaving it here or not!
 
-BETA_POSITION=4
+CHEMPOT_REGEX='\(0\|PiT\)'
 KAPPA_REGEX='[[:digit:]]\{4\}'
-NTIME_REGEX='[[:digit:]]'
+NTIME_REGEX='[[:digit:]]\{1,2\}'
 NSPACE_REGEX='[[:digit:]]\{2\}'
+
+PARAMETER_REGEXES=([$CHEMPOT_POSITION]=$CHEMPOT_REGEX [$KAPPA_POSITION]=$KAPPA_REGEX [$NTIME_POSITION]=$NTIME_REGEX [$NSPACE_POSITION]=$NSPACE_REGEX)
+
+BETA_POSITION=4
 BETA_REGEX='[[:digit:]]\.[[:digit:]]\{4\}'
 #-------------------------------------------------------------
 
@@ -74,27 +79,25 @@ function SetParametersPathAndString(){
 	    echo "Unable to SetParametersPath! Aborting..."
         exit -1
     fi
-    local PREFIXES=([$CHEMPOT_POSITION]=$CHEMPOT_PREFIX [$KAPPA_POSITION]=$KAPPA_PREFIX [$NTIME_POSITION]=$NTIME_PREFIX [$NSPACE_POSITION]=$NSPACE_PREFIX)
     local PARAMETERS_VALUE=([$CHEMPOT_POSITION]=$CHEMPOT [$KAPPA_POSITION]=$KAPPA [$NTIME_POSITION]=$NTIME [$NSPACE_POSITION]=$NSPACE)
-    for ((i=0; i<${#PREFIXES[@]}; i++)); do    
-	PARAMETERS_PATH="$PARAMETERS_PATH/${PREFIXES[$i]}${PARAMETERS_VALUE[$i]}"
-	PARAMETERS_STRING="$PARAMETERS_STRING${PREFIXES[$i]}${PARAMETERS_VALUE[$i]}_"
+    for ((i=0; i<${#PARAMETER_PREFIXES[@]}; i++)); do    
+	PARAMETERS_PATH="$PARAMETERS_PATH/${PARAMETER_PREFIXES[$i]}${PARAMETERS_VALUE[$i]}"
+	PARAMETERS_STRING="$PARAMETERS_STRING${PARAMETER_PREFIXES[$i]}${PARAMETERS_VALUE[$i]}_"
     done
     PARAMETERS_STRING=${PARAMETERS_STRING%?} #Remove last underscore
 }
 
 function ReadParametersFromPath(){
-    local PREFIXES=([$CHEMPOT_POSITION]=$CHEMPOT_PREFIX [$KAPPA_POSITION]=$KAPPA_PREFIX [$NTIME_POSITION]=$NTIME_PREFIX [$NSPACE_POSITION]=$NSPACE_PREFIX)
     local PARAMETERS_VALUE=()
     #Path given as first argument to this function
     local PATH_TO_BE_USED="/$1/" #Add in front and back a "/" just to be general in the search
-    for ((i=0; i<${#PREFIXES[@]}; i++)); do
-	if [ $(echo $PATH_TO_BE_USED | grep -o "/${PREFIXES[$i]}" | wc -l) -ne 1 ]; then
-	    printf "\e[0;31m Unable to recover \"${PREFIXES[$i]}\" from the path \"$1\". Aborting...\n\n\e[0m"
+    for ((i=0; i<${#PARAMETER_PREFIXES[@]}; i++)); do
+	if [ $(echo $PATH_TO_BE_USED | grep -o "/${PARAMETER_PREFIXES[$i]}" | wc -l) -ne 1 ]; then
+	    printf "\e[0;31m Unable to recover \"${PARAMETER_PREFIXES[$i]}\" from the path \"$1\". Aborting...\n\n\e[0m"
             exit -1
 	fi
-	PARAMETERS_VALUE[$i]=$(echo "$PATH_TO_BE_USED" | awk -v expr="${PREFIXES[$i]}" \
-                                                            -v expr_len=${#PREFIXES[$i]} \
+	PARAMETERS_VALUE[$i]=$(echo "$PATH_TO_BE_USED" | awk -v expr="${PARAMETER_PREFIXES[$i]}" \
+                                                            -v expr_len=${#PARAMETER_PREFIXES[$i]} \
                                                            '{print substr($0, index($0, "/"expr) + expr_len + 1, index(substr($0, index($0, "/"expr) + expr_len+1), "/") - 1)}')
     done
     CHEMPOT=${PARAMETERS_VALUE[$CHEMPOT_POSITION]}

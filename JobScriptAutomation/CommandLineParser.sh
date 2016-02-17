@@ -12,6 +12,7 @@ function ParseCommandLineOption(){
                             "-U | --uncommentBetas"
                             "-u | --commentBetas"
                             "-i | --invertConfigurations"
+							"-D | --dataBase"
                             "--liststatus_all"
                             "--submitonly"
                             "--showjobs"
@@ -104,6 +105,7 @@ function ParseCommandLineOption(){
 		        echo -e "                                           or simply beta values like 5.4380 or a mix of both. If pure beta values are given then all seeds of the given beta value will be uncommented."
 		        echo -e "  \e[0;34m-u | --commentBetas\e[0;32m                ->    Is the reverse option of the \"--uncommentBetas\" option"
 		        echo -e "  \e[0;34m-i | --invertConfigurations\e[0;32m        ->    Invert configurations and produce correlator files for betas and seed specified in the betas file."
+				echo -e "  \e[0;34m-D | --dataBase\e[0;32m                    ->    Update, display and filter data base. For more info call -D with --helpDataBase."
 		        echo ""
 		        echo -e "\e[0;93mNOTE: The blue options are mutually exclusive and they are all FALSE by default! In other words, if none of them"
 		        echo -e "\e[0;93m      is given, the script will create beta-folders with the right files inside, but no job will be submitted."
@@ -293,6 +295,13 @@ function ParseCommandLineOption(){
                 INVERT_CONFIGURATIONS="TRUE"
                 shift
                 ;;
+			-D | --database)
+				CALL_DATABASE="TRUE"
+				MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--database" )
+				shift
+				DATABASE_OPTIONS=( $@ )
+				shift $#
+				;;
 	        * ) printf "\n\e[0;31m Invalid option \e[1m$1\e[0;31m (see help for further information)! Aborting...\n\n\e[0m" ; exit -1 ;;
 	    esac
     done
