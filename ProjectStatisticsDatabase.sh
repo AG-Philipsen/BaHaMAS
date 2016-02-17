@@ -568,13 +568,13 @@ if [ "$UPDATE" = "TRUE" ]; then
 	done
 	REGEX_STRING=${REGEX_STRING%/}		
 
-	[ "$READ_DIRECTORIES_FROM_FILE" = "FALSE" ] && find $HOME_DIR/$SIMULATION_PATH -regextype grep -regex "$REGEX_STRING" > $TEMPORARY_FILE_WITH_DIRECTORIES
-	[ "$READ_DIRECTORIES_FROM_FILE" = "TRUE" ] && cat $FILE_WITH_DIRECTORIES > $TEMPORARY_FILE_WITH_DIRECTORIES
-
-	echo entering while loop ...
 
 	while :
 	do
+
+		[ "$READ_DIRECTORIES_FROM_FILE" = "FALSE" ] && find $HOME_DIR/$SIMULATION_PATH -regextype grep -regex "$REGEX_STRING" > $TEMPORARY_FILE_WITH_DIRECTORIES
+		[ "$READ_DIRECTORIES_FROM_FILE" = "TRUE" ] && cat $FILE_WITH_DIRECTORIES > $TEMPORARY_FILE_WITH_DIRECTORIES
+
 		while read line
 		do
 			if [[ "$line" =~ ^[^#] ]]; then 
