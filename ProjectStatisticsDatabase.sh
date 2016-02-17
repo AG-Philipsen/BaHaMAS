@@ -364,7 +364,7 @@ done
 if [ "$UPDATE" = "FALSE" ] && [ ! -f $SPECIFIED_PROJECT_DATABASE_FILE ] && [ $FILTER_SPECIFIC_DATABASE_FILE = "FALSE" ]; then
 	echo "Found no up to date database file with date $(date +%d_%m_%y). Looking for older versions..."
 	LATEST_DATABASE_FILE=$(ls $PROJECT_DATABASE_DIRECTORY | grep -E [[:digit:]]{2}_[[:digit:]]{2}_[[:digit:]]{2}_projectStatistics.dat | sort -t "_" -k 3,3 -k 2,2 -k 1,1 | tail -n1)
-	[ $LATEST_DATABASE_FILE = "" ] && echo "No older database versions found...exiting." && return
+	[ "$LATEST_DATABASE_FILE" = "" ] && echo "No older database versions found...exiting." && return
 	echo "Found older version: $LATEST_DATABASE_FILE"
 	SPECIFIED_PROJECT_DATABASE_FILE=$PROJECT_DATABASE_DIRECTORY/$LATEST_DATABASE_FILE
 elif [ "$UPDATE" = "FALSE" ] && [ ! -f $SPECIFIED_PROJECT_DATABASE_FILE ] && [ $FILTER_SPECIFIC_DATABASE_FILE = "TRUE" ]; then

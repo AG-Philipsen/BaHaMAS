@@ -129,7 +129,7 @@ SPECIFIED_COMMAND_LINE_OPTIONS=( $@ )
 #If the help is asked, it doesn't matter which other options are given to the script
 if ElementInArray "-h" ${SPECIFIED_COMMAND_LINE_OPTIONS[@]} || ElementInArray "--help" ${SPECIFIED_COMMAND_LINE_OPTIONS[@]}; then
     SPECIFIED_COMMAND_LINE_OPTIONS=( "--help" )
-elif ElementInArray "-D" ${SPECIFIED_COMMAND_LINE_OPTIONS[@]} && ElementInArray "--helpDatabase" ${SPECIFIED_COMMAND_LINE_OPTIONS[@]}; then
+elif ElementInArray "--helpDatabase" ${SPECIFIED_COMMAND_LINE_OPTIONS[@]}; then
 	SPECIFIED_COMMAND_LINE_OPTIONS=( "-D" "-h" )
 fi
 
