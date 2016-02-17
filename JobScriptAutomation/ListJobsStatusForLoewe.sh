@@ -85,7 +85,27 @@ function __static__ExtractMetaInformationFromJOBNAME(){
 
 function ListJobStatus_Loewe(){
 
-    local JOBS_STATUS_FILE="jobs_status_$PARAMETERS_STRING.txt"
+    # This function can be called by the JobHandler either in the LISTSTATUS setup or in the DATABASE setup.
+    # The crucial difference is that in the first case the PARAMETERS_STRING and PARAMETERS_PATH variable
+    # must be the global ones, otherwise they have to be built on the basis of some given information.
+    # Then we make this function accept one and ONLY ONE argument (given only in the DATABASE setup)
+    # containing the PARAMETERS_PATH (e.g. /muiPiT/k1550/nt6/ns12) and we will define local
+    # PARAMETERS_STRING and PARAMETERS_PATH variables filled differently in the two cases.
+    # In the DATABASE setup the PARAMETERS_STRING is built using the argument given.
+    if [ $# -eq 0 ]; then
+        local LOCAL_PARAMETERS_STRING="$PARAMETERS_STRING"
+        local LOCAL_PARAMETERS_PATH="$PARAMETERS_PATH"
+    elif [ $# -eq 1 ]; then
+        local LOCAL_PARAMETERS_PATH="$1"
+        local LOCAL_PARAMETERS_STRING=$(sed 's@/@_@g' <<< "$LOCAL_PARAMETERS_PATH")
+        LOCAL_PARAMETERS_STRING=${LOCAL_PARAMETERS_STRING:1}
+	else 
+		echo "\e[31m Wrong invocation of ListJobStatus_Loewe: Invalid number of arguments. Please investigate...exiting."
+		return
+	fi
+    
+
+    local JOBS_STATUS_FILE="jobs_status_$LOCAL_PARAMETERS_STRING.txt"
     rm -f $JOBS_STATUS_FILE
     
     printf "\n\e[0;36m===============================================================================================================================================\n\e[0m"
@@ -106,30 +126,21 @@ function ListJobStatus_Loewe(){
 	local POSTFIX_FROM_FOLDER=$(echo ${BETA##*_} | grep -o "[[:alpha:]]\+\$")
 
 	local STATUS=( )
-	for JOB_MATCHING in $(echo ${JOB_METAINFORMATION_ARRAY[@]} | sed 's/ /\n/g' | grep "${PARAMETERS_STRING}" | grep "${BETA_PREFIX}${BETA%_*}" | grep "postfix=${POSTFIX_FROM_FOLDER}|"); do
+	for JOB_MATCHING in $(echo ${JOB_METAINFORMATION_ARRAY[@]} | sed 's/ /\n/g' | grep "${LOCAL_PARAMETERS_STRING}" | grep "${BETA_PREFIX}${BETA%_*}" | grep "postfix=${POSTFIX_FROM_FOLDER}|"); do
 	    STATUS+=( "${JOB_MATCHING##*|}" )
 	done
 	if [ ${#STATUS[@]} -eq 0 ]; then
 	    [ $LISTSTATUS_SHOW_ONLY_QUEUED = "TRUE" ] && continue
 	    STATUS="notQueued"
 	elif [ ${#STATUS[@]} -ne 1 ]; then
-	    printf "\n \e[1;37;41mWARNING:\e[0;31m \e[1mThere are more than one job with ${PARAMETERS_STRING} and BETA=$BETA as parameters! CHECK!!! Aborting...\n\n\e[0m\n"
+	    printf "\n \e[1;37;41mWARNING:\e[0;31m \e[1mThere are more than one job with ${LOCAL_PARAMETERS_STRING} and BETA=$BETA as parameters! CHECK!!! Aborting...\n\n\e[0m\n"
 	    exit -1
 	fi
 	
 	#----Constructing WORK_BETADIRECTORY, HOME_BETADIRECTORY, JOBSCRIPT_NAME, JOBSCRIPT_GLOBALPATH and INPUTFILE_GLOBALPATH---#
-	if [ $# -eq 1 ]; then
-		local OUTPUTFILE_GLOBALPATH="$WORK_DIR/$SIMULATION_PATH$1/$BETA_PREFIX$BETA/$OUTPUTFILE_NAME"
-		local INPUTFILE_GLOBALPATH="$HOME_DIR/$SIMULATION_PATH$1/$BETA_PREFIX$BETA/$INPUTFILE_NAME"
-		local STDOUTPUT_GLOBALPATH="$HOME_DIR/$SIMULATION_PATH$1/$BETA_PREFIX$BETA/$STDOUTPUT_FILE"
-	elif [ $# -eq 0 ]; then
-		local OUTPUTFILE_GLOBALPATH="$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA/$OUTPUTFILE_NAME"
-		local INPUTFILE_GLOBALPATH="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA/$INPUTFILE_NAME"
-		local STDOUTPUT_GLOBALPATH="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA/$STDOUTPUT_FILE"
-	else 
-		echo "\e[31m Wrong invocation of ListJobStatus_Loewe: Invalid number of arguments. Please investigate...exiting."
-		return
-	fi
+	local OUTPUTFILE_GLOBALPATH="$WORK_DIR/$SIMULATION_PATH$LOCAL_PARAMETERS_PATH/$BETA_PREFIX$BETA/$OUTPUTFILE_NAME"
+	local INPUTFILE_GLOBALPATH="$HOME_DIR/$SIMULATION_PATH$LOCAL_PARAMETERS_PATH/$BETA_PREFIX$BETA/$INPUTFILE_NAME"
+	local STDOUTPUT_GLOBALPATH="$HOME_DIR/$SIMULATION_PATH$LOCAL_PARAMETERS_PATH/$BETA_PREFIX$BETA/$STDOUTPUT_FILE"
 	local STDOUTPUT_FILE=`ls -t1 $BETA_PREFIX$BETA | awk -v filename="$HMC_FILENAME" 'BEGIN{regexp="^"filename".[[:digit:]]+.out$"}{if($1 ~ regexp){print $1}}' | head -n1`
 	#-------------------------------------------------------------------------------------------------------------------------#
 	if [ $LISTSTATUS_MEASURE_TIME = "TRUE" ]; then
