@@ -137,7 +137,6 @@ ParseCommandLineOption "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}"
 CheckWilsonStaggeredVariables
 
 if [ "$CALL_DATABASE" = "TRUE" ]; then
-	echo Calling Database...
 	projectStatisticsDatabase ${DATABASE_OPTIONS[@]}	
 	exit
 fi

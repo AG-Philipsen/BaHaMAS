@@ -12,10 +12,11 @@ function join { local IFS="$1"; shift; echo "$*"; }
 
 function projectStatisticsDatabase(){
 
-local FILE_WITH_DIRECTORIES=""
+#local FILE_WITH_DIRECTORIES=""
 local TEMPORARY_FILE_WITH_DIRECTORIES="temporaryFileWithDirectoriesForDatabaseUpdate.dat"
 local TEMPORARY_DATABASE_FILE="tmpDatabase.dat"
-local SPECIFIED_PROJECT_DATABASE_FILE=$PROJECT_DATABASE_DIRECTORY/$(date +%d_%m_%y)_$PROJECT_DATABASE_FILENAME
+#local PROJECT_DATABASE_FILE=$PROJECT_DATABASE_DIRECTORY/$(date +%d_%m_%y)_$PROJECT_DATABASE_FILENAME
+local FILENAME_GIVEN_AS_INPUT=""
 local CURRENT_DIRECTORY=$(pwd)
 
 rm -f $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE
@@ -34,17 +35,18 @@ LASTTRAJ_C=$((2*9))
 declare -A COLUMNS=( [muC]=$MU_C [kC]=$K_C [ntC]=$NT_C [nsC]=$NS_C [betaC]=$BETA_C [trajNoC]=$TRAJNO_C [accRateC]=$ACCRATE_C [statusC]=$STATUS_C [lastTrajC]=$LASTTRAJ_C )
 
 #FSNA = FORMAT_SPECIFIER_NUMBER_ARRAY
-declare -A FSNA=( [muC]="7" [kC]="8" [ntC]="6" [nsC]="6" [betaC]="19" [trajNoC]="11" [accRateC]="8" [statusC]="13" [lastTrajC]="11" )
+declare -A FSNA=( [muC]="6" [kC]="8" [ntC]="6" [nsC]="6" [betaC]="19" [trajNoC]="11" [accRateC]="8" [statusC]="13" [lastTrajC]="11" )
 
-declare -A PRINTF_FORMAT_SPECIFIER_ARRAY=( [muC]="%-${FSNA[muC]}s" [kC]="%-${FSNA[kC]}s" [ntC]="%-${FSNA[ntC]}d" [nsC]="%-${FSNA[nsC]}d" [betaC]="%-${FSNA[betaC]}s" \
-											[trajNoC]="%-${FSNA[trajNoC]}d" [accRateC]="%-${FSNA[accRateC]}s" [statusC]="%-${FSNA[statusC]}s" [lastTrajC]="%-${FSNA[lastTrajC]}s" )
+declare -A PRINTF_FORMAT_SPECIFIER_ARRAY=( [muC]="%+${FSNA[muC]}s" [kC]="%+${FSNA[kC]}s" [ntC]="%${FSNA[ntC]}d" [nsC]="%${FSNA[nsC]}d" [betaC]="%+${FSNA[betaC]}s" \
+											[trajNoC]="%${FSNA[trajNoC]}d" [accRateC]="%+${FSNA[accRateC]}s" [statusC]="%+${FSNA[statusC]}s" [lastTrajC]="%+${FSNA[lastTrajC]}s" )
 
-declare -A HEADER_PRINTF_FORMAT_SPECIFIER_ARRAY=( [muC]="%-8s" [kC]="%-9s" [ntC]="%-7s" [nsC]="%-7s" [betaC]="%-20s" [trajNoC]="%-12s" [accRateC]="%-9s" [statusC]="%-14s" [lastTrajC]="%-12s" )
+declare -A HEADER_PRINTF_FORMAT_SPECIFIER_ARRAY=( [muC]="%+${FSNA[muC]}s" [kC]="%+$((${FSNA[kC]}+1))s" [ntC]="%+$((${FSNA[ntC]}+1))s" [nsC]="%+$((${FSNA[nsC]}+1))s" [betaC]="%+$((${FSNA[betaC]}+1))s" \
+                                                  [trajNoC]="%+$((${FSNA[trajNoC]}+1))s" [accRateC]="%+$((${FSNA[accRateC]}+1))s" [statusC]="%+$((${FSNA[statusC]}+1))s" [lastTrajC]="%+$((${FSNA[lastTrajC]}+1))s" )
 
 [ $WILSON = "TRUE" ] && MASS_PARAMETER="kappa"
 [ $STAGGERED = "TRUE" ] && MASS_PARAMETER="mass"
 
-declare -A HEADER_PRINTF_PARAMETER_ARRAY=( [muC]="mu" [kC]=$MASS_PARAMETER [ntC]="nt" [nsC]="ns" [betaC]="beta_chain_type" [trajNoC]="trajNo" \
+declare -A HEADER_PRINTF_PARAMETER_ARRAY=( [muC]=$CHEMPOT_PREFIX [kC]=$MASS_PARAMETER [ntC]=$NTIME_PREFIX [nsC]=$NSPACE_PREFIX [betaC]="beta_chain_type" [trajNoC]="trajNo" \
 											[accRateC]="acc" [statusC]="status" [lastTrajC]="l.T.[s]" )
 
 declare -a NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=()
@@ -63,6 +65,7 @@ local CUSTOMIZE_COLUMNS="FALSE"
 local STATISTICS_SUMMARY="FALSE"
 
 local UPDATE="FALSE"
+local DISPLAY="FALSE"
 
 local READ_DIRECTORIES_FROM_FILE="FALSE"
 local FILTER_SPECIFIC_DATABASE_FILE="FALSE"
@@ -96,11 +99,27 @@ local LAST_TRAJ_TIME=""
 
 local UPDATE_FREQUENCY=""
 
+
+#If the option -l | --local is given, then the option -l is replaced by mu,mass,nt,ns options with local values 
+if ElementInArray "-l" $@ || ElementInArray "--local" $@;  then
+    if ElementInArray "--$MASS_PARAMETER" $@ || ElementInArray "--mu" $@ || ElementInArray "--nt" $@ || ElementInArray "--ns" $@; then
+        printf "\n\e[91m Option \e[1m-l | --local\e[21m not compatible with any of \e[1m--mu\e[21m, \e[1m--$MASS_PARAMETER\e[21m, \e[1m--nt\e[21m, \e[1m--ns\e[21m! Exiting...\e[0m\n\n"
+        return
+    fi
+    local NEW_OPTIONS=()
+    for VALUE in "$@"
+    do
+        [[ $VALUE != "-l" ]] && [[ $VALUE != "--local" ]] && NEW_OPTIONS+=($VALUE)
+    done && unset -v 'VALUE'
+    ReadParametersFromPath $(pwd)
+    set -- ${NEW_OPTIONS[@]} "--mu" "$CHEMPOT" "--$MASS_PARAMETER" "$KAPPA" "--nt" "$NTIME" "--ns" "$NSPACE"
+fi
+
 while [ $# -gt 0 ]; do
 	case $1 in
 		-c | --columns)
 			OPTION=$1
-			UPDATE="FALSE"
+            DISPLAY="TRUE"
 			CUSTOMIZE_COLUMNS="TRUE"
 			while [[ "$2" =~ ^[^-] ]]; do
 				case $2 in
@@ -141,17 +160,18 @@ while [ $# -gt 0 ]; do
 						shift
 						;;
 					*)
-						echo "$0: $OPTION: $2: unrecognized option...exiting"
-						return
+                        printf "\n\e[91m Option \e[1m$2\e[21m unrecognized! Exiting...\e[0m\n\n"
+                        return
 						;;
 				esac	
 			done
 			;;
 		--sum)
+            DISPLAY="TRUE"
 			STATISTICS_SUMMARY="TRUE"
 			;;
 		--mu)
-			UPDATE="FALSE"
+            DISPLAY="TRUE"
 			FILTER_MU="TRUE"
 			while [[ $2 =~ ^[^-] ]];do
 				case $2 in 
@@ -164,50 +184,50 @@ while [ $# -gt 0 ]; do
 						shift
 						;;
 					*)
-						echo "$0: $1: $2: unrecognized option."
+						printf "\n\e[33m Value \e[1m$2\e[21m for option \e[1m$1\e[21m is invalid! Skipping it!\e[0m\n"
 						shift
 				esac
 			done
-			[ ${#MU_ARRAY[@]} -eq 0 ] && echo "You did not correctly specify filtering values, hence no filtering on mu will be applied." && FILTER_MU="FALSE" && return
+			[ ${#MU_ARRAY[@]} -eq 0 ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
 			;;
 		--$MASS_PARAMETER)
-			UPDATE="FALSE"
+            DISPLAY="TRUE"
 			FILTER_KAPPA="TRUE"
 			while [[ $2 =~ ^[[:digit:]]{4}$ ]]; do 
 				KAPPA_ARRAY+=( $2 )
 				shift
 			done
-			[ ${#KAPPA_ARRAY[@]} -eq 0 ] && echo "You did not correctly specify filtering values, hence no filtering on $MASS_PARAMETER will be applied." && FILTER_KAPPA="FALSE" && return
+			[ ${#KAPPA_ARRAY[@]} -eq 0 ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
 			;;
 		--nt)
-			UPDATE="FALSE"
+            DISPLAY="TRUE"
 			FILTER_NT="TRUE"
 			while [[ $2 =~ ^[[:digit:]]{1,2}$ ]]; do 
 				NT_ARRAY+=( $2 )
 				shift
 			done
-			[ ${#NT_ARRAY[@]} -eq 0 ] && echo "You did not correctly specify filtering values, hence no filtering on nt will be applied." && FILTER_NT="FALSE" && return
+			[ ${#NT_ARRAY[@]} -eq 0 ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
 			;;
 		--ns)
-			UPDATE="FALSE"
+            DISPLAY="TRUE"
 			FILTER_NS="TRUE"
 			while [[ $2 =~ ^[[:digit:]]{1,2}$ ]]; do 
 				NS_ARRAY+=( $2 )
 				shift
 			done
-			[ ${#NS_ARRAY[@]} -eq 0 ] && echo "You did not correctly specify filtering values, hence no filtering on ns will be applied." && FILTER_NS="FALSE" && return
+			[ ${#NS_ARRAY[@]} -eq 0 ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
 			;;
 		--beta)
-			UPDATE="FALSE"
+            DISPLAY="TRUE"
 			FILTER_BETA="TRUE"	
 			while [[ $2 =~ ^[[:digit:]]\.[[:digit:]]{4}$ ]]; do 
 				BETA_ARRAY+=( $2 )
 				shift
 			done
-			[ ${#BETA_ARRAY[@]} -eq 0 ] && echo "You did not correctly specify filtering values, hence no filtering on beta will be applied." && FILTER_BETA="FALSE" && return
+			[ ${#BETA_ARRAY[@]} -eq 0 ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
 			;;
 		--type)
-			UPDATE="FALSE"
+            DISPLAY="TRUE"
 			FILTER_TYPE="TRUE"	
 			while [[ $2 =~ ^[^-] ]];do
 				case $2 in 
@@ -224,34 +244,34 @@ while [ $# -gt 0 ]; do
 						shift
 						;;
 					*)
-						echo "$0: $1: $2: unrecognized option...exiting" && return
+						printf "\n\e[33m Value \e[1m$2\e[21m for option \e[1m$1\e[21m is invalid! Skipping it!\e[0m\n"
 						shift
 				esac
 			done
-			[ ${#TYPE_ARRAY[@]} -eq 0 ] && echo "You did not correctly specify filtering values, hence no filtering on the status will be applied." && FILTER_TYPE="FALSE" && return
+			[ ${#TYPE_ARRAY[@]} -eq 0 ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
 			;;
 		--traj)
-			UPDATE="FALSE"
+            DISPLAY="TRUE"
 			FILTER_TRAJNO="TRUE"
 			while [[ $2 =~ ^[\>|\<][[:digit:]]+ ]];do
 				[[ $2 =~ ^\>[[:digit:]]+ ]] && TRAJ_LOW_VALUE=${2#\>*}
 				[[ $2 =~ ^\<[[:digit:]]+ ]] && TRAJ_HIGH_VALUE=${2#\<*}
 				shift
 			done
-			[ "$TRAJ_LOW_VALUE" = "" ] && [ "$TRAJ_HIGH_VALUE" = "" ] && echo "You did not correctly specify filtering values, hence no filtering on the trajectory number will be applied." && FILTER_TRAJNO="FALSE" && return
+			[ "$TRAJ_LOW_VALUE" = "" ] && [ "$TRAJ_HIGH_VALUE" = "" ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
 			;;
 		--acc)
-			UPDATE="FALSE"
+            DISPLAY="TRUE"
 			FILTER_ACCRATE="TRUE"
 			while [[ $2 =~ ^[\>|\<][[:digit:]]+\.[[:digit:]]+ ]];do
 				[[ $2 =~ ^\>[[:digit:]]+ ]] && ACCRATE_LOW_VALUE=${2#\>*}
 				[[ $2 =~ ^\<[[:digit:]]+ ]] && ACCRATE_HIGH_VALUE=${2#\<*}
 				shift
 			done
-			[ "$ACCRATE_LOW_VALUE" = "" ] && [ "$ACCRATE_HIGH_VALUE" = "" ] && echo "You did not correctly specify filtering values, hence no filtering on the acceptance rate number will be applied." && FILTER_ACCRATE="FALSE" && return
+			[ "$ACCRATE_LOW_VALUE" = "" ] && [ "$ACCRATE_HIGH_VALUE" = "" ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
 			;;
 		--status)
-			UPDATE="FALSE"
+            DISPLAY="TRUE"
 			FILTER_STATUS="TRUE"	
 			while [[ $2 =~ ^[^-] ]];do
 				case $2 in 
@@ -268,20 +288,20 @@ while [ $# -gt 0 ]; do
 						shift
 						;;
 					*)
-						echo "$0: $1: $2: unrecognized option...exiting" && return
+						printf "\n\e[33m Value \e[1m$2\e[21m for option \e[1m$1\e[21m is invalid! Skipping it!\e[0m\n"
 						shift
 				esac
 			done
-			[ ${#STATUS_ARRAY[@]} -eq 0 ] && echo "You did not correctly specify filtering values, hence no filtering on the status will be applied." && FILTER_STATUS="FALSE" && return
+			[ ${#STATUS_ARRAY[@]} -eq 0 ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
 			;;
 		--lastTraj)
-			UPDATE="FALSE"
+            DISPLAY="TRUE"
 			FILTER_LASTTRAJ="TRUE"
 			if [[ "$2" =~ ^[[:digit:]]+ ]]; then
 				LAST_TRAJ_TIME=$2
 				shift
 			fi
-			[ "$LAST_TRAJ_TIME" = "" ] && echo "You did not correctly specify the time value, hence no filtering on the last trajectory time will be applied...exiting." && return 
+			[ "$LAST_TRAJ_TIME" = "" ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
 			;;
 		-u | --update)
 			if [[ $2 =~ [[:digit:]]+[s|m|h|d] ]]; then
@@ -291,91 +311,116 @@ while [ $# -gt 0 ]; do
 			UPDATE="TRUE"
 			;;
 		-f | --file)
-			READ_DIRECTORIES_FROM_FILE="TRUE"
-			FILTER_SPECIFIC_DATABASE_FILE="TRUE"
 			case $2 in
 				-*)
-					echo "$0: $1: $2: invalid file name specified...exiting."
-					echo "            --> Filenames starting with - are not permissible."
+					printf "\n\e[91m Filename \e[1m$1\e[21m invalid! Filenames starting with - are not allowed! Exiting...\e[0m\n\n"
 					return
 					;;
+                *) FILENAME_GIVEN_AS_INPUT=$2 ;;
 			esac
-			[ "$UPDATE" = "FALSE" ] && SPECIFIED_PROJECT_DATABASE_FILE=$2
-			[ "$UPDATE" = "TRUE" ] && FILE_WITH_DIRECTORIES=$2
-			shift
+            shift
 			;;
 		-h | --help)
-			echo "Displaying options:"
-			echo ""
-			echo "-c | --columns --> Specify the columns to be displayed."
-		   	echo "               --> Possible columns are: mu, $MASS_PARAMETER, nt, ns, beta_chain_type, trajNo, acc, status, lastTraj."
-		   	echo "               --> Example: -c $MASS_PARAMETER nt ns beta_chain_type trajNo."
-			echo "               --> If no columns are specified, all of the above columns will be printed by default."
-			echo "--color        --> Specifiy this option for displaying coloured output.(NOT YET IMPLEMENTED)"
-			echo "--sum          --> Summing up the trajectory numbers of each parameter set."
-			echo ""
-			echo "Filtering:"
-			echo ""
-			echo "--mu           --> Specify filtering values for mu."
-			echo "--$MASS_PARAMETER        --> Specify filtering values for $MASS_PARAMETER."
-			echo "--nt           --> Specify filtering values for nt."
-			echo "--ns           --> Specify filtering values for ns."
-			echo "--beta         --> Specify filtering values for beta."
-			echo "--type         --> Specify filtering values for the type of the simulation, i.e whether it is NC, fC or fH"
-			echo "--traj         --> Specify either a minimal or a maximal value or both for the trajectory number to be filtered for."
-			echo "               --> E.g. --traj \">10000\" \"<50000\" (DON'T FORGET THE QUOTES.)"
-			echo "--acc          --> Specify either a minimal or a maximal value or both for the acceptance rate to be filtered for."
-			echo "               --> E.g. --acc \">50.23\" \"<80.1\" (The value is in percentage. DON'T FORGET THE QUOTES.)"
-			echo "--status       --> Specify status value for the corresponding simulation."
-			echo "               --> Possible values are: RUNNING, PENDING, notQueued."
-			echo "--lastTraj     --> Specify a value in seconds. If the specified value exceeds the value of the field, the record is not printed."
-			echo "               --> Use this when you want to scan for crashed simulations."
-			echo ""
-			echo "Updating database:"
-			echo ""
-			echo "-u | --update  --> Specify this option to (re)create the file $SPECIFIED_PROJECT_DATABASE_FILE."
-			echo "               --> This option is incompatible with any other option."
-			echo "               --> Optionally a frequency can be specified at which the script performs a database update."
-			echo "                   The frequency is a number followed by s = seconds, m = minutes, h = hours, d = days, e.g. --update 2h."
-		    echo "                   In this case it is best to start the script in a screen session and to let it run in the background."	
-			echo "General options:"
-			echo ""
-			echo "-f | --file    --> This option can be specified for both, the updating of the database as well as the displaying and filtering of the data."
-			echo ""
-			echo "               --> Updating:"
-			echo "               --> If you don't wish the script to simply search for all directories containing data, use this option to specify a file with directories (abosulte paths)"
-			echo "               --> in which the script looks for data."
-			echo ""
-			echo "               --> Displaying and Filtering:"
-			echo "               --> If you don't wish the script to use the latest database file, use this option to specify a file to display and filter."
+            printf "\e[38;5;34m\n"
+			echo -e "  \e[4m\e[1mDisplaying options\e[24m:\e[21m"
+			echo -e "  \e[38;5;69m"
+			echo -e "     -c | --columns -->  Specify the columns to be displayed."
+		   	echo -e "                         Possible columns are: mu, $MASS_PARAMETER, nt, ns, beta_chain_type, trajNo, acc, status, lastTraj."
+		   	echo -e "                         Example: -c $MASS_PARAMETER nt ns beta_chain_type trajNo."
+			echo -e "                         If no columns are specified, all of the above columns will be printed by default."
+			echo -e "     --color        -->  Specifiy this option for displaying coloured output.(NOT YET IMPLEMENTED)"
+			echo -e "     --sum          -->  Summing up the trajectory numbers of each parameter set."
+			echo -e "  \e[38;5;48m"
+			echo -e "    \e[4m\e[1mFiltering\e[24m:\e[21m"
+            echo -e "  \e[38;5;69m" #When --nt, --ns, --mu, --kappa will be compatible with update, substitute this line with ---> echo -e "\e[38;5;202m"
+			echo -e "     --mu           -->  Specify filtering values for mu."
+			printf  "     %-15s%s\n" "--$MASS_PARAMETER" "-->  Specify filtering values for $MASS_PARAMETER."
+			echo -e "     --nt           -->  Specify filtering values for nt."
+			echo -e "     --ns           -->  Specify filtering values for ns.\e[38;5;69m"
+			echo -e "     --beta         -->  Specify filtering values for beta."
+			echo -e "     --type         -->  Specify filtering values for the type of the simulation, i.e whether it is NC, fC or fH"
+			echo -e "     --traj         -->  Specify either a minimal or a maximal value or both for the trajectory number to be filtered for."
+			echo -e "                         E.g. --traj \">10000\" \"<50000\" (DON'T FORGET THE QUOTES.)"
+			echo -e "     --acc          -->  Specify either a minimal or a maximal value or both for the acceptance rate to be filtered for."
+			echo -e "                         E.g. --acc \">50.23\" \"<80.1\" (The value is in percentage. DON'T FORGET THE QUOTES.)"
+			echo -e "     --status       -->  Specify status value for the corresponding simulation."
+			echo -e "                         Possible values are: RUNNING, PENDING, notQueued."
+			echo -e "     --lastTraj     -->  Specify a value in seconds. If the specified value exceeds the value of the field, the record is not printed."
+			echo -e "                         Use this when you want to scan for crashed simulations."
+			echo -e "  \e[38;5;34m"
+			echo -e "  \e[4m\e[1mUpdating database\e[24m:\e[21m"
+			echo -e "  \e[38;5;198m"
+			echo -e "     -u | --update  -->  Specify this option to (re)create the database file."
+			echo -e "                         Optionally a frequency can be specified at which the script performs a database update."
+			echo -e "                         The frequency is a number followed by s = seconds, m = minutes, h = hours, d = days, e.g. --update 2h."
+		    echo -e "                         In this case it is best to start the script in a screen session and to let it run in the background."
+            echo -e "  \e[38;5;202m"
+			echo -e "  \e[4m\e[1mGeneral options\e[24m:\e[21m"
+			echo -e "     "
+			echo -e "     -f | --file    -->  This option can be specified for both the updating of the database and the displaying and filtering of the data."
+			echo -e "     "
+			echo -e  "               \e[38;5;34m\e[4m\e[1mUpdating\e[24m:\e[21m\e[38;5;202m If you don't wish the script to simply search for all directories containing data, use this option to specify "
+			echo -e "                         a file with directories (abosulte paths) in which the script looks for data."
+			echo -e "     "
+			echo -e "             \e[38;5;34m\e[4m\e[1mDisplaying\e[24m:\e[21m\e[38;5;202m If you don't wish the script to use the latest database file, use this option to specify a file to display and filter."
+			echo -e "     "            
+			echo -e "     -l | --local   -->  To use this option, the script should be called from a position such that mu, $MASS_PARAMETER, nt and ns can be extracted prom the path."
+			echo -e "                         This option will add to the given option the --mu, --$MASS_PARAMETER, --nt and --ns options with the values exttracted from the path."
+            echo -e "                         At the moment it is not compatible with any of such an option."
+            echo -e "   "
+            echo -e "   "
+            echo -e "    \e[4m\e[1m\e[91mNOTE\e[24m:\e[21m\e[38;5;34m The \e[38;5;69mblue\e[38;5;34m and the \e[38;5;198mpink\e[38;5;34m options are not compatible!"            
+            printf "\e[0m\n"
 			return
 			;;
 		-*)
-			echo "$0: $1: unrecognized option...exiting"
+			printf "\n\e[91m Option \e[1m$1\e[21m unrecognized! Exiting...\e[0m\n\n"
 			return
 			;;
 		*)
-			echo "$0: $1: unrecognized option...exiting"
+			printf "\n\e[91m Option \e[1m$1\e[21m invalid! Exiting...\e[0m\n\n"
 			return
 			;;
 	esac
 	shift
 done
 
-if [ "$UPDATE" = "FALSE" ] && [ ! -f $SPECIFIED_PROJECT_DATABASE_FILE ] && [ $FILTER_SPECIFIC_DATABASE_FILE = "FALSE" ]; then
-	echo "Found no up to date database file with date $(date +%d_%m_%y). Looking for older versions..."
-	LATEST_DATABASE_FILE=$(ls $PROJECT_DATABASE_DIRECTORY | grep -E [[:digit:]]{2}_[[:digit:]]{2}_[[:digit:]]{2}_projectStatistics.dat | sort -t "_" -k 3,3 -k 2,2 -k 1,1 | tail -n1)
-	[ $LATEST_DATABASE_FILE = "" ] && echo "No older database versions found...exiting." && return
-	echo "Found older version: $LATEST_DATABASE_FILE"
-	SPECIFIED_PROJECT_DATABASE_FILE=$PROJECT_DATABASE_DIRECTORY/$LATEST_DATABASE_FILE
-elif [ "$UPDATE" = "FALSE" ] && [ ! -f $SPECIFIED_PROJECT_DATABASE_FILE ] && [ $FILTER_SPECIFIC_DATABASE_FILE = "TRUE" ]; then
-	echo "$SPECIFIED_PROJECT_DATABASE_FILE does not exist....exiting." 
-	return
+if [ $DISPLAY = $UPDATE ]; then
+    printf "\n\e[91m Option for UPDATE and DISPLAY/FILTERING scenarios cannot be mixed!\e[0m\n\n"
+    return
 fi
+
+echo ''
+# The PROJECT_DATABASE_FILE variable refers to a file which is an input in the filtering/displaying scenario and which is an output in the update scenario.
+# Then it has to be initialized accordingly!
+if [ "$UPDATE" = "FALSE" ]; then
+    if [ "$FILENAME_GIVEN_AS_INPUT" = "" ]; then
+	    LATEST_DATABASE_FILE=$(ls $PROJECT_DATABASE_DIRECTORY | grep -E [[:digit:]]{2}_[[:digit:]]{2}_[[:digit:]]{2}_$PROJECT_DATABASE_FILENAME | sort -t "_" -k 3,3 -k 2,2 -k 1,1 | tail -n1)
+	    [ "$LATEST_DATABASE_FILE" = "" ] && printf "\n\e[91m No older database versions found! Exiting...\e[0m\n\n" && return
+        local PROJECT_DATABASE_FILE=$PROJECT_DATABASE_DIRECTORY/$LATEST_DATABASE_FILE
+    else
+        if [ ! f $FILENAME_GIVEN_AS_INPUT ]; then
+	        printf "\n\e[91m File \"$FILENAME_GIVEN_AS_INPUT\" does not exist! Exiting...\e[0m\n\n"
+	        return
+        fi
+        local PROJECT_DATABASE_FILE=$FILENAME_GIVEN_AS_INPUT
+    fi
+else
+    if [ "$FILENAME_GIVEN_AS_INPUT" != "" ] ; then
+        if [ ! -f $FILENAME_GIVEN_AS_INPUT ]; then
+            printf "\n\e[91m File \"$FILENAME_GIVEN_AS_INPUT\" does not exist! Exiting...\e[0m\n\n"
+	        return
+        fi
+        local FILE_WITH_DIRECTORIES=$FILENAME_GIVEN_AS_INPUT
+    fi
+    local PROJECT_DATABASE_FILE=$PROJECT_DATABASE_DIRECTORY/$(date +%d_%m_%y)_$PROJECT_DATABASE_FILENAME
+fi
+
+
 
 if [ "$UPDATE" = "FALSE" ]; then
 
-	echo "Current database file: $SPECIFIED_PROJECT_DATABASE_FILE"
+	printf " \e[38;5;202mCurrent database file: \e[38;5;105m$PROJECT_DATABASE_FILE\n\n\e[0m"
 
 	MU_STRING=$(join "|" "${MU_ARRAY[@]}")
 	KAPPA_STRING=$(join "|" "${KAPPA_ARRAY[@]}")
@@ -413,9 +458,9 @@ if [ "$UPDATE" = "FALSE" ]; then
 			[ "$NAME_OF_COLUMN" = "trajNoC" ] && break
 			NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN=$(($NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN+${FSNA[$NAME_OF_COLUMN]}+1))
 	done
-	NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN=$((NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN+7))
+	NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN=$((NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN+${FSNA[trajNoC]}+1))
 	STATISTICS_PRINTF_FORMAT_SPECIFIER_STRING="%${NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN}s\n"
-
+    LENGTH_OF_HEADER_SEPERATOR=$(($LENGTH_OF_HEADER_SEPERATOR+${FSNA[muC]}+1-${#CHEMPOT_PREFIX})) #Add dynamicly to simmetrize the line under the header (the +1 is the space that is at the beginning of the line)
 	#STRIPPING OF THE LAST | SYMBOL FROM THE STRING
 	NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL=$(echo ${NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL%"|"})
 	NAME_OF_COLUMN_NR_OF_COLUMN_STRING=$(echo ${NAME_OF_COLUMN_NR_OF_COLUMN_STRING%"|"})
@@ -463,18 +508,24 @@ if [ "$UPDATE" = "FALSE" ]; then
 						}
 						split(nameOfColumnsAndHeaderOfColumnsString,columnNamesAndHeaderArray,"|");
 						split(nameOfColumnsAndHeaderSpecOfColumnsString,columnNamesAndHeaderSpecArray,"|");
-						printf(" "); #THIS PRINTF IS IMPORTANT TO GET THE HEADER IN TO THE RIGHT PLACE
+
+						printf(" \033[38;5;26m");
+						for(i=1;i<=lengthOfHeaderSeperator;i++){
+							printf("=");
+						}
+						printf("\033[0m\n");
+						printf("  "); #THIS PRINTF IS IMPORTANT TO GET THE HEADER IN TO THE RIGHT PLACE
 						for(i=1;i<=nrOfDisplayedColumns;i++){
 							split(columnNamesAndHeaderArray[i],columnAndHeader,"-");
 							split(columnNamesAndHeaderSpecArray[i],columnAndHeaderSpec,"--");
 							specifierString=columnAndHeaderSpec[2];
 							printf(specifierString,columnAndHeader[2]);
 						}
-						printf("\n");
+						printf("  \033[0m\n \033[0;38;5;26m");
 						for(i=1;i<=lengthOfHeaderSeperator;i++){
-							printf("-");
+							printf("=");
 						}
-						printf("\n");
+						printf("\033[0m\n");
 					 }
 					 {critFailedCounter=0}
 
@@ -496,6 +547,7 @@ if [ "$UPDATE" = "FALSE" ]; then
 					 filterLastTrajTime == "TRUE" {if(lastTrajTime > $(columnNameColumnNumber["lastTrajC"]) || $(columnNameColumnNumber["lastTrajC"]) == "------"){critFailedCounter--;}}
 					 
 					 statisticsSummary == "FALSE" && critFailedCounter == 0 {
+						printf(" "); #Aesthetics
 						for(i=1;i<=nrOfDisplayedColumns;i++){
 							nameOfColumn=columnNamesInOrder[i];
 							specifierString=columnNameColumnSpec[nameOfColumn];
@@ -544,6 +596,7 @@ if [ "$UPDATE" = "FALSE" ]; then
 								}
 
 								split(dataRowArray[i],columnsArray," ")
+								printf(" "); #Aesthetics
 								for(columnEntry=1;columnEntry<=nrOfDisplayedColumns;columnEntry++){
 									nameOfColumn=columnNamesInOrder[columnEntry];
 									specifierString=columnNameColumnSpec[nameOfColumn];
@@ -554,10 +607,12 @@ if [ "$UPDATE" = "FALSE" ]; then
 								printf(" \033[0;m")
 								printf("\n");
 							}
+							printf(" "); #Aesthetics
 							printf(statisticsFormatSpecString,statisticsSummaryArray[newKey]);
 						}
 					}
-		' $SPECIFIED_PROJECT_DATABASE_FILE
+		' $PROJECT_DATABASE_FILE
+    echo ''
 fi
 
 
@@ -572,12 +627,12 @@ if [ "$UPDATE" = "TRUE" ]; then
 
 	while :
 	do
-		[ "$READ_DIRECTORIES_FROM_FILE" = "FALSE" ] && find $HOME_DIR/$SIMULATION_PATH -regextype grep -regex "$REGEX_STRING" > $TEMPORARY_FILE_WITH_DIRECTORIES
-		[ "$READ_DIRECTORIES_FROM_FILE" = "TRUE" ] && cat $FILE_WITH_DIRECTORIES > $TEMPORARY_FILE_WITH_DIRECTORIES
+		[ "$FILE_WITH_DIRECTORIES" = "" ] && find $HOME_DIR/$SIMULATION_PATH -regextype grep -regex "$REGEX_STRING" > $TEMPORARY_FILE_WITH_DIRECTORIES
+		[ "$FILE_WITH_DIRECTORIES" != "" ] && cat $FILE_WITH_DIRECTORIES > $TEMPORARY_FILE_WITH_DIRECTORIES
 
 		while read line
 		do
-			echo line: $line
+			#printf "%+15s: %s\n" "line" "$line"
 			if [[ "$line" =~ ^[^#] ]]; then 
 				PARAMS=( $(echo $line | awk 'BEGIN{FS="/"}{print $(NF-3) " " $(NF-2) " " $(NF-1) " " $(NF)}') )
 			else
@@ -585,7 +640,7 @@ if [ "$UPDATE" = "TRUE" ]; then
 			fi
 			
 			if [ -d $line ]; then
-				echo updating $line ...
+			    printf "\t\e[38;5;208m\e[48;5;16mUpdating:\e[38;5;49m $line "
 				cd $line
 			else
 				continue
@@ -606,12 +661,12 @@ if [ "$UPDATE" = "TRUE" ]; then
 						' >> $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE
 
 			cd $CURRENT_DIRECTORY
-			echo updated $line ...
+			printf "\e[38;5;10m...done!\e[0m\n"
 		done < <(cat $TEMPORARY_FILE_WITH_DIRECTORIES)
 
 		[ "$(wc -l $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE | awk '{print $1}')" -eq 0 ] && echo "Empty database, please investigate...exiting." && return
 
-		cp $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE $SPECIFIED_PROJECT_DATABASE_FILE
+		cp $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE $PROJECT_DATABASE_FILE
 
 		#Clean up
 		rm $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE
@@ -623,6 +678,7 @@ if [ "$UPDATE" = "TRUE" ]; then
 			sleep $UPDATE_FREQUENCY 
 		fi
 	done
+    echo ''
 fi
 
 }
