@@ -674,7 +674,8 @@ if [ "$UPDATE" = "TRUE" ]; then
 
 		if [ "$UPDATE_FREQUENCY" = "" ]; then 
 			break 
-		else 
+		else
+            printf "\n\t\e[1m\e[38;5;147mSleeping \e[38;5;86m$UPDATE_FREQUENCY\e[38;5;147m starting on $(date +%d.%m.%Y) at $(date +%H:%M:%S)\e[0m\n\n"
 			sleep $UPDATE_FREQUENCY 
 		fi
 	done
