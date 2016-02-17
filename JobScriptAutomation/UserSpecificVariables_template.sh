@@ -1,4 +1,4 @@
-# Paths on LOEWE using CL2QCD
+# Paths on any cluster to handle simulations that use CL2QCD
 #
 # Note, this is only a template, you MUST copy it to another file called UserSpecificVariables.sh
 # and complete it setting all the variables to proper values. Remove also the "echo lines" in the
@@ -25,8 +25,8 @@ if [ $WILSON = "TRUE" ]; then
     JOBSCRIPT_PREFIX=""
     OUTPUTFILE_NAME=""
     SRUN_COMMANDSFILE_FOR_INVERSION=""
-	PROJECT_DATABASE_FILENAME=""
-	PROJECT_DATABASE_DIRECTORY=""
+    PROJECT_DATABASE_FILENAME=""
+    PROJECT_DATABASE_DIRECTORY=""
 fi
 
 if [ $STAGGERED = "TRUE" ]; then
@@ -42,8 +42,8 @@ if [ $STAGGERED = "TRUE" ]; then
     APPROX_HEATBATH_NAME=""
     APPROX_MD_NAME=""
     APPROX_METROPOLIS_NAME=""
-	PROJECT_DATABASE_FILENAME="projectStatistics_$(date +%d_%m_%y).dat"
-	PROJECT_DATABASE_DIRECTORY=""
+    PROJECT_DATABASE_FILENAME=""
+    PROJECT_DATABASE_DIRECTORY=""
 fi
 
 HMC_GLOBALPATH="${HOME}/$HMC_BUILD_PATH/$HMC_FILENAME"
@@ -71,6 +71,9 @@ THERMALIZED_CONFIGURATIONS_PATH=""
 #     HMC_GLOBALPATH                        executable global path
 #     THERMALIZED_CONFIGURATIONS_PATH       global path to the folder containing the thermalized configurations
 #     SRUN_COMMANDSFILE_FOR_INVERSION       name of the file where the execution commands for the inversions are being stored
+#     PROJECT_DATABASE_DIRECTORY            directory where the the simulation status files are stored (it MUST be a GLOBALPATH)
+#     PROJECT_DATABASE_FILENAME             name of the file containing the database
+#
 #
 # Some further information:
 #
