@@ -19,7 +19,7 @@ source $HOME/Script/JobScriptAutomation/AuxiliaryFunctions.sh || exit -2
 source $HOME/Script/JobScriptAutomation/AcceptanceRateReport.sh || exit -2
 source $HOME/Script/JobScriptAutomation/BuildRegexPath.sh || exit -2
 source $HOME/Script/JobScriptAutomation/EmptyBetaDirectories.sh || exit -2
-source $HOME/Script/ProjectStatisticsDatabase.sh || exit -2
+source $HOME/Script/JobScriptAutomation/ProjectStatisticsDatabase.sh || exit -2
 #-----------------------------------------------------------------------------------------------------------------#
 
 #-----------------------------------------------------------------------------------------------------------------#
