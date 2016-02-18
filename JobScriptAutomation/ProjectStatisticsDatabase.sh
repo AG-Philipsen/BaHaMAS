@@ -64,6 +64,7 @@ local STATISTICS_SUMMARY="FALSE"
 
 local UPDATE="FALSE"
 local DISPLAY="FALSE"
+local REPORT="FALSE"
 
 local READ_DIRECTORIES_FROM_FILE="FALSE"
 local FILTER_SPECIFIC_DATABASE_FILE="FALSE"
@@ -307,6 +308,9 @@ while [ $# -gt 0 ]; do
 			fi
 			UPDATE="TRUE"
 			;;
+        -r | --report)
+            REPORT="TRUE"
+            ;;
 		-f | --file)
 			case $2 in
 				-*)
@@ -365,8 +369,13 @@ while [ $# -gt 0 ]; do
 			echo -e "                         This option will add to the given option the --mu, --$MASS_PARAMETER, --nt and --ns options with the values extracted from the path."
             echo -e "                         At the moment it is not compatible with any of such an option."
             echo -e "   "
+			echo -e "  \e[38;5;34m"
+			echo -e "  \e[4m\e[1mReport from database\e[24m:\e[21m"
+			echo -e "  \e[38;5;123m"
+			echo -e "     -r | --report  -->  Specify this option to get a colorful report of the simulations using the last updated database."
             echo -e "   "
-            echo -e "    \e[4m\e[1m\e[91mNOTE\e[24m:\e[21m\e[38;5;34m The \e[38;5;69mblue\e[38;5;34m and the \e[38;5;198mpink\e[38;5;34m options are not compatible!"            
+            echo -e "   "
+            echo -e "    \e[4m\e[1m\e[91mNOTE\e[24m:\e[21m\e[38;5;34m The \e[38;5;69mblue\e[38;5;34m, the \e[38;5;123mcyan\e[38;5;34m and the \e[38;5;198mpink\e[38;5;34m options are not compatible!"            
             printf "\e[0m\n"
 			return
 			;;
@@ -382,10 +391,15 @@ while [ $# -gt 0 ]; do
 	shift
 done
 
-[ $UPDATE = "FALSE" ] && DISPLAY="TRUE"
+[ $UPDATE = "FALSE" ] && [ $REPORT = "FALSE" ] && DISPLAY="TRUE"
 
-if [ $DISPLAY = $UPDATE ]; then
-    printf "\n\e[91m Option for UPDATE and DISPLAY/FILTERING scenarios cannot be mixed!\e[0m\n\n"
+local MUTUALLY_EXCLUSIVE_OPTIONS_PASSED=0
+[ $UPDATE = "TRUE" ] && (( MUTUALLY_EXCLUSIVE_OPTIONS_PASSED++ ))
+[ $DISPLAY = "TRUE" ] && (( MUTUALLY_EXCLUSIVE_OPTIONS_PASSED++ ))
+[ $REPORT = "TRUE" ] && (( MUTUALLY_EXCLUSIVE_OPTIONS_PASSED++ ))
+
+if [ $MUTUALLY_EXCLUSIVE_OPTIONS_PASSED -gt 1 ]; then
+    printf "\n\e[91m Option for UPDATE,  DISPLAY/FILTERING and REPORT scenarios cannot be mixed!\e[0m\n\n"
     return
 fi
 
@@ -417,7 +431,7 @@ fi
 
 
 
-if [ "$UPDATE" = "FALSE" ]; then
+if [ $DISPLAY = "TRUE" ]; then
 
 	MU_STRING=$(join "|" "${MU_ARRAY[@]}")
 	KAPPA_STRING=$(join "|" "${KAPPA_ARRAY[@]}")
@@ -617,11 +631,11 @@ if [ "$UPDATE" = "FALSE" ]; then
 		' $PROJECT_DATABASE_FILE
     
     echo ''
-    printf " Last update ended on \e[1m$(date -r $PROJECT_DATABASE_FILE +"%d.%m.%Y")\e[21m at \e[1m$(date -r $PROJECT_DATABASE_FILE +"%H:%M")\e[21m  \e[38;5;202m--->\e[38;5;207m  $PROJECT_DATABASE_FILE\n\n"
+    printf " Last update ended on \e[1m$(date -r $PROJECT_DATABASE_FILE +"%d.%m.%Y")\e[21m at \e[1m$(date -r $PROJECT_DATABASE_FILE +"%H:%M")\e[21m  \e[38;5;202m--->\e[38;5;207m  $PROJECT_DATABASE_FILE\n\n\e[0m"
 fi
 
 
-if [ "$UPDATE" = "TRUE" ]; then
+if [ $UPDATE = "TRUE" ]; then
 
 	REGEX_STRING=".*/"
 	for i in $(seq 0 3); do
@@ -685,6 +699,81 @@ if [ "$UPDATE" = "TRUE" ]; then
 		fi
 	done
     echo ''
+fi
+
+if [ $REPORT = "TRUE" ]; then
+
+    printf "\t    \e[95m\e[4mAUTOMATIC REPORT FROM DATABASE (status on \e[1m$(date -r $PROJECT_DATABASE_FILE +"%d.%m.%Y")\e[21m at \e[1m$(date -r $PROJECT_DATABASE_FILE +"%H:%M")\e[21m)\n\n\e[0m"
+
+    awk --posix -v betaColorColumn="$((${COLUMNS[betaC]} -1 ))" \
+        -v trajNoColorColumn="$((${COLUMNS[trajNoC]} -1 ))" \
+        -v accRateColorColumn="$((${COLUMNS[accRateC]} -1 ))" \
+        -v statusColorColumn="$((${COLUMNS[statusC]} -1 ))" \
+        -v lastTrajColorColumn="$((${COLUMNS[lastTrajC]} -1 ))" \
+        -v defaultColor="${DEFAULT_LISTSTATUS_COLOR/e/033}" \
+        -v suspiciousBetaColor="${SUSPICIOUS_BETA_LISTSTATUS_COLOR/e/033}" \
+        -v wrongBetaColor="${WRONG_BETA_LISTSTATUS_COLOR/e/033}" \
+        -v tooLowAccColor="${TOO_LOW_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" \
+        -v lowAccColor="${LOW_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" \
+        -v optimalAccColor="${OPTIMAL_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" \
+        -v highAccColor="${HIGH_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" \
+        -v tooHighAccColor="${TOO_HIGH_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" \
+        -v runningColor="${RUNNING_LISTSTATUS_COLOR/e/033}" \
+        -v pendingColor="${PENDING_LISTSTATUS_COLOR/e/033}" \
+        -v toBeCleanedColor="${CLEANING_LISTSTATUS_COLOR/e/033}" \
+        -v stuckedColor="${STUCKED_SIMULATION_LISTSTATUS_COLOR/e/033}" \
+        -v fineColor="${FINE_SIMULATION_LISTSTATUS_COLOR/e/033}" '
+BEGIN{
+outputFilesToBeCleaned = 0
+simulationsTooLowAcc = 0
+simulationsLowAcc = 0
+simulationsOptimalAcc = 0
+simulationsHighAcc = 0
+simulationsTooHighAcc = 0
+simulationsRunning = 0
+simulationsPending = 0
+simulationsStucked = 0
+simulationsFine = 0
+simulationsOnBrokenGPU = 0
+}
+{
+if($betaColorColumn == wrongBetaColor){simulationsOnBrokenGPU+=1}
+if($trajNoColorColumn == toBeCleanedColor){outputFilesToBeCleaned+=1} 
+if($accRateColorColumn == tooLowAccColor){simulationsTooLowAcc+=1}
+if($accRateColorColumn == lowAccColor){simulationsLowAcc+=1}
+if($accRateColorColumn == optimalAccColor){simulationsOptimalAcc+=1}
+if($accRateColorColumn == highAccColor){simulationsHighAcc+=1}
+if($accRateColorColumn == tooHighAccColor){simulationsTooHighAcc+=1}
+if($statusColorColumn == runningColor){simulationsRunning+=1}
+if($statusColorColumn == pendingColor){simulationsPending+=1}
+if($lastTrajColorColumn == stuckedColor){simulationsStucked+=1}
+if($lastTrajColorColumn == fineColor){simulationsFine+=1}
+} 
+END{ 
+def="\033[0m"
+red="\033[91m"
+darkOrange="\033[38;5;202m"
+lightOrange="\033[38;5;208m"
+yellow="\033[93m"
+green="\033[32m"
+blue="\033[38;5;45m"
+pink="\033[38;5;171m"
+bold="\033[1m"
+
+printf pink  "\t\t            Simulations on " bold "broken GPU"   def blue   ": "   (simulationsOnBrokenGPU>0 ? red : green)           bold    simulationsOnBrokenGPU def "\n"
+printf blue  "\t\t  Simulations with " bold "too low acceptance"   def blue   ": "   (simulationsTooLowAcc>0   ? red : green)           bold    simulationsTooLowAcc   def "\n"
+printf blue  "\t\t      Simulations with " bold "low acceptance"   def blue   ": "   (simulationsLowAcc>0      ? darkOrange : green)    bold    simulationsLowAcc      def "\n"
+printf blue  "\t\t  Simulations with " bold "optimal acceptance"   def blue   ": "   (simulationsOptimalAcc==0  ? red : green)          bold    simulationsOptimalAcc  def "\n"
+printf blue  "\t\t     Simulations with " bold "high acceptance"   def blue   ": "   (simulationsHighAcc>0     ? yellow : green)        bold    simulationsHighAcc     def "\n"
+printf blue  "\t\t Simulations with too " bold "high acceptance"   def blue   ": "   (simulationsTooHighAcc>0  ? lightOrange : green)   bold    simulationsTooHighAcc  def "\n"
+printf pink  "\t\t                  Simulations " bold "running"   def blue   ": "   green                                              bold    simulationsRunning     def "\n"
+printf pink  "\t\t                  Simulations " bold "pending"   def blue   ": "   (simulationsPending>0     ? yellow : green)        bold    simulationsPending     def "\n"
+printf blue  "\t\t                  Simulations " bold "stucked"   def blue   ": "   (simulationsStucked>0     ? red : green)           bold    simulationsStucked     def "\n"
+printf blue  "\t\t             Simulations " bold "running fine"   def blue   ": "   green                                              bold    simulationsFine        def "\n"
+printf pink  "\t\t           Output files " bold "to be cleaned"   def blue   ": "   (outputFilesToBeCleaned>0 ? lightOrange : green)   bold    outputFilesToBeCleaned def "\n"
+        }' $PROJECT_DATABASE_FILE
+
+    echo ""
 fi
 
 }
