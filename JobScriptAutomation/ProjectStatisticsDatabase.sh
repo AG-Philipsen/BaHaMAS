@@ -362,8 +362,8 @@ while [ $# -gt 0 ]; do
 			echo -e "     "
 			echo -e "             \e[38;5;34m\e[4m\e[1mDisplaying\e[24m:\e[21m\e[38;5;202m If you don't wish the script to use the latest database file, use this option to specify a file to display and filter."
 			echo -e "     "            
-			echo -e "     -l | --local   -->  To use this option, the script should be called from a position such that mu, $MASS_PARAMETER, nt and ns can be extracted prom the path."
-			echo -e "                         This option will add to the given option the --mu, --$MASS_PARAMETER, --nt and --ns options with the values exttracted from the path."
+			echo -e "     -l | --local   -->  To use this option, the script should be called from a position such that mu, $MASS_PARAMETER, nt and ns can be extracted from the path."
+			echo -e "                         This option will add to the given option the --mu, --$MASS_PARAMETER, --nt and --ns options with the values extracted from the path."
             echo -e "                         At the moment it is not compatible with any of such an option."
             echo -e "   "
             echo -e "   "
@@ -382,6 +382,8 @@ while [ $# -gt 0 ]; do
 	esac
 	shift
 done
+
+[ $UPDATE = "FALSE" ] && DISPLAY="TRUE"
 
 if [ $DISPLAY = $UPDATE ]; then
     printf "\n\e[91m Option for UPDATE and DISPLAY/FILTERING scenarios cannot be mixed!\e[0m\n\n"
