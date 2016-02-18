@@ -69,7 +69,7 @@ function ProduceJobscript_Loewe(){
     echo "#       of the exec. Copying it later does not guarantee that it is still the same..." >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"Copy executable to beta directories in ${WORK_DIR_WITH_BETAFOLDERS}/${BETA_PREFIX}x.xxxx...\"" >> $JOBSCRIPT_GLOBALPATH
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-        echo "cp -a $HMC_GLOBALPATH \$dir$INDEX || exit 2" >> $JOBSCRIPT_GLOBALPATH
+        echo "rm -f \$dir$INDEX/$HMC_FILENAME && cp -a $HMC_GLOBALPATH \$dir$INDEX || exit 2" >> $JOBSCRIPT_GLOBALPATH
     done
     echo "echo \"...done!\"" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
