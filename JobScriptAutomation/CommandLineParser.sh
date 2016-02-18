@@ -2,6 +2,29 @@
 #       --startcondition and/or --host_seed (CL2QCD) one should think whether
 #       the continue part should be modified or not. 
 
+function SplitCombinedShortOptionsInSingloOptions() {
+    local NEW_OPTIONS=()
+    for VALUE in "$@"; do
+        if [[ $VALUE =~ ^-[[:alpha:]]+(=.*)?$ ]]; then
+            if [ $(grep -c "=" <<< "$VALUE") -gt 0 ]; then
+                local OPTION_EQUAL_PART=${VALUE##*=}
+                VALUE=${VALUE%%=*}
+            else
+                local OPTION_EQUAL_PART=""
+            fi
+            local SPLITTED_OPTIONS=( $(grep -o "." <<< "${VALUE:1}") )
+            for OPTION in "${SPLITTED_OPTIONS[@]}"; do
+                NEW_OPTIONS+=( "-$OPTION" )
+            done && unset -v 'OPTION'
+            [ "$OPTION_EQUAL_PART" != "" ] && NEW_OPTIONS[${#NEW_OPTIONS[@]}-1]="${NEW_OPTIONS[${#NEW_OPTIONS[@]}-1]}=$OPTION_EQUAL_PART" #Add =.* to last option 
+        else
+            NEW_OPTIONS+=($VALUE)
+        fi
+    done && unset -v 'VALUE'
+    echo ${NEW_OPTIONS[@]}
+}
+
+
 function ParseCommandLineOption(){
 
     MUTUALLYEXCLUSIVEOPTS=( "-s | --submit"
@@ -23,27 +46,6 @@ function ParseCommandLineOption(){
                             "--cleanOutputFiles"
                             "--completeBetasFile")
     MUTUALLYEXCLUSIVEOPTS_PASSED=( )
-
-    #Rewrite combined short options as proper options for parser
-    local NEW_OPTIONS=()
-    for VALUE in "$@"; do
-        if [[ $VALUE =~ ^-[[:alpha:]]+(=.*)?$ ]]; then
-            if [ $(grep -c "=" <<< "$VALUE") -gt 0 ]; then
-                local OPTION_EQUAL_PART=${VALUE##*=}
-                VALUE=${VALUE%%=*}
-            else
-                local OPTION_EQUAL_PART=""
-            fi
-            local SPLITTED_OPTIONS=( $(grep -o "." <<< "${VALUE:1}") )
-            for OPTION in "${SPLITTED_OPTIONS[@]}"; do
-                NEW_OPTIONS+=( "-$OPTION" )
-            done && unset -v 'OPTION'
-            [ "$OPTION_EQUAL_PART" != "" ] && NEW_OPTIONS[-1]="${NEW_OPTIONS[-1]}=$OPTION_EQUAL_PART" #Add =.* to last option 
-        else
-            NEW_OPTIONS+=($VALUE)
-        fi
-    done && unset -v 'VALUE'
-    set -- ${NEW_OPTIONS[@]}
     
     if ! ElementInArray "--doNotUseMultipleChains" $@ && [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
         printf "\n\e[0;31m At the moment, the options --doNotUseMultipleChains must be specified on not CSC clusters!! Aborting...\n\n\e[0m"
