@@ -24,10 +24,32 @@ function ParseCommandLineOption(){
                             "--completeBetasFile")
     MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 
+    #Rewrite combined short options as proper options for parser
+    local NEW_OPTIONS=()
+    for VALUE in "$@"; do
+        if [[ $VALUE =~ ^-[[:alpha:]]+(=.*)?$ ]]; then
+            if [ $(grep -c "=" <<< "$VALUE") -gt 0 ]; then
+                local OPTION_EQUAL_PART=${VALUE##*=}
+                VALUE=${VALUE%%=*}
+            else
+                local OPTION_EQUAL_PART=""
+            fi
+            local SPLITTED_OPTIONS=( $(grep -o "." <<< "${VALUE:1}") )
+            for OPTION in "${SPLITTED_OPTIONS[@]}"; do
+                NEW_OPTIONS+=( "-$OPTION" )
+            done && unset -v 'OPTION'
+            [ "$OPTION_EQUAL_PART" != "" ] && NEW_OPTIONS[-1]="${NEW_OPTIONS[-1]}=$OPTION_EQUAL_PART" #Add =.* to last option 
+        else
+            NEW_OPTIONS+=($VALUE)
+        fi
+    done && unset -v 'VALUE'
+    set -- ${NEW_OPTIONS[@]}
+    
     if ! ElementInArray "--doNotUseMultipleChains" $@ && [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
         printf "\n\e[0;31m At the moment, the options --doNotUseMultipleChains must be specified on not CSC clusters!! Aborting...\n\n\e[0m"
         exit -1
 	fi
+
     
     while [ "$1" != "" ]; do
 	    case $1 in
@@ -105,7 +127,7 @@ function ParseCommandLineOption(){
 		        echo -e "                                           or simply beta values like 5.4380 or a mix of both. If pure beta values are given then all seeds of the given beta value will be uncommented."
 		        echo -e "  \e[0;34m-u | --commentBetas\e[0;32m                ->    Is the reverse option of the --uncommentBetas option"
 		        echo -e "  \e[0;34m-i | --invertConfigurations\e[0;32m        ->    Invert configurations and produce correlator files for betas and seed specified in the betas file."
-				echo -e "  \e[0;34m-D | --dataBase\e[0;32m                    ->    Update, display and filter database. This is a subprogram plenty of functionalities. Run this script with"
+				echo -e "  \e[0;34m-d | --dataBase\e[0;32m                    ->    Update, display and filter database. This is a subprogram plenty of functionalities. Run this script with"
                 echo -e "                                           the option \e[0;34m--helpDatabase\e[0;32m to get an explanation about the various possibilities. To work with the database, specify the \e[0;34m-D\e[0;32m"
                 echo -e "                                           option followed by all the database options. Differently said, all options given after \e[0;34m-D\e[0;32m are options for the database subprogram."
 		        echo ""
@@ -297,7 +319,7 @@ function ParseCommandLineOption(){
                 INVERT_CONFIGURATIONS="TRUE"
                 shift
                 ;;
-			-D | --database)
+			-d | --database)
 				CALL_DATABASE="TRUE"
 				MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--database" )
 				shift

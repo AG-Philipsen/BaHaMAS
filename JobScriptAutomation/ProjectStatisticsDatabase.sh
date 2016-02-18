@@ -105,8 +105,7 @@ if ElementInArray "-l" $@ || ElementInArray "--local" $@;  then
         return
     fi
     local NEW_OPTIONS=()
-    for VALUE in "$@"
-    do
+    for VALUE in "$@"; do
         [[ $VALUE != "-l" ]] && [[ $VALUE != "--local" ]] && NEW_OPTIONS+=($VALUE)
     done && unset -v 'VALUE'
     ReadParametersFromPath $(pwd)
