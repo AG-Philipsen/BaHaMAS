@@ -253,14 +253,14 @@ function ListJobStatus_Loewe(){
 	    fi
 	    
 	    printf \
-            "\e[0;$(ColorBeta)m%-15s\t  \
-\e[0;$((36-$TO_BE_CLEANED*5))m%8s\e[0;36m \
-(\e[38;5;$(GoodAcc $ACCEPTANCE)m%s %%\e[0;36m) \
-[\e[38;5;$(GoodAcc $ACCEPTANCE_LAST)m%s %%\e[0;36m]  \
+            "$(ColorBeta)%-15s\t  \
+$(ColorClean $TO_BE_CLEANED)%8s\e[0;36m \
+($(GoodAcc $ACCEPTANCE)%s %%\e[0;36m) \
+[$(GoodAcc $ACCEPTANCE_LAST)%s %%\e[0;36m]  \
 %s-%s%s%s\t \
-\e[0;$(ColorStatus $STATUS)m%9s\e[0;36m\
+$(ColorStatus $STATUS)%9s\e[0;36m\
 \t%9s\t   \
-\e[0;$(ColorTime $TIME_FROM_LAST_MODIFICATION)m%s\e[0;36m      \
+$(ColorTime $TIME_FROM_LAST_MODIFICATION)%s\e[0;36m      \
 %6s \
 ( %s ) \
 \n\e[0m" \
@@ -297,33 +297,33 @@ function GetShortenedBetaString(){
 }
 
 function GoodAcc(){
-    echo "$1" | awk '{if($1<68){print 9}else if($1<70){print 208}else if($1>78){print 11}else if($1>90){print 202}else{print 10}}'
+    echo "$1" | awk -v tl="${TOO_LOW_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
+                    -v l="${LOW_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
+                    -v op="${OPTIMAL_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
+                    -v h="${HIGH_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
+                    -v th="${TOO_HIGH_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" '{if($1<68){print tl}else if($1<70){print l}else if($1>90){print th}else if($1>78){print h}else{print op}}'
 }
 
 function ColorStatus(){
     if [[ $1 == "RUNNING" ]]; then
-	    echo "32"
+	    echo $RUNNING_LISTSTATUS_COLOR
     elif [[ $1 == "PENDING" ]]; then
-	    echo "33"
+	    echo $PENDING_LISTSTATUS_COLOR
     else
-	    echo "36"
+	    echo $DEFAULT_LISTSTATUS_COLOR
     fi
 }
 
 function ColorTime(){
     if [[ ! $1 =~ ^[[:digit:]]+$ ]]; then
-	    echo "36"
+	    echo $DEFAULT_LISTSTATUS_COLOR
     else
-	    echo $(($1 > 450 ? 31 : 32 ))
+        [ $1 -gt 450 ] && echo "$STUCKED_SIMULATION_LISTSTATUS_COLOR" || echo "$FINE_SIMULATION_LISTSTATUS_COLOR"
     fi
 }
 
-function ColorDuration(){
-    if [[ $AV_DURATION_LAST_TR = "" ]]; then
-	    echo "33"
-    else
-	    echo "32"
-    fi
+function ColorClean(){
+    [ $1 -eq 0 ] && echo "$DEFAULT_LISTSTATUS_COLOR" || echo "$CLEANING_LISTSTATUS_COLOR"
 }
 
 function ColorBeta(){
@@ -348,11 +348,11 @@ function ColorBeta(){
     local ERROR_CODE=$?
     
     if [ $ERROR_CODE -eq 0 ]; then
-        echo "36"
+        echo $DEFAULT_LISTSTATUS_COLOR
     elif [ $ERROR_CODE -eq 1 ]; then
-        echo "91"
+        echo $WRONG_BETA_LISTSTATUS_COLOR
     else
-        echo "33"
+        echo $SUSPICIOUS_BETA_LISTSTATUS_COLOR
     fi
     
 }
