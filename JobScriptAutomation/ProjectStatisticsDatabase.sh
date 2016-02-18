@@ -12,10 +12,8 @@ function join { local IFS="$1"; shift; echo "$*"; }
 
 function projectStatisticsDatabase(){
 
-#local FILE_WITH_DIRECTORIES=""
 local TEMPORARY_FILE_WITH_DIRECTORIES="temporaryFileWithDirectoriesForDatabaseUpdate.dat"
 local TEMPORARY_DATABASE_FILE="tmpDatabase.dat"
-#local PROJECT_DATABASE_FILE=$PROJECT_DATABASE_DIRECTORY/$(date +%d_%m_%y)_$PROJECT_DATABASE_FILENAME
 local FILENAME_GIVEN_AS_INPUT=""
 local CURRENT_DIRECTORY=$(pwd)
 
@@ -420,8 +418,6 @@ fi
 
 if [ "$UPDATE" = "FALSE" ]; then
 
-	printf " \e[38;5;202mCurrent database file: \e[38;5;105m$PROJECT_DATABASE_FILE\n\n\e[0m"
-
 	MU_STRING=$(join "|" "${MU_ARRAY[@]}")
 	KAPPA_STRING=$(join "|" "${KAPPA_ARRAY[@]}")
 	NS_STRING=$(join "|" "${NS_ARRAY[@]}")
@@ -590,6 +586,7 @@ if [ "$UPDATE" = "FALSE" ]; then
 
 								if(betaChainType[3] == "NC"){
 									if(newKey != oldKey){
+										printf(" "); #Aesthetics
 										printf(statisticsFormatSpecString,statisticsSummaryArray[oldKey]); 
 										oldKey=newKey;
 									}
@@ -610,9 +607,16 @@ if [ "$UPDATE" = "FALSE" ]; then
 							printf(" "); #Aesthetics
 							printf(statisticsFormatSpecString,statisticsSummaryArray[newKey]);
 						}
+						printf(" \033[0m\033[0;38;5;26m");
+						for(i=1;i<=lengthOfHeaderSeperator;i++){
+							printf("=");
+						}
+						printf("\033[0m\n");
 					}
 		' $PROJECT_DATABASE_FILE
+    
     echo ''
+    printf " Last update ended on \e[1m$(date -r $PROJECT_DATABASE_FILE +"%d.%m.%Y")\e[21m at \e[1m$(date -r $PROJECT_DATABASE_FILE +"%H:%M")\e[21m  \e[38;5;202m--->\e[38;5;207m  $PROJECT_DATABASE_FILE\n\n"
 fi
 
 
