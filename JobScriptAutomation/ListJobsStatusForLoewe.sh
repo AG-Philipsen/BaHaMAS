@@ -140,45 +140,50 @@ function ListJobStatus_Loewe(){
 	#----Constructing WORK_BETADIRECTORY, HOME_BETADIRECTORY, JOBSCRIPT_NAME, JOBSCRIPT_GLOBALPATH and INPUTFILE_GLOBALPATH---#
 	local OUTPUTFILE_GLOBALPATH="$WORK_DIR/$SIMULATION_PATH$LOCAL_PARAMETERS_PATH/$BETA_PREFIX$BETA/$OUTPUTFILE_NAME"
 	local INPUTFILE_GLOBALPATH="$HOME_DIR/$SIMULATION_PATH$LOCAL_PARAMETERS_PATH/$BETA_PREFIX$BETA/$INPUTFILE_NAME"
-	local STDOUTPUT_GLOBALPATH="$HOME_DIR/$SIMULATION_PATH$LOCAL_PARAMETERS_PATH/$BETA_PREFIX$BETA/$STDOUTPUT_FILE"
 	local STDOUTPUT_FILE=`ls -t1 $BETA_PREFIX$BETA | awk -v filename="$HMC_FILENAME" 'BEGIN{regexp="^"filename".[[:digit:]]+.out$"}{if($1 ~ regexp){print $1}}' | head -n1`
+	local STDOUTPUT_GLOBALPATH="$HOME_DIR/$SIMULATION_PATH$LOCAL_PARAMETERS_PATH/$BETA_PREFIX$BETA/$STDOUTPUT_FILE"
 	#-------------------------------------------------------------------------------------------------------------------------#
 	if [ $LISTSTATUS_MEASURE_TIME = "TRUE" ]; then
 	    if [ -f $STDOUTPUT_GLOBALPATH ] && [[ $STATUS == "RUNNING" ]]; then
     	    #Since in CL2QCD std. output there is only the time of saving and not the day, I have to go through the std. output and count the
 	        #number of days (done looking at the hours). One could sum up all the tr. times as done in the TimeTrajectoryCL2QCD.sh but it is
 	        #not really efficient!
-		    local TIMES_ARRAY=( $(grep "finished trajectory" $STDOUTPUT_GLOBALPATH | awk '{print substr($1,2,8)}') )
-		    local UNIQUE_HOURS_ARRAY=( $(grep "finished trajectory" $STDOUTPUT_GLOBALPATH | awk '{print substr($1,2,2)}' | uniq -d) )
+		local TIMES_ARRAY=( $(grep "finished trajectory" $STDOUTPUT_GLOBALPATH | awk '{print substr($1,2,8)}') )
+		local UNIQUE_HOURS_ARRAY=( $(grep "finished trajectory" $STDOUTPUT_GLOBALPATH | awk '{print substr($1,2,2)}' | uniq -d) )
 	        #local =( $(echo ${TIMES_ARRAY[@]} | awk 'BEGIN{RS=" "}{print substr($1,1,2)}' | uniq -d) )
 	        #I use the number of occurences of the second hours in order to get the almost correct number of days,
 	        #then I correct in the case the last hour is equal to the first.
-		    if [ ${#UNIQUE_HOURS_ARRAY[@]} -lt 2 ]; then
-		        local NUMBER_OF_DAYS=0
-		    else
-		        local NUMBER_OF_DAYS=$(echo ${UNIQUE_HOURS_ARRAY[@]} | awk 'BEGIN{RS=" "}NR==2{secondHour=$1}{hours[$1]++}END{print hours[secondHour]-1}')
-		        if [ ${UNIQUE_HOURS_ARRAY[0]} -eq ${UNIQUE_HOURS_ARRAY[@]:(-1)} ]; then
-			        [ $(TimeToSeconds ${TIMES_ARRAY[0]}) -le $(TimeToSeconds ${TIMES_ARRAY[@]:(-1)}) ] && NUMBER_OF_DAYS=$(($NUMBER_OF_DAYS + 1))
-		        fi
+		if [ ${#UNIQUE_HOURS_ARRAY[@]} -lt 2 ]; then
+		    local NUMBER_OF_DAYS=0
+		else
+		    local NUMBER_OF_DAYS=$(echo ${UNIQUE_HOURS_ARRAY[@]} | awk 'BEGIN{RS=" "}NR==2{secondHour=$1}{hours[$1]++}END{print hours[secondHour]-1}')
+		    if [ ${UNIQUE_HOURS_ARRAY[0]} -eq ${UNIQUE_HOURS_ARRAY[@]:(-1)} ]; then
+			[ $(TimeToSeconds ${TIMES_ARRAY[0]}) -le $(TimeToSeconds ${TIMES_ARRAY[@]:(-1)}) ] && NUMBER_OF_DAYS=$(($NUMBER_OF_DAYS + 1))
 		    fi
+		fi
 	        #Now we can calculate the total time and then the average time if we have done more than one trajectory!
-		    if [ ${#TIMES_ARRAY[@]} -gt 1 ]; then
-		        local TOTAL_TIME_OF_SIMULATION=$(( $(date -d "${TIMES_ARRAY[@]:(-1)}" +%s) - $(date -d "${TIMES_ARRAY[0]}" +%s) ))
-		        [ $TOTAL_TIME_OF_SIMULATION -lt 0 ] && TOTAL_TIME_OF_SIMULATION=$(( $TOTAL_TIME_OF_SIMULATION + 86400 ))
-		        TOTAL_TIME_OF_SIMULATION=$(( $TOTAL_TIME_OF_SIMULATION + $NUMBER_OF_DAYS*86400 ))
-		        local AVERAGE_TIME_PER_TRAJECTORY=$(( $TOTAL_TIME_OF_SIMULATION / (${#TIMES_ARRAY[@]}-1) +1)) #The +1 is to round to the following integer
+		if [ ${#TIMES_ARRAY[@]} -gt 1 ]; then
+		    local TOTAL_TIME_OF_SIMULATION=$(( $(date -d "${TIMES_ARRAY[@]:(-1)}" +%s) - $(date -d "${TIMES_ARRAY[0]}" +%s) ))
+		    [ $TOTAL_TIME_OF_SIMULATION -lt 0 ] && TOTAL_TIME_OF_SIMULATION=$(( $TOTAL_TIME_OF_SIMULATION + 86400 ))
+		    TOTAL_TIME_OF_SIMULATION=$(( $TOTAL_TIME_OF_SIMULATION + $NUMBER_OF_DAYS*86400 ))
+		    local AVERAGE_TIME_PER_TRAJECTORY=$(( $TOTAL_TIME_OF_SIMULATION / (${#TIMES_ARRAY[@]}-1) +1)) #The +1 is to round to the following integer
 	            #Calculate also last trajectory time
-		        local TIME_LAST_TRAJECTORY=$(( $(date -d "${TIMES_ARRAY[@]:(-1)}" +%s) - $(date -d "${TIMES_ARRAY[$((${#TIMES_ARRAY[@]}-2))]}" +%s) ))
-		        [ $TIME_LAST_TRAJECTORY -lt 0 ] && TIME_LAST_TRAJECTORY=$(( $TIME_LAST_TRAJECTORY + 86400 ))
+		    local TIME_LAST_TRAJECTORY=$(( $(date -d "${TIMES_ARRAY[@]:(-1)}" +%s) - $(date -d "${TIMES_ARRAY[$((${#TIMES_ARRAY[@]}-2))]}" +%s) ))
+		    [ $TIME_LAST_TRAJECTORY -lt 0 ] && TIME_LAST_TRAJECTORY=$(( $TIME_LAST_TRAJECTORY + 86400 ))
 		        #The following line is to avoid that the time is 0s because the last two lines found in the file are for the saving to prng.save and prng.xxxx
-		        [ $TIME_LAST_TRAJECTORY -lt 1 ] && TIME_LAST_TRAJECTORY=$(( $(date -d "${TIMES_ARRAY[@]:(-1)}" +%s) - $(date -d "${TIMES_ARRAY[$((${#TIMES_ARRAY[@]}-3))]}" +%s) ))
-		    else
-		        local AVERAGE_TIME_PER_TRAJECTORY="----"
-		        local TIME_LAST_TRAJECTORY="----"
-		    fi
+		    [ $TIME_LAST_TRAJECTORY -lt 1 ] && TIME_LAST_TRAJECTORY=$(( $(date -d "${TIMES_ARRAY[@]:(-1)}" +%s) - $(date -d "${TIMES_ARRAY[$((${#TIMES_ARRAY[@]}-3))]}" +%s) ))
+		else
+		    local AVERAGE_TIME_PER_TRAJECTORY="ERR"
+		    local TIME_LAST_TRAJECTORY="ERR"
+		fi
 	    else
+		if [ ! -f $STDOUTPUT_GLOBALPATH ]; then
+		    local AVERAGE_TIME_PER_TRAJECTORY="ERR"
+		    local TIME_LAST_TRAJECTORY="ERR"
+		else
 		    local AVERAGE_TIME_PER_TRAJECTORY="----"
 		    local TIME_LAST_TRAJECTORY="----"
+		fi
 	    fi
 	else
 		local AVERAGE_TIME_PER_TRAJECTORY="OFF"
@@ -267,14 +272,13 @@ function ListJobStatus_Loewe(){
             "$STATUS"   "$MAX_DELTAS" \
 	    "$(echo $TIME_FROM_LAST_MODIFICATION | awk '{if($1 ~ /^[[:digit:]]+$/){printf "%6d", $1}else{print $1}}') sec. ago" \
 	    "$NUMBER_LAST_TRAJECTORY" \
-	    "$(echo "$TIME_LAST_TRAJECTORY $AVERAGE_TIME_PER_TRAJECTORY" | awk '{if($1 ~ /^[[:digit:]]+$/ && $2 ~ /^[[:digit:]]+$/){printf "%3ds | %3ds", $1, $2}else{print "notMeasured"}}')" 
+	    "$(echo "$TIME_LAST_TRAJECTORY $AVERAGE_TIME_PER_TRAJECTORY" | awk '{if($1 ~ /^[[:digit:]]+$/ && $2 ~ /^[[:digit:]]+$/){printf "%3ds | %3ds", $1, $2}else if($1 == "ERR" || $2 == "ERR"){print "_errorMeas_"}else{print "notMeasured"}}')" 
 	
 	if [ $TO_BE_CLEANED -eq 0 ]; then
 	    printf "%s\t\t%8s (%s %%) [%s %%]  %s-%s%s%s\t%9s\t%s\n"   "$(GetShortenedBetaString)"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$ACCEPTANCE_LAST"   "$INT0" "$INT1" "$INT2" "$K_MP"   "$STATUS"   "$MAX_DELTAS" >> $JOBS_STATUS_FILE
 	else
 	    printf "%s\t\t%8s (%s %%) [%s %%]  %s-%s%s%s\t%9s\t%s\t ---> File to be cleaned!\n"   "$(GetShortenedBetaString)"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$ACCEPTANCE_LAST"   "$INT0" "$INT1" "$INT2" "$K_MP"   "$STATUS"   "$MAX_DELTAS" >> $JOBS_STATUS_FILE
 	fi
-	
 	
     done #Loop on BETA
     printf "\e[0;36m===============================================================================================================================================\n\e[0m"
