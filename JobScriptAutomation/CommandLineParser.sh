@@ -133,6 +133,9 @@ function ParseCommandLineOption(){
 		        echo ""
 		        echo -e "\e[0;93mNOTE: The blue options are mutually exclusive and they are all FALSE by default! In other words, if none of them"
 		        echo -e "\e[0;93m      is given, the script will create beta-folders with the right files inside, but no job will be submitted."
+		        echo ""
+		        echo -e "\e[38;5;202mNOTE: Short options can be combined, and one specification via = can be appended to the last short option specified."
+		        echo -e "\e[38;5;202m      For example \e[0;95m-dl\e[38;5;202m is equivalent to \e[0;95m-d -l\e[38;5;202m and \e[0;95m-pcm=10000\e[38;5;202m is equivalent to \e[0;95m-p -c -m=10000\e[38;5;202m."
 		        printf "\n\e[0m"
 		        exit
 		        shift;;
