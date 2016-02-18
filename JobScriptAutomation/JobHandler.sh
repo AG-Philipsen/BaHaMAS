@@ -130,7 +130,7 @@ SPECIFIED_COMMAND_LINE_OPTIONS=( $(SplitCombinedShortOptionsInSingloOptions $@) 
 if ElementInArray "-h" ${SPECIFIED_COMMAND_LINE_OPTIONS[@]} || ElementInArray "--help" ${SPECIFIED_COMMAND_LINE_OPTIONS[@]}; then
     SPECIFIED_COMMAND_LINE_OPTIONS=( "--help" )
 elif ElementInArray "--helpDatabase" ${SPECIFIED_COMMAND_LINE_OPTIONS[@]}; then
-	SPECIFIED_COMMAND_LINE_OPTIONS=( "-D" "-h" )
+	SPECIFIED_COMMAND_LINE_OPTIONS=( "-d" "-h" )
 fi
 
 ParseCommandLineOption "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}"
