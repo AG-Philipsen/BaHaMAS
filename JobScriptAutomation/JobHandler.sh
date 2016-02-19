@@ -92,7 +92,7 @@ if [ $STAGGERED = "TRUE" ]; then
     USE_RATIONAL_APPROXIMATION_FILE="TRUE"
 fi
 
-#Variables for Liststatus colors (here since they are used also by the database)
+#Variables for Liststatus colors and acceptances thresholds (here since they are used also by the database)
 DEFAULT_LISTSTATUS_COLOR="\e[0;36m"
 SUSPICIOUS_BETA_LISTSTATUS_COLOR="\e[0;33m"
 WRONG_BETA_LISTSTATUS_COLOR="\e[0;91m"
@@ -106,7 +106,11 @@ PENDING_LISTSTATUS_COLOR="\e[0;33m"
 CLEANING_LISTSTATUS_COLOR="\e[0;31m"
 STUCKED_SIMULATION_LISTSTATUS_COLOR="\e[0;91m"
 FINE_SIMULATION_LISTSTATUS_COLOR="\e[0;32m"
-
+#-----------------
+TOO_LOW_ACCEPTANCE_THRESHOLD=68
+LOW_ACCEPTANCE_THRESHOLD=70
+HIGH_ACCEPTANCE_THRESHOLD=78
+TOO_HIGH_ACCEPTANCE_THRESHOLD=90
 
 #####################################CREATE OPTIONS FOR COMMAND-LINE-PARSER######################################
 #Inverter Options

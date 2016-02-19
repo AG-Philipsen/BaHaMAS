@@ -140,7 +140,7 @@ function ListJobStatus_Loewe(){
 	    #----Constructing WORK_BETADIRECTORY, HOME_BETADIRECTORY, JOBSCRIPT_NAME, JOBSCRIPT_GLOBALPATH and INPUTFILE_GLOBALPATH---#
 	    local OUTPUTFILE_GLOBALPATH="$WORK_DIR/$SIMULATION_PATH$LOCAL_PARAMETERS_PATH/$BETA_PREFIX$BETA/$OUTPUTFILE_NAME"
 	    local INPUTFILE_GLOBALPATH="$HOME_DIR/$SIMULATION_PATH$LOCAL_PARAMETERS_PATH/$BETA_PREFIX$BETA/$INPUTFILE_NAME"
-	    local STDOUTPUT_FILE=`ls -t1 $BETA_PREFIX$BETA | awk -v filename="$HMC_FILENAME" 'BEGIN{regexp="^"filename".[[:digit:]]+.out$"}{if($1 ~ regexp){print $1}}' | head -n1`
+	    local STDOUTPUT_FILE=`ls -t1 $BETA_PREFIX$BETA 2>/dev/null | awk -v filename="$HMC_FILENAME" 'BEGIN{regexp="^"filename".[[:digit:]]+.out$"}{if($1 ~ regexp){print $1}}' | head -n1`
 	    local STDOUTPUT_GLOBALPATH="$HOME_DIR/$SIMULATION_PATH$LOCAL_PARAMETERS_PATH/$BETA_PREFIX$BETA/$STDOUTPUT_FILE"
 	    #-------------------------------------------------------------------------------------------------------------------------#
 	    if [ $LISTSTATUS_MEASURE_TIME = "TRUE" ]; then
@@ -301,7 +301,11 @@ function GoodAcc(){
                     -v l="${LOW_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
                     -v op="${OPTIMAL_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
                     -v h="${HIGH_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
-                    -v th="${TOO_HIGH_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" '{if($1<68){print tl}else if($1<70){print l}else if($1>90){print th}else if($1>78){print h}else{print op}}'
+                    -v th="${TOO_HIGH_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
+                    -v tlt="$TOO_LOW_ACCEPTANCE_THRESHOLD" \
+                    -v lt="$LOW_ACCEPTANCE_THRESHOLD" \
+                    -v ht="$HIGH_ACCEPTANCE_THRESHOLD" \
+                    -v tht="$TOO_HIGH_ACCEPTANCE_THRESHOLD" '{if($1<tlt){print tl}else if($1<lt){print l}else if($1>tht){print th}else if($1>ht){print h}else{print op}}'
 }
 
 function ColorStatus(){

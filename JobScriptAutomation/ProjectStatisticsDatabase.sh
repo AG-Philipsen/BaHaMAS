@@ -703,7 +703,7 @@ fi
 
 if [ $REPORT = "TRUE" ]; then
 
-    printf "\t    \e[95m\e[4mAUTOMATIC REPORT FROM DATABASE (status on \e[1m$(date -r $PROJECT_DATABASE_FILE +"%d.%m.%Y")\e[21m at \e[1m$(date -r $PROJECT_DATABASE_FILE +"%H:%M")\e[21m)\n\n\e[0m"
+    printf "\t\t\e[95m\e[4mAUTOMATIC REPORT FROM DATABASE (status on \e[1m$(date -r $PROJECT_DATABASE_FILE +"%d.%m.%Y")\e[21m at \e[1m$(date -r $PROJECT_DATABASE_FILE +"%H:%M")\e[21m)\n\n\e[0m"
 
     awk --posix -v betaColorColumn="$((${COLUMNS[betaC]} -1 ))" \
         -v trajNoColorColumn="$((${COLUMNS[trajNoC]} -1 ))" \
@@ -722,7 +722,11 @@ if [ $REPORT = "TRUE" ]; then
         -v pendingColor="${PENDING_LISTSTATUS_COLOR/e/033}" \
         -v toBeCleanedColor="${CLEANING_LISTSTATUS_COLOR/e/033}" \
         -v stuckedColor="${STUCKED_SIMULATION_LISTSTATUS_COLOR/e/033}" \
-        -v fineColor="${FINE_SIMULATION_LISTSTATUS_COLOR/e/033}" '
+        -v fineColor="${FINE_SIMULATION_LISTSTATUS_COLOR/e/033}" \
+        -v tooLowAccThreshold="${TOO_LOW_ACCEPTANCE_THRESHOLD}" \
+        -v lowAccThreshold="${LOW_ACCEPTANCE_THRESHOLD}" \
+        -v highAccThreshold="${HIGH_ACCEPTANCE_THRESHOLD}" \
+        -v tooHighAccThreshold="${TOO_HIGH_ACCEPTANCE_THRESHOLD}" '
 BEGIN{
 outputFilesToBeCleaned = 0
 simulationsTooLowAcc = 0
@@ -760,17 +764,17 @@ blue="\033[38;5;45m"
 pink="\033[38;5;171m"
 bold="\033[1m"
 
-printf pink  "\t\t            Simulations on " bold "broken GPU"   def blue   ": "   (simulationsOnBrokenGPU>0 ? red : green)           bold    simulationsOnBrokenGPU def "\n"
-printf blue  "\t\t  Simulations with " bold "too low acceptance"   def blue   ": "   (simulationsTooLowAcc>0   ? red : green)           bold    simulationsTooLowAcc   def "\n"
-printf blue  "\t\t      Simulations with " bold "low acceptance"   def blue   ": "   (simulationsLowAcc>0      ? darkOrange : green)    bold    simulationsLowAcc      def "\n"
-printf blue  "\t\t  Simulations with " bold "optimal acceptance"   def blue   ": "   (simulationsOptimalAcc==0  ? red : green)          bold    simulationsOptimalAcc  def "\n"
-printf blue  "\t\t     Simulations with " bold "high acceptance"   def blue   ": "   (simulationsHighAcc>0     ? yellow : green)        bold    simulationsHighAcc     def "\n"
-printf blue  "\t\t Simulations with too " bold "high acceptance"   def blue   ": "   (simulationsTooHighAcc>0  ? lightOrange : green)   bold    simulationsTooHighAcc  def "\n"
-printf pink  "\t\t                  Simulations " bold "running"   def blue   ": "   green                                              bold    simulationsRunning     def "\n"
-printf pink  "\t\t                  Simulations " bold "pending"   def blue   ": "   (simulationsPending>0     ? yellow : green)        bold    simulationsPending     def "\n"
-printf blue  "\t\t                  Simulations " bold "stucked"   def blue   ": "   (simulationsStucked>0     ? red : green)           bold    simulationsStucked     def "\n"
-printf blue  "\t\t             Simulations " bold "running fine"   def blue   ": "   green                                              bold    simulationsFine        def "\n"
-printf pink  "\t\t           Output files " bold "to be cleaned"   def blue   ": "   (outputFilesToBeCleaned>0 ? lightOrange : green)   bold    outputFilesToBeCleaned def "\n"
+printf "\t\t%s            Simulations on %s broken GPU%s%s: %s%s %4d %s                       \n",  pink,  bold,  def,  blue, (simulationsOnBrokenGPU>0 ? red : green)        ,   bold,   simulationsOnBrokenGPU, def 
+printf "\t\t%s  Simulations with %s too low acceptance%s%s: %s%s %4d %s%s  [  0%%,  %2d%% ) %s\n",  blue,  bold,  def,  blue, (simulationsTooLowAcc>0   ? red : green)        ,   bold,   simulationsTooLowAcc  , def, blue, tooLowAccThreshold, def
+printf "\t\t%s      Simulations with %s low acceptance%s%s: %s%s %4d %s%s  [ %2d%%,  %2d%% )%s\n",  blue,  bold,  def,  blue, (simulationsLowAcc>0      ? darkOrange : green) ,   bold,   simulationsLowAcc     , def, blue, tooLowAccThreshold, lowAccThreshold, def
+printf "\t\t%s  Simulations with %s optimal acceptance%s%s: %s%s %4d %s%s  [ %2d%%,  %2d%% ]%s\n",  blue,  bold,  def,  blue, (simulationsOptimalAcc==0  ? red : green)       ,   bold,   simulationsOptimalAcc , def, blue, lowAccThreshold, highAccThreshold, def
+printf "\t\t%s     Simulations with %s high acceptance%s%s: %s%s %4d %s%s  ( %2d%%,  %2d%% ]%s\n",  blue,  bold,  def,  blue, (simulationsHighAcc>0     ? yellow : green)     ,   bold,   simulationsHighAcc    , def, blue, highAccThreshold, tooHighAccThreshold, def
+printf "\t\t%s Simulations with too %s high acceptance%s%s: %s%s %4d %s%s  ( %2d%%, 100%% ] %s\n",  blue,  bold,  def,  blue, (simulationsTooHighAcc>0  ? lightOrange : green),   bold,   simulationsTooHighAcc , def, blue, tooHighAccThreshold, def
+printf "\t\t%s                  Simulations %s running%s%s: %s%s %4d %s                       \n",  pink,  bold,  def,  blue, green                                           ,   bold,   simulationsRunning    , def 
+printf "\t\t%s                  Simulations %s pending%s%s: %s%s %4d %s                       \n",  pink,  bold,  def,  blue, (simulationsPending>0     ? yellow : green)     ,   bold,   simulationsPending    , def 
+printf "\t\t%s    Simulations %s stucked%s%s (or finished): %s%s %4d %s                       \n",  blue,  bold,  def,  blue, (simulationsStucked>0     ? red : green)        ,   bold,   simulationsStucked    , def 
+printf "\t\t%s             Simulations %s running fine%s%s: %s%s %4d %s                       \n",  blue,  bold,  def,  blue, green                                           ,   bold,   simulationsFine       , def 
+printf "\t\t%s           Output files %s to be cleaned%s%s: %s%s %4d %s                       \n",  pink,  bold,  def,  blue, (outputFilesToBeCleaned>0 ? lightOrange : green),   bold,   outputFilesToBeCleaned, def 
         }' $PROJECT_DATABASE_FILE
 
     echo ""
