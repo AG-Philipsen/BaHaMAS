@@ -672,7 +672,7 @@ if [ $UPDATE = "TRUE" ]; then
 			sed -r 's/(\x1B\[[[:digit:]]{1,2};[[:digit:]]{0,2};[[:digit:]]{0,3}m)(.)/\1 \2/g' | \
 			sed -r 's/(.)(\x1B\[.{1,2};.{1,2}m)/\1 \2/g' | \
 			sed -r 's/(\x1B\[.{1,2};.{1,2}m)(.)/\1 \2/g' |
-			awk --posix -v mu=${PARAMS[0]#mui*} -v k=${PARAMS[1]#$KAPPA_PREFIX*} -v nt=${PARAMS[2]#nt*} -v ns=${PARAMS[3]#*ns} '
+			awk --posix -v mu=${PARAMS[0]#$CHEMPOT_PREFIX*} -v k=${PARAMS[1]#$KAPPA_PREFIX*} -v nt=${PARAMS[2]#$NTIME_PREFIX*} -v ns=${PARAMS[3]#*$NSPACE_PREFIX} '
 
 							$3 ~ /^[[:digit:]]\.[[:digit:]]{4}/{
 								print $(3-1) " " mu " " $(3-1) " " k " " $(3-1) " " nt " " $(3-1) " " ns " " $(3-1) " " $3 " " $(5-1) " " $5 " " $(8-1) " " $8 " " $(15-1) " " $15 " " $(19-1) " " $19 " " "\033[0m"
