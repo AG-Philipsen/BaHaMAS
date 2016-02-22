@@ -16,6 +16,7 @@ function ParseCommandLineOptions(){
             echo "  -h | --help"
             echo "  -u | --user       ->    user for which jobs should be displayed (DEFAULT = $(whoami))"
             echo "  -a | --allUsers   ->    display jobs information for all users"
+            echo "  -l | --local      ->    display information for jobs submitted from a folder whose path match the present directory"
             if [ $CLUSTER_NAME = "LCSC" ]; then
                 echo "  -n | --nodeUsage  ->    display information ONLY about which nodes are used"
                 echo "  -g | --groupBetas ->    display partial information grouping betas used"
@@ -26,13 +27,14 @@ function ParseCommandLineOptions(){
             shift;;
         -u=* | --user=* )    SELECTED_USER=${1#*=}; shift ;;
         -a | --allUsers )    DISPLAY_ALL_JOBS="TRUE"; shift ;;
+	    -l | --local )       MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--local" ); LOCAL_JOBS="TRUE"; shift;;
 	    -n | --nodeUsage )   MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--nodeUsage" ); NODE_USAGE="TRUE"; shift;;
 	    -g | --groupBetas )  MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--groupBetas" ); GROUP_BETAS="TRUE"; shift;;
         * ) printf "\n\e[0;31mError parsing the options! Aborting...\n\n\e[0m" ; exit -1 ;;
         esac
     done
 
-    if [ ${#MUTUALLYEXCLUSIVEOPTS_PASSED[@]} -gt 0 ] && [ $CLUSTER_NAME != "LCSC" ]; then
+    if { [ $LOCAL_JOBS = 'TRUE' ] || [ $GROUP_BETAS = 'TRUE' ]; } && [ $CLUSTER_NAME != "LCSC" ]; then
         printf "\n\e[0;31mError parsing the options (see --help)! Aborting...\n\n\e[0m"
         exit -1
     fi
@@ -61,12 +63,15 @@ function ExtractParameterFromJobInformations(){
 
 CLUSTER_NAME="LOEWE"
 [ "$(hostname)" = "lxlcsc0001" ] && CLUSTER_NAME="LCSC"
-MUTUALLYEXCLUSIVEOPTS=( "-n | --nodeUsage" "-g | --groupBetas" )
+MUTUALLYEXCLUSIVEOPTS=( "-n | --nodeUsage" "-g | --groupBetas" "-l | --local" )
 MUTUALLYEXCLUSIVEOPTS_PASSED=( )
 SELECTED_USER="$(whoami)"
+TEMPORARY_FILE_FOR_COLOURED_JOBINFORMATION="temporaryFileForColouredListstatus.dat"
 DISPLAY_ALL_JOBS="FALSE"
 NODE_USAGE="FALSE"
 GROUP_BETAS="FALSE"
+LOCAL_JOBS="FALSE"
+
 
 ParseCommandLineOptions $@
 
@@ -205,62 +210,74 @@ fi
 
 #------------------------------------------------------------------------------------------------------------------------------------------------#
 
-#Table header
-COLUMNS_OF_THE_SHELL=$(tput cols)
-TABLE_FORMAT="%-8s%-5s%-$((2+${#LONGEST_NAME}))s%-5s%-25s%-5s%-19s%-5s%+14s%-5s%-s"
-printf "\n\e[1;36m"
-for (( c=1; c<=$(($COLUMNS_OF_THE_SHELL-3)); c++ )); do printf "="; done && unset -v 'c'
-printf "\e[0m\n"
-printf "\e[38;5;202m$TABLE_FORMAT\e[0m\n"   "JOBID:" ""   "  JOB NAME:" ""   "STATUS:" ""   "START/END TIME:" ""   "WALL/RUNTIME:" ""   "SUBMITTED FROM:"
-
-#Print table sorting according jobname
-while [ ${#JOBNAME[@]} -gt 0 ]; do
-    i=$(FindPositionOfFirstMinimumOfArray "${JOBNAME[@]}")
-
-    if [[ ${JOBSTATUS[$i]} == "RUNNING" ]]; then
-        printf "\e[0;32m"
-    elif [[ ${JOBSTATUS[$i]} == "PENDING" ]]; then
-        if [[ ${JOBSTARTTIME[$i]} != "Unknown" ]]; then
-            printf "\e[0;33m"
-        else
-            printf "\e[0;31m"
-        fi
-    else
-        printf "\e[0;35m"
-    fi
-
-    if [[ ${JOBSTATUS[$i]} == "RUNNING" ]]; then
-        printf "$TABLE_FORMAT\e[0m\n"   "${JOBID_ARRAY[$i]}" ""\
-                                        "  ${JOBNAME[$i]}" ""\
-                                        "${JOBSTATUS[$i]} on ${JOBFIRSTNODE[$i]}" ""\
-                                        "${JOBENDTIME[$i]}" ""\
-                                        "${JOBRUNTIME[$i]}" ""\
-                                        "${JOBSUBFROM[$i]}"
-    else
-        printf "$TABLE_FORMAT\e[0m\n"   "${JOBID_ARRAY[$i]}" ""\
-                                        "  ${JOBNAME[$i]}" ""\
-                                        "${JOBSTATUS[$i]}" ""\
-                                        "${JOBSTARTTIME[$i]}" ""\
-                                        "${JOBWALLTIME[$i]}" ""\
-                                        "${JOBSUBFROM[$i]} on ${JOBSUBTIME[$i]}"
-    fi
-
-    unset JOBID_ARRAY[$i]; JOBID_ARRAY=( "${JOBID_ARRAY[@]}" )
-    unset JOBNAME[$i]; JOBNAME=( "${JOBNAME[@]}" )
-    unset JOBSTATUS[$i]; JOBSTATUS=( "${JOBSTATUS[@]}" )
-    unset JOBSTARTTIME[$i]; JOBSTARTTIME=( "${JOBSTARTTIME[@]}" )
-    unset JOBENDTIME[$i]; JOBENDTIME=( "${JOBENDTIME[@]}" )
-    unset JOBSUBTIME[$i]; JOBSUBTIME=( "${JOBSUBTIME[@]}" )
-    unset JOBSUBFROM[$i]; JOBSUBFROM=( "${JOBSUBFROM[@]}" )
-    unset JOBNUMNODES[$i]; JOBNUMNODES=( "${JOBNUMNODES[@]}" )
-    unset JOBFIRSTNODE[$i]; JOBFIRSTNODE=( "${JOBFIRSTNODE[@]}" )
-    unset JOBWALLTIME[$i]; JOBWALLTIME=( "${JOBWALLTIME[@]}" )
-    unset JOBRUNTIME[$i]; JOBRUNTIME=( "${JOBRUNTIME[@]}" )
+function PrintJobInformation(){
     
-done
+    #Table header
+    COLUMNS_OF_THE_SHELL=$(tput cols)
+    TABLE_FORMAT="%-8s%-5s%-$((2+${#LONGEST_NAME}))s%-5s%-25s%-5s%-19s%-5s%+14s%-5s%-s"
+    printf "\n\e[1;36m"
+    for (( c=1; c<=$(($COLUMNS_OF_THE_SHELL-3)); c++ )); do printf "="; done && unset -v 'c'
+    printf "\e[0m\n"
+    printf "\e[38;5;202m$TABLE_FORMAT\e[0m\n"   "JOBID:" ""   "  JOB NAME:" ""   "STATUS:" ""   "START/END TIME:" ""   "WALL/RUNTIME:" ""   "SUBMITTED FROM:"
 
-printf "\n\e[38;5;202m  Total number of submitted jobs: $TOTAL_JOBS"
-printf " (\e[1;32mRunning: $RUNNING_JOBS  \e[0m - \e[1;31m  Pending: $PENDING_JOBS  \e[0m - \e[1;35m  Others: $OTHER_JOBS\e[38;5;202m)\n"
-printf "\e[1;36m"
-for (( c=1; c<=$(($COLUMNS_OF_THE_SHELL-3)); c++ )); do printf "="; done && unset -v 'c'
-printf "\e[0m\n\n"
+    #Print table sorting according jobname
+    while [ ${#JOBNAME[@]} -gt 0 ]; do
+        i=$(FindPositionOfFirstMinimumOfArray "${JOBNAME[@]}")
+
+        if [[ ${JOBSTATUS[$i]} == "RUNNING" ]]; then
+            printf "\e[0;32m"
+        elif [[ ${JOBSTATUS[$i]} == "PENDING" ]]; then
+            if [[ ${JOBSTARTTIME[$i]} != "Unknown" ]]; then
+                printf "\e[0;33m"
+            else
+                printf "\e[0;31m"
+            fi
+        else
+            printf "\e[0;35m"
+        fi
+
+        if [[ ${JOBSTATUS[$i]} == "RUNNING" ]]; then
+            printf "$TABLE_FORMAT\e[0m\n"   "${JOBID_ARRAY[$i]}" ""\
+                   "  ${JOBNAME[$i]}" ""\
+                   "${JOBSTATUS[$i]} on ${JOBFIRSTNODE[$i]}" ""\
+                   "${JOBENDTIME[$i]}" ""\
+                   "${JOBRUNTIME[$i]}" ""\
+                   "${JOBSUBFROM[$i]}"
+        else
+            printf "$TABLE_FORMAT\e[0m\n"   "${JOBID_ARRAY[$i]}" ""\
+                   "  ${JOBNAME[$i]}" ""\
+                   "${JOBSTATUS[$i]}" ""\
+                   "${JOBSTARTTIME[$i]}" ""\
+                   "${JOBWALLTIME[$i]}" ""\
+                   "${JOBSUBFROM[$i]} on ${JOBSUBTIME[$i]}"
+        fi
+
+        unset JOBID_ARRAY[$i]; JOBID_ARRAY=( "${JOBID_ARRAY[@]}" )
+        unset JOBNAME[$i]; JOBNAME=( "${JOBNAME[@]}" )
+        unset JOBSTATUS[$i]; JOBSTATUS=( "${JOBSTATUS[@]}" )
+        unset JOBSTARTTIME[$i]; JOBSTARTTIME=( "${JOBSTARTTIME[@]}" )
+        unset JOBENDTIME[$i]; JOBENDTIME=( "${JOBENDTIME[@]}" )
+        unset JOBSUBTIME[$i]; JOBSUBTIME=( "${JOBSUBTIME[@]}" )
+        unset JOBSUBFROM[$i]; JOBSUBFROM=( "${JOBSUBFROM[@]}" )
+        unset JOBNUMNODES[$i]; JOBNUMNODES=( "${JOBNUMNODES[@]}" )
+        unset JOBFIRSTNODE[$i]; JOBFIRSTNODE=( "${JOBFIRSTNODE[@]}" )
+        unset JOBWALLTIME[$i]; JOBWALLTIME=( "${JOBWALLTIME[@]}" )
+        unset JOBRUNTIME[$i]; JOBRUNTIME=( "${JOBRUNTIME[@]}" )
+
+    done
+
+
+    printf "\n\e[38;5;202m  Total number of submitted jobs: $TOTAL_JOBS"
+    printf " (\e[1;32mRunning: $RUNNING_JOBS  \e[0m - \e[1;31m  Pending: $PENDING_JOBS  \e[0m - \e[1;35m  Others: $OTHER_JOBS\e[38;5;202m)\n"
+    printf "\e[1;36m"
+    for (( c=1; c<=$(($COLUMNS_OF_THE_SHELL-3)); c++ )); do printf "="; done && unset -v 'c'
+    printf "\e[0m\n\n"
+}
+
+if [ $LOCAL_JOBS = 'TRUE' ]; then
+    PrintJobInformation | awk -v pathToMatch="$PWD" 'NR<=3{print $0}NR==2{line=$0}NR>3{if($0 ~ pathToMatch){print $0}}END{print line; printf "\n"}'
+else
+    PrintJobInformation
+fi
+
+
