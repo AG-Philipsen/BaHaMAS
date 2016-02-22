@@ -28,12 +28,12 @@ LASTTRAJ_C=$((2*9))
 declare -A COLUMNS=( [muC]=$MU_C [kC]=$K_C [ntC]=$NT_C [nsC]=$NS_C [betaC]=$BETA_C [trajNoC]=$TRAJNO_C [accRateC]=$ACCRATE_C [statusC]=$STATUS_C [lastTrajC]=$LASTTRAJ_C )
 
 #FSNA = FORMAT_SPECIFIER_NUMBER_ARRAY
-declare -A FSNA=( [nfC]="6" [muC]="6" [kC]="8" [ntC]="6" [nsC]="6" [betaC]="19" [trajNoC]="11" [accRateC]="8" [statusC]="13" [lastTrajC]="11" )
+declare -A FSNA=( [nfC]="6" [muC]="7" [kC]="8" [ntC]="6" [nsC]="6" [betaC]="19" [trajNoC]="11" [accRateC]="8" [statusC]="13" [lastTrajC]="11" )
 
 declare -A PRINTF_FORMAT_SPECIFIER_ARRAY=( [nfC]="%+${FSNA[nfC]}s" [muC]="%+${FSNA[muC]}s" [kC]="%+${FSNA[kC]}s" [ntC]="%${FSNA[ntC]}d" [nsC]="%${FSNA[nsC]}d" [betaC]="%+${FSNA[betaC]}s" \
 											[trajNoC]="%${FSNA[trajNoC]}d" [accRateC]="%+${FSNA[accRateC]}s" [statusC]="%+${FSNA[statusC]}s" [lastTrajC]="%+${FSNA[lastTrajC]}s" )
 
-declare -A HEADER_PRINTF_FORMAT_SPECIFIER_ARRAY=( [nfC]="%+${FSNA[nfC]}s" [muC]="%+${FSNA[muC]}s" [kC]="%+$((${FSNA[kC]}+1))s" [ntC]="%+$((${FSNA[ntC]}+1))s" [nsC]="%+$((${FSNA[nsC]}+1))s" [betaC]="%+$((${FSNA[betaC]}+1))s" \
+declare -A HEADER_PRINTF_FORMAT_SPECIFIER_ARRAY=( [nfC]="%+$((${FSNA[nfC]}+1))s" [muC]="%+$((${FSNA[muC]}+1))s" [kC]="%+$((${FSNA[kC]}+1))s" [ntC]="%+$((${FSNA[ntC]}+1))s" [nsC]="%+$((${FSNA[nsC]}+1))s" [betaC]="%+$((${FSNA[betaC]}+1))s" \
                                                   [trajNoC]="%+$((${FSNA[trajNoC]}+1))s" [accRateC]="%+$((${FSNA[accRateC]}+1))s" [statusC]="%+$((${FSNA[statusC]}+1))s" [lastTrajC]="%+$((${FSNA[lastTrajC]}+1))s" )
 
 [ $WILSON = "TRUE" ] && MASS_PARAMETER="kappa"
@@ -491,7 +491,7 @@ if [ $DISPLAY = "TRUE" ]; then
 	done
 	NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN=$((NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN+${FSNA[trajNoC]}+1))
 	STATISTICS_PRINTF_FORMAT_SPECIFIER_STRING="%${NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN}s\n"
-    LENGTH_OF_HEADER_SEPERATOR=$(($LENGTH_OF_HEADER_SEPERATOR+${FSNA[muC]}+1-${#CHEMPOT_PREFIX})) #Add dynamicly to simmetrize the line under the header (the +1 is the space that is at the beginning of the line)
+    LENGTH_OF_HEADER_SEPERATOR=$(($LENGTH_OF_HEADER_SEPERATOR+${FSNA[nfC]}+1-${#NFLAVOUR_PREFIX})) #Add dynamicly to symmetrize the line under the header (the +1 is the space that is at the beginning of the line)
 	#STRIPPING OF THE LAST | SYMBOL FROM THE STRING
 	NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL=$(echo ${NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL%"|"})
 	NAME_OF_COLUMN_NR_OF_COLUMN_STRING=$(echo ${NAME_OF_COLUMN_NR_OF_COLUMN_STRING%"|"})
@@ -545,7 +545,7 @@ if [ $DISPLAY = "TRUE" ]; then
 							printf("=");
 						}
 						printf("\033[0m\n");
-						printf("  "); #THIS PRINTF IS IMPORTANT TO GET THE HEADER IN TO THE RIGHT PLACE
+						printf(" "); #THIS PRINTF IS IMPORTANT TO GET THE HEADER IN TO THE RIGHT PLACE
 						for(i=1;i<=nrOfDisplayedColumns;i++){
 							split(columnNamesAndHeaderArray[i],columnAndHeader,"-");
 							split(columnNamesAndHeaderSpecArray[i],columnAndHeaderSpec,"--");
@@ -700,7 +700,7 @@ if [ $UPDATE = "TRUE" ]; then
 		        sed -r 's/(\x1B\[.{1,2};.{1,2}m)(.)/\1 \2/g' |
 	            awk --posix -v mu=${PARAMS[0]#mui*} -v k=${PARAMS[1]#$KAPPA_PREFIX*} -v nt=${PARAMS[2]#nt*} -v ns=${PARAMS[3]#*ns} '
 							$3 ~ /^[[:digit:]]\.[[:digit:]]{4}/{
-								print $(3-1) " " nf " " $(3-1) " " mu " " $(3-1) " " k " " $(3-1) " " nt " " $(3-1) " " ns " " $(3-1) " " $3 " " $(5-1) " " $5 " " $(8-1) " " $8 " " $(15-1) " " $15 " " $(19-1) " " $19 " " "\033[0m"
+								print "\033[36m " nf " \033[36m " mu " \033[36m " k " \033[36m " nt " \033[36m " ns " " $(3-1) " " $3 " " $(5-1) " " $5 " " $(8-1) " " $8 " " $(15-1) " " $15 " " $(19-1) " " $19 " " "\033[0m"
 							}
 						' >> $TEMPORARY_DATABASE_FILE
 
@@ -708,7 +708,7 @@ if [ $UPDATE = "TRUE" ]; then
 	        printf "\e[38;5;10m...done!\e[0m\n"
 	    done < <(cat $TEMPORARY_FILE_WITH_DIRECTORIES)
 
-	    if [ "$(wc -l < $TEMPORARY_DATABASE_FILE)" -eq 0 ]; then
+	    if [ ! -f $TEMPORARY_DATABASE_FILE ] || [ "$(wc -l < $TEMPORARY_DATABASE_FILE)" -eq 0 ]; then
             printf "\n\e[91m After the database procedure, the database seems to be empty! Temporary files\n"
             printf "   $TEMPORARY_DATABASE_FILE\n   $TEMPORARY_FILE_WITH_DIRECTORIES\n"
             printf " have been left for further investigation! Aborting...\e[0m\n\n"
@@ -970,7 +970,7 @@ function __static__DisplayDatabaseFile() {
 							printf("=");
 						}
 						printf("\033[0m\n");
-						printf("  "); #THIS PRINTF IS IMPORTANT TO GET THE HEADER IN TO THE RIGHT PLACE
+						printf(" "); #THIS PRINTF IS IMPORTANT TO GET THE HEADER IN TO THE RIGHT PLACE
 						for(i=1;i<=nrOfDisplayedColumns;i++){
 							split(columnNamesAndHeaderArray[i],columnAndHeader,"-");
 							split(columnNamesAndHeaderSpecArray[i],columnAndHeaderSpec,"--");
