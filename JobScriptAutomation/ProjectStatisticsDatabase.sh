@@ -20,31 +20,32 @@ local CURRENT_DIRECTORY=$(pwd)
 rm -f $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE
 rm -f $TEMPORARY_FILE_WITH_DIRECTORIES
 
-MU_C=$((2*1)) 
-K_C=$((2*2)) 
-NT_C=$((2*3)) 
-NS_C=$((2*4)) 
-BETA_C=$((2*5)) 
-TRAJNO_C=$((2*6)) 
-ACCRATE_C=$((2*7)) 
-STATUS_C=$((2*8)) 
-LASTTRAJ_C=$((2*9))
+NF_C=$((2*1))
+MU_C=$((2*2)) 
+K_C=$((2*3)) 
+NT_C=$((2*4)) 
+NS_C=$((2*5)) 
+BETA_C=$((2*6)) 
+TRAJNO_C=$((2*7)) 
+ACCRATE_C=$((2*8)) 
+STATUS_C=$((2*9)) 
+LASTTRAJ_C=$((2*10))
 
-declare -A COLUMNS=( [muC]=$MU_C [kC]=$K_C [ntC]=$NT_C [nsC]=$NS_C [betaC]=$BETA_C [trajNoC]=$TRAJNO_C [accRateC]=$ACCRATE_C [statusC]=$STATUS_C [lastTrajC]=$LASTTRAJ_C )
+declare -A COLUMNS=( [nfC]=$NF_C [muC]=$MU_C [kC]=$K_C [ntC]=$NT_C [nsC]=$NS_C [betaC]=$BETA_C [trajNoC]=$TRAJNO_C [accRateC]=$ACCRATE_C [statusC]=$STATUS_C [lastTrajC]=$LASTTRAJ_C )
 
 #FSNA = FORMAT_SPECIFIER_NUMBER_ARRAY
-declare -A FSNA=( [muC]="6" [kC]="8" [ntC]="6" [nsC]="6" [betaC]="19" [trajNoC]="11" [accRateC]="8" [statusC]="13" [lastTrajC]="11" )
+declare -A FSNA=( [nfC]="6" [muC]="6" [kC]="8" [ntC]="6" [nsC]="6" [betaC]="19" [trajNoC]="11" [accRateC]="8" [statusC]="13" [lastTrajC]="11" )
 
-declare -A PRINTF_FORMAT_SPECIFIER_ARRAY=( [muC]="%+${FSNA[muC]}s" [kC]="%+${FSNA[kC]}s" [ntC]="%${FSNA[ntC]}d" [nsC]="%${FSNA[nsC]}d" [betaC]="%+${FSNA[betaC]}s" \
+declare -A PRINTF_FORMAT_SPECIFIER_ARRAY=( [nfC]="%+${FSNA[nfC]}s" [muC]="%+${FSNA[muC]}s" [kC]="%+${FSNA[kC]}s" [ntC]="%${FSNA[ntC]}d" [nsC]="%${FSNA[nsC]}d" [betaC]="%+${FSNA[betaC]}s" \
 											[trajNoC]="%${FSNA[trajNoC]}d" [accRateC]="%+${FSNA[accRateC]}s" [statusC]="%+${FSNA[statusC]}s" [lastTrajC]="%+${FSNA[lastTrajC]}s" )
 
-declare -A HEADER_PRINTF_FORMAT_SPECIFIER_ARRAY=( [muC]="%+${FSNA[muC]}s" [kC]="%+$((${FSNA[kC]}+1))s" [ntC]="%+$((${FSNA[ntC]}+1))s" [nsC]="%+$((${FSNA[nsC]}+1))s" [betaC]="%+$((${FSNA[betaC]}+1))s" \
+declare -A HEADER_PRINTF_FORMAT_SPECIFIER_ARRAY=( [nfC]="%+${FSNA[nfC]}s" [muC]="%+${FSNA[muC]}s" [kC]="%+$((${FSNA[kC]}+1))s" [ntC]="%+$((${FSNA[ntC]}+1))s" [nsC]="%+$((${FSNA[nsC]}+1))s" [betaC]="%+$((${FSNA[betaC]}+1))s" \
                                                   [trajNoC]="%+$((${FSNA[trajNoC]}+1))s" [accRateC]="%+$((${FSNA[accRateC]}+1))s" [statusC]="%+$((${FSNA[statusC]}+1))s" [lastTrajC]="%+$((${FSNA[lastTrajC]}+1))s" )
 
 [ $WILSON = "TRUE" ] && MASS_PARAMETER="kappa"
 [ $STAGGERED = "TRUE" ] && MASS_PARAMETER="mass"
 
-declare -A HEADER_PRINTF_PARAMETER_ARRAY=( [muC]=$CHEMPOT_PREFIX [kC]=$MASS_PARAMETER [ntC]=$NTIME_PREFIX [nsC]=$NSPACE_PREFIX [betaC]="beta_chain_type" [trajNoC]="trajNo" \
+declare -A HEADER_PRINTF_PARAMETER_ARRAY=( [nfC]="nf" [muC]=$CHEMPOT_PREFIX [kC]=$MASS_PARAMETER [ntC]=$NTIME_PREFIX [nsC]=$NSPACE_PREFIX [betaC]="beta_chain_type" [trajNoC]="trajNo" \
 											[accRateC]="acc" [statusC]="status" [lastTrajC]="l.T.[s]" )
 
 declare -a NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=()
@@ -80,6 +81,7 @@ local FILTER_ACCRATE="FALSE"
 local FILTER_STATUS="FALSE"	
 local FILTER_LASTTRAJ="FALSE"
 
+declare -a local NF_ARRAY
 declare -a local MU_ARRAY
 declare -a local KAPPA_ARRAY
 declare -a local NS_ARRAY
@@ -121,6 +123,10 @@ while [ $# -gt 0 ]; do
 			CUSTOMIZE_COLUMNS="TRUE"
 			while [[ "$2" =~ ^[^-] ]]; do
 				case $2 in
+					nf)
+						NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER+=( nfC )
+						shift
+						;;
 					mu)
 						NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER+=( muC )
 						shift
@@ -167,6 +173,15 @@ while [ $# -gt 0 ]; do
 		--sum)
             DISPLAY="TRUE"
 			STATISTICS_SUMMARY="TRUE"
+			;;
+		--nf)
+			DISPLAY="TRUE"
+			FILTER_NF="TRUE"
+			while [[ $2 =~ ^[[:digit:]](\.[[:digit:]][[:digit:]]?)?$ ]]; do
+				NF_ARRAY+=( $2 )	
+				shift
+			done
+			[ ${#NF_ARRAY[@]} -eq 0 ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
 			;;
 		--mu)
             DISPLAY="TRUE"
@@ -433,6 +448,7 @@ fi
 
 if [ $DISPLAY = "TRUE" ]; then
 
+	NF_STRING=$(join "|" "${NF_ARRAY[@]}")
 	MU_STRING=$(join "|" "${MU_ARRAY[@]}")
 	KAPPA_STRING=$(join "|" "${KAPPA_ARRAY[@]}")
 	NS_STRING=$(join "|" "${NS_ARRAY[@]}")
@@ -450,7 +466,7 @@ if [ $DISPLAY = "TRUE" ]; then
 
 
 	if [ "$CUSTOMIZE_COLUMNS" = "FALSE" ]; then
-		NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=( muC kC ntC nsC betaC trajNoC accRateC statusC lastTrajC )
+		NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=( nfC muC kC ntC nsC betaC trajNoC accRateC statusC lastTrajC )
 	fi
 
 	for NAME_OF_COLUMN in ${!COLUMNS[@]}; do
@@ -479,11 +495,11 @@ if [ $DISPLAY = "TRUE" ]; then
 	NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING=$(echo ${NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING%"|"})
 	NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING=$(echo ${NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING%"|"})
 
-	awk --posix -v filterMu=$FILTER_MU -v filterKappa=$FILTER_KAPPA -v filterNt=$FILTER_NT -v filterNs=$FILTER_NS \
+	awk --posix -v filterNf=$FILTER_NF -v filterMu=$FILTER_MU -v filterKappa=$FILTER_KAPPA -v filterNt=$FILTER_NT -v filterNs=$FILTER_NS \
 				-v filterBeta=$FILTER_BETA -v filterType=$FILTER_TYPE \
 				-v filterTrajNo=$FILTER_TRAJNO -v filterAccRate=$FILTER_ACCRATE -v filterStatus=$FILTER_STATUS -v filterLastTrajTime=$FILTER_LASTTRAJ \
 				-v statisticsSummary=$STATISTICS_SUMMARY \
-				-v muString="$MU_STRING" -v kappaString="$KAPPA_STRING" -v nsString="$NS_STRING" -v ntString="$NT_STRING" -v betaString="$BETA_STRING" \
+				-v nfString="$NF_STRING" -v muString="$MU_STRING" -v kappaString="$KAPPA_STRING" -v nsString="$NS_STRING" -v ntString="$NT_STRING" -v betaString="$BETA_STRING" \
 				-v typeString=$TYPE_STRING -v statusString="$STATUS_STRING" \
 				-v trajLowValue=$TRAJ_LOW_VALUE -v trajHighValue=$TRAJ_HIGH_VALUE -v accRateLowValue=$ACCRATE_LOW_VALUE \
 				-v accRateHighValue=$ACCRATE_HIGH_VALUE -v lastTrajTime=$LAST_TRAJ_TIME \
@@ -541,6 +557,7 @@ if [ $DISPLAY = "TRUE" ]; then
 					 {critFailedCounter=0}
 
 					 ######################################################################## FILTERING PART BEGIN ############################################################################
+					 filterNF == "TRUE" {if($(columnNameColumnNumber["nfC"]) !~ nfString) {critFailedCounter--;}}
 					 filterMu == "TRUE" {if($(columnNameColumnNumber["muC"]) !~ muString) {critFailedCounter--;}}
 					 filterKappa == "TRUE" {if($(columnNameColumnNumber["kC"]) !~ kappaString) {critFailedCounter--;}}
 					 filterNs == "TRUE" {if($(columnNameColumnNumber["nsC"]) !~ nsString) {critFailedCounter--;}}
@@ -576,7 +593,7 @@ if [ $DISPLAY = "TRUE" ]; then
 					 statisticsSummary == "TRUE" {
 						split($(columnNameColumnNumber["betaC"]),betaChainType,"_");
 						if(betaChainType[3] == "NC"){
-							statisticsSummaryArray[$(columnNameColumnNumber["muC"]) "_" $(columnNameColumnNumber["kC"]) "_" $(columnNameColumnNumber["ntC"]) "_" \
+							statisticsSummaryArray[$(columnNameColumnNumber["nfC"]) "_" $(columnNameColumnNumber["muC"]) "_" $(columnNameColumnNumber["kC"]) "_" $(columnNameColumnNumber["ntC"]) "_" \
 							$(columnNameColumnNumber["nsC"]) "_" betaChainType[1] "_" betaChainType[3]]+=$(columnNameColumnNumber["trajNoC"]);
 						}
 					}
@@ -587,7 +604,7 @@ if [ $DISPLAY = "TRUE" ]; then
 							split(fieldsArray[columnNameColumnNumber["betaC"]],betaChainType,"_");
 
 							if(betaChainType[3] == "NC"){
-								oldKey = fieldsArray[columnNameColumnNumber["muC"]] "_" fieldsArray[columnNameColumnNumber["kC"]] "_" fieldsArray[columnNameColumnNumber["ntC"]] "_" \
+								oldKey = fieldsArray[columnNameColumnNumber["nfC"]] "_" fieldsArray[columnNameColumnNumber["muC"]] "_" fieldsArray[columnNameColumnNumber["kC"]] "_" fieldsArray[columnNameColumnNumber["ntC"]] "_" \
 								fieldsArray[columnNameColumnNumber["nsC"]] "_" betaChainType[1] "_" betaChainType[3];
 							}
 
@@ -595,8 +612,8 @@ if [ $DISPLAY = "TRUE" ]; then
 								split(dataRowArray[i],fieldsArray," ");	
 								split(fieldsArray[columnNameColumnNumber["betaC"]],betaChainType,"_");
 								if(betaChainType[3] == "NC"){
-									newKey = fieldsArray[columnNameColumnNumber["muC"]] "_" fieldsArray[columnNameColumnNumber["kC"]] "_" fieldsArray[columnNameColumnNumber["ntC"]] "_" \
-									fieldsArray[columnNameColumnNumber["nsC"]] "_" betaChainType[1] "_" betaChainType[3]
+									newKey = fieldsArray[columnNameColumnNumber["nfC"]] "_" fieldsArray[columnNameColumnNumber["muC"]] "_" fieldsArray[columnNameColumnNumber["kC"]] "_" \
+									fieldsArray[columnNameColumnNumber["ntC"]] "_" fieldsArray[columnNameColumnNumber["nsC"]] "_" betaChainType[1] "_" betaChainType[3]
 								}
 
 								if(betaChainType[3] == "NC"){
@@ -638,7 +655,7 @@ fi
 if [ $UPDATE = "TRUE" ]; then
 
 	REGEX_STRING=".*/"
-	for i in $(seq 0 3); do
+	for i in $(seq 0 4); do
 		REGEX_STRING=$REGEX_STRING${PARAMETER_PREFIXES[$i]}${PARAMETER_REGEXES[$i]}/
 	done
 	REGEX_STRING=${REGEX_STRING%/}		
@@ -653,7 +670,7 @@ if [ $UPDATE = "TRUE" ]; then
 		do
 			#printf "%+15s: %s\n" "line" "$line"
 			if [[ "$line" =~ ^[^#] ]]; then 
-				PARAMS=( $(echo $line | awk 'BEGIN{FS="/"}{print $(NF-3) " " $(NF-2) " " $(NF-1) " " $(NF)}') )
+				PARAMS=( $(echo $line | awk 'BEGIN{FS="/"}{print $(NF-4) " " $(NF-3) " " $(NF-2) " " $(NF-1) " " $(NF)}') )
 			else
 				continue 
 			fi
@@ -672,10 +689,10 @@ if [ $UPDATE = "TRUE" ]; then
 			sed -r 's/(\x1B\[[[:digit:]]{1,2};[[:digit:]]{0,2};[[:digit:]]{0,3}m)(.)/\1 \2/g' | \
 			sed -r 's/(.)(\x1B\[.{1,2};.{1,2}m)/\1 \2/g' | \
 			sed -r 's/(\x1B\[.{1,2};.{1,2}m)(.)/\1 \2/g' |
-			awk --posix -v mu=${PARAMS[0]#$CHEMPOT_PREFIX*} -v k=${PARAMS[1]#$KAPPA_PREFIX*} -v nt=${PARAMS[2]#$NTIME_PREFIX*} -v ns=${PARAMS[3]#*$NSPACE_PREFIX} '
+			awk --posix -v nf={PARAMS[0]#$NFLAVOUR_PREFIX*} -v mu=${PARAMS[1]#$CHEMPOT_PREFIX*} -v k=${PARAMS[2]#$KAPPA_PREFIX*} -v nt=${PARAMS[3]#$NTIME_PREFIX*} -v ns=${PARAMS[4]#*$NSPACE_PREFIX} '
 
 							$3 ~ /^[[:digit:]]\.[[:digit:]]{4}/{
-								print $(3-1) " " mu " " $(3-1) " " k " " $(3-1) " " nt " " $(3-1) " " ns " " $(3-1) " " $3 " " $(5-1) " " $5 " " $(8-1) " " $8 " " $(15-1) " " $15 " " $(19-1) " " $19 " " "\033[0m"
+								print $(3-1) " " nf " " $(3-1) " " mu " " $(3-1) " " k " " $(3-1) " " nt " " $(3-1) " " ns " " $(3-1) " " $3 " " $(5-1) " " $5 " " $(8-1) " " $8 " " $(15-1) " " $15 " " $(19-1) " " $19 " " "\033[0m"
 							}
 						' >> $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE
 
