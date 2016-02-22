@@ -103,16 +103,16 @@ function ReadParametersFromPath(){
     NTIME=${PARAMETERS_VALUE[$NTIME_POSITION]}
     NSPACE=${PARAMETERS_VALUE[$NSPACE_POSITION]}
     #Check that the recovered parameter makes sense
-    if [[ ! $KAPPA =~ ^[[:digit:]]{4}$ ]]; then
+    if [[ ! $KAPPA =~ ^${KAPPA_REGEX//\\/}$ ]]; then
 	    printf "\n\e[0;31m Parameter \"$KAPPA_PREFIX\" from the path \"$1\" not allowed! Aborting...\n\n\e[0m"
 	    exit -1
-    elif [[ ! $NTIME =~ ^[[:digit:]]{1,2}$ ]]; then
+    elif [[ ! $NTIME =~ ^${NTIME_REGEX//\\/}$ ]]; then
 	    printf "\n\e[0;31m Parameter \"$NTIME_PREFIX\" from the path \"$1\" not allowed! Aborting...\n\n\e[0m"
 	    exit -1
-    elif [[ ! $NSPACE =~ ^[[:digit:]]{1,2}$ ]]; then
+    elif [[ ! $NSPACE =~ ^${NSPACE_REGEX//\\/}$ ]]; then
 	    printf "\n\e[0;31m Parameter \"$NSPACE_PREFIX\" from the path \"$1\" not allowed! Aborting...\n\n\e[0m"
 	    exit -1
-    elif [[ ! $NFLAVOUR =~ ^[[:digit:]]{1}$ ]]; then
+    elif [[ ! $NFLAVOUR =~ ^${NFLAVOUR_REGEX//\\/}$ ]]; then
 	    printf "\n\e[0;31m Parameter \"$NFLAVOUR_PREFIX\" from the path \"$1\" not allowed! Aborting...\n\n\e[0m"
 	    exit -1        
     fi

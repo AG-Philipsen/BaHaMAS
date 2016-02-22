@@ -23,6 +23,21 @@ function SecondsToTimeString(){
     printf "%02dh %02dm %02ds"  "${hours}" "${minutes}" "${seconds}"
 }
 
+function TimeStringToSecond(){ 
+    #The string can contain s,m,h,d preceded by digits, NO SPACES
+    local STRING_SEPARATED=( $(sed 's/\([smhd]\)/\1 /g' <<< "$1") )
+    local TOTAL_TIME_IN_SECONDS=0
+    for ELEMENT in ${STRING_SEPARATED[@]}; do
+	case $ELEMENT in
+	    *d) TOTAL_TIME_IN_SECONDS=$(( $TOTAL_TIME_IN_SECONDS + 86400*${ELEMENT%?} )) ;;
+	    *h) TOTAL_TIME_IN_SECONDS=$(( $TOTAL_TIME_IN_SECONDS +  3600*${ELEMENT%?} )) ;;
+	    *m) TOTAL_TIME_IN_SECONDS=$(( $TOTAL_TIME_IN_SECONDS +    60*${ELEMENT%?} )) ;;
+	    *s) TOTAL_TIME_IN_SECONDS=$(( $TOTAL_TIME_IN_SECONDS +       ${ELEMENT%?} )) ;;
+	esac
+    done && unset -v 'ELEMENT' 
+    echo "$TOTAL_TIME_IN_SECONDS"
+}
+
 function SecondsToTimeStringWithDays(){
     local T=$1; shift
     local days=$(( $T/86400))
