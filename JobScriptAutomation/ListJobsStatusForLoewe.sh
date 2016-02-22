@@ -59,6 +59,7 @@ function __static__ExtractMetaInformationFromJOBNAME(){
     local JOBID_ARRAY=( $(squeue | awk -v username="$(whoami)" 'NR>1{if($4 == username){print $1}}') )
     for JOBID in ${JOBID_ARRAY[@]}; do
         local JOBNAME=$(scontrol show job $JOBID | grep "Name=" | sed "s/^.*Name=\(.*$\)/\1/")
+        local JOBNAME_NFLAVOUR=$(__static__ExtractParameterFromJOBNAME $NFLAVOUR_PREFIX)
         local JOBNAME_CHEMPOT=$(__static__ExtractParameterFromJOBNAME $CHEMPOT_PREFIX)
         local JOBNAME_NTIME=$(__static__ExtractParameterFromJOBNAME $NTIME_PREFIX)
         local JOBNAME_NSPACE=$(__static__ExtractParameterFromJOBNAME $NSPACE_PREFIX)
@@ -67,12 +68,11 @@ function __static__ExtractMetaInformationFromJOBNAME(){
         local JOBNAME_POSTFIX=$(__static__ExtractPostfixFromJOBNAME)
         local JOB_STATUS=$(scontrol show job $JOBID | grep "^[[:blank:]]*JobState=" | sed "s/^.*JobState=\([[:alpha:]]*\).*$/\1/")
         #Retrieved the information add an unique string to array of meta information
-        local PREFIXES=([$CHEMPOT_POSITION]=$CHEMPOT_PREFIX [$KAPPA_POSITION]=$KAPPA_PREFIX [$NTIME_POSITION]=$NTIME_PREFIX [$NSPACE_POSITION]=$NSPACE_PREFIX)
-        local JOB_PARAMETERS_VALUE=([$CHEMPOT_POSITION]=$JOBNAME_CHEMPOT [$KAPPA_POSITION]=$JOBNAME_KAPPA [$NTIME_POSITION]=$JOBNAME_NTIME [$NSPACE_POSITION]=$JOBNAME_NSPACE)
+        local JOB_PARAMETERS_VALUE=([$NFLAVOUR_POSITION]=$JOBNAME_NFLAVOUR [$CHEMPOT_POSITION]=$JOBNAME_CHEMPOT [$KAPPA_POSITION]=$JOBNAME_KAPPA [$NTIME_POSITION]=$JOBNAME_NTIME [$NSPACE_POSITION]=$JOBNAME_NSPACE)
         local JOB_PARAMETERS_STRING=""
-        for ((i=0; i<${#PREFIXES[@]}; i++)); do
-            JOB_PARAMETERS_STRING="$JOB_PARAMETERS_STRING${PREFIXES[$i]}${JOB_PARAMETERS_VALUE[$i]}_"
-        done
+        for INDEX in "${!PARAMETER_PREFIXES[@]}"; do
+            JOB_PARAMETERS_STRING="$JOB_PARAMETERS_STRING${PARAMETER_PREFIXES[$INDEX]}${JOB_PARAMETERS_VALUE[$INDEX]}_"
+        done && unset -v 'INDEX'
         JOB_PARAMETERS_STRING=${JOB_PARAMETERS_STRING%?} #Remove last underscore
         #If JOB_PARAMETERS_STRING is not at the beginning of the jobname, skip job
         [ $(echo "$JOBNAME" | grep "^${JOB_PARAMETERS_STRING}" | wc -l) -eq 0 ] && continue
@@ -111,9 +111,9 @@ function ListJobStatus_Loewe(){
     printf "\n\e[0;36m===============================================================================================================================================\n\e[0m"
     printf "\e[0;35m%s\t\t  %s\t  %s\t   %s\t  %s\t%s\n\e[0m"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" "Last tr. finished" " Tr: # (time last|av.)"
     printf "%s\t\t\t  %s\t  %s\t%s\t  %s\t%s\n"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" >> $JOBS_STATUS_FILE
-    
-    JOB_METAINFORMATION_ARRAY=( $(__static__ExtractMetaInformationFromJOBNAME) )
 
+    JOB_METAINFORMATION_ARRAY=( $(__static__ExtractMetaInformationFromJOBNAME) )
+    
     for BETA in ${BETA_PREFIX}[[:digit:]]*; do
 
 	    #Select only folders with old or new names
@@ -322,7 +322,7 @@ function ColorTime(){
     if [[ ! $1 =~ ^[[:digit:]]+$ ]]; then
 	    echo $DEFAULT_LISTSTATUS_COLOR
     else
-        [ $1 -gt 450 ] && echo "$STUCKED_SIMULATION_LISTSTATUS_COLOR" || echo "$FINE_SIMULATION_LISTSTATUS_COLOR"
+        [ $1 -gt 450 ] && echo "$STUCK_SIMULATION_LISTSTATUS_COLOR" || echo "$FINE_SIMULATION_LISTSTATUS_COLOR"
     fi
 }
 

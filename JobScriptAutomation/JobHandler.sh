@@ -25,20 +25,23 @@ source $HOME/Script/JobScriptAutomation/ProjectStatisticsDatabase.sh || exit -2
 #-----------------------------------------------------------------------------------------------------------------#
 # Global variables declared in other scripts
 #   STAGGERED="TRUE" or WILSON="TRUE"
+#   NFLAVOUR_PREFIX="Nf"
 #   CHEMPOT_PREFIX="mui"
 #   NTIME_PREFIX="nt"
 #   NSPACE_PREFIX="ns"
 #   KAPPA_PREFIX="k" or KAPPA_PREFIX="mass"
-#   CHEMPOT_POSITION=0
-#   KAPPA_POSITION=1
-#   NTIME_POSITION=2
-#   NSPACE_POSITION=3
+#   NFLAVOUR_POSITION=0
+#   CHEMPOT_POSITION=1
+#   KAPPA_POSITION=2
+#   NTIME_POSITION=3
+#   NSPACE_POSITION=4
+#   NFLAVOUR
 #   CHEMPOT
 #   KAPPA
 #   NSPACE
 #   NTIME
-#   PARAMETERS_PATH    <---This is the string in the path with the 4 parameters with slash in front, e.g. /muiPiT/k1550/nt6/ns12   or   /mui0/mass0250/nt4/ns8
-#   PARAMETERS_STRING  <---This is the string in the path with the 4 parameters with underscores, e.g. muiPiT_k1550_nt6_ns12   or   mui0_mass0250_nt4_ns8
+#   PARAMETERS_PATH    <---This is the string in the path with the 4 parameters with slash in front, e.g. /Nf2/muiPiT/k1550/nt6/ns12   or   /Nf2/mui0/mass0250/nt4/ns8
+#   PARAMETERS_STRING  <---This is the string in the path with the 4 parameters with underscores, e.g. Nf2_muiPiT_k1550_nt6_ns12   or   Nf2_mui0_mass0250_nt4_ns8
 
 #-----------------------------------------------------------------------------------------------------------------#
 # Set default values for the command line parameters
@@ -88,7 +91,6 @@ INVERT_CONFIGURATIONS="FALSE"
 CALL_DATABASE="FALSE"
 NUMBER_OF_CHAINS_TO_BE_IN_THE_BETAS_FILE="4"
 if [ $STAGGERED = "TRUE" ]; then
-    NUM_TASTES="2"
     USE_RATIONAL_APPROXIMATION_FILE="TRUE"
 fi
 
@@ -104,7 +106,7 @@ TOO_HIGH_ACCEPTANCE_LISTSTATUS_COLOR="\e[38;5;202m"
 RUNNING_LISTSTATUS_COLOR="\e[0;32m"
 PENDING_LISTSTATUS_COLOR="\e[0;33m"
 CLEANING_LISTSTATUS_COLOR="\e[0;31m"
-STUCKED_SIMULATION_LISTSTATUS_COLOR="\e[0;91m"
+STUCK_SIMULATION_LISTSTATUS_COLOR="\e[0;91m"
 FINE_SIMULATION_LISTSTATUS_COLOR="\e[0;32m"
 #-----------------
 TOO_LOW_ACCEPTANCE_THRESHOLD=68
@@ -179,12 +181,12 @@ fi
 #-----------------------------------------------------------------------------------------------------------------#
 # Perform all the checks on the path, reading out some variables 
 if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
-    CheckSingleOccurrenceInPath "homeb" "hkf8[^[:digit:]]" "hkf8[[:digit:]]{2}" "mui" "k[[:digit:]]\+" "nt[[:digit:]]\+" "ns[[:digit:]]\+"
+    CheckSingleOccurrenceInPath "homeb" "hkf8/" "hkf8[[:digit:]]\+" "Nf" "mui" "k[[:digit:]]\+" "nt[[:digit:]]\+" "ns[[:digit:]]\+"
 else
-    CheckSingleOccurrenceInPath $(echo $HOME_DIR | sed 's/\// /g') "$CHEMPOT_PREFIX" "${KAPPA_PREFIX}[[:digit:]]\+" "${NTIME_PREFIX}[[:digit:]]\+" "${NSPACE_PREFIX}[[:digit:]]\+"
-    if [ $STAGGERED = "TRUE" ]; then
-        CheckSingleOccurrenceInPath "Nf${NUM_TASTES}"
-    fi
+    CheckSingleOccurrenceInPath $(echo $HOME_DIR | sed 's/\// /g') "${NFLAVOUR_PREFIX}${NFLAVOUR_REGEX}" "$CHEMPOT_PREFIX" "${KAPPA_PREFIX}[[:digit:]]\+" "${NTIME_PREFIX}[[:digit:]]\+" "${NSPACE_PREFIX}[[:digit:]]\+"
+    #if [ $STAGGERED = "TRUE" ]; then
+    #    CheckSingleOccurrenceInPath "Nf${NFLAVOUR}"
+    #fi
 fi
 
 ReadParametersFromPath $(pwd)
