@@ -12,26 +12,20 @@ function join { local IFS="$1"; shift; echo "$*"; }
 
 function projectStatisticsDatabase(){
 
-local TEMPORARY_FILE_WITH_DIRECTORIES="temporaryFileWithDirectoriesForDatabaseUpdate.dat"
-local TEMPORARY_DATABASE_FILE="tmpDatabase.dat"
 local FILENAME_GIVEN_AS_INPUT=""
 local CURRENT_DIRECTORY=$(pwd)
 
-rm -f $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE
-rm -f $TEMPORARY_FILE_WITH_DIRECTORIES
+MU_C=$((2*1)) 
+K_C=$((2*2)) 
+NT_C=$((2*3)) 
+NS_C=$((2*4)) 
+BETA_C=$((2*5)) 
+TRAJNO_C=$((2*6)) 
+ACCRATE_C=$((2*7)) 
+STATUS_C=$((2*8)) 
+LASTTRAJ_C=$((2*9))
 
-NF_C=$((2*1))
-MU_C=$((2*2)) 
-K_C=$((2*3)) 
-NT_C=$((2*4)) 
-NS_C=$((2*5)) 
-BETA_C=$((2*6)) 
-TRAJNO_C=$((2*7)) 
-ACCRATE_C=$((2*8)) 
-STATUS_C=$((2*9)) 
-LASTTRAJ_C=$((2*10))
-
-declare -A COLUMNS=( [nfC]=$NF_C [muC]=$MU_C [kC]=$K_C [ntC]=$NT_C [nsC]=$NS_C [betaC]=$BETA_C [trajNoC]=$TRAJNO_C [accRateC]=$ACCRATE_C [statusC]=$STATUS_C [lastTrajC]=$LASTTRAJ_C )
+declare -A COLUMNS=( [muC]=$MU_C [kC]=$K_C [ntC]=$NT_C [nsC]=$NS_C [betaC]=$BETA_C [trajNoC]=$TRAJNO_C [accRateC]=$ACCRATE_C [statusC]=$STATUS_C [lastTrajC]=$LASTTRAJ_C )
 
 #FSNA = FORMAT_SPECIFIER_NUMBER_ARRAY
 declare -A FSNA=( [nfC]="6" [muC]="6" [kC]="8" [ntC]="6" [nsC]="6" [betaC]="19" [trajNoC]="11" [accRateC]="8" [statusC]="13" [lastTrajC]="11" )
@@ -66,6 +60,7 @@ local STATISTICS_SUMMARY="FALSE"
 local UPDATE="FALSE"
 local DISPLAY="FALSE"
 local REPORT="FALSE"
+local SHOW="FALSE"
 
 local READ_DIRECTORIES_FROM_FILE="FALSE"
 local FILTER_SPECIFIC_DATABASE_FILE="FALSE"
@@ -326,6 +321,9 @@ while [ $# -gt 0 ]; do
         -r | --report)
             REPORT="TRUE"
             ;;
+        -s | --show)
+            SHOW="TRUE"
+            ;;
 		-f | --file)
 			case $2 in
 				-*)
@@ -389,6 +387,12 @@ while [ $# -gt 0 ]; do
 			echo -e "  \e[38;5;123m"
 			echo -e "     -r | --report  -->  Specify this option to get a colorful report of the simulations using the last updated database."
             echo -e "   "
+			echo -e "  \e[38;5;34m"
+			echo -e "  \e[4m\e[1mShow from database\e[24m:\e[21m"
+			echo -e "  \e[38;5;123m"
+			echo -e "     -s | --show    -->  Specify this option to show a particular set of simulations using the last updated database."
+			echo -e "                         Which set to be displayed will be asked and can be choosen interactively."
+            echo -e "   "
             echo -e "   "
             echo -e "    \e[4m\e[1m\e[91mNOTE\e[24m:\e[21m\e[38;5;34m The \e[38;5;69mblue\e[38;5;34m, the \e[38;5;123mcyan\e[38;5;34m and the \e[38;5;198mpink\e[38;5;34m options are not compatible!"            
             printf "\e[0m\n"
@@ -406,12 +410,12 @@ while [ $# -gt 0 ]; do
 	shift
 done
 
-[ $UPDATE = "FALSE" ] && [ $REPORT = "FALSE" ] && DISPLAY="TRUE"
+[ $UPDATE = "FALSE" ] && [ $REPORT = "FALSE" ] && [ $SHOW = "FALSE" ] && DISPLAY="TRUE"
 
 local MUTUALLY_EXCLUSIVE_OPTIONS_PASSED=0
 [ $UPDATE = "TRUE" ] && (( MUTUALLY_EXCLUSIVE_OPTIONS_PASSED++ ))
 [ $DISPLAY = "TRUE" ] && (( MUTUALLY_EXCLUSIVE_OPTIONS_PASSED++ ))
-[ $REPORT = "TRUE" ] && (( MUTUALLY_EXCLUSIVE_OPTIONS_PASSED++ ))
+[ $REPORT = "TRUE" ] || [ $SHOW = "TRUE" ] && (( MUTUALLY_EXCLUSIVE_OPTIONS_PASSED++ ))
 
 if [ $MUTUALLY_EXCLUSIVE_OPTIONS_PASSED -gt 1 ]; then
     printf "\n\e[91m Option for UPDATE,  DISPLAY/FILTERING and REPORT scenarios cannot be mixed!\e[0m\n\n"
@@ -651,72 +655,83 @@ if [ $DISPLAY = "TRUE" ]; then
     printf " Last update ended on \e[1m$(date -r $PROJECT_DATABASE_FILE +"%d.%m.%Y")\e[21m at \e[1m$(date -r $PROJECT_DATABASE_FILE +"%H:%M")\e[21m  \e[38;5;202m--->\e[38;5;207m  $PROJECT_DATABASE_FILE\n\n\e[0m"
 fi
 
+#==========================================================================================================================================================================================#
 
 if [ $UPDATE = "TRUE" ]; then
 
-	REGEX_STRING=".*/"
-	for i in $(seq 0 4); do
-		REGEX_STRING=$REGEX_STRING${PARAMETER_PREFIXES[$i]}${PARAMETER_REGEXES[$i]}/
-	done
-	REGEX_STRING=${REGEX_STRING%/}		
+    local TEMPORARY_FILE_WITH_DIRECTORIES="${PROJECT_DATABASE_DIRECTORY}/temporaryFileWithDirectoriesForDatabaseUpdate.dat"
+    rm -f $TEMPORARY_FILE_WITH_DIRECTORIES
+    local TEMPORARY_DATABASE_FILE="${PROJECT_DATABASE_DIRECTORY}/temporaryDatabaseForUpdate.dat"
+    rm -f $TEMPORARY_DATABASE_FILE
 
+    REGEX_STRING=".*/"
+    for i in $(seq 0 4); do
+	    REGEX_STRING=$REGEX_STRING${PARAMETER_PREFIXES[$i]}${PARAMETER_REGEXES[$i]}/
+    done
+    REGEX_STRING=${REGEX_STRING%/}		
 
-	while :
-	do
-		[ "$FILE_WITH_DIRECTORIES" = "" ] && find $HOME_DIR/$SIMULATION_PATH -regextype grep -regex "$REGEX_STRING" > $TEMPORARY_FILE_WITH_DIRECTORIES
-		[ "$FILE_WITH_DIRECTORIES" != "" ] && cat $FILE_WITH_DIRECTORIES > $TEMPORARY_FILE_WITH_DIRECTORIES
+    while :
+    do
+	    [ "$FILE_WITH_DIRECTORIES" = "" ] && find $HOME_DIR/$SIMULATION_PATH -regextype grep -regex "$REGEX_STRING" > $TEMPORARY_FILE_WITH_DIRECTORIES
+	    [ "$FILE_WITH_DIRECTORIES" != "" ] && cat $FILE_WITH_DIRECTORIES > $TEMPORARY_FILE_WITH_DIRECTORIES
 
-		while read line
-		do
+	    while read line
+	    do
 			#printf "%+15s: %s\n" "line" "$line"
-			if [[ "$line" =~ ^[^#] ]]; then 
-				PARAMS=( $(echo $line | awk 'BEGIN{FS="/"}{print $(NF-4) " " $(NF-3) " " $(NF-2) " " $(NF-1) " " $(NF)}') )
-			else
-				continue 
-			fi
-			
-			if [ -d $line ]; then
-			    printf "\t\e[38;5;208m\e[48;5;16mUpdating:\e[38;5;49m $line "
-				cd $line
-			else
-				continue
-			fi
+	        if [[ "$line" =~ ^[^#] ]]; then 
+		        PARAMS=( $(echo $line | awk 'BEGIN{FS="/"}{print $(NF-3) " " $(NF-2) " " $(NF-1) " " $(NF)}') )
+	        else
+		        continue 
+	        fi
+	        
+	        if [ -d $line ]; then
+		        printf "\t\e[38;5;208m\e[48;5;16mUpdating:\e[38;5;49m $line "
+		        cd $line
+	        else
+		        continue
+	        fi
 
-			PARAMETER_DIRECTORY_STRUCTURE=${line##*$SIMULATION_PATH}
+	        PARAMETER_DIRECTORY_STRUCTURE=${line##*$SIMULATION_PATH}
 
-			ListJobStatus_Loewe $PARAMETER_DIRECTORY_STRUCTURE | \
-			sed -r 's/[^(\x1b)]\[|\]|\(|\)|%//g' | \
-			sed -r 's/(\x1B\[[[:digit:]]{1,2};[[:digit:]]{0,2};[[:digit:]]{0,3}m)(.)/\1 \2/g' | \
-			sed -r 's/(.)(\x1B\[.{1,2};.{1,2}m)/\1 \2/g' | \
-			sed -r 's/(\x1B\[.{1,2};.{1,2}m)(.)/\1 \2/g' |
-			awk --posix -v nf={PARAMS[0]#$NFLAVOUR_PREFIX*} -v mu=${PARAMS[1]#$CHEMPOT_PREFIX*} -v k=${PARAMS[2]#$KAPPA_PREFIX*} -v nt=${PARAMS[3]#$NTIME_PREFIX*} -v ns=${PARAMS[4]#*$NSPACE_PREFIX} '
-
+	        ListJobStatus_Loewe $PARAMETER_DIRECTORY_STRUCTURE | \
+		        sed -r 's/[^(\x1b)]\[|\]|\(|\)|%//g' | \
+		        sed -r 's/(\x1B\[[[:digit:]]{1,2};[[:digit:]]{0,2};[[:digit:]]{0,3}m)(.)/\1 \2/g' | \
+		        sed -r 's/(.)(\x1B\[.{1,2};.{1,2}m)/\1 \2/g' | \
+		        sed -r 's/(\x1B\[.{1,2};.{1,2}m)(.)/\1 \2/g' |
+	            awk --posix -v mu=${PARAMS[0]#mui*} -v k=${PARAMS[1]#$KAPPA_PREFIX*} -v nt=${PARAMS[2]#nt*} -v ns=${PARAMS[3]#*ns} '
 							$3 ~ /^[[:digit:]]\.[[:digit:]]{4}/{
 								print $(3-1) " " nf " " $(3-1) " " mu " " $(3-1) " " k " " $(3-1) " " nt " " $(3-1) " " ns " " $(3-1) " " $3 " " $(5-1) " " $5 " " $(8-1) " " $8 " " $(15-1) " " $15 " " $(19-1) " " $19 " " "\033[0m"
 							}
-						' >> $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE
+						' >> $TEMPORARY_DATABASE_FILE
 
-			cd $CURRENT_DIRECTORY
-			printf "\e[38;5;10m...done!\e[0m\n"
-		done < <(cat $TEMPORARY_FILE_WITH_DIRECTORIES)
+	        cd $CURRENT_DIRECTORY
+	        printf "\e[38;5;10m...done!\e[0m\n"
+	    done < <(cat $TEMPORARY_FILE_WITH_DIRECTORIES)
 
-		[ "$(wc -l $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE | awk '{print $1}')" -eq 0 ] && echo "Empty database, please investigate...exiting." && return
+	    if [ "$(wc -l < $TEMPORARY_DATABASE_FILE)" -eq 0 ]; then
+            printf "\n\e[91m After the database procedure, the database seems to be empty! Temporary files\n"
+            printf "   $TEMPORARY_DATABASE_FILE\n   $TEMPORARY_FILE_WITH_DIRECTORIES\n"
+            printf " have been left for further investigation! Aborting...\e[0m\n\n"
+            return
+        fi
 
-		cp $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE $PROJECT_DATABASE_FILE
+	    cp $TEMPORARY_DATABASE_FILE $PROJECT_DATABASE_FILE
 
-		#Clean up
-		rm $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE
-		rm $TEMPORARY_FILE_WITH_DIRECTORIES
+	    #Clean up
+	    rm $TEMPORARY_DATABASE_FILE
+	    rm $TEMPORARY_FILE_WITH_DIRECTORIES
 
-		if [ "$UPDATE_FREQUENCY" = "" ]; then 
-			break 
-		else
+	    if [ "$UPDATE_FREQUENCY" = "" ]; then 
+	        break 
+	    else
             printf "\n\t\e[1m\e[38;5;147mSleeping \e[38;5;86m$UPDATE_FREQUENCY\e[38;5;147m starting on $(date +%d.%m.%Y) at $(date +%H:%M:%S)\e[0m\n\n"
-			sleep $UPDATE_FREQUENCY 
-		fi
-	done
+	        sleep $UPDATE_FREQUENCY 
+	    fi
+    done
     echo ''
 fi
+
+#==========================================================================================================================================================================================#
 
 if [ $REPORT = "TRUE" ]; then
 
@@ -738,7 +753,7 @@ if [ $REPORT = "TRUE" ]; then
         -v runningColor="${RUNNING_LISTSTATUS_COLOR/e/033}" \
         -v pendingColor="${PENDING_LISTSTATUS_COLOR/e/033}" \
         -v toBeCleanedColor="${CLEANING_LISTSTATUS_COLOR/e/033}" \
-        -v stuckedColor="${STUCKED_SIMULATION_LISTSTATUS_COLOR/e/033}" \
+        -v stuckColor="${STUCK_SIMULATION_LISTSTATUS_COLOR/e/033}" \
         -v fineColor="${FINE_SIMULATION_LISTSTATUS_COLOR/e/033}" \
         -v tooLowAccThreshold="${TOO_LOW_ACCEPTANCE_THRESHOLD}" \
         -v lowAccThreshold="${LOW_ACCEPTANCE_THRESHOLD}" \
@@ -753,21 +768,22 @@ simulationsHighAcc = 0
 simulationsTooHighAcc = 0
 simulationsRunning = 0
 simulationsPending = 0
-simulationsStucked = 0
+simulationsStuck = 0
 simulationsFine = 0
 simulationsOnBrokenGPU = 0
+criticalSituation = 0
 }
 {
-if($betaColorColumn == wrongBetaColor){simulationsOnBrokenGPU+=1}
+if($betaColorColumn == wrongBetaColor){simulationsOnBrokenGPU+=1; criticalSituation=1}
 if($trajNoColorColumn == toBeCleanedColor){outputFilesToBeCleaned+=1} 
-if($accRateColorColumn == tooLowAccColor){simulationsTooLowAcc+=1}
+if($accRateColorColumn == tooLowAccColor){simulationsTooLowAcc+=1; criticalSituation=1}
 if($accRateColorColumn == lowAccColor){simulationsLowAcc+=1}
 if($accRateColorColumn == optimalAccColor){simulationsOptimalAcc+=1}
 if($accRateColorColumn == highAccColor){simulationsHighAcc+=1}
 if($accRateColorColumn == tooHighAccColor){simulationsTooHighAcc+=1}
 if($statusColorColumn == runningColor){simulationsRunning+=1}
 if($statusColorColumn == pendingColor){simulationsPending+=1}
-if($lastTrajColorColumn == stuckedColor){simulationsStucked+=1}
+if($lastTrajColorColumn == stuckColor){simulationsStuck+=1; criticalSituation=1}
 if($lastTrajColorColumn == fineColor){simulationsFine+=1}
 } 
 END{ 
@@ -789,12 +805,201 @@ printf "\t\t%s     Simulations with %s high acceptance%s%s: %s%s %4d %s%s  ( %2d
 printf "\t\t%s Simulations with too %s high acceptance%s%s: %s%s %4d %s%s  ( %2d%%, 100%% ] %s\n",  blue,  bold,  def,  blue, (simulationsTooHighAcc>0  ? lightOrange : green),   bold,   simulationsTooHighAcc , def, blue, tooHighAccThreshold, def
 printf "\t\t%s                  Simulations %s running%s%s: %s%s %4d %s                       \n",  pink,  bold,  def,  blue, green                                           ,   bold,   simulationsRunning    , def 
 printf "\t\t%s                  Simulations %s pending%s%s: %s%s %4d %s                       \n",  pink,  bold,  def,  blue, (simulationsPending>0     ? yellow : green)     ,   bold,   simulationsPending    , def 
-printf "\t\t%s    Simulations %s stucked%s%s (or finished): %s%s %4d %s                       \n",  blue,  bold,  def,  blue, (simulationsStucked>0     ? red : green)        ,   bold,   simulationsStucked    , def 
+printf "\t\t%s      Simulations %s stuck%s%s (or finished): %s%s %4d %s                       \n",  blue,  bold,  def,  blue, (simulationsStuck>0     ? red : green)          ,   bold,   simulationsStuck    , def 
 printf "\t\t%s             Simulations %s running fine%s%s: %s%s %4d %s                       \n",  blue,  bold,  def,  blue, green                                           ,   bold,   simulationsFine       , def 
 printf "\t\t%s           Output files %s to be cleaned%s%s: %s%s %4d %s                       \n",  pink,  bold,  def,  blue, (outputFilesToBeCleaned>0 ? lightOrange : green),   bold,   outputFilesToBeCleaned, def 
+
+if(criticalSituation ==1){exit 1}else{exit 0}
         }' $PROJECT_DATABASE_FILE
 
-    echo ""
+    if [ $? -ne 0 ]; then
+        printf "\n\t\t\e[38;5;9m"
+    else
+        printf "\n\t\t\e[38;5;83m"
+    fi
+    printf "\tUse \e[1m--\e[4mshow\e[24m\e[21m option to display set of simulations.\n\n"
 fi
+
+#==========================================================================================================================================================================================#
+
+if [ $SHOW = "TRUE" ]; then
+
+    local TEMPORARY_DATABASE_FILE="tmpDatabaseForShowing.dat"
+    rm -f $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE
+
+    local POSSIBLE_SIMULATIONS_TO_SHOW=( "Simulations on broken GPU"
+                                         "Simulations stuck (or finished)"
+                                         "Simulations with output file to be cleaned"
+                                         "Simulations with too low acceptance rate"
+                                         "Simulations with low acceptance rate"
+                                         "Simulations with optimal acceptance rate"
+                                         "Simulations with high acceptance rate"
+                                         "Simulations with too high acceptance rate"
+                                         "Running simulations"
+                                         "Pending simulations" )
+    
+    printf "\e[38;5;118mWhich simulations would you like to show?\n\e[38;5;135m"
+    PS3=$'\n\e[38;5;118mEnter the number corresponding to the desired set: \e[38;5;135m'
+    select SIMULATION in "${POSSIBLE_SIMULATIONS_TO_SHOW[@]}"; do
+	    if ! ElementInArray "$SIMULATION" "${POSSIBLE_SIMULATIONS_TO_SHOW[@]}"; then
+		    continue
+	    else
+            case $SIMULATION in
+                "Simulations on broken GPU")
+                    local COLUMN_TO_FILTER="$((${COLUMNS[betaC]} -1 ))"
+                    local VALUE_TO_MATCH="${WRONG_BETA_LISTSTATUS_COLOR/e/033}"
+                    ;;
+                "Simulations stuck (or finished)")
+                    local COLUMN_TO_FILTER="$((${COLUMNS[lastTrajC]} -1 ))"
+                    local VALUE_TO_MATCH="${STUCK_SIMULATION_LISTSTATUS_COLOR/e/033}"
+                    ;;
+                "Simulations with output file to be cleaned")
+                    local COLUMN_TO_FILTER="$((${COLUMNS[trajNoC]} -1 ))"
+                    local VALUE_TO_MATCH="${CLEANING_LISTSTATUS_COLOR/e/033}"
+                    ;;
+                "Simulations with too low acceptance rate")
+                    local COLUMN_TO_FILTER="$((${COLUMNS[accRateC]} -1 ))"
+                    local VALUE_TO_MATCH="${TOO_LOW_ACCEPTANCE_LISTSTATUS_COLOR/e/033}"
+                    ;;
+                "Simulations with low acceptance rate")
+                    local COLUMN_TO_FILTER="$((${COLUMNS[accRateC]} -1 ))"
+                    local VALUE_TO_MATCH="${LOW_ACCEPTANCE_LISTSTATUS_COLOR/e/033}"
+                    ;;
+                "Simulations with optimal acceptance rate")
+                    local COLUMN_TO_FILTER="$((${COLUMNS[accRateC]} -1 ))"
+                    local VALUE_TO_MATCH="${OPTIMAL_ACCEPTANCE_LISTSTATUS_COLOR/e/033}"
+                    ;;
+                "Simulations with high acceptance rate")
+                    local COLUMN_TO_FILTER="$((${COLUMNS[accRateC]} -1 ))"
+                    local VALUE_TO_MATCH="${HIGH_ACCEPTANCE_LISTSTATUS_COLOR/e/033}"
+                    ;;
+                "Simulations with too high acceptance rate")
+                    local COLUMN_TO_FILTER="$((${COLUMNS[accRateC]} -1 ))"
+                    local VALUE_TO_MATCH="${TOO_HIGH_ACCEPTANCE_LISTSTATUS_COLOR/e/033}"
+                    ;;
+                "Running simulations")
+                    local COLUMN_TO_FILTER="$((${COLUMNS[statusC]} -1 ))"
+                    local VALUE_TO_MATCH="${RUNNING_LISTSTATUS_COLOR/e/033}"
+                    ;;
+                "Pending simulations")
+                    local COLUMN_TO_FILTER="$((${COLUMNS[statusC]} -1 ))"
+                    local VALUE_TO_MATCH="${PENDING_LISTSTATUS_COLOR/e/033}"
+                    ;;
+            esac
+            break
+	    fi
+    done
+    printf "\n\e[0m"        
+
+    awk --posix -v columnToFilter="$COLUMN_TO_FILTER" -v valueToMatch="$VALUE_TO_MATCH" '$columnToFilter == valueToMatch{print $0}' $PROJECT_DATABASE_FILE >> $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE
+
+    if [ $(wc -l < $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE) -eq 0 ]; then
+        printf " \e[38;5;202m $SIMULATION not found in database (last update ended on \e[1m$(date -r $PROJECT_DATABASE_FILE +"%d.%m.%Y")\e[21m at \e[1m$(date -r $PROJECT_DATABASE_FILE +"%H:%M")\e[21m).\n\e[0m"
+    else
+        __static__DisplayDatabaseFile $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE
+    fi
+    
+    rm $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE
+
+    echo ''
+fi
+
+}
+
+
+
+function __static__DisplayDatabaseFile() {
+
+	if [ "$CUSTOMIZE_COLUMNS" = "FALSE" ]; then
+		NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=( muC kC ntC nsC betaC trajNoC accRateC statusC lastTrajC )
+	fi
+
+	for NAME_OF_COLUMN in ${!COLUMNS[@]}; do
+		NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL=$NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL$NAME_OF_COLUMN-${COLUMNS[$NAME_OF_COLUMN]}"|"
+	done
+
+	for NAME_OF_COLUMN in ${NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER[@]}; do
+		NAME_OF_COLUMN_NR_OF_COLUMN_STRING=$NAME_OF_COLUMN_NR_OF_COLUMN_STRING$NAME_OF_COLUMN-${COLUMNS[$NAME_OF_COLUMN]}"|"
+		NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING=$NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING$NAME_OF_COLUMN--${PRINTF_FORMAT_SPECIFIER_ARRAY[$NAME_OF_COLUMN]}"|"
+		NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING=$NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING$NAME_OF_COLUMN-${HEADER_PRINTF_PARAMETER_ARRAY[$NAME_OF_COLUMN]}"|"
+		NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING=$NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING$NAME_OF_COLUMN--${HEADER_PRINTF_FORMAT_SPECIFIER_ARRAY[$NAME_OF_COLUMN]}"|"
+		LENGTH_OF_HEADER_SEPERATOR=$(($LENGTH_OF_HEADER_SEPERATOR+${FSNA[$NAME_OF_COLUMN]}+1))
+	done
+
+    LENGTH_OF_HEADER_SEPERATOR=$(($LENGTH_OF_HEADER_SEPERATOR+${FSNA[muC]}+1-${#CHEMPOT_PREFIX})) #Add dynamicly to simmetrize the line under the header (the +1 is the space that is at the beginning of the line)
+	#STRIPPING OF THE LAST | SYMBOL FROM THE STRING
+	NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL=$(echo ${NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL%"|"})
+	NAME_OF_COLUMN_NR_OF_COLUMN_STRING=$(echo ${NAME_OF_COLUMN_NR_OF_COLUMN_STRING%"|"})
+	NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING=$(echo ${NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING%"|"})
+	NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING=$(echo ${NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING%"|"})
+	NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING=$(echo ${NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING%"|"})
+
+	awk --posix -v nameOfColumnsAndNumberOfColumnsString=$NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL \
+				-v nameOfDisplayedColumnsAndnrOfDisplayedColumnsString=$NAME_OF_COLUMN_NR_OF_COLUMN_STRING \
+				-v nameOfDisplayedColumnsAndSpecOfColumnsString=$NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING \
+				-v nameOfColumnsAndHeaderOfColumnsString=$NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING \
+				-v nameOfColumnsAndHeaderSpecOfColumnsString=$NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING \
+				-v lengthOfHeaderSeperator=$LENGTH_OF_HEADER_SEPERATOR '
+					 BEGIN{
+					 	nrOfTotalColumns=split(nameOfColumnsAndNumberOfColumnsString,columnNamesAndNumbersArray,"|");
+
+						for(i=1;i<=nrOfTotalColumns;i++){
+							split(columnNamesAndNumbersArray[i],columnNameAndNumber,"-");
+							columnName=columnNameAndNumber[1];
+							columnNumber=columnNameAndNumber[2];
+							columnNameColumnNumber[columnName]=columnNumber;
+						}
+						nrOfDisplayedColumns=split(nameOfDisplayedColumnsAndnrOfDisplayedColumnsString,columnNamesAndNumbersArray,"|");
+						split(nameOfDisplayedColumnsAndSpecOfColumnsString,columnNamesAndSpecsArray,"|");
+
+						for(i=1;i<=nrOfDisplayedColumns;i++){
+							split(columnNamesAndNumbersArray[i],columnNameAndNumber,"-");
+							columnName=columnNameAndNumber[1];
+							columnNumber=columnNameAndNumber[2];
+							columnNamesInOrder[i]=columnName;
+							split(columnNamesAndSpecsArray[i],columnNameAndSpec,"--");
+							columnSpec=columnNameAndSpec[2];
+							specForColorCode="%-s";
+							columnNameColumnSpec[columnName]=specForColorCode " " columnSpec;
+						}
+						split(nameOfColumnsAndHeaderOfColumnsString,columnNamesAndHeaderArray,"|");
+						split(nameOfColumnsAndHeaderSpecOfColumnsString,columnNamesAndHeaderSpecArray,"|");
+
+						printf(" \033[38;5;26m");
+						for(i=1;i<=lengthOfHeaderSeperator;i++){
+							printf("=");
+						}
+						printf("\033[0m\n");
+						printf("  "); #THIS PRINTF IS IMPORTANT TO GET THE HEADER IN TO THE RIGHT PLACE
+						for(i=1;i<=nrOfDisplayedColumns;i++){
+							split(columnNamesAndHeaderArray[i],columnAndHeader,"-");
+							split(columnNamesAndHeaderSpecArray[i],columnAndHeaderSpec,"--");
+							specifierString=columnAndHeaderSpec[2];
+							printf(specifierString,columnAndHeader[2]);
+						}
+						printf("  \033[0m\n \033[0;38;5;26m");
+						for(i=1;i<=lengthOfHeaderSeperator;i++){
+							printf("=");
+						}
+						printf("\033[0m\n");
+					 }
+{
+						printf(" "); #Aesthetics
+						for(i=1;i<=nrOfDisplayedColumns;i++){
+							nameOfColumn=columnNamesInOrder[i];
+							specifierString=columnNameColumnSpec[nameOfColumn];
+							columnOfColorCode=columnNameColumnNumber[nameOfColumn]-1;
+							columnOfColumnName=columnNameColumnNumber[nameOfColumn];
+							printf(specifierString,$(columnOfColorCode),$(columnOfColumnName));
+						}
+						printf("\n");
+}
+					END{
+						printf(" \033[0m\033[0;38;5;26m");
+						for(i=1;i<=lengthOfHeaderSeperator;i++){
+							printf("=");
+						}
+						printf("\033[0m\n");
+					}'     $1
 
 }
