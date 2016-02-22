@@ -157,7 +157,16 @@ function ParseCommandLineOption(){
 	        --betasfile=* )                 BETASFILE=${1#*=}; shift ;;
 	        --chempot=* )                   CHEMPOT=${1#*=}; shift ;;
 	        --kappa=* )                     KAPPA=${1#*=}; shift ;;
-	        -w=* | --walltime=* )           WALLTIME=${1#*=}; shift ;;
+	        -w=* | --walltime=* )
+		WALLTIME=${1#*=}
+		if [[ $WALLTIME =~ ^([[:digit:]]+[dhms])+$ ]]; then
+		    WALLTIME=$(TimeStringToSecond $WALLTIME)
+		    WALLTIME=$(SecondsToTimeStringWithDays $WALLTIME)
+		fi
+		if [[ ! $WALLTIME =~ ^([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]]; then
+		    printf "\n\e[0;31m Specified walltime format invalid! Aborting...\n\n\e[0m" && exit -1
+		fi
+		shift ;;
 	        --bgsize=* )                    BGSIZE=${1#*=}; shift ;;
 	        -m=* | --measurements=* )       MEASUREMENTS=${1#*=}; shift ;;
 	        --nrxprocs=* )                  NRXPROCS=${1#*=}; shift ;;
