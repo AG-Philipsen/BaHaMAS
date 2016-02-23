@@ -817,7 +817,7 @@ if(criticalSituation ==1){exit 1}else{exit 0}
     else
         printf "\n\t\t\e[38;5;83m"
     fi
-    printf "\tUse \e[1m--\e[4mshow\e[24m\e[21m option to display set of simulations.\n\n"
+    printf "     Use \e[1m--\e[4ms\e[24m\e[21m | \e[1m--\e[4mshow\e[24m\e[21m option to display set of simulations.\n\n"
 fi
 
 #==========================================================================================================================================================================================#
