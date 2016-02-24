@@ -256,8 +256,8 @@ function ListJobStatus_Loewe(){
             "$(ColorBeta)%-15s\t  \
 $(ColorClean $TO_BE_CLEANED)%8s\e[0;36m \
 ($(GoodAcc $ACCEPTANCE)%s %%\e[0;36m) \
-[$(GoodAcc $ACCEPTANCE_LAST)%s %%\e[0;36m]  \
-%s-%s%s%s\t \
+[$(GoodAcc $ACCEPTANCE_LAST)%s %%\e[0;36m] \
+%s-%s%s%s\t\
 $(ColorStatus $STATUS)%9s\e[0;36m\
 \t%9s\t   \
 $(ColorTime $TIME_FROM_LAST_MODIFICATION)%s\e[0;36m      \
@@ -344,7 +344,7 @@ function ColorBeta(){
     local AUX1=$(printf "%s," "${OBSERVABLES_COLUMNS[@]}")
     local AUX2=$(printf "%s," "${!OBSERVABLES_COLUMNS[@]}")
     if [ ! -f $OUTPUTFILE_GLOBALPATH ]; then
-        echo "36"
+        echo $DEFAULT_LISTSTATUS_COLOR
         return
     fi
     

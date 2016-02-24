@@ -66,7 +66,7 @@ function ProduceInputFile_Loewe() {
             echo "num_timescales=2" >> $INPUTFILE_GLOBALPATH
         fi
     elif [ $STAGGERED = "TRUE" ]; then
-        echo "cg_iteration_block_size=50" >> $INPUTFILE_GLOBALPATH
+        echo "cg_iteration_block_size=$CGBS" >> $INPUTFILE_GLOBALPATH
         echo "num_timescales=2" >> $INPUTFILE_GLOBALPATH
     fi
     echo "tau=1" >> $INPUTFILE_GLOBALPATH
