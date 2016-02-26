@@ -4,8 +4,8 @@ function __static__CheckFileForSuspiciousTrajectory(){
     # TODO: Adjust the following line for JUQUEEN where there is the time in the output file!
     local SUSPICIOUS_TRAJECTORY=$(awk '{val=$1; $1=""; array[val]++; if(array[val]>1 && $0 != lineRest[val]){print val; exit}; lineRest[val]=$0}' $FILE_GLOBALPATH)
     if [ "$SUSPICIOUS_TRAJECTORY" != "" ]; then
-        printf "        \e[38;5;202mFound different observables for same trajectory number! First occurence at trajectory $SUSPICIOUS_TRAJECTORY. The file will be cleaned anyway,\n"
-        printf "        use the backup file \"${FILE_GLOBALPATH}_date\" in case of need.\n\e[0m"
+        printf "        \e[38;5;202mFound different lines for same trajectory number! First occurence at trajectory $SUSPICIOUS_TRAJECTORY. The file will be cleaned anyway,\n"
+        printf "        use the backup file \"${FILE_GLOBALPATH}_[date]\" in case of need.\n\e[0m"
     fi
 }
 
