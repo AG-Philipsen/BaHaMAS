@@ -56,9 +56,9 @@ function ParseCommandLineOptions(){
 function ExtractParametersFromJobInformation(){
     local JOB_ID_NUMBER="$1"; shift
     local PARAMETERS_NAME=("$@")
-    local SCONTROL_OUTPUT="$(scontrol show job $JOBID)"
+    local SCONTROL_OUTPUT="$(scontrol show job $JOB_ID_NUMBER)"
     for PARAM in "${PARAMETERS_NAME[@]}"; do
-        JOBINFO["$PARAM"]=$(sed -n 's@.*'${PARAM}'=\([^[:space:]]*\).*@\1@p' <<< "$SCONTROL_OUTPUT")
+        EXTRACTED_JOB_INFORMATION["$PARAM"]=$(sed -n 's@.*'${PARAM}'=\([^[:space:]]*\).*@\1@p' <<< "$SCONTROL_OUTPUT")
     done && unset -v 'PARAM'
 }
 
@@ -104,13 +104,47 @@ ParseCommandLineOptions $@
 
 #Get information via squeue and in case filter jobs -> ATTENTION: Double quoting here is CRUCIAL (to respect endlines)!!
 if [ $DISPLAY_ALL_JOBS = 'TRUE' ]; then
-    SQUEUE_OUTPUT="$(squeue --noheader -p $CLUSTER_PARTITION -o ${SQUEUE_FORMAT_CODE_STRING:1})"
+    SQUEUE_OUTPUT="$(squeue --noheader -p $CLUSTER_PARTITION -o ${SQUEUE_FORMAT_CODE_STRING:1} 2>/dev/null)"
 else
-    SQUEUE_OUTPUT="$(squeue --noheader -u $SELECTED_USER -o "${SQUEUE_FORMAT_CODE_STRING:1}")"
+    SQUEUE_OUTPUT="$(squeue --noheader -u $SELECTED_USER -o "${SQUEUE_FORMAT_CODE_STRING:1}" 2>/dev/null)"
+fi
+
+#The following if is a workaround for Loewe where squeue is old and %Z and %V are not available in the format! TODO: Remove as soon as possible.
+if [ $CLUSTER_NAME = 'LOEWE' ]; then
+    JOB_SUBMISSION_FOLDER=""
+    JOB_SUBMISSION_TIME=""
+    for ID in $(cut -d'@' -f1  <<< "$SQUEUE_OUTPUT"); do
+        declare -A EXTRACTED_JOB_INFORMATION
+        ExtractParametersFromJobInformation "$ID" "WorkDir" "SubmitTime"
+        JOB_SUBMISSION_FOLDER="${JOB_SUBMISSION_FOLDER}|${ID}@${EXTRACTED_JOB_INFORMATION[WorkDir]}"
+        JOB_SUBMISSION_TIME="${JOB_SUBMISSION_TIME}|${ID}@${EXTRACTED_JOB_INFORMATION[SubmitTime]}"
+        unset -v 'EXTRACTED_JOB_INFORMATION'
+    done && unset 'ID'
+    SQUEUE_OUTPUT=$(awk --posix -v subFolder="${JOB_SUBMISSION_FOLDER:1}" \
+                                -v subTime="${JOB_SUBMISSION_TIME:1}" '
+                                BEGIN{
+                                    split(subFolder, tmpSubFold, "|")
+                                    split(subTime, tmpSubTime, "|")
+                                    for(i in tmpSubFold){
+                                        split(tmpSubFold[i], resultFold, "@")
+                                        jobSubmissionFolder[resultFold[1]]=resultFold[2]
+                                        split(tmpSubTime[i], resultTime, "@")
+                                        jobSubmissionTime[resultTime[1]]=resultTime[2]
+                                    }
+                                    FS="@"
+                                    OFS="@"
+                                }
+                                {
+                                    $5=jobSubmissionTime[$1]
+                                    $10=jobSubmissionFolder[$1]
+                                    print $0
+                                }
+    ' <<< "$SQUEUE_OUTPUT")
+    unset -v 'JOB_SUBMISSION_FOLDER' 'JOB_SUBMISSION_TIME'
 fi
 
 if [ $LOCAL_JOBS = 'TRUE' ]; then
-    SQUEUE_OUTPUT="$(grep --color=never "${PWD}" <<< "$SQUEUE_OUTPUT")"
+        SQUEUE_OUTPUT="$(grep --color=never "${PWD}" <<< "$SQUEUE_OUTPUT")"
 fi
 
 #Split squeue output and prepare table layout
@@ -128,12 +162,12 @@ JOB_NUM_NODES=(         $(cut -d'@' -f11 <<< "$SQUEUE_OUTPUT") )
 
 if [ $CLUSTER_NAME = 'LOEWE' ]; then
     HOME_DIR=${HOME}
-    WORK_DIR="/home/hfftheo/$(whoami)"
-    DATA1_DIR="/data01/hfftheo/$(whoami)"
-    DATA2_DIR="/data02/hfftheo/$(whoami)"
+    WORK_DIR="/home/hfftheo/$SELECTED_USER"
+    DATA1_DIR="/data01/hfftheo/$SELECTED_USER"
+    DATA2_DIR="/data02/hfftheo/$SELECTED_USER"
 else
     HOME_DIR=${HOME}
-    WORK_DIR="/lustre/nyx/lcsc/$(whoami)"
+    WORK_DIR="/lustre/nyx/lcsc/$SELECTED_USER"
 fi
 
 for ((j=0; j<${#JOB_SUBMISSION_FOLDER[@]}; j++)); do
