@@ -75,6 +75,7 @@ local FILTER_TRAJNO="FALSE"
 local FILTER_ACCRATE="FALSE"	
 local FILTER_STATUS="FALSE"	
 local FILTER_LASTTRAJ="FALSE"
+local UPDATE_WITH_FREQUENCY="FALSE"
 
 declare -a local NF_ARRAY
 declare -a local MU_ARRAY
@@ -93,7 +94,8 @@ local ACCRATE_HIGH_VALUE=""
 
 local LAST_TRAJ_TIME=""
 
-local UPDATE_FREQUENCY=""
+local SLEEP_TIME=""
+local UPDATE_TIME=""
 
 
 #If the option -l | --local is given, then the option -l is replaced by mu,mass,nt,ns options with local values 
@@ -312,8 +314,13 @@ while [ $# -gt 0 ]; do
 			[ "$LAST_TRAJ_TIME" = "" ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
 			;;
 		-u | --update)
-			if [[ $2 =~ [[:digit:]]+[s|m|h|d] ]]; then
-				UPDATE_FREQUENCY=$2
+			if [[ $2 =~ ^[[:digit:]]+[s|m|h|d]$ ]]; then
+				SLEEP_TIME=$2
+				shift
+			fi
+			if [[ $2 =~ ^[[:digit:]]{1,2}$ ]]; then
+				[ "$2" -gt 23 ] && 	printf "\n\e[91m For the update at a specific time option only full hours < 24 are allowed! Exiting...\e[0m\n\n" && return
+				UPDATE_TIME=$2
 				shift
 			fi
 			UPDATE="TRUE"
@@ -365,9 +372,13 @@ while [ $# -gt 0 ]; do
 			echo -e "  \e[4m\e[1mUpdating database\e[24m:\e[21m"
 			echo -e "  \e[38;5;198m"
 			echo -e "     -u | --update  -->  Specify this option to (re)create the database file."
-			echo -e "                         Optionally a frequency can be specified at which the script performs a database update."
-			echo -e "                         The frequency is a number followed by s = seconds, m = minutes, h = hours, d = days, e.g. --update 2h."
-		    echo -e "                         In this case it is best to start the script in a screen session and to let it run in the background."
+			echo -e "                         Optionally" 
+			echo -e "                         1) a sleep time can be specified after which the script repeatedly performs a database update."
+			echo -e "                            The sleep time is a number followed by s = seconds, m = minutes, h = hours, d = days, e.g. --update 2h."
+			echo -e "                         2) an update time can be specified at which the  script repeatedly performs a database update."
+			echo -e "                            The update time is a one or two digit number which corresponds to a full hour. E.g. --update 09 will cause the script"
+			echo -e "                            to perform a database update every days at 09:00:00."
+		    echo -e "                         In both cases it is best to start the script in a screen session and to let it run in the background."
             echo -e "  \e[38;5;202m"
 			echo -e "  \e[4m\e[1mGeneral options\e[24m:\e[21m"
 			echo -e "     "
@@ -659,6 +670,17 @@ fi
 
 if [ $UPDATE = "TRUE" ]; then
 
+	if [ "$SLEEP_TIME" != "" ] && [ "$UPDATE_TIME" != "" ]; then
+		printf "\n\e[91m  Values for both, sleep time and update time are specified but are mutually exclusive. Please investigate! Exiting...\e[0m\n\n" && return
+	fi
+
+	if [ "$UPDATE_TIME" != "" ]; then
+	    CURRENT_EPOCH=$(date +%s)
+	    TARGET_EPOCH=$(date -d "$UPDATE_TIME + 1 days" +%s)
+	    SLEEP_SECONDS=$(( $TARGET_EPOCH - $CURRENT_EPOCH ))
+	    sleep $SLEEP_SECONDS
+	fi
+
     local TEMPORARY_FILE_WITH_DIRECTORIES="${PROJECT_DATABASE_DIRECTORY}/temporaryFileWithDirectoriesForDatabaseUpdate.dat"
     rm -f $TEMPORARY_FILE_WITH_DIRECTORIES
     local TEMPORARY_DATABASE_FILE="${PROJECT_DATABASE_DIRECTORY}/temporaryDatabaseForUpdate.dat"
@@ -721,12 +743,19 @@ if [ $UPDATE = "TRUE" ]; then
 	    rm $TEMPORARY_DATABASE_FILE
 	    rm $TEMPORARY_FILE_WITH_DIRECTORIES
 
-	    if [ "$UPDATE_FREQUENCY" = "" ]; then 
-	        break 
-	    else
-            printf "\n\t\e[1m\e[38;5;147mSleeping \e[38;5;86m$UPDATE_FREQUENCY\e[38;5;147m starting on $(date +%d.%m.%Y) at $(date +%H:%M:%S)\e[0m\n\n"
-	        sleep $UPDATE_FREQUENCY 
+	    if [ "$SLEEP_TIME" != "" ]; then 
+            printf "\n\t\e[1m\e[38;5;147mSleeping \e[38;5;86m$SLEEP_TIME\e[38;5;147m starting on $(date +%d.%m.%Y) at $(date +%H:%M:%S)\e[0m\n\n"
+	        sleep $SLEEP_TIME 
 	    fi
+
+	    if [ "$UPDATE_TIME" != "" ]; then 
+            printf "\n\t\e[1m\e[38;5;147mEntering sleeping mode. Performing next update at \e[38;5;86m$(date -d "$UPDATE_TIME + 1 days")\e[0m\n\n"
+	        sleep $SLEEP_TIME 
+	    fi
+
+		if ["$SLEEP_TIME" = "" ] && [ "$UPDATE_TIME" = "" ]; then
+			break
+		fi
     done
     echo ''
 fi
