@@ -691,8 +691,7 @@ function projectStatisticsDatabase(){
 					}
 		' $PROJECT_DATABASE_FILE
         
-        echo ''
-        printf " Last update ended on \e[1m$(date -r $PROJECT_DATABASE_FILE +"%d.%m.%Y")\e[21m at \e[1m$(date -r $PROJECT_DATABASE_FILE +"%H:%M")\e[21m  \e[38;5;202m--->\e[38;5;207m  $PROJECT_DATABASE_FILE\n\n\e[0m"
+        printf "\n Last update ended on \e[1m$(date -r $PROJECT_DATABASE_FILE +"%d.%m.%Y\e[21m at \e[1m%H:%M")\e[21m  \e[38;5;202m--->\e[38;5;207m  $PROJECT_DATABASE_FILE\n\n\e[0m"
     fi
 
     #==========================================================================================================================================================================================#
@@ -720,10 +719,10 @@ function projectStatisticsDatabase(){
 			    CURRENT_EPOCH=$(date +%s)
 			    if [ $CURRENT_EPOCH -gt $(date -d "$UPDATE_TIME" +%s) ]; then
 				    TARGET_EPOCH=$(date -d "$UPDATE_TIME + 1 days" +%s)
-				    printf "\n\t\e[1m\e[38;5;147mEntering sleeping mode. Performing next update at \e[38;5;86m$(date -d "$UPDATE_TIME + 1 days")\e[0m\n\n"
+				    printf "\t\e[1m\e[38;5;147mEntering sleeping mode. Performing next update on \e[38;5;86m$(date -d "$UPDATE_TIME + 1 days" +"%d.%m.%Y \e[38;5;147mat\e[38;5;86m %H:%M")\e[0m\n\n"
 			    else
 				    TARGET_EPOCH=$(date -d "$UPDATE_TIME" +%s)
-				    printf "\n\t\e[1m\e[38;5;147mEntering sleeping mode. Performing next update at \e[38;5;86m$(date -d "$UPDATE_TIME")\e[0m\n\n"
+				    printf "\t\e[1m\e[38;5;147mEntering sleeping mode. Performing next update today at \e[38;5;86m$(date -d "$UPDATE_TIME" +"%H:%M")\e[0m\n\n"
 			    fi
 			    SLEEP_SECONDS=$(( $TARGET_EPOCH - $CURRENT_EPOCH ))
 			    sleep $SLEEP_SECONDS
@@ -782,7 +781,7 @@ function projectStatisticsDatabase(){
 	        rm $TEMPORARY_FILE_WITH_DIRECTORIES
 
 	        if [ "$SLEEP_TIME" != "" ]; then 
-                printf "\n\t\e[1m\e[38;5;147mSleeping \e[38;5;86m$SLEEP_TIME\e[38;5;147m starting on $(date +%d.%m.%Y) at $(date +%H:%M:%S)\e[0m\n\n"
+                printf "\n\t\e[1m\e[38;5;147mSleeping \e[38;5;86m$SLEEP_TIME\e[38;5;147m starting on $(date +"%d.%m.%Y at %H:%M:%S")\e[0m\n\n"
 	            sleep $SLEEP_TIME 
 	        fi
 
@@ -797,7 +796,7 @@ function projectStatisticsDatabase(){
 
     if [ $REPORT = "TRUE" ]; then
 
-        printf "\t\t\t  \e[95m\e[4mAUTOMATIC REPORT FROM DATABASE (status on \e[1m$(date -r $PROJECT_DATABASE_FILE +"%d.%m.%Y")\e[21m at \e[1m$(date -r $PROJECT_DATABASE_FILE +"%H:%M")\e[21m)\n\n\e[0m"
+        printf "\t\t\t  \e[95m\e[4mAUTOMATIC REPORT FROM DATABASE (status on \e[1m$(date -r $PROJECT_DATABASE_FILE +"%d.%m.%Y\e[21m at \e[1m%H:%M")\e[21m)\n\n\e[0m"
 
         awk --posix -v betaColorColumn="$((${COLUMNS[betaC]} -1 ))" \
             -v trajNoColorColumn="$((${COLUMNS[trajNoC]} -1 ))" \
@@ -1004,14 +1003,14 @@ if(criticalSituation ==1){exit 1}else{exit 0}
         awk --posix -v columnToFilter="$COLUMN_TO_FILTER" -v valueToMatch="$VALUE_TO_MATCH" '$columnToFilter == valueToMatch{print $0}' $PROJECT_DATABASE_FILE >> $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE
 
         if [ $(wc -l < $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE) -eq 0 ]; then
-            printf " \e[38;5;202m $SIMULATION not found in database (last update ended on \e[1m$(date -r $PROJECT_DATABASE_FILE +"%d.%m.%Y")\e[21m at \e[1m$(date -r $PROJECT_DATABASE_FILE +"%H:%M")\e[21m).\n\e[0m"
+            printf " \e[38;5;202m $SIMULATION not found in database (last update ended on \e[1m$(date -r $PROJECT_DATABASE_FILE +"%d.%m.%Y\e[21m at \e[1m%H:%M")\e[21m).\n\n\e[0m"
         else
             __static__DisplayDatabaseFile $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE
+            printf "\n Last update ended on \e[1m$(date -r $PROJECT_DATABASE_FILE +"%d.%m.%Y\e[21m at \e[1m%H:%M")\e[21m  \e[38;5;202m--->\e[38;5;207m  $PROJECT_DATABASE_FILE\n\n\e[0m"
         fi
         
         rm $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE
 
-        echo ''
     fi
 
 }
