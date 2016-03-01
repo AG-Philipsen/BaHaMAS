@@ -15,32 +15,35 @@ function projectStatisticsDatabase(){
 local FILENAME_GIVEN_AS_INPUT=""
 local CURRENT_DIRECTORY=$(pwd)
 
-MU_C=$((2*1)) 
-K_C=$((2*2)) 
-NT_C=$((2*3)) 
-NS_C=$((2*4)) 
-BETA_C=$((2*5)) 
-TRAJNO_C=$((2*6)) 
-ACCRATE_C=$((2*7)) 
-STATUS_C=$((2*8)) 
-LASTTRAJ_C=$((2*9))
+NF_C=$((2*1))
+MU_C=$((2*2)) 
+K_C=$((2*3)) 
+NT_C=$((2*4)) 
+NS_C=$((2*5)) 
+BETA_C=$((2*6)) 
+TRAJNO_C=$((2*7)) 
+ACCRATE_C=$((2*8)) 
+ACCRATE_LAST1K_C=$((2*9)) 
+STATUS_C=$((2*10)) 
+LASTTRAJ_C=$((2*11))
 
-declare -A COLUMNS=( [muC]=$MU_C [kC]=$K_C [ntC]=$NT_C [nsC]=$NS_C [betaC]=$BETA_C [trajNoC]=$TRAJNO_C [accRateC]=$ACCRATE_C [statusC]=$STATUS_C [lastTrajC]=$LASTTRAJ_C )
+declare -A COLUMNS=( [nfC]=$NF_C [muC]=$MU_C [kC]=$K_C [ntC]=$NT_C [nsC]=$NS_C [betaC]=$BETA_C [trajNoC]=$TRAJNO_C [accRateC]=$ACCRATE_C [accRateLast1KC]=$ACCRATE_LAST1K_C \
+                     [statusC]=$STATUS_C [lastTrajC]=$LASTTRAJ_C )
 
 #FSNA = FORMAT_SPECIFIER_NUMBER_ARRAY
-declare -A FSNA=( [nfC]="6" [muC]="7" [kC]="8" [ntC]="6" [nsC]="6" [betaC]="19" [trajNoC]="11" [accRateC]="8" [statusC]="13" [lastTrajC]="11" )
+declare -A FSNA=( [nfC]="6" [muC]="7" [kC]="8" [ntC]="6" [nsC]="6" [betaC]="19" [trajNoC]="11" [accRateC]="8" [accRateLast1KC]="12" [statusC]="13" [lastTrajC]="11" )
 
 declare -A PRINTF_FORMAT_SPECIFIER_ARRAY=( [nfC]="%+${FSNA[nfC]}s" [muC]="%+${FSNA[muC]}s" [kC]="%+${FSNA[kC]}s" [ntC]="%${FSNA[ntC]}d" [nsC]="%${FSNA[nsC]}d" [betaC]="%+${FSNA[betaC]}s" \
-											[trajNoC]="%${FSNA[trajNoC]}d" [accRateC]="%+${FSNA[accRateC]}s" [statusC]="%+${FSNA[statusC]}s" [lastTrajC]="%+${FSNA[lastTrajC]}s" )
+											[trajNoC]="%${FSNA[trajNoC]}d" [accRateC]="%+${FSNA[accRateC]}s" [accRateLast1KC]="%+${FSNA[accRateLast1KC]}s" [statusC]="%+${FSNA[statusC]}s" [lastTrajC]="%+${FSNA[lastTrajC]}s" )
 
 declare -A HEADER_PRINTF_FORMAT_SPECIFIER_ARRAY=( [nfC]="%+$((${FSNA[nfC]}+1))s" [muC]="%+$((${FSNA[muC]}+1))s" [kC]="%+$((${FSNA[kC]}+1))s" [ntC]="%+$((${FSNA[ntC]}+1))s" [nsC]="%+$((${FSNA[nsC]}+1))s" [betaC]="%+$((${FSNA[betaC]}+1))s" \
-                                                  [trajNoC]="%+$((${FSNA[trajNoC]}+1))s" [accRateC]="%+$((${FSNA[accRateC]}+1))s" [statusC]="%+$((${FSNA[statusC]}+1))s" [lastTrajC]="%+$((${FSNA[lastTrajC]}+1))s" )
+                                                  [trajNoC]="%+$((${FSNA[trajNoC]}+1))s" [accRateC]="%+$((${FSNA[accRateC]}+1))s" [accRateLast1KC]="%+$((${FSNA[accRateLast1KC]}+1))s" [statusC]="%+$((${FSNA[statusC]}+1))s" [lastTrajC]="%+$((${FSNA[lastTrajC]}+1))s" )
 
 [ $WILSON = "TRUE" ] && MASS_PARAMETER="kappa"
 [ $STAGGERED = "TRUE" ] && MASS_PARAMETER="mass"
 
 declare -A HEADER_PRINTF_PARAMETER_ARRAY=( [nfC]="nf" [muC]=$CHEMPOT_PREFIX [kC]=$MASS_PARAMETER [ntC]=$NTIME_PREFIX [nsC]=$NSPACE_PREFIX [betaC]="beta_chain_type" [trajNoC]="trajNo" \
-											[accRateC]="acc" [statusC]="status" [lastTrajC]="l.T.[s]" )
+											[accRateC]="acc" [accRateLast1KC]="accLast1K" [statusC]="status" [lastTrajC]="l.T.[s]" )
 
 declare -a NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=()
 
@@ -73,6 +76,7 @@ local FILTER_BETA="FALSE"
 local FILTER_TYPE="FALSE"
 local FILTER_TRAJNO="FALSE"	
 local FILTER_ACCRATE="FALSE"	
+local FILTER_ACCRATE_LAST1K="FALSE"	
 local FILTER_STATUS="FALSE"	
 local FILTER_LASTTRAJ="FALSE"
 local UPDATE_WITH_FREQUENCY="FALSE"
@@ -91,6 +95,9 @@ local TRAJ_HIGH_VALUE=""
 
 local ACCRATE_LOW_VALUE=""
 local ACCRATE_HIGH_VALUE=""
+
+local ACCRATE_LAST1K_LOW_VALUE=""
+local ACCRATE_LAST1K_HIGH_VALUE=""
 
 local LAST_TRAJ_TIME=""
 
@@ -150,6 +157,10 @@ while [ $# -gt 0 ]; do
 						;;
 					acc)
 						NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER+=( accRateC )
+						shift
+						;;
+					accLast1k)
+						NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER+=( accRateLast1KC )
 						shift
 						;;
 					status)
@@ -280,6 +291,16 @@ while [ $# -gt 0 ]; do
 			done
 			[ "$ACCRATE_LOW_VALUE" = "" ] && [ "$ACCRATE_HIGH_VALUE" = "" ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
 			;;
+		--accLast1K)
+            DISPLAY="TRUE"
+			FILTER_ACCRATE_LAST1K="TRUE"
+			while [[ $2 =~ ^[\>|\<][[:digit:]]+\.[[:digit:]]+ ]];do
+				[[ $2 =~ ^\>[[:digit:]]+ ]] && ACCRATE_LAST1K_LOW_VALUE=${2#\>*}
+				[[ $2 =~ ^\<[[:digit:]]+ ]] && ACCRATE_LAST1K_HIGH_VALUE=${2#\<*}
+				shift
+			done
+			[ "$ACCRATE_LAST1K_LOW_VALUE" = "" ] && [ "$ACCRATE_LAST1K_HIGH_VALUE" = "" ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
+			;;
 		--status)
             DISPLAY="TRUE"
 			FILTER_STATUS="TRUE"	
@@ -318,8 +339,10 @@ while [ $# -gt 0 ]; do
 				SLEEP_TIME=$2
 				shift
 			fi
-			if [[ $2 =~ ^[[:digit:]]{1,2}$ ]]; then
-				[ "$2" -gt 23 ] && 	printf "\n\e[91m For the update at a specific time option only full hours < 24 are allowed! Exiting...\e[0m\n\n" && return
+			if [[ $2 =~ ^[[:digit:]]{1,2}(:[[:digit:]]{1,2}(:[[:digit:]]{1,2})?)?$ ]]; then
+				[ "$(awk '{split($0,hms,":"); print hms[1]}' <<< "$2")" -ge 24 ] && 	printf "\n\e[91m For the update at a specific time option only hours < 24, minutes < 60 and seconds < 60 are allowed! Exiting...\e[0m\n\n" && return
+				[ "$(awk '{split($0,hms,":"); print hms[2]}' <<< "$2")" != "" ] && [ "$(awk '{split($0,hms,":"); print hms[2]}' <<< "$2")" -ge 60 ] && 	printf "\n\e[91m For the update at a specific time option only hours < 24, minutes < 60 and seconds < 60 are allowed! Exiting...\e[0m\n\n" && return
+				[ "$(awk '{split($0,hms,":"); print hms[3]}' <<< "$2")" != "" ] && [ "$(awk '{split($0,hms,":"); print hms[3]}' <<< "$2")" -ge 60 ] && 	printf "\n\e[91m For the update at a specific time option only hours < 24, minutes < 60 and seconds < 60 are allowed! Exiting...\e[0m\n\n" && return
 				UPDATE_TIME=$2
 				shift
 			fi
@@ -421,6 +444,7 @@ while [ $# -gt 0 ]; do
 	shift
 done
 
+
 [ $UPDATE = "FALSE" ] && [ $REPORT = "FALSE" ] && [ $SHOW = "FALSE" ] && DISPLAY="TRUE"
 
 local MUTUALLY_EXCLUSIVE_OPTIONS_PASSED=0
@@ -438,7 +462,7 @@ echo ''
 # Then it has to be initialized accordingly!
 if [ "$UPDATE" = "FALSE" ]; then
     if [ "$FILENAME_GIVEN_AS_INPUT" = "" ]; then
-	    LATEST_DATABASE_FILE=$(ls $PROJECT_DATABASE_DIRECTORY | grep -E [[:digit:]]{2}_[[:digit:]]{2}_[[:digit:]]{2}_$PROJECT_DATABASE_FILENAME | sort -t "_" -k 3,3 -k 2,2 -k 1,1 | tail -n1)
+	    LATEST_DATABASE_FILE=$(ls $PROJECT_DATABASE_DIRECTORY | grep -E [[:digit:]]{2}_[[:digit:]]{2}_[[:digit:]]{2}_$PROJECT_DATABASE_FILENAME | sort -t "_" -k 1,1 -k 2,2 -k 3,3 | tail -n1)
 	    [ "$LATEST_DATABASE_FILE" = "" ] && printf "\n\e[91m No older database versions found! Exiting...\e[0m\n\n" && return
         local PROJECT_DATABASE_FILE=$PROJECT_DATABASE_DIRECTORY/$LATEST_DATABASE_FILE
     else
@@ -456,7 +480,7 @@ else
         fi
         local FILE_WITH_DIRECTORIES=$FILENAME_GIVEN_AS_INPUT
     fi
-    local PROJECT_DATABASE_FILE=$PROJECT_DATABASE_DIRECTORY/$(date +%d_%m_%y)_$PROJECT_DATABASE_FILENAME
+    local PROJECT_DATABASE_FILE=$PROJECT_DATABASE_DIRECTORY/$(date +%Y_%m_%d)_$PROJECT_DATABASE_FILENAME
 fi
 
 
@@ -478,10 +502,12 @@ if [ $DISPLAY = "TRUE" ]; then
 	[ "$FILTER_ACCRATE" = "TRUE" ] && [ "$ACCRATE_LOW_VALUE" = "" ]  && ACCRATE_LOW_VALUE=0.0
 	[ "$FILTER_ACCRATE" = "TRUE" ] && [ "$ACCRATE_HIGH_VALUE" = "" ]  && ACCRATE_HIGH_VALUE=100.00
 
+	[ "$FILTER_ACCRATE_LAST1K" = "TRUE" ] && [ "$ACCRATE_LAST1K_LOW_VALUE" = "" ]  && ACCRATE_LAST1K_LOW_VALUE=0.0
+	[ "$FILTER_ACCRATE_LAST1K" = "TRUE" ] && [ "$ACCRATE__LAST1KHIGH_VALUE" = "" ]  && ACCRATE_LAST1K_HIGH_VALUE=100.00
 
 
 	if [ "$CUSTOMIZE_COLUMNS" = "FALSE" ]; then
-		NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=( nfC muC kC ntC nsC betaC trajNoC accRateC statusC lastTrajC )
+		NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=( nfC muC kC ntC nsC betaC trajNoC accRateC accRateLast1KC statusC lastTrajC )
 	fi
 
 	for NAME_OF_COLUMN in ${!COLUMNS[@]}; do
@@ -512,12 +538,12 @@ if [ $DISPLAY = "TRUE" ]; then
 
 	awk --posix -v filterNf=$FILTER_NF -v filterMu=$FILTER_MU -v filterKappa=$FILTER_KAPPA -v filterNt=$FILTER_NT -v filterNs=$FILTER_NS \
 				-v filterBeta=$FILTER_BETA -v filterType=$FILTER_TYPE \
-				-v filterTrajNo=$FILTER_TRAJNO -v filterAccRate=$FILTER_ACCRATE -v filterStatus=$FILTER_STATUS -v filterLastTrajTime=$FILTER_LASTTRAJ \
+				-v filterTrajNo=$FILTER_TRAJNO -v filterAccRate=$FILTER_ACCRATE -v filterAccRateLast1K=$FILTER_ACCRATE_LAST1K -v filterStatus=$FILTER_STATUS -v filterLastTrajTime=$FILTER_LASTTRAJ \
 				-v statisticsSummary=$STATISTICS_SUMMARY \
 				-v nfString="$NF_STRING" -v muString="$MU_STRING" -v kappaString="$KAPPA_STRING" -v nsString="$NS_STRING" -v ntString="$NT_STRING" -v betaString="$BETA_STRING" \
 				-v typeString=$TYPE_STRING -v statusString="$STATUS_STRING" \
-				-v trajLowValue=$TRAJ_LOW_VALUE -v trajHighValue=$TRAJ_HIGH_VALUE -v accRateLowValue=$ACCRATE_LOW_VALUE \
-				-v accRateHighValue=$ACCRATE_HIGH_VALUE -v lastTrajTime=$LAST_TRAJ_TIME \
+				-v trajLowValue=$TRAJ_LOW_VALUE -v trajHighValue=$TRAJ_HIGH_VALUE -v accRateLowValue=$ACCRATE_LOW_VALUE -v accRateHighValue=$ACCRATE_HIGH_VALUE \
+				-v accRateLast1KLowValue=$ACCRATE_LAST1K_LOW_VALUE -v accRateLast1KHighValue=$ACCRATE_LAST1K_HIGH_VALUE -v lastTrajTime=$LAST_TRAJ_TIME \
 				-v nameOfColumnsAndNumberOfColumnsString=$NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL \
 				-v nameOfDisplayedColumnsAndnrOfDisplayedColumnsString=$NAME_OF_COLUMN_NR_OF_COLUMN_STRING \
 				-v nameOfDisplayedColumnsAndSpecOfColumnsString=$NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING \
@@ -586,6 +612,9 @@ if [ $DISPLAY = "TRUE" ]; then
 
 					 filterAccRate == "TRUE" {if(length(accRateLowValue) == 0 ? "0" : accRateLowValue > $(columnNameColumnNumber["accRateC"])){critFailedCounter--;}}
 					 filterAccRate == "TRUE" {if(length(accRateHighValue) == 0 ? "100.00" : accRateHighValue < $(columnNameColumnNumber["accRateC"])){critFailedCounter--;}}
+
+					 filterAccRateLast1K == "TRUE" {if(length(accRateLast1KLowValue) == 0 ? "0" : accRateLast1KLowValue > $(columnNameColumnNumber["accRateLast1KC"])){critFailedCounter--;}}
+					 filterAccRateLast1K == "TRUE" {if(length(accRateLast1KHighValue) == 0 ? "100.00" : accRateLast1KHighValue < $(columnNameColumnNumber["accRateLast1KC"])){critFailedCounter--;}}
 
 					 filterLastTrajTime == "TRUE" {if(lastTrajTime > $(columnNameColumnNumber["lastTrajC"]) || $(columnNameColumnNumber["lastTrajC"]) == "------"){critFailedCounter--;}}
 					 
@@ -674,13 +703,6 @@ if [ $UPDATE = "TRUE" ]; then
 		printf "\n\e[91m  Values for both, sleep time and update time are specified but are mutually exclusive. Please investigate! Exiting...\e[0m\n\n" && return
 	fi
 
-	if [ "$UPDATE_TIME" != "" ]; then
-	    CURRENT_EPOCH=$(date +%s)
-	    TARGET_EPOCH=$(date -d "$UPDATE_TIME + 1 days" +%s)
-	    SLEEP_SECONDS=$(( $TARGET_EPOCH - $CURRENT_EPOCH ))
-	    sleep $SLEEP_SECONDS
-	fi
-
     local TEMPORARY_FILE_WITH_DIRECTORIES="${PROJECT_DATABASE_DIRECTORY}/temporaryFileWithDirectoriesForDatabaseUpdate.dat"
     rm -f $TEMPORARY_FILE_WITH_DIRECTORIES
     local TEMPORARY_DATABASE_FILE="${PROJECT_DATABASE_DIRECTORY}/temporaryDatabaseForUpdate.dat"
@@ -697,8 +719,21 @@ if [ $UPDATE = "TRUE" ]; then
 	    [ "$FILE_WITH_DIRECTORIES" = "" ] && find $HOME_DIR/$SIMULATION_PATH -regextype grep -regex "$REGEX_STRING" > $TEMPORARY_FILE_WITH_DIRECTORIES
 	    [ "$FILE_WITH_DIRECTORIES" != "" ] && cat $FILE_WITH_DIRECTORIES > $TEMPORARY_FILE_WITH_DIRECTORIES
 
-	    while read line
-	    do
+		if [ "$UPDATE_TIME" != "" ]; then
+			CURRENT_EPOCH=$(date +%s)
+			if [ $CURRENT_EPOCH -gt $(date -d "$UPDATE_TIME" +%s) ]; then
+				TARGET_EPOCH=$(date -d "$UPDATE_TIME + 1 days" +%s)
+				printf "\n\t\e[1m\e[38;5;147mEntering sleeping mode. Performing next update at \e[38;5;86m$(date -d "$UPDATE_TIME + 1 days")\e[0m\n\n"
+			else
+				TARGET_EPOCH=$(date -d "$UPDATE_TIME" +%s)
+				printf "\n\t\e[1m\e[38;5;147mEntering sleeping mode. Performing next update at \e[38;5;86m$(date -d "$UPDATE_TIME")\e[0m\n\n"
+			fi
+			SLEEP_SECONDS=$(( $TARGET_EPOCH - $CURRENT_EPOCH ))
+			sleep $SLEEP_SECONDS
+		fi
+
+		while read line
+		do
 			#printf "%+15s: %s\n" "line" "$line"
 	        if [[ "$line" =~ ^[^#] ]]; then 
 		        PARAMS=( $(echo $line | awk 'BEGIN{FS="/"}{print $(NF-3) " " $(NF-2) " " $(NF-1) " " $(NF)}') )
@@ -722,7 +757,7 @@ if [ $UPDATE = "TRUE" ]; then
 		        sed -r 's/(\x1B\[.{1,2};.{1,2}m)(.)/\1 \2/g' |
 	            awk --posix -v mu=${PARAMS[0]#mui*} -v k=${PARAMS[1]#$KAPPA_PREFIX*} -v nt=${PARAMS[2]#nt*} -v ns=${PARAMS[3]#*ns} '
 							$3 ~ /^[[:digit:]]\.[[:digit:]]{4}/{
-								print "\033[36m " nf " \033[36m " mu " \033[36m " k " \033[36m " nt " \033[36m " ns " " $(3-1) " " $3 " " $(5-1) " " $5 " " $(8-1) " " $8 " " $(15-1) " " $15 " " $(19-1) " " $19 " " "\033[0m"
+								print "\033[36m " nf " \033[36m " mu " \033[36m " k " \033[36m " nt " \033[36m " ns " " $(3-1) " " $3 " " $(5-1) " " $5 " " $(8-1) " " $8 " " $(11-1) " " $(11) " " $(15-1) " " $15 " " $(19-1) " " $19 " " "\033[0m"
 							}
 						' >> $TEMPORARY_DATABASE_FILE
 
@@ -737,6 +772,8 @@ if [ $UPDATE = "TRUE" ]; then
             return
         fi
 
+		#Updating the content of PROJECT_DATABASE_FILE
+		local PROJECT_DATABASE_FILE=$PROJECT_DATABASE_DIRECTORY/$(date +%Y_%m_%d)_$PROJECT_DATABASE_FILENAME
 	    cp $TEMPORARY_DATABASE_FILE $PROJECT_DATABASE_FILE
 
 	    #Clean up
@@ -748,12 +785,7 @@ if [ $UPDATE = "TRUE" ]; then
 	        sleep $SLEEP_TIME 
 	    fi
 
-	    if [ "$UPDATE_TIME" != "" ]; then 
-            printf "\n\t\e[1m\e[38;5;147mEntering sleeping mode. Performing next update at \e[38;5;86m$(date -d "$UPDATE_TIME + 1 days")\e[0m\n\n"
-	        sleep $SLEEP_TIME 
-	    fi
-
-		if ["$SLEEP_TIME" = "" ] && [ "$UPDATE_TIME" = "" ]; then
+		if [ "$SLEEP_TIME" = "" ] && [ "$UPDATE_TIME" = "" ]; then
 			break
 		fi
     done
@@ -940,7 +972,7 @@ fi
 function __static__DisplayDatabaseFile() {
 
 	if [ "$CUSTOMIZE_COLUMNS" = "FALSE" ]; then
-		NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=( muC kC ntC nsC betaC trajNoC accRateC statusC lastTrajC )
+		NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=( nfC muC kC ntC nsC betaC trajNoC accRateC accRateLast1KC statusC lastTrajC )
 	fi
 
 	for NAME_OF_COLUMN in ${!COLUMNS[@]}; do
