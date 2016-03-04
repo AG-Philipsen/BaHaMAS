@@ -56,30 +56,21 @@ function __static__ExtractPostfixFromJOBNAME(){
 
 function __static__ExtractMetaInformationFromJOBNAME(){
     local METAINFORMATION_ARRAY=()
-    local JOBID_ARRAY=( $(squeue | awk -v username="$(whoami)" 'NR>1{if($4 == username){print $1}}') )
-    for JOBID in ${JOBID_ARRAY[@]}; do
-        local JOBNAME=$(scontrol show job $JOBID | grep "Name=" | sed "s/^.*Name=\(.*$\)/\1/")
-        local JOBNAME_NFLAVOUR=$(__static__ExtractParameterFromJOBNAME $NFLAVOUR_PREFIX)
-        local JOBNAME_CHEMPOT=$(__static__ExtractParameterFromJOBNAME $CHEMPOT_PREFIX)
-        local JOBNAME_NTIME=$(__static__ExtractParameterFromJOBNAME $NTIME_PREFIX)
-        local JOBNAME_NSPACE=$(__static__ExtractParameterFromJOBNAME $NSPACE_PREFIX)
-        local JOBNAME_KAPPA=$(__static__ExtractParameterFromJOBNAME $KAPPA_PREFIX)
+    local JOBINFO_STRING="$(squeue --noheader -u $(whoami) -o "%j@%T")" #here JOBINFO_STRING contains spaces at the end of the line
+    
+    for VALUE in $JOBINFO_STRING; do #here I use the fact that JOBINFO_STRING has spaces to split it (IMPORTANT missing quotes)
+        local JOBNAME=${VALUE%@*}
+        local JOB_STATUS=${VALUE#*@}
         local JOBNAME_BETAS=( $(__static__ExtractBetasFromJOBNAME) )
         local JOBNAME_POSTFIX=$(__static__ExtractPostfixFromJOBNAME)
-        local JOB_STATUS=$(scontrol show job $JOBID | grep "^[[:blank:]]*JobState=" | sed "s/^.*JobState=\([[:alpha:]]*\).*$/\1/")
-        #Retrieved the information add an unique string to array of meta information
-        local JOB_PARAMETERS_VALUE=([$NFLAVOUR_POSITION]=$JOBNAME_NFLAVOUR [$CHEMPOT_POSITION]=$JOBNAME_CHEMPOT [$KAPPA_POSITION]=$JOBNAME_KAPPA [$NTIME_POSITION]=$JOBNAME_NTIME [$NSPACE_POSITION]=$JOBNAME_NSPACE)
-        local JOB_PARAMETERS_STRING=""
-        for INDEX in "${!PARAMETER_PREFIXES[@]}"; do
-            JOB_PARAMETERS_STRING="$JOB_PARAMETERS_STRING${PARAMETER_PREFIXES[$INDEX]}${JOB_PARAMETERS_VALUE[$INDEX]}_"
-        done && unset -v 'INDEX'
-        JOB_PARAMETERS_STRING=${JOB_PARAMETERS_STRING%?} #Remove last underscore
+        local JOB_PARAMETERS_STRING="${JOBNAME%%__*}"
         #If JOB_PARAMETERS_STRING is not at the beginning of the jobname, skip job
         [ $(echo "$JOBNAME" | grep "^${JOB_PARAMETERS_STRING}" | wc -l) -eq 0 ] && continue
         #If the status is COMPLETING, skip job
         [ $JOB_STATUS == "COMPLETING" ] && continue
         METAINFORMATION_ARRAY+=( $(echo "${JOB_PARAMETERS_STRING} | $( echo "${JOBNAME_BETAS[@]}" | sed 's/ /_/g') | postfix=${JOBNAME_POSTFIX} | ${JOB_STATUS}" | sed 's/ //g') )
-    done
+    done && unset -v 'VALUE'
+
     echo "${METAINFORMATION_ARRAY[@]}"
 }
 
@@ -125,14 +116,14 @@ function ListJobStatus_Loewe(){
 
 	    local POSTFIX_FROM_FOLDER=$(echo ${BETA##*_} | grep -o "[[:alpha:]]\+\$")
 
-	    local STATUS=( )
-	    for JOB_MATCHING in $(echo ${JOB_METAINFORMATION_ARRAY[@]} | sed 's/ /\n/g' | grep "${LOCAL_PARAMETERS_STRING}" | grep "${BETA_PREFIX}${BETA%_*}" | grep "postfix=${POSTFIX_FROM_FOLDER}|"); do
-	        STATUS+=( "${JOB_MATCHING##*|}" )
-	    done
+        local STATUS=( $(sed 's/ /\n/g' <<< "${JOB_METAINFORMATION_ARRAY[@]}" | grep "${LOCAL_PARAMETERS_STRING}" | grep "${BETA_PREFIX}${BETA%_*}" | grep "postfix=${POSTFIX_FROM_FOLDER}|" | cut -d'|' -f4) )
+
 	    if [ ${#STATUS[@]} -eq 0 ]; then
 	        [ $LISTSTATUS_SHOW_ONLY_QUEUED = "TRUE" ] && continue
 	        STATUS="notQueued"
-	    elif [ ${#STATUS[@]} -ne 1 ]; then
+        elif [ ${#STATUS[@]} -eq 1 ]; then
+            STATUS=${STATUS[0]}
+	    else
 	        printf "\n \e[1;37;41mWARNING:\e[0;31m \e[1mThere are more than one job with ${LOCAL_PARAMETERS_STRING} and BETA=$BETA as parameters! CHECK!!! Aborting...\n\n\e[0m\n"
 	        exit -1
 	    fi

@@ -85,29 +85,25 @@ function ProcessBetaValuesForSubmitOnly_Loewe() {
 
 #=======================================================================================================================#
 
-function __static__CheckIfJobIsInQueue_Loewe(){
-    local JOBID_ARRAY=( $(squeue | awk -v username="$(whoami)" 'NR>1{if($4 == username){print $1}}') )
-    for JOBID in ${JOBID_ARRAY[@]}; do
-        local GREPPED_JOBNAME=$(scontrol show job  $JOBID | grep "Name=" | sed "s/^.*Name=\(.*$\)/\1/") 
-        local JOBSTATUS=$(scontrol show job $JOBID | grep "^[[:blank:]]*JobState=" | sed "s/^.*JobState=\([[:alpha:]]*\)[[:blank:]].*$/\1/")
+function __static__GetStatusOfJobsContainingBetavalues_Loewe(){
+    local JOBINFO_STRING="$(squeue --noheader -u $(whoami) -o "%i@%j@%T")"
+    for BETA in ${BETAVALUES[@]}; do
+        STATUS_OF_JOBS_CONTAINING_BETA_VALUES["$BETA"]="$(grep "$BETA_PREFIX${BETA%%_*}" <<< "$JOBINFO_STRING" | grep $(cut -d'_' -f2 <<< "$BETA") | grep "$PARAMETERS_STRING")"
+    done
+}
 
-        #if [[ ! $GREPPED_JOBNAME =~ b[[:digit:]]{1}[.]{1}[[:digit:]]{4}$ ]]; then
-        #    continue
-        #fi
-
-        if [ $(echo $GREPPED_JOBNAME | grep -o "$BETA_PREFIX${BETA%%_*}" | wc -l) -ne 0 ] && 
-           [ $(echo $GREPPED_JOBNAME | grep -o "$(echo $BETA | awk '{split($1, res, "_"); print res[2]}')" | wc -l) -ne 0 ] && 
-           [ $(echo $GREPPED_JOBNAME | grep -o "$PARAMETERS_STRING" | wc -l) -ne 0 ]; then
-
-            if [ "$JOBSTATUS" != "RUNNING" ] && [ "$JOBSTATUS" != "PENDING" ]; then
-                continue;
-            fi
+function __static__CheckIfJobIsInQueueForGivenBeta_Loewe(){
+    if [ "${STATUS_OF_JOBS_CONTAINING_BETA_VALUES[$1]}" = "" ]; then
+        return 1
+    else
+        if [ $(grep -c "\(RUNNING\|PENDING\)" <<< "${STATUS_OF_JOBS_CONTAINING_BETA_VALUES[$1]}") -gt 0 ]; then
             printf "\e[0;31m Job with name $JOBNAME seems to be already running with id $JOBID.\n"
             printf " Job cannot be continued...\n\n\e[0m"
             return 0
+        else
+            return 1
         fi
-    done
-    return 1
+    fi
 }
 
 #This function must be called with 3 parameters: filename (global path), string to be found, replace string
@@ -174,6 +170,10 @@ function ProcessBetaValuesForContinue_Loewe() {
         fi
     done
 
+    #Associative array filled in the function called immediately after
+    declare -A STATUS_OF_JOBS_CONTAINING_BETA_VALUES
+    __static__GetStatusOfJobsContainingBetavalues_Loewe
+    
     for BETA in ${BETAVALUES[@]}; do
         #-------------------------------------------------------------------------#
         local WORK_BETADIRECTORY="$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
@@ -204,7 +204,7 @@ function ProcessBetaValuesForContinue_Loewe() {
         fi
 
         echo ""
-        __static__CheckIfJobIsInQueue_Loewe
+        __static__CheckIfJobIsInQueueForGivenBeta_Loewe $BETA
         if [ $? == 0 ]; then
             PROBLEM_BETA_ARRAY+=( $BETA )
             continue
@@ -214,7 +214,7 @@ function ProcessBetaValuesForContinue_Loewe() {
         if KeyInArray $BETA CONTINUE_RESUMETRAJ_ARRAY; then
             #If the user wishes to resume from the last avialable trajectory, then find here which number is "last"
             if [ ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} = "last" ]; then
-                CONTINUE_RESUMETRAJ_ARRAY[$BETA]=$(ls $WORK_BETADIRECTORY/conf.* | grep -o "/conf.[[:digit:]]\+$" | grep -o "[[:digit:]]\+" | sort -n | tail -n1 | sed 's/^0*//')
+                CONTINUE_RESUMETRAJ_ARRAY[$BETA]=$(ls $WORK_BETADIRECTORY/conf.* | grep -o "[[:digit:]]\+$" | sort -n | tail -n1 | sed 's/^0*//')
                 if [[ ! ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} =~ ^[[:digit:]]+$ ]]; then
                     printf "\e[0;31m Unable to find last configuration for resumefrom! Leaving out beta = $BETA .\n\n\e[0m"
                     PROBLEM_BETA_ARRAY+=( $BETA )
