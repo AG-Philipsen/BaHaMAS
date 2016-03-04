@@ -103,6 +103,7 @@ done
 ParseCommandLineOptions $@
 
 #Get information via squeue and in case filter jobs -> ATTENTION: Double quoting here is CRUCIAL (to respect endlines)!!
+#NOTE: It seems that the sacct command can give a similar result, but at the moment there is no analog to the %Z field.
 if [ $DISPLAY_ALL_JOBS = 'TRUE' ]; then
     SQUEUE_OUTPUT="$(squeue --noheader -p $CLUSTER_PARTITION -o ${SQUEUE_FORMAT_CODE_STRING:1} 2>/dev/null)"
 else
