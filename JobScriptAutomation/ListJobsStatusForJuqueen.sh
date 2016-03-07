@@ -62,8 +62,8 @@ function __static__ListJobsStatus_local(){
 
 	printf "\n\e[0;36m==================================================================================================\n\e[0m"
 
-	printf "\n\e[0;34m%s  %s  %s\n" $KAPPA_PREFIX$KAPPA $NTIME_PREFIX$NTIME $NSPACE_PREFIX$NSPACE 
-	printf "\n      %s  %s  %s\n" $KAPPA_PREFIX$KAPPA $NTIME_PREFIX$NTIME $NSPACE_PREFIX$NSPACE >> $JOBS_STATUS_FILE
+	printf "\n\e[0;34m%s  %s  %s\n" $MASS_PREFIX$MASS $NTIME_PREFIX$NTIME $NSPACE_PREFIX$NSPACE 
+	printf "\n      %s  %s  %s\n" $MASS_PREFIX$MASS $NTIME_PREFIX$NTIME $NSPACE_PREFIX$NSPACE >> $JOBS_STATUS_FILE
 	printf "\n  Beta Total /  Done  Acc int0/1    Status Sub. Nr /    First /     Last\n\e[0m"
 	printf "  	Beta Total /  Done  Acc int0/1    Status Sub. Nr /    First /     Last\n" >> $JOBS_STATUS_FILE
 
@@ -77,7 +77,7 @@ function __static__ListJobsStatus_local(){
 			continue;
 		fi
 
-		STATUS=$(llq -W -f %jn %st -u $(whoami) | awk '$1 ~ /^muiPiT_'$KAPPA_PREFIX$KAPPA'_'$NTIME_PREFIX$NTIME'_'$NSPACE_PREFIX$NSPACE'_'$i'$/ {print $2}') 
+		STATUS=$(llq -W -f %jn %st -u $(whoami) | awk '$1 ~ /^muiPiT_'$MASS_PREFIX$MASS'_'$NTIME_PREFIX$NTIME'_'$NSPACE_PREFIX$NSPACE'_'$i'$/ {print $2}') 
 
 		if [ ${#STATUS} -eq 0 ]; then
 			STATUS="notQueued"	
@@ -180,7 +180,7 @@ function __static__ListJobsStatus_global(){
 			WORK_DIR_WITH_BETAFOLDERS="$WORK_DIR/$SIMULATION_PATH$PARAMETERS_PATH"
 			#echo $WORK_DIR_WITH_BETAFOLDERS
 
-			JOBS_STATUS_FILE="jobs_status_"$CHEMPOT_PREFIX$CHEMPOT"_"$KAPPA_PREFIX$KAPPA"_"$NTIME_PREFIX$NTIME"_"$NSPACE_PREFIX$NSPACE".txt"
+			JOBS_STATUS_FILE="jobs_status_"$CHEMPOT_PREFIX$CHEMPOT"_"$MASS_PREFIX$MASS"_"$NTIME_PREFIX$NTIME"_"$NSPACE_PREFIX$NSPACE".txt"
 			#echo $JOBS_STATUS_FILE
 			rm -f $JOBS_STATUS_FILE
 
@@ -204,11 +204,11 @@ function __static__BuildGlobalJobStatusFile(){
 
 		LOCAL_FILE=$(find $i -regextype grep -regex $REGEX_PATH)
 
-		KAPPA_TMP=`echo $LOCAL_FILE | grep -o "$JOBS_STATUS_PREFIX.*" | grep -o "$KAPPA_PREFIX$KAPPA_REGEX"`
+		MASS_TMP=`echo $LOCAL_FILE | grep -o "$JOBS_STATUS_PREFIX.*" | grep -o "$MASS_PREFIX$MASS_REGEX"`
 		NTIME_TMP=`echo $LOCAL_FILE | grep -o "$JOBS_STATUS_PREFIX.*" | grep -o "$NTIME_PREFIX$NTIME_REGEX"`
 		NSPACE_TMP=`echo $LOCAL_FILE | grep -o "$JOBS_STATUS_PREFIX.*" | grep -o "$NSPACE_PREFIX$NSPACE_REGEX"`
 
-		#echo "$KAPPA_TMP $NTIME_TMP $NSPACE_TMP" >> "$JOBS_STATUS_FILE_GLOBAL"
+		#echo "$MASS_TMP $NTIME_TMP $NSPACE_TMP" >> "$JOBS_STATUS_FILE_GLOBAL"
 		#echo "cat $LOCAL_FILE >> $JOBS_STATUS_FILE_GLOBAL"
 		cat $LOCAL_FILE >> "$JOBS_STATUS_FILE_GLOBAL"
 		echo "" >> "$JOBS_STATUS_FILE_GLOBAL"
@@ -225,7 +225,7 @@ function ListJobStatus_Juqueen(){
     
     if [ $LISTSTATUS = "TRUE" ]; then
 
-	JOBS_STATUS_FILE="jobs_status_"$CHEMPOT_PREFIX$CHEMPOT"_"$KAPPA_PREFIX$KAPPA"_"$NTIME_PREFIX$NTIME"_"$NSPACE_PREFIX$NSPACE".txt"
+	JOBS_STATUS_FILE="jobs_status_"$CHEMPOT_PREFIX$CHEMPOT"_"$MASS_PREFIX$MASS"_"$NTIME_PREFIX$NTIME"_"$NSPACE_PREFIX$NSPACE".txt"
 	echo "NSPACE:$NSPACE"
 	echo "JOBS_STATUS_FILE: $JOBS_STATUS_FILE"
 	rm -f $JOBS_STATUS_FILE

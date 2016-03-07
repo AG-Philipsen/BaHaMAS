@@ -6,7 +6,7 @@ function ProduceSrunCommandsFileForInversionsPerBeta(){
                                                                      -v startcondition="continue" \
                                                                      -v logLevel="info" \
                                                                      -v beta="${BETA%%_*}" \
-                                                                     -v kappa="0.$KAPPA" \
+                                                                     -v kappa="0.$MASS" \
                                                                      -v corrDir="$CORRELATOR_DIRECTION" \
                                                                      -v solver="cg" \
                                                                      -v cgmax="30000" \

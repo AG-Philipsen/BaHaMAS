@@ -3,7 +3,7 @@ function ProduceInputFile_Juqueen(){
     echo '#######################################################' > $INPUTFILE_GLOBALPATH
     echo '## sample tmlqcd input file for imagMu runs on Juqueen' >> $INPUTFILE_GLOBALPATH
     echo "##beta =	$BETA	" >> $INPUTFILE_GLOBALPATH
-    echo "##kappa =	0.$KAPPA" >> $INPUTFILE_GLOBALPATH
+    echo "##kappa =	0.$MASS" >> $INPUTFILE_GLOBALPATH
     echo '##amu =	0.' >> $INPUTFILE_GLOBALPATH
     echo '##2kappamu =	0.' >> $INPUTFILE_GLOBALPATH
     echo '##apply mass preconditioning with' >> $INPUTFILE_GLOBALPATH
@@ -11,7 +11,7 @@ function ProduceInputFile_Juqueen(){
     echo '' >> $INPUTFILE_GLOBALPATH
     echo '#######################################################' >> $INPUTFILE_GLOBALPATH
     echo '## mass parameters' >> $INPUTFILE_GLOBALPATH
-    echo "kappa = 0.$KAPPA" >> $INPUTFILE_GLOBALPATH
+    echo "kappa = 0.$MASS" >> $INPUTFILE_GLOBALPATH
     echo '2KappaMu = 0.' >> $INPUTFILE_GLOBALPATH
     echo '' >> $INPUTFILE_GLOBALPATH
     echo '#######################################################' >> $INPUTFILE_GLOBALPATH
@@ -73,7 +73,7 @@ function ProduceInputFile_Juqueen(){
     echo 'BeginMonomial DET' >> $INPUTFILE_GLOBALPATH
     echo '  Timescale=1' >> $INPUTFILE_GLOBALPATH
     echo '  2KappaMu=0.' >> $INPUTFILE_GLOBALPATH
-    echo "  kappa=0.$KAPPA" >> $INPUTFILE_GLOBALPATH
+    echo "  kappa=0.$MASS" >> $INPUTFILE_GLOBALPATH
     echo '  AcceptancePrecision = 1.e-20' >> $INPUTFILE_GLOBALPATH
     echo '  ForcePrecision = 1.e-14' >> $INPUTFILE_GLOBALPATH
     echo '  Name = det' >> $INPUTFILE_GLOBALPATH
@@ -84,7 +84,7 @@ function ProduceInputFile_Juqueen(){
     echo '#  Timescale = 2' >> $INPUTFILE_GLOBALPATH
     echo '#  2KappaMu = 0.' >> $INPUTFILE_GLOBALPATH
     echo '#  2KappaMu2 = notYetUsed' >> $INPUTFILE_GLOBALPATH
-    echo "#  kappa = 0.$KAPPA" >> $INPUTFILE_GLOBALPATH
+    echo "#  kappa = 0.$MASS" >> $INPUTFILE_GLOBALPATH
     echo '#  kappa2 = 0.' >> $INPUTFILE_GLOBALPATH
     echo '#  MaxSolverIterations = 20000' >> $INPUTFILE_GLOBALPATH
     echo '#  AcceptancePrecision = 1.e-20' >> $INPUTFILE_GLOBALPATH

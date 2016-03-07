@@ -147,16 +147,16 @@ function ParseCommandLineOption(){
                 CHEMPOT_PREFIX=${1#*=}; shift ;;
             --kappa_prefix=* )
                 [ $STAGGERED = "TRUE" ] && printf "\n\e[0;31m The option --kappa_prefix can be used only in WILSON simulations! Aborting...\n\n\e[0m" && exit -1
-		        KAPPA_PREFIX=${1#*=}; shift ;;
+		        MASS_PREFIX=${1#*=}; shift ;;
 	        --mass_prefix=* )
-                [ $WILSON = "TRUE" ] && printf "\n\e[0;31m The option --kappa_prefix can be used only in STAGGERED simulations! Aborting...\n\n\e[0m" && exit -1
-                KAPPA_PREFIX=${1#*=}; shift ;;
+                [ $WILSON = "TRUE" ] && printf "\n\e[0;31m The option --mass_prefix can be used only in STAGGERED simulations! Aborting...\n\n\e[0m" && exit -1
+                MASS_PREFIX=${1#*=}; shift ;;
 	        --ntime_prefix=* )              NTIME_PREFIX=${1#*=}; shift ;;
 	        --nspace_prefix=* )             NSPACE_PREFIX=${1#*=}; shift ;;
 	        --beta_prefix=* )               BETA_PREFIX=${1#*=}; shift ;;
 	        --betasfile=* )                 BETASFILE=${1#*=}; shift ;;
 	        --chempot=* )                   CHEMPOT=${1#*=}; shift ;;
-	        --kappa=* )                     KAPPA=${1#*=}; shift ;;
+	        --kappa=* )                     MASS=${1#*=}; shift ;;
 	        -w=* | --walltime=* )
 		WALLTIME=${1#*=}
 		if [[ $WALLTIME =~ ^([[:digit:]]+[dhms])+$ ]]; then

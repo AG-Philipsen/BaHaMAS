@@ -69,7 +69,7 @@ function projectStatisticsDatabase(){
     local FILTER_SPECIFIC_DATABASE_FILE="FALSE"
 
     local FILTER_MU="FALSE"	
-    local FILTER_KAPPA="FALSE"	
+    local FILTER_MASS="FALSE"	
     local FILTER_NT="FALSE"	
     local FILTER_NS="FALSE"	
     local FILTER_BETA="FALSE"	
@@ -83,7 +83,7 @@ function projectStatisticsDatabase(){
 
     declare -a local NF_ARRAY
     declare -a local MU_ARRAY
-    declare -a local KAPPA_ARRAY
+    declare -a local MASS_ARRAY
     declare -a local NS_ARRAY
     declare -a local NT_ARRAY
     declare -a local BETA_ARRAY
@@ -116,7 +116,7 @@ function projectStatisticsDatabase(){
             [[ $VALUE != "-l" ]] && [[ $VALUE != "--local" ]] && NEW_OPTIONS+=($VALUE)
         done && unset -v 'VALUE'
         ReadParametersFromPath $(pwd)
-        set -- ${NEW_OPTIONS[@]} "--mu" "$CHEMPOT" "--$MASS_PARAMETER" "$KAPPA" "--nt" "$NTIME" "--ns" "$NSPACE"
+        set -- ${NEW_OPTIONS[@]} "--mu" "$CHEMPOT" "--$MASS_PARAMETER" "$MASS" "--nt" "$NTIME" "--ns" "$NSPACE"
     fi
 
     while [ $# -gt 0 ]; do
@@ -213,12 +213,12 @@ function projectStatisticsDatabase(){
 			    ;;
 		    --$MASS_PARAMETER)
                 DISPLAY="TRUE"
-			    FILTER_KAPPA="TRUE"
+			    FILTER_MASS="TRUE"
 			    while [[ $2 =~ ^[[:digit:]]{4}$ ]]; do 
-				    KAPPA_ARRAY+=( $2 )
+				    MASS_ARRAY+=( $2 )
 				    shift
 			    done
-			    [ ${#KAPPA_ARRAY[@]} -eq 0 ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
+			    [ ${#MASS_ARRAY[@]} -eq 0 ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
 			    ;;
 		    --nt)
                 DISPLAY="TRUE"
@@ -489,7 +489,7 @@ function projectStatisticsDatabase(){
 
 	    NF_STRING=$(join "|" "${NF_ARRAY[@]}")
 	    MU_STRING=$(join "|" "${MU_ARRAY[@]}")
-	    KAPPA_STRING=$(join "|" "${KAPPA_ARRAY[@]}")
+	    MASS_STRING=$(join "|" "${MASS_ARRAY[@]}")
 	    NS_STRING=$(join "|" "${NS_ARRAY[@]}")
 	    NT_STRING=$(join "|" "${NT_ARRAY[@]}")
 	    BETA_STRING=$(join "|" "${BETA_ARRAY[@]}")
@@ -536,11 +536,11 @@ function projectStatisticsDatabase(){
 	    NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING=$(echo ${NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING%"|"})
 	    NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING=$(echo ${NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING%"|"})
 
-	    awk --posix -v filterNf=$FILTER_NF -v filterMu=$FILTER_MU -v filterKappa=$FILTER_KAPPA -v filterNt=$FILTER_NT -v filterNs=$FILTER_NS \
+	    awk --posix -v filterNf=$FILTER_NF -v filterMu=$FILTER_MU -v filterKappa=$FILTER_MASS -v filterNt=$FILTER_NT -v filterNs=$FILTER_NS \
 			-v filterBeta=$FILTER_BETA -v filterType=$FILTER_TYPE \
 			-v filterTrajNo=$FILTER_TRAJNO -v filterAccRate=$FILTER_ACCRATE -v filterAccRateLast1K=$FILTER_ACCRATE_LAST1K -v filterStatus=$FILTER_STATUS -v filterLastTrajTime=$FILTER_LASTTRAJ \
 			-v statisticsSummary=$STATISTICS_SUMMARY \
-			-v nfString="$NF_STRING" -v muString="$MU_STRING" -v kappaString="$KAPPA_STRING" -v nsString="$NS_STRING" -v ntString="$NT_STRING" -v betaString="$BETA_STRING" \
+			-v nfString="$NF_STRING" -v muString="$MU_STRING" -v kappaString="$MASS_STRING" -v nsString="$NS_STRING" -v ntString="$NT_STRING" -v betaString="$BETA_STRING" \
 			-v typeString=$TYPE_STRING -v statusString="$STATUS_STRING" \
 			-v trajLowValue=$TRAJ_LOW_VALUE -v trajHighValue=$TRAJ_HIGH_VALUE -v accRateLowValue=$ACCRATE_LOW_VALUE -v accRateHighValue=$ACCRATE_HIGH_VALUE \
 			-v accRateLast1KLowValue=$ACCRATE_LAST1K_LOW_VALUE -v accRateLast1KHighValue=$ACCRATE_LAST1K_HIGH_VALUE -v lastTrajTime=$LAST_TRAJ_TIME \
@@ -755,7 +755,7 @@ function projectStatisticsDatabase(){
 		            sed -r 's/(\x1B\[[[:digit:]]{1,2};[[:digit:]]{0,2};[[:digit:]]{0,3}m)(.)/\1 \2/g' | \
 		            sed -r 's/(.)(\x1B\[.{1,2};.{1,2}m)/\1 \2/g' | \
 		            sed -r 's/(\x1B\[.{1,2};.{1,2}m)(.)/\1 \2/g' |
-			        awk --posix -v nf=${PARAMS[0]#$NFLAVOUR_PREFIX*} -v mu=${PARAMS[1]#$CHEMPOT_PREFIX*} -v k=${PARAMS[2]#$KAPPA_PREFIX*} -v nt=${PARAMS[3]#$NTIME_PREFIX*} -v ns=${PARAMS[4]#*$NSPACE_PREFIX} '
+			        awk --posix -v nf=${PARAMS[0]#$NFLAVOUR_PREFIX*} -v mu=${PARAMS[1]#$CHEMPOT_PREFIX*} -v k=${PARAMS[2]#$MASS_PREFIX*} -v nt=${PARAMS[3]#$NTIME_PREFIX*} -v ns=${PARAMS[4]#*$NSPACE_PREFIX} '
 							$3 ~ /^[[:digit:]]\.[[:digit:]]{4}/{
 								print "\033[36m " nf " \033[36m " mu " \033[36m " k " \033[36m " nt " \033[36m " ns " " $(3-1) " " $3 " " $(5-1) " " $5 " " $(8-1) " " $8 " " $(11-1) " " $(11) " " $(15-1) " " $15 " " $(19-1) " " $19 " " "\033[0m"
 							}

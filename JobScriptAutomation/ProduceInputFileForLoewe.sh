@@ -78,10 +78,10 @@ function ProduceInputFile_Loewe() {
     echo "nspace=$NSPACE" >> $INPUTFILE_GLOBALPATH
     echo "ntime=$NTIME" >> $INPUTFILE_GLOBALPATH
     if [ $WILSON = "TRUE" ]; then
-        echo "kappa=0.$KAPPA" >> $INPUTFILE_GLOBALPATH
+        echo "kappa=0.$MASS" >> $INPUTFILE_GLOBALPATH
         echo "hmcsteps=$MEASUREMENTS" >> $INPUTFILE_GLOBALPATH
     elif [ $STAGGERED = "TRUE" ]; then
-        echo "mass=0.$KAPPA" >> $INPUTFILE_GLOBALPATH
+        echo "mass=0.$MASS" >> $INPUTFILE_GLOBALPATH
         echo "rhmcsteps=$MEASUREMENTS" >> $INPUTFILE_GLOBALPATH
     fi
     echo "savefrequency=$NSAVE" >> $INPUTFILE_GLOBALPATH

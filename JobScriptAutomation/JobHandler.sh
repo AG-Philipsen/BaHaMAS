@@ -29,15 +29,15 @@ source $HOME/Script/JobScriptAutomation/ProjectStatisticsDatabase.sh || exit -2
 #   CHEMPOT_PREFIX="mui"
 #   NTIME_PREFIX="nt"
 #   NSPACE_PREFIX="ns"
-#   KAPPA_PREFIX="k" or KAPPA_PREFIX="mass"
+#   MASS_PREFIX="k" or MASS_PREFIX="mass"
 #   NFLAVOUR_POSITION=0
 #   CHEMPOT_POSITION=1
-#   KAPPA_POSITION=2
+#   MASS_POSITION=2
 #   NTIME_POSITION=3
 #   NSPACE_POSITION=4
 #   NFLAVOUR
 #   CHEMPOT
-#   KAPPA
+#   MASS
 #   NSPACE
 #   NTIME
 #   PARAMETERS_PATH    <---This is the string in the path with the 4 parameters with slash in front, e.g. /Nf2/muiPiT/k1550/nt6/ns12   or   /Nf2/mui0/mass0250/nt4/ns8
@@ -181,9 +181,9 @@ fi
 #-----------------------------------------------------------------------------------------------------------------#
 # Perform all the checks on the path, reading out some variables 
 if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
-    CheckSingleOccurrenceInPath "homeb" "hkf8/" "hkf8[[:digit:]]\+" "${NFLAVOUR_PREFIX}${NFLAVOUR_REGEX}" "${CHEMPOT_PREFIX}${CHEMPOT_REGEX}" "${KAPPA_PREFIX}${KAPPA_REGEX}" "${NTIME_PREFIX}${NTIME_REGEX}" "${NSPACE_PREFIX}${NSPACE_REGEX}"
+    CheckSingleOccurrenceInPath "homeb" "hkf8/" "hkf8[[:digit:]]\+" "${NFLAVOUR_PREFIX}${NFLAVOUR_REGEX}" "${CHEMPOT_PREFIX}${CHEMPOT_REGEX}" "${MASS_PREFIX}${MASS_REGEX}" "${NTIME_PREFIX}${NTIME_REGEX}" "${NSPACE_PREFIX}${NSPACE_REGEX}"
 else
-    CheckSingleOccurrenceInPath $(echo $HOME_DIR | sed 's/\// /g') "${NFLAVOUR_PREFIX}${NFLAVOUR_REGEX}" "${CHEMPOT_PREFIX}${CHEMPOT_REGEX}" "${KAPPA_PREFIX}${KAPPA_REGEX}" "${NTIME_PREFIX}${NTIME_REGEX}" "${NSPACE_PREFIX}${NSPACE_REGEX}"
+    CheckSingleOccurrenceInPath $(echo $HOME_DIR | sed 's/\// /g') "${NFLAVOUR_PREFIX}${NFLAVOUR_REGEX}" "${CHEMPOT_PREFIX}${CHEMPOT_REGEX}" "${MASS_PREFIX}${MASS_REGEX}" "${NTIME_PREFIX}${NTIME_REGEX}" "${NSPACE_PREFIX}${NSPACE_REGEX}"
 fi
 
 ReadParametersFromPath $(pwd)
