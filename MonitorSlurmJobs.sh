@@ -148,6 +148,9 @@ if [ $LOCAL_JOBS = 'TRUE' ]; then
         SQUEUE_OUTPUT="$(grep --color=never "${PWD}" <<< "$SQUEUE_OUTPUT")"
 fi
 
+#If any field is empty, fill it with empty word in order to have later all arrays with same number of elements
+SQUEUE_OUTPUT=$(sed "s/@@/@empty@/g" <<< "$SQUEUE_OUTPUT")
+
 #Split squeue output and prepare table layout
 JOB_ID=(                $(cut -d'@' -f1  <<< "$SQUEUE_OUTPUT") )
 JOB_NAME=(              $(cut -d'@' -f2  <<< "$SQUEUE_OUTPUT") )
