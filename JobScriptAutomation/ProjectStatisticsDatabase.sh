@@ -718,11 +718,11 @@ function projectStatisticsDatabase(){
 		    if [ "$UPDATE_TIME" != "" ]; then
 			    CURRENT_EPOCH=$(date +%s)
 			    if [ $CURRENT_EPOCH -gt $(date -d "$UPDATE_TIME" +%s) ]; then
-				    TARGET_EPOCH=$(date -d "$UPDATE_TIME + 1 days" +%s)
-				    printf "\t\e[1m\e[38;5;147mEntering sleeping mode. Performing next update on \e[38;5;86m$(date -d "$UPDATE_TIME + 1 days" +"%d.%m.%Y \e[38;5;147mat\e[38;5;86m %H:%M")\e[0m\n\n"
+				    TARGET_EPOCH=$(date -d "$UPDATE_TIME tomorrow" +%s)
+				    printf "\n\t\e[1m\e[38;5;147mEntering sleeping mode. Performing next update on \e[38;5;86m$(date -d "$UPDATE_TIME tomorrow" +"%d.%m.%Y \e[38;5;147mat\e[38;5;86m %H:%M")\e[0m\n\n"
 			    else
 				    TARGET_EPOCH=$(date -d "$UPDATE_TIME" +%s)
-				    printf "\t\e[1m\e[38;5;147mEntering sleeping mode. Performing next update today at \e[38;5;86m$(date -d "$UPDATE_TIME" +"%H:%M")\e[0m\n\n"
+				    printf "\n\t\e[1m\e[38;5;147mEntering sleeping mode. Performing next update today at \e[38;5;86m$(date -d "$UPDATE_TIME" +"%H:%M")\e[0m\n\n"
 			    fi
 			    SLEEP_SECONDS=$(( $TARGET_EPOCH - $CURRENT_EPOCH ))
 			    sleep $SLEEP_SECONDS
