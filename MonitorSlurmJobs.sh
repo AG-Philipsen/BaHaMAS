@@ -287,7 +287,7 @@ if [ $DISPLAY_STANDARD_LIST = "TRUE" ]; then
         if [[ ${JOB_STATUS[$i]} == "RUNNING" ]]; then
             printf "\e[0;32m"
         elif [[ ${JOB_STATUS[$i]} == "PENDING" ]]; then
-            if [[ ${JOB_START_TIME[$i]} != "Unknown" ]]; then
+            if [[ ${JOB_START_TIME[$i]} != "N/A" ]]; then
                 printf "\e[0;33m"
             else
                 printf "\e[0;31m"
