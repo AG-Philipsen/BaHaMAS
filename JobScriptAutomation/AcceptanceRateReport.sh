@@ -1,192 +1,94 @@
-function __static__AcceptanceRateReportLocal(){
+# Load auxiliary bash files that will be used.
+source $HOME/Script/JobScriptAutomation/ListJobsStatusForLoewe.sh || exit -2
+#------------------------------------------------------------------------------------#
 
-	PARAMETERS_PATH=""
-	ReadParametersFromPath $(pwd) #defining WORK_DIR_WITH_BETAFOLDERS
-	WORK_DIR_WITH_BETAFOLDERS="$WORK_DIR/$SIMULATION_PATH$PARAMETERS_PATH"
-
-	if [ ! -d $DIR_WITH_BETAS ]; then
-		echo "Invalid directory specified..."
-		exit
-	elif [[ ! $INTERVAL =~ [[:digit:]]+ ]]; then
-		echo "Interval must be an integer number..."
-		exit
-	fi
-
-	ReadBetaValuesFromFile
-
-	local BETA_DIR_ARRAY=()
-
-	for BETA in ${BETAVALUES[@]}; do
-
-		BETA_DIR_ARRAY+=( "b$BETA" )
-	done
-
-	if [ ${#BETA_DIR_ARRAY[@]} -lt 1 ]; then
-		echo "No beta directories in the specified directory..."
-		exit
-	fi
-
-	#SOME ARRAYS NEEDED FOR THE FURTHER PROCESS
+function AcceptanceRateReport(){
+    #-----------------------------------------#
+    local BETAVALUES_COPY=(${BETAVALUES[@]})
+    #-----------------------------------------#
+    for INDEX in "${!BETAVALUES_COPY[@]}"; do
+        local OUTPUTFILE_GLOBALPATH=$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$INDEX]}/$OUTPUTFILE_NAME
+    	if [ ! -f $OUTPUTFILE_GLOBALPATH ]; then
+			printf "\n\e[31m File $OUTPUTFILE_NAME not found in $WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$INDEX]} folder! Skipping this beta...\e[0m"
+	        PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$INDEX]} )
+	        unset BETAVALUES_COPY[$INDEX] #Here BETAVALUES_COPY becomes sparse
+        fi
+    done
+    #Make BETAVALUES_COPY not sparse if not empty
+    if [ ${#BETAVALUES_COPY[@]} -eq 0 ]; then
+        echo '' && return
+    else
+        BETAVALUES_COPY=( ${BETAVALUES_COPY[@]} )
+    fi
+  	#Auxialiary arrays
 	local NRLINES_ARRAY=()
 	local DATA_ARRAY=()
-	local POS_BETA_STRING=()
-
-	for BETA_DIR in ${BETA_DIR_ARRAY[@]}; do
-
-		BETA_DIR_NAME=$(echo $BETA_DIR | grep -o "b[[:digit:]]\.[[:digit:]]\{4\}")
-
-		if [ ! -f $WORK_DIR_WITH_BETAFOLDERS/$BETA_DIR/$FILENAME ]; then
-
-			echo "File output.data does not in exist in $WORK_DIR_WITH_BETAFOLDERS/$BETA_DIR"
-			continue
-		fi
-
-		NRLINES_ARRAY+=( $(awk '{if(NR%'$INTERVAL'==0){counter++;}}END{print counter}' $WORK_DIR_WITH_BETAFOLDERS/$BETA_DIR/$FILENAME) )
-
-		DATA_ARRAY+=( $BETA_DIR_NAME )
-		POS_BETA_STRING+=( $(expr ${#DATA_ARRAY[@]} - 1) )
-		DATA_ARRAY+=( $(awk '{if(NR%'$INTERVAL'==0){printf("%.2f \n", sum/'$INTERVAL');sum=0}}{sum+=$7}' $WORK_DIR_WITH_BETAFOLDERS/$BETA_DIR/$FILENAME) )
-
+	local POSITION_BETA_STRING_IN_DATA_ARRAY=()
+    #Loop on betas and calculate acceptance concatenating data in single array    
+	for BETA in ${BETAVALUES_COPY[@]}; do
+        OUTPUTFILE_GLOBALPATH=$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA/$OUTPUTFILE_NAME
+		NRLINES_ARRAY+=( $(awk '{if(NR%'$INTERVAL'==0){counter++;}}END{print counter}' $OUTPUTFILE_GLOBALPATH) )
+		POSITION_BETA_STRING_IN_DATA_ARRAY+=( ${#DATA_ARRAY[@]} )
+		DATA_ARRAY+=( "b${BETA%_*}" )
+		DATA_ARRAY+=( $(awk '{if(NR%'$INTERVAL'==0){printf("%.2f \n", sum/'$INTERVAL*100');sum=0}}{sum+=$'$ACCEPTANCE_COLUMN'}' $OUTPUTFILE_GLOBALPATH) )
 	done
-
-	#FIND LARGEST NUMBER OF INTERVALS
-	local LARGEST_INTERVAL=${NRLINES_ARRAY[0]} #Initialize LARGEST_INTERVAL variable
-
+	#Find largest number of intervals to print table properly
+	local LENGTH_LONGEST_COLUMN=0
 	for NRLINES in ${NRLINES_ARRAY[@]}; do
-
-		if [ $NRLINES -gt $LARGEST_INTERVAL ]; then
-			LARGEST_INTERVAL=$NRLINES	
-		fi
+		[ $NRLINES -gt $LENGTH_LONGEST_COLUMN ] && LENGTH_LONGEST_COLUMN=$NRLINES
 	done
-
-	printf "\n"
-
-	#PRINT HEADER LINE
-	printf "\n      %s  %s  %s\n" $MASS_PREFIX$MASS $NTIME_PREFIX$NTIME $NSPACE_PREFIX$NSPACE >> $ACCRATE_REPORT
-
-	#PRINT ROW WITH BETAS
+    #Print table in proper form
+    printf -v SPACE_AT_THE_BEGINNING_OF_EACH_LINE '%*s' 10 ''
+    local EMPTY_SEPARATOR="   "
+    #Here we evaluate the numbers to center the acceptance under the beta header:
+    #
+    #     |----beta_header----|
+    #             xx.yy
+    #      <----------------->    this is ${#DATA_ARRAY[0]}
+    #             <--->           this is 5 (for the moment hard coded)
+    #                  <----->    this is (${#DATA_ARRAY[0]} - 5 + 1)/2 where the +1 is to put one more in case of odd result of the subtraction
+    #      <---------->           this is ${#DATA_ARRAY[0]} - (${#DATA_ARRAY[0]} - 5 + 1)/2  
+    #
+    local SPACE_AFTER_ACCEPTANCE_FIELD=$(( (${#DATA_ARRAY[0]} - 5 + 1)/2 )) #The first entry in DATA_ARRAY is a beta that is print in the header
+    local ACCEPTANCE_FIELD_LENGTH=$(( ${#DATA_ARRAY[0]} - $SPACE_AFTER_ACCEPTANCE_FIELD )) 
+    #Header
+    printf -v LINE_OF_EQUAL '%*s' $((9 + (${#BETAVALUES_COPY[@]} + 1) * (2 *  ${#EMPTY_SEPARATOR}) + ${#BETAVALUES_COPY[@]} * ${#DATA_ARRAY[0]} )) ''
+    printf "\n\e[0;36m$SPACE_AT_THE_BEGINNING_OF_EACH_LINE${LINE_OF_EQUAL// /=}\e[0m\n"
 	local BETA_COUNTER=0
-
-	printf "Intervals "
-	printf "Intervals " >> $ACCRATE_REPORT
-
-	while [ $BETA_COUNTER -lt ${#BETA_DIR_ARRAY[@]} ]; do
-
-		INDEX=${POS_BETA_STRING[$BETA_COUNTER]}
-
-		printf "%s " ${DATA_ARRAY[$INDEX]}
-		printf "%s " ${DATA_ARRAY[$INDEX]} >> $ACCRATE_REPORT
-
-		BETA_COUNTER=$(expr $BETA_COUNTER + 1)
+	printf "\e[38;5;39m${SPACE_AT_THE_BEGINNING_OF_EACH_LINE}${EMPTY_SEPARATOR}Intervals$EMPTY_SEPARATOR"
+	while [ $BETA_COUNTER -lt ${#BETAVALUES_COPY[@]} ]; do
+		printf "$EMPTY_SEPARATOR%s$EMPTY_SEPARATOR" ${DATA_ARRAY[${POSITION_BETA_STRING_IN_DATA_ARRAY[$BETA_COUNTER]}]}
+		(( BETA_COUNTER++ ))
 	done
-	
-	printf "\n"
-	printf "\n" >> $ACCRATE_REPORT
-
-	#PRINT ACCEPTANCE RATES
+    printf "\n\e[0;36m$SPACE_AT_THE_BEGINNING_OF_EACH_LINE${LINE_OF_EQUAL// /=}\e[0m\n"
+	#Body
 	local COUNTER=1
-
-	while [ $COUNTER -lt $(expr $LARGEST_INTERVAL + 1) ];do
-
-		printf "%02d% 8s" $COUNTER $EMPTY
-		printf "%02d% 8s" $COUNTER $EMPTY >> $ACCRATE_REPORT
-
+	while [ $COUNTER -le $LENGTH_LONGEST_COLUMN ];do
+		printf "${SPACE_AT_THE_BEGINNING_OF_EACH_LINE}${EMPTY_SEPARATOR}%6d   $EMPTY_SEPARATOR\e[0m" $COUNTER
 		local POS_INDEX=1
-
-		for POS in ${POS_BETA_STRING[@]}; do
-			
+		for POS in ${POSITION_BETA_STRING_IN_DATA_ARRAY[@]}; do
 			DATA_INDEX=$(expr $POS + $COUNTER)
-
-			if [ $POS_INDEX -eq ${#POS_BETA_STRING[@]} ]; then
-
-				if [ $DATA_INDEX -lt ${#DATA_ARRAY[@]} ]; then
-
-					printf "%s    " ${DATA_ARRAY[$DATA_INDEX]}
-					printf "%s    " ${DATA_ARRAY[$DATA_INDEX]} >> $ACCRATE_REPORT
-				else
-					printf "        " ${DATA_ARRAY[$DATA_INDEX]}
-					printf "        " ${DATA_ARRAY[$DATA_INDEX]} >> $ACCRATE_REPORT
-				fi
-
-			elif [ $POS_INDEX -lt ${#POS_BETA_STRING[@]} ]; then
-
-				if [ $DATA_INDEX -lt ${POS_BETA_STRING[$POS_INDEX]} ]; then
-
-					printf "%s    " ${DATA_ARRAY[$DATA_INDEX]}
-					printf "%s    " ${DATA_ARRAY[$DATA_INDEX]} >> $ACCRATE_REPORT
-				else
-					printf "        " ${DATA_ARRAY[$DATA_INDEX]}
-					printf "        " ${DATA_ARRAY[$DATA_INDEX]} >> $ACCRATE_REPORT
+			if [ $POS_INDEX -eq ${#POSITION_BETA_STRING_IN_DATA_ARRAY[@]} ]; then                  # "If I am printing the last column"
+				if [ $DATA_INDEX -lt ${#DATA_ARRAY[@]} ]; then                                     # "If there are still data to print, print"
+					printf "$(GoodAcc ${DATA_ARRAY[$DATA_INDEX]})$EMPTY_SEPARATOR%${ACCEPTANCE_FIELD_LENGTH}s%${SPACE_AFTER_ACCEPTANCE_FIELD}s$EMPTY_SEPARATOR\e[0m" ${DATA_ARRAY[$DATA_INDEX]} "" 
+				else                                                                               # "otherwise print blank space"
+					printf "$EMPTY_SEPARATOR$EMPTY_SEPARATOR"
+				fi                                                                                 
+			elif [ $POS_INDEX -lt ${#POSITION_BETA_STRING_IN_DATA_ARRAY[@]} ]; then                # "If I am printing not the last column"
+				if [ $DATA_INDEX -lt ${POSITION_BETA_STRING_IN_DATA_ARRAY[$POS_INDEX]} ]; then     # "If there are still data to print, print"
+					printf "$(GoodAcc ${DATA_ARRAY[$DATA_INDEX]})$EMPTY_SEPARATOR%${ACCEPTANCE_FIELD_LENGTH}s%${SPACE_AFTER_ACCEPTANCE_FIELD}s$EMPTY_SEPARATOR\e[0m" ${DATA_ARRAY[$DATA_INDEX]} "" 
+				else                                                                               # "otherwise print blank space"
+					printf "$EMPTY_SEPARATOR$EMPTY_SEPARATOR" 
 				fi
 			fi
-
-			#printf "(%s %s)" $DATA_INDEX $POS_INDEX
-
 			POS_INDEX=$(expr $POS_INDEX + 1)
 		done
 		printf "\n"
-		printf "\n" >> $ACCRATE_REPORT
-			
-		COUNTER=$(expr $COUNTER + 1)
+		(( COUNTER++ ))
 	done
+    printf "\e[0;36m$SPACE_AT_THE_BEGINNING_OF_EACH_LINE${LINE_OF_EQUAL// /=}\e[0m\n"
 
 }
 
-function __static__AcceptanceRateReportGlobal(){
-
-	local ORIGINAL_PATH=$(pwd)
-
-	local JOBS_STATUS_FILE_GLOBAL=$HOME_DIR'/'$SIMULATION_PATH'/global_'$JOBS_STATUS_PREFIX$DATE'.txt'
-
-	local ACCRATE_REPORT_PREFIX="$HOME_DIR/$SIMULATION_PATH/global_acceptancerate_report_"
-
-	local ACCRATE_REPORT="$ACCRATE_REPORT_PREFIX$DATE.txt"
-
-	rm -f $ACCRATE_REPORT
-
-	BuildRegexPath
-
-	for i in ${DIRECTORY_ARRAY[@]}; do
-
-		local DIR_WITH_BETAS=$i
-		
-		cd $DIR_WITH_BETAS
-
-		__static__AcceptanceRateReportLocal
-
-		cd $ORIGINAL_PATH
-
-		printf "\n" >> $ACCRATE_REPORT
-	done
-}
-
-
-function AcceptanceRateReport(){
-
-	local FILENAME='output.data'
-
-	DATE='D_'$(date +"%d_%m_%Y")'_T_'$(date +"%H_%M")
-
-	if [ $ACCRATE_REPORT_GLOBAL = "FALSE" ]; then
-
-		printf "Printing local acceptance rate report...\n"
-
-		local DIR_WITH_BETAS=$WORK_DIR_WITH_BETAFOLDERS
-
-		local ACCRATE_REPORT_PREFIX="$HOME_DIR_WITH_BETAFOLDERS/acceptancerate_report_"
-
-		local ACCRATE_REPORT="$ACCRATE_REPORT_PREFIX$CHEMPOT_PREFIX$CHEMPOT"_"$MASS_PREFIX$MASS"_"$NTIME_PREFIX$NTIME"_"$NSPACE_PREFIX$NSPACE_$DATE.txt"
-
-		rm -f $ACCRATE_REPORT_PREFIX*
-
-		__static__AcceptanceRateReportLocal
-
-	elif [ $ACCRATE_REPORT_GLOBAL = "TRUE" ]; then 
-
-		printf "Printing global acceptance rate report...\n"
-
-		__static__AcceptanceRateReportGlobal
-	fi
-}
 
 

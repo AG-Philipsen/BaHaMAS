@@ -41,7 +41,6 @@ function ParseCommandLineOption(){
                             "--showjobs"
                             "--showjobs_all"
                             "--accRateReport"
-                            "--accRateReport_all"
                             "--emptyBetaDirectories"
                             "--cleanOutputFiles"
                             "--completeBetasFile")
@@ -113,8 +112,7 @@ function ParseCommandLineOption(){
 		        fi
 		        echo -e "  \e[0;34m--liststatus_all\e[0;32m                   ->    The global measurement status for all beta will be displayed"
 		        echo -e "  \e[0;34m--showjobs\e[0;32m                         ->    The queued jobs will be displayed for the local parameters (kappa,nt,ns,beta)"
-		        echo -e "  \e[0;34m--accRateReport\e[0;32m                    ->    The acceptance rates will be computed for the specified intervals of configurations"
-		        echo -e "  \e[0;34m--accRateReport_all\e[0;32m                ->    The acceptance rates will be computed for the specified intervals of configurations for all parameters (kappa,nt,ns,beta)"
+		        echo -e "  \e[0;34m--accRateReport=[#]\e[0;32m                ->    The acceptance rates will be computed on the output files of the given betas every [#] configurations and summarized in a table."
 		        echo -e "  \e[0;34m--cleanOutputFiles\e[0;32m                 ->    The output files referred to the betas contained in the betas file are cleaned (repeated lines are eliminated)"
 		        echo -e "                                           For safety reason, a backup of the output file is done (it is left in the output file folder with the name outputfilename_date)" 
 		        echo -e "                                           Secondary options: \e[0;34m--all\e[0;32m to clean output files for all betas in WORK_DIR referred to the actual path parameters"
@@ -271,15 +269,10 @@ function ParseCommandLineOption(){
 		        SHOWJOBS="TRUE"
 		        shift;; 
 	        --accRateReport=* )
-                INTERVAL=${1#*=} 
+                INTERVAL=${1#*=}
+                [[ ! $INTERVAL =~ [[:digit:]]+ ]] && printf "\n\e[0;31m Interval for --accRateReport option must be an integer number! Aborting...\n\n\e[0m" && exit -1
 		        MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--accRateReport" )
 	   	        ACCRATE_REPORT="TRUE"
-	            shift ;;
-	        --accRateReport_all=* )
-                INTERVAL=${1#*=}
-		        MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--accRateReport_all" )
-	   	        ACCRATE_REPORT="TRUE"
-	   	        ACCRATE_REPORT_GLOBAL="TRUE"
 	            shift ;;
 	        --cleanOutputFiles )
                 MUTUALLYEXCLUSIVEOPTS_PASSED+=( "$1" )

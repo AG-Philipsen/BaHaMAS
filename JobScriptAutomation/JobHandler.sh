@@ -80,7 +80,6 @@ LOEWE_NODE="unset"
 JOBS_STATUS_PREFIX="jobs_status_"
 SHOWJOBS="FALSE"
 ACCRATE_REPORT="FALSE"
-ACCRATE_REPORT_GLOBAL="FALSE"
 EMPTY_BETA_DIRS="FALSE"
 CLEAN_OUTPUT_FILES="FALSE"
 SECONDARY_OPTION_ALL="FALSE"
@@ -196,6 +195,12 @@ if [ "$HOME_DIR_WITH_BETAFOLDERS" != "$(pwd)" ]; then
 	printf "\e[0;31m Constructed path to directory containing beta folders does not match the actual position! Aborting...\n\n\e[0m"
 	exit -1
 fi
+if [ ! -d $WORK_DIR_WITH_BETAFOLDERS ]; then
+    printf "\n\e[0;31m WORK_DIR_WITH_BETAFOLDERS=$WORK_DIR_WITH_BETAFOLDERS\n"
+	printf "\e[0;31m seems not to be an existing folder! Aborting...\n\n\e[0m"
+	exit -1
+fi
+
 #-----------------------------------------------------------------------------------------------------------------#
 
 
@@ -280,6 +285,7 @@ elif [ $SHOWJOBS = "TRUE" ]; then
 
 elif [ $ACCRATE_REPORT = "TRUE" ]; then
 
+	ReadBetaValuesFromFile
     AcceptanceRateReport
 
 elif [ $CLEAN_OUTPUT_FILES = "TRUE" ]; then

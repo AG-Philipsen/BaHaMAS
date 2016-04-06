@@ -23,6 +23,7 @@ if [ $WILSON = "TRUE" ]; then
     INPUTFILE_NAME=""
     JOBSCRIPT_PREFIX=""
     OUTPUTFILE_NAME=""
+    ACCEPTANCE_COLUMN=""
     PROJECT_DATABASE_FILENAME=""
     PROJECT_DATABASE_DIRECTORY=""
     SRUN_COMMANDSFILE_FOR_INVERSION=""
@@ -39,6 +40,7 @@ if [ $STAGGERED = "TRUE" ]; then
     INPUTFILE_NAME=""
     JOBSCRIPT_PREFIX=""
     OUTPUTFILE_NAME=""
+    ACCEPTANCE_COLUMN=""
     RATIONAL_APPROXIMATIONS_PATH=""
     APPROX_HEATBATH_NAME=""
     APPROX_MD_NAME=""
@@ -67,6 +69,7 @@ INVERTER_GLOBALPATH="${HOME}/$HMC_BUILD_PATH/$INVERTER_FILENAME"
 #     INPUTFILE_NAME                        name of the inputfile
 #     JOBSCRIPT_PREFIX                      prefix of the jobscript name
 #     OUTPUTFILE_NAME                       name of the outputfile
+#     ACCEPTANCE_COLUMN                     number of column containing outcomes (zeros or ones) of Metropolis test [first column is column number 1].
 #     RATIONAL_APPROXIMATIONS_PATH          global path to the folder containing the rational approximations
 #     APPROX_HEATBATH_NAME                  rational approximation used for the pseudofermion fields
 #     APPROX_MD_NAME                        rational approximation used for the molecular dynamis

@@ -101,7 +101,7 @@ function ReadBetaValuesFromFile(){
             exit -1
         fi
 
-        #NOTE: If one uses the option -u | --useMultipleChains and forgets the seeds column and the second integrator steps column
+        #NOTE: If one uses multiple chains and forgets the seeds column and the second integrator steps column
         #      in the betas file, then the first column of integrator steps is used as seed and the default integrators steps
         #      are used. In the case in which the first integrator steps is a 4-digit number, the script will do its job without
         #      throwing any exception. We didn't cure this case since it is a very remote case................
@@ -112,12 +112,12 @@ function ReadBetaValuesFromFile(){
         done
     fi
 
-    if [ ${#INTSTEPS0_ARRAY_TEMP[@]} -ne 0 ]; then #If the first intsteps array is empty the second CANNOT be not empt (because of how I read them with awk from file)
+    if [ ${#INTSTEPS0_ARRAY_TEMP[@]} -ne 0 ]; then #If the first intsteps array is empty the second CANNOT be not empty (because of how I read them with awk from file)
         for STEPS in ${INTSTEPS0_ARRAY_TEMP[@]} ${INTSTEPS1_ARRAY_TEMP[@]}; do
             if [[ ! $STEPS =~ ^[[:digit:]]{1,2}$ ]]; then
                 printf "\n\e[0;31m Invalid integrator step entry in betas file (only one or two digits admitted)! Aborting...\n\e[0m"
                 if [[ $STEPS =~ ^[[:digit:]]{4}$ ]]; then
-                    printf "\e[0;31m   \e[4mHINT\e[0;31m: Maybe your intention was to use the \e[1m-u | --useMultipleChains\e[0;31m option...\n\n\e[0m"
+                    printf "\e[0;31m   \e[4mHINT\e[0;31m: Maybe your intention was to use Multiple Chains...\n\n\e[0m"
                     exit -1
                 else
                     printf "\n"
@@ -186,7 +186,7 @@ function ReadBetaValuesFromFile(){
     printf "\e[0;36m============================================================================================================\n\e[0m"
 
     #If we are not in the continue scenario (and not in other script use cases), look for the correct configuration to start from and set the global path
-    if [ $CONTINUE = "FALSE" ] && [ $CLEAN_OUTPUT_FILES = "FALSE" ] && [ $EMPTY_BETA_DIRS = "FALSE" ] && [ $INVERT_CONFIGURATIONS = "FALSE" ]; then
+    if [ $CONTINUE = "FALSE" ] && [ $CLEAN_OUTPUT_FILES = "FALSE" ] && [ $EMPTY_BETA_DIRS = "FALSE" ] && [ $INVERT_CONFIGURATIONS = "FALSE" ] && [ $ACCRATE_REPORT = "FALSE" ]; then
         for BETA in "${BETAVALUES[@]}"; do
             if [ "$BETA_POSTFIX" == "" ]; then #Old nomenclature case: no beta postfix!
                 local FOUND_CONFIGURATIONS=( $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA}.*") )
