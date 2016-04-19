@@ -369,7 +369,7 @@ function projectStatisticsDatabase(){
 			    echo -e "  \e[4m\e[1mDisplaying options\e[24m:\e[21m"
 			    echo -e "  \e[38;5;69m"
 			    echo -e "     -c | --columns -->  Specify the columns to be displayed."
-		   	    echo -e "                         Possible columns are: mu, $MASS_PARAMETER, nt, ns, beta_chain_type, trajNo, acc, status, lastTraj."
+		   	    echo -e "                         Possible columns are: mu, $MASS_PARAMETER, nt, ns, beta_chain_type, trajNo, acc, accLast1k, status, lastTraj."
 		   	    echo -e "                         Example: -c $MASS_PARAMETER nt ns beta_chain_type trajNo."
 			    echo -e "                         If no columns are specified, all of the above columns will be printed by default."
 			    echo -e "     --color        -->  Specifiy this option for displaying coloured output.(NOT YET IMPLEMENTED)"
