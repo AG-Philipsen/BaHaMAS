@@ -589,7 +589,8 @@ function ProcessBetaValuesForContinue_Loewe() {
         #If the script runs fine and it arrives here, it means no bash continue command was done --> we can add BETA to the jobs to be submitted
         rm $ORIGINAL_INPUTFILE_GLOBALPATH
         LOCAL_SUBMIT_BETA_ARRAY+=( $BETA )
-
+		
+		cp $INPUTFILE_GLOBALPATH $WORK_BETADIRECTORY/$INPUTFILE_NAME
     done #loop on BETA
 
     #Partition of the LOCAL_SUBMIT_BETA_ARRAY into group of GPU_PER_NODE and create the JobScript files inside the JOBSCRIPT_FOLDER

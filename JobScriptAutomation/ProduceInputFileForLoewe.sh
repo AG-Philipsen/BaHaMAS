@@ -101,11 +101,6 @@ function ProduceInputFile_Loewe() {
             echo "host_seed=$SEED_EXTRACTED_FROM_BETA" >> $INPUTFILE_GLOBALPATH
         fi
     fi
-
-	#Copy input file from homedir to workdir, in case they are different
-	if [ $HOME_DIR != $WORK_DIR ] && [ -d $WORK_BETADIRECTORY ];then
-		cp $INPUTFILE_GLOBALPATH  $WORK_BETADIRECTORY/$INPUTFILE_NAME
-	fi	
 }
 
 
