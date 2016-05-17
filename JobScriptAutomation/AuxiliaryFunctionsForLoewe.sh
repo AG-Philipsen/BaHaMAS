@@ -221,19 +221,19 @@ function ProcessBetaValuesForContinue_Loewe() {
                     continue
                 fi
             fi
-            printf "\e[0;35m\e[1m\e[4mATTENTION\e[24m: The simulation for beta = ${BETA%_*} will be resumed from trajectory"
-            printf " ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}. Is it what you would like to do (Y/N)? \e[0m"
-            local CONFIRM="";
-            while read CONFIRM; do
-                if [ "$CONFIRM" = "Y" ]; then
-                    break;
-                elif [ "$CONFIRM" = "N" ]; then
-                    printf "\n\e[1;31m Leaving out beta = $BETA\e[0m\n\n"
-                    continue 2
-                else
-                    printf "\e[0;36m\e[1m Please enter Y (yes) or N (no): \e[0m"
-                fi
-            done
+            printf "\e[0;35m\e[1m\e[4mATTENTION\e[24m: The simulation for beta = ${BETA%_*} will be resumed from trajectory ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}.\n\e[0m"
+#tf " ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}. Is it what you would like to do (Y/N)? \e[0m"
+#l CONFIRM="";
+#e read CONFIRM; do
+#if [ "$CONFIRM" = "Y" ]; then
+#    break;
+#elif [ "$CONFIRM" = "N" ]; then
+#    printf "\n\e[1;31m Leaving out beta = $BETA\e[0m\n\n"
+#    continue 2
+#else
+#    printf "\e[0;36m\e[1m Please enter Y (yes) or N (no): \e[0m"
+#fi
+#
             #If the user wants to resume from a given trajectory, first check that the conf is available
             if [ -f $WORK_BETADIRECTORY/$(printf "conf.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}") ];then
                 local NAME_LAST_CONFIGURATION=$(printf "conf.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}")
@@ -257,7 +257,7 @@ function ProcessBetaValuesForContinue_Loewe() {
             fi
             #Now it should be feasable to resume simulation ---> clean WORK_BETADIRECTORY
             #Create in WORK_BETADIRECTORY a folder named Trash_$(date) where to mv all the file produced after the traj. ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}
-            local TRASH_NAME="$WORK_BETADIRECTORY/Trash_$(date +'%F_%H%M')"
+            local TRASH_NAME="$WORK_BETADIRECTORY/Trash_$(date +'%F_%H%M%S')"
             mkdir $TRASH_NAME || exit 2
             for FILE in $WORK_BETADIRECTORY/conf.* $WORK_BETADIRECTORY/prng.*; do
                 #Move to trash only conf.xxxxx prng.xxxxx files or conf.xxxxx_pbp.dat files where xxxxx are digits
