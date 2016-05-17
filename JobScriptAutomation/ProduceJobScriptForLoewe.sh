@@ -73,6 +73,14 @@ function ProduceJobscript_Loewe(){
     done
     echo "echo \"...done!\"" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
+    if [ "$HOME_DIR" != "$WORK_DIR" ]; then
+        echo "#Copy inputfile from home to work directories..." >> $JOBSCRIPT_GLOBALPATH
+        for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
+            echo "cp \$dir$INDEX/$INPUTFILE_NAME \$workdir$INDEX/$INPUTFILE_NAME.\$SLURM_JOB_ID || exit 2" >> $JOBSCRIPT_GLOBALPATH            		
+        done
+    fi
+    echo "echo \"...done!\"" >> $JOBSCRIPT_GLOBALPATH
+    echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"---------------------------\"" >> $JOBSCRIPT_GLOBALPATH
     echo "export DISPLAY=:0" >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"\\\"export DISPLAY=:0\\\" done!\"" >> $JOBSCRIPT_GLOBALPATH
@@ -113,11 +121,7 @@ function ProduceJobscript_Loewe(){
         for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
             echo "cd \$dir$INDEX || exit 2" >> $JOBSCRIPT_GLOBALPATH
             if [ $MEASURE_PBP = "TRUE" ]; then
-                if [ $WILSON = "TRUE" ]; then
-                    echo "rsync -quavz \$workdir$INDEX/conf*pbp* \$dir$INDEX/Pbp || exit 2" >> $JOBSCRIPT_GLOBALPATH
-                elif [ $STAGGERED = "TRUE" ]; then
-                    echo "cp \$workdir$INDEX/${OUTPUTFILE_NAME}_pbp.dat \$dir$INDEX/${OUTPUTFILE_NAME}_pbp.\$SLURM_JOB_ID || exit 2" >> $JOBSCRIPT_GLOBALPATH
-                fi
+                echo "cp \$workdir$INDEX/${OUTPUTFILE_NAME}_pbp.dat \$dir$INDEX/${OUTPUTFILE_NAME}_pbp.\$SLURM_JOB_ID || exit 2" >> $JOBSCRIPT_GLOBALPATH
             fi
             echo "cp \$workdir$INDEX/$OUTPUTFILE_NAME \$dir$INDEX/$OUTPUTFILE_NAME.\$SLURM_JOB_ID || exit 2" >> $JOBSCRIPT_GLOBALPATH
             echo "" >> $JOBSCRIPT_GLOBALPATH

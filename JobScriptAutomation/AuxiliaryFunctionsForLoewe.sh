@@ -32,7 +32,6 @@ function ProduceInputFileAndJobScriptForEachBeta_Loewe(){
     #If the previous for loop went through, we create the beta folders (just to avoid to create some folders and then abort)
     for INDEX in "${!BETAVALUES_COPY[@]}"; do
         local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$INDEX]}"
-		local WORK_BETADIRECTORY="$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$INDEX]}"
         printf "\e[0;34m Creating directory \e[1m$BETA_PREFIX${BETAVALUES_COPY[$INDEX]}\e[0;34m..."
         mkdir $HOME_BETADIRECTORY || exit -2
         printf "\e[0;34m done!\n\e[0m"
@@ -589,8 +588,7 @@ function ProcessBetaValuesForContinue_Loewe() {
         #If the script runs fine and it arrives here, it means no bash continue command was done --> we can add BETA to the jobs to be submitted
         rm $ORIGINAL_INPUTFILE_GLOBALPATH
         LOCAL_SUBMIT_BETA_ARRAY+=( $BETA )
-		
-		cp $INPUTFILE_GLOBALPATH $WORK_BETADIRECTORY/$INPUTFILE_NAME
+
     done #loop on BETA
 
     #Partition of the LOCAL_SUBMIT_BETA_ARRAY into group of GPU_PER_NODE and create the JobScript files inside the JOBSCRIPT_FOLDER
