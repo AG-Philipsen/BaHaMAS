@@ -884,7 +884,7 @@ string[10]="\t\t" pink "                    Output files " bold " to be cleaned"
 printf string[0] , (simOnBrokenGPU>0 ? red : green)          , bold, simOnBrokenGPU
 printf string[1] , (simTooLowAcc>0   ? red : green)          , bold, simTooLowAcc    , (simTooLowAcc1K>0   ? red : green)        , bold, simTooLowAcc1K,  tooLowAccThreshold
 printf string[2] , (simLowAcc>0      ? darkOrange : green)   , bold, simLowAcc       , (simLowAcc1K>0      ? darkOrange : green) , bold, simLowAcc1K,     tooLowAccThreshold, lowAccThreshold
-printf string[3] , (simOptimalAcc==0  ? red : green)         , bold, simOptimalAcc   , (simOptimalAcc1K==0  ? red : green)       , bold, simOptimalAcc1K, lowAccThreshold, highAccThreshold
+printf string[3] , (simOptimalAcc==0  ? green : green)       , bold, simOptimalAcc   , (simOptimalAcc1K==0  ? green : green)     , bold, simOptimalAcc1K, lowAccThreshold, highAccThreshold
 printf string[4] , (simHighAcc>0     ? yellow : green)       , bold, simHighAcc      , (simHighAcc1K>0     ? yellow : green)     , bold, simHighAcc1K,    highAccThreshold, tooHighAccThreshold
 printf string[5] , (simTooHighAcc>0  ? lightOrange : green)  , bold, simTooHighAcc   , (simTooHighAcc1K>0  ? lightOrange : green), bold, simTooHighAcc1K, tooHighAccThreshold
 printf string[6] , green                                     , bold, simRunning      
