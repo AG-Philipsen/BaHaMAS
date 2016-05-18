@@ -78,8 +78,8 @@ function ProduceJobscript_Loewe(){
         for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
             echo "cp \$dir$INDEX/$INPUTFILE_NAME \$workdir$INDEX/$INPUTFILE_NAME.\$SLURM_JOB_ID || exit 2" >> $JOBSCRIPT_GLOBALPATH            		
         done
+        echo "echo \"...done!\"" >> $JOBSCRIPT_GLOBALPATH
     fi
-    echo "echo \"...done!\"" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"---------------------------\"" >> $JOBSCRIPT_GLOBALPATH
     echo "export DISPLAY=:0" >> $JOBSCRIPT_GLOBALPATH
