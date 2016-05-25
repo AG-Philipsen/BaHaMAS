@@ -76,7 +76,7 @@ function ProduceJobscript_Loewe(){
     if [ "$HOME_DIR" != "$WORK_DIR" ]; then
         echo "#Copy inputfile from home to work directories..." >> $JOBSCRIPT_GLOBALPATH
         for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-            echo "cp \$dir$INDEX/$INPUTFILE_NAME \$workdir$INDEX/$INPUTFILE_NAME.\$SLURM_JOB_ID || exit 2" >> $JOBSCRIPT_GLOBALPATH            		
+            echo "mkdir -p \$workdir$INDEX && cp \$dir$INDEX/$INPUTFILE_NAME \$workdir$INDEX/$INPUTFILE_NAME.\$SLURM_JOB_ID || exit 2" >> $JOBSCRIPT_GLOBALPATH            		
         done
         echo "echo \"...done!\"" >> $JOBSCRIPT_GLOBALPATH
     fi
