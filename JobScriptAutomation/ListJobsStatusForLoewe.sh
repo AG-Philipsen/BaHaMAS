@@ -112,6 +112,7 @@ function ListJobStatus_Loewe(){
 	    if [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}$ ]] &&
 	           [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}_"$SEED_PREFIX"[[:alnum:]]{4}_continueWithNewChain$ ]] &&
 	           [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}_"$SEED_PREFIX"[[:alnum:]]{4}_thermalizeFromHot$ ]] &&
+	           [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}_"$SEED_PREFIX"[[:alnum:]]{4}_thermalizeFromCold$ ]] &&
 	           [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}_"$SEED_PREFIX"[[:alnum:]]{4}_thermalizeFromConf$ ]]; then continue; fi
 
 	    local POSTFIX_FROM_FOLDER=$(echo ${BETA##*_} | grep -o "[[:alpha:]]\+\$")
