@@ -34,7 +34,7 @@ function ProduceInputFile_Loewe() {
     fi
     #Information about solver and measurements
     echo "solver=cg" >> $INPUTFILE_GLOBALPATH
-    echo "cgmax=8000" >> $INPUTFILE_GLOBALPATH
+    echo "cgmax=15000" >> $INPUTFILE_GLOBALPATH
     echo "measure_correlators=0" >> $INPUTFILE_GLOBALPATH
     if [ $MEASURE_PBP = "TRUE" ]; then
         echo "measure_pbp=1" >> $INPUTFILE_GLOBALPATH

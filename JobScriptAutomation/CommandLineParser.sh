@@ -35,7 +35,7 @@ function ParseCommandLineOption(){
                             "-U | --uncommentBetas"
                             "-u | --commentBetas"
                             "-i | --invertConfigurations"
-							"-D | --dataBase"
+                            "-d | --dataBase"
                             "--liststatus_all"
                             "--submitonly"
                             "--showjobs"
