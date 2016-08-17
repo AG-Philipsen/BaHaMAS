@@ -262,10 +262,22 @@ elif [ $THERMALIZE = "TRUE" ] || [ $CONTINUE_THERMALIZATION = "TRUE" ]; then
     ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
     if [ $THERMALIZE = "TRUE" ]; then
         ProduceInputFileAndJobScriptForEachBeta
+        CONFIRM="";
+        printf "\n\e[0;33m Check if everything is fine. Would you like to submit the jobs (Y/N)? \e[0m"
+		while read CONFIRM; do
+		    if [ "$CONFIRM" = "Y" ]; then
+			    break;
+		    elif [ "$CONFIRM" = "N" ]; then
+			    printf "\n\e[1;37;41mNo jobs will be submitted.\e[0m\n"
+			    exit
+		    else
+			    printf "\n\e[0;33m Please enter Y (yes) or N (no): \e[0m"
+		    fi
+		done
+        unset -v 'CONFIRM'
     elif [ $CONTINUE_THERMALIZATION = "TRUE" ]; then
         ProcessBetaValuesForContinue
     fi
-    
     SubmitJobsForValidBetaValues #TODO: Declare all possible local variable in this function as local!
     
 elif [ $CONTINUE = "TRUE" ]; then
