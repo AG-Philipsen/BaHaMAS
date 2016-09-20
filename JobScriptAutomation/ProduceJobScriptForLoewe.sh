@@ -28,7 +28,7 @@ function ProduceJobscript_Loewe(){
 	    echo "#SBATCH --gres=gpu:$GPU_PER_NODE" >> $JOBSCRIPT_GLOBALPATH
         #Option to choose only a node with 'hawaii' GPU hardware
         echo "#SBATCH --constrain=hawaii" >> $JOBSCRIPT_GLOBALPATH
-        echo "#SBATCH --exclude=lxlcsc[0025,0057,0059-0060,0097,0099,0105,0128,0145,0149,0153]" >> $JOBSCRIPT_GLOBALPATH
+        echo "#SBATCH --exclude=lxlcsc[0019,0042,0099,0119]" >> $JOBSCRIPT_GLOBALPATH
         #The following nodes of L-CSC are using tahiti as GPU hardware (sinfo -o "%4c %10z %8d %8m %10f %10G %D %N"), CL2QCD fails on them.
         #echo "#SBATCH --exclude=lxlcsc0043,lxlcsc0044,lxlcsc0045,lxlcsc0046,lxlcsc0047,lxlcsc0049,lxlcsc0050,lxlcsc0052,lxlcsc0053" >> $JOBSCRIPT_GLOBALPATH
     elif [ $CLUSTER_NAME = "LCSC_OLD" ]; then
@@ -87,6 +87,11 @@ function ProduceJobscript_Loewe(){
     #echo "export GPU_MAX_HEAP_SIZE=75" >> $JOBSCRIPT_GLOBALPATH             #Max amount of total memory of GPU allowed to be used, we do not set it for the moment
     echo "echo \"---------------------------\"" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
+    if [ $CLUSTER_NAME = "LCSC" ]; then
+        echo "# Since we run the job with a pipeline to handle the std output with mbuffer, we must activate pipefail to get the correct error code!" >> $JOBSCRIPT_GLOBALPATH
+        echo "set -o pipefail" >> $JOBSCRIPT_GLOBALPATH
+        echo "" >> $JOBSCRIPT_GLOBALPATH
+    fi
     echo "# Run jobs from different directories" >> $JOBSCRIPT_GLOBALPATH
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
         echo "mkdir -p \$workdir$INDEX || exit 2" >> $JOBSCRIPT_GLOBALPATH
@@ -111,6 +116,11 @@ function ProduceJobscript_Loewe(){
     echo "   exit 255" >> $JOBSCRIPT_GLOBALPATH
     echo "fi" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
+    if [ $CLUSTER_NAME = "LCSC" ]; then
+        echo "# Unset pipefail since not needed anymore" >> $JOBSCRIPT_GLOBALPATH
+        echo "set +o pipefail" >> $JOBSCRIPT_GLOBALPATH
+        echo "" >> $JOBSCRIPT_GLOBALPATH
+    fi
     echo "echo \"---------------------------\"" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"Date and time: \$(date)\"" >> $JOBSCRIPT_GLOBALPATH
