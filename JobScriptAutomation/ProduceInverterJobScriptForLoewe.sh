@@ -35,7 +35,6 @@ function ProduceInverterJobscript_Loewe(){
     elif [ $CLUSTER_NAME = "LCSC_OLD" ]; then
         echo "#SBATCH --partition=lcsc_lqcd" >> $JOBSCRIPT_GLOBALPATH
         echo "#SBATCH --exclude=lcsc-r03n01,lcsc-r06n17,lcsc-r06n10,lcsc-r03n12,lcsc-r03n13,lcsc-r06n02,lcsc-r06n03" >> $JOBSCRIPT_GLOBALPATH
-        #echo "#SBATCH --exclude=lcsc-r04n01,lcsc-r04n02,lcsc-r04n03,lcsc-r04n04,lcsc-r05n01,lcsc-r05n02,lcsc-r05n03,lcsc-r05n04,lcsc-r06n01,lcsc-r06n02,lcsc-r06n03,lcsc-r06n04,lcsc-r07n01,lcsc-r07n02,lcsc-r07n03,lcsc-r07n04,lcsc-r08n01,lcsc-r08n02,lcsc-r08n03,lcsc-r08n04,lcsc-r02n01,lcsc-r02n02,lcsc-r02n03,lcsc-r02n04,lcsc-r03n01,lcsc-r03n02,lcsc-r03n07,lcsc-r03n08,lcsc-r09n16,lcsc-r06n17,lcsc-r07n08,lcsc-r06n14,lcsc-r07n14,lcsc-r04n12,lcsc-r06n18,lcsc-r09n18" >> $JOBSCRIPT_GLOBALPATH
     fi
     echo "#SBATCH --ntasks=$GPU_PER_NODE" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
@@ -93,7 +92,7 @@ function ProduceInverterJobscript_Loewe(){
         echo "cd \$workdir$INDEX" >> $JOBSCRIPT_GLOBALPATH
         echo "pwd" >> $JOBSCRIPT_GLOBALPATH
         echo "if [ ! -e \$workdir$INDEX/$SRUN_COMMANDSFILE_FOR_INVERSION ]; then" >> $JOBSCRIPT_GLOBALPATH
-        echo "  echo "File \$workdir$INDEX/$SRUN_COMMANDSFILE_FOR_INVERSION with execution commands for the inversion does not exist...aborting"" >> $JOBSCRIPT_GLOBALPATH
+        echo "  echo \"File \$workdir$INDEX/$SRUN_COMMANDSFILE_FOR_INVERSION with execution commands for the inversion does not exist...aborting\"" >> $JOBSCRIPT_GLOBALPATH
         echo "  exit 30" >> $JOBSCRIPT_GLOBALPATH
         echo "fi" >> $JOBSCRIPT_GLOBALPATH
         echo "OLD_IFS=\$IFS" >> $JOBSCRIPT_GLOBALPATH
@@ -128,41 +127,11 @@ function ProduceInverterJobscript_Loewe(){
     echo "echo \"Date and time: \$(date)\"" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
-	#The following section makes no sense in the case of an inversion job and hece is outcommented. Probably it should be removed. 
-    #if [ "$HOME_DIR" != "$WORK_DIR" ]; then
-    #    echo "# Backup files" >> $JOBSCRIPT_GLOBALPATH
-    #    for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-    #        echo "cd \$dir$INDEX || exit 2" >> $JOBSCRIPT_GLOBALPATH
-    #        if [ $MEASURE_PBP = "TRUE" ]; then
-    #            if [ $WILSON = "TRUE" ]; then
-    #                echo "rsync -quavz \$workdir$INDEX/conf*pbp* \$dir$INDEX/Pbp || exit 2" >> $JOBSCRIPT_GLOBALPATH
-    #            elif [ $STAGGERED = "TRUE" ]; then
-    #                echo "cp \$workdir$INDEX/${OUTPUTFILE_NAME}_pbp.dat \$dir$INDEX/${OUTPUTFILE_NAME}_pbp.\$SLURM_JOB_ID || exit 2" >> $JOBSCRIPT_GLOBALPATH
-    #            fi
-    #        fi
-    #        echo "cp \$workdir$INDEX/$OUTPUTFILE_NAME \$dir$INDEX/$OUTPUTFILE_NAME.\$SLURM_JOB_ID || exit 2" >> $JOBSCRIPT_GLOBALPATH
-    #        echo "" >> $JOBSCRIPT_GLOBALPATH
-    #    done
-    #fi
     echo "# Remove executable" >> $JOBSCRIPT_GLOBALPATH
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
         echo "rm \$dir$INDEX/$INVERTER_FILENAME || exit 2 " >> $JOBSCRIPT_GLOBALPATH
     done
     echo "" >> $JOBSCRIPT_GLOBALPATH
-    if [ $THERMALIZE = "TRUE" ]; then
-        echo "# Copy last configuration to Thermalized Configurations folder" >> $JOBSCRIPT_GLOBALPATH
-        if [ $BETA_POSTFIX == "_thermalizeFromHot" ]; then
-            for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-                echo "cp \$workdir$INDEX/conf.save ${THERMALIZED_CONFIGURATIONS_PATH}/conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA_FOR_JOBSCRIPT[$INDEX]%%_*}_fromHot${MEASUREMENTS}" \
-                     "|| exit 2" >> $JOBSCRIPT_GLOBALPATH
-            done
-        elif [ $BETA_POSTFIX == "_thermalizeFromConf" ]; then
-            for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-                echo "cp \$workdir$INDEX/conf.save ${THERMALIZED_CONFIGURATIONS_PATH}/conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA_FOR_JOBSCRIPT[$INDEX]%%_*}_fromConf${MEASUREMENTS} " \
-                     "|| exit 2" >> $JOBSCRIPT_GLOBALPATH
-            done
-        fi
-    fi
 
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
         echo "if [ -e \$dir$INDEX/failed_inversions_tmp_file ]; then" >> $JOBSCRIPT_GLOBALPATH

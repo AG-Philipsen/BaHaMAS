@@ -250,7 +250,7 @@ elif [ $THERMALIZE = "TRUE" ] || [ $CONTINUE_THERMALIZATION = "TRUE" ]; then
     #
     # TODO: If a thermalization from hot is finished but one other crashed and one wishes to resume it, the postfix should be
     #       from Hot but it is from conf since in $THERMALIZED_CONFIGURATIONS_PATH a conf from hot is found. Think about how to fix this.
-    if [ $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA_REGEX}_fromHot[[:digit:]]\+.*" | wc -l) -eq 0 ]; then
+    if [ $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA_REGEX}_${SEED_PREFIX}${SEED_REGEX}_fromHot[[:digit:]]\+.*" | wc -l) -eq 0 ]; then
 	    BETA_POSTFIX="_thermalizeFromHot"
     else
 	    BETA_POSTFIX="_thermalizeFromConf"
@@ -259,7 +259,9 @@ elif [ $THERMALIZE = "TRUE" ] || [ $CONTINUE_THERMALIZATION = "TRUE" ]; then
 	    printf "\n \e[1;33;4mMeasurement of PBP switched off during thermalization!!\n\e[0m"
 	    MEASURE_PBP="FALSE"
     fi
+
     ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
+
     if [ $THERMALIZE = "TRUE" ]; then
         ProduceInputFileAndJobScriptForEachBeta
         CONFIRM="";
