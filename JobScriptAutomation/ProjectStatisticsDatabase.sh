@@ -770,7 +770,7 @@ function projectStatisticsDatabase(){
 		            sed -r 's/(\x1B\[.{1,2};.{1,2}m)(.)/\1 \2/g' |
 			        awk --posix -v nf=${PARAMS[0]#$NFLAVOUR_PREFIX*} -v mu=${PARAMS[1]#$CHEMPOT_PREFIX*} -v k=${PARAMS[2]#$MASS_PREFIX*} -v nt=${PARAMS[3]#$NTIME_PREFIX*} -v ns=${PARAMS[4]#*$NSPACE_PREFIX} '
 							$3 ~ /^[[:digit:]]\.[[:digit:]]{4}/{
-                            print "\033[36m " nf " \033[36m " mu " \033[36m " k " \033[36m " nt " \033[36m " ns " " $(3-1) " " $3 " " $(5-1) " " $5 " " $(8-1) " " $8 " " $(11-1) " " $(11) " " $(17-1) " " $(17) " " $(15-1) " " $15 " " $(19-1) " " $19 " " "\033[0m"
+                            print "\033[36m " nf " \033[36m " mu " \033[36m " k " \033[36m " nt " \033[36m " ns " " $(3-1) " " $3 " " $(5-1) " " $5 " " $(8-1) " " $8 " " $(11-1) " " $(11) " " $(18-1) " " $(18) " " $(15-1) " " $15 " " $(21-1) " " $21 " " "\033[0m"
 							}
 						' >> $TEMPORARY_DATABASE_FILE
 
@@ -951,64 +951,66 @@ if(criticalSituation ==1){exit 1}else{exit 0}
 	        else
                 case $SIMULATION in
                     "Simulations on broken GPU")
-                        local COLUMN_TO_FILTER="$((${COLUMNS[betaC]} -1 ))"
-                        local VALUE_TO_MATCH="${WRONG_BETA_LISTSTATUS_COLOR/e/033}"
+                        local COLUMNS_TO_FILTER=( "$((${COLUMNS[betaC]} -1 ))" )
+                        COLUMNS_TO_FILTER+=( "$((${COLUMNS[maxDsC]} -1 ))" )
+                        local VALUES_TO_MATCH=( "${WRONG_BETA_LISTSTATUS_COLOR/e/033}" )
+                        VALUES_TO_MATCH+=( "${TOO_HIGH_DELTA_S_LISTSTATUS_COLOR/e/033}" )
                         ;;
                     "Simulations stuck (or finished)")
-                        local COLUMN_TO_FILTER="$((${COLUMNS[lastTrajC]} -1 ))"
-                        local VALUE_TO_MATCH="${STUCK_SIMULATION_LISTSTATUS_COLOR/e/033}"
+                        local COLUMNS_TO_FILTER=( "$((${COLUMNS[lastTrajC]} -1 ))" )
+                        local VALUES_TO_MATCH=( "${STUCK_SIMULATION_LISTSTATUS_COLOR/e/033}" )
                         ;;
                     "Simulations with output file to be cleaned")
-                        local COLUMN_TO_FILTER="$((${COLUMNS[trajNoC]} -1 ))"
-                        local VALUE_TO_MATCH="${CLEANING_LISTSTATUS_COLOR/e/033}"
+                        local COLUMNS_TO_FILTER=( "$((${COLUMNS[trajNoC]} -1 ))" )
+                        local VALUES_TO_MATCH=( "${CLEANING_LISTSTATUS_COLOR/e/033}" )
                         ;;
                     "Simulations with too low acceptance rate")
-                        local COLUMN_TO_FILTER="$((${COLUMNS[accRateC]} -1 ))"
-                        local VALUE_TO_MATCH="${TOO_LOW_ACCEPTANCE_LISTSTATUS_COLOR/e/033}"
+                        local COLUMNS_TO_FILTER=( "$((${COLUMNS[accRateC]} -1 ))" )
+                        local VALUES_TO_MATCH=( "${TOO_LOW_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" )
                         ;;
                     "Simulations with low acceptance rate")
-                        local COLUMN_TO_FILTER="$((${COLUMNS[accRateC]} -1 ))"
-                        local VALUE_TO_MATCH="${LOW_ACCEPTANCE_LISTSTATUS_COLOR/e/033}"
+                        local COLUMNS_TO_FILTER=( "$((${COLUMNS[accRateC]} -1 ))" )
+                        local VALUES_TO_MATCH=( "${LOW_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" )
                         ;;
                     "Simulations with optimal acceptance rate")
-                        local COLUMN_TO_FILTER="$((${COLUMNS[accRateC]} -1 ))"
-                        local VALUE_TO_MATCH="${OPTIMAL_ACCEPTANCE_LISTSTATUS_COLOR/e/033}"
+                        local COLUMNS_TO_FILTER=( "$((${COLUMNS[accRateC]} -1 ))" )
+                        local VALUES_TO_MATCH=( "${OPTIMAL_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" )
                         ;;
                     "Simulations with high acceptance rate")
-                        local COLUMN_TO_FILTER="$((${COLUMNS[accRateC]} -1 ))"
-                        local VALUE_TO_MATCH="${HIGH_ACCEPTANCE_LISTSTATUS_COLOR/e/033}"
+                        local COLUMNS_TO_FILTER=( "$((${COLUMNS[accRateC]} -1 ))" )
+                        local VALUES_TO_MATCH=( "${HIGH_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" )
                         ;;
                     "Simulations with too high acceptance rate")
-                        local COLUMN_TO_FILTER="$((${COLUMNS[accRateC]} -1 ))"
-                        local VALUE_TO_MATCH="${TOO_HIGH_ACCEPTANCE_LISTSTATUS_COLOR/e/033}"
+                        local COLUMNS_TO_FILTER=( "$((${COLUMNS[accRateC]} -1 ))" )
+                        local VALUES_TO_MATCH=( "${TOO_HIGH_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" )
                         ;;
                     "Simulations with too low acceptance rate in last 1k trajectories")
-                        local COLUMN_TO_FILTER="$((${COLUMNS[accRateLast1KC]} -1 ))"
-                        local VALUE_TO_MATCH="${TOO_LOW_ACCEPTANCE_LISTSTATUS_COLOR/e/033}"
+                        local COLUMNS_TO_FILTER=( "$((${COLUMNS[accRateLast1KC]} -1 ))" )
+                        local VALUES_TO_MATCH=( "${TOO_LOW_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" )
                         ;;
                     "Simulations with low acceptance rate in last 1k trajectories")
-                        local COLUMN_TO_FILTER="$((${COLUMNS[accRateLast1KC]} -1 ))"
-                        local VALUE_TO_MATCH="${LOW_ACCEPTANCE_LISTSTATUS_COLOR/e/033}"
+                        local COLUMNS_TO_FILTER=( "$((${COLUMNS[accRateLast1KC]} -1 ))" )
+                        local VALUES_TO_MATCH=( "${LOW_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" )
                         ;;
                     "Simulations with optimal acceptance rate in last 1k trajectories")
-                        local COLUMN_TO_FILTER="$((${COLUMNS[accRateLast1KC]} -1 ))"
-                        local VALUE_TO_MATCH="${OPTIMAL_ACCEPTANCE_LISTSTATUS_COLOR/e/033}"
+                        local COLUMNS_TO_FILTER=( "$((${COLUMNS[accRateLast1KC]} -1 ))" ) 
+                        local VALUES_TO_MATCH=( "${OPTIMAL_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" )
                         ;;
                     "Simulations with high acceptance rate in last 1k trajectories")
-                        local COLUMN_TO_FILTER="$((${COLUMNS[accRateLast1KC]} -1 ))"
-                        local VALUE_TO_MATCH="${HIGH_ACCEPTANCE_LISTSTATUS_COLOR/e/033}"
+                        local COLUMNS_TO_FILTER=( "$((${COLUMNS[accRateLast1KC]} -1 ))" )
+                        local VALUES_TO_MATCH=( "${HIGH_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" )
                         ;;
                     "Simulations with too high acceptance rate in last 1k trajectories")
-                        local COLUMN_TO_FILTER="$((${COLUMNS[accRateLast1KC]} -1 ))"
-                        local VALUE_TO_MATCH="${TOO_HIGH_ACCEPTANCE_LISTSTATUS_COLOR/e/033}"
+                        local COLUMNS_TO_FILTER=( "$((${COLUMNS[accRateLast1KC]} -1 ))" )
+                        local VALUES_TO_MATCH=( "${TOO_HIGH_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" )
                         ;;
                     "Running simulations")
-                        local COLUMN_TO_FILTER="$((${COLUMNS[statusC]} -1 ))"
-                        local VALUE_TO_MATCH="${RUNNING_LISTSTATUS_COLOR/e/033}"
+                        local COLUMNS_TO_FILTER=( "$((${COLUMNS[statusC]} -1 ))" )
+                        local VALUES_TO_MATCH=( "${RUNNING_LISTSTATUS_COLOR/e/033}" )
                         ;;
                     "Pending simulations")
-                        local COLUMN_TO_FILTER="$((${COLUMNS[statusC]} -1 ))"
-                        local VALUE_TO_MATCH="${PENDING_LISTSTATUS_COLOR/e/033}"
+                        local COLUMNS_TO_FILTER=( "$((${COLUMNS[statusC]} -1 ))" )
+                        local VALUES_TO_MATCH=( "${PENDING_LISTSTATUS_COLOR/e/033}" )
                         ;;
                 esac
                 break
@@ -1016,7 +1018,10 @@ if(criticalSituation ==1){exit 1}else{exit 0}
         done
         printf "\n\e[0m"        
 
-        awk --posix -v columnToFilter="$COLUMN_TO_FILTER" -v valueToMatch="$VALUE_TO_MATCH" '$columnToFilter == valueToMatch{print $0}' $PROJECT_DATABASE_FILE >> $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE
+        for i in ${!COLUMNS_TO_FILTER[@]}
+        do
+            awk --posix -v columnToFilter="${COLUMNS_TO_FILTER[$i]}" -v valueToMatch="${VALUES_TO_MATCH[$i]}" '$columnToFilter == valueToMatch{print $0}' $PROJECT_DATABASE_FILE >> $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE
+        done
 
         if [ $(wc -l < $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE) -eq 0 ]; then
             printf " \e[38;5;202m $SIMULATION not found in database (last update ended on \e[1m$(date -r $PROJECT_DATABASE_FILE +"%d.%m.%Y\e[21m at \e[1m%H:%M")\e[21m).\n\n\e[0m"

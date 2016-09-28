@@ -355,9 +355,14 @@ function ColorBeta(){
 
 
 function ColorDeltaS(){
-    if [ "$POSTFIX_FROM_FOLDER" == "continueWithNewChain" ] && [ $(bc -l <<< "$1>=$DELTA_S_THRESHOLD") -eq 1 ]; then
-        echo "$TOO_HIGH_DELTA_S_LISTSTATUS_COLOR"
-    else
+    if [[ ! $1 =~ [+-]?[[:digit:]]+[.]?[[:digit:]]* ]]; then 
+        echo "_$1_"
         echo "$DEFAULT_LISTSTATUS_COLOR"
+    else
+        if [ "$POSTFIX_FROM_FOLDER" == "continueWithNewChain" ] && [ $(bc -l <<< "$1>=$DELTA_S_THRESHOLD") -eq 1 ]; then
+            echo "$TOO_HIGH_DELTA_S_LISTSTATUS_COLOR"
+        else
+            echo "$DEFAULT_LISTSTATUS_COLOR"
+        fi
     fi
 }
