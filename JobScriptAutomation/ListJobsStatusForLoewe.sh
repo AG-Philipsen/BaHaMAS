@@ -99,7 +99,7 @@ function ListJobStatus_Loewe(){
     local JOBS_STATUS_FILE="jobs_status_$LOCAL_PARAMETERS_STRING.txt"
     rm -f $JOBS_STATUS_FILE
     
-    printf "\n\e[0;36m===============================================================================================================================================\n\e[0m"
+    printf "\n${DEFAULT_LISTSTATUS_COLOR}===============================================================================================================================================\n\e[0m"
     printf "\e[0;35m%s\t\t  %s\t  %s\t   %s\t  %s\t%s\n\e[0m"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" "Last tr. finished" " Tr: # (time last|av.)"
     printf "%s\t\t\t  %s\t  %s\t%s\t  %s\t%s\n"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" >> $JOBS_STATUS_FILE
 
@@ -246,13 +246,13 @@ function ListJobStatus_Loewe(){
 	    
 	    printf \
             "$(ColorBeta)%-15s\t  \
-$(ColorClean $TO_BE_CLEANED)%8s\e[0;36m \
-($(GoodAcc $ACCEPTANCE)%s %%\e[0;36m) \
-[$(GoodAcc $ACCEPTANCE_LAST)%s %%\e[0;36m] \
+$(ColorClean $TO_BE_CLEANED)%8s${DEFAULT_LISTSTATUS_COLOR} \
+($(GoodAcc $ACCEPTANCE)%s %%${DEFAULT_LISTSTATUS_COLOR}) \
+[$(GoodAcc $ACCEPTANCE_LAST)%s %%${DEFAULT_LISTSTATUS_COLOR}] \
 %s-%s%s%s\t\
-$(ColorStatus $STATUS)%9s\e[0;36m\
-\t%9s\t   \
-$(ColorTime $TIME_FROM_LAST_MODIFICATION)%s\e[0;36m      \
+$(ColorStatus $STATUS)%9s${DEFAULT_LISTSTATUS_COLOR}\t\
+$(ColorDeltaS $MAX_DELTAS)%9s${DEFAULT_LISTSTATUS_COLOR}\t   \
+$(ColorTime $TIME_FROM_LAST_MODIFICATION)%s${DEFAULT_LISTSTATUS_COLOR}      \
 %6s \
 ( %s ) \
 \n\e[0m" \
@@ -273,7 +273,7 @@ $(ColorTime $TIME_FROM_LAST_MODIFICATION)%s\e[0;36m      \
 	    fi
 	    
     done #Loop on BETA
-    printf "\e[0;36m===============================================================================================================================================\n\e[0m"
+    printf "${DEFAULT_LISTSTATUS_COLOR}===============================================================================================================================================\n\e[0m"
 }
 
 function GetShortenedBetaString(){
@@ -354,3 +354,10 @@ function ColorBeta(){
 }
 
 
+function ColorDeltaS(){
+    if [ "$POSTFIX_FROM_FOLDER" == "continueWithNewChain" ] && [ $(bc -l <<< "$1>=$DELTA_S_THRESHOLD") -eq 1 ]; then
+        echo "$TOO_HIGH_DELTA_S_LISTSTATUS_COLOR"
+    else
+        echo "$DEFAULT_LISTSTATUS_COLOR"
+    fi
+}

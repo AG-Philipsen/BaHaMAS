@@ -93,10 +93,11 @@ if [ $STAGGERED = "TRUE" ]; then
     USE_RATIONAL_APPROXIMATION_FILE="TRUE"
 fi
 
-#Variables for Liststatus colors and acceptances thresholds (here since they are used also by the database)
+#Variables for Liststatus colors and acceptances/deltaS thresholds (here since they are used also by the database)
 DEFAULT_LISTSTATUS_COLOR="\e[0;36m"
 SUSPICIOUS_BETA_LISTSTATUS_COLOR="\e[0;33m"
 WRONG_BETA_LISTSTATUS_COLOR="\e[0;91m"
+TOO_HIGH_DELTA_S_LISTSTATUS_COLOR="\e[0;91m"
 TOO_LOW_ACCEPTANCE_LISTSTATUS_COLOR="\e[38;5;9m"
 LOW_ACCEPTANCE_LISTSTATUS_COLOR="\e[38;5;208m"
 OPTIMAL_ACCEPTANCE_LISTSTATUS_COLOR="\e[38;5;10m"
