@@ -24,26 +24,28 @@ function projectStatisticsDatabase(){
     TRAJNO_C=$((2*7)) 
     ACCRATE_C=$((2*8)) 
     ACCRATE_LAST1K_C=$((2*9)) 
-    STATUS_C=$((2*10)) 
-    LASTTRAJ_C=$((2*11))
+    MAX_ACTION_C=$((2*10))
+    STATUS_C=$((2*11)) 
+    LASTTRAJ_C=$((2*12))
 
     declare -A COLUMNS=( [nfC]=$NF_C [muC]=$MU_C [kC]=$K_C [ntC]=$NT_C [nsC]=$NS_C [betaC]=$BETA_C [trajNoC]=$TRAJNO_C [accRateC]=$ACCRATE_C [accRateLast1KC]=$ACCRATE_LAST1K_C \
-                              [statusC]=$STATUS_C [lastTrajC]=$LASTTRAJ_C )
+                              [maxDsC]=$MAX_ACTION_C [statusC]=$STATUS_C [lastTrajC]=$LASTTRAJ_C )
 
     #FSNA = FORMAT_SPECIFIER_NUMBER_ARRAY
-    declare -A FSNA=( [nfC]="6" [muC]="7" [kC]="8" [ntC]="6" [nsC]="6" [betaC]="19" [trajNoC]="11" [accRateC]="8" [accRateLast1KC]="12" [statusC]="13" [lastTrajC]="11" )
+    declare -A FSNA=( [nfC]="6" [muC]="7" [kC]="8" [ntC]="6" [nsC]="6" [betaC]="19" [trajNoC]="11" [accRateC]="8" [accRateLast1KC]="12" [maxDsC]="12" [statusC]="13" [lastTrajC]="11" )
 
     declare -A PRINTF_FORMAT_SPECIFIER_ARRAY=( [nfC]="%+${FSNA[nfC]}s" [muC]="%+${FSNA[muC]}s" [kC]="%+${FSNA[kC]}s" [ntC]="%${FSNA[ntC]}d" [nsC]="%${FSNA[nsC]}d" [betaC]="%+${FSNA[betaC]}s" \
-											        [trajNoC]="%${FSNA[trajNoC]}d" [accRateC]="%+${FSNA[accRateC]}s" [accRateLast1KC]="%+${FSNA[accRateLast1KC]}s" [statusC]="%+${FSNA[statusC]}s" [lastTrajC]="%+${FSNA[lastTrajC]}s" )
+											        [trajNoC]="%${FSNA[trajNoC]}d" [accRateC]="%+${FSNA[accRateC]}s" [accRateLast1KC]="%+${FSNA[accRateLast1KC]}s" [maxDsC]="%+${FSNA[maxDsC]}s" \
+                                                    [statusC]="%+${FSNA[statusC]}s" [lastTrajC]="%+${FSNA[lastTrajC]}s" )
 
     declare -A HEADER_PRINTF_FORMAT_SPECIFIER_ARRAY=( [nfC]="%+$((${FSNA[nfC]}+1))s" [muC]="%+$((${FSNA[muC]}+1))s" [kC]="%+$((${FSNA[kC]}+1))s" [ntC]="%+$((${FSNA[ntC]}+1))s" [nsC]="%+$((${FSNA[nsC]}+1))s" [betaC]="%+$((${FSNA[betaC]}+1))s" \
-                                                           [trajNoC]="%+$((${FSNA[trajNoC]}+1))s" [accRateC]="%+$((${FSNA[accRateC]}+1))s" [accRateLast1KC]="%+$((${FSNA[accRateLast1KC]}+1))s" [statusC]="%+$((${FSNA[statusC]}+1))s" [lastTrajC]="%+$((${FSNA[lastTrajC]}+1))s" )
+                                                           [trajNoC]="%+$((${FSNA[trajNoC]}+1))s" [accRateC]="%+$((${FSNA[accRateC]}+1))s" [accRateLast1KC]="%+$((${FSNA[accRateLast1KC]}+1))s" [maxDsC]="%+$((${FSNA[maxDsC]}+1))s" [statusC]="%+$((${FSNA[statusC]}+1))s" [lastTrajC]="%+$((${FSNA[lastTrajC]}+1))s" )
 
     [ $WILSON = "TRUE" ] && MASS_PARAMETER="kappa"
     [ $STAGGERED = "TRUE" ] && MASS_PARAMETER="mass"
 
     declare -A HEADER_PRINTF_PARAMETER_ARRAY=( [nfC]="nf" [muC]=$CHEMPOT_PREFIX [kC]=$MASS_PARAMETER [ntC]=$NTIME_PREFIX [nsC]=$NSPACE_PREFIX [betaC]="beta_chain_type" [trajNoC]="trajNo" \
-											        [accRateC]="acc" [accRateLast1KC]="accLast1K" [statusC]="status" [lastTrajC]="l.T.[s]" )
+											        [accRateC]="acc" [accRateLast1KC]="accLast1K" [maxDsC]="maxDS" [statusC]="status" [lastTrajC]="l.T.[s]" )
 
     declare -a NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=()
 
@@ -77,8 +79,10 @@ function projectStatisticsDatabase(){
     local FILTER_TRAJNO="FALSE"	
     local FILTER_ACCRATE="FALSE"	
     local FILTER_ACCRATE_LAST1K="FALSE"	
+    local FILTER_MAX_ACTION="FALSE"
     local FILTER_STATUS="FALSE"	
     local FILTER_LASTTRAJ="FALSE"
+
     local UPDATE_WITH_FREQUENCY="FALSE"
 
     declare -a local NF_ARRAY
@@ -163,6 +167,10 @@ function projectStatisticsDatabase(){
 						    NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER+=( accRateLast1KC )
 						    shift
 						    ;;
+                        maxDS)
+                            NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER+=( maxDsC )
+                            shift
+                            ;;
 					    status)
 						    NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER+=( statusC )
 						    shift
@@ -301,6 +309,10 @@ function projectStatisticsDatabase(){
 			    done
 			    [ "$ACCRATE_LAST1K_LOW_VALUE" = "" ] && [ "$ACCRATE_LAST1K_HIGH_VALUE" = "" ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
 			    ;;
+            --maxDS)
+                DISPLAY="TRUE"
+                FILTER_MAX_ACTION="TRUE"
+                ;;
 		    --status)
                 DISPLAY="TRUE"
 			    FILTER_STATUS="TRUE"	
@@ -387,6 +399,7 @@ function projectStatisticsDatabase(){
 			    echo -e "                         E.g. --traj \">10000\" \"<50000\" (DON'T FORGET THE QUOTES.)"
 			    echo -e "     --acc          -->  Specify either a minimal or a maximal value or both for the acceptance rate to be filtered for."
 			    echo -e "                         E.g. --acc \">50.23\" \"<80.1\" (The value is in percentage. DON'T FORGET THE QUOTES.)"
+                echo -e "     --maxDS        -->  (NOT YET IMPLEMENTED) Specify either a minimal or a maximal value or both for the acceptance rate to be filtered for."
 			    echo -e "     --status       -->  Specify status value for the corresponding simulation."
 			    echo -e "                         Possible values are: RUNNING, PENDING, notQueued."
 			    echo -e "     --lastTraj     -->  Specify a value in seconds. If the specified value exceeds the value of the field, the record is not printed."
@@ -507,7 +520,7 @@ function projectStatisticsDatabase(){
 
 
 	    if [ "$CUSTOMIZE_COLUMNS" = "FALSE" ]; then
-		    NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=( nfC muC kC ntC nsC betaC trajNoC accRateC accRateLast1KC statusC lastTrajC )
+		    NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=( nfC muC kC ntC nsC betaC trajNoC accRateC accRateLast1KC maxDsC statusC lastTrajC )
 	    fi
 
 	    for NAME_OF_COLUMN in ${!COLUMNS[@]}; do
@@ -538,8 +551,8 @@ function projectStatisticsDatabase(){
 
 	    awk --posix -v filterNf=$FILTER_NF -v filterMu=$FILTER_MU -v filterKappa=$FILTER_MASS -v filterNt=$FILTER_NT -v filterNs=$FILTER_NS \
 			-v filterBeta=$FILTER_BETA -v filterType=$FILTER_TYPE \
-			-v filterTrajNo=$FILTER_TRAJNO -v filterAccRate=$FILTER_ACCRATE -v filterAccRateLast1K=$FILTER_ACCRATE_LAST1K -v filterStatus=$FILTER_STATUS -v filterLastTrajTime=$FILTER_LASTTRAJ \
-			-v statisticsSummary=$STATISTICS_SUMMARY \
+			-v filterTrajNo=$FILTER_TRAJNO -v filterAccRate=$FILTER_ACCRATE -v filterAccRateLast1K=$FILTER_ACCRATE_LAST1K -v filterMaxDs=$FILTER_MAX_ACTION \
+            -v filterStatus=$FILTER_STATUS -v filterLastTrajTime=$FILTER_LASTTRAJ -v statisticsSummary=$STATISTICS_SUMMARY \
 			-v nfString="$NF_STRING" -v muString="$MU_STRING" -v kappaString="$MASS_STRING" -v nsString="$NS_STRING" -v ntString="$NT_STRING" -v betaString="$BETA_STRING" \
 			-v typeString=$TYPE_STRING -v statusString="$STATUS_STRING" \
 			-v trajLowValue=$TRAJ_LOW_VALUE -v trajHighValue=$TRAJ_HIGH_VALUE -v accRateLowValue=$ACCRATE_LOW_VALUE -v accRateHighValue=$ACCRATE_HIGH_VALUE \
@@ -757,7 +770,7 @@ function projectStatisticsDatabase(){
 		            sed -r 's/(\x1B\[.{1,2};.{1,2}m)(.)/\1 \2/g' |
 			        awk --posix -v nf=${PARAMS[0]#$NFLAVOUR_PREFIX*} -v mu=${PARAMS[1]#$CHEMPOT_PREFIX*} -v k=${PARAMS[2]#$MASS_PREFIX*} -v nt=${PARAMS[3]#$NTIME_PREFIX*} -v ns=${PARAMS[4]#*$NSPACE_PREFIX} '
 							$3 ~ /^[[:digit:]]\.[[:digit:]]{4}/{
-								print "\033[36m " nf " \033[36m " mu " \033[36m " k " \033[36m " nt " \033[36m " ns " " $(3-1) " " $3 " " $(5-1) " " $5 " " $(8-1) " " $8 " " $(11-1) " " $(11) " " $(15-1) " " $15 " " $(19-1) " " $19 " " "\033[0m"
+                            print "\033[36m " nf " \033[36m " mu " \033[36m " k " \033[36m " nt " \033[36m " ns " " $(3-1) " " $3 " " $(5-1) " " $5 " " $(8-1) " " $8 " " $(11-1) " " $(11) " " $(17-1) " " $(17) " " $(15-1) " " $15 " " $(19-1) " " $19 " " "\033[0m"
 							}
 						' >> $TEMPORARY_DATABASE_FILE
 
@@ -802,6 +815,7 @@ function projectStatisticsDatabase(){
             -v trajNoColorColumn="$((${COLUMNS[trajNoC]} -1 ))" \
             -v accRateColorColumn="$((${COLUMNS[accRateC]} -1 ))" \
             -v accRateLast1KColorColumn="$((${COLUMNS[accRateLast1KC]} -1 ))" \
+            -v maxDsColorColumn="$((${COLUMNS[maxDsC]} -1 ))" \
             -v statusColorColumn="$((${COLUMNS[statusC]} -1 ))" \
             -v lastTrajColorColumn="$((${COLUMNS[lastTrajC]} -1 ))" \
             -v defaultColor="${DEFAULT_LISTSTATUS_COLOR/e/033}" \
@@ -812,6 +826,7 @@ function projectStatisticsDatabase(){
             -v optimalAccColor="${OPTIMAL_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" \
             -v highAccColor="${HIGH_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" \
             -v tooHighAccColor="${TOO_HIGH_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" \
+            -v tooHighMaxDsColor="${TOO_HIGH_DELTA_S_LISTSTATUS_COLOR/e/033}" \
             -v runningColor="${RUNNING_LISTSTATUS_COLOR/e/033}" \
             -v pendingColor="${PENDING_LISTSTATUS_COLOR/e/033}" \
             -v toBeCleanedColor="${CLEANING_LISTSTATUS_COLOR/e/033}" \
@@ -820,7 +835,8 @@ function projectStatisticsDatabase(){
             -v tooLowAccThreshold="${TOO_LOW_ACCEPTANCE_THRESHOLD}" \
             -v lowAccThreshold="${LOW_ACCEPTANCE_THRESHOLD}" \
             -v highAccThreshold="${HIGH_ACCEPTANCE_THRESHOLD}" \
-            -v tooHighAccThreshold="${TOO_HIGH_ACCEPTANCE_THRESHOLD}" '
+            -v tooHighAccThreshold="${TOO_HIGH_ACCEPTANCE_THRESHOLD}" \
+            -v tooHighMaxDsThreshold="${DELTA_S_THRESHOLD}" '
 BEGIN{
 filesToBeCleaned = 0
 simTooLowAcc = 0
@@ -841,7 +857,7 @@ simOnBrokenGPU = 0
 criticalSituation = 0
 }
 {
-if($betaColorColumn == wrongBetaColor){simOnBrokenGPU+=1; criticalSituation=1}
+if($betaColorColumn == wrongBetaColor || $maxDsColorColumn == tooHighMaxDsColor){simOnBrokenGPU+=1; criticalSituation=1}
 if($trajNoColorColumn == toBeCleanedColor){filesToBeCleaned+=1} 
 if($accRateColorColumn == tooLowAccColor){simTooLowAcc+=1; criticalSituation=1}
 if($accRateColorColumn == lowAccColor){simLowAcc+=1}
@@ -1020,7 +1036,7 @@ if(criticalSituation ==1){exit 1}else{exit 0}
 function __static__DisplayDatabaseFile() {
 
 	if [ "$CUSTOMIZE_COLUMNS" = "FALSE" ]; then
-		NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=( nfC muC kC ntC nsC betaC trajNoC accRateC accRateLast1KC statusC lastTrajC )
+		NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=( nfC muC kC ntC nsC betaC trajNoC accRateC accRateLast1KC maxDsC statusC lastTrajC )
 	fi
 
 	for NAME_OF_COLUMN in ${!COLUMNS[@]}; do
