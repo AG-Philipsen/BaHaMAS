@@ -13,7 +13,7 @@ HOME_DIR=""
 WORK_DIR="" 
 GPU_PER_NODE=
 JOBSCRIPT_LOCALFOLDER=""
-FILE_WITH_INFORMATION_WHICH_NODES_TO_EXCLUDE=""
+FILE_WITH_WHICH_NODES_TO_EXCLUDE=""
 
 if [ $WILSON = "TRUE" ]; then
     
@@ -65,6 +65,7 @@ INVERTER_GLOBALPATH="${HOME}/$HMC_BUILD_PATH/$INVERTER_FILENAME"
 #     WORK_DIR                              path to the disk from which the jobs are run (see further informations below)
 #     GPU_PER_NODE                          number of GPUs per node
 #     JOBSCRIPT_LOCALFOLDER                 name of the folder where the job scripts are collected
+#     FILE_WITH_WHICH_NODES_TO_EXCLUDE      local or remote global path to file containing the sbatch directive to exclude nodes (--exclude=...)
 #     SIMULATION_PATH                       path to the folder containing the parameters folders structure (see further informations below)
 #     HMC_FILENAME                          name of the executable
 #     INPUTFILE_NAME                        name of the inputfile

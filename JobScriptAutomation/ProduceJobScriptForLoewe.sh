@@ -33,26 +33,18 @@ function ProduceJobscript_Loewe(){
         echo "#SBATCH --partition=lcsc_lqcd" >> $JOBSCRIPT_GLOBALPATH
     fi
 
-	if [[ $FILE_WITH_INFORMATION_WHICH_NODES_TO_EXCLUDE =~ ^.+[@]*[^/]+[:] ]]; 
-	then 
-		SERVER_AND_PATH=($(awk -v server_colon_path=$FILE_WITH_INFORMATION_WHICH_NODES_TO_EXCLUDE 'BEGIN{split(server_colon_path,server_and_path,":");printf("%s %s",server_and_path[1],server_and_path[2])}'))
-
-        EXCLUDE_STRING=$(ssh ${SERVER_AND_PATH[0]} "grep -oE '\-\-exclude=.*\[.*\]' ${SERVER_AND_PATH[1]} 2>/dev/null")
-	else 
-		if [ -f $FILE_WITH_INFORMATION_WHICH_NODES_TO_EXCLUDE ]
-		then
-			EXCLUDE_STRING=$(grep -oE '\-\-exclude=.*\[.*\]' $FILE_WITH_INFORMATION_WHICH_NODES_TO_EXCLUDE 2>/dev/null)
-		fi
+	if [ -f "$FILE_WITH_WHICH_NODES_TO_EXCLUDE" ]; then
+		EXCLUDE_STRING=$(grep -oE '\-\-exclude=.*\[.*\]' $FILE_WITH_WHICH_NODES_TO_EXCLUDE 2>/dev/null)
+	elif [[ $FILE_WITH_WHICH_NODES_TO_EXCLUDE =~ : ]]; then 
+        EXCLUDE_STRING=$(ssh ${FILE_WITH_WHICH_NODES_TO_EXCLUDE%%:*} "grep -oE '\-\-exclude=.*\[.*\]' ${FILE_WITH_WHICH_NODES_TO_EXCLUDE#*:} 2>/dev/null")
 	fi
-
-	[ "$EXCLUDE_STRING" != "" ] && echo "#SBATCH $EXCLUDE_STRING"  >> $JOBSCRIPT_GLOBALPATH
-	if [  "$EXCLUDE_STRING" = "" ]
-    then 
-        echo -e "\e[31m WARNING! NO EXCLUDE STRING FOR EXCLUDING NODES IN JOBSCRIPT!\e[0m"
-        echo -e "\e[31m Do you still want to continue with jobscript creation? [Y/N] \e[0m"
-        
-        while read CONFIRM; 
-        do
+    if [ "$EXCLUDE_STRING" != "" ]; then
+        echo "#SBATCH $EXCLUDE_STRING"  >> $JOBSCRIPT_GLOBALPATH
+        printf "\e[1A\e[80C\t$EXCLUDE_STRING\n"
+    else
+        printf "\n\e[0;33m \e[1m\e[4mWARNING\e[24m:\e[0;33m No exclude string to exclude nodes in jobscript found!"
+        printf " Do you still want to continue with jobscript creation? [Y/N] \e[0m"
+        while read CONFIRM; do
             if [ "$CONFIRM" = "Y" ]; then
                 break
             elif [ "$CONFIRM" = "N" ]; then
