@@ -33,16 +33,14 @@ function ProduceJobscript_Loewe(){
         echo "#SBATCH --partition=lcsc_lqcd" >> $JOBSCRIPT_GLOBALPATH
     fi
 
-	if [[ $FILE_WITH_INFORMATION_WHICH_NODES_TO_EXCLUDE =~ ^.+[@][^/]+[:] ]]; 
+	if [[ $FILE_WITH_INFORMATION_WHICH_NODES_TO_EXCLUDE =~ ^.+[@]*[^/]+[:] ]]; 
 	then 
 		SERVER_AND_PATH=($(awk -v server_colon_path=$FILE_WITH_INFORMATION_WHICH_NODES_TO_EXCLUDE 'BEGIN{split(server_colon_path,server_and_path,":");printf("%s %s",server_and_path[1],server_and_path[2])}'))
 
-		EXCLUDE_STRING=$(ssh ${SERVER_AND_PATH[0]} "grep -oE '\-\-exclude=.*\[.*\]' ${SERVER_AND_PATH[1]} 2>/dev/null")
+        EXCLUDE_STRING=$(ssh ${SERVER_AND_PATH[0]} "grep -oE '\-\-exclude=.*\[.*\]' ${SERVER_AND_PATH[1]} 2>/dev/null")
 	else 
-		echo HERE
 		if [ -f $FILE_WITH_INFORMATION_WHICH_NODES_TO_EXCLUDE ]
 		then
-			echo THERE
 			EXCLUDE_STRING=$(grep -oE '\-\-exclude=.*\[.*\]' $FILE_WITH_INFORMATION_WHICH_NODES_TO_EXCLUDE 2>/dev/null)
 		fi
 	fi
