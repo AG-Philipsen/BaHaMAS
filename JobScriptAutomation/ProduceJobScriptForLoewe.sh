@@ -46,7 +46,24 @@ function ProduceJobscript_Loewe(){
 	fi
 
 	[ "$EXCLUDE_STRING" != "" ] && echo "#SBATCH $EXCLUDE_STRING"  >> $JOBSCRIPT_GLOBALPATH
-	[  "$EXCLUDE_STRING" = "" ] && echo -e "\e[31m WARNING! NO EXCLUDE STRING FOR EXCLUDING NODES IN JOBSCRIPT!\e[0m"
+	if [  "$EXCLUDE_STRING" = "" ]
+    then 
+        echo -e "\e[31m WARNING! NO EXCLUDE STRING FOR EXCLUDING NODES IN JOBSCRIPT!\e[0m"
+        echo -e "\e[31m Do you still want to continue with jobscript creation? [Y/N] \e[0m"
+        
+        while read CONFIRM; 
+        do
+            if [ "$CONFIRM" = "Y" ]; then
+                break
+            elif [ "$CONFIRM" = "N" ]; then
+                printf "\n\e[1;31m Exiting from job script creation process...\e[0m\n\n"
+                rm -f $JOBSCRIPT_GLOBALPATH
+                exit
+            else
+                printf "\e[0;36m\e[1m Please enter Y (yes) or N (no): \e[0m"
+            fi
+        done
+    fi
 
     echo "#SBATCH --ntasks=$GPU_PER_NODE" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
