@@ -28,14 +28,28 @@ function ProduceJobscript_Loewe(){
 	    echo "#SBATCH --gres=gpu:$GPU_PER_NODE" >> $JOBSCRIPT_GLOBALPATH
         #Option to choose only a node with 'hawaii' GPU hardware
         echo "#SBATCH --constrain=hawaii" >> $JOBSCRIPT_GLOBALPATH
-        echo "#SBATCH --exclude=lxlcsc[0019,0042,0043-0053,0097,0099,0116,0119,0137,0149,0151-0154,0157]" >> $JOBSCRIPT_GLOBALPATH
         #The following nodes of L-CSC are using tahiti as GPU hardware (sinfo -o "%4c %10z %8d %8m %10f %10G %D %N"), CL2QCD fails on them.
-        #echo "#SBATCH --exclude=lxlcsc0043,lxlcsc0044,lxlcsc0045,lxlcsc0046,lxlcsc0047,lxlcsc0049,lxlcsc0050,lxlcsc0052,lxlcsc0053" >> $JOBSCRIPT_GLOBALPATH
     elif [ $CLUSTER_NAME = "LCSC_OLD" ]; then
         echo "#SBATCH --partition=lcsc_lqcd" >> $JOBSCRIPT_GLOBALPATH
-        echo "#SBATCH --exclude=lcsc-r03n01,lcsc-r06n17,lcsc-r06n10,lcsc-r03n12,lcsc-r03n13,lcsc-r06n02,lcsc-r06n03" >> $JOBSCRIPT_GLOBALPATH
-        #echo "#SBATCH --exclude=lcsc-r04n01,lcsc-r04n02,lcsc-r04n03,lcsc-r04n04,lcsc-r05n01,lcsc-r05n02,lcsc-r05n03,lcsc-r05n04,lcsc-r06n01,lcsc-r06n02,lcsc-r06n03,lcsc-r06n04,lcsc-r07n01,lcsc-r07n02,lcsc-r07n03,lcsc-r07n04,lcsc-r08n01,lcsc-r08n02,lcsc-r08n03,lcsc-r08n04,lcsc-r02n01,lcsc-r02n02,lcsc-r02n03,lcsc-r02n04,lcsc-r03n01,lcsc-r03n02,lcsc-r03n07,lcsc-r03n08,lcsc-r09n16,lcsc-r06n17,lcsc-r07n08,lcsc-r06n14,lcsc-r07n14,lcsc-r04n12,lcsc-r06n18,lcsc-r09n18" >> $JOBSCRIPT_GLOBALPATH
     fi
+
+	if [[ $FILE_WITH_INFORMATION_WHICH_NODES_TO_EXCLUDE =~ ^.+[@][^/]+[:] ]]; 
+	then 
+		SERVER_AND_PATH=($(awk -v server_colon_path=$FILE_WITH_INFORMATION_WHICH_NODES_TO_EXCLUDE 'BEGIN{split(server_colon_path,server_and_path,":");printf("%s %s",server_and_path[1],server_and_path[2])}'))
+
+		EXCLUDE_STRING=$(ssh ${SERVER_AND_PATH[0]} "grep -oE '\-\-exclude=.*\[.*\]' ${SERVER_AND_PATH[1]} 2>/dev/null")
+	else 
+		echo HERE
+		if [ -f $FILE_WITH_INFORMATION_WHICH_NODES_TO_EXCLUDE ]
+		then
+			echo THERE
+			EXCLUDE_STRING=$(grep -oE '\-\-exclude=.*\[.*\]' $FILE_WITH_INFORMATION_WHICH_NODES_TO_EXCLUDE 2>/dev/null)
+		fi
+	fi
+
+	[ "$EXCLUDE_STRING" != "" ] && echo "#SBATCH $EXCLUDE_STRING"  >> $JOBSCRIPT_GLOBALPATH
+	[  "$EXCLUDE_STRING" = "" ] && echo -e "\e[31m WARNING! NO EXCLUDE STRING FOR EXCLUDING NODES IN JOBSCRIPT!\e[0m"
+
     echo "#SBATCH --ntasks=$GPU_PER_NODE" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
