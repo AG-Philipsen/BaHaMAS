@@ -721,7 +721,7 @@ function projectStatisticsDatabase(){
         rm -f $TEMPORARY_DATABASE_FILE
 
         REGEX_STRING=".*/"
-        for i in $(seq 0 4); do
+        for i in ${!PARAMETER_PREFIXES[@]}; do
 	        REGEX_STRING=$REGEX_STRING${PARAMETER_PREFIXES[$i]}${PARAMETER_REGEXES[$i]}/
         done
         REGEX_STRING=${REGEX_STRING%/}		
@@ -741,7 +741,7 @@ function projectStatisticsDatabase(){
 			    sleep $SLEEP_SECONDS
 		    fi
 
-	        [ "$FILE_WITH_DIRECTORIES" = "" ] && find $HOME_DIR/$SIMULATION_PATH -regextype grep -regex "$REGEX_STRING" > $TEMPORARY_FILE_WITH_DIRECTORIES
+	        [ "$FILE_WITH_DIRECTORIES" = "" ] && find $HOME_DIR/$SIMULATION_PATH -regextype grep -regex "$REGEX_STRING" -type d > $TEMPORARY_FILE_WITH_DIRECTORIES
 	        [ "$FILE_WITH_DIRECTORIES" != "" ] && cat $FILE_WITH_DIRECTORIES > $TEMPORARY_FILE_WITH_DIRECTORIES
 
 		    while read line
