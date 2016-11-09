@@ -619,15 +619,23 @@ function ProcessBetaValuesForInversion_Loewe(){
     for BETA in ${BETAVALUES[@]}; do
         #-------------------------------------------------------------------------#
         local WORK_BETADIRECTORY="$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
+        local NUMBER_OF_CONF_IN_BETADIRECTORY=$(ls $WORK_BETADIRECTORY/conf.[0-9]* | wc -l)
+        local NUMBER_OF_TOTAL_CORRELATORS=$(($NUMBER_OF_CONF_IN_BETADIRECTORY * $NUMBER_SOURCES_FOR_CORRELATORS))
+        local NUMBER_OF_MISSING_CORRELATORS=$(($NUMBER_OF_TOTAL_CORRELATORS - $(ls $WORK_BETADIRECTORY/conf.[0-9]*_corr 2>/dev/null | wc -l) ))
         #-------------------------------------------------------------------------#
-        #echo ${BETAVALUES[@]}
-
         ProduceSrunCommandsFileForInversionsPerBeta
-
-        #HERE: check if the file produced by awk is empty or not.
-        #Think about which information to provide to the user.
-
-        #only put into this array the beta with no empty awk output files
+        local NUMBER_OF_INVERSION_COMMANDS=$(wc -l < $WORK_BETADIRECTORY/$SRUN_COMMANDSFILE_FOR_INVERSION)
+        if [ $NUMBER_OF_MISSING_CORRELATORS -ne $NUMBER_OF_INVERSION_COMMANDS ]; then
+            printf "\n\e[0;91m File with commands for inversion expected to contain $NUMBER_OF_MISSING_CORRELATORS lines, but having $NUMBER_OF_INVERSION_COMMANDS. Skipping beta...\n\n\e[0m"
+            PROBLEM_BETA_ARRAY+=( $BETA )
+            continue            
+        fi
+        if [ ! -s $WORK_BETADIRECTORY/$SRUN_COMMANDSFILE_FOR_INVERSION ] && [ $NUMBER_OF_MISSING_CORRELATORS -ne 0 ]; then
+            printf "\n\e[0;91m File with commands for inversion empty, but expected containing $NUMBER_OF_MISSING_CORRELATORS lines! Skipping beta...\n\n\e[0m"
+            PROBLEM_BETA_ARRAY+=( $BETA )
+            continue
+        fi
+        #If file seems fine put it to submit list
         LOCAL_SUBMIT_BETA_ARRAY+=( $BETA )
     done
 
@@ -640,48 +648,48 @@ function ProcessBetaValuesForInversion_Loewe(){
 
 function SubmitJobsForValidBetaValues_Loewe() {
     if [ ${#SUBMIT_BETA_ARRAY[@]} -gt "0" ]; then
-	printf "\n\e[0;36m===================================================================================\n\e[0m"
-	printf "\e[0;34m Jobs will be submitted for the following beta values:\n\e[0m"
-	for BETA in ${SUBMIT_BETA_ARRAY[@]}; do
-	    echo "  - $BETA"
-	done
-	
-	for BETA in ${SUBMIT_BETA_ARRAY[@]}; do
-	    if [ $USE_MULTIPLE_CHAINS == "FALSE" ]; then
-		local PREFIX_TO_BE_GREPPED_FOR="$BETA_PREFIX"
-	    else
-		local PREFIX_TO_BE_GREPPED_FOR="$SEED_PREFIX"
-	    fi
-	    local TEMP_ARRAY=( $(echo $BETA | sed 's/_/ /g') )
-	    if [ $(echo $BETA | grep -o "${PREFIX_TO_BE_GREPPED_FOR}\([[:digit:]][.]\)\?[[:alnum:]]\{4\}" | wc -l) -ne $GPU_PER_NODE ]; then
-		printf "\n\e[0;33m \e[1m\e[4mWARNING\e[24m:\e[0;33m At least one job is being submitted with less than\n"
-		printf "          $GPU_PER_NODE runs inside. Would you like to submit in any case (Y/N)? \e[0m"
-		local CONFIRM="";
-		while read CONFIRM; do
-		    if [ "$CONFIRM" = "Y" ]; then
-			break;
-		    elif [ "$CONFIRM" = "N" ]; then
-			printf "\n\e[1;37;41mNo jobs will be submitted.\e[0m\n"
-			return
-		    else
-			printf "\n\e[0;33m Please enter Y (yes) or N (no): \e[0m"
-		    fi
-		done
-	    fi
-	done
+	    printf "\n\e[0;36m===================================================================================\n\e[0m"
+	    printf "\e[0;34m Jobs will be submitted for the following beta values:\n\e[0m"
+	    for BETA in ${SUBMIT_BETA_ARRAY[@]}; do
+	        echo "  - $BETA"
+	    done
+	    
+	    for BETA in ${SUBMIT_BETA_ARRAY[@]}; do
+	        if [ $USE_MULTIPLE_CHAINS == "FALSE" ]; then
+		        local PREFIX_TO_BE_GREPPED_FOR="$BETA_PREFIX"
+	        else
+		        local PREFIX_TO_BE_GREPPED_FOR="$SEED_PREFIX"
+	        fi
+	        local TEMP_ARRAY=( $(echo $BETA | sed 's/_/ /g') )
+	        if [ $(echo $BETA | grep -o "${PREFIX_TO_BE_GREPPED_FOR}\([[:digit:]][.]\)\?[[:alnum:]]\{4\}" | wc -l) -ne $GPU_PER_NODE ]; then
+		        printf "\n\e[0;33m \e[1m\e[4mWARNING\e[24m:\e[0;33m At least one job is being submitted with less than\n"
+		        printf "          $GPU_PER_NODE runs inside. Would you like to submit in any case (Y/N)? \e[0m"
+		        local CONFIRM="";
+		        while read CONFIRM; do
+		            if [ "$CONFIRM" = "Y" ]; then
+			            break;
+		            elif [ "$CONFIRM" = "N" ]; then
+			            printf "\n\e[1;37;41mNo jobs will be submitted.\e[0m\n"
+			            return
+		            else
+			            printf "\n\e[0;33m Please enter Y (yes) or N (no): \e[0m"
+		            fi
+		        done
+	        fi
+	    done
 
-	for BETA in ${SUBMIT_BETA_ARRAY[@]}; do
-	    local SUBMITTING_DIRECTORY="${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER"
-	    local JOBSCRIPT_NAME="$(__static__GetJobScriptName ${BETA})"
-	    cd $SUBMITTING_DIRECTORY
-	    printf "\n\e[0;34m Actual location: \e[0;35m$(pwd) \n\e[0m"
-	    printf "\e[1;34m      Submitting:\e[0m"
-		printf "\e[0;32m \e[4msbatch $JOBSCRIPT_NAME\n\e[0m"
-		sbatch $JOBSCRIPT_NAME
-	done
-	printf "\n\e[0;36m===================================================================================\n\e[0m"
+	    for BETA in ${SUBMIT_BETA_ARRAY[@]}; do
+	        local SUBMITTING_DIRECTORY="${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER"
+	        local JOBSCRIPT_NAME="$(__static__GetJobScriptName ${BETA})"
+	        cd $SUBMITTING_DIRECTORY
+	        printf "\n\e[0;34m Actual location: \e[0;35m$(pwd) \n\e[0m"
+	        printf "\e[1;34m      Submitting:\e[0m"
+		    printf "\e[0;32m \e[4msbatch $JOBSCRIPT_NAME\n\e[0m"
+		    sbatch $JOBSCRIPT_NAME
+	    done
+	    printf "\n\e[0;36m===================================================================================\n\e[0m"
     else
-	printf " \e[1;37;41mNo jobs will be submitted.\e[0m\n"
+	    printf " \e[1;37;41mNo jobs will be submitted.\e[0m\n"
     fi
 }
 

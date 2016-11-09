@@ -29,13 +29,36 @@ function ProduceInverterJobscript_Loewe(){
 	    echo "#SBATCH --gres=gpu:$GPU_PER_NODE" >> $JOBSCRIPT_GLOBALPATH
         #Option to choose only a node with 'hawaii' GPU hardware
         echo "#SBATCH --constrain=hawaii" >> $JOBSCRIPT_GLOBALPATH
-        echo "#SBATCH --exclude=lxlcsc[0006,0009,0011,0041,0055,0070,0105,0108,0153]" >> $JOBSCRIPT_GLOBALPATH
         #The following nodes of L-CSC are using tahiti as GPU hardware (sinfo -o "%4c %10z %8d %8m %10f %10G %D %N"), CL2QCD fails on them.
-        #echo "#SBATCH --exclude=lxlcsc0043,lxlcsc0044,lxlcsc0045,lxlcsc0046,lxlcsc0047,lxlcsc0049,lxlcsc0050,lxlcsc0052,lxlcsc0053" >> $JOBSCRIPT_GLOBALPATH
     elif [ $CLUSTER_NAME = "LCSC_OLD" ]; then
         echo "#SBATCH --partition=lcsc_lqcd" >> $JOBSCRIPT_GLOBALPATH
         echo "#SBATCH --exclude=lcsc-r03n01,lcsc-r06n17,lcsc-r06n10,lcsc-r03n12,lcsc-r03n13,lcsc-r06n02,lcsc-r06n03" >> $JOBSCRIPT_GLOBALPATH
     fi
+
+	if [ -f "$FILE_WITH_WHICH_NODES_TO_EXCLUDE" ]; then
+		EXCLUDE_STRING=$(grep -oE '\-\-exclude=.*\[.*\]' $FILE_WITH_WHICH_NODES_TO_EXCLUDE 2>/dev/null)
+	elif [[ $FILE_WITH_WHICH_NODES_TO_EXCLUDE =~ : ]]; then 
+        EXCLUDE_STRING=$(ssh ${FILE_WITH_WHICH_NODES_TO_EXCLUDE%%:*} "grep -oE '\-\-exclude=.*\[.*\]' ${FILE_WITH_WHICH_NODES_TO_EXCLUDE#*:} 2>/dev/null")
+	fi
+    if [ "$EXCLUDE_STRING" != "" ]; then
+        echo "#SBATCH $EXCLUDE_STRING"  >> $JOBSCRIPT_GLOBALPATH
+        printf "\e[1A\e[80C\t$EXCLUDE_STRING\n"
+    else
+        printf "\n\e[0;33m \e[1m\e[4mWARNING\e[24m:\e[0;33m No exclude string to exclude nodes in jobscript found!"
+        printf " Do you still want to continue with jobscript creation? [Y/N] \e[0m"
+        while read CONFIRM; do
+            if [ "$CONFIRM" = "Y" ]; then
+                break
+            elif [ "$CONFIRM" = "N" ]; then
+                printf "\n\e[1;31m Exiting from job script creation process...\e[0m\n\n"
+                rm -f $JOBSCRIPT_GLOBALPATH
+                exit
+            else
+                printf "\e[0;36m\e[1m Please enter Y (yes) or N (no): \e[0m"
+            fi
+        done
+    fi
+
     echo "#SBATCH --ntasks=$GPU_PER_NODE" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
@@ -69,7 +92,7 @@ function ProduceInverterJobscript_Loewe(){
     echo "#       of the exec. Copying it later does not guarantee that it is still the same..." >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"Copy executable to beta directories in ${WORK_DIR_WITH_BETAFOLDERS}/${BETA_PREFIX}x.xxxx...\"" >> $JOBSCRIPT_GLOBALPATH
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-        echo "cp -a $INVERTER_GLOBALPATH \$dir$INDEX || exit 2" >> $JOBSCRIPT_GLOBALPATH
+        echo "rm -f \$dir$INDEX/$INVERTER_FILENAME && cp -a $INVERTER_GLOBALPATH \$dir$INDEX || exit 2" >> $JOBSCRIPT_GLOBALPATH
     done
     echo "echo \"...done!\"" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
@@ -78,7 +101,11 @@ function ProduceInverterJobscript_Loewe(){
     echo "echo \"\\\"export DISPLAY=:0\\\" done!\"" >> $JOBSCRIPT_GLOBALPATH
     #echo "export GPU_MAX_HEAP_SIZE=75" >> $JOBSCRIPT_GLOBALPATH             #Max amount of total memory of GPU allowed to be used, we do not set it for the moment
     echo "echo \"---------------------------\"" >> $JOBSCRIPT_GLOBALPATH
-    echo "" >> $JOBSCRIPT_GLOBALPATH
+    if [ $CLUSTER_NAME = "LCSC" ]; then
+        echo "# Since we run the job with a pipeline to handle the std output with mbuffer, we must activate pipefail to get the correct error code!" >> $JOBSCRIPT_GLOBALPATH
+        echo "set -o pipefail" >> $JOBSCRIPT_GLOBALPATH
+        echo "" >> $JOBSCRIPT_GLOBALPATH
+    fi
     echo "# Run jobs from different directories" >> $JOBSCRIPT_GLOBALPATH
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
         #The following check is done twice. During the creation of the jobscript for the case in which the $SRUN_COMMANDSFILE_FOR_INVERSION does not exist from the beginning on and 
@@ -98,11 +125,11 @@ function ProduceInverterJobscript_Loewe(){
         echo "OLD_IFS=\$IFS" >> $JOBSCRIPT_GLOBALPATH
         echo "IFS=\$'\n'" >> $JOBSCRIPT_GLOBALPATH
         echo "for line in \$(cat \$workdir$INDEX/$SRUN_COMMANDSFILE_FOR_INVERSION); do" >> $JOBSCRIPT_GLOBALPATH
-        echo "IFS=\$OLD_IFS" >> $JOBSCRIPT_GLOBALPATH
+        echo "IFS=\$OLD_IFS #Restore here old IFS to give separated options (and not only one)to CL2QCD!" >> $JOBSCRIPT_GLOBALPATH 
         if [ $CLUSTER_NAME = "LOEWE" ]; then
             echo "  time srun -n 1 \$dir$INDEX/$INVERTER_FILENAME \$line --device=$INDEX 2>> \$dir$INDEX/\$errFile >> \$dir$INDEX/\$outFile " >> $JOBSCRIPT_GLOBALPATH
         elif [ $CLUSTER_NAME = "LCSC" ]; then
-            echo "  time srun -n 1 \$dir$INDEX/$INVERTER_FILENAME \$line --device=$INDEX 2>> \$dir$INDEX/\$errFile | mbuffer -q -m2M >> \$dir$INDEX/\$outFile " >> $JOBSCRIPT_GLOBALPATH
+            echo "  time \$dir$INDEX/$INVERTER_FILENAME \$line --device=$INDEX 2>> \$dir$INDEX/\$errFile | mbuffer -q -m2M >> \$dir$INDEX/\$outFile " >> $JOBSCRIPT_GLOBALPATH
         fi
         echo "  if [ \$? -ne 0 ]; then" >> $JOBSCRIPT_GLOBALPATH
         echo "       printf \"\nError occurred in simulation at b${BETA_FOR_JOBSCRIPT[$INDEX]%_*}.\n\"" >> $JOBSCRIPT_GLOBALPATH
@@ -121,7 +148,11 @@ function ProduceInverterJobscript_Loewe(){
         echo "wait \$PID_FOR_$INDEX || { printf \"\nError occurred in simulation at b${BETA_FOR_JOBSCRIPT[$INDEX]%_*}. Please check (process id \${PID_FOR_$INDEX})...\n\"; }" >> $JOBSCRIPT_GLOBALPATH
     done
     echo "" >> $JOBSCRIPT_GLOBALPATH
-    echo "" >> $JOBSCRIPT_GLOBALPATH
+    if [ $CLUSTER_NAME = "LCSC" ]; then
+        echo "# Unset pipefail since not needed anymore" >> $JOBSCRIPT_GLOBALPATH
+        echo "set +o pipefail" >> $JOBSCRIPT_GLOBALPATH
+        echo "" >> $JOBSCRIPT_GLOBALPATH
+    fi
     echo "echo \"---------------------------\"" >> $JOBSCRIPT_GLOBALPATH
     echo "" >> $JOBSCRIPT_GLOBALPATH
     echo "echo \"Date and time: \$(date)\"" >> $JOBSCRIPT_GLOBALPATH

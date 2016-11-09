@@ -332,7 +332,7 @@ elif [ $INVERT_CONFIGURATIONS = "TRUE" ]; then
 
     ReadBetaValuesFromFile
     ProcessBetaValuesForInversion 
-    #SubmitJobsForValidBetaValues
+    SubmitJobsForValidBetaValues
 fi
 
 
