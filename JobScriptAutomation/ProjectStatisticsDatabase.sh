@@ -1026,7 +1026,7 @@ if(criticalSituation ==1){exit 1}else{exit 0}
         if [ $(wc -l < $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE) -eq 0 ]; then
             printf " \e[38;5;202m $SIMULATION not found in database (last update ended on \e[1m$(date -r $PROJECT_DATABASE_FILE +"%d.%m.%Y\e[21m at \e[1m%H:%M")\e[21m).\n\n\e[0m"
         else
-            __static__DisplayDatabaseFile $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE
+            __static__DisplayDatabaseFile <(sort $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE | uniq)
             printf "\n Last update ended on \e[1m$(date -r $PROJECT_DATABASE_FILE +"%d.%m.%Y\e[21m at \e[1m%H:%M")\e[21m  \e[38;5;202m--->\e[38;5;207m  $PROJECT_DATABASE_FILE\n\n\e[0m"
         fi
         
