@@ -164,3 +164,16 @@ function PrintArray(){
     done
 }
 
+
+function ConvertFromBytesToHumanReadable(){
+    local BYTES=$1
+    awk '
+        function human(x) {
+            if (x<1000) {return sprintf("%7.3f", x)} else {x/=1024}
+            s="kMGTPEYZ";
+            while (x>=1000 && length(s)>1)
+                {x/=1024; s=substr(s,2)}
+            return sprintf("%7.3f", x) substr(s,1,1) "iB"
+        }
+        {print human($1)}' <<< "$BYTES"
+}
