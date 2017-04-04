@@ -1,0 +1,109 @@
+#!/bin/bash
+#
+# Hook script to check the commit log message. The commit will
+# be aborted if the first line of the commit is longer than 72 chars.
+# This is the hard limit for GitHub at which a commit message is hidden.
+# See https://chris.beams.io/posts/git-commit/ for more infortmation.
+#
+# Called by "git commit" with one argument, the name of the file
+# that has the commit message.  The hook should exit with non-zero
+# status after issuing an appropriate message if it wants to stop the
+# commit.  The hook is allowed to edit the commit message file.
+
+function errecho() {
+    if [ $# -eq 1 ]; then
+        echo -e -n "$indentation$1\e[0m" 1>&2
+    elif [ $# -eq 2 ]; then
+        echo -e -n "\e[38;5;$2m$indentation$1\e[0m" 1>&2
+    elif [ $# -eq 3 ]; then
+        echo -e -n "\e[$2;38;5;$3m$indentation$1\e[0m" 1>&2
+    fi
+}
+ 
+function GiveAdviceToResumeCommit() {
+    errecho 'To resume editing your commit message, run the command:\n' 202
+    errecho '   git commit -e -F '"$commitMessageFile\n" 11
+    errecho '(assuming your working directory is at the top).\n' 202
+    errecho ''
+}
+
+function IsCommitMessageAMerge() {
+    if [ $(cat "$commitMessageFile" | head -1 | grep -c "^Merge") -gt 0 ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+function IsCommitMessageARevert() {
+    if [ $(cat "$commitMessageFile" | head -1 | grep -c "^Revert") -gt 0 ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+function IsFirstLineTooShort() {
+    if [ $(cat "$commitMessageFile" | head -1 | grep -c '^.\{8\}') -gt 0 ]; then
+        return 1
+    else
+        return 0
+    fi
+}
+
+function IsFirstLineTooLong() {
+    if [ $(cat "$commitMessageFile" | head -1 | grep -c '^..\{50\}') -gt 0 ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+function IsSecondLineNotEmpty() {
+    if [ $(cat "$commitMessageFile" | head -2 | tail -1 | grep -c '^[[:space:]]*$') -gt 0 ]; then
+        return 1
+    else
+        return 0
+    fi
+}
+
+function IsAnyOfTheLinesAfterTheSecondTooLong() {
+    if [ $(cat "$commitMessageFile" | tail -n +2 | grep -c '^..\{72\}') -gt 0 ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+function AbortCommit() {
+    errecho '\n' 
+    errecho 'HOOK FAILURE (commit-msg):' 1 9
+    errecho "$@\n" 9
+    errecho '\n' 
+    GiveAdviceToResumeCommit
+    errecho '\n' 
+    exit 1
+}
+
+#======================================================================================#
+indentation="   "
+#Store commit message in a file to allow user to resume and edit commit
+gitDirectory=$(git rev-parse --git-dir)
+commitMessageFile="$gitDirectory/temporary_commit_message"
+cat "$1" > "$commitMessageFile"
+
+#If message is a merge or a revert do not complain about format
+if ! IsCommitMessageAMerge && ! IsCommitMessageARevert; then
+    if IsFirstLineTooShort; then
+        AbortCommit "The first line of your commit must be at least 8 chars long!"
+    elif IsFirstLineTooLong; then
+        AbortCommit "The first line of your commit exceeds the 72-char limit!"
+    elif IsSecondLineNotEmpty; then
+        AbortCommit "The second line of your commit must be empty!"
+    elif IsAnyOfTheLinesAfterTheSecondTooLong; then
+        AbortCommit "All the lines of your commit after the second must be shorter than 72 chars!"
+    fi
+fi
+
+#Remove commit file if not needed
+rm -f "$commitMessageFile" || exit 1
