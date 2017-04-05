@@ -11,6 +11,7 @@
 # commit.  The hook is allowed to edit the commit message file.
 
 function errecho() {
+    local indentation="   "
     if [ $# -eq 1 ]; then
         echo -e -n "$indentation$1\e[0m" 1>&2
     elif [ $# -eq 2 ]; then
@@ -19,12 +20,18 @@ function errecho() {
         echo -e -n "\e[$2;38;5;$3m$indentation$1\e[0m" 1>&2
     fi
 }
- 
+
 function GiveAdviceToResumeCommit() {
-    errecho 'To resume editing your commit message, run the command:\n' 202
-    errecho '   git commit -e -F '"$commitMessageFile\n" 11
-    errecho '(assuming your working directory is at the top).\n' 202
-    errecho ''
+    errecho 'To resume editing your commit message, run the command:\n\n' 202
+    errecho '   git commit -e -F '"$commitMessageFile\n\n" 11
+}
+
+function IsCommitMessageEmpty() {
+    if [ -s "$1" ]; then
+        return 1
+    else
+        return 0
+    fi
 }
 
 function RemoveTrailingSpacesAtBeginOfFirstThreeLines() {
@@ -33,6 +40,19 @@ function RemoveTrailingSpacesAtBeginOfFirstThreeLines() {
 
 function RemoveTrailingSpacesAtEndOfEachLine() {
     sed -i -e 's/[[:blank:]]*$//g' "$1"
+}
+
+function AddEndOfLineAtEndOfFileIfMissing() {
+    #This does not work on empty files, but here it is not!
+    [ -z "$(tail -c 1 "$1")" ] || echo '' >> "$1"
+}
+
+function CapitalizeFirstLetterFirstLine() {
+    sed -i -e  '1s/^\(.\)/\U\1/' "$1"
+}
+
+function RemovePointAtTheEndFirstLine() {
+    sed -i -e  '1s/[^[:alpha:]]$//' "$1"
 }
 
 function IsCommitMessageAMerge() {
@@ -51,16 +71,8 @@ function IsCommitMessageARevert() {
     fi
 }
 
-function IsFirstLineEndingWithPeriod(){
-    if [ $(cat "$commitMessageFile" | head -1 | grep -c '[.][[:blank:]]*$') -gt 0 ]; then
-        return 0
-    else
-        return 1
-    fi
-}
-
-function IsFirstLineNotStartingWithCapitalLetter(){
-    if [ $(cat "$commitMessageFile" | head -1 | grep -c '[[:blank:]]*[A-Z]') -gt 0 ]; then
+function IsFirstLineNotStartingWithLetter(){ #Assume no trailing spaces, since removed
+    if [ $(cat "$commitMessageFile" | head -1 | grep -c '^[[:alpha:]]') -gt 0 ]; then
         return 1
     else
         return 0
@@ -76,7 +88,7 @@ function IsFirstLineTooShort() {
 }
 
 function IsFirstLineTooLong() {
-    if [ $(cat "$commitMessageFile" | head -1 | grep -c '^..\{50\}') -gt 0 ]; then
+    if [ $(cat "$commitMessageFile" | head -1 | grep -c '^..\{60\}') -gt 0 ]; then
         return 0
     else
         return 1
@@ -84,6 +96,9 @@ function IsFirstLineTooLong() {
 }
 
 function IsSecondLineNotEmpty() {
+    if [ $(wc -l < "$commitMessageFile") -lt 2 ]; then
+        return 1
+    fi
     if [ $(cat "$commitMessageFile" | head -2 | tail -1 | grep -c '^[[:blank:]]*$') -gt 0 ]; then
         return 1
     else
@@ -99,23 +114,32 @@ function IsAnyOfTheLinesAfterTheSecondTooLong() {
     fi
 }
 
-function AbortCommit() {
+function PrintHookFailure() {
     errecho '\n' 
     errecho 'HOOK FAILURE (commit-msg):' 1 9
     errecho "$@\n" 9
     errecho '\n' 
+}
+
+function AbortCommit() {
+    PrintHookFailure "$@"
     GiveAdviceToResumeCommit
-    errecho '\n' 
     exit 1
 }
 
 #======================================================================================#
-indentation="   "
+#Abort immediately on empty commit
+if IsCommitMessageEmpty "$1"; then
+    PrintHookFailure "Committed aborted due to empty message!"; exit 1
+fi
 #Store commit message in a file to allow user to resume and edit commit
-gitDirectory=$(git rev-parse --git-dir)
-commitMessageFile="$gitDirectory/COMMIT_MSG"
+gitDirectoryGlobal="$(git rev-parse --show-toplevel)/.git"
+commitMessageFile="$gitDirectoryGlobal/COMMIT_MSG"
 RemoveTrailingSpacesAtBeginOfFirstThreeLines "$1"
 RemoveTrailingSpacesAtEndOfEachLine "$1"
+AddEndOfLineAtEndOfFileIfMissing "$1"
+CapitalizeFirstLetterFirstLine "$1"
+RemovePointAtTheEndFirstLine "$1"
 # It is nicer to store a clean message in case the user has to resume editing after a
 # hook failure due to a violation of the rules (storing just the file would lead to
 # having the bunch of commented lines in the resumed commit more than once)
@@ -124,14 +148,12 @@ sed -n -e '/^#/d' -e '/^diff --git/q' -e 'p;d' "$1" > "$commitMessageFile"
 
 #If message is a merge or a revert do not complain about format
 if ! IsCommitMessageAMerge && ! IsCommitMessageARevert; then
-    if IsFirstLineNotStartingWithCapitalLetter; then
-        AbortCommit "The first line must start with a capital letter!"
-    elif IsFirstLineEndingWithPeriod; then
-        AbortCommit "The first line is a title and it must not end with a period!"
+    if IsFirstLineNotStartingWithLetter; then
+        AbortCommit "The first line must start with a letter!"
     elif IsFirstLineTooShort; then
         AbortCommit "The first line of your commit must be at least 8 chars long!"
     elif IsFirstLineTooLong; then
-        AbortCommit "The first line of your commit exceeds the 72-char limit!"
+        AbortCommit "The first line of your commit exceeds the 60-char limit!"
     elif IsSecondLineNotEmpty; then
         AbortCommit "The second line of your commit must be empty!"
     elif IsAnyOfTheLinesAfterTheSecondTooLong; then
