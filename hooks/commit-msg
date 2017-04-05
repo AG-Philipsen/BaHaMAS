@@ -1,9 +1,19 @@
 #!/bin/bash
 #
-# Hook script to check the commit log message. The commit will
-# be aborted if the first line of the commit is longer than 72 chars.
-# This is the hard limit for GitHub at which a commit message is hidden.
-# See https://chris.beams.io/posts/git-commit/ for more infortmation.
+# Hook script to check the commit message.
+#
+# ENFORCED POLICY:
+#  1) The first line of the commit must be at maximum 60 chars.
+#     This is the hard limit for GitHub at which a commit message is hidden.
+#     See https://chris.beams.io/posts/git-commit/ for more infortmation.
+#  2) The first line of the commit must have at least 8 chars.
+#  3) The first line must begin with a character
+#  4) A small letter at the beginning of the first line is capitalised
+#  5) Any character among ".?!" at the end of the first line is removed
+#     in a repetitive way (e.g. "commit..!!!" -> "commit")
+#  6) The second line must be empty
+#  7) Any following line after the second must be 72 chars at maximum
+#  8) Trailing spaces at begin and end of the first two lines are removed
 #
 # Called by "git commit" with one argument, the name of the file
 # that has the commit message.  The hook should exit with non-zero
@@ -52,7 +62,7 @@ function CapitalizeFirstLetterFirstLine() {
 }
 
 function RemovePointAtTheEndFirstLine() {
-    sed -i -e  '1s/[^[:alpha:]]$//' "$1"
+    sed -i -e  '1s/[.!?]\+$//g' "$1"
 }
 
 function IsCommitMessageAMerge() {
@@ -80,7 +90,7 @@ function IsFirstLineNotStartingWithLetter(){ #Assume no trailing spaces, since r
 }
 
 function IsFirstLineTooShort() {
-    if [ $(cat "$commitMessageFile" | head -1 | grep -c '^.\{8\}') -gt 0 ]; then
+    if [ $(cat "$commitMessageFile" | head -1 | grep -c '^.\{7\}') -gt 0 ]; then
         return 1
     else
         return 0
