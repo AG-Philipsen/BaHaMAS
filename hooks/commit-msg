@@ -27,8 +27,16 @@ function GiveAdviceToResumeCommit() {
     errecho ''
 }
 
+function RemoveTrailingSpacesAtBeginOfFirstThreeLines() {
+    sed -i -e '1,3{s/^[[:blank:]]*//}' "$1"
+}
+
+function RemoveTrailingSpacesAtEndOfEachLine() {
+    sed -i -e 's/[[:blank:]]*$//g' "$1"
+}
+
 function IsCommitMessageAMerge() {
-    if [ $(cat "$commitMessageFile" | head -1 | grep -c "^Merge") -gt 0 ]; then
+    if [ $(cat "$commitMessageFile" | head -1 | grep -c "^Merge ") -gt 0 ]; then
         return 0
     else
         return 1
@@ -36,10 +44,26 @@ function IsCommitMessageAMerge() {
 }
 
 function IsCommitMessageARevert() {
-    if [ $(cat "$commitMessageFile" | head -1 | grep -c "^Revert") -gt 0 ]; then
+    if [ $(cat "$commitMessageFile" | head -1 | grep -c "^Revert ") -gt 0 ]; then
         return 0
     else
         return 1
+    fi
+}
+
+function IsFirstLineEndingWithPeriod(){
+    if [ $(cat "$commitMessageFile" | head -1 | grep -c '[.][[:blank:]]*$') -gt 0 ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+function IsFirstLineNotStartingWithCapitalLetter(){
+    if [ $(cat "$commitMessageFile" | head -1 | grep -c '[[:blank:]]*[A-Z]') -gt 0 ]; then
+        return 1
+    else
+        return 0
     fi
 }
 
@@ -60,7 +84,7 @@ function IsFirstLineTooLong() {
 }
 
 function IsSecondLineNotEmpty() {
-    if [ $(cat "$commitMessageFile" | head -2 | tail -1 | grep -c '^[[:space:]]*$') -gt 0 ]; then
+    if [ $(cat "$commitMessageFile" | head -2 | tail -1 | grep -c '^[[:blank:]]*$') -gt 0 ]; then
         return 1
     else
         return 0
@@ -89,7 +113,9 @@ function AbortCommit() {
 indentation="   "
 #Store commit message in a file to allow user to resume and edit commit
 gitDirectory=$(git rev-parse --git-dir)
-commitMessageFile="$gitDirectory/temporary_commit_message"
+commitMessageFile="$gitDirectory/COMMIT_MSG"
+RemoveTrailingSpacesAtBeginOfFirstThreeLines "$1"
+RemoveTrailingSpacesAtEndOfEachLine "$1"
 # It is nicer to store a clean message in case the user has to resume editing after a
 # hook failure due to a violation of the rules (storing just the file would lead to
 # having the bunch of commented lines in the resumed commit more than once)
@@ -98,7 +124,11 @@ sed -n -e '/^#/d' -e '/^diff --git/q' -e 'p;d' "$1" > "$commitMessageFile"
 
 #If message is a merge or a revert do not complain about format
 if ! IsCommitMessageAMerge && ! IsCommitMessageARevert; then
-    if IsFirstLineTooShort; then
+    if IsFirstLineNotStartingWithCapitalLetter; then
+        AbortCommit "The first line must start with a capital letter!"
+    elif IsFirstLineEndingWithPeriod; then
+        AbortCommit "The first line is a title and it must not end with a period!"
+    elif IsFirstLineTooShort; then
         AbortCommit "The first line of your commit must be at least 8 chars long!"
     elif IsFirstLineTooLong; then
         AbortCommit "The first line of your commit exceeds the 72-char limit!"
