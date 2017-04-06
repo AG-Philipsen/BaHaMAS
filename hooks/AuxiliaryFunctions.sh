@@ -89,4 +89,40 @@ function GiveAdviceToResumeCommit() {
     errecho '   git commit -e -F '"$commitMessageFile\n\n" 11 #Variable commitMessageFile from invoking script
 }
 
+#------------------------------------#
+# pre-commit hook specific functions #
+#------------------------------------#
+
+function GiveAdviceAboutUserNameAndEmail() {
+    errecho 'Use the commands\n' 202
+    errecho '   git config --global user.name "Your Name"\n' 11
+    errecho '   git config --global user.email "you@yourdomain.com"\n' 11
+    errecho 'to introduce yourself to Git before committing.\n\n' 202
+    errecho 'Omit the "--global" option to set your infortmation only in the local repository.\n\n' 208
+}
+
+function GiveAdviceAboutUserNameFormat() {
+    errecho 'Please, configure your user.name using the command\n' 202
+    errecho '   git config --global user.name "Your Name"\n' 11
+    errecho 'where your name has to be formed by two word starting with\n' 202
+    errecho 'capital letter and separated by one space.\n\n' 202
+    errecho 'Omit the "--global" option to set your infortmation only in the local repository.\n\n' 208
+}
+
+function GiveAdviceAboutUserEmailFormat() {
+    errecho 'Please, configure your user.email using the command\n' 202
+    errecho '   git config --global user.email "you@yourdomain.com"\n' 11
+    errecho 'where your email has to be in a valid format as shown here above.\n\n' 202
+    errecho 'Omit the "--global" option to set your infortmation only in the local repository.\n\n' 208
+}
+
+function GiveAdviceAboutNonASCIICharacters() {
+    errecho 'This can cause problems if you want to work with people on other platforms.\n' 202
+    errecho 'To be portable it is advisable to rename the file.\n' 202
+    errecho 'If you know what you are doing you can disable this check using:\n' 202
+    errecho '   git config hooks.allownonascii true\n\n' 11
+}
+
+function GiveAdviceAboutBranch() {
+    errecho "If you are sure about what you are doing, commit with \e[38;5;11m--no-verify\e[38;5;202m to bypass this check.\n\n" 202
 }
