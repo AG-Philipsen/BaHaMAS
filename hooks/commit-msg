@@ -26,7 +26,7 @@ source $repositoryTopLevelPath/hooks/AuxiliaryFunctions.sh || exit -2
 
 #Abort immediately on empty commit
 if IsCommitMessageEmpty "$1"; then
-    PrintHookFailure "Committed aborted due to empty message!"; exit 1
+    AbortCommit "Committed aborted due to empty message!"
 fi
 #Store commit message in a file to allow user to resume and edit commit
 dotGitFolderPath="$repositoryTopLevelPath/.git"
@@ -46,15 +46,15 @@ sed -n -e '/^#/d' -e '/^diff --git/q' -e 'p;d' "$1" > "$commitMessageFile"
 if ! IsCommitMessageAMerge "$commitMessageFile" && ! IsCommitMessageARevert "$commitMessageFile"; then
     #Check format
     if IsFirstLineNotStartingWithLetter "$commitMessageFile"; then
-        AbortCommit "The first line must start with a letter!"
+        AbortCommit "The first line must start with a letter!" GiveAdviceToResumeCommit
     elif IsFirstLineTooShort "$commitMessageFile"; then
-        AbortCommit "The first line of your commit must be at least 8 chars long!"
+        AbortCommit "The first line of your commit must be at least 8 chars long!" GiveAdviceToResumeCommit
     elif IsFirstLineTooLong "$commitMessageFile"; then
-        AbortCommit "The first line of your commit exceeds the 60-char limit!"
+        AbortCommit "The first line of your commit exceeds the 60-char limit!" GiveAdviceToResumeCommit
     elif IsSecondLineNotEmpty "$commitMessageFile"; then
-        AbortCommit "The second line of your commit must be empty!"
+        AbortCommit "The second line of your commit must be empty!" GiveAdviceToResumeCommit
     elif IsAnyOfTheLinesAfterTheSecondTooLong "$commitMessageFile"; then
-        AbortCommit "All the lines of your commit after the second must be shorter than 72 chars!"
+        AbortCommit "All the lines of your commit after the second must be shorter than 72 chars!" GiveAdviceToResumeCommit
     fi
     #Forbid commits directly on the master (at the moment only a warning but
     #the commit will be aborted when using gitflow in development)
@@ -64,7 +64,7 @@ if ! IsCommitMessageAMerge "$commitMessageFile" && ! IsCommitMessageARevert "$co
         errecho 'WARNING:' 1 11
         errecho 'You just made a commit on the master branch. Please undo it if it was not intended!\n' 11
         errecho '\n'
-        #AbortCommit "To commit directly on the master branch is forbidden!"
+        #AbortCommit "To commit directly on the master branch is forbidden!" GiveAdviceToResumeCommit
     fi
 fi
 

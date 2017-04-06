@@ -13,14 +13,22 @@ function errecho() {
     fi
 }
 
+function PrintHookFailure() {
+    errecho '\n'
+    errecho "HOOK FAILURE ($(basename $0)):" 1 9
+    errecho "$@\n" 9
+    errecho '\n'
+}
+
+function AbortCommit() {
+    PrintHookFailure "$1"
+    [ $# -gt 1 ] && $2
+    exit 1
+}
+
 #------------------------------------#
 # commit-msg hook specific functions #
 #------------------------------------#
-
-function GiveAdviceToResumeCommit() {
-    errecho 'To resume editing your commit message, run the command:\n\n' 202
-    errecho '   git commit -e -F '"$commitMessageFile\n\n" 11
-}
 
 function IsCommitMessageEmpty() {
     [ -s "$1" ] && return 1 || return 0
@@ -76,15 +84,9 @@ function IsAnyOfTheLinesAfterTheSecondTooLong() {
     [ $(cat "$1" | tail -n +2 | grep -c '^..\{72\}') -gt 0 ] && return 0 || return 1
 }
 
-function PrintHookFailure() {
-    errecho '\n'
-    errecho 'HOOK FAILURE (commit-msg):' 1 9
-    errecho "$@\n" 9
-    errecho '\n'
+function GiveAdviceToResumeCommit() {
+    errecho 'To resume editing your commit message, run the command:\n\n' 202
+    errecho '   git commit -e -F '"$commitMessageFile\n\n" 11 #Variable commitMessageFile from invoking script
 }
 
-function AbortCommit() {
-    PrintHookFailure "$@"
-    GiveAdviceToResumeCommit
-    exit 1
 }
