@@ -171,5 +171,18 @@ if ! IsCommitMessageAMerge && ! IsCommitMessageARevert; then
     fi
 fi
 
+#Forbid commits directly on the master (at the moment only a warning but
+#the commit will be aborted when using gitflow in development)
+BRANCH=`git rev-parse --abbrev-ref HEAD`
+if ! IsCommitMessageAMerge && ! IsCommitMessageARevert; then
+    if [ "$BRANCH" = "master" ]; then
+        errecho '\n'
+        errecho 'WARNING:' 1 11
+        errecho 'You just made a commit on the master branch. Please undo it if it was not intended!\n' 11
+        errecho '\n'
+        #AbortCommit "To commit directly on the master branch is forbidden!"
+    fi
+fi
+
 #Remove commit file if not needed
 rm -f "$commitMessageFile" || exit 1
