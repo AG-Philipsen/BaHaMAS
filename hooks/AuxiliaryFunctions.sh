@@ -30,29 +30,33 @@ function AbortCommit() {
 # commit-msg hook specific functions #
 #------------------------------------#
 
+function GiveAdviceToResumeCommit() {
+    errecho 'To resume editing your commit message, run the command:\n\n' 202
+    errecho '   git commit -e -F '"$commitMessageFile\n\n" 11 #Variable commitMessageFile from invoking script
+}
+
 function IsCommitMessageEmpty() {
     [ -s "$1" ] && return 1 || return 0
 }
 
 function RemoveTrailingSpacesAtBeginOfFirstThreeLines() {
-    sed -i -e '1,3{s/^[[:blank:]]*//}' "$1"
+    sed -i '1,3{s/^[[:blank:]]*//}' "$1"
 }
 
 function RemoveTrailingSpacesAtEndOfEachLine() {
-    sed -i -e 's/[[:blank:]]*$//g' "$1"
+    sed -i 's/[[:blank:]]*$//g' "$1"
 }
 
 function AddEndOfLineAtEndOfFileIfMissing() {
-    #This does not work on empty files, but here it is not!
-    [ -z "$(tail -c 1 "$1")" ] || echo '' >> "$1"
+    sed -i '$a\' "$1"
 }
 
 function CapitalizeFirstLetterFirstLine() {
-    sed -i -e  '1s/^\(.\)/\U\1/' "$1"
+    sed -i '1s/^\(.\)/\U\1/' "$1"
 }
 
 function RemovePointAtTheEndFirstLine() {
-    sed -i -e  '1s/[.!?]\+$//g' "$1"
+    sed -i '1s/[.!?]\+$//g' "$1"
 }
 
 function IsCommitMessageAMerge() {
@@ -82,11 +86,6 @@ function IsSecondLineNotEmpty() {
 
 function IsAnyOfTheLinesAfterTheSecondTooLong() {
     [ $(cat "$1" | tail -n +2 | grep -c '^..\{72\}') -gt 0 ] && return 0 || return 1
-}
-
-function GiveAdviceToResumeCommit() {
-    errecho 'To resume editing your commit message, run the command:\n\n' 202
-    errecho '   git commit -e -F '"$commitMessageFile\n\n" 11 #Variable commitMessageFile from invoking script
 }
 
 #------------------------------------#
