@@ -126,3 +126,9 @@ function GiveAdviceAboutNonASCIICharacters() {
 function GiveAdviceAboutBranch() {
     errecho "If you are sure about what you are doing, commit with \e[38;5;11m--no-verify\e[38;5;202m to bypass this check.\n\n" 202
 }
+
+function GiveAdviceAboutWhitespaceError() {
+    errecho 'Use the command\n' 202
+    errecho '   git diff-index --check --cached\n' 11
+    errecho 'to have a look to the whitespace violation on staged files.\n\n' 202
+}
