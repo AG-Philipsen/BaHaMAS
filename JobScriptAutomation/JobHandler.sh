@@ -1,16 +1,20 @@
 #!/bin/bash
 
-#Some scripts could be called via . (source) builtin, see e.g.
-#https://developer.apple.com/library/mac/documentation/OpenSource/Conceptual/ShellScripting/SubroutinesandScoping/SubroutinesandScoping.html
-#Important: Unlike executing a script as a normal shell command, executing a script with the source builtin results in the second script executing within the same 
-#overall context as the first script. Any variables that are modified by the second script will be seen by the calling script.
-
-#COMMENT about -s | --submit and --submitonly: ...############### INSERT COMMENT HERE ###################
-
-# NOTE: Usually in this script, if an error occurs, a short description is given to the user.
-#       Nevertheless, it is annoying and not really necessary to check every single operation.
-#       As compromise, we chose the return code -2 (=> 254) to be returned for standard operations
-#       like source, mkdir, cd, ecc.
+#------------------------------------------------------------------------#
+#         ____             __  __            __  ___    ___    _____     #
+#        / __ )  ____ _   / / / /  ____ _   /  |/  /   /   |  / ___/     #
+#       / __  | / __ `/  / /_/ /  / __ `/  / /|_/ /   / /| |  \__ \      #
+#      / /_/ / / /_/ /  / __  /  / /_/ /  / /  / /   / ___ | ___/ /      #
+#     /_____/  \__,_/  /_/ /_/   \__,_/  /_/  /_/   /_/  |_|/____/       #
+#                                                                        #
+#------------------------------------------------------------------------#
+#                                                                        #
+#      Copyright (c)  2014  Alessandro Sciarra, Christopher Czaban       #
+#                     2015  Alessandro Sciarra, Christopher Czaban       #
+#                     2016  Alessandro Sciarra, Christopher Czaban       #
+#                     2017  Alessandro Sciarra, Christopher Czaban       #
+#                                                                        #
+#------------------------------------------------------------------------#
 
 #-----------------------------------------------------------------------------------------------------------------#
 # Load auxiliary bash files that will be used.
@@ -118,7 +122,7 @@ DELTA_S_THRESHOLD=6
 
 #####################################CREATE OPTIONS FOR COMMAND-LINE-PARSER######################################
 #Inverter Options
-CORRELATOR_DIRECTION="0" 
+CORRELATOR_DIRECTION="0"
 NUMBER_SOURCES_FOR_CORRELATORS="8"
 
 
@@ -126,7 +130,7 @@ NUMBER_SOURCES_FOR_CORRELATORS="8"
 UNCOMMENT_BETAS_SEED_ARRAY=()
 UNCOMMENT_BETAS_ARRAY=()
 
-#Array for the options string 
+#Array for the options string
 DATABASE_OPTIONS=()
 
 #-----------------------------------------------------------------------------------------------------------------#
@@ -154,15 +158,15 @@ SPECIFIED_COMMAND_LINE_OPTIONS=( $(SplitCombinedShortOptionsInSingloOptions $@) 
 if ElementInArray "-h" ${SPECIFIED_COMMAND_LINE_OPTIONS[@]} || ElementInArray "--help" ${SPECIFIED_COMMAND_LINE_OPTIONS[@]}; then
     SPECIFIED_COMMAND_LINE_OPTIONS=( "--help" )
 elif ElementInArray "--helpDatabase" ${SPECIFIED_COMMAND_LINE_OPTIONS[@]}; then
-	SPECIFIED_COMMAND_LINE_OPTIONS=( "-d" "-h" )
+    SPECIFIED_COMMAND_LINE_OPTIONS=( "-d" "-h" )
 fi
 
 ParseCommandLineOption "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}"
 CheckWilsonStaggeredVariables
 
 if [ "$CALL_DATABASE" = "TRUE" ]; then
-	projectStatisticsDatabase ${DATABASE_OPTIONS[@]}	
-	exit
+    projectStatisticsDatabase ${DATABASE_OPTIONS[@]}
+    exit
 fi
 
 ReadParametersFromPath $(pwd)
@@ -181,7 +185,7 @@ fi
 
 
 #-----------------------------------------------------------------------------------------------------------------#
-# Perform all the checks on the path, reading out some variables 
+# Perform all the checks on the path, reading out some variables
 if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
     CheckSingleOccurrenceInPath "homeb" "hkf8/" "hkf8[[:digit:]]\+" "${NFLAVOUR_PREFIX}${NFLAVOUR_REGEX}" "${CHEMPOT_PREFIX}${CHEMPOT_REGEX}" "${MASS_PREFIX}${MASS_REGEX}" "${NTIME_PREFIX}${NTIME_REGEX}" "${NSPACE_PREFIX}${NSPACE_REGEX}"
 else
@@ -195,13 +199,13 @@ WORK_DIR_WITH_BETAFOLDERS="$WORK_DIR/$SIMULATION_PATH$PARAMETERS_PATH"
 
 if [ "$HOME_DIR_WITH_BETAFOLDERS" != "$(pwd)" ]; then
     printf "\n\e[0;31m HOME_DIR_WITH_BETAFOLDERS=$HOME_DIR_WITH_BETAFOLDERS\n"
-	printf "\e[0;31m Constructed path to directory containing beta folders does not match the actual position! Aborting...\n\n\e[0m"
-	exit -1
+    printf "\e[0;31m Constructed path to directory containing beta folders does not match the actual position! Aborting...\n\n\e[0m"
+    exit -1
 fi
 if [ ! -d $WORK_DIR_WITH_BETAFOLDERS ]; then
     printf "\n\e[0;31m WORK_DIR_WITH_BETAFOLDERS=$WORK_DIR_WITH_BETAFOLDERS\n"
-	printf "\e[0;31m seems not to be an existing folder! Aborting...\n\n\e[0m"
-	exit -1
+    printf "\e[0;31m seems not to be an existing folder! Aborting...\n\n\e[0m"
+    exit -1
 fi
 
 #-----------------------------------------------------------------------------------------------------------------#
@@ -215,8 +219,8 @@ SUBMIT_BETA_ARRAY=()
 PROBLEM_BETA_ARRAY=() #Arrays that will contain the beta values that actually will be processed
 declare -A INTSTEPS0_ARRAY
 declare -A INTSTEPS1_ARRAY
-declare -A CONTINUE_RESUMETRAJ_ARRAY 
-declare -A MASS_PRECONDITIONING_ARRAY 
+declare -A CONTINUE_RESUMETRAJ_ARRAY
+declare -A MASS_PRECONDITIONING_ARRAY
 declare -A STARTCONFIGURATION_GLOBALPATH #NOTE: Before bash 4.2 associative array are LOCAL by default (from bash 4.2 one can do "declare -g ARRAY" to make it global).
                                          #      This is the reason why they are declared here and not in ReadBetaValuesFromFile where it would be natural!!
 
@@ -244,7 +248,7 @@ elif [ $THERMALIZE = "TRUE" ] || [ $CONTINUE_THERMALIZATION = "TRUE" ]; then
 
     if [ $USE_MULTIPLE_CHAINS = "FALSE" ]; then
         [ $THERMALIZE = "TRUE" ] && printf "\n\e[0;31m Option -t | --thermalize implemented ONLY combined not with --doNotUseMultipleChains option! Aborting...\n\n\e[0m"
-	    [ $CONTINUE_THERMALIZATION = "TRUE" ] && printf "\n\e[0;31m Option -C | --continueThermalization implemented ONLY combined not with --doNotUseMultipleChains option! Aborting...\n\n\e[0m"
+        [ $CONTINUE_THERMALIZATION = "TRUE" ] && printf "\n\e[0;31m Option -C | --continueThermalization implemented ONLY combined not with --doNotUseMultipleChains option! Aborting...\n\n\e[0m"
         exit -1
     fi
     #Here we fix the beta postfix just looking for thermalized conf from hot at the actual parameters (no matter at which beta);
@@ -254,13 +258,13 @@ elif [ $THERMALIZE = "TRUE" ] || [ $CONTINUE_THERMALIZATION = "TRUE" ]; then
     # TODO: If a thermalization from hot is finished but one other crashed and one wishes to resume it, the postfix should be
     #       from Hot but it is from conf since in $THERMALIZED_CONFIGURATIONS_PATH a conf from hot is found. Think about how to fix this.
     if [ $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA_REGEX}_${SEED_PREFIX}${SEED_REGEX}_fromHot[[:digit:]]\+.*" | wc -l) -eq 0 ]; then
-	    BETA_POSTFIX="_thermalizeFromHot"
+        BETA_POSTFIX="_thermalizeFromHot"
     else
-	    BETA_POSTFIX="_thermalizeFromConf"
-    fi	
+        BETA_POSTFIX="_thermalizeFromConf"
+    fi
     if [ $MEASURE_PBP = "TRUE" ]; then
-	    printf "\n \e[1;33;4mMeasurement of PBP switched off during thermalization!!\n\e[0m"
-	    MEASURE_PBP="FALSE"
+        printf "\n \e[1;33;4mMeasurement of PBP switched off during thermalization!!\n\e[0m"
+        MEASURE_PBP="FALSE"
     fi
 
     ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
@@ -269,29 +273,29 @@ elif [ $THERMALIZE = "TRUE" ] || [ $CONTINUE_THERMALIZATION = "TRUE" ]; then
         ProduceInputFileAndJobScriptForEachBeta
         CONFIRM="";
         printf "\n\e[0;33m Check if everything is fine. Would you like to submit the jobs (Y/N)? \e[0m"
-		while read CONFIRM; do
-		    if [ "$CONFIRM" = "Y" ]; then
-			    break;
-		    elif [ "$CONFIRM" = "N" ]; then
-			    printf "\n\e[1;37;41mNo jobs will be submitted.\e[0m\n"
-			    exit
-		    else
-			    printf "\n\e[0;33m Please enter Y (yes) or N (no): \e[0m"
-		    fi
-		done
+        while read CONFIRM; do
+            if [ "$CONFIRM" = "Y" ]; then
+                break;
+            elif [ "$CONFIRM" = "N" ]; then
+                printf "\n\e[1;37;41mNo jobs will be submitted.\e[0m\n"
+                exit
+            else
+                printf "\n\e[0;33m Please enter Y (yes) or N (no): \e[0m"
+            fi
+        done
         unset -v 'CONFIRM'
     elif [ $CONTINUE_THERMALIZATION = "TRUE" ]; then
         ProcessBetaValuesForContinue
     fi
     SubmitJobsForValidBetaValues #TODO: Declare all possible local variable in this function as local!
-    
+
 elif [ $CONTINUE = "TRUE" ]; then
 
     if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then CheckParallelizationTmlqcdForJuqueen; fi
     ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
     ProcessBetaValuesForContinue #TODO: Declare all possible local variable in this function as local! Use also only capital letters!
     SubmitJobsForValidBetaValues #TODO: Declare all possible local variable in this function as local!
-    
+
 elif [ $LISTSTATUS = "TRUE" ] || [ $LISTSTATUSALL = "TRUE" ]; then
 
     ListJobStatus   #TODO: On Juqueen, declare all possible local variable in this function as local! Use PARAMETERS_STRING/PATH where needed!
@@ -302,11 +306,11 @@ elif [ $SHOWJOBS = "TRUE" ]; then
 
 elif [ $ACCRATE_REPORT = "TRUE" ]; then
 
-	ReadBetaValuesFromFile
+    ReadBetaValuesFromFile
     AcceptanceRateReport
 
 elif [ $CLEAN_OUTPUT_FILES = "TRUE" ]; then
-    
+
     if [ $SECONDARY_OPTION_ALL = "TRUE" ]; then
         BETAVALUES=( $( ls $WORK_DIR_WITH_BETAFOLDERS | grep "^${BETA_PREFIX}${BETA_REGEX}" | awk '{print substr($1,2)}') )
     else
@@ -315,23 +319,23 @@ elif [ $CLEAN_OUTPUT_FILES = "TRUE" ]; then
     CleanOutputFiles
 
 elif [ $EMPTY_BETA_DIRS = "TRUE" ]; then
-    
+
     BETASFILE="emptybetas"
     ReadBetaValuesFromFile
     EmptyBetaDirectories
-    
+
 elif [ $COMPLETE_BETAS_FILE = "TRUE" ]; then
 
     CompleteBetasFile
-    
+
 elif [ $UNCOMMENT_BETAS = "TRUE" ] || [ $COMMENT_BETAS = "TRUE" ]; then
 
-	UncommentEntriesInBetasFile
+    UncommentEntriesInBetasFile
 
 elif [ $INVERT_CONFIGURATIONS = "TRUE" ]; then
 
     ReadBetaValuesFromFile
-    ProcessBetaValuesForInversion 
+    ProcessBetaValuesForInversion
     SubmitJobsForValidBetaValues
 fi
 
@@ -345,4 +349,3 @@ PrintReportForProblematicBeta
 printf "\e[0;32m \n ...done!\n\n\e[0m"
 
 exit 0
-
