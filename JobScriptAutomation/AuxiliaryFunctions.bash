@@ -1,11 +1,11 @@
 # Collection of function needed in the job handler script.
 
 # Load auxiliary bash files that will be used.
-source $HOME/Script/JobScriptAutomation/AuxiliaryFunctionsForLoewe.sh || exit -2
-source $HOME/Script/JobScriptAutomation/AuxiliaryFunctionsForJuqueen.sh || exit -2
-source $HOME/Script/JobScriptAutomation/ListJobsStatusForLoewe.sh || exit -2
-source $HOME/Script/JobScriptAutomation/ListJobsStatusForJuqueen.sh || exit -2
-source $HOME/Script/JobScriptAutomation/CleanOutputFiles.sh || exit -2
+source $HOME/Script/JobScriptAutomation/AuxiliaryFunctionsForLoewe.bash || exit -2
+source $HOME/Script/JobScriptAutomation/AuxiliaryFunctionsForJuqueen.bash || exit -2
+source $HOME/Script/JobScriptAutomation/ListJobsStatusForLoewe.bash || exit -2
+source $HOME/Script/JobScriptAutomation/ListJobsStatusForJuqueen.bash || exit -2
+source $HOME/Script/JobScriptAutomation/CleanOutputFiles.bash || exit -2
 #------------------------------------------------------------------------------------#
 
 function ReadBetaValuesFromFile(){
@@ -32,9 +32,9 @@ function ReadBetaValuesFromFile(){
     local RESUME_REGEXPR="resumefrom=\([[:digit:]]\+\|last\)"
     local MP_REGEXPR="MP=(.*)"
     local SEARCH_RESULT=""  # Auxiliary variable to help to parse the file
-    local OLD_IFS=$IFS      # save the field separator           
-    local IFS=$'\n'         # new field separator, the end of line           
-    for LINE in $(cat $BETASFILE); do          
+    local OLD_IFS=$IFS      # save the field separator
+    local IFS=$'\n'         # new field separator, the end of line
+    for LINE in $(cat $BETASFILE); do
         if [[ $LINE =~ ^[[:blank:]]*# ]] || [[ $LINE =~ ^[[:blank:]]*$ ]]; then
             continue
         fi
@@ -63,8 +63,8 @@ function ReadBetaValuesFromFile(){
             INTSTEPS0_ARRAY_TEMP+=( $(echo $LINE | awk '{print $3}') )
             INTSTEPS1_ARRAY_TEMP+=( $(echo $LINE | awk '{print $4}') )
         fi
-    done          
-    IFS=$OLD_IFS     # restore default field separator 
+    done
+    IFS=$OLD_IFS     # restore default field separator
 
     #Check whether the entries in the file have the right format, otherwise abort
     if [ ${#BETAVALUES[@]} -eq 0 ]; then
@@ -92,7 +92,7 @@ function ReadBetaValuesFromFile(){
             exit -1
             fi
         done
-        
+
         #Check whether same seed is provided multiple times for same beta --> do it with an associative array in awk after having removed "resumefrom=", EMPTYLINES and comments
         if [ "$(awk '{split($0, res, "'#'"); print res[1]}' $BETASFILE |\
                 sed -e 's/'$RESUME_REGEXPR'//g' -e 's/'$MP_REGEXPR'//g' -e '/^[[:space:]]*$/d' |\
@@ -131,17 +131,17 @@ function ReadBetaValuesFromFile(){
             exit -1
         fi
 
-        #Now that all the checks have been done, build associative arrays for later use of integration steps 
+        #Now that all the checks have been done, build associative arrays for later use of integration steps
         for INDEX in "${!BETAVALUES[@]}"; do
             INTSTEPS0_ARRAY["${BETAVALUES[$INDEX]}"]="${INTSTEPS0_ARRAY_TEMP[$INDEX]}"
             INTSTEPS1_ARRAY["${BETAVALUES[$INDEX]}"]="${INTSTEPS1_ARRAY_TEMP[$INDEX]}"
-        done	
+        done
     else
         #Build associative arrays for later use of integration steps with the same value for all betas
         for INDEX in "${!BETAVALUES[@]}"; do
             INTSTEPS0_ARRAY["${BETAVALUES[$INDEX]}"]=$INTSTEPS0
             INTSTEPS1_ARRAY["${BETAVALUES[$INDEX]}"]=$INTSTEPS1
-        done		
+        done
     fi
 
     for INDEX in "${!BETAVALUES[@]}"; do
@@ -152,7 +152,7 @@ function ReadBetaValuesFromFile(){
                 printf "\n\e[0;31m Invalid resume trajectory number in betasfile! Aborting...\n\n\e[0m"
                 exit -1
             fi
-            #Build associative array for later use 
+            #Build associative array for later use
             CONTINUE_RESUMETRAJ_ARRAY["${BETAVALUES[$INDEX]}"]="$TEMP_STR"
         fi
         TEMP_STR=${MASS_PRECONDITIONING_TEMP[$INDEX]}
@@ -215,11 +215,11 @@ function ReadBetaValuesFromFile(){
                         printf "\e[38;5;202m found more than one! Which should be used?\n\n\e[38;5;27m"
                         PS3=$'\n\e[38;5;118mEnter the number corresponding to the desired set: \e[38;5;27m'
                         select CONFIGURATION_CHOSEN_BY_USER in "${FOUND_CONFIGURATIONS[@]}"; do
-	                        if ! ElementInArray "$CONFIGURATION_CHOSEN_BY_USER" "${FOUND_CONFIGURATIONS[@]}"; then
-		                        continue
-	                        else
-		                        break
-	                        fi
+                            if ! ElementInArray "$CONFIGURATION_CHOSEN_BY_USER" "${FOUND_CONFIGURATIONS[@]}"; then
+                                continue
+                            else
+                                break
+                            fi
                         done
                         printf "\n\e[0m"
                         STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERMALIZED_CONFIGURATIONS_PATH}/$CONFIGURATION_CHOSEN_BY_USER"
@@ -238,7 +238,7 @@ function ReadBetaValuesFromFile(){
                     exit -1
                 fi
                 local FOUND_CONFIGURATIONS=( $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "^conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA_REGEX}_${SEED_PREFIX}${SEED_REGEX}_fromHot[[:digit:]]\+.*") )
-                #Here a 0 length of FOUND_CONFIGURATIONS is not checked since we rely on the fact that if this was the case we would have $BETA_POSTFIX == "_thermalizeFromHot" as set in JobHandler.sh (Thermalize case)
+                #Here a 0 length of FOUND_CONFIGURATIONS is not checked since we rely on the fact that if this was the case we would have $BETA_POSTFIX == "_thermalizeFromHot" as set in JobHandler.bash (Thermalize case)
                 declare -A FOUND_CONFIGURATIONS_WITH_BETA_AS_KEY
                 for CONFNAME in "${FOUND_CONFIGURATIONS[@]}"; do
                     local BETAVALUE_RECOVERED_FROM_NAME=$(echo $CONFNAME | awk '{split($1, res, "_fromHot"); print res[1]}' | sed 's/.*\('${BETA_REGEX}'\).*/\1/')
@@ -450,9 +450,9 @@ function UncommentEntriesInBetasFile()
 function ProduceInputFileAndJobScriptForEachBeta()
 {
     if [ "$CLUSTER_NAME" = "JUQUEEN" ]
-    then 
+    then
         ProduceInputFileAndJobScriptForEachBeta_Juqueen
-    else 
+    else
         ProduceInputFileAndJobScriptForEachBeta_Loewe
     fi
 }
@@ -470,7 +470,7 @@ function ProcessBetaValuesForSubmitOnly()
 
 
 function ProcessBetaValuesForContinue()
-{    
+{
     if [ "$CLUSTER_NAME" = "JUQUEEN" ]
     then
         ProcessBetaValuesForContinue_Juqueen
@@ -481,7 +481,7 @@ function ProcessBetaValuesForContinue()
 
 
 function ProcessBetaValuesForInversion()
-{    
+{
     if [ "$CLUSTER_NAME" = "JUQUEEN" ]
     then
         printf "\n\e[0;31mOption --invertConfigurations not yet implemented on the Juqueen! Aborting...\n\n\e[0m"; exit -1

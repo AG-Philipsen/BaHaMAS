@@ -15,7 +15,7 @@ function __static__CleanFile(){
     #Do a backup of the file
     local FILE_GLOBALPATH_BACKUP="${FILE_GLOBALPATH}_$(date +'%F_%H%M')"
     cp $FILE_GLOBALPATH $FILE_GLOBALPATH_BACKUP || exit -2
-    
+
     if [ "$CHECK_FOR_SUSPICIOUS_TR" = "TRUE" ]; then
         __static__CheckFileForSuspiciousTrajectory $FILE_GLOBALPATH
     fi
@@ -48,13 +48,13 @@ function CleanOutputFiles()
         fi
 
         printf "\n   \e[1;36m- $BETA\n\e[0m"
-        
+
         if $(sort --numeric-sort --unique --check=silent --key 1,1 ${MAINFILE_GLOBALPATH}); then
             printf "\e[38;5;13m        The file \"${BETA_PREFIX}${MAINFILE_GLOBALPATH##*/$BETA_PREFIX}\" has not to be cleaned!\n\e[0m"
         else
             __static__CleanFile "$MAINFILE_GLOBALPATH" "TRUE"
         fi
-        
+
         if [ -f $PBPFILE_GLOBALPATH ]; then
             if $(sort --numeric-sort --unique --check=silent --key 1,1 ${PBPFILE_GLOBALPATH}); then
                 printf "\e[38;5;13m        The file \"${BETA_PREFIX}${PBPFILE_GLOBALPATH##*/$BETA_PREFIX}\" has not to be cleaned!\n\e[0m"
@@ -62,6 +62,6 @@ function CleanOutputFiles()
                 __static__CleanFile "$PBPFILE_GLOBALPATH" "FALSE"
             fi
         fi
-        
+
     done
 }

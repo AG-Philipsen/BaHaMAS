@@ -23,9 +23,9 @@ function ProduceJobscript_Loewe(){
             echo "#SBATCH -w $LOEWE_NODE" >> $JOBSCRIPT_GLOBALPATH
         fi
     elif [ $CLUSTER_NAME = "LCSC" ]; then
-	    echo "#SBATCH --partition=lcsc" >> $JOBSCRIPT_GLOBALPATH
-	    echo "#SBATCH --mem=64000" >> $JOBSCRIPT_GLOBALPATH
-	    echo "#SBATCH --gres=gpu:$GPU_PER_NODE" >> $JOBSCRIPT_GLOBALPATH
+        echo "#SBATCH --partition=lcsc" >> $JOBSCRIPT_GLOBALPATH
+        echo "#SBATCH --mem=64000" >> $JOBSCRIPT_GLOBALPATH
+        echo "#SBATCH --gres=gpu:$GPU_PER_NODE" >> $JOBSCRIPT_GLOBALPATH
         #Option to choose only a node with 'hawaii' GPU hardware
         echo "#SBATCH --constrain=hawaii" >> $JOBSCRIPT_GLOBALPATH
         #The following nodes of L-CSC are using tahiti as GPU hardware (sinfo -o "%4c %10z %8d %8m %10f %10G %D %N"), CL2QCD fails on them.
@@ -33,11 +33,11 @@ function ProduceJobscript_Loewe(){
         echo "#SBATCH --partition=lcsc_lqcd" >> $JOBSCRIPT_GLOBALPATH
     fi
 
-	if [ -f "$FILE_WITH_WHICH_NODES_TO_EXCLUDE" ]; then
-		EXCLUDE_STRING=$(grep -oE '\-\-exclude=.*\[.*\]' $FILE_WITH_WHICH_NODES_TO_EXCLUDE 2>/dev/null)
-	elif [[ $FILE_WITH_WHICH_NODES_TO_EXCLUDE =~ : ]]; then 
+    if [ -f "$FILE_WITH_WHICH_NODES_TO_EXCLUDE" ]; then
+        EXCLUDE_STRING=$(grep -oE '\-\-exclude=.*\[.*\]' $FILE_WITH_WHICH_NODES_TO_EXCLUDE 2>/dev/null)
+    elif [[ $FILE_WITH_WHICH_NODES_TO_EXCLUDE =~ : ]]; then
         EXCLUDE_STRING=$(ssh ${FILE_WITH_WHICH_NODES_TO_EXCLUDE%%:*} "grep -oE '\-\-exclude=.*\[.*\]' ${FILE_WITH_WHICH_NODES_TO_EXCLUDE#*:} 2>/dev/null")
-	fi
+    fi
     if [ "$EXCLUDE_STRING" != "" ]; then
         echo "#SBATCH $EXCLUDE_STRING"  >> $JOBSCRIPT_GLOBALPATH
         printf "\e[1A\e[80C\t$EXCLUDE_STRING\n"
@@ -97,7 +97,7 @@ function ProduceJobscript_Loewe(){
     if [ "$HOME_DIR" != "$WORK_DIR" ]; then
         echo "#Copy inputfile from home to work directories..." >> $JOBSCRIPT_GLOBALPATH
         for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-            echo "mkdir -p \$workdir$INDEX && cp \$dir$INDEX/$INPUTFILE_NAME \$workdir$INDEX/$INPUTFILE_NAME.\$SLURM_JOB_ID || exit 2" >> $JOBSCRIPT_GLOBALPATH            		
+            echo "mkdir -p \$workdir$INDEX && cp \$dir$INDEX/$INPUTFILE_NAME \$workdir$INDEX/$INPUTFILE_NAME.\$SLURM_JOB_ID || exit 2" >> $JOBSCRIPT_GLOBALPATH
         done
         echo "echo \"...done!\"" >> $JOBSCRIPT_GLOBALPATH
     fi
@@ -120,8 +120,8 @@ function ProduceJobscript_Loewe(){
         echo "pwd &" >> $JOBSCRIPT_GLOBALPATH
         if [ $CLUSTER_NAME = "LOEWE" ]; then
             echo "time srun -n 1 \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$INPUTFILE_NAME --device=$INDEX --beta=${BETA_FOR_JOBSCRIPT[$INDEX]%%_*} > \$dir$INDEX/\$outFile 2> \$dir$INDEX/\$errFile &" >> $JOBSCRIPT_GLOBALPATH
-	    elif [ $CLUSTER_NAME = "LCSC" ]; then
-	        echo "time \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$INPUTFILE_NAME --device=$INDEX --beta=${BETA_FOR_JOBSCRIPT[$INDEX]%%_*} 2> \$dir$INDEX/\$errFile | mbuffer -q -m2M > \$dir$INDEX/\$outFile &" >> $JOBSCRIPT_GLOBALPATH
+        elif [ $CLUSTER_NAME = "LCSC" ]; then
+            echo "time \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$INPUTFILE_NAME --device=$INDEX --beta=${BETA_FOR_JOBSCRIPT[$INDEX]%%_*} 2> \$dir$INDEX/\$errFile | mbuffer -q -m2M > \$dir$INDEX/\$outFile &" >> $JOBSCRIPT_GLOBALPATH
         fi
         echo "PID_SRUN_$INDEX=\${!}" >> $JOBSCRIPT_GLOBALPATH
         echo "" >> $JOBSCRIPT_GLOBALPATH

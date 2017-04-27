@@ -108,7 +108,7 @@ function ProduceJobscript_Juqueen(){
     echo '#       set the "Total number of trajectories" in the input file to 60 (in general to the' >> $JOBSCRIPT_GLOBALPATH
     echo '#       number of progressive lines of the output.data file plus the number of new trajectory).' >> $JOBSCRIPT_GLOBALPATH
     echo '#       If not, he will get from below a message like "Done 60 trajectories out of 10" and the' >> $JOBSCRIPT_GLOBALPATH
-    echo '#	  job will stop (in general this is serious if the job is actually not finished but it' >> $JOBSCRIPT_GLOBALPATH
+    echo '#      job will stop (in general this is serious if the job is actually not finished but it' >> $JOBSCRIPT_GLOBALPATH
     echo '#       seems so because of something like that and it is not again submitted).' >> $JOBSCRIPT_GLOBALPATH
     echo '#' >> $JOBSCRIPT_GLOBALPATH
     echo 'eval $(bash ${SDIR}/GetTotNumTrajectories.sh ${IFILE})' >> $JOBSCRIPT_GLOBALPATH

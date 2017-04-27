@@ -28,7 +28,7 @@ function ProduceInputFile_Loewe() {
         if [ $CHEMPOT = "PiT" ]; then
             echo "chem_pot_im=0.523598775598299" >> $INPUTFILE_GLOBALPATH
         else
-            printf "\n\e[0;31m Unknown value of imaginary chemical potential for input file! Aborting...\n\n\e[0m" 
+            printf "\n\e[0;31m Unknown value of imaginary chemical potential for input file! Aborting...\n\n\e[0m"
             exit -1
         fi
     fi
@@ -50,7 +50,7 @@ function ProduceInputFile_Loewe() {
         echo "ferm_obs_pbp_prefix=${OUTPUTFILE_NAME}" >> $INPUTFILE_GLOBALPATH
     fi
     #Information about integrators
-    if [ $WILSON = "TRUE" ]; then    
+    if [ $WILSON = "TRUE" ]; then
         echo "iter_refresh=2000" >> $INPUTFILE_GLOBALPATH
         echo "use_merge_kernels_fermion=1" >> $INPUTFILE_GLOBALPATH
         if KeyInArray "${BETAVALUES_COPY[$INDEX]}" MASS_PRECONDITIONING_ARRAY; then
@@ -95,12 +95,10 @@ function ProduceInputFile_Loewe() {
     if [ $USE_MULTIPLE_CHAINS == "TRUE" ]; then
         local SEED_EXTRACTED_FROM_BETA="$(echo ${BETAVALUES_COPY[$INDEX]} | awk '{split($1, result, "_"); print substr(result[2],2)}')"
         if [[ ! $SEED_EXTRACTED_FROM_BETA =~ ^[[:digit:]]{4}$ ]] || [[ $SEED_EXTRACTED_FROM_BETA == "0000" ]]; then
-            printf "\n\e[0;31m Seed not allowed to be put in inputfile for CL2QCD! Aborting...\n\n\e[0m" 
+            printf "\n\e[0;31m Seed not allowed to be put in inputfile for CL2QCD! Aborting...\n\n\e[0m"
             exit -1
         else
             echo "host_seed=$SEED_EXTRACTED_FROM_BETA" >> $INPUTFILE_GLOBALPATH
         fi
     fi
 }
-
-

@@ -4,7 +4,7 @@
 # squeue on the LOEWE and or L-CSC together to scontrol show job, in order
 # to give to the user a more readable status of the submitted jobs.
 
-source $HOME/Script/UtilityFunctions.sh || exit -2
+source $HOME/Script/UtilityFunctions.bash || exit -2
 
 function ParseCommandLineOptions(){
 
@@ -29,9 +29,9 @@ function ParseCommandLineOptions(){
                 shift;;
             -u=* | --user=* )    SELECTED_USER=${1#*=}; shift ;;
             -a | --allUsers )    DISPLAY_ALL_JOBS="TRUE"; shift ;;
-	        -l | --local )       LOCAL_JOBS="TRUE"; shift;;
-	        -n | --nodeUsage )   MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--nodeUsage" ); NODE_USAGE="TRUE"; DISPLAY_STANDARD_LIST='FALSE'; shift;;
-	        -g | --groupBetas )  MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--groupBetas" ); GROUP_BETAS="TRUE"; DISPLAY_STANDARD_LIST='FALSE'; shift;;
+            -l | --local )       LOCAL_JOBS="TRUE"; shift;;
+            -n | --nodeUsage )   MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--nodeUsage" ); NODE_USAGE="TRUE"; DISPLAY_STANDARD_LIST='FALSE'; shift;;
+            -g | --groupBetas )  MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--groupBetas" ); GROUP_BETAS="TRUE"; DISPLAY_STANDARD_LIST='FALSE'; shift;;
             * ) printf "\n\e[0;31mError parsing the options! Aborting...\n\n\e[0m" ; exit -1 ;;
         esac
     done
@@ -40,16 +40,16 @@ function ParseCommandLineOptions(){
         printf "\n\e[0;31mError parsing the options (see --help)! Aborting...\n\n\e[0m"
         exit -1
     fi
-    
+
     if [ ${#MUTUALLYEXCLUSIVEOPTS_PASSED[@]} -gt 1 ]; then
-	    printf "\n\e[0;31m The options\n\n\e[1m"
-	    for OPT in "${MUTUALLYEXCLUSIVEOPTS[@]}"; do
-	        printf "  %s\n" "$OPT"
-	    done
-	    printf "\n\e[0;31m are mutually exclusive and must not be combined! Aborting...\n\n\e[0m"
-	    exit -1
+        printf "\n\e[0;31m The options\n\n\e[1m"
+        for OPT in "${MUTUALLYEXCLUSIVEOPTS[@]}"; do
+            printf "  %s\n" "$OPT"
+        done
+        printf "\n\e[0;31m are mutually exclusive and must not be combined! Aborting...\n\n\e[0m"
+        exit -1
     fi
-    
+
 }
 
 #Unused function left here in case in future some more information is needed (for which squeue has not a format option)
@@ -181,7 +181,7 @@ for ((j=0; j<${#JOB_SUBMISSION_FOLDER[@]}; j++)); do
     JOB_SUBMISSION_FOLDER[$j]=${JOB_SUBMISSION_FOLDER[$j]/$DATA2_DIR/DATA02}
 done && unset -v 'HOME_DIR' 'WORK_DIR' 'DATA1_DIR' 'DATA2_DIR'
 
-#Some counting for the table 
+#Some counting for the table
 LONGEST_NAME=${JOB_NAME[0]}
 for NAME in ${JOB_NAME[@]}; do
     if [ ${#NAME} -gt ${#LONGEST_NAME} ]; then
@@ -207,7 +207,7 @@ if [ $NODE_USAGE = "TRUE" ]; then
     declare -A USED_NODES
     #Counting
     for NODE in ${JOB_NODELIST[@]}; do
-	    USED_NODES[$NODE]="${USED_NODES[$NODE]}+"
+        USED_NODES[$NODE]="${USED_NODES[$NODE]}+"
     done
     #Printing
     printf "\n\e[1;36m"
@@ -216,9 +216,9 @@ if [ $NODE_USAGE = "TRUE" ]; then
 
     printf "\e[38;5;13m%-15s%-10s\n\e[0m" "NODE" "RUNNING_JOBS"
     for NODE in ${!USED_NODES[@]}; do
-	    printf "\e[38;5;39m%-15s\e[38;5;10m%-10s\e[38;5;49m%d\e[0m\n" "${NODE}" "${USED_NODES[$NODE]}" "$(grep -o '+' <<< "${USED_NODES[$NODE]}" | wc -l)"
+        printf "\e[38;5;39m%-15s\e[38;5;10m%-10s\e[38;5;49m%d\e[0m\n" "${NODE}" "${USED_NODES[$NODE]}" "$(grep -o '+' <<< "${USED_NODES[$NODE]}" | wc -l)"
     done | sort -h
-    
+
     printf "\n\e[38;5;202m  Total number of submitted jobs: $TOTAL_JOBS"
     printf " (\e[1;32mRunning: $RUNNING_JOBS  \e[0m - \e[1;31m  Pending: $PENDING_JOBS  \e[0m - \e[1;35m  Others: $OTHER_JOBS\e[38;5;202m)\n"
     printf "\e[1;36m"
@@ -236,19 +236,19 @@ if [ $GROUP_BETAS = "TRUE" ]; then
     declare -A SEEDS_STATUS
     #Counting
     for INDEX in ${!JOB_NAME[@]}; do
-	    NAME=${JOB_NAME[$INDEX]}
-	    JOB_PARAMETERS[${NAME%%_s*}]="${JOB_PARAMETERS[${NAME%%_s*}]} ${NAME##*_s}"
-	    if [ ${JOB_STATUS[$INDEX]} = "RUNNING" ]; then
-	        SEEDS_STATUS[${NAME%%_s*}]="${SEEDS_STATUS[${NAME%%_s*}]} \e[38;5;10m${JOB_STATUS[$INDEX]:0:1}\e[0m"
-	    elif [ ${JOB_STATUS[$INDEX]} = "PENDING" ]; then
-	        if [ ${JOB_START_TIME[$i]} != "Unknown" ]; then
-		        SEEDS_STATUS[${NAME%%_s*}]="${SEEDS_STATUS[${NAME%%_s*}]} \e[38;5;11m${JOB_STATUS[$INDEX]:0:1}\e[0m"
-	        else
-		        SEEDS_STATUS[${NAME%%_s*}]="${SEEDS_STATUS[${NAME%%_s*}]} \e[38;5;9m${JOB_STATUS[$INDEX]:0:1}\e[0m"
-	        fi
+        NAME=${JOB_NAME[$INDEX]}
+        JOB_PARAMETERS[${NAME%%_s*}]="${JOB_PARAMETERS[${NAME%%_s*}]} ${NAME##*_s}"
+        if [ ${JOB_STATUS[$INDEX]} = "RUNNING" ]; then
+            SEEDS_STATUS[${NAME%%_s*}]="${SEEDS_STATUS[${NAME%%_s*}]} \e[38;5;10m${JOB_STATUS[$INDEX]:0:1}\e[0m"
+        elif [ ${JOB_STATUS[$INDEX]} = "PENDING" ]; then
+            if [ ${JOB_START_TIME[$i]} != "Unknown" ]; then
+                SEEDS_STATUS[${NAME%%_s*}]="${SEEDS_STATUS[${NAME%%_s*}]} \e[38;5;11m${JOB_STATUS[$INDEX]:0:1}\e[0m"
+            else
+                SEEDS_STATUS[${NAME%%_s*}]="${SEEDS_STATUS[${NAME%%_s*}]} \e[38;5;9m${JOB_STATUS[$INDEX]:0:1}\e[0m"
+            fi
         else
             SEEDS_STATUS[${NAME%%_s*}]="${SEEDS_STATUS[${NAME%%_s*}]} \e[38;5;13m${JOB_STATUS[$INDEX]:0:1}\e[0m"
-	    fi
+        fi
     done
     #Printing
     printf "\n\e[1;36m"
@@ -257,9 +257,9 @@ if [ $GROUP_BETAS = "TRUE" ]; then
 
     printf "\e[38;5;4m%-40s%-30s%s\n\e[0m" "JOB_PARAMETERS" "QUEUED_SEEDS" "STATUS"
     for NAME in ${!JOB_PARAMETERS[@]}; do
-	    printf "\e[38;5;14m%-40s\e[38;5;13m%-30s${SEEDS_STATUS[$NAME]:1}\e[0m\n" "${NAME}" "${JOB_PARAMETERS[$NAME]:1}"
+        printf "\e[38;5;14m%-40s\e[38;5;13m%-30s${SEEDS_STATUS[$NAME]:1}\e[0m\n" "${NAME}" "${JOB_PARAMETERS[$NAME]:1}"
     done | sort -h
-    
+
     printf "\n\e[38;5;202m  Total number of submitted jobs: $TOTAL_JOBS"
     printf " (\e[1;32mRunning: $RUNNING_JOBS  \e[0m - \e[1;31m  Pending: $PENDING_JOBS  \e[0m - \e[1;35m  Others: $OTHER_JOBS\e[38;5;202m)\n"
     printf "\e[1;36m"
@@ -271,7 +271,7 @@ fi
 #------------------------------------------------------------------------------------------------------------------------------------------------#
 #Stabdard display
 if [ $DISPLAY_STANDARD_LIST = "TRUE" ]; then
-        
+
     #Table header
     COLUMNS_OF_THE_SHELL=$(tput cols)
     TABLE_FORMAT="%-8s%-5s%-$((2+${#LONGEST_NAME}))s%-5s%-25s%-5s%-19s%-5s%+14s%-5s%-s"

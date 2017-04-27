@@ -4,7 +4,7 @@
 
 function TimeToSeconds(){
     local T=$1; shift
-    echo $((10#${T:0:2} * 3600 + 10#${T:3:2} * 60 + 10#${T:6:2})) 
+    echo $((10#${T:0:2} * 3600 + 10#${T:3:2} * 60 + 10#${T:6:2}))
 }
 
 function SecondsToTime(){
@@ -23,18 +23,18 @@ function SecondsToTimeString(){
     printf "%02dh %02dm %02ds"  "${hours}" "${minutes}" "${seconds}"
 }
 
-function TimeStringToSecond(){ 
+function TimeStringToSecond(){
     #The string can contain s,m,h,d preceded by digits, NO SPACES
     local STRING_SEPARATED=( $(sed 's/\([smhd]\)/\1 /g' <<< "$1") )
     local TOTAL_TIME_IN_SECONDS=0
     for ELEMENT in ${STRING_SEPARATED[@]}; do
-	    case $ELEMENT in
-	        *d) TOTAL_TIME_IN_SECONDS=$(( $TOTAL_TIME_IN_SECONDS + 86400*${ELEMENT%?} )) ;;
-	        *h) TOTAL_TIME_IN_SECONDS=$(( $TOTAL_TIME_IN_SECONDS +  3600*${ELEMENT%?} )) ;;
-	        *m) TOTAL_TIME_IN_SECONDS=$(( $TOTAL_TIME_IN_SECONDS +    60*${ELEMENT%?} )) ;;
-	        *s) TOTAL_TIME_IN_SECONDS=$(( $TOTAL_TIME_IN_SECONDS +       ${ELEMENT%?} )) ;;
-	    esac
-    done && unset -v 'ELEMENT' 
+        case $ELEMENT in
+            *d) TOTAL_TIME_IN_SECONDS=$(( $TOTAL_TIME_IN_SECONDS + 86400*${ELEMENT%?} )) ;;
+            *h) TOTAL_TIME_IN_SECONDS=$(( $TOTAL_TIME_IN_SECONDS +  3600*${ELEMENT%?} )) ;;
+            *m) TOTAL_TIME_IN_SECONDS=$(( $TOTAL_TIME_IN_SECONDS +    60*${ELEMENT%?} )) ;;
+            *s) TOTAL_TIME_IN_SECONDS=$(( $TOTAL_TIME_IN_SECONDS +       ${ELEMENT%?} )) ;;
+        esac
+    done && unset -v 'ELEMENT'
     echo "$TOTAL_TIME_IN_SECONDS"
 }
 
@@ -50,10 +50,10 @@ function SecondsToTimeStringWithDays(){
 function MinimumOfArray(){
     local MIN=$1; shift
     while [ "$1" != "" ]; do
-	    if [ $(echo "$1 $MIN" | awk '{print ($1<$2)}') -eq 1 ]; then
-	        MIN=$1
-	    fi
-	    shift
+        if [ $(echo "$1 $MIN" | awk '{print ($1<$2)}') -eq 1 ]; then
+            MIN=$1
+        fi
+        shift
     done
     echo "$MIN"
 }
@@ -64,11 +64,11 @@ function KeyOfMinimumOfArray(){
     local MIN=$1; shift
     while [ "$1" != "" ]; do
         (( COUNTER++ ))
-	    if [ $(echo "$1 $MIN" | awk '{print ($1<$2)}') -eq 1 ]; then
-	        MIN=$1
+        if [ $(echo "$1 $MIN" | awk '{print ($1<$2)}') -eq 1 ]; then
+            MIN=$1
             KEY_AT_MIN=$COUNTER
-	    fi
-	    shift
+        fi
+        shift
     done
     echo "$KEY_AT_MIN"
 }
@@ -76,10 +76,10 @@ function KeyOfMinimumOfArray(){
 function MaximumOfArray(){
     local MAX=$1; shift
     while [ "$1" != "" ]; do
-	    if [ $(echo "$1 $MAX" | awk '{print ($1>$2)}') -eq 1 ]; then
-	        MAX=$1
-	    fi
-	    shift
+        if [ $(echo "$1 $MAX" | awk '{print ($1>$2)}') -eq 1 ]; then
+            MAX=$1
+        fi
+        shift
     done
     echo "$MAX"
 }
@@ -90,11 +90,11 @@ function KeyOfMaximumOfArray(){
     local MAX=$1; shift
     while [ "$1" != "" ]; do
         (( COUNTER++ ))
-	    if [ $(echo "$1 $MAX" | awk '{print ($1>$2)}') -eq 1 ]; then
-	        MAX=$1
+        if [ $(echo "$1 $MAX" | awk '{print ($1>$2)}') -eq 1 ]; then
+            MAX=$1
             KEY_AT_MAX=$COUNTER
-	    fi
-	    shift
+        fi
+        shift
     done
     echo "$KEY_AT_MAX"
 }
@@ -104,20 +104,20 @@ function FindPositionOfFirstMinimumOfArray(){
     local ARRAY=("$@")
     local MIN=$(MinimumOfArray "${ARRAY_TMP[@]}")
     for (( i=0; i<${#ARRAY[@]}; i++ )); do
-	    if [ "${ARRAY[$i]}" = "${MIN}" ]; then
-	        echo $i;
-	        break
-	    fi
+        if [ "${ARRAY[$i]}" = "${MIN}" ]; then
+            echo $i;
+            break
+        fi
     done
 }
 
 function LengthOfLongestEntryInArray(){
     local LENGTH_MAX=${#1}; shift
     while [ "$1" != "" ]; do
-	    if [ ${#1} -gt $LENGTH_MAX ]; then
-	        LENGTH_MAX=${#1}
-	    fi
-	    shift
+        if [ ${#1} -gt $LENGTH_MAX ]; then
+            LENGTH_MAX=${#1}
+        fi
+        shift
     done
     echo "$LENGTH_MAX"
 }
@@ -139,9 +139,9 @@ function KeyInArray() {
     local ARRAY=$2
     local KEY=$1
     if eval '[ ${'$ARRAY'[$KEY]+isSet} ]'; then
-	    return 0;
+        return 0;
     else
-	    return 1;
+        return 1;
     fi
 }
 
@@ -160,7 +160,7 @@ function PrintArray(){
     local INDEX=""
     [ $(eval echo "\${#$NAME_OF_THE_ARRAY[@]}") -eq 0 ] && echo "Array $NAME_OF_THE_ARRAY is empty!" && return
     for INDEX in $(eval echo "\${!$NAME_OF_THE_ARRAY[@]}"); do
-	    echo "$NAME_OF_THE_ARRAY[$INDEX]=$(eval echo "\${$NAME_OF_THE_ARRAY[$INDEX]}")"
+        echo "$NAME_OF_THE_ARRAY[$INDEX]=$(eval echo "\${$NAME_OF_THE_ARRAY[$INDEX]}")"
     done
 }
 

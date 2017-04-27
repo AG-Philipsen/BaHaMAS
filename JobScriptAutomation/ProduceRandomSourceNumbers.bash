@@ -9,7 +9,7 @@ BEGIN{
         srand();
 }
 {
-    split($1,corr_name_array,"_"); 
+    split($1,corr_name_array,"_");
     conf_count[corr_name_array[1]]++;
     if(corr_name_array[2] != "")
     {
@@ -28,7 +28,7 @@ END{
             {
                 conf_x_y_z_t_corr_key_new[new_corr_name];
                 conf_count[conf_nr]++;
-            }            
+            }
         }
     }
 
@@ -39,7 +39,7 @@ END{
        {
            if(match(j,conf_count_sorted[i]))
            {
-               split(j,corr_name_array,"_"); 
+               split(j,corr_name_array,"_");
                print "--sourcefile=" conf_count_sorted[i] " --source_x=" corr_name_array[2] " --source_y=" corr_name_array[3] " --source_z=" corr_name_array[4] " --source_t=" corr_name_array[5];
            }
        }

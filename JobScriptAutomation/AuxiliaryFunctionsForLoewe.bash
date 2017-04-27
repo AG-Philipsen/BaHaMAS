@@ -1,8 +1,8 @@
 # Load auxiliary bash files that will be used.
-source $HOME/Script/JobScriptAutomation/ProduceInputFileForLoewe.sh || exit -2
-source $HOME/Script/JobScriptAutomation/ProduceJobScriptForLoewe.sh || exit -2
-source $HOME/Script/JobScriptAutomation/ProduceSrunCommandsFileForInversions.sh || exit -2
-source $HOME/Script/JobScriptAutomation/ProduceInverterJobScriptForLoewe.sh || exit -2
+source $HOME/Script/JobScriptAutomation/ProduceInputFileForLoewe.bash || exit -2
+source $HOME/Script/JobScriptAutomation/ProduceJobScriptForLoewe.bash || exit -2
+source $HOME/Script/JobScriptAutomation/ProduceSrunCommandsFileForInversions.bash || exit -2
+source $HOME/Script/JobScriptAutomation/ProduceInverterJobScriptForLoewe.bash || exit -2
 #------------------------------------------------------------------------------------#
 
 # Collection of function needed in the job handler script (mostly in AuxiliaryFunctions).
@@ -17,7 +17,7 @@ function ProduceInputFileAndJobScriptForEachBeta_Loewe(){
     local BETAVALUES_COPY=(${BETAVALUES[@]})
     #---------------------------------------------------------------------------------------------------------------------#
     for INDEX in "${!BETAVALUES_COPY[@]}"; do
-	    local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$INDEX]}"
+        local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$INDEX]}"
         if [ -d "$HOME_BETADIRECTORY" ]; then
             if [ $(ls $HOME_BETADIRECTORY | wc -l) -gt 0 ]; then
             printf "\n\e[0;31m There are already files in $HOME_BETADIRECTORY.\n The value BETA = ${BETAVALUES_COPY[$INDEX]} will be skipped!\n\n\e[0m"
@@ -52,33 +52,33 @@ function ProcessBetaValuesForSubmitOnly_Loewe() {
     local BETAVALUES_COPY=(${BETAVALUES[@]})
     #-----------------------------------------#
     for BETA in "${!BETAVALUES_COPY[@]}"; do
-	local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$BETA]}"
-	local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$INPUTFILE_NAME"
-	if [ ! -d $HOME_BETADIRECTORY ]; then
-	    printf "\n\e[0;31m Directory $HOME_BETADIRECTORY not existing. The value beta = ${BETAVALUES_COPY[$BETA]} will be skipped!\n\n\e[0m"
-	    PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$BETA]} )
-	    unset BETAVALUES_COPY[$BETA] #Here BETAVALUES_COPY becomes sparse
-	    continue
-	else
-	    #$HOME_BETADIRECTORY already exists. Check if there are files in $HOME_BETADIRECTORY. 
-	    if [ -f "$INPUTFILE_GLOBALPATH" ]; then
-		# In the home betadirectory there should be ONLY the inputfile
-		if [ $(ls $HOME_BETADIRECTORY | wc -l) -ne 1 ]; then
-		    printf "\n\e[0;31m There are already files in $HOME_BETADIRECTORY beyond the input file."
-		    printf " The value beta = ${BETAVALUES_COPY[$BETA]} will be skipped!\n\n\e[0m"
-		    PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$BETA]} )
-		    unset BETAVALUES_COPY[$BETA] #Here BETAVALUES_COPY becomes sparse
-		    continue
-		fi		 
-	    else
-		printf "\n\e[0;31m The following intput-file is missing:\n\e[0m"
-		printf "\n\e[0;31m    $INPUTFILE_GLOBALPATH\e[0m"
-		printf "\n\e[0;31m The value beta = ${BETAVALUES_COPY[$BETA]} will be skipped!\n\n\e[0m"
-		PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$BETA]} )
-		unset BETAVALUES_COPY[$BETA] #Here BETAVALUES_COPY becomes sparse
-		continue
-	    fi
-	fi
+    local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$BETA]}"
+    local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$INPUTFILE_NAME"
+    if [ ! -d $HOME_BETADIRECTORY ]; then
+        printf "\n\e[0;31m Directory $HOME_BETADIRECTORY not existing. The value beta = ${BETAVALUES_COPY[$BETA]} will be skipped!\n\n\e[0m"
+        PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$BETA]} )
+        unset BETAVALUES_COPY[$BETA] #Here BETAVALUES_COPY becomes sparse
+        continue
+    else
+        #$HOME_BETADIRECTORY already exists. Check if there are files in $HOME_BETADIRECTORY.
+        if [ -f "$INPUTFILE_GLOBALPATH" ]; then
+        # In the home betadirectory there should be ONLY the inputfile
+        if [ $(ls $HOME_BETADIRECTORY | wc -l) -ne 1 ]; then
+            printf "\n\e[0;31m There are already files in $HOME_BETADIRECTORY beyond the input file."
+            printf " The value beta = ${BETAVALUES_COPY[$BETA]} will be skipped!\n\n\e[0m"
+            PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$BETA]} )
+            unset BETAVALUES_COPY[$BETA] #Here BETAVALUES_COPY becomes sparse
+            continue
+        fi
+        else
+        printf "\n\e[0;31m The following intput-file is missing:\n\e[0m"
+        printf "\n\e[0;31m    $INPUTFILE_GLOBALPATH\e[0m"
+        printf "\n\e[0;31m The value beta = ${BETAVALUES_COPY[$BETA]} will be skipped!\n\n\e[0m"
+        PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$BETA]} )
+        unset BETAVALUES_COPY[$BETA] #Here BETAVALUES_COPY becomes sparse
+        continue
+        fi
+    fi
     done
     __static__PackBetaValuesPerGpuAndCreateJobScriptFiles "${BETAVALUES_COPY[@]}"
 }
@@ -122,7 +122,7 @@ function __static__FindAndReplaceSingleOccurenceInFile(){
 
     sed -i "s/$2/$3/g" $1 || exit 2
 
-    return 0    
+    return 0
 }
 
 function __static__ModifyOptionInInputFile(){
@@ -130,7 +130,7 @@ function __static__ModifyOptionInInputFile(){
         printf "\n\e[0;31m The function __static__ModifyOptionInInputFile() has been wrongly called! Aborting...\n\n\e[0m"
         exit -1
     fi
-    
+
     case $1 in
         startcondition=* )                  __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "startcondition=[[:alpha:]]\+" "startcondition=${1#*=}" ;;
         sourcefile=* )                      __static__FindAndReplaceSingleOccurenceInFile $INPUTFILE_GLOBALPATH "sourcefile=[[:alnum:][:punct:]]*" "sourcefile=${1#*=}" ;;
@@ -173,7 +173,7 @@ function ProcessBetaValuesForContinue_Loewe() {
     #Associative array filled in the function called immediately after
     declare -A STATUS_OF_JOBS_CONTAINING_BETA_VALUES
     __static__GetStatusOfJobsContainingBetavalues_Loewe
-    
+
     for BETA in ${BETAVALUES[@]}; do
         #-------------------------------------------------------------------------#
         local WORK_BETADIRECTORY="$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
@@ -239,8 +239,8 @@ function ProcessBetaValuesForContinue_Loewe() {
                 local NAME_LAST_CONFIGURATION=$(printf "conf.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}")
             else
                 printf "\e[0;31m Configuration \"$(printf "conf.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}") not found in $WORK_BETADIRECTORY folder.\n"
-                printf " Unable to continue the simulation. Leaving out beta = $BETA .\n\n\e[0m" 
-                PROBLEM_BETA_ARRAY+=( $BETA ) 
+                printf " Unable to continue the simulation. Leaving out beta = $BETA .\n\n\e[0m"
+                PROBLEM_BETA_ARRAY+=( $BETA )
                 continue
             fi
             if [ -f $WORK_BETADIRECTORY/$(printf "prng.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}") ]; then
@@ -249,7 +249,7 @@ function ProcessBetaValuesForContinue_Loewe() {
                 local NAME_LAST_PRNG="" #If the prng.xxxxx is not found, use random seed
             fi
             #If the OUTPUTFILE_NAME is not in the WORK_BETADIRECTORY stop and not do anything
-            if [ ! -f $OUTPUTFILE_GLOBALPATH ]; then 
+            if [ ! -f $OUTPUTFILE_GLOBALPATH ]; then
                 printf "\e[0;31m File \"$OUTPUTFILE_NAME\" not found in $WORK_BETADIRECTORY folder.\n"
                 printf " Unable to continue the simulation from trajectory. Leaving out beta = $BETA .\n\n\e[0m"
                 PROBLEM_BETA_ARRAY+=( $BETA )
@@ -276,7 +276,7 @@ function ProcessBetaValuesForContinue_Loewe() {
             if [ -f $WORK_BETADIRECTORY/conf.save_backup ]; then mv $WORK_BETADIRECTORY/conf.save_backup $TRASH_NAME; fi
             if [ -f $WORK_BETADIRECTORY/prng.save_backup ]; then mv $WORK_BETADIRECTORY/prng.save_backup $TRASH_NAME; fi
             #Copy the output file to Trash, edit it leaving out all the trajectories after ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}, including ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}
-            cp $OUTPUTFILE_GLOBALPATH $TRASH_NAME || exit -2 
+            cp $OUTPUTFILE_GLOBALPATH $TRASH_NAME || exit -2
             local LINES_TO_BE_CANCELED_IN_OUTPUTFILE=$(tac $OUTPUTFILE_GLOBALPATH | awk -v resumeFrom=${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} 'BEGIN{found=0}{if($1==(resumeFrom-1)){found=1; print NR-1; exit}}END{if(found==0){print -1}}')
             if [ $LINES_TO_BE_CANCELED_IN_OUTPUTFILE -eq -1 ]; then
                 printf "\n\e[0;31m Measurement for trajectory ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} not found in outputfile.\n\e[0m"
@@ -376,13 +376,13 @@ function ProcessBetaValuesForContinue_Loewe() {
             printf "\e[0;32m Set option \e[0;35mmeasure_pbp=$MEASURE_PBP_VALUE_FOR_INPUTFILE"
             printf "\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
         fi
-        
+
         if [ $WILSON = "TRUE" ]; then
             #If the option MP=() is given in the betasfile we have to do some work on the INPUTFILE to check if it was already given or not and act accordingly
-            if KeyInArray $BETA MASS_PRECONDITIONING_ARRAY; then	
+            if KeyInArray $BETA MASS_PRECONDITIONING_ARRAY; then
                 case $(grep -o "use_mp" $INPUTFILE_GLOBALPATH | wc -l) in
-                    0 ) 
-                        if [ $(grep -o "solver_mp" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] || [ $(grep -o "kappa_mp" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] || 
+                    0 )
+                        if [ $(grep -o "solver_mp" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] || [ $(grep -o "kappa_mp" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] ||
                         [ $(grep -o "integrator2" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] || [ $(grep -o "integrationsteps2" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ]; then
                         printf "\e[0;31m The option \"use_mp\" is not present in the input file but one or more specification about how to use\n"
                         printf " mass preconditioning are present. Suspicious situation, investigate! Skipping beta = $BETA .\n\n\e[0m"
@@ -428,7 +428,7 @@ function ProcessBetaValuesForContinue_Loewe() {
                         [ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
                         printf "\e[0;32m Set option \e[0;35mcg_iteration_block_size=10\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
                         ;;
-                    * ) 
+                    * )
                         printf "\n\e[0;31m String use_mp occurs more than 1 time in file $INPUTFILE_GLOBALPATH! Skipping beta = $BETA .\n\n\e[0m"
                         PROBLEM_BETA_ARRAY+=( $BETA )
                         mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
@@ -473,7 +473,7 @@ function ProcessBetaValuesForContinue_Loewe() {
         #            output is wrong (for example: a simulation runs for 20k trajectories, it is stopped and by accident it is restarted
         #            from the beginning for 5k trajectories; then the last standard output will give a wrong number of measurements).
         #            This case is left out here and it should be the user to avoid it.
-        # 
+        #
         # NOTE: If the configuration from which we are starting, i.e. NAME_LAST_CONFIGURATION, contains digits then it is
         #       better to deduce the number of measurements to be done from there.
         #
@@ -506,7 +506,7 @@ function ProcessBetaValuesForContinue_Loewe() {
             __static__ModifyOptionInInputFile "measurements=$(($CONTINUE_NUMBER - $NUMBER_DONE_TRAJECTORIES))"
             [ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
             printf "\e[0;32m Set option \e[0;35mmeasurements=$(($CONTINUE_NUMBER - $NUMBER_DONE_TRAJECTORIES))"
-            printf "\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"		
+            printf "\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
         fi
         #Always convert startcondition in continue
         __static__ModifyOptionInInputFile "startcondition=continue"
@@ -628,7 +628,7 @@ function ProcessBetaValuesForInversion_Loewe(){
         if [ $NUMBER_OF_MISSING_CORRELATORS -ne $NUMBER_OF_INVERSION_COMMANDS ]; then
             printf "\n\e[0;91m File with commands for inversion expected to contain $NUMBER_OF_MISSING_CORRELATORS lines, but having $NUMBER_OF_INVERSION_COMMANDS. Skipping beta...\n\n\e[0m"
             PROBLEM_BETA_ARRAY+=( $BETA )
-            continue            
+            continue
         fi
         if [ ! -s $WORK_BETADIRECTORY/$SRUN_COMMANDSFILE_FOR_INVERSION ] && [ $NUMBER_OF_MISSING_CORRELATORS -ne 0 ]; then
             printf "\n\e[0;91m File with commands for inversion empty, but expected containing $NUMBER_OF_MISSING_CORRELATORS lines! Skipping beta...\n\n\e[0m"
@@ -648,48 +648,48 @@ function ProcessBetaValuesForInversion_Loewe(){
 
 function SubmitJobsForValidBetaValues_Loewe() {
     if [ ${#SUBMIT_BETA_ARRAY[@]} -gt "0" ]; then
-	    printf "\n\e[0;36m===================================================================================\n\e[0m"
-	    printf "\e[0;34m Jobs will be submitted for the following beta values:\n\e[0m"
-	    for BETA in ${SUBMIT_BETA_ARRAY[@]}; do
-	        echo "  - $BETA"
-	    done
-	    
-	    for BETA in ${SUBMIT_BETA_ARRAY[@]}; do
-	        if [ $USE_MULTIPLE_CHAINS == "FALSE" ]; then
-		        local PREFIX_TO_BE_GREPPED_FOR="$BETA_PREFIX"
-	        else
-		        local PREFIX_TO_BE_GREPPED_FOR="$SEED_PREFIX"
-	        fi
-	        local TEMP_ARRAY=( $(echo $BETA | sed 's/_/ /g') )
-	        if [ $(echo $BETA | grep -o "${PREFIX_TO_BE_GREPPED_FOR}\([[:digit:]][.]\)\?[[:alnum:]]\{4\}" | wc -l) -ne $GPU_PER_NODE ]; then
-		        printf "\n\e[0;33m \e[1m\e[4mWARNING\e[24m:\e[0;33m At least one job is being submitted with less than\n"
-		        printf "          $GPU_PER_NODE runs inside. Would you like to submit in any case (Y/N)? \e[0m"
-		        local CONFIRM="";
-		        while read CONFIRM; do
-		            if [ "$CONFIRM" = "Y" ]; then
-			            break;
-		            elif [ "$CONFIRM" = "N" ]; then
-			            printf "\n\e[1;37;41mNo jobs will be submitted.\e[0m\n"
-			            return
-		            else
-			            printf "\n\e[0;33m Please enter Y (yes) or N (no): \e[0m"
-		            fi
-		        done
-	        fi
-	    done
+        printf "\n\e[0;36m===================================================================================\n\e[0m"
+        printf "\e[0;34m Jobs will be submitted for the following beta values:\n\e[0m"
+        for BETA in ${SUBMIT_BETA_ARRAY[@]}; do
+            echo "  - $BETA"
+        done
 
-	    for BETA in ${SUBMIT_BETA_ARRAY[@]}; do
-	        local SUBMITTING_DIRECTORY="${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER"
-	        local JOBSCRIPT_NAME="$(__static__GetJobScriptName ${BETA})"
-	        cd $SUBMITTING_DIRECTORY
-	        printf "\n\e[0;34m Actual location: \e[0;35m$(pwd) \n\e[0m"
-	        printf "\e[1;34m      Submitting:\e[0m"
-		    printf "\e[0;32m \e[4msbatch $JOBSCRIPT_NAME\n\e[0m"
-		    sbatch $JOBSCRIPT_NAME
-	    done
-	    printf "\n\e[0;36m===================================================================================\n\e[0m"
+        for BETA in ${SUBMIT_BETA_ARRAY[@]}; do
+            if [ $USE_MULTIPLE_CHAINS == "FALSE" ]; then
+                local PREFIX_TO_BE_GREPPED_FOR="$BETA_PREFIX"
+            else
+                local PREFIX_TO_BE_GREPPED_FOR="$SEED_PREFIX"
+            fi
+            local TEMP_ARRAY=( $(echo $BETA | sed 's/_/ /g') )
+            if [ $(echo $BETA | grep -o "${PREFIX_TO_BE_GREPPED_FOR}\([[:digit:]][.]\)\?[[:alnum:]]\{4\}" | wc -l) -ne $GPU_PER_NODE ]; then
+                printf "\n\e[0;33m \e[1m\e[4mWARNING\e[24m:\e[0;33m At least one job is being submitted with less than\n"
+                printf "          $GPU_PER_NODE runs inside. Would you like to submit in any case (Y/N)? \e[0m"
+                local CONFIRM="";
+                while read CONFIRM; do
+                    if [ "$CONFIRM" = "Y" ]; then
+                        break;
+                    elif [ "$CONFIRM" = "N" ]; then
+                        printf "\n\e[1;37;41mNo jobs will be submitted.\e[0m\n"
+                        return
+                    else
+                        printf "\n\e[0;33m Please enter Y (yes) or N (no): \e[0m"
+                    fi
+                done
+            fi
+        done
+
+        for BETA in ${SUBMIT_BETA_ARRAY[@]}; do
+            local SUBMITTING_DIRECTORY="${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER"
+            local JOBSCRIPT_NAME="$(__static__GetJobScriptName ${BETA})"
+            cd $SUBMITTING_DIRECTORY
+            printf "\n\e[0;34m Actual location: \e[0;35m$(pwd) \n\e[0m"
+            printf "\e[1;34m      Submitting:\e[0m"
+            printf "\e[0;32m \e[4msbatch $JOBSCRIPT_NAME\n\e[0m"
+            sbatch $JOBSCRIPT_NAME
+        done
+        printf "\n\e[0;36m===================================================================================\n\e[0m"
     else
-	    printf " \e[1;37;41mNo jobs will be submitted.\e[0m\n"
+        printf " \e[1;37;41mNo jobs will be submitted.\e[0m\n"
     fi
 }
 
@@ -731,7 +731,7 @@ function __static__PackBetaValuesPerGpuAndCreateJobScriptFiles(){
             if [ $INVERT_CONFIGURATIONS = "TRUE" ]; then
                 ProduceInverterJobscript_Loewe
             else
-                ProduceJobscript_Loewe 
+                ProduceJobscript_Loewe
             fi
             if [ -e $JOBSCRIPT_GLOBALPATH ]; then
                 SUBMIT_BETA_ARRAY+=( "${BETAS_STRING}" )
@@ -758,21 +758,21 @@ function __static__GetJobBetasStringUsing(){
     local BETAVALUES_TO_BE_USED=( $@ )
     declare -A BETAS_WITH_SEED
     for INDEX in "${BETAVALUES_TO_BE_USED[@]}"; do
-	BETAS_WITH_SEED[${INDEX%%_*}]="${BETAS_WITH_SEED[${INDEX%%_*}]}_$(echo $INDEX | awk '{split($0, res, "_"); print res[2]}')"
+    BETAS_WITH_SEED[${INDEX%%_*}]="${BETAS_WITH_SEED[${INDEX%%_*}]}_$(echo $INDEX | awk '{split($0, res, "_"); print res[2]}')"
     done
     local BETAS_STRING_TO_BE_RETURNED=""
     #Here I iterate again on BETAVALUES_TO_BE_USED and not on ${!BETAS_WITH_SEED[@]} in order to guarantee an order in BETAS_STRING
     #(remember that associative arrays keys are not sorted in general, if it is, it is by coincidence). Note that now I have to use
     #the same BETA only once and this is easily achieved unsetting the BETAS_WITH_SEED array entry once used it
     for BETA in "${BETAVALUES_TO_BE_USED[@]}"; do
-	BETA=${BETA%%_*}
-	if KeyInArray $BETA BETAS_WITH_SEED; then
-	    BETAS_STRING_TO_BE_RETURNED="${BETAS_STRING_TO_BE_RETURNED}__${BETA_PREFIX}${BETA}${BETAS_WITH_SEED[${BETA}]}"
-     	    unset 'BETAS_WITH_SEED[${BETA}]'
-	fi
+    BETA=${BETA%%_*}
+    if KeyInArray $BETA BETAS_WITH_SEED; then
+        BETAS_STRING_TO_BE_RETURNED="${BETAS_STRING_TO_BE_RETURNED}__${BETA_PREFIX}${BETA}${BETAS_WITH_SEED[${BETA}]}"
+             unset 'BETAS_WITH_SEED[${BETA}]'
+    fi
     done
     if [ $USE_MULTIPLE_CHAINS == "FALSE" ]; then
-	BETAS_STRING_TO_BE_RETURNED="$( echo ${BETAS_STRING_TO_BE_RETURNED} | sed -e 's/___/_/g' -e 's/_$//')"
+    BETAS_STRING_TO_BE_RETURNED="$( echo ${BETAS_STRING_TO_BE_RETURNED} | sed -e 's/___/_/g' -e 's/_$//')"
     fi
 
     echo "${BETAS_STRING_TO_BE_RETURNED:2}" #I cut here the two initial underscores

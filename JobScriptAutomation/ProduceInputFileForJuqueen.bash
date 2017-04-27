@@ -2,12 +2,12 @@ function ProduceInputFile_Juqueen(){
     #This input file is for tmLQCD only!
     echo '#######################################################' > $INPUTFILE_GLOBALPATH
     echo '## sample tmlqcd input file for imagMu runs on Juqueen' >> $INPUTFILE_GLOBALPATH
-    echo "##beta =	$BETA	" >> $INPUTFILE_GLOBALPATH
-    echo "##kappa =	0.$MASS" >> $INPUTFILE_GLOBALPATH
-    echo '##amu =	0.' >> $INPUTFILE_GLOBALPATH
-    echo '##2kappamu =	0.' >> $INPUTFILE_GLOBALPATH
+    echo "##beta =    $BETA    " >> $INPUTFILE_GLOBALPATH
+    echo "##kappa =    0.$MASS" >> $INPUTFILE_GLOBALPATH
+    echo '##amu =    0.' >> $INPUTFILE_GLOBALPATH
+    echo '##2kappamu =    0.' >> $INPUTFILE_GLOBALPATH
     echo '##apply mass preconditioning with' >> $INPUTFILE_GLOBALPATH
-    echo '##2kappamu2 =	notUsedYet' >> $INPUTFILE_GLOBALPATH
+    echo '##2kappamu2 =    notUsedYet' >> $INPUTFILE_GLOBALPATH
     echo '' >> $INPUTFILE_GLOBALPATH
     echo '#######################################################' >> $INPUTFILE_GLOBALPATH
     echo '## mass parameters' >> $INPUTFILE_GLOBALPATH

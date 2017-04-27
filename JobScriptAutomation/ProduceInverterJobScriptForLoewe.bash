@@ -24,9 +24,9 @@ function ProduceInverterJobscript_Loewe(){
             echo "#SBATCH -w $LOEWE_NODE" >> $JOBSCRIPT_GLOBALPATH
         fi
     elif [ $CLUSTER_NAME = "LCSC" ]; then
-	    echo "#SBATCH --partition=lcsc" >> $JOBSCRIPT_GLOBALPATH
-	    echo "#SBATCH --mem=64000" >> $JOBSCRIPT_GLOBALPATH
-	    echo "#SBATCH --gres=gpu:$GPU_PER_NODE" >> $JOBSCRIPT_GLOBALPATH
+        echo "#SBATCH --partition=lcsc" >> $JOBSCRIPT_GLOBALPATH
+        echo "#SBATCH --mem=64000" >> $JOBSCRIPT_GLOBALPATH
+        echo "#SBATCH --gres=gpu:$GPU_PER_NODE" >> $JOBSCRIPT_GLOBALPATH
         #Option to choose only a node with 'hawaii' GPU hardware
         echo "#SBATCH --constrain=hawaii" >> $JOBSCRIPT_GLOBALPATH
         #The following nodes of L-CSC are using tahiti as GPU hardware (sinfo -o "%4c %10z %8d %8m %10f %10G %D %N"), CL2QCD fails on them.
@@ -35,11 +35,11 @@ function ProduceInverterJobscript_Loewe(){
         echo "#SBATCH --exclude=lcsc-r03n01,lcsc-r06n17,lcsc-r06n10,lcsc-r03n12,lcsc-r03n13,lcsc-r06n02,lcsc-r06n03" >> $JOBSCRIPT_GLOBALPATH
     fi
 
-	if [ -f "$FILE_WITH_WHICH_NODES_TO_EXCLUDE" ]; then
-		EXCLUDE_STRING=$(grep -oE '\-\-exclude=.*\[.*\]' $FILE_WITH_WHICH_NODES_TO_EXCLUDE 2>/dev/null)
-	elif [[ $FILE_WITH_WHICH_NODES_TO_EXCLUDE =~ : ]]; then 
+    if [ -f "$FILE_WITH_WHICH_NODES_TO_EXCLUDE" ]; then
+        EXCLUDE_STRING=$(grep -oE '\-\-exclude=.*\[.*\]' $FILE_WITH_WHICH_NODES_TO_EXCLUDE 2>/dev/null)
+    elif [[ $FILE_WITH_WHICH_NODES_TO_EXCLUDE =~ : ]]; then
         EXCLUDE_STRING=$(ssh ${FILE_WITH_WHICH_NODES_TO_EXCLUDE%%:*} "grep -oE '\-\-exclude=.*\[.*\]' ${FILE_WITH_WHICH_NODES_TO_EXCLUDE#*:} 2>/dev/null")
-	fi
+    fi
     if [ "$EXCLUDE_STRING" != "" ]; then
         echo "#SBATCH $EXCLUDE_STRING"  >> $JOBSCRIPT_GLOBALPATH
         printf "\e[1A\e[80C\t$EXCLUDE_STRING\n"
@@ -108,7 +108,7 @@ function ProduceInverterJobscript_Loewe(){
     fi
     echo "# Run jobs from different directories" >> $JOBSCRIPT_GLOBALPATH
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-        #The following check is done twice. During the creation of the jobscript for the case in which the $SRUN_COMMANDSFILE_FOR_INVERSION does not exist from the beginning on and 
+        #The following check is done twice. During the creation of the jobscript for the case in which the $SRUN_COMMANDSFILE_FOR_INVERSION does not exist from the beginning on and
         #in the jobscript itself for the case in which it exists during the creation of the jobscript but accidentally gets deleted later on after the creation.
         #if [ ! -e $workdir$INDEX/$SRUN_COMMANDSFILE_FOR_INVERSION ]; then #SHOULD BE LIKE THIS??
         if [ ! -e ${WORK_DIR_WITH_BETAFOLDERS}/$BETA_PREFIX${BETA_FOR_JOBSCRIPT[$INDEX]}/$SRUN_COMMANDSFILE_FOR_INVERSION ]; then #I THINK WORK_BETADIRECTORY has to be replaced!!!!
@@ -125,7 +125,7 @@ function ProduceInverterJobscript_Loewe(){
         echo "OLD_IFS=\$IFS" >> $JOBSCRIPT_GLOBALPATH
         echo "IFS=\$'\n'" >> $JOBSCRIPT_GLOBALPATH
         echo "for line in \$(cat \$workdir$INDEX/$SRUN_COMMANDSFILE_FOR_INVERSION); do" >> $JOBSCRIPT_GLOBALPATH
-        echo "IFS=\$OLD_IFS #Restore here old IFS to give separated options (and not only one)to CL2QCD!" >> $JOBSCRIPT_GLOBALPATH 
+        echo "IFS=\$OLD_IFS #Restore here old IFS to give separated options (and not only one)to CL2QCD!" >> $JOBSCRIPT_GLOBALPATH
         if [ $CLUSTER_NAME = "LOEWE" ]; then
             echo "  time srun -n 1 \$dir$INDEX/$INVERTER_FILENAME \$line --device=$INDEX 2>> \$dir$INDEX/\$errFile >> \$dir$INDEX/\$outFile " >> $JOBSCRIPT_GLOBALPATH
         elif [ $CLUSTER_NAME = "LCSC" ]; then

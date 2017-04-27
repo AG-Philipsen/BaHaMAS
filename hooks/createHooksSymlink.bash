@@ -5,7 +5,7 @@
 #-----------------------------------------------------------------------------#
 
 repositoryTopLevelPath="$(git rev-parse --show-toplevel)"
-source $repositoryTopLevelPath/hooks/AuxiliaryFunctions.sh || exit -2
+source $repositoryTopLevelPath/hooks/AuxiliaryFunctions.bash || exit -2
 hookGitFolder=$repositoryTopLevelPath/.git/hooks
 hookDistributedFolder=$repositoryTopLevelPath/hooks
 

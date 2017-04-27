@@ -22,7 +22,7 @@
 #-----------------------------------------------------------------------------#
 
 repositoryTopLevelPath="$(git rev-parse --show-toplevel)"
-source $repositoryTopLevelPath/hooks/AuxiliaryFunctions.sh || exit -2
+source $repositoryTopLevelPath/hooks/AuxiliaryFunctions.bash || exit -2
 
 #Abort immediately on empty commit
 if IsCommitMessageEmpty "$1"; then
@@ -39,7 +39,7 @@ RemovePointAtTheEndFirstLine "$1"
 # It is nicer to store a clean message in case the user has to resume editing after a
 # hook failure due to a violation of the rules (storing just the file would lead to
 # having the bunch of commented lines in the resumed commit more than once)
-# NOTE: quit at "diff" in case of "git commit -v". 
+# NOTE: quit at "diff" in case of "git commit -v".
 sed -n -e '/^#/d' -e '/^diff --git/q' -e 'p;d' "$1" > "$commitMessageFile"
 
 #If message is a merge or a revert do not complain about format
