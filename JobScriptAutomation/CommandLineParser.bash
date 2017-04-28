@@ -35,7 +35,7 @@ function ParseCommandLineOption(){
         case $1 in
             -h | --help )
                 PrintHelper
-                exit
+                exit 0
                 shift;;
 
             --jobscript_prefix=* )
@@ -81,23 +81,8 @@ function ParseCommandLineOption(){
                 fi
                 shift ;;
 
-            --bgsize=* )
-                BGSIZE=${1#*=}; shift ;;
-
             -m=* | --measurements=* )
                 MEASUREMENTS=${1#*=}; shift ;;
-
-            --nrxprocs=* )
-                NRXPROCS=${1#*=}; shift ;;
-
-            --nryprocs=* )
-                NRYPROCS=${1#*=}; shift ;;
-
-            --nrzprocs=* )
-                NRZPROCS=${1#*=}; shift ;;
-
-            --ompnumthreads=* )
-                OMPNUMTHREADS=${1#*=}; shift ;;
 
             -f=* | --confSaveFrequency=* )
                 NSAVE=${1#*=}; shift ;;
@@ -110,9 +95,6 @@ function ParseCommandLineOption(){
 
             --intsteps1=* )
                 INTSTEPS1=${1#*=}; shift ;;
-
-            --intsteps2=* )
-                INTSTEPS2=${1#*=}; shift ;;
 
             --cgbs=* )
                 CGBS=${1#*=}; shift ;;
