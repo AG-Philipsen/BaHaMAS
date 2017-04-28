@@ -20,7 +20,7 @@ function __static__DetermineCreationDateAndSubmits(){
         SUBMITFIRST=$(date -d @$(date +"$(grep "Timestamp" $WORK_BETADIRECTORY/history_hmc_tm | egrep -o "[[:digit:]]{10}" | head -n1)") +"%d.%m.%y")
         SUBMITLAST=$(date -d @$(date +"$(grep "Timestamp" $WORK_BETADIRECTORY/history_hmc_tm | egrep -o "[[:digit:]]{10}" | tail -n1)") +"%d.%m.%y")
 
-#$(date -d @$(date +"$(grep "Timestamp" $WORK_BETADIRECTORY/history_hmc_tm | egrep -o "[[:digit:]]{10}" | tail -n1)") +"%d.%m.%y")
+        #$(date -d @$(date +"$(grep "Timestamp" $WORK_BETADIRECTORY/history_hmc_tm | egrep -o "[[:digit:]]{10}" | tail -n1)") +"%d.%m.%y")
     else
         NRSUBMITS="NNN"
         SUBMITFIRST="NN.NN.NN"
@@ -105,7 +105,7 @@ function __static__ListJobsStatus_local(){
             ACCEPTANCE=$(awk '{ sum+=$7} END {if(NR != 0){acc=sum/(NR); printf "%.2f", acc} else {acc="N.NN";printf "%s", acc} }' $OUTPUTFILE_GLOBALPATH)
         else
             WORKDIRS_EXIST="false"
-             ACCEPTANCE="N.NN"
+            ACCEPTANCE="N.NN"
         fi
 
         if [ -d $HOME_BETADIRECTORY ] && [ -f $INPUTFILE_GLOBALPATH ]; then
@@ -141,80 +141,13 @@ function __static__ListJobsStatus_local(){
 
             __static__DetermineCreationDateAndSubmits
 
-                printf "\e[0;34m%s %5d / %5d $ACCEPTANCE    $INT0/$INT1  %8s     %3s / $SUBMITFIRST / $SUBMITLAST\n\e[0m" $BETA $TOTAL_NR_TRAJECTORIES $TRAJECTORIES_DONE $STATUS $NRSUBMITS
-                printf "      %s %5d / %5d $ACCEPTANCE    $INT0/$INT1  %8s     %3s / $SUBMITFIRST / $SUBMITLAST\n" $BETA $TOTAL_NR_TRAJECTORIES $TRAJECTORIES_DONE $STATUS $NRSUBMITS >> $JOBS_STATUS_FILE
+            printf "\e[0;34m%s %5d / %5d $ACCEPTANCE    $INT0/$INT1  %8s     %3s / $SUBMITFIRST / $SUBMITLAST\n\e[0m" $BETA $TOTAL_NR_TRAJECTORIES $TRAJECTORIES_DONE $STATUS $NRSUBMITS
+            printf "      %s %5d / %5d $ACCEPTANCE    $INT0/$INT1  %8s     %3s / $SUBMITFIRST / $SUBMITLAST\n" $BETA $TOTAL_NR_TRAJECTORIES $TRAJECTORIES_DONE $STATUS $NRSUBMITS >> $JOBS_STATUS_FILE
 
             __static__CreateSubmitsFile
         fi
 
     done
-}
-
-function __static__ListJobsStatus_global(){
-
-        ORIGINAL_HOME_DIR_WITH_BETAFOLDERS=$HOME_DIR_WITH_BETAFOLDERS
-        ORIGINAL_WORK_DIR_WITH_BETAFOLDERS=$WORK_DIR_WITH_BETAFOLDERS
-
-        PARAMETER_REGEX_ARRAY=()
-        DIRECTORY_ARRAY=()
-        #Filling PARAMETER_REGEX_ARRAY and DIRECTORY_ARRAY:
-        BuildRegexPath
-
-
-        for i in ${DIRECTORY_ARRAY[@]}; do
-
-            cd $i
-
-            PARAMETERS_PATH=""
-            PARAMETERS_STRING=""
-
-            ReadParametersFromPath $(pwd)
-
-            HOME_DIR_WITH_BETAFOLDERS="$HOME_DIR/$SIMULATION_PATH$PARAMETERS_PATH"
-
-            if [ "$HOME_DIR_WITH_BETAFOLDERS" != "$(pwd)" ]; then
-                printf "\n\e[0;31m Constructed path to directory containing beta folders does not match the actual position! Aborting...\n\n\e[0m"
-                exit -1
-            fi
-            #echo $HOME_DIR_WITH_BETAFOLDERS
-            WORK_DIR_WITH_BETAFOLDERS="$WORK_DIR/$SIMULATION_PATH$PARAMETERS_PATH"
-            #echo $WORK_DIR_WITH_BETAFOLDERS
-
-            JOBS_STATUS_FILE="jobs_status_"$CHEMPOT_PREFIX$CHEMPOT"_"$MASS_PREFIX$MASS"_"$NTIME_PREFIX$NTIME"_"$NSPACE_PREFIX$NSPACE".txt"
-            #echo $JOBS_STATUS_FILE
-            rm -f $JOBS_STATUS_FILE
-
-            __static__ListJobsStatus_local
-        done
-
-        cd $ORIGINAL_HOME_DIR_WITH_BETAFOLDERS
-}
-
-function __static__BuildGlobalJobStatusFile(){
-
-    DATE='D_'$(date +"%d_%m_%Y")'_T_'$(date +"%H_%M")
-    JOBS_STATUS_FILE_GLOBAL=$HOME_DIR'/'$SIMULATION_PATH'/global_'$JOBS_STATUS_PREFIX$DATE'.txt'
-
-    rm -f $JOBS_STATUS_FILE_GLOBAL
-
-    REGEX_PATH=$JOBS_STATUS_PREFIX'[^~]*$'
-    REGEX_PATH='.*'$REGEX_PATH
-
-    for i in ${DIRECTORY_ARRAY[@]}; do
-
-        LOCAL_FILE=$(find $i -regextype grep -regex $REGEX_PATH)
-
-        MASS_TMP=`echo $LOCAL_FILE | grep -o "$JOBS_STATUS_PREFIX.*" | grep -o "$MASS_PREFIX$MASS_REGEX"`
-        NTIME_TMP=`echo $LOCAL_FILE | grep -o "$JOBS_STATUS_PREFIX.*" | grep -o "$NTIME_PREFIX$NTIME_REGEX"`
-        NSPACE_TMP=`echo $LOCAL_FILE | grep -o "$JOBS_STATUS_PREFIX.*" | grep -o "$NSPACE_PREFIX$NSPACE_REGEX"`
-
-        #echo "$MASS_TMP $NTIME_TMP $NSPACE_TMP" >> "$JOBS_STATUS_FILE_GLOBAL"
-        #echo "cat $LOCAL_FILE >> $JOBS_STATUS_FILE_GLOBAL"
-        cat $LOCAL_FILE >> "$JOBS_STATUS_FILE_GLOBAL"
-        echo "" >> "$JOBS_STATUS_FILE_GLOBAL"
-    done
-
-    printf "\n\e[0;34m A global jobs status file has been created: %s\n\e[0m" $JOBS_STATUS_FILE_GLOBAL
 }
 
 function ListJobStatus_Juqueen(){
@@ -225,25 +158,16 @@ function ListJobStatus_Juqueen(){
 
     if [ $LISTSTATUS = "TRUE" ]; then
 
-    JOBS_STATUS_FILE="jobs_status_"$CHEMPOT_PREFIX$CHEMPOT"_"$MASS_PREFIX$MASS"_"$NTIME_PREFIX$NTIME"_"$NSPACE_PREFIX$NSPACE".txt"
-    echo "NSPACE:$NSPACE"
-    echo "JOBS_STATUS_FILE: $JOBS_STATUS_FILE"
-    rm -f $JOBS_STATUS_FILE
+        JOBS_STATUS_FILE="jobs_status_"$CHEMPOT_PREFIX$CHEMPOT"_"$MASS_PREFIX$MASS"_"$NTIME_PREFIX$NTIME"_"$NSPACE_PREFIX$NSPACE".txt"
+        echo "NSPACE:$NSPACE"
+        echo "JOBS_STATUS_FILE: $JOBS_STATUS_FILE"
+        rm -f $JOBS_STATUS_FILE
 
-    printf "\n\e[0;36m==================================================================================================\n\e[0m"
-    printf "\e[0;34m Listing current local measurements status...\n\e[0m"
+        printf "\n\e[0;36m==================================================================================================\n\e[0m"
+        printf "\e[0;34m Listing current local measurements status...\n\e[0m"
 
-    __static__ListJobsStatus_local
+        __static__ListJobsStatus_local
 
-    elif [ $LISTSTATUSALL = "TRUE" ]; then
-
-    printf "\n\e[0;36m==================================================================================================\n\e[0m"
-    printf "\e[0;34m Listing current global measurements status...\n\e[0m"
-
-    __static__ListJobsStatus_global
-
-    printf "\n\e[0;36m==================================================================================================\n\e[0m"
-    __static__BuildGlobalJobStatusFile
     fi
 
     printf "\e[0;36m==================================================================================================\n\e[0m"

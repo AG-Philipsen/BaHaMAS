@@ -78,7 +78,6 @@ CONTINUE_THERMALIZATION="FALSE"
 LISTSTATUS="FALSE"
 LISTSTATUS_MEASURE_TIME="FALSE"
 LISTSTATUS_SHOW_ONLY_QUEUED="FALSE"
-LISTSTATUSALL="FALSE"
 CLUSTER_NAME="LOEWE"
 LOEWE_PARTITION="gpu"
 LOEWE_NODE="unset"
@@ -296,7 +295,7 @@ elif [ $CONTINUE = "TRUE" ]; then
     ProcessBetaValuesForContinue #TODO: Declare all possible local variable in this function as local! Use also only capital letters!
     SubmitJobsForValidBetaValues #TODO: Declare all possible local variable in this function as local!
 
-elif [ $LISTSTATUS = "TRUE" ] || [ $LISTSTATUSALL = "TRUE" ]; then
+elif [ $LISTSTATUS = "TRUE" ]; then
 
     ListJobStatus   #TODO: On Juqueen, declare all possible local variable in this function as local! Use PARAMETERS_STRING/PATH where needed!
 
