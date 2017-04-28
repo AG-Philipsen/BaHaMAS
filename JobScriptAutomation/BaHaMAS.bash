@@ -18,12 +18,13 @@
 
 #-----------------------------------------------------------------------------------------------------------------#
 # Load auxiliary bash files that will be used.
-source $HOME/Script/PathManagement.bash || exit -2
-source $HOME/Script/JobScriptAutomation/AuxiliaryFunctions.bash || exit -2
-source $HOME/Script/JobScriptAutomation/AcceptanceRateReport.bash || exit -2
-source $HOME/Script/JobScriptAutomation/BuildRegexPath.bash || exit -2
-source $HOME/Script/JobScriptAutomation/EmptyBetaDirectories.bash || exit -2
-source $HOME/Script/JobScriptAutomation/ProjectStatisticsDatabase.bash || exit -2
+BaHaMAS_repositoryTopLevelPath="$(git rev-parse --show-toplevel)"
+source ${BaHaMAS_repositoryTopLevelPath}/PathManagement.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/AuxiliaryFunctions.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/AcceptanceRateReport.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/BuildRegexPath.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/EmptyBetaDirectories.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ProjectStatisticsDatabase.bash || exit -2
 #-----------------------------------------------------------------------------------------------------------------#
 
 #-----------------------------------------------------------------------------------------------------------------#
@@ -135,13 +136,13 @@ DATABASE_OPTIONS=()
 
 #-----------------------------------------------------------------------------------------------------------------#
 # Set default values for the non-modifyable variables ---> Modify this file to change them!
-source $HOME/Script/JobScriptAutomation/UserSpecificVariables.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/UserSpecificVariables.bash || exit -2
 #-----------------------------------------------------------------------------------------------------------------#
 
 
 #-----------------------------------------------------------------------------------------------------------------#
 # Extract options and their arguments into variables, saving a copy of the specified options in an array for later use.
-source $HOME/Script/JobScriptAutomation/CommandLineParser.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/CommandLineParser.bash || exit -2
 # NOTE: The CLUSTER_NAME variable has not been so far put in the parser since
 #       it can be either LOEWE or LCSC or JUQUEEN. It is set using whoami/hostname. Change this in future if needed!
 if [[ $(whoami) =~ ^hkf[[:digit:]]{3} ]]; then

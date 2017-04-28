@@ -1,5 +1,5 @@
 # Load auxiliary bash files that will be used.
-source $HOME/Script/UtilityFunctions.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/UtilityFunctions.bash || exit -2
 #------------------------------------------------------------------------------------#
 
 function __static__ExtractParameterFromJOBNAME(){

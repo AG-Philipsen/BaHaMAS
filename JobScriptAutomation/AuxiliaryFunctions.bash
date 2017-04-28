@@ -1,11 +1,11 @@
 # Collection of function needed in the job handler script.
 
 # Load auxiliary bash files that will be used.
-source $HOME/Script/JobScriptAutomation/AuxiliaryFunctionsForLoewe.bash || exit -2
-source $HOME/Script/JobScriptAutomation/AuxiliaryFunctionsForJuqueen.bash || exit -2
-source $HOME/Script/JobScriptAutomation/ListJobsStatusForLoewe.bash || exit -2
-source $HOME/Script/JobScriptAutomation/ListJobsStatusForJuqueen.bash || exit -2
-source $HOME/Script/JobScriptAutomation/CleanOutputFiles.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/AuxiliaryFunctionsForLoewe.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/AuxiliaryFunctionsForJuqueen.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ListJobsStatusForLoewe.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ListJobsStatusForJuqueen.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/CleanOutputFiles.bash || exit -2
 #------------------------------------------------------------------------------------#
 
 function ReadBetaValuesFromFile(){

@@ -1,6 +1,6 @@
 # Load auxiliary bash files that will be used.
-source $HOME/Script/JobScriptAutomation/ProduceInputFileForJuqueen.bash || exit -2
-source $HOME/Script/JobScriptAutomation/ProduceJobScriptForJuqueen.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ProduceInputFileForJuqueen.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ProduceJobScriptForJuqueen.bash || exit -2
 #------------------------------------------------------------------------------------#
 
 # Collection of function needed in the job handler script (mostly in AuxiliaryFunctions).

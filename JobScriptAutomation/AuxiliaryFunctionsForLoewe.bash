@@ -1,8 +1,8 @@
 # Load auxiliary bash files that will be used.
-source $HOME/Script/JobScriptAutomation/ProduceInputFileForLoewe.bash || exit -2
-source $HOME/Script/JobScriptAutomation/ProduceJobScriptForLoewe.bash || exit -2
-source $HOME/Script/JobScriptAutomation/ProduceSrunCommandsFileForInversions.bash || exit -2
-source $HOME/Script/JobScriptAutomation/ProduceInverterJobScriptForLoewe.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ProduceInputFileForLoewe.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ProduceJobScriptForLoewe.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ProduceSrunCommandsFileForInversions.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ProduceInverterJobScriptForLoewe.bash || exit -2
 #------------------------------------------------------------------------------------#
 
 # Collection of function needed in the job handler script (mostly in AuxiliaryFunctions).
