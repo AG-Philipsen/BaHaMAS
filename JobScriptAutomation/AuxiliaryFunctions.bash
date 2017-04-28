@@ -491,17 +491,6 @@ function ProcessBetaValuesForInversion()
 }
 
 
-function ShowQueuedJobsLocal()
-{
-    if [ "$CLUSTER_NAME" = "JUQUEEN" ]
-    then
-        ShowQueuedJobsLocal_Juqueen
-    else
-        printf "\n\e[0;31mOption --showjobs not yet implemented on the LOEWE! Aborting...\n\n\e[0m"; exit -1
-    fi
-}
-
-
 function SubmitJobsForValidBetaValues()
 {
     if [ "$CLUSTER_NAME" = "JUQUEEN" ]

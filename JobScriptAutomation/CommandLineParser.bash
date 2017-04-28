@@ -16,8 +16,6 @@ function ParseCommandLineOption(){
                             "-i | --invertConfigurations"
                             "-d | --dataBase"
                             "--submitonly"
-                            "--showjobs"
-                            "--showjobs_all"
                             "--accRateReport"
                             "--cleanOutputFiles"
                             "--completeBetasFile")
@@ -193,11 +191,6 @@ function ParseCommandLineOption(){
             --showOnlyQueued )
                 [ $LISTSTATUS = "FALSE" ] && printf "\n\e[0;31mSecondary option --showOnlyQueued must be given after the primary one \"-l | --liststatus\"! Aborting...\n\n\e[0m" && exit -1
                 LISTSTATUS_SHOW_ONLY_QUEUED="TRUE"
-                shift;;
-
-            --showjobs )
-                MUTUALLYEXCLUSIVEOPTS_PASSED+=( "$1" )
-                SHOWJOBS="TRUE"
                 shift;;
 
             --accRateReport=* )

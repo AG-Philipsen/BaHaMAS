@@ -275,15 +275,6 @@ function ProcessBetaValuesForContinue_Juqueen() {
 
 #=======================================================================================================================#
 
-function ShowQueuedJobsLocal_Juqueen(){
-    #TODO: Generalize user name
-    printf "\n\e[0;36m==================================================================================================\n\e[0m"
-    llq -W -f %id %jn %st %c %dq %dd %gl %h -u $(whoami) | awk --posix '$2 ~ /^muiPiT_'$MASS_PREFIX$MASS'_'$NTIME_PREFIX$NTIME'_'$NSPACE_PREFIX$NSPACE'_'$BETA_PREFIX'[[:digit:]]\.[[:digit:]]{4}$/ || NR <= 2 {print}'
-    printf "\e[0;36m==================================================================================================\n\e[0m"
-}
-
-#=======================================================================================================================#
-
 function SubmitJobsForValidBetaValues_Juqueen() {
     if [ ${#SUBMIT_BETA_ARRAY[@]} -gt "0" ]; then
     printf "\n\e[0;36m===================================================================================\n\e[0m"

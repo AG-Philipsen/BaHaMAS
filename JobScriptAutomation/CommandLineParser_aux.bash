@@ -91,7 +91,6 @@ function PrintHelper(){
     __static__AddOptionToHelper -e "-l | --liststatus" "A report of the local simulation status for all beta will be displayed"\
                                 "$(cecho  U "Secondary options" uU ": " $mutuallyExclusiveColor "--measureTime" $helperColor " to get information about the trajectory time")"\
                                 "$(cecho "                   " $mutuallyExclusiveColor "--showOnlyQueued" $helperColor " not to show status about not queued jobs")"
-    __static__AddOptionToHelper -e "--showjobs" "The queued jobs will be displayed for the local parameters (kappa,nt,ns,beta)"
     __static__AddOptionToHelper -e "--accRateReport=[#]" "The acceptance rates will be computed on the output files of the given"\
                                 "betas every [#] configurations and summarized in a table."
     __static__AddOptionToHelper -e "--cleanOutputFiles" "The output files referred to the betas contained in the betas file are cleaned"\

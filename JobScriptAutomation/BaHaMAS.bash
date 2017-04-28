@@ -82,7 +82,6 @@ CLUSTER_NAME="LOEWE"
 LOEWE_PARTITION="gpu"
 LOEWE_NODE="unset"
 JOBS_STATUS_PREFIX="jobs_status_"
-SHOWJOBS="FALSE"
 ACCRATE_REPORT="FALSE"
 CLEAN_OUTPUT_FILES="FALSE"
 SECONDARY_OPTION_ALL="FALSE"
@@ -298,10 +297,6 @@ elif [ $CONTINUE = "TRUE" ]; then
 elif [ $LISTSTATUS = "TRUE" ]; then
 
     ListJobStatus   #TODO: On Juqueen, declare all possible local variable in this function as local! Use PARAMETERS_STRING/PATH where needed!
-
-elif [ $SHOWJOBS = "TRUE" ]; then
-
-    ShowQueuedJobsLocal
 
 elif [ $ACCRATE_REPORT = "TRUE" ]; then
 
