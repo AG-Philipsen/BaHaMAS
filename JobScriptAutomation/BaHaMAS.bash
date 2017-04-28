@@ -24,7 +24,6 @@ source ${BaHaMAS_repositoryTopLevelPath}/PathManagement.bash || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/AuxiliaryFunctions.bash || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/AcceptanceRateReport.bash || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/BuildRegexPath.bash || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/EmptyBetaDirectories.bash || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ProjectStatisticsDatabase.bash || exit -2
 #-----------------------------------------------------------------------------------------------------------------#
 
@@ -86,7 +85,6 @@ LOEWE_NODE="unset"
 JOBS_STATUS_PREFIX="jobs_status_"
 SHOWJOBS="FALSE"
 ACCRATE_REPORT="FALSE"
-EMPTY_BETA_DIRS="FALSE"
 CLEAN_OUTPUT_FILES="FALSE"
 SECONDARY_OPTION_ALL="FALSE"
 COMPLETE_BETAS_FILE="FALSE"
@@ -319,12 +317,6 @@ elif [ $CLEAN_OUTPUT_FILES = "TRUE" ]; then
         ReadBetaValuesFromFile
     fi
     CleanOutputFiles
-
-elif [ $EMPTY_BETA_DIRS = "TRUE" ]; then
-
-    BETASFILE="emptybetas"
-    ReadBetaValuesFromFile
-    EmptyBetaDirectories
 
 elif [ $COMPLETE_BETAS_FILE = "TRUE" ]; then
 

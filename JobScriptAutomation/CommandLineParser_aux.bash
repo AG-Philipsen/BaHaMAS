@@ -99,9 +99,6 @@ function PrintHelper(){
                                 "(repeated lines are eliminated). For safety reason, a backup of the output file is done"\
                                 "(it is left in the output file folder with the name outputfilename_date)."\
                                 "$(cecho "Secondary options: " $mutuallyExclusiveColor "--all" $helperColor " to clean output files for all betas in present folder")"
-    __static__AddOptionToHelper -e "--emptyBetaDirectories" "The beta directories corresponding to the beta values specified in the file"\
-                                "$(cecho "\"" p "emptybetas" $helperColor "\" will be emptied! For each beta value specified there will be")"\
-                                "$(cecho "a prompt for confirmation! " ly "ATTENTION: " $helperColor "After the confirmation the process cannot be undone!")"
     __static__AddOptionToHelper -e "--completeBetasFile[=number]" "The beta file is completed adding for each beta new chains in order to have as many chain as specified."\
                                 "$(cecho "If no number is specified, 4 is used. This option, if " $mutuallyExclusiveColor "--doNotUseMultipleChains" $helperColor " has not been given, uses")"\
                                 "the seed in the second field to generate new chains (or one new field containing the seed is inserted)."

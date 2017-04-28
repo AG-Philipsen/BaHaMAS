@@ -20,7 +20,6 @@ function ParseCommandLineOption(){
                             "--showjobs"
                             "--showjobs_all"
                             "--accRateReport"
-                            "--emptyBetaDirectories"
                             "--cleanOutputFiles"
                             "--completeBetasFile")
     MUTUALLYEXCLUSIVEOPTS_PASSED=( )
@@ -225,11 +224,6 @@ function ParseCommandLineOption(){
                 [ $CLEAN_OUTPUT_FILES = "FALSE" ] && printf "\n\e[0;31mSecondary option --all must be given after the primary one! Aborting...\n\n\e[0m" && exit -1
                 SECONDARY_OPTION_ALL="TRUE"
                 shift;;
-
-            --emptyBetaDirectories )
-                MUTUALLYEXCLUSIVEOPTS_PASSED+=( "$1" )
-                EMPTY_BETA_DIRS="TRUE"
-                shift ;;
 
             --completeBetasFile* )
                 MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--completeBetasFile" )
