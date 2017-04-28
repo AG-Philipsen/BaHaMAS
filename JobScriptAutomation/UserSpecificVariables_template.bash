@@ -6,7 +6,7 @@
 #
 # ATTENTION: Do not put slashes "/" at the end of the paths variables!!
 
-
+BaHaMAS_colouredOutput='TRUE'
 USER_MAIL=""
 HMC_BUILD_PATH=""
 HOME_DIR=""
@@ -59,6 +59,7 @@ INVERTER_GLOBALPATH="${HOME}/$HMC_BUILD_PATH/$INVERTER_FILENAME"
 
 # Documentation:
 #
+#     BaHaMAS_colouredOutput                it can be 'TRUE' or 'FALSE' and can be used to disable coloured output
 #     USER_MAIL                             mail to which job information (e.g. failures) is sent to
 #     HMC_BUILD_PATH                        path to the folder where the executable is (from user's HOME directory)
 #     HOME_DIR                              path to the disk from which the jobs are submitted (see further informations below)
