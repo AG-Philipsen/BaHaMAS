@@ -59,6 +59,7 @@ function cecho() {
             #other possibilities
             default | d) format="${escape}0m" ;;
             -n) endline='' ;;
+            -d) defaultFormat='' ;;
             *) text="$1"
         esac
         shift
