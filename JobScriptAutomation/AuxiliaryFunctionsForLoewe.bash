@@ -203,7 +203,7 @@ function ProcessBetaValuesForContinue_Loewe() {
             continue
         fi
 
-        echo ""
+        cecho ""
         __static__CheckIfJobIsInQueueForGivenBeta_Loewe $BETA
         if [ $? == 0 ]; then
             PROBLEM_BETA_ARRAY+=( $BETA )
@@ -261,11 +261,11 @@ function ProcessBetaValuesForContinue_Loewe() {
             mkdir $TRASH_NAME || exit 2
             for FILE in $WORK_BETADIRECTORY/conf.* $WORK_BETADIRECTORY/prng.*; do
                 #Move to trash only conf.xxxxx prng.xxxxx files or conf.xxxxx_pbp.dat files where xxxxx are digits
-                local NUMBER_FROM_FILE=$(echo "$FILE" | grep -o "\(\(conf.\)\|\(prng.\)\)[[:digit:]]\+\(_pbp.dat\)\?$" | sed 's/\(\(conf.\)\|\(prng.\)\)\([[:digit:]]\+\).*/\4/' | sed 's/^0*//')
+                local NUMBER_FROM_FILE=$(grep -o "\(\(conf.\)\|\(prng.\)\)[[:digit:]]\+\(_pbp.dat\)\?$" <<< "$FILE" | sed 's/\(\(conf.\)\|\(prng.\)\)\([[:digit:]]\+\).*/\4/' | sed 's/^0*//')
                 if [ "$NUMBER_FROM_FILE" != "" ]; then
                     if [ $NUMBER_FROM_FILE -gt ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} ]; then
                         mv $FILE $TRASH_NAME
-                    elif [ $NUMBER_FROM_FILE -eq ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} ] && [ $(echo "$FILE" | grep -o "conf[.][[:digit:]]\+_pbp[.]dat$" | wc -l) -eq 1 ]; then
+                    elif [ $NUMBER_FROM_FILE -eq ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} ] && [ $(grep -o "conf[.][[:digit:]]\+_pbp[.]dat$" <<< "$FILE" | wc -l) -eq 1 ]; then
                         mv $FILE $TRASH_NAME
                     fi
                 fi
@@ -313,7 +313,7 @@ function ProcessBetaValuesForContinue_Loewe() {
         fi
         #Check that, in case the continue is done from a "numeric" configuration, the number of conf and prng is the same
         if [ "$NAME_LAST_CONFIGURATION" != "conf.save" ] && [ "$NAME_LAST_PRNG" != "prng.save" ] && [ "$NAME_LAST_PRNG" != "" ]; then
-            if [ `echo ${NAME_LAST_CONFIGURATION#*.} | sed 's/^0*//g'` -ne `echo ${NAME_LAST_PRNG#*.} | sed 's/^0*//g'` ]; then
+            if [ `sed 's/^0*//g' <<< "${NAME_LAST_CONFIGURATION#*.}"` -ne `sed 's/^0*//g' <<< "${NAME_LAST_PRNG#*.}"` ]; then
                 printf "\n\e[0;31m The numbers of conf.xxxxx and prng.xxxxx are different! Check the respective folder!!\n\e[0m"
                 printf "\e[0;31m Simulation cannot be continued. Leaving out beta = $BETA .\n\n\e[0m"
                 PROBLEM_BETA_ARRAY+=( $BETA )
@@ -332,7 +332,7 @@ function ProcessBetaValuesForContinue_Loewe() {
             local MEASURE_PBP_VALUE_FOR_INPUTFILE=1
             #If the pbp file already exists non empty, append a line to it to be sure the prompt is at the beginning of a new line
             if [ -f ${OUTPUTFILE_GLOBALPATH}_pbp.dat ] && [ $(wc -l < ${OUTPUTFILE_GLOBALPATH}_pbp.dat) -ne 0 ]; then
-                echo "" >> ${OUTPUTFILE_GLOBALPATH}_pbp.dat
+                printf "\n" >> ${OUTPUTFILE_GLOBALPATH}_pbp.dat
             fi
         fi
         if [ $(grep -o "measure_pbp" $INPUTFILE_GLOBALPATH | wc -l) -eq 0 ]; then
@@ -347,16 +347,16 @@ function ProcessBetaValuesForContinue_Loewe() {
                 PROBLEM_BETA_ARRAY+=( $BETA )
                 mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue 2
             fi
-            echo "measure_pbp=$MEASURE_PBP_VALUE_FOR_INPUTFILE" >> $INPUTFILE_GLOBALPATH
-            echo "sourcetype=volume" >> $INPUTFILE_GLOBALPATH
-            echo "sourcecontent=gaussian" >> $INPUTFILE_GLOBALPATH
+            printf "measure_pbp=$MEASURE_PBP_VALUE_FOR_INPUTFILE\n" >> $INPUTFILE_GLOBALPATH
+            printf "sourcetype=volume\n" >> $INPUTFILE_GLOBALPATH
+            printf "sourcecontent=gaussian\n" >> $INPUTFILE_GLOBALPATH
             if [ $WILSON = "TRUE" ]; then
-                echo "num_sources=16" >> $INPUTFILE_GLOBALPATH
+                printf "num_sources=16\n" >> $INPUTFILE_GLOBALPATH
             elif [ $STAGGERED = "TRUE" ]; then
-                echo "num_sources=1" >> $INPUTFILE_GLOBALPATH
-                echo "pbp_measurements=8" >> $INPUTFILE_GLOBALPATH
-                echo "ferm_obs_to_single_file=1" >> $INPUTFILE_GLOBALPATH
-                echo "ferm_obs_pbp_prefix=${OUTPUTFILE_NAME}" >> $INPUTFILE_GLOBALPATH
+                printf "num_sources=1\n" >> $INPUTFILE_GLOBALPATH
+                printf "pbp_measurements=8\n" >> $INPUTFILE_GLOBALPATH
+                printf "ferm_obs_to_single_file=1\n" >> $INPUTFILE_GLOBALPATH
+                printf "ferm_obs_pbp_prefix=${OUTPUTFILE_NAME}\n" >> $INPUTFILE_GLOBALPATH
             fi
             printf "\e[0;32m Added options \e[0;35mmeasure_pbp=$MEASURE_PBP_VALUE_FOR_INPUTFILE\n"
             printf "\e[0;32m               \e[0;35msourcetype=volume\n"
@@ -389,11 +389,11 @@ function ProcessBetaValuesForContinue_Loewe() {
                         PROBLEM_BETA_ARRAY+=( $BETA )
                         mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
                         else
-                        echo "use_mp=1" >> $INPUTFILE_GLOBALPATH
-                        echo "solver_mp=cg" >> $INPUTFILE_GLOBALPATH
-                        echo "kappa_mp=0.${MASS_PRECONDITIONING_ARRAY[$BETA]#*,}" >> $INPUTFILE_GLOBALPATH
-                        echo "integrator2=twomn" >> $INPUTFILE_GLOBALPATH
-                        echo "integrationsteps2=${MASS_PRECONDITIONING_ARRAY[$BETA]%,*}" >> $INPUTFILE_GLOBALPATH
+                        printf "use_mp=1\n" >> $INPUTFILE_GLOBALPATH
+                        printf "solver_mp=cg\n" >> $INPUTFILE_GLOBALPATH
+                        printf "kappa_mp=0.${MASS_PRECONDITIONING_ARRAY[$BETA]#*,}\n" >> $INPUTFILE_GLOBALPATH
+                        printf "integrator2=twomn\n" >> $INPUTFILE_GLOBALPATH
+                        printf "integrationsteps2=${MASS_PRECONDITIONING_ARRAY[$BETA]%,*}\n" >> $INPUTFILE_GLOBALPATH
                         printf "\e[0;32m Added options \e[0;35muse_mp=1\n"
                         printf "\e[0;32m               \e[0;35msolver_mp=cg\n"
                         printf "\e[0;32m               \e[0;35mkappa_mp=0.${MASS_PRECONDITIONING_ARRAY[$BETA]#*,}\n"
@@ -513,11 +513,11 @@ function ProcessBetaValuesForContinue_Loewe() {
         #If sourcefile not present in the input file, add it, otherwise modify it
         local NUMBER_OCCURENCE_SOURCEFILE=$(grep -o "sourcefile=[[:alnum:][:punct:]]*" $INPUTFILE_GLOBALPATH | wc -l)
         if [ $NUMBER_OCCURENCE_SOURCEFILE -eq 0 ]; then
-            echo "sourcefile=$WORK_BETADIRECTORY/${NAME_LAST_CONFIGURATION}" >> $INPUTFILE_GLOBALPATH
+            printf "sourcefile=$WORK_BETADIRECTORY/${NAME_LAST_CONFIGURATION}\n" >> $INPUTFILE_GLOBALPATH
             printf "\e[0;32m Added option \e[0;35msourcefile=$WORK_BETADIRECTORY/${NAME_LAST_CONFIGURATION}"
             printf "\e[0;32m to the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
         elif [ $NUMBER_OCCURENCE_SOURCEFILE -eq 1 ]; then #In order to use __static__ModifyOptionInInputFile I have to escape the slashes in the path (for sed)
-            __static__ModifyOptionInInputFile "sourcefile=$(echo $WORK_BETADIRECTORY | sed 's/\//\\\//g')\/$NAME_LAST_CONFIGURATION"
+            __static__ModifyOptionInInputFile "sourcefile=$(sed 's/\//\\\//g' <<< "$WORK_BETADIRECTORY")\/$NAME_LAST_CONFIGURATION"
             [ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
             printf "\e[0;32m Set option \e[0;35msourcefile=$WORK_BETADIRECTORY/${NAME_LAST_CONFIGURATION}"
             printf "\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
@@ -535,7 +535,7 @@ function ProcessBetaValuesForContinue_Loewe() {
             fi
             if [ $NUMBER_OCCURENCE_HOST_SEED -eq 0 ]; then
                 local HOST_SEED=`shuf -i 1000-9999 -n1`
-                echo "host_seed=$HOST_SEED" >> $INPUTFILE_GLOBALPATH
+                printf "host_seed=$HOST_SEED\n" >> $INPUTFILE_GLOBALPATH
                 printf "\e[0;32m Added option \e[0;35mhost_seed=$HOST_SEED\e[0;32m to the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
             elif [ $NUMBER_OCCURENCE_HOST_SEED -eq 1 ]; then
                 local HOST_SEED=`shuf -i 1000-9999 -n1`
@@ -553,11 +553,11 @@ function ProcessBetaValuesForContinue_Loewe() {
                 sed -i '/host_seed/d' $INPUTFILE_GLOBALPATH #If a prng valid state has been found, delete eventual line from input file with host_seed
             fi
             if [ $NUMBER_OCCURENCE_PRNG_STATE -eq 0 ]; then
-                echo "initial_prng_state=$WORK_BETADIRECTORY/${NAME_LAST_PRNG}" >> $INPUTFILE_GLOBALPATH
+                printf "initial_prng_state=$WORK_BETADIRECTORY/${NAME_LAST_PRNG}\n" >> $INPUTFILE_GLOBALPATH
                 printf "\e[0;32m Added option \e[0;35minitial_prng_state=$WORK_BETADIRECTORY/${NAME_LAST_PRNG}"
                 printf "\e[0;32m to the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
             elif [ $NUMBER_OCCURENCE_PRNG_STATE -eq 1 ]; then #In order to use __static__ModifyOptionInInputFile I have to escape the slashes in the path (for sed)
-                __static__ModifyOptionInInputFile "initial_prng_state=$(echo $WORK_BETADIRECTORY | sed 's/\//\\\//g')\/${NAME_LAST_PRNG}"
+                __static__ModifyOptionInInputFile "initial_prng_state=$(sed 's/\//\\\//g' <<< "$WORK_BETADIRECTORY")\/${NAME_LAST_PRNG}"
                 [ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
                 printf "\e[0;32m Set option \e[0;35minitial_prng_state=$WORK_BETADIRECTORY/${NAME_LAST_PRNG}"
                 printf "\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
@@ -651,7 +651,7 @@ function SubmitJobsForValidBetaValues_Loewe() {
         printf "\n\e[0;36m===================================================================================\n\e[0m"
         printf "\e[0;34m Jobs will be submitted for the following beta values:\n\e[0m"
         for BETA in ${SUBMIT_BETA_ARRAY[@]}; do
-            echo "  - $BETA"
+            cecho "  - $BETA"
         done
 
         for BETA in ${SUBMIT_BETA_ARRAY[@]}; do
@@ -660,8 +660,8 @@ function SubmitJobsForValidBetaValues_Loewe() {
             else
                 local PREFIX_TO_BE_GREPPED_FOR="$SEED_PREFIX"
             fi
-            local TEMP_ARRAY=( $(echo $BETA | sed 's/_/ /g') )
-            if [ $(echo $BETA | grep -o "${PREFIX_TO_BE_GREPPED_FOR}\([[:digit:]][.]\)\?[[:alnum:]]\{4\}" | wc -l) -ne $GPU_PER_NODE ]; then
+            local TEMP_ARRAY=( $(sed 's/_/ /g' <<< "$BETA") )
+            if [ $(grep -o "${PREFIX_TO_BE_GREPPED_FOR}\([[:digit:]][.]\)\?[[:alnum:]]\{4\}" <<< "$BETA" | wc -l) -ne $GPU_PER_NODE ]; then
                 printf "\n\e[0;33m \e[1m\e[4mWARNING\e[24m:\e[0;33m At least one job is being submitted with less than\n"
                 printf "          $GPU_PER_NODE runs inside. Would you like to submit in any case (Y/N)? \e[0m"
                 local CONFIRM="";
@@ -719,7 +719,7 @@ function __static__PackBetaValuesPerGpuAndCreateJobScriptFiles(){
         for BETA in "${BETA_FOR_JOBSCRIPT[@]}"; do
             printf "    ${BETA_PREFIX}${BETA%_*}"
         done
-        echo ""
+        cecho ""
         local BETAS_STRING="$(__static__GetJobBetasStringUsing ${BETA_FOR_JOBSCRIPT[@]})"
         local JOBSCRIPT_NAME="$(__static__GetJobScriptName ${BETAS_STRING})"
         local JOBSCRIPT_GLOBALPATH="${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER/$JOBSCRIPT_NAME"
@@ -758,7 +758,7 @@ function __static__GetJobBetasStringUsing(){
     local BETAVALUES_TO_BE_USED=( $@ )
     declare -A BETAS_WITH_SEED
     for INDEX in "${BETAVALUES_TO_BE_USED[@]}"; do
-    BETAS_WITH_SEED[${INDEX%%_*}]="${BETAS_WITH_SEED[${INDEX%%_*}]}_$(echo $INDEX | awk '{split($0, res, "_"); print res[2]}')"
+    BETAS_WITH_SEED[${INDEX%%_*}]="${BETAS_WITH_SEED[${INDEX%%_*}]}_$(awk '{split($0, res, "_"); print res[2]}' <<< "$INDEX")"
     done
     local BETAS_STRING_TO_BE_RETURNED=""
     #Here I iterate again on BETAVALUES_TO_BE_USED and not on ${!BETAS_WITH_SEED[@]} in order to guarantee an order in BETAS_STRING
@@ -772,10 +772,10 @@ function __static__GetJobBetasStringUsing(){
     fi
     done
     if [ $USE_MULTIPLE_CHAINS == "FALSE" ]; then
-    BETAS_STRING_TO_BE_RETURNED="$( echo ${BETAS_STRING_TO_BE_RETURNED} | sed -e 's/___/_/g' -e 's/_$//')"
+    BETAS_STRING_TO_BE_RETURNED="$(sed -e 's/___/_/g' -e 's/_$//' <<< "$BETAS_STRING_TO_BE_RETURNED")"
     fi
 
-    echo "${BETAS_STRING_TO_BE_RETURNED:2}" #I cut here the two initial underscores
+    printf "${BETAS_STRING_TO_BE_RETURNED:2}" #I cut here the two initial underscores
 }
 
 
@@ -783,14 +783,14 @@ function __static__GetJobScriptName(){
     local STRING_WITH_BETAVALUES="$1"
 
     if [ $INVERT_CONFIGURATIONS = "TRUE" ]; then
-        echo "${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}__${STRING_WITH_BETAVALUES}_INV"
+        printf "${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}__${STRING_WITH_BETAVALUES}_INV"
     else
         if [ "$BETA_POSTFIX" == "_thermalizeFromConf" ]; then
-            echo "${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}__${STRING_WITH_BETAVALUES}_TC"
+            printf "${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}__${STRING_WITH_BETAVALUES}_TC"
         elif [ "$BETA_POSTFIX" == "_thermalizeFromHot" ]; then
-            echo "${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}__${STRING_WITH_BETAVALUES}_TH"
+            printf "${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}__${STRING_WITH_BETAVALUES}_TH"
         else
-            echo "${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}__${STRING_WITH_BETAVALUES}"
+            printf "${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}__${STRING_WITH_BETAVALUES}"
         fi
     fi
 }
