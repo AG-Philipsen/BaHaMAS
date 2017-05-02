@@ -38,30 +38,30 @@ function ReadBetaValuesFromFile(){
         if [[ $LINE =~ ^[[:blank:]]*# ]] || [[ $LINE =~ ^[[:blank:]]*$ ]]; then
             continue
         fi
-        LINE=`echo $LINE | awk '{split($0, res, "#"); print res[1]}'`
+        LINE=`awk '{split($0, res, "#"); print res[1]}' <<< "$LINE"`
         #Look for "resumefrom=*" check it, save the content and delete it
-        SEARCH_RESULT=( $(echo $LINE | grep -o "$RESUME_REGEXPR") )
+        SEARCH_RESULT=( $(grep -o "$RESUME_REGEXPR" <<< "$LINE") )
         case ${#SEARCH_RESULT[@]} in
             0 ) CONTINUE_RESUMETRAJ_TEMP+=( "notFound" );;
-            1 ) CONTINUE_RESUMETRAJ_TEMP+=( ${SEARCH_RESULT[0]}); LINE=$( echo $LINE | sed 's/'$RESUME_REGEXPR'//g' );;
+            1 ) CONTINUE_RESUMETRAJ_TEMP+=( ${SEARCH_RESULT[0]}); LINE=$( sed 's/'$RESUME_REGEXPR'//g' <<< "$LINE" );;
             * ) printf "\n\e[0;31m String \"resumefrom=*\" specified multiple times per line in betasfile! Aborting...\n\n\e[0m"; exit -1;;
         esac
         #Look for "MP=(*,*)" check it, save the content and delete it
-        SEARCH_RESULT=( $(echo $LINE | grep -o "$MP_REGEXPR") )
+        SEARCH_RESULT=( $(grep -o "$MP_REGEXPR" <<< "$LINE") )
         case ${#SEARCH_RESULT[@]} in
             0 ) MASS_PRECONDITIONING_TEMP+=( "notFound" );;
-            1 ) MASS_PRECONDITIONING_TEMP+=( ${SEARCH_RESULT[0]}); LINE=$( echo $LINE | sed 's/'$MP_REGEXPR'//g' );;
+            1 ) MASS_PRECONDITIONING_TEMP+=( ${SEARCH_RESULT[0]}); LINE=$( sed 's/'$MP_REGEXPR'//g' <<< "$LINE" );;
             * ) printf "\n\e[0;31m String \"MP=(*,*)\" specified multiple times per line in betasfile! Aborting...\n\n\e[0m"; exit -1;;
         esac
         #Read the rest
-        BETAVALUES+=( $(echo $LINE | awk '{print $1}') )
+        BETAVALUES+=( $(awk '{print $1}' <<< "$LINE") )
         if [ $USE_MULTIPLE_CHAINS == "FALSE" ]; then
-            INTSTEPS0_ARRAY_TEMP+=( $(echo $LINE | awk '{print $2}') )
-            INTSTEPS1_ARRAY_TEMP+=( $(echo $LINE | awk '{print $3}') )
+            INTSTEPS0_ARRAY_TEMP+=( $(awk '{print $2}' <<< "$LINE") )
+            INTSTEPS1_ARRAY_TEMP+=( $(awk '{print $3}' <<< "$LINE") )
         else
-            SEED_ARRAY_TEMP+=( $(echo $LINE | awk '{print $2}') )
-            INTSTEPS0_ARRAY_TEMP+=( $(echo $LINE | awk '{print $3}') )
-            INTSTEPS1_ARRAY_TEMP+=( $(echo $LINE | awk '{print $4}') )
+            SEED_ARRAY_TEMP+=( $(awk '{print $2}' <<< "$LINE") )
+            INTSTEPS0_ARRAY_TEMP+=( $(awk '{print $3}' <<< "$LINE") )
+            INTSTEPS1_ARRAY_TEMP+=( $(awk '{print $4}' <<< "$LINE") )
         fi
     done
     IFS=$OLD_IFS     # restore default field separator
@@ -157,7 +157,7 @@ function ReadBetaValuesFromFile(){
         fi
         TEMP_STR=${MASS_PRECONDITIONING_TEMP[$INDEX]}
         if [[ $TEMP_STR != "notFound" ]]; then
-            TEMP_STR=$(echo ${TEMP_STR#"MP=("})
+            TEMP_STR=${TEMP_STR#"MP=("}
             TEMP_STR=${TEMP_STR%")"}
             #Build associative array for later use
             if [[ ! $TEMP_STR =~ ^[[:digit:]]{1,2},[[:digit:]]{3,4}$ ]]; then
@@ -186,7 +186,7 @@ function ReadBetaValuesFromFile(){
     printf "\e[0;36m============================================================================================================\n\e[0m"
 
     #If we are not in the continue scenario (and not in other script use cases), look for the correct configuration to start from and set the global path
-    if [ $CONTINUE = "FALSE" ] && [ $CLEAN_OUTPUT_FILES = "FALSE" ] && [ $EMPTY_BETA_DIRS = "FALSE" ] && [ $INVERT_CONFIGURATIONS = "FALSE" ] && [ $ACCRATE_REPORT = "FALSE" ]; then
+    if [ $CONTINUE = "FALSE" ] && [ $CLEAN_OUTPUT_FILES = "FALSE" ] && [ $INVERT_CONFIGURATIONS = "FALSE" ] && [ $ACCRATE_REPORT = "FALSE" ]; then
         for BETA in "${BETAVALUES[@]}"; do
             if [ "$BETA_POSTFIX" == "" ]; then #Old nomenclature case: no beta postfix!
                 local FOUND_CONFIGURATIONS=( $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "^conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA}.*") )
@@ -241,8 +241,7 @@ function ReadBetaValuesFromFile(){
                 #Here a 0 length of FOUND_CONFIGURATIONS is not checked since we rely on the fact that if this was the case we would have $BETA_POSTFIX == "_thermalizeFromHot" as set in JobHandler.bash (Thermalize case)
                 declare -A FOUND_CONFIGURATIONS_WITH_BETA_AS_KEY
                 for CONFNAME in "${FOUND_CONFIGURATIONS[@]}"; do
-                    local BETAVALUE_RECOVERED_FROM_NAME=$(echo $CONFNAME | awk '{split($1, res, "_fromHot"); print res[1]}' | sed 's/.*\('${BETA_REGEX}'\).*/\1/')
-                    #local BETAVALUE_RECOVERED_FROM_NAME=$(echo $CONFNAME | awk '{split($1, res, "_fromHot"); print res[1]}' | sed 's/.*\([[:digit:]][.][[:digit:]]\{4\}\).*/\1/')
+                    local BETAVALUE_RECOVERED_FROM_NAME=$(awk '{split($1, res, "_fromHot"); print res[1]}' <<< "$CONFNAME" | sed 's/.*\('${BETA_REGEX}'\).*/\1/')
                     FOUND_CONFIGURATIONS_WITH_BETA_AS_KEY["$BETAVALUE_RECOVERED_FROM_NAME"]=$CONFNAME
                 done
                 local CLOSEST_BETA=$(FindValueOfClosestElementInArrayToGivenValue ${BETA%%_*} "${!FOUND_CONFIGURATIONS_WITH_BETA_AS_KEY[@]}")
@@ -298,7 +297,7 @@ function CompleteBetasFile(){
             COMMENTED_LINE_ARRAY+=( "$LINE" )
             continue
         fi
-        LINE=`echo $LINE | awk '{split($0, res, "#"); print res[1]}'`
+        LINE=$(awk '{split($0, res, "#"); print res[1]}' <<< "$LINE")
         BETA=$(awk '{print $1}' <<< "$LINE")
         REST_OF_THE_LINE=$(awk '{$1=""; print $0}' <<< "$LINE")
         if [ $USE_MULTIPLE_CHAINS == "TRUE" ]; then
@@ -375,11 +374,11 @@ function CompleteBetasFile(){
             __static__PrintNewLineToBetasFile
             SEED_TO_GENERATE_NEW_SEED_FROM=$NEW_SEED
         done
-        echo "" >> $BETASFILE
+        cecho "" >> $BETASFILE
     done
     #Print commented lines
     for LINE in "${COMMENTED_LINE_ARRAY[@]}"; do
-        echo $LINE >> $BETASFILE
+        cecho $LINE >> $BETASFILE
     done
     rm $BETASFILE_BACKUP
 
@@ -398,7 +397,6 @@ function UncommentEntriesInBetasFile()
         local OLD_IFS=$IFS
         for i in ${UNCOMMENT_BETAS_SEED_ARRAY[@]}
         do
-            #echo entry: $i
             IFS='_'
             local U_ARRAY=( $i )
             local U_BETA=${U_ARRAY[0]}
@@ -424,7 +422,6 @@ function UncommentEntriesInBetasFile()
         local OLD_IFS=$IFS
         for i in ${UNCOMMENT_BETAS_SEED_ARRAY[@]}
         do
-            #echo entry: $i
             IFS='_'
             local U_ARRAY=( $i )
             local U_BETA=${U_ARRAY[0]}
