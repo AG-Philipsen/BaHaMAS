@@ -5,26 +5,26 @@ source ${BaHaMAS_repositoryTopLevelPath}/UtilityFunctions.bash || exit -2
 function __static__ExtractParameterFromJOBNAME(){
     local PREFIX=$1
     #Here it is supposed that the name of the job is ${PARAMETERS_STRING}_(...)
-    if [ "$(echo $JOBNAME | grep -o "_\?${PREFIX}[^_]*_" | wc -l)" -gt 1 ]; then
+    if [ "$(grep -o "_\?${PREFIX}[^_]*_" <<< "$JOBNAME" | wc -l)" -gt 1 ]; then
         printf "\n \e[0;31m Parameter \"$PREFIX\" appears more than once in one queued jobname (\"$JOBNAME\")! Aborting...\n\n\e[0m\n"
         exit -1
     fi
-    PARAMETERS=$(echo $JOBNAME | grep -o "_\?${PREFIX}[^_]*_" | sed -e 's/_//g' | sed 's/'$PREFIX'//g')
-    echo "$PARAMETERS"
+    PARAMETERS=$(grep -o "_\?${PREFIX}[^_]*_" <<< "$JOBNAME" | sed -e 's/_//g' | sed 's/'$PREFIX'//g')
+    cecho "$PARAMETERS"
 }
 
 function __static__ExtractBetasFromJOBNAME(){
     #Here it is supposed that the name of the job is ${PARAMETERS_STRING}_(...)
     #The goal of this function is to get an array whose elements are bx.xxxx_syyyy and since we use involved bash lines it is better to say that:
     #  1) from JOBNAME we take everything after the BETA_PREFIX
-    local BETAS_STRING=$(echo $JOBNAME | awk -v pref="$BETA_PREFIX" '{print substr($0, index($0, pref))}')
+    local BETAS_STRING=$(awk -v pref="$BETA_PREFIX" '{print substr($0, index($0, pref))}' <<< "$JOBNAME")
     #  2) we split on the BETA_PREFIX in order to get all the seeds referred to the same beta
-    local TEMPORAL_ARRAY=( $(echo $BETAS_STRING | awk -v pref="$BETA_PREFIX" '{split($1, res, pref); for (i in res) print res[i]}') )
+    local TEMPORAL_ARRAY=( $(awk -v pref="$BETA_PREFIX" '{split($1, res, pref); for (i in res) print res[i]}' <<< "$BETAS_STRING") )
     #  3) we take the value of the beta and of the seeds building up the final array
     local BETAVALUES_ARRAY=()
     for ELEMENT in "${TEMPORAL_ARRAY[@]}"; do
         local BETAVALUE=${ELEMENT%%_*}
-        local SEEDS_ARRAY=( $(echo ${ELEMENT#*_} | grep -o "${SEED_PREFIX}[[:alnum:]]\{4\}") )
+        local SEEDS_ARRAY=( $(grep -o "${SEED_PREFIX}[[:alnum:]]\{4\}" <<< "${ELEMENT#*_}") )
         if [ ${#SEEDS_ARRAY[@]} -gt 0 ]; then
             for SEED in "${SEEDS_ARRAY[@]}"; do
                 BETAVALUES_ARRAY+=( "${BETA_PREFIX}${BETAVALUE}_${SEED}" )
@@ -33,24 +33,24 @@ function __static__ExtractBetasFromJOBNAME(){
             BETAVALUES_ARRAY+=( "${BETA_PREFIX}${BETAVALUE}" )
         fi
     done
-    echo "${BETAVALUES_ARRAY[@]}"
+    cecho "${BETAVALUES_ARRAY[@]}"
 }
 
 function __static__ExtractPostfixFromJOBNAME(){
     local POSTFIX=${JOBNAME##*_}
     if [ "$POSTFIX" == "TC" ]; then
-        echo "thermalizeFromConf"
+        cecho "thermalizeFromConf"
     elif [ "$POSTFIX" == "TH" ]; then
-        echo "thermalizeFromHot"
+        cecho "thermalizeFromHot"
     elif [ "$POSTFIX" == "Thermalize" ]; then
-        echo "thermalize_old"
+        cecho "thermalize_old"
     elif [ "$POSTFIX" == "Tuning" ]; then
-        echo "tuning"
+        cecho "tuning"
         #Also in the "TC" and "TH" cases we have seeds in the name, but such a cases are exluded from the elif
-    elif [ $(echo $JOBNAME | grep -o "_${SEED_PREFIX}[[:alnum:]]\{4\}" | wc -l) -ne 0 ]; then
-        echo "continueWithNewChain"
+    elif [ $(grep -o "_${SEED_PREFIX}[[:alnum:]]\{4\}" <<< "$JOBNAME" | wc -l) -ne 0 ]; then
+        cecho "continueWithNewChain"
     else
-        echo ""
+        cecho ""
     fi
 }
 
@@ -65,13 +65,13 @@ function __static__ExtractMetaInformationFromJOBNAME(){
         local JOBNAME_POSTFIX=$(__static__ExtractPostfixFromJOBNAME)
         local JOB_PARAMETERS_STRING="${JOBNAME%%__*}"
         #If JOB_PARAMETERS_STRING is not at the beginning of the jobname, skip job
-        [ $(echo "$JOBNAME" | grep "^${JOB_PARAMETERS_STRING}" | wc -l) -eq 0 ] && continue
+        [ $(grep "^${JOB_PARAMETERS_STRING}" <<< "$JOBNAME" | wc -l) -eq 0 ] && continue
         #If the status is COMPLETING, skip job
         [ $JOB_STATUS == "COMPLETING" ] && continue
-        METAINFORMATION_ARRAY+=( $(echo "${JOB_PARAMETERS_STRING} | $( echo "${JOBNAME_BETAS[@]}" | sed 's/ /_/g') | postfix=${JOBNAME_POSTFIX} | ${JOB_STATUS}" | sed 's/ //g') )
+        METAINFORMATION_ARRAY+=( $(sed 's/ //g' <<< "${JOB_PARAMETERS_STRING} | $(sed 's/ /_/g' <<< "${JOBNAME_BETAS[@]}") | postfix=${JOBNAME_POSTFIX} | ${JOB_STATUS}") )
     done && unset -v 'VALUE'
 
-    echo "${METAINFORMATION_ARRAY[@]}"
+    cecho "${METAINFORMATION_ARRAY[@]}"
 }
 
 function ListJobStatus_Loewe(){
@@ -91,7 +91,7 @@ function ListJobStatus_Loewe(){
         local LOCAL_PARAMETERS_STRING=$(sed 's@/@_@g' <<< "$LOCAL_PARAMETERS_PATH")
         LOCAL_PARAMETERS_STRING=${LOCAL_PARAMETERS_STRING:1}
     else
-        echo "\e[31m Wrong invocation of ListJobStatus_Loewe: Invalid number of arguments. Please investigate...exiting."
+        cecho "\e[31m Wrong invocation of ListJobStatus_Loewe: Invalid number of arguments. Please investigate...exiting."
         return
     fi
 
@@ -115,7 +115,7 @@ function ListJobStatus_Loewe(){
                [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}_"$SEED_PREFIX"[[:alnum:]]{4}_thermalizeFromCold$ ]] &&
                [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}_"$SEED_PREFIX"[[:alnum:]]{4}_thermalizeFromConf$ ]]; then continue; fi
 
-        local POSTFIX_FROM_FOLDER=$(echo ${BETA##*_} | grep -o "[[:alpha:]]\+\$")
+        local POSTFIX_FROM_FOLDER=$(grep -o "[[:alpha:]]\+\$" <<< "${BETA##*_}")
 
         local STATUS=( $(sed 's/ /\n/g' <<< "${JOB_METAINFORMATION_ARRAY[@]}" | grep "${LOCAL_PARAMETERS_STRING}" | grep "${BETA_PREFIX}${BETA%_*}" | grep "postfix=${POSTFIX_FROM_FOLDER}|" | cut -d'|' -f4) )
 
@@ -141,13 +141,12 @@ function ListJobStatus_Loewe(){
                 #number of days (done looking at the hours). One could sum up all the tr. times but it is not really efficient!
                 local TIMES_ARRAY=( $(grep "finished trajectory" $STDOUTPUT_GLOBALPATH | awk '{print substr($1,2,8)}') )
                 local UNIQUE_HOURS_ARRAY=( $(grep "finished trajectory" $STDOUTPUT_GLOBALPATH | awk '{print substr($1,2,2)}' | uniq -d) )
-                #local =( $(echo ${TIMES_ARRAY[@]} | awk 'BEGIN{RS=" "}{print substr($1,1,2)}' | uniq -d) )
                 #I use the number of occurences of the second hours in order to get the almost correct number of days,
                 #then I correct in the case the last hour is equal to the first.
                 if [ ${#UNIQUE_HOURS_ARRAY[@]} -lt 2 ]; then
                     local NUMBER_OF_DAYS=0
                 else
-                    local NUMBER_OF_DAYS=$(echo ${UNIQUE_HOURS_ARRAY[@]} | awk 'BEGIN{RS=" "}NR==2{secondHour=$1}{hours[$1]++}END{print hours[secondHour]-1}')
+                    local NUMBER_OF_DAYS=$(awk 'BEGIN{RS=" "}NR==2{secondHour=$1}{hours[$1]++}END{print hours[secondHour]-1}' <<< "${UNIQUE_HOURS_ARRAY[@]}")
                     if [ ${UNIQUE_HOURS_ARRAY[0]} -eq ${UNIQUE_HOURS_ARRAY[@]:(-1)} ]; then
                         [ $(TimeToSeconds ${TIMES_ARRAY[0]}) -le $(TimeToSeconds ${TIMES_ARRAY[@]:(-1)}) ] && NUMBER_OF_DAYS=$(($NUMBER_OF_DAYS + 1))
                     fi
@@ -261,9 +260,9 @@ $(ColorTime $TIME_FROM_LAST_MODIFICATION)%s${DEFAULT_LISTSTATUS_COLOR}      \
             "$ACCEPTANCE_LAST" \
             "$INT0" "$INT1" "$INT2" "$K_MP" \
             "$STATUS"   "$MAX_DELTAS" \
-            "$(echo $TIME_FROM_LAST_MODIFICATION | awk '{if($1 ~ /^[[:digit:]]+$/){printf "%6d", $1}else{print $1}}') sec. ago" \
+            "$(awk '{if($1 ~ /^[[:digit:]]+$/){printf "%6d", $1}else{print $1}}' <<< "$TIME_FROM_LAST_MODIFICATION") sec. ago" \
             "$NUMBER_LAST_TRAJECTORY" \
-            "$(echo "$TIME_LAST_TRAJECTORY $AVERAGE_TIME_PER_TRAJECTORY" | awk '{if($1 ~ /^[[:digit:]]+$/ && $2 ~ /^[[:digit:]]+$/){printf "%3ds | %3ds", $1, $2}else if($1 == "ERR" || $2 == "ERR"){print "_errorMeas_"}else{print "notMeasured"}}')"
+            "$(awk '{if($1 ~ /^[[:digit:]]+$/ && $2 ~ /^[[:digit:]]+$/){printf "%3ds | %3ds", $1, $2}else if($1 == "ERR" || $2 == "ERR"){print "_errorMeas_"}else{print "notMeasured"}}' <<< "$TIME_LAST_TRAJECTORY $AVERAGE_TIME_PER_TRAJECTORY")"
 
         if [ $TO_BE_CLEANED -eq 0 ]; then
             printf "%s\t\t%8s (%s %%) [%s %%]  %s-%s%s%s\t%9s\t%s\n"   "$(GetShortenedBetaString)"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$ACCEPTANCE_LAST"   "$INT0" "$INT1" "$INT2" "$K_MP"   "$STATUS"   "$MAX_DELTAS" >> $JOBS_STATUS_FILE
@@ -277,48 +276,48 @@ $(ColorTime $TIME_FROM_LAST_MODIFICATION)%s${DEFAULT_LISTSTATUS_COLOR}      \
 
 function GetShortenedBetaString(){
     if [ "$POSTFIX_FROM_FOLDER" == "continueWithNewChain" ]; then
-        echo "${BETA%_*}_NC"
+        cecho "${BETA%_*}_NC"
     elif [ "$POSTFIX_FROM_FOLDER" == "thermalizeFromHot" ]; then
-        echo "${BETA%_*}_fH"
+        cecho "${BETA%_*}_fH"
     elif [ "$POSTFIX_FROM_FOLDER" == "thermalizeFromConf" ]; then
-        echo "${BETA%_*}_fC"
+        cecho "${BETA%_*}_fC"
     else
-        echo "${BETA%_*}"
+        cecho "${BETA%_*}"
     fi
 }
 
 function GoodAcc(){
-    echo "$1" | awk -v tl="${TOO_LOW_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
-                    -v l="${LOW_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
-                    -v op="${OPTIMAL_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
-                    -v h="${HIGH_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
-                    -v th="${TOO_HIGH_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
-                    -v tlt="$TOO_LOW_ACCEPTANCE_THRESHOLD" \
-                    -v lt="$LOW_ACCEPTANCE_THRESHOLD" \
-                    -v ht="$HIGH_ACCEPTANCE_THRESHOLD" \
-                    -v tht="$TOO_HIGH_ACCEPTANCE_THRESHOLD" '{if($1<tlt){print tl}else if($1<lt){print l}else if($1>tht){print th}else if($1>ht){print h}else{print op}}'
+    cecho "$1" | awk -v tl="${TOO_LOW_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
+                     -v l="${LOW_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
+                     -v op="${OPTIMAL_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
+                     -v h="${HIGH_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
+                     -v th="${TOO_HIGH_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
+                     -v tlt="$TOO_LOW_ACCEPTANCE_THRESHOLD" \
+                     -v lt="$LOW_ACCEPTANCE_THRESHOLD" \
+                     -v ht="$HIGH_ACCEPTANCE_THRESHOLD" \
+                     -v tht="$TOO_HIGH_ACCEPTANCE_THRESHOLD" '{if($1<tlt){print tl}else if($1<lt){print l}else if($1>tht){print th}else if($1>ht){print h}else{print op}}'
 }
 
 function ColorStatus(){
     if [[ $1 == "RUNNING" ]]; then
-        echo $RUNNING_LISTSTATUS_COLOR
+        cecho $RUNNING_LISTSTATUS_COLOR
     elif [[ $1 == "PENDING" ]]; then
-        echo $PENDING_LISTSTATUS_COLOR
+        cecho $PENDING_LISTSTATUS_COLOR
     else
-        echo $DEFAULT_LISTSTATUS_COLOR
+        cecho $DEFAULT_LISTSTATUS_COLOR
     fi
 }
 
 function ColorTime(){
     if [[ ! $1 =~ ^[[:digit:]]+$ ]]; then
-        echo $DEFAULT_LISTSTATUS_COLOR
+        cecho $DEFAULT_LISTSTATUS_COLOR
     else
-        [ $1 -gt 450 ] && echo "$STUCK_SIMULATION_LISTSTATUS_COLOR" || echo "$FINE_SIMULATION_LISTSTATUS_COLOR"
+        [ $1 -gt 450 ] && cecho "$STUCK_SIMULATION_LISTSTATUS_COLOR" || cecho "$FINE_SIMULATION_LISTSTATUS_COLOR"
     fi
 }
 
 function ColorClean(){
-    [ $1 -eq 0 ] && echo "$DEFAULT_LISTSTATUS_COLOR" || echo "$CLEANING_LISTSTATUS_COLOR"
+    [ $1 -eq 0 ] && cecho "$DEFAULT_LISTSTATUS_COLOR" || cecho "$CLEANING_LISTSTATUS_COLOR"
 }
 
 function ColorBeta(){
@@ -335,7 +334,7 @@ function ColorBeta(){
     local AUX1=$(printf "%s," "${OBSERVABLES_COLUMNS[@]}")
     local AUX2=$(printf "%s," "${!OBSERVABLES_COLUMNS[@]}")
     if [ ! -f $OUTPUTFILE_GLOBALPATH ]; then
-        echo $DEFAULT_LISTSTATUS_COLOR
+        cecho $DEFAULT_LISTSTATUS_COLOR
         return
     fi
 
@@ -343,11 +342,11 @@ function ColorBeta(){
     local ERROR_CODE=$?
 
     if [ $ERROR_CODE -eq 0 ]; then
-        echo $DEFAULT_LISTSTATUS_COLOR
+        cecho $DEFAULT_LISTSTATUS_COLOR
     elif [ $ERROR_CODE -eq 1 ]; then
-        echo $WRONG_BETA_LISTSTATUS_COLOR
+        cecho $WRONG_BETA_LISTSTATUS_COLOR
     else
-        echo $SUSPICIOUS_BETA_LISTSTATUS_COLOR
+        cecho $SUSPICIOUS_BETA_LISTSTATUS_COLOR
     fi
 
 }
@@ -355,12 +354,12 @@ function ColorBeta(){
 
 function ColorDeltaS(){
     if [[ ! $1 =~ [+-]?[[:digit:]]+[.]?[[:digit:]]* ]]; then
-        echo "$DEFAULT_LISTSTATUS_COLOR"
+        cecho "$DEFAULT_LISTSTATUS_COLOR"
     else
         if [ "$POSTFIX_FROM_FOLDER" == "continueWithNewChain" ] && [ $(awk -v threshold=$DELTA_S_THRESHOLD -v value=$1 'BEGIN{if(value >= threshold)print 1; else print 0;}') -eq 1 ]; then
-            echo "$TOO_HIGH_DELTA_S_LISTSTATUS_COLOR"
+            cecho "$TOO_HIGH_DELTA_S_LISTSTATUS_COLOR"
         else
-            echo "$DEFAULT_LISTSTATUS_COLOR"
+            cecho "$DEFAULT_LISTSTATUS_COLOR"
         fi
     fi
 }
