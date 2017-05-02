@@ -18,7 +18,7 @@
 
 #-----------------------------------------------------------------------------------------------------------------#
 # Load auxiliary bash files that will be used.
-BaHaMAS_repositoryTopLevelPath="$(git rev-parse --show-toplevel)"
+BaHaMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"
 source ${BaHaMAS_repositoryTopLevelPath}/OutputFunctionality.bash || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/PathManagement.bash || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/AuxiliaryFunctions.bash || exit -2
