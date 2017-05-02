@@ -94,7 +94,6 @@ function ProduceInputFile_Loewe() {
         "integrator1=twomn"\
         "integrationsteps0=${INTSTEPS0_ARRAY[${BETAVALUES_COPY[$INDEX]}]}"\
         "integrationsteps1=${INTSTEPS1_ARRAY[${BETAVALUES_COPY[$INDEX]}]}"\
-        #Information about physical parameters
         "nspace=$NSPACE"\
         "ntime=$NTIME"
     if [ $WILSON = "TRUE" ]; then
