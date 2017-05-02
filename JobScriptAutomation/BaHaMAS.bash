@@ -166,8 +166,6 @@ if [ "$CALL_DATABASE" = "TRUE" ]; then
     projectStatisticsDatabase ${DATABASE_OPTIONS[@]}
     exit
 fi
-
-ReadParametersFromPath $(pwd)
 #-----------------------------------------------------------------------------------------------------------------#
 
 
