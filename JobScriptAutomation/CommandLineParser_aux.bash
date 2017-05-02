@@ -17,7 +17,7 @@ function SplitCombinedShortOptionsInSingloOptions() {
             NEW_OPTIONS+=($VALUE)
         fi
     done && unset -v 'VALUE'
-    echo ${NEW_OPTIONS[@]}
+    printf "%s " "${NEW_OPTIONS[@]}"
 }
 
 function __static__AddOptionToHelper() {
