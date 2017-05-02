@@ -2,17 +2,6 @@
 source ${BaHaMAS_repositoryTopLevelPath}/UtilityFunctions.bash || exit -2
 #------------------------------------------------------------------------------------#
 
-function __static__ExtractParameterFromJOBNAME(){
-    local PREFIX=$1
-    #Here it is supposed that the name of the job is ${PARAMETERS_STRING}_(...)
-    if [ "$(grep -o "_\?${PREFIX}[^_]*_" <<< "$JOBNAME" | wc -l)" -gt 1 ]; then
-        printf "\n \e[0;31m Parameter \"$PREFIX\" appears more than once in one queued jobname (\"$JOBNAME\")! Aborting...\n\n\e[0m\n"
-        exit -1
-    fi
-    PARAMETERS=$(grep -o "_\?${PREFIX}[^_]*_" <<< "$JOBNAME" | sed -e 's/_//g' | sed 's/'$PREFIX'//g')
-    cecho "$PARAMETERS"
-}
-
 function __static__ExtractBetasFromJOBNAME(){
     #Here it is supposed that the name of the job is ${PARAMETERS_STRING}_(...)
     #The goal of this function is to get an array whose elements are bx.xxxx_syyyy and since we use involved bash lines it is better to say that:
@@ -33,24 +22,24 @@ function __static__ExtractBetasFromJOBNAME(){
             BETAVALUES_ARRAY+=( "${BETA_PREFIX}${BETAVALUE}" )
         fi
     done
-    cecho "${BETAVALUES_ARRAY[@]}"
+    printf "%s " "${BETAVALUES_ARRAY[@]}"
 }
 
 function __static__ExtractPostfixFromJOBNAME(){
     local POSTFIX=${JOBNAME##*_}
     if [ "$POSTFIX" == "TC" ]; then
-        cecho "thermalizeFromConf"
+        printf "thermalizeFromConf"
     elif [ "$POSTFIX" == "TH" ]; then
-        cecho "thermalizeFromHot"
+        printf "thermalizeFromHot"
     elif [ "$POSTFIX" == "Thermalize" ]; then
-        cecho "thermalize_old"
+        printf "thermalize_old"
     elif [ "$POSTFIX" == "Tuning" ]; then
-        cecho "tuning"
+        printf "tuning"
         #Also in the "TC" and "TH" cases we have seeds in the name, but such a cases are exluded from the elif
     elif [ $(grep -o "_${SEED_PREFIX}[[:alnum:]]\{4\}" <<< "$JOBNAME" | wc -l) -ne 0 ]; then
-        cecho "continueWithNewChain"
+        printf "continueWithNewChain"
     else
-        cecho ""
+        printf ""
     fi
 }
 
@@ -71,7 +60,7 @@ function __static__ExtractMetaInformationFromJOBNAME(){
         METAINFORMATION_ARRAY+=( $(sed 's/ //g' <<< "${JOB_PARAMETERS_STRING} | $(sed 's/ /_/g' <<< "${JOBNAME_BETAS[@]}") | postfix=${JOBNAME_POSTFIX} | ${JOB_STATUS}") )
     done && unset -v 'VALUE'
 
-    cecho "${METAINFORMATION_ARRAY[@]}"
+    printf "%s " "${METAINFORMATION_ARRAY[@]}"
 }
 
 function ListJobStatus_Loewe(){
@@ -276,48 +265,48 @@ $(ColorTime $TIME_FROM_LAST_MODIFICATION)%s${DEFAULT_LISTSTATUS_COLOR}      \
 
 function GetShortenedBetaString(){
     if [ "$POSTFIX_FROM_FOLDER" == "continueWithNewChain" ]; then
-        cecho "${BETA%_*}_NC"
+        printf "${BETA%_*}_NC"
     elif [ "$POSTFIX_FROM_FOLDER" == "thermalizeFromHot" ]; then
-        cecho "${BETA%_*}_fH"
+        printf "${BETA%_*}_fH"
     elif [ "$POSTFIX_FROM_FOLDER" == "thermalizeFromConf" ]; then
-        cecho "${BETA%_*}_fC"
+        printf "${BETA%_*}_fC"
     else
-        cecho "${BETA%_*}"
+        printf "${BETA%_*}"
     fi
 }
 
 function GoodAcc(){
-    cecho "$1" | awk -v tl="${TOO_LOW_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
-                     -v l="${LOW_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
-                     -v op="${OPTIMAL_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
-                     -v h="${HIGH_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
-                     -v th="${TOO_HIGH_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
-                     -v tlt="$TOO_LOW_ACCEPTANCE_THRESHOLD" \
-                     -v lt="$LOW_ACCEPTANCE_THRESHOLD" \
-                     -v ht="$HIGH_ACCEPTANCE_THRESHOLD" \
-                     -v tht="$TOO_HIGH_ACCEPTANCE_THRESHOLD" '{if($1<tlt){print tl}else if($1<lt){print l}else if($1>tht){print th}else if($1>ht){print h}else{print op}}'
+    awk -v tl="${TOO_LOW_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
+        -v l="${LOW_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
+        -v op="${OPTIMAL_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
+        -v h="${HIGH_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
+        -v th="${TOO_HIGH_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
+        -v tlt="$TOO_LOW_ACCEPTANCE_THRESHOLD" \
+        -v lt="$LOW_ACCEPTANCE_THRESHOLD" \
+        -v ht="$HIGH_ACCEPTANCE_THRESHOLD" \
+        -v tht="$TOO_HIGH_ACCEPTANCE_THRESHOLD" '{if($1<tlt){print tl}else if($1<lt){print l}else if($1>tht){print th}else if($1>ht){print h}else{print op}}' <<< "$1"
 }
 
 function ColorStatus(){
     if [[ $1 == "RUNNING" ]]; then
-        cecho $RUNNING_LISTSTATUS_COLOR
+        printf $RUNNING_LISTSTATUS_COLOR
     elif [[ $1 == "PENDING" ]]; then
-        cecho $PENDING_LISTSTATUS_COLOR
+        printf $PENDING_LISTSTATUS_COLOR
     else
-        cecho $DEFAULT_LISTSTATUS_COLOR
+        printf $DEFAULT_LISTSTATUS_COLOR
     fi
 }
 
 function ColorTime(){
     if [[ ! $1 =~ ^[[:digit:]]+$ ]]; then
-        cecho $DEFAULT_LISTSTATUS_COLOR
+        printf $DEFAULT_LISTSTATUS_COLOR
     else
-        [ $1 -gt 450 ] && cecho "$STUCK_SIMULATION_LISTSTATUS_COLOR" || cecho "$FINE_SIMULATION_LISTSTATUS_COLOR"
+        [ $1 -gt 450 ] && printf $STUCK_SIMULATION_LISTSTATUS_COLOR || printf $FINE_SIMULATION_LISTSTATUS_COLOR
     fi
 }
 
 function ColorClean(){
-    [ $1 -eq 0 ] && cecho "$DEFAULT_LISTSTATUS_COLOR" || cecho "$CLEANING_LISTSTATUS_COLOR"
+    [ $1 -eq 0 ] && printf $DEFAULT_LISTSTATUS_COLOR || printf $CLEANING_LISTSTATUS_COLOR
 }
 
 function ColorBeta(){
@@ -334,7 +323,7 @@ function ColorBeta(){
     local AUX1=$(printf "%s," "${OBSERVABLES_COLUMNS[@]}")
     local AUX2=$(printf "%s," "${!OBSERVABLES_COLUMNS[@]}")
     if [ ! -f $OUTPUTFILE_GLOBALPATH ]; then
-        cecho $DEFAULT_LISTSTATUS_COLOR
+        printf $DEFAULT_LISTSTATUS_COLOR
         return
     fi
 
@@ -342,11 +331,11 @@ function ColorBeta(){
     local ERROR_CODE=$?
 
     if [ $ERROR_CODE -eq 0 ]; then
-        cecho $DEFAULT_LISTSTATUS_COLOR
+        printf $DEFAULT_LISTSTATUS_COLOR
     elif [ $ERROR_CODE -eq 1 ]; then
-        cecho $WRONG_BETA_LISTSTATUS_COLOR
+        printf $WRONG_BETA_LISTSTATUS_COLOR
     else
-        cecho $SUSPICIOUS_BETA_LISTSTATUS_COLOR
+        printf $SUSPICIOUS_BETA_LISTSTATUS_COLOR
     fi
 
 }
@@ -354,12 +343,12 @@ function ColorBeta(){
 
 function ColorDeltaS(){
     if [[ ! $1 =~ [+-]?[[:digit:]]+[.]?[[:digit:]]* ]]; then
-        cecho "$DEFAULT_LISTSTATUS_COLOR"
+        printf $DEFAULT_LISTSTATUS_COLOR
     else
         if [ "$POSTFIX_FROM_FOLDER" == "continueWithNewChain" ] && [ $(awk -v threshold=$DELTA_S_THRESHOLD -v value=$1 'BEGIN{if(value >= threshold)print 1; else print 0;}') -eq 1 ]; then
-            cecho "$TOO_HIGH_DELTA_S_LISTSTATUS_COLOR"
+            printf $TOO_HIGH_DELTA_S_LISTSTATUS_COLOR
         else
-            cecho "$DEFAULT_LISTSTATUS_COLOR"
+            printf $DEFAULT_LISTSTATUS_COLOR
         fi
     fi
 }
