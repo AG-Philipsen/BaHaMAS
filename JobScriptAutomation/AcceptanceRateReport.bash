@@ -16,7 +16,7 @@ function AcceptanceRateReport(){
     done
     #Make BETAVALUES_COPY not sparse if not empty
     if [ ${#BETAVALUES_COPY[@]} -eq 0 ]; then
-        echo '' && return
+        cecho '' && return
     else
         BETAVALUES_COPY=( ${BETAVALUES_COPY[@]} )
     fi
