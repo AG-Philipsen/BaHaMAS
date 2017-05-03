@@ -93,7 +93,7 @@ function ProduceJobscript_Loewe(){
     done
     __static__AddToJobscriptFile\
         "# Print some information"\
-        "echo \"${BETA_FOR_JOBSCRIPT[@]}\""\
+        "echo \"$(printf "%s " ${BETA_FOR_JOBSCRIPT[@]})\""\
         "echo \"\""\
         "echo \"Host: \$(hostname)\""\
         "echo \"GPU:  \$GPU_DEVICE_ORDINAL\""\
