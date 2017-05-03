@@ -1,5 +1,5 @@
 function __static__AddToInputFile() {
-    while [ "$1" != '' ]; do
+    while [ $# -ne 0 ]; do
         printf "%s\n" "$1" >> $INPUTFILE_GLOBALPATH
         shift
     done
