@@ -444,55 +444,50 @@ function UncommentEntriesInBetasFile()
 
 function ProduceInputFileAndJobScriptForEachBeta()
 {
-    if [ "$CLUSTER_NAME" = "JUQUEEN" ]
-    then
-        cecho "\n" lr "Function \"" B "$FUNCNAME" uB "\" not yet implemented for $CLUSTER_NAME! Aborting...\n"; exit -1
+    if [ "$(type -t ${FUNCNAME}_${BaHaMAS_clusterScheduler})" = 'function' ]; then
+        cecho "\n" lr "Function " B "$FUNCNAME" uB " not yet implemented for " B "$BaHaMAS_clusterScheduler" uB " scheduler! Aborting...\n"; exit -1
     else
-        ProduceInputFileAndJobScriptForEachBeta_SLURM
+        ${FUNCNAME}_$BaHaMAS_clusterScheduler
     fi
 }
 
 
 function ProcessBetaValuesForSubmitOnly()
 {
-    if [ "$CLUSTER_NAME" = "JUQUEEN" ]
-    then
-        cecho "\n" lr "Function \"" B "$FUNCNAME" uB "\" not yet implemented for $CLUSTER_NAME! Aborting...\n"; exit -1
+    if [ "$(type -t ${FUNCNAME}_${BaHaMAS_clusterScheduler})" = 'function' ]; then
+        cecho "\n" lr "Function " B "$FUNCNAME" uB " not yet implemented for " B "$BaHaMAS_clusterScheduler" uB " scheduler! Aborting...\n"; exit -1
     else
-        ProcessBetaValuesForSubmitOnly_SLURM
+        ${FUNCNAME}_$BaHaMAS_clusterScheduler
     fi
 }
 
 
 function ProcessBetaValuesForContinue()
 {
-    if [ "$CLUSTER_NAME" = "JUQUEEN" ]
-    then
-        cecho "\n" lr "Function \"" B "$FUNCNAME" uB "\" not yet implemented for $CLUSTER_NAME! Aborting...\n"; exit -1
+    if [ "$(type -t ${FUNCNAME}_${BaHaMAS_clusterScheduler})" = 'function' ]; then
+        cecho "\n" lr "Function " B "$FUNCNAME" uB " not yet implemented for " B "$BaHaMAS_clusterScheduler" uB " scheduler! Aborting...\n"; exit -1
     else
-        ProcessBetaValuesForContinue_SLURM
+        ${FUNCNAME}_$BaHaMAS_clusterScheduler
     fi
 }
 
 
 function ProcessBetaValuesForInversion()
 {
-    if [ "$CLUSTER_NAME" = "JUQUEEN" ]
-    then
-        cecho "\n" lr "Function \"" B "$FUNCNAME" uB "\" not yet implemented for $CLUSTER_NAME! Aborting...\n"; exit -1
+    if [ "$(type -t ${FUNCNAME}_${BaHaMAS_clusterScheduler})" = 'function' ]; then
+        cecho "\n" lr "Function " B "$FUNCNAME" uB " not yet implemented for " B "$BaHaMAS_clusterScheduler" uB " scheduler! Aborting...\n"; exit -1
     else
-        ProcessBetaValuesForInversion_SLURM
+        ${FUNCNAME}_$BaHaMAS_clusterScheduler
     fi
 }
 
 
 function SubmitJobsForValidBetaValues()
 {
-    if [ "$CLUSTER_NAME" = "JUQUEEN" ]
-    then
-        cecho "\n" lr "Function \"" B "$FUNCNAME" uB "\" not yet implemented for $CLUSTER_NAME! Aborting...\n"; exit -1
+    if [ "$(type -t ${FUNCNAME}_${BaHaMAS_clusterScheduler})" = 'function' ]; then
+        cecho "\n" lr "Function " B "$FUNCNAME" uB " not yet implemented for " B "$BaHaMAS_clusterScheduler" uB " scheduler! Aborting...\n"; exit -1
     else
-        SubmitJobsForValidBetaValues_SLURM
+        ${FUNCNAME}_$BaHaMAS_clusterScheduler
     fi
 }
 
@@ -513,10 +508,9 @@ function PrintReportForProblematicBeta() {
 
 function ListJobStatus()
 {
-    if [ "$CLUSTER_NAME" = "JUQUEEN" ]
-    then
-        cecho "\n" lr "Function \"" B "$FUNCNAME" uB "\" not yet implemented for $CLUSTER_NAME! Aborting...\n"; exit -1
+    if [ "$(type -t ${FUNCNAME}_${BaHaMAS_clusterScheduler})" = 'function' ]; then
+        cecho "\n" lr "Function " B "$FUNCNAME" uB " not yet implemented for " B "$BaHaMAS_clusterScheduler" uB " scheduler! Aborting...\n"; exit -1
     else
-        ListJobStatus_SLURM
+        ${FUNCNAME}_$BaHaMAS_clusterScheduler
     fi
 }
