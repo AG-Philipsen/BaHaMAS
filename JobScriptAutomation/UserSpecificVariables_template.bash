@@ -17,7 +17,7 @@ FILE_WITH_WHICH_NODES_TO_EXCLUDE=""
 
 if [ $WILSON = "TRUE" ]; then
 
-    echo -e "\e[0;31m Parameters for Wilson case unset in \"UserSpecificVariables.bash\" file! Aborting...\e[0m" && exit -1;
+    cecho lr " Parameters for Wilson case unset in \"UserSpecificVariables.bash\" file! Aborting..." && exit -1;
 
     SIMULATION_PATH=""
     HMC_FILENAME=""
@@ -34,7 +34,7 @@ fi
 
 if [ $STAGGERED = "TRUE" ]; then
 
-    echo -e "\e[0;31m Parameters for Staggered case unset in \"UserSpecificVariables.bash\" file! Aborting...\e[0m" && exit -1;
+    cecho lr " Parameters for Staggered case unset in \"UserSpecificVariables.bash\" file! Aborting..." && exit -1;
 
     SIMULATION_PATH=""
     HMC_FILENAME=""
