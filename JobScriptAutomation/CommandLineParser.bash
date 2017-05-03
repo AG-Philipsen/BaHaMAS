@@ -6,26 +6,13 @@ source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/CommandLineParser_a
 
 function ParseCommandLineOption(){
 
-    MUTUALLYEXCLUSIVEOPTS=( "-s | --submit"
-                            "-c | --continue"
-                            "-C | --continueThermalization"
-                            "-t | --thermalize"
-                            "-l | --liststatus"
-                            "-U | --uncommentBetas"
-                            "-u | --commentBetas"
-                            "-i | --invertConfigurations"
-                            "-d | --dataBase"
-                            "--submitonly"
-                            "--accRateReport"
-                            "--cleanOutputFiles"
-                            "--completeBetasFile")
-    MUTUALLYEXCLUSIVEOPTS_PASSED=( )
-
-    if ! ElementInArray "--doNotUseMultipleChains" $@ && [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
-        printf "\n\e[0;31m At the moment, the options --doNotUseMultipleChains must be specified on not CSC clusters!! Aborting...\n\n\e[0m"
-        exit -1
-    fi
-
+    local commandLineOptions, mutuallyExclusiveOptions
+    commandLineOptions=( $(SplitCombinedShortOptionsInSingleOptions $@) )
+    mutuallyExclusiveOptions=( "-s | --submit"        "-c | --continue"    "-C | --continueThermalization"
+                               "-t | --thermalize"    "-l | --liststatus"  "-U | --uncommentBetas"
+                               "-u | --commentBetas"  "-d | --dataBase"    "-i | --invertConfigurations"
+                               "--submitonly"  "--accRateReport"  "--cleanOutputFiles"  "--completeBetasFile")
+    MUTUALLYEXCLUSIVEOPTS_PASSED=()
 
     while [ "$1" != "" ]; do
         case $1 in

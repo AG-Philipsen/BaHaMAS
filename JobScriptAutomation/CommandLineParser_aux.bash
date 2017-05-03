@@ -1,4 +1,4 @@
-function SplitCombinedShortOptionsInSingloOptions() {
+function SplitCombinedShortOptionsInSingleOptions() {
     local NEW_OPTIONS=()
     for VALUE in "$@"; do
         if [[ $VALUE =~ ^-[[:alpha:]]+(=.*)?$ ]]; then

@@ -151,7 +151,7 @@ elif [ "$(hostname)" = "lqcd-login" ]; then
     CLUSTER_NAME="LCSC_OLD" #Temporary, until all nodes will be moved to gsi
 fi
 
-SPECIFIED_COMMAND_LINE_OPTIONS=( $(SplitCombinedShortOptionsInSingloOptions $@) )
+SPECIFIED_COMMAND_LINE_OPTIONS=( $@ )
 #If the help is asked, it doesn't matter which other options are given to the script
 if ElementInArray "-h" ${SPECIFIED_COMMAND_LINE_OPTIONS[@]} || ElementInArray "--help" ${SPECIFIED_COMMAND_LINE_OPTIONS[@]}; then
     SPECIFIED_COMMAND_LINE_OPTIONS=( "--help" )
