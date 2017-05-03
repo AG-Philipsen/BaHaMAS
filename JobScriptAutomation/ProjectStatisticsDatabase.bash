@@ -8,7 +8,7 @@
 #*Everytime the database is updated, actually create a new file with the date and time in the name? This way it possible to track how the statistics
 # grow over longer periods.
 
-function join { local IFS="$1"; shift; echo "$*"; }
+function join { local IFS="$1"; shift; printf "$*"; } # "$*" expands to a single argument with all the elements delimited by the first character of $IFS
 
 function projectStatisticsDatabase(){
 
@@ -381,8 +381,8 @@ function projectStatisticsDatabase(){
                 echo -e "  \e[4m\e[1mDisplaying options\e[24m:\e[21m"
                 echo -e "  \e[38;5;69m"
                 echo -e "     -c | --columns -->  Specify the columns to be displayed."
-                   echo -e "                         Possible columns are: mu, $MASS_PARAMETER, nt, ns, beta_chain_type, trajNo, acc, accLast1k, status, lastTraj."
-                   echo -e "                         Example: -c $MASS_PARAMETER nt ns beta_chain_type trajNo."
+                echo -e "                         Possible columns are: mu, $MASS_PARAMETER, nt, ns, beta_chain_type, trajNo, acc, accLast1k, status, lastTraj."
+                echo -e "                         Example: -c $MASS_PARAMETER nt ns beta_chain_type trajNo."
                 echo -e "                         If no columns are specified, all of the above columns will be printed by default."
                 echo -e "     --color        -->  Specifiy this option for displaying coloured output.(NOT YET IMPLEMENTED)"
                 echo -e "     --sum          -->  Summing up the trajectory numbers of each parameter set."
@@ -470,7 +470,7 @@ function projectStatisticsDatabase(){
         return
     fi
 
-    echo ''
+    cecho ''
     # The PROJECT_DATABASE_FILE variable refers to a file which is an input in the filtering/displaying scenario and which is an output in the update scenario.
     # Then it has to be initialized accordingly!
     if [ "$UPDATE" = "FALSE" ]; then
@@ -543,11 +543,11 @@ function projectStatisticsDatabase(){
         STATISTICS_PRINTF_FORMAT_SPECIFIER_STRING="%${NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN}s\n"
         LENGTH_OF_HEADER_SEPERATOR=$(($LENGTH_OF_HEADER_SEPERATOR+${FSNA[nfC]}+1-${#NFLAVOUR_PREFIX})) #Add dynamicly to symmetrize the line under the header (the +1 is the space that is at the beginning of the line)
         #STRIPPING OF THE LAST | SYMBOL FROM THE STRING
-        NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL=$(echo ${NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL%"|"})
-        NAME_OF_COLUMN_NR_OF_COLUMN_STRING=$(echo ${NAME_OF_COLUMN_NR_OF_COLUMN_STRING%"|"})
-        NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING=$(echo ${NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING%"|"})
-        NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING=$(echo ${NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING%"|"})
-        NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING=$(echo ${NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING%"|"})
+        NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL="${NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL%|}"
+        NAME_OF_COLUMN_NR_OF_COLUMN_STRING="${NAME_OF_COLUMN_NR_OF_COLUMN_STRING%|})"
+        NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING="${NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING%|}"
+        NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING="${NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING%|}"
+        NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING="${NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING%|}"
 
         awk --posix -v filterNf=$FILTER_NF -v filterMu=$FILTER_MU -v filterKappa=$FILTER_MASS -v filterNt=$FILTER_NT -v filterNs=$FILTER_NS \
             -v filterBeta=$FILTER_BETA -v filterType=$FILTER_TYPE \
@@ -748,7 +748,7 @@ function projectStatisticsDatabase(){
             do
                 #printf "%+15s: %s\n" "line" "$line"
                 if [[ "$line" =~ ^[^#] ]]; then
-                    PARAMS=( $(echo $line | awk 'BEGIN{FS="/"}{print $(NF-4) " " $(NF-3) " " $(NF-2) " " $(NF-1) " " $(NF)}') )
+                    PARAMS=( $(awk 'BEGIN{FS="/"}{print $(NF-4) " " $(NF-3) " " $(NF-2) " " $(NF-1) " " $(NF)}' <<< "$line") )
                 else
                     continue
                 fi
@@ -802,7 +802,7 @@ function projectStatisticsDatabase(){
                 break
             fi
         done
-        echo ''
+        cecho ''
     fi
 
     #==========================================================================================================================================================================================#
@@ -1058,11 +1058,11 @@ function __static__DisplayDatabaseFile() {
 
     LENGTH_OF_HEADER_SEPERATOR=$(($LENGTH_OF_HEADER_SEPERATOR+${FSNA[muC]}+1-${#CHEMPOT_PREFIX})) #Add dynamicly to simmetrize the line under the header (the +1 is the space that is at the beginning of the line)
     #STRIPPING OF THE LAST | SYMBOL FROM THE STRING
-    NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL=$(echo ${NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL%"|"})
-    NAME_OF_COLUMN_NR_OF_COLUMN_STRING=$(echo ${NAME_OF_COLUMN_NR_OF_COLUMN_STRING%"|"})
-    NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING=$(echo ${NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING%"|"})
-    NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING=$(echo ${NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING%"|"})
-    NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING=$(echo ${NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING%"|"})
+    NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL="${NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL%|}"
+    NAME_OF_COLUMN_NR_OF_COLUMN_STRING="${NAME_OF_COLUMN_NR_OF_COLUMN_STRING%|}"
+    NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING="${NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING%|})"
+    NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING="${NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING%|}"
+    NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING="${NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING%|}"
 
     awk --posix -v nameOfColumnsAndNumberOfColumnsString=$NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL \
         -v nameOfDisplayedColumnsAndnrOfDisplayedColumnsString=$NAME_OF_COLUMN_NR_OF_COLUMN_STRING \
