@@ -763,7 +763,7 @@ function projectStatisticsDatabase(){
 
                 PARAMETER_DIRECTORY_STRUCTURE=${line##*$SIMULATION_PATH}
 
-                ListJobStatus_Loewe $PARAMETER_DIRECTORY_STRUCTURE | \
+                ListJobStatus_SLURM $PARAMETER_DIRECTORY_STRUCTURE | \
                     sed -r 's/[^(\x1b)]\[|\]|\(|\)|%//g' | \
                     sed -r 's/(\x1B\[[[:digit:]]{1,2};[[:digit:]]{0,2};[[:digit:]]{0,3}m)(.)/\1 \2/g' | \
                     sed -r 's/(.)(\x1B\[.{1,2};.{1,2}m)/\1 \2/g' | \

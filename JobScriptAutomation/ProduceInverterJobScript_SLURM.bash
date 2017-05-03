@@ -5,7 +5,7 @@ function __static__AddToInverterJobscriptFile() {
     done
 }
 
-function ProduceInverterJobscript_Loewe(){
+function ProduceInverterJobscript_SLURM(){
     rm -f $JOBSCRIPT_GLOBALPATH || exit -2
     touch $JOBSCRIPT_GLOBALPATH || exit -2
 

@@ -1,5 +1,5 @@
 # Load auxiliary bash files that will be used.
-source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ListJobsStatusForLoewe.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ListJobsStatus_SLURM.bash || exit -2
 #------------------------------------------------------------------------------------#
 
 function AcceptanceRateReport(){

@@ -63,7 +63,7 @@ function __static__ExtractMetaInformationFromJOBNAME(){
     printf "%s " "${METAINFORMATION_ARRAY[@]}"
 }
 
-function ListJobStatus_Loewe(){
+function ListJobStatus_SLURM(){
 
     # This function can be called by the JobHandler either in the LISTSTATUS setup or in the DATABASE setup.
     # The crucial difference is that in the first case the PARAMETERS_STRING and PARAMETERS_PATH variable
@@ -80,7 +80,7 @@ function ListJobStatus_Loewe(){
         local LOCAL_PARAMETERS_STRING=$(sed 's@/@_@g' <<< "$LOCAL_PARAMETERS_PATH")
         LOCAL_PARAMETERS_STRING=${LOCAL_PARAMETERS_STRING:1}
     else
-        cecho "\e[31m Wrong invocation of ListJobStatus_Loewe: Invalid number of arguments. Please investigate...exiting."
+        cecho "\e[31m Wrong invocation of ListJobStatus_SLURM: Invalid number of arguments. Please investigate...exiting."
         return
     fi
 

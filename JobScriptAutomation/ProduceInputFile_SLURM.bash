@@ -5,7 +5,7 @@ function __static__AddToInputFile() {
     done
 }
 
-function ProduceInputFile_Loewe() {
+function ProduceInputFile_SLURM() {
     rm -f $INPUTFILE_GLOBALPATH || exit -2
     touch $INPUTFILE_GLOBALPATH || exit -2
 

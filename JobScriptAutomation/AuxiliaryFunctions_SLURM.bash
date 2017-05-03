@@ -1,13 +1,13 @@
 # Load auxiliary bash files that will be used.
-source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ProduceInputFileForLoewe.bash || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ProduceJobScriptForLoewe.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ProduceInputFile_SLURM.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ProduceJobScript_SLURM.bash || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ProduceSrunCommandsFileForInversions.bash || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ProduceInverterJobScriptForLoewe.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ProduceInverterJobScript_SLURM.bash || exit -2
 #------------------------------------------------------------------------------------#
 
 # Collection of function needed in the job handler script (mostly in AuxiliaryFunctions).
 
-function ProduceInputFileAndJobScriptForEachBeta_Loewe(){
+function ProduceInputFileAndJobScriptForEachBeta_SLURM(){
     #---------------------------------------------------------------------------------------------------------------------#
     #NOTE: Since this function has to iterate over the betas either doing something and putting the value into
     #      SUBMIT_BETA_ARRAY or putting the beta value into PROBLEM_BETA_ARRAY, it is better to make a local copy
@@ -38,7 +38,7 @@ function ProduceInputFileAndJobScriptForEachBeta_Loewe(){
         printf "\e[0;36m   Configuration used: \"${STARTCONFIGURATION_GLOBALPATH[${BETAVALUES_COPY[$INDEX]}]}\"\n\e[0m"
         #Call the file to produce the input file
         local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$INPUTFILE_NAME"
-        ProduceInputFile_Loewe
+        ProduceInputFile_SLURM
     done
     # Partition the BETAVALUES_COPY array into group of GPU_PER_NODE and create the JobScript files inside the JOBSCRIPT_FOLDER
     mkdir -p ${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER || exit -2
@@ -47,7 +47,7 @@ function ProduceInputFileAndJobScriptForEachBeta_Loewe(){
 
 #=======================================================================================================================#
 
-function ProcessBetaValuesForSubmitOnly_Loewe() {
+function ProcessBetaValuesForSubmitOnly_SLURM() {
     #-----------------------------------------#
     local BETAVALUES_COPY=(${BETAVALUES[@]})
     #-----------------------------------------#
@@ -85,14 +85,14 @@ function ProcessBetaValuesForSubmitOnly_Loewe() {
 
 #=======================================================================================================================#
 
-function __static__GetStatusOfJobsContainingBetavalues_Loewe(){
+function __static__GetStatusOfJobsContainingBetavalues_SLURM(){
     local JOBINFO_STRING="$(squeue --noheader -u $(whoami) -o "%i@%j@%T")"
     for BETA in ${BETAVALUES[@]}; do
         STATUS_OF_JOBS_CONTAINING_BETA_VALUES["$BETA"]="$(grep "$BETA_PREFIX${BETA%%_*}" <<< "$JOBINFO_STRING" | grep $(cut -d'_' -f2 <<< "$BETA") | grep "$PARAMETERS_STRING")"
     done
 }
 
-function __static__CheckIfJobIsInQueueForGivenBeta_Loewe(){
+function __static__CheckIfJobIsInQueueForGivenBeta_SLURM(){
     if [ "${STATUS_OF_JOBS_CONTAINING_BETA_VALUES[$1]}" = "" ]; then
         return 1
     else
@@ -159,7 +159,7 @@ function __static__ModifyOptionInInputFile(){
 
 
 
-function ProcessBetaValuesForContinue_Loewe() {
+function ProcessBetaValuesForContinue_SLURM() {
     local LOCAL_SUBMIT_BETA_ARRAY=()
     #Remove -c | --continue option from command line
     for INDEX in "${!SPECIFIED_COMMAND_LINE_OPTIONS[@]}"; do
@@ -172,7 +172,7 @@ function ProcessBetaValuesForContinue_Loewe() {
 
     #Associative array filled in the function called immediately after
     declare -A STATUS_OF_JOBS_CONTAINING_BETA_VALUES
-    __static__GetStatusOfJobsContainingBetavalues_Loewe
+    __static__GetStatusOfJobsContainingBetavalues_SLURM
 
     for BETA in ${BETAVALUES[@]}; do
         #-------------------------------------------------------------------------#
@@ -204,7 +204,7 @@ function ProcessBetaValuesForContinue_Loewe() {
         fi
 
         cecho ""
-        __static__CheckIfJobIsInQueueForGivenBeta_Loewe $BETA
+        __static__CheckIfJobIsInQueueForGivenBeta_SLURM $BETA
         if [ $? == 0 ]; then
             PROBLEM_BETA_ARRAY+=( $BETA )
             continue
@@ -612,7 +612,7 @@ function ProcessBetaValuesForContinue_Loewe() {
 
 #=======================================================================================================================#
 
-function ProcessBetaValuesForInversion_Loewe(){
+function ProcessBetaValuesForInversion_SLURM(){
 
     local LOCAL_SUBMIT_BETA_ARRAY=()
 
@@ -646,7 +646,7 @@ function ProcessBetaValuesForInversion_Loewe(){
 
 #=======================================================================================================================#
 
-function SubmitJobsForValidBetaValues_Loewe() {
+function SubmitJobsForValidBetaValues_SLURM() {
     if [ ${#SUBMIT_BETA_ARRAY[@]} -gt "0" ]; then
         printf "\n\e[0;36m===================================================================================\n\e[0m"
         printf "\e[0;34m Jobs will be submitted for the following beta values:\n\e[0m"
@@ -729,9 +729,9 @@ function __static__PackBetaValuesPerGpuAndCreateJobScriptFiles(){
             fi
             #Call the file to produce the jobscript file
             if [ $INVERT_CONFIGURATIONS = "TRUE" ]; then
-                ProduceInverterJobscript_Loewe
+                ProduceInverterJobscript_SLURM
             else
-                ProduceJobscript_Loewe
+                ProduceJobscript_SLURM
             fi
             if [ -e $JOBSCRIPT_GLOBALPATH ]; then
                 SUBMIT_BETA_ARRAY+=( "${BETAS_STRING}" )

@@ -1,9 +1,9 @@
 # Collection of function needed in the job handler script.
 
 # Load auxiliary bash files that will be used.
-source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/AuxiliaryFunctionsForLoewe.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/AuxiliaryFunctions_SLURM.bash || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/AuxiliaryFunctionsForJuqueen.bash || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ListJobsStatusForLoewe.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ListJobsStatus_SLURM.bash || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ListJobsStatusForJuqueen.bash || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/CleanOutputFiles.bash || exit -2
 #------------------------------------------------------------------------------------#
@@ -450,7 +450,7 @@ function ProduceInputFileAndJobScriptForEachBeta()
     then
         ProduceInputFileAndJobScriptForEachBeta_Juqueen
     else
-        ProduceInputFileAndJobScriptForEachBeta_Loewe
+        ProduceInputFileAndJobScriptForEachBeta_SLURM
     fi
 }
 
@@ -461,7 +461,7 @@ function ProcessBetaValuesForSubmitOnly()
     then
         ProcessBetaValuesForSubmitOnly_Juqueen
     else
-        ProcessBetaValuesForSubmitOnly_Loewe
+        ProcessBetaValuesForSubmitOnly_SLURM
     fi
 }
 
@@ -472,7 +472,7 @@ function ProcessBetaValuesForContinue()
     then
         ProcessBetaValuesForContinue_Juqueen
     else
-        ProcessBetaValuesForContinue_Loewe
+        ProcessBetaValuesForContinue_SLURM
     fi
 }
 
@@ -483,7 +483,7 @@ function ProcessBetaValuesForInversion()
     then
         printf "\n\e[0;31mOption --invertConfigurations not yet implemented on the Juqueen! Aborting...\n\n\e[0m"; exit -1
     else
-        ProcessBetaValuesForInversion_Loewe
+        ProcessBetaValuesForInversion_SLURM
     fi
 }
 
@@ -494,7 +494,7 @@ function SubmitJobsForValidBetaValues()
     then
         SubmitJobsForValidBetaValues_Juqueen
     else
-        SubmitJobsForValidBetaValues_Loewe
+        SubmitJobsForValidBetaValues_SLURM
     fi
 }
 
@@ -519,6 +519,6 @@ function ListJobStatus()
     then
         ListJobStatus_Juqueen
     else
-        ListJobStatus_Loewe
+        ListJobStatus_SLURM
     fi
 }

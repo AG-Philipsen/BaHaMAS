@@ -5,7 +5,7 @@ function __static__AddToJobscriptFile() {
     done
 }
 
-function ProduceJobscript_Loewe(){
+function ProduceJobscript_SLURM(){
     rm -f $JOBSCRIPT_GLOBALPATH || exit -2
     touch $JOBSCRIPT_GLOBALPATH || exit -2
 
