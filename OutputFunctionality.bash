@@ -47,9 +47,9 @@ function cecho() {
             l-cyan    |  lc) format="${escape}96m" ;;
             white     |   w) format="${escape}97m" ;;
             #Font 256 colors
-            b-blue   | bb) format="${escape}38;5;26m " ;;
-            b-cyan   | bc) format="${escape}38;5;45m " ;;
-            w-green  | wg) format="${escape}38;5;48m " ;;
+            b-blue   | bb) format="${escape}38;5;26m"  ;;
+            b-cyan   | bc) format="${escape}38;5;45m"  ;;
+            w-green  | wg) format="${escape}38;5;48m"  ;;
             y-green  | yg) format="${escape}38;5;118m" ;;
             purple   |  p) format="${escape}38;5;135m" ;;
             l-purple | lp) format="${escape}38;5;147m" ;;
