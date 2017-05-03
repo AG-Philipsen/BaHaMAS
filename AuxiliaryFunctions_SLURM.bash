@@ -1,8 +1,8 @@
 # Load auxiliary bash files that will be used.
-source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ProduceInputFile_SLURM.bash || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ProduceJobScript_SLURM.bash || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ProduceSrunCommandsFileForInversions.bash || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ProduceInverterJobScript_SLURM.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/ProduceInputFile_SLURM.bash               || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/ProduceJobScript_SLURM.bash               || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/ProduceSrunCommandsFileForInversions.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/ProduceInverterJobScript_SLURM.bash       || exit -2
 #------------------------------------------------------------------------------------#
 
 # Collection of function needed in the job handler script (mostly in AuxiliaryFunctions).

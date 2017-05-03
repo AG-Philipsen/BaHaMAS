@@ -1,9 +1,9 @@
 # Collection of function needed in the job handler script.
 
 # Load auxiliary bash files that will be used.
-source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/AuxiliaryFunctions_SLURM.bash || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ListJobsStatus_SLURM.bash || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/CleanOutputFiles.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/AuxiliaryFunctions_SLURM.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/ListJobsStatus_SLURM.bash     || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/CleanOutputFiles.bash         || exit -2
 #------------------------------------------------------------------------------------#
 
 function ReadBetaValuesFromFile(){

@@ -10,7 +10,7 @@
 # to get a report.
 
 BEGIN{
-    split(obsNames, namesArray, ","); 
+    split(obsNames, namesArray, ",");
     split(obsColumns, columnsArray, ",");
     for(i in namesArray){
         observables[namesArray[i]]=columnsArray[i]
@@ -20,7 +20,7 @@ BEGIN{
     if(acceptedFound!=1 || trajectoryNumberFound!=1){skipEnd=1; exit}
 }
 NR>1{
-    if($(observables["Accepted"]) == 0){ 
+    if($(observables["Accepted"]) == 0){
         for(obs in observables){
             if(obs=="TrajectoryNr" || obs=="Accepted"){continue};
             if($(observables[obs]) != oldObservables[obs]){
@@ -28,7 +28,7 @@ NR>1{
                 else{changedObs=(changedObs ", " obs)}
             }
         }
-        if(changedObs != ""){ 
+        if(changedObs != ""){
             if(printReport==1){print "\033[38;5;9m Trajectory\033[38;5;11m", $(observables["TrajectoryNr"]) "\033[38;5;9m -> configuration rejected but\033[38;5;11m", changedObs, "\033[38;5;9mchanged!\033[0m"}
             changedObs=""
             wrongLines++
@@ -53,5 +53,3 @@ END{
         exit 1
     }
 }
-
-

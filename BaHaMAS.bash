@@ -19,14 +19,15 @@
 #-----------------------------------------------------------------------------------------------------------------#
 # Load auxiliary bash files that will be used.
 BaHaMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"
-source ${BaHaMAS_repositoryTopLevelPath}/OutputFunctionality.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/OutputFunctionality.bash         || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/PathManagementFunctionality.bash || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/UserSpecificVariables.bash || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/FindClusterScheduler.bash || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/AuxiliaryFunctions.bash || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/AcceptanceRateReport.bash || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/BuildRegexPath.bash || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ProjectStatisticsDatabase.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/UserSpecificVariables.bash       || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/FindClusterScheduler.bash        || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParser.bash           || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/AuxiliaryFunctions.bash          || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/AcceptanceRateReport.bash        || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/BuildRegexPath.bash              || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/ProjectStatisticsDatabase.bash   || exit -2
 #-----------------------------------------------------------------------------------------------------------------#
 
 #-----------------------------------------------------------------------------------------------------------------#
@@ -137,7 +138,6 @@ DATABASE_OPTIONS=()
 
 #-----------------------------------------------------------------------------------------------------------------#
 # Extract options and their arguments into variables, saving a copy of the specified options in an array for later use.
-source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/CommandLineParser.bash || exit -2
 # NOTE: The CLUSTER_NAME variable has not been so far put in the parser since
 #       it can be either LOEWE or LCSC or JUQUEEN. It is set using whoami/hostname. Change this in future if needed!
 if [[ $(whoami) =~ ^hkf[[:digit:]]{3} ]]; then

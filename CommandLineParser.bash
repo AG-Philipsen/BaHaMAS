@@ -2,7 +2,7 @@
 #       --startcondition and/or --host_seed (CL2QCD) one should think whether
 #       the continue part should be modified or not.
 
-source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/CommandLineParser_aux.bash
+source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParser_aux.bash
 
 function ParseCommandLineOption(){
 

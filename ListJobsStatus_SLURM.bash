@@ -327,7 +327,7 @@ function ColorBeta(){
         return
     fi
 
-    awk -v obsColumns="${AUX1%?}" -v obsNames="${AUX2%?}" -f ${HOME}/Script/JobScriptAutomation/CheckCorrectnessCl2qcdOutputFile.awk $OUTPUTFILE_GLOBALPATH
+    awk -v obsColumns="${AUX1%?}" -v obsNames="${AUX2%?}" -f ${HOME}/Script/CheckCorrectnessCl2qcdOutputFile.awk $OUTPUTFILE_GLOBALPATH
     local ERROR_CODE=$?
 
     if [ $ERROR_CODE -eq 0 ]; then
