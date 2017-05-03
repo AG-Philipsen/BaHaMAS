@@ -222,20 +222,17 @@ declare -A STARTCONFIGURATION_GLOBALPATH #NOTE: Before bash 4.2 associative arra
 
 if [ ${#MUTUALLYEXCLUSIVEOPTS_PASSED[@]} = 0 ]; then
 
-    if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then CheckParallelizationTmlqcdForJuqueen; fi
     ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
     ProduceInputFileAndJobScriptForEachBeta
 
 elif [ $SUBMITONLY = "TRUE" ]; then
 
-    if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then CheckParallelizationTmlqcdForJuqueen; fi
     ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
     ProcessBetaValuesForSubmitOnly
     SubmitJobsForValidBetaValues #TODO: Declare all possible local variable in this function as local!
 
 elif [ $SUBMIT = "TRUE" ]; then
 
-    if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then CheckParallelizationTmlqcdForJuqueen; fi
     ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
     ProduceInputFileAndJobScriptForEachBeta
     SubmitJobsForValidBetaValues #TODO: Declare all possible local variable in this function as local!
@@ -287,14 +284,13 @@ elif [ $THERMALIZE = "TRUE" ] || [ $CONTINUE_THERMALIZATION = "TRUE" ]; then
 
 elif [ $CONTINUE = "TRUE" ]; then
 
-    if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then CheckParallelizationTmlqcdForJuqueen; fi
     ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
     ProcessBetaValuesForContinue #TODO: Declare all possible local variable in this function as local! Use also only capital letters!
     SubmitJobsForValidBetaValues #TODO: Declare all possible local variable in this function as local!
 
 elif [ $LISTSTATUS = "TRUE" ]; then
 
-    ListJobStatus   #TODO: On Juqueen, declare all possible local variable in this function as local! Use PARAMETERS_STRING/PATH where needed!
+    ListJobStatus
 
 elif [ $ACCRATE_REPORT = "TRUE" ]; then
 

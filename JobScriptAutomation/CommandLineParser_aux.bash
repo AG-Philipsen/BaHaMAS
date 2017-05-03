@@ -59,15 +59,6 @@ function PrintHelper(){
     __static__AddOptionToHelper "--cgbs"                           "default value = $CGBS (cg_iteration_block_size)"
     __static__AddOptionToHelper "--doNotUseMultipleChains"         "multiple chain usage and nomenclature are disabled"\
                                 "(in the betas file the seed column is NOT present)"
-    #if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
-    #    cecho -d\
-    #          "  --intsteps2                        ->    default value = $INTSTEPS2"                         "\n"\
-    #          "  -w | --walltime                    ->    default value = $WALLTIME [hours:min:sec]"          "\n"\
-    #          "  --bgsize                           ->    default value = $BGSIZE"                            "\n"\
-    #          "  --nrxprocs                         ->    default value = $NRXPROCS"                          "\n"\
-    #          "  --nryprocs                         ->    default value = $NRYPROCS"                          "\n"\
-    #          "  --nrzprocs                         ->    default value = $NRZPROCS"                          "\n"\
-    #          "  --ompnumthreads                    ->    default value = $OMPNUMTHREADS"
     __static__AddOptionToHelper "-p | --doNotMeasurePbp"     "the chiral condensate measurement is switched off"
     __static__AddOptionToHelper "-w | --walltime"            "default value = $WALLTIME [days-hours:min:sec]"
     __static__AddOptionToHelper "--partition"                "default value = $LOEWE_PARTITION"

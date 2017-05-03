@@ -2,9 +2,7 @@
 
 # Load auxiliary bash files that will be used.
 source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/AuxiliaryFunctions_SLURM.bash || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/AuxiliaryFunctionsForJuqueen.bash || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ListJobsStatus_SLURM.bash || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ListJobsStatusForJuqueen.bash || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/CleanOutputFiles.bash || exit -2
 #------------------------------------------------------------------------------------#
 
@@ -448,7 +446,7 @@ function ProduceInputFileAndJobScriptForEachBeta()
 {
     if [ "$CLUSTER_NAME" = "JUQUEEN" ]
     then
-        ProduceInputFileAndJobScriptForEachBeta_Juqueen
+        cecho "\n" lr "Function \"" B "$FUNCNAME" uB "\" not yet implemented for $CLUSTER_NAME! Aborting...\n"; exit -1
     else
         ProduceInputFileAndJobScriptForEachBeta_SLURM
     fi
@@ -459,7 +457,7 @@ function ProcessBetaValuesForSubmitOnly()
 {
     if [ "$CLUSTER_NAME" = "JUQUEEN" ]
     then
-        ProcessBetaValuesForSubmitOnly_Juqueen
+        cecho "\n" lr "Function \"" B "$FUNCNAME" uB "\" not yet implemented for $CLUSTER_NAME! Aborting...\n"; exit -1
     else
         ProcessBetaValuesForSubmitOnly_SLURM
     fi
@@ -470,7 +468,7 @@ function ProcessBetaValuesForContinue()
 {
     if [ "$CLUSTER_NAME" = "JUQUEEN" ]
     then
-        ProcessBetaValuesForContinue_Juqueen
+        cecho "\n" lr "Function \"" B "$FUNCNAME" uB "\" not yet implemented for $CLUSTER_NAME! Aborting...\n"; exit -1
     else
         ProcessBetaValuesForContinue_SLURM
     fi
@@ -481,7 +479,7 @@ function ProcessBetaValuesForInversion()
 {
     if [ "$CLUSTER_NAME" = "JUQUEEN" ]
     then
-        printf "\n\e[0;31mOption --invertConfigurations not yet implemented on the Juqueen! Aborting...\n\n\e[0m"; exit -1
+        cecho "\n" lr "Function \"" B "$FUNCNAME" uB "\" not yet implemented for $CLUSTER_NAME! Aborting...\n"; exit -1
     else
         ProcessBetaValuesForInversion_SLURM
     fi
@@ -492,7 +490,7 @@ function SubmitJobsForValidBetaValues()
 {
     if [ "$CLUSTER_NAME" = "JUQUEEN" ]
     then
-        SubmitJobsForValidBetaValues_Juqueen
+        cecho "\n" lr "Function \"" B "$FUNCNAME" uB "\" not yet implemented for $CLUSTER_NAME! Aborting...\n"; exit -1
     else
         SubmitJobsForValidBetaValues_SLURM
     fi
@@ -517,7 +515,7 @@ function ListJobStatus()
 {
     if [ "$CLUSTER_NAME" = "JUQUEEN" ]
     then
-        ListJobStatus_Juqueen
+        cecho "\n" lr "Function \"" B "$FUNCNAME" uB "\" not yet implemented for $CLUSTER_NAME! Aborting...\n"; exit -1
     else
         ListJobStatus_SLURM
     fi
