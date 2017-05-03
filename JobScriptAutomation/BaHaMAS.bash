@@ -20,7 +20,7 @@
 # Load auxiliary bash files that will be used.
 BaHaMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"
 source ${BaHaMAS_repositoryTopLevelPath}/OutputFunctionality.bash || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/PathManagement.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/PathManagementFunctionality.bash || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/UserSpecificVariables.bash || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/FindClusterScheduler.bash || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/AuxiliaryFunctions.bash || exit -2
@@ -47,8 +47,8 @@ source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ProjectStatisticsDa
 #   MASS
 #   NSPACE
 #   NTIME
-#   PARAMETERS_PATH    <---This is the string in the path with the 4 parameters with slash in front, e.g. /Nf2/muiPiT/k1550/nt6/ns12   or   /Nf2/mui0/mass0250/nt4/ns8
-#   PARAMETERS_STRING  <---This is the string in the path with the 4 parameters with underscores, e.g. Nf2_muiPiT_k1550_nt6_ns12   or   Nf2_mui0_mass0250_nt4_ns8
+#   PARAMETERS_PATH    <--- This is the string in the path with the 4 parameters with slash in front, e.g. /Nf2/muiPiT/k1550/nt6/ns12   or   /Nf2/mui0/mass0250/nt4/ns8
+#   PARAMETERS_STRING  <--- This is the string in the path with the 4 parameters with underscores, e.g. Nf2_muiPiT_k1550_nt6_ns12   or   Nf2_mui0_mass0250_nt4_ns8
 
 #-----------------------------------------------------------------------------------------------------------------#
 # Set default values for the command line parameters
