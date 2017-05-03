@@ -39,10 +39,6 @@ function ProduceInverterJobscript_SLURM(){
             "#SBATCH --mem=64000"\
             "#SBATCH --gres=gpu:$GPU_PER_NODE"\
             "#SBATCH --constrain=hawaii" #Option to choose only a node with 'hawaii' GPU hardware
-    elif [ $CLUSTER_NAME = "LCSC_OLD" ]; then
-        __static__AddToInverterJobscriptFile\
-            "#SBATCH --partition=lcsc_lqcd"\
-            "#SBATCH --exclude=lcsc-r03n01,lcsc-r06n17,lcsc-r06n10,lcsc-r03n12,lcsc-r03n13,lcsc-r06n02,lcsc-r06n03"
     fi
 
     #Trying to retrieve information about the list of nodes to be excluded

@@ -39,8 +39,6 @@ function ProduceJobscript_SLURM(){
             "#SBATCH --mem=64000"\
             "#SBATCH --gres=gpu:$GPU_PER_NODE"\
             "#SBATCH --constrain=hawaii"  #Option to choose only a node with 'hawaii' GPU hardware
-    elif [ $CLUSTER_NAME = "LCSC_OLD" ]; then
-        __static__AddToJobscriptFile "#SBATCH --partition=lcsc_lqcd"
     fi
 
     #Trying to retrieve information about the list of nodes to be excluded

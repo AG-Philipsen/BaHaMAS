@@ -147,8 +147,6 @@ if [[ $(whoami) =~ ^hkf[[:digit:]]{3} ]]; then
     WALLTIME="00:30:00"
 elif [ "$(hostname)" = "lxlcsc0001" ]; then
     CLUSTER_NAME="LCSC"
-elif [ "$(hostname)" = "lqcd-login" ]; then
-    CLUSTER_NAME="LCSC_OLD" #Temporary, until all nodes will be moved to gsi
 fi
 
 SPECIFIED_COMMAND_LINE_OPTIONS=( $@ )
