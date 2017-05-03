@@ -6,7 +6,7 @@ source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/CommandLineParser_a
 
 function ParseCommandLineOption(){
 
-    local commandLineOptions, mutuallyExclusiveOptions
+    local commandLineOptions mutuallyExclusiveOptions
     commandLineOptions=( $(SplitCombinedShortOptionsInSingleOptions $@) )
     mutuallyExclusiveOptions=( "-s | --submit"        "-c | --continue"    "-C | --continueThermalization"
                                "-t | --thermalize"    "-l | --liststatus"  "-U | --uncommentBetas"

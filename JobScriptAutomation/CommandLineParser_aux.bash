@@ -41,7 +41,7 @@ function PrintHelper(){
     local helperColor normalColor mutuallyExclusiveColor
     helperColor='g'; normalColor='m'; mutuallyExclusiveColor='b'
     cecho -d $helperColor
-    cecho -d " Call the script $0 with the following optional arguments:" "\n"
+    cecho -d " Call " B "BaHaMAS" uB " with the following optional arguments:" "\n"
     __static__AddOptionToHelper "-h | --help"                      ""
     __static__AddOptionToHelper "--jobscript_prefix"               "default value = $JOBSCRIPT_PREFIX"
     __static__AddOptionToHelper "--chempot_prefix"                 "default value = $CHEMPOT_PREFIX"
@@ -104,7 +104,7 @@ function PrintHelper(){
                                 "$(cecho "after " $mutuallyExclusiveColor "--dataBase" $helperColor " are options for the database subprogram.")"
     cecho ''
     cecho ly B\
-          'NOTE:' uB ' The " $mutuallyExclusiveColor "blue options' ly ' are mutually exclusive and they are all ' c 'FALSE' ly ' by default! In other words, if none of them\n'\
+          'NOTE:' uB " The " $mutuallyExclusiveColor "blue options" ly ' are mutually exclusive and they are all ' c 'FALSE' ly ' by default! In other words, if none of them\n'\
           '      is given, the script will try to create beta-folders with the right files inside, but no job will be submitted.'
     cecho ''
     cecho lo B\
