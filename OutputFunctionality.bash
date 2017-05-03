@@ -72,7 +72,7 @@ function cecho() {
         format=''; text='' #To avoid to put them again in outputString
     done
     outputString+="$defaultFormat$endline"
-    echo -en "$outputString"
+    printf "$outputString"
 }
 
 

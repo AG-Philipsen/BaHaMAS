@@ -4,7 +4,8 @@
 # squeue on the LOEWE and or L-CSC together to scontrol show job, in order
 # to give to the user a more readable status of the submitted jobs.
 
-source $HOME/Script/UtilityFunctions.bash || exit -2
+BaHaMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)" #To be removed!
+source ${BaHaMAS_repositoryTopLevelPath}/UtilityFunctions.bash || exit -2
 
 function ParseCommandLineOptions(){
 
@@ -12,18 +13,18 @@ function ParseCommandLineOptions(){
         case $1 in
             -h | --help )
                 printf "\n\e[0;32m"
-                echo "Call the script $0 with the following optional arguments:"
-                echo "  -h | --help"
-                echo "  -u | --user       ->    user for which jobs should be displayed (DEFAULT = $(whoami))"
-                echo "  -a | --allUsers   ->    display jobs information for all users (on $CLUSTER_PARTITION partition)"
-                echo "  -l | --local      ->    display information for jobs submitted from a folder whose path match the present directory"
+                printf "Call the script $0 with the following optional arguments:\n"
+                printf "  -h | --help\n"
+                printf "  -u | --user       ->    user for which jobs should be displayed (DEFAULT = $(whoami))\n"
+                printf "  -a | --allUsers   ->    display jobs information for all users (on $CLUSTER_PARTITION partition)\n"
+                printf "  -l | --local      ->    display information for jobs submitted from a folder whose path match the present directory\n"
                 if [ $CLUSTER_NAME = "LCSC" ]; then
-                    echo "  -n | --nodeUsage  ->    display information ONLY about which nodes are used"
-                    echo "  -g | --groupBetas ->    display partial information grouping betas used"
-                    echo "                          WARNING: it is useful when a single simulation per job is run,"
-                    echo "                                   otherwise the output is incomplete!"
+                    printf "  -n | --nodeUsage  ->    display information ONLY about which nodes are used\n"
+                    printf "  -g | --groupBetas ->    display partial information grouping betas used\n"
+                    printf "                          WARNING: it is useful when a single simulation per job is run,\n"
+                    printf "                                   otherwise the output is incomplete!\n"
                 fi
-                echo -e "\n\e[0;35mNOTE: If the option -a is given, then the -u one is ignored!\e[0m"
+                printf "\n\e[0;35mNOTE: If the option -a is given, then the -u one is ignored!\e[0m\n"
                 printf "\n\e[0m"
                 exit
                 shift;;

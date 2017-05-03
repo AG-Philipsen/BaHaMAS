@@ -5,11 +5,11 @@
 function errecho() {
     local indentation="   "
     if [ $# -eq 1 ]; then
-        echo -e -n "$indentation$1\e[0m" 1>&2
+        printf "$indentation$1\e[0m" 1>&2
     elif [ $# -eq 2 ]; then
-        echo -e -n "\e[38;5;$2m$indentation$1\e[0m" 1>&2
+        printf "\e[38;5;$2m$indentation$1\e[0m" 1>&2
     elif [ $# -eq 3 ]; then
-        echo -e -n "\e[$2;38;5;$3m$indentation$1\e[0m" 1>&2
+        printf "\e[$2;38;5;$3m$indentation$1\e[0m" 1>&2
     fi
 }
 

@@ -4,14 +4,14 @@
 
 function TimeToSeconds(){
     local T=$1; shift
-    echo $((10#${T:0:2} * 3600 + 10#${T:3:2} * 60 + 10#${T:6:2}))
+    printf $((10#${T:0:2} * 3600 + 10#${T:3:2} * 60 + 10#${T:6:2}))
 }
 
 function SecondsToTime(){
     local T=$1; shift
     local hours=$(( $T/3600 ))
     local minutes=$(( ($T - $hours*3600)/60 ))
-    local seconds=$( echo $T | awk 'END{print $1 % 60}')
+    local seconds=$(awk 'END{print $1 % 60}' <<< "$T")
     printf "%02d:%02d:%02d" "${hours}" "${minutes}" "${seconds}"
 }
 
@@ -19,7 +19,7 @@ function SecondsToTimeString(){
     local T=$1; shift
     local hours=$(( $T/3600 ))
     local minutes=$(( ($T - $hours*3600)/60 ))
-    local seconds=$( echo $T | awk 'END{print $1 % 60}')
+    local seconds=$(awk 'END{print $1 % 60}' <<< "$T")
     printf "%02dh %02dm %02ds"  "${hours}" "${minutes}" "${seconds}"
 }
 
@@ -35,7 +35,7 @@ function TimeStringToSecond(){
             *s) TOTAL_TIME_IN_SECONDS=$(( $TOTAL_TIME_IN_SECONDS +       ${ELEMENT%?} )) ;;
         esac
     done && unset -v 'ELEMENT'
-    echo "$TOTAL_TIME_IN_SECONDS"
+    printf "$TOTAL_TIME_IN_SECONDS"
 }
 
 function SecondsToTimeStringWithDays(){
@@ -43,19 +43,19 @@ function SecondsToTimeStringWithDays(){
     local days=$(( $T/86400))
     local hours=$(( ($T - $days*86400)/3600 ))
     local minutes=$(( ($T - $days*86400 - $hours*3600)/60 ))
-    local seconds=$( echo $T | awk 'END{print $1 % 60}')
+    local seconds=$(awk 'END{print $1 % 60}' <<< "$T")
     printf "%d-%02d:%02d:%02d" "${days}" "${hours}" "${minutes}" "${seconds}"
 }
 
 function MinimumOfArray(){
     local MIN=$1; shift
     while [ "$1" != "" ]; do
-        if [ $(echo "$1 $MIN" | awk '{print ($1<$2)}') -eq 1 ]; then
+        if [ $(awk '{print ($1<$2)}' <<< "$1 $MIN") -eq 1 ]; then
             MIN=$1
         fi
         shift
     done
-    echo "$MIN"
+    printf "$MIN"
 }
 
 function KeyOfMinimumOfArray(){
@@ -64,24 +64,24 @@ function KeyOfMinimumOfArray(){
     local MIN=$1; shift
     while [ "$1" != "" ]; do
         (( COUNTER++ ))
-        if [ $(echo "$1 $MIN" | awk '{print ($1<$2)}') -eq 1 ]; then
+        if [ $(awk '{print ($1<$2)}' <<< "$1 $MIN") -eq 1 ]; then
             MIN=$1
             KEY_AT_MIN=$COUNTER
         fi
         shift
     done
-    echo "$KEY_AT_MIN"
+    printf "$KEY_AT_MIN"
 }
 
 function MaximumOfArray(){
     local MAX=$1; shift
     while [ "$1" != "" ]; do
-        if [ $(echo "$1 $MAX" | awk '{print ($1>$2)}') -eq 1 ]; then
+        if [ $(awk '{print ($1>$2)}' <<< "$1 $MAX") -eq 1 ]; then
             MAX=$1
         fi
         shift
     done
-    echo "$MAX"
+    printf "$MAX"
 }
 
 function KeyOfMaximumOfArray(){
@@ -90,13 +90,13 @@ function KeyOfMaximumOfArray(){
     local MAX=$1; shift
     while [ "$1" != "" ]; do
         (( COUNTER++ ))
-        if [ $(echo "$1 $MAX" | awk '{print ($1>$2)}') -eq 1 ]; then
+        if [ $(awk '{print ($1>$2)}' <<< "$1 $MAX") -eq 1 ]; then
             MAX=$1
             KEY_AT_MAX=$COUNTER
         fi
         shift
     done
-    echo "$KEY_AT_MAX"
+    printf "$KEY_AT_MAX"
 }
 
 function FindPositionOfFirstMinimumOfArray(){
@@ -105,7 +105,7 @@ function FindPositionOfFirstMinimumOfArray(){
     local MIN=$(MinimumOfArray "${ARRAY_TMP[@]}")
     for (( i=0; i<${#ARRAY[@]}; i++ )); do
         if [ "${ARRAY[$i]}" = "${MIN}" ]; then
-            echo $i;
+            printf "$i";
             break
         fi
     done
@@ -119,7 +119,7 @@ function LengthOfLongestEntryInArray(){
         fi
         shift
     done
-    echo "$LENGTH_MAX"
+    printf "$LENGTH_MAX"
 }
 
 
@@ -149,18 +149,22 @@ function FindValueOfClosestElementInArrayToGivenValue(){
     local VALUE=$1
     shift
     local ARRAY=( $@ )
-    echo ${ARRAY[@]} | awk -v value="$VALUE" 'BEGIN{RS=" "} \
-                                              NR==1{result=$1; difference=sqrt(($1-value)^2)} \
-                                              NR>1{if(sqrt(($1-value)^2)<difference){result=$1; difference=sqrt(($1-value)^2)}} \
-                                              END{print result}'
+    awk -v value="$VALUE" 'BEGIN{RS=" "} \
+                           NR==1{result=$1; difference=sqrt(($1-value)^2)} \
+                           NR>1{if(sqrt(($1-value)^2)<difference){result=$1; difference=sqrt(($1-value)^2)}} \
+                           END{print result}' <<< "${ARRAY[@]}"
 }
 
 function PrintArray(){
     local NAME_OF_THE_ARRAY=$1
-    local INDEX=""
-    [ $(eval echo "\${#$NAME_OF_THE_ARRAY[@]}") -eq 0 ] && echo "Array $NAME_OF_THE_ARRAY is empty!" && return
-    for INDEX in $(eval echo "\${!$NAME_OF_THE_ARRAY[@]}"); do
-        echo "$NAME_OF_THE_ARRAY[$INDEX]=$(eval echo "\${$NAME_OF_THE_ARRAY[$INDEX]}")"
+    if [[ ! $NAME_OF_THE_ARRAY =~ ^[[:alpha:]_]+$ ]]; then #http://mywiki.wooledge.org/BashFAQ/048
+        printf "Not able to print the array! Only letters/underscores are allowed in array name!\n"; return
+    fi
+    local INDEX
+    local ARRAY_SIZE=$(eval printf "\${#$NAME_OF_THE_ARRAY[@]}")
+    [ $ARRAY_SIZE -eq 0 ] && printf "Array $NAME_OF_THE_ARRAY is empty!\n" && return
+    for (( INDEX=0; INDEX<$ARRAY_SIZE; INDEX++ )); do
+        printf "$NAME_OF_THE_ARRAY[$INDEX]=$(eval printf "\${$NAME_OF_THE_ARRAY[$INDEX]}")\n"
     done
 }
 

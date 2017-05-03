@@ -23,7 +23,7 @@ function GetParametersString(){
     for PREFIX in $@; do
         RESULTING_STRING="$RESULTING_STRING${PREFIX}${!PARAMETER_VARIABLE_NAMES[$PREFIX]}_"
     done && unset -v 'PREFIX'
-    echo ${RESULTING_STRING%?} #Remove last underscore
+    printf "${RESULTING_STRING%?}" #Remove last underscore
 }
 
 #This function get the prefixes of parameters with which the path has to be built (order as given) -> e,g, /Nf2/nt4/ns8
@@ -33,7 +33,7 @@ function GetParametersPath(){
     for PREFIX in $@; do
         RESULTING_PATH="$RESULTING_PATH/${PREFIX}${!PARAMETER_VARIABLE_NAMES[$PREFIX]}"
     done && unset -v 'PREFIX'
-    echo $RESULTING_PATH
+    printf "$RESULTING_PATH"
 }
 
 #This function set the global variables PARAMETERS_PATH and PARAMETERS_STRING after having checked that the parameters have been extracted
@@ -137,13 +137,13 @@ function ReadParametersFromPath(){
     #Path given as first argument to this function
     local PATH_TO_BE_USED="/$1/"
     for ((i=0; i<${#PARAMETER_PREFIXES[@]}; i++)); do
-        if [ $(echo $PATH_TO_BE_USED | grep -o "/${PARAMETER_PREFIXES[$i]}" | wc -l) -ne 1 ]; then
+        if [ $(grep -o "/${PARAMETER_PREFIXES[$i]}" <<< "$PATH_TO_BE_USED" | wc -l) -ne 1 ]; then
             printf "\n\e[0;31m Unable to recover \"${PARAMETER_PREFIXES[$i]}\" from the path \"$1\". Aborting...\n\n\e[0m"
             exit -1
         fi
-        PARAMETERS_VALUE[$i]=$(echo "$PATH_TO_BE_USED" | awk -v expr="${PARAMETER_PREFIXES[$i]}" \
-                                                             -v expr_len=${#PARAMETER_PREFIXES[$i]} \
-                                                             '{print substr($0, index($0, "/"expr) + expr_len + 1, index(substr($0, index($0, "/"expr) + expr_len+1), "/") - 1)}')
+        PARAMETERS_VALUE[$i]=$(awk -v expr="${PARAMETER_PREFIXES[$i]}" \
+                                   -v expr_len=${#PARAMETER_PREFIXES[$i]} \
+                                   '{print substr($0, index($0, "/"expr) + expr_len + 1, index(substr($0, index($0, "/"expr) + expr_len+1), "/") - 1)}' <<< "$PATH_TO_BE_USED")
     done
     NFLAVOUR=${PARAMETERS_VALUE[$NFLAVOUR_POSITION]}
     CHEMPOT=${PARAMETERS_VALUE[$CHEMPOT_POSITION]}
@@ -174,7 +174,7 @@ function ReadParametersFromPath(){
 
 function CheckSingleOccurrenceInPath(){
     for var in $@; do
-        Var=$(echo $(pwd) | grep -o "$var" | wc -l)
+        Var=$(grep -o "$var" <<< "$(pwd)" | wc -l)
         if [ $Var -ne 1 ] ; then
             printf "\n\e[0;31m The string \"$var\" must occur once and only once in the path! Aborting...\n\n\e[0m"
             exit 1
