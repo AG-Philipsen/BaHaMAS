@@ -21,6 +21,8 @@
 BaHaMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"
 source ${BaHaMAS_repositoryTopLevelPath}/OutputFunctionality.bash || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/PathManagement.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/UserSpecificVariables.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/FindClusterScheduler.bash || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/AuxiliaryFunctions.bash || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/AcceptanceRateReport.bash || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/BuildRegexPath.bash || exit -2
@@ -51,6 +53,7 @@ source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/ProjectStatisticsDa
 #-----------------------------------------------------------------------------------------------------------------#
 # Set default values for the command line parameters
 
+BaHaMAS_clusterScheduler="$(SelectClusterSchedulerName)"
 BETASFILE="betas"
 BETA_POSTFIX="_continueWithNewChain" #Here we set the BETA_POSTFIX supposing it is not a thermalization. If indeed it is, the postfix will be overwritten in the thermalize case in the main!
 WALLTIME="7-00:00:00"
@@ -130,11 +133,6 @@ UNCOMMENT_BETAS_ARRAY=()
 
 #Array for the options string
 DATABASE_OPTIONS=()
-
-#-----------------------------------------------------------------------------------------------------------------#
-# Set default values for the non-modifyable variables ---> Modify this file to change them!
-source ${BaHaMAS_repositoryTopLevelPath}/JobScriptAutomation/UserSpecificVariables.bash || exit -2
-#-----------------------------------------------------------------------------------------------------------------#
 
 
 #-----------------------------------------------------------------------------------------------------------------#
