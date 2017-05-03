@@ -1,74 +1,3 @@
-#!/bin/bash
-
-# This script is supposed to be the ONLY place where to store the path
-# convention used in all the other scripts. Basically this is the best
-# way to work in a general way without to much effort. Even if in our
-# project we agree on a common scheme to save data, it is far better
-# to be able to adapt to other schemes without any problem. This of
-# course would imply some adjustment of the scripts that, nevertheless,
-# are ALL here in this file collected.
-#
-# NOTE: Since we have 5 parameters (Nf, kappa, mu, ns, nt), in principle there
-#       are 5!=120 possible orders. Here we fix the order using an array.
-#
-# NOTE: Variables are written with capital letters and underscores, name
-#       of functions with only capital initial letter of each word and no
-#       underscores.
-#
-# ATTENTION: The path management should be such that both Wilson and Staggered
-#            code can be handled at the same time. This is achieved anywhere
-#            according to the variables WILSON and STAGGERED set respectively
-#            to "TRUE" or "FALSE". It can be thought that this is an overhead
-#            since in principle a single variable would be enough, but actually
-#            it increases readability of the code and this approach is open to
-#            future new cases.
-
-#Setting of the correct case based on the path.
-STAGGERED="FALSE"
-WILSON="FALSE"
-[ $(grep "[sS]taggered" <<< "$PWD" | wc -l) -gt 0 ] && STAGGERED="TRUE"
-[ $(grep "[wW]ilson" <<< "$PWD" | wc -l) -gt 0 ] && WILSON="TRUE"
-
-# Global variables:
-NFLAVOUR_POSITION=0
-CHEMPOT_POSITION=1
-MASS_POSITION=2
-NTIME_POSITION=3
-NSPACE_POSITION=4
-NFLAVOUR_PREFIX="Nf"
-CHEMPOT_PREFIX="mui"
-[ $WILSON = "TRUE" ] && MASS_PREFIX="k" || MASS_PREFIX="mass"
-NTIME_PREFIX="nt"
-NSPACE_PREFIX="ns"
-PARAMETER_PREFIXES=([$NFLAVOUR_POSITION]=$NFLAVOUR_PREFIX [$CHEMPOT_POSITION]=$CHEMPOT_PREFIX [$MASS_POSITION]=$MASS_PREFIX [$NTIME_POSITION]=$NTIME_PREFIX [$NSPACE_POSITION]=$NSPACE_PREFIX)
-NFLAVOUR=""
-CHEMPOT=""
-MASS=0
-NSPACE=0
-NTIME=0
-PARAMETERS_PATH=""
-PARAMETERS_STRING=""
-BETA_PREFIX="b"
-SEED_PREFIX="s"
-BETA_POSTFIX=""
-PARAMETER_PREFIXES=([$NFLAVOUR_POSITION]=$NFLAVOUR_PREFIX [$CHEMPOT_POSITION]=$CHEMPOT_PREFIX [$MASS_POSITION]=$MASS_PREFIX [$NTIME_POSITION]=$NTIME_PREFIX [$NSPACE_POSITION]=$NSPACE_PREFIX)
-NFLAVOUR_REGEX='[[:digit:]]\([.][[:digit:]]\)\?'
-CHEMPOT_REGEX='\(0\|PiT\)'
-MASS_REGEX='[[:digit:]]\{4\}'
-NTIME_REGEX='[[:digit:]]\{1,2\}'
-NSPACE_REGEX='[[:digit:]]\{1,2\}'
-PARAMETER_REGEXES=([$NFLAVOUR_POSITION]=$NFLAVOUR_REGEX [$CHEMPOT_POSITION]=$CHEMPOT_REGEX [$MASS_POSITION]=$MASS_REGEX [$NTIME_POSITION]=$NTIME_REGEX [$NSPACE_POSITION]=$NSPACE_REGEX)
-BETA_PREFIX="b"
-SEED_PREFIX="s"
-SEED_REGEX='[[:digit:]]\{4\}'
-BETA_POSTFIX=""
-BETA_POSITION=5
-BETA_REGEX='[[:digit:]][.][[:digit:]]\{4\}'
-BETA_FOLDER_SHORT_REGEX=$BETA_REGEX'_'$SEED_PREFIX'[[:digit:]]\{4\}_[[:alpha:]]\+'
-BETA_FOLDER_REGEX=$BETA_PREFIX$BETA_FOLDER_SHORT_REGEX
-#-------------------------------------------------------------
-# Global functions
-
 function CheckWilsonStaggeredVariables(){
     if [ "$WILSON" == "$STAGGERED" ]; then
         printf "\n\e[0;31m Variables WILSON and STAGGERED both set to the same value (please check the position from where the script was run)! Aborting...\n\n\e[0m"
@@ -195,7 +124,7 @@ function CheckParametersExtractedFromPath(){
 
 function ReadParametersFromPath(){
 
-    # TODO: This function should become something like
+    # TODO: This function should become something like (Bash >= 4.2 otherwise declare -g not supported!)
     #
     #   for PREFIX in $@; do
     #       ReadSingleParameterFromPath $1 $PREFIX

@@ -19,6 +19,7 @@
 #-----------------------------------------------------------------------------------------------------------------#
 # Load auxiliary bash files that will be used.
 BaHaMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"
+source ${BaHaMAS_repositoryTopLevelPath}/GlobalVariables.bash             || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/OutputFunctionality.bash         || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/PathManagementFunctionality.bash || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/UserSpecificVariables.bash       || exit -2
@@ -29,98 +30,6 @@ source ${BaHaMAS_repositoryTopLevelPath}/AcceptanceRateReport.bash        || exi
 source ${BaHaMAS_repositoryTopLevelPath}/BuildRegexPath.bash              || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/ProjectStatisticsDatabase.bash   || exit -2
 #-----------------------------------------------------------------------------------------------------------------#
-
-#-----------------------------------------------------------------------------------------------------------------#
-# Global variables declared in other scripts
-#   STAGGERED="TRUE" or WILSON="TRUE"
-#   NFLAVOUR_PREFIX="Nf"
-#   CHEMPOT_PREFIX="mui"
-#   NTIME_PREFIX="nt"
-#   NSPACE_PREFIX="ns"
-#   MASS_PREFIX="k" or MASS_PREFIX="mass"
-#   NFLAVOUR_POSITION=0
-#   CHEMPOT_POSITION=1
-#   MASS_POSITION=2
-#   NTIME_POSITION=3
-#   NSPACE_POSITION=4
-#   NFLAVOUR
-#   CHEMPOT
-#   MASS
-#   NSPACE
-#   NTIME
-#   PARAMETERS_PATH    <--- This is the string in the path with the 4 parameters with slash in front, e.g. /Nf2/muiPiT/k1550/nt6/ns12   or   /Nf2/mui0/mass0250/nt4/ns8
-#   PARAMETERS_STRING  <--- This is the string in the path with the 4 parameters with underscores, e.g. Nf2_muiPiT_k1550_nt6_ns12   or   Nf2_mui0_mass0250_nt4_ns8
-
-#-----------------------------------------------------------------------------------------------------------------#
-# Set default values for the command line parameters
-
-BaHaMAS_clusterScheduler="$(SelectClusterSchedulerName)"
-BETASFILE="betas"
-BETA_POSTFIX="_continueWithNewChain" #Here we set the BETA_POSTFIX supposing it is not a thermalization. If indeed it is, the postfix will be overwritten in the thermalize case in the main!
-WALLTIME="7-00:00:00"
-BGSIZE="32"
-MEASUREMENTS="20000"
-NRXPROCS="4"
-NRYPROCS="2"
-NRZPROCS="2"
-OMPNUMTHREADS="64"
-NSAVE="100"
-NSAVEPOINT="20"
-INTSTEPS0="7"
-INTSTEPS1="5"
-INTSTEPS2="5"
-CGBS="50"
-MEASURE_PBP="TRUE"
-INTERVAL="1000"
-USE_MULTIPLE_CHAINS="TRUE"
-SUBMIT="FALSE"
-SUBMITONLY="FALSE"
-THERMALIZE="FALSE"
-CONTINUE="FALSE"
-CONTINUE_NUMBER="0"
-CONTINUE_THERMALIZATION="FALSE"
-LISTSTATUS="FALSE"
-LISTSTATUS_MEASURE_TIME="FALSE"
-LISTSTATUS_SHOW_ONLY_QUEUED="FALSE"
-CLUSTER_NAME="LOEWE"
-LOEWE_PARTITION="gpu"
-LOEWE_NODE="unset"
-JOBS_STATUS_PREFIX="jobs_status_"
-ACCRATE_REPORT="FALSE"
-CLEAN_OUTPUT_FILES="FALSE"
-SECONDARY_OPTION_ALL="FALSE"
-COMPLETE_BETAS_FILE="FALSE"
-UNCOMMENT_BETAS="FALSE"
-COMMENT_BETAS="FALSE"
-INVERT_CONFIGURATIONS="FALSE"
-CALL_DATABASE="FALSE"
-NUMBER_OF_CHAINS_TO_BE_IN_THE_BETAS_FILE="4"
-if [ $STAGGERED = "TRUE" ]; then
-    USE_RATIONAL_APPROXIMATION_FILE="TRUE"
-fi
-
-#Variables for Liststatus colors and acceptances/deltaS thresholds (here since they are used also by the database)
-DEFAULT_LISTSTATUS_COLOR="\e[0;36m"
-SUSPICIOUS_BETA_LISTSTATUS_COLOR="\e[0;33m"
-WRONG_BETA_LISTSTATUS_COLOR="\e[0;91m"
-TOO_HIGH_DELTA_S_LISTSTATUS_COLOR="\e[0;91m"
-TOO_LOW_ACCEPTANCE_LISTSTATUS_COLOR="\e[38;5;9m"
-LOW_ACCEPTANCE_LISTSTATUS_COLOR="\e[38;5;208m"
-OPTIMAL_ACCEPTANCE_LISTSTATUS_COLOR="\e[38;5;10m"
-HIGH_ACCEPTANCE_LISTSTATUS_COLOR="\e[38;5;11m"
-TOO_HIGH_ACCEPTANCE_LISTSTATUS_COLOR="\e[38;5;202m"
-TOO_HIGH_DELTA_S_LISTSTATUS_COLOR="\e[0;91m"
-RUNNING_LISTSTATUS_COLOR="\e[0;32m"
-PENDING_LISTSTATUS_COLOR="\e[0;33m"
-CLEANING_LISTSTATUS_COLOR="\e[0;31m"
-STUCK_SIMULATION_LISTSTATUS_COLOR="\e[0;91m"
-FINE_SIMULATION_LISTSTATUS_COLOR="\e[0;32m"
-#-----------------
-TOO_LOW_ACCEPTANCE_THRESHOLD=68
-LOW_ACCEPTANCE_THRESHOLD=70
-HIGH_ACCEPTANCE_THRESHOLD=78
-TOO_HIGH_ACCEPTANCE_THRESHOLD=90
-DELTA_S_THRESHOLD=6
 
 #####################################CREATE OPTIONS FOR COMMAND-LINE-PARSER######################################
 #Inverter Options
