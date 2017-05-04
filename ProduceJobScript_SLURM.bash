@@ -116,15 +116,14 @@ function ProduceJobscript_SLURM(){
         __static__AddToJobscriptFile\
             "mkdir -p \$workdir$INDEX || exit 2"\
             "cd \$workdir$INDEX"\
-            "pwd &"
-        if [ $CLUSTER_NAME = "LOEWE" ]; then
-            __static__AddToJobscriptFile\
-                "time srun -n 1 \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$INPUTFILE_NAME --device=$INDEX --beta=${BETA_FOR_JOBSCRIPT[$INDEX]%%_*} > \$dir$INDEX/\$outFile 2> \$dir$INDEX/\$errFile &"
-        elif [ $CLUSTER_NAME = "LCSC" ]; then
-            __static__AddToJobscriptFile\
-                "time \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$INPUTFILE_NAME --device=$INDEX --beta=${BETA_FOR_JOBSCRIPT[$INDEX]%%_*} 2> \$dir$INDEX/\$errFile | mbuffer -q -m2M > \$dir$INDEX/\$outFile &"
-        fi
-        __static__AddToJobscriptFile "PID_SRUN_$INDEX=\${!}" ""
+            "pwd &"\
+            "if hash mbuffer 2>/dev/null; then"\
+            "    time \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$INPUTFILE_NAME --device=$INDEX --beta=${BETA_FOR_JOBSCRIPT[$INDEX]%%_*} 2> \$dir$INDEX/\$errFile | mbuffer -q -m2M > \$dir$INDEX/\$outFile &"\
+            "else"\
+            "    time srun -n 1 \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$INPUTFILE_NAME --device=$INDEX --beta=${BETA_FOR_JOBSCRIPT[$INDEX]%%_*} > \$dir$INDEX/\$outFile 2> \$dir$INDEX/\$errFile &"\
+            "fi"\
+            "PID_SRUN_$INDEX=\${!}"\
+            ""
     done
     __static__AddToJobscriptFile "#Execute wait \$PID job after job"
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do

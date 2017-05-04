@@ -124,19 +124,18 @@ function ProduceInverterJobscript_SLURM(){
             "OLD_IFS=\$IFS"\
             "IFS=\$'\n'"\
             "for line in \$(cat \$workdir$INDEX/$SRUN_COMMANDSFILE_FOR_INVERSION); do"\
-            "IFS=\$OLD_IFS #Restore here old IFS to give separated options (and not only one)to CL2QCD!"
-        if [ $CLUSTER_NAME = "LOEWE" ]; then
-            __static__AddToInverterJobscriptFile "  time srun -n 1 \$dir$INDEX/$INVERTER_FILENAME \$line --device=$INDEX 2>> \$dir$INDEX/\$errFile >> \$dir$INDEX/\$outFile"
-        elif [ $CLUSTER_NAME = "LCSC" ]; then
-            __static__AddToInverterJobscriptFile "  time \$dir$INDEX/$INVERTER_FILENAME \$line --device=$INDEX 2>> \$dir$INDEX/\$errFile | mbuffer -q -m2M >> \$dir$INDEX/\$outFile"
-        fi
-        __static__AddToInverterJobscriptFile\
-            "  if [ \$? -ne 0 ]; then"\
-            "       printf \"\nError occurred in simulation at b${BETA_FOR_JOBSCRIPT[$INDEX]%_*}.\n\""\
-            "       CONFIGURATION_$INDEX=\$(grep -o \"conf.[[:digit:]]\{5\}\" <<< \"\$line\")"\
-            "       CORRELATOR_POSTFIX_$INDEX=\$(grep -o \"_[[:digit:]]\+_[[:digit:]]\+_[[:digit:]]\+_[[:digit:]]\+_corr\"  <<< \"\$line\")"\
-            "       echo \$CONFIGURATION_$INDEX\$CORRELATOR_POSTFIX_$INDEX >> \$dir$INDEX/failed_inversions_tmp_file"\
-            "  fi"\
+            "    IFS=\$OLD_IFS #Restore here old IFS to give separated options (and not only one)to CL2QCD!"\
+            "    if hash mbuffer 2>/dev/null; then"\
+            "        time \$dir$INDEX/$INVERTER_FILENAME \$line --device=$INDEX 2>> \$dir$INDEX/\$errFile | mbuffer -q -m2M >> \$dir$INDEX/\$outFile"\
+            "    else"\
+            "        time srun -n 1 \$dir$INDEX/$INVERTER_FILENAME \$line --device=$INDEX 2>> \$dir$INDEX/\$errFile >> \$dir$INDEX/\$outFile"\
+            "    fi"\
+            "    if [ \$? -ne 0 ]; then"\
+            "        printf \"\nError occurred in simulation at b${BETA_FOR_JOBSCRIPT[$INDEX]%_*}.\n\""\
+            "        CONFIGURATION_$INDEX=\$(grep -o \"conf.[[:digit:]]\{5\}\" <<< \"\$line\")"\
+            "        CORRELATOR_POSTFIX_$INDEX=\$(grep -o \"_[[:digit:]]\+_[[:digit:]]\+_[[:digit:]]\+_[[:digit:]]\+_corr\"  <<< \"\$line\")"\
+            "        echo \$CONFIGURATION_$INDEX\$CORRELATOR_POSTFIX_$INDEX >> \$dir$INDEX/failed_inversions_tmp_file"\
+            "    fi"\
             "done &"\
             "IFS=\$OLD_IFS"\
             "PID_FOR_$INDEX=\${!}"\
