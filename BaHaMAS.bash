@@ -33,6 +33,11 @@ source ${BaHaMAS_repositoryTopLevelPath}/BuildRegexPath.bash              || exi
 source ${BaHaMAS_repositoryTopLevelPath}/ProjectStatisticsDatabase.bash   || exit -2
 #------------------------------------------------------------------------------------------------------#
 
+#Declare all variables
+DeclarePathRelatedGlobalVariables
+DeclareUserDefinedGlobalVariables
+DeclareBaHaMASGlobalVariables
+
 #If the help is asked, it doesn't matter which other options are given to the script
 if ElementInArray '-h' "$@" || ElementInArray '--help' "$@"; then
     ParseCommandLineOption '--help'
@@ -42,13 +47,11 @@ else
     SPECIFIED_COMMAND_LINE_OPTIONS=( $@ )
 fi
 
-#Declare all variables
-DeclarePathRelatedGlobalVariables
+#Make checks on all variables
 CheckWilsonStaggeredVariables
-DeclareUserDefinedGlobalVariables
 CheckUserDefinedVariables
-DeclareBaHaMASGlobalVariables
 
+exit
 
 #####################################CREATE OPTIONS FOR COMMAND-LINE-PARSER######################################
 #Inverter Options
