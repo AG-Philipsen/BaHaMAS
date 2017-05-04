@@ -107,14 +107,11 @@ function ProduceJobscript_SLURM(){
         "export DISPLAY=:0"\
         "echo \"\\\"export DISPLAY=:0\\\" done!\""\
         "echo \"---------------------------\""\
-        ""
-    if [ $CLUSTER_NAME = "LCSC" ]; then
-        __static__AddToJobscriptFile\
-            "# Since we run the job with a pipeline to handle the std output with mbuffer, we must activate pipefail to get the correct error code!"\
-            "set -o pipefail"\
-            ""
-    fi
-    __static__AddToJobscriptFile "# Run jobs from different directories"
+        ""\
+        "# Since we could run the job with a pipeline to handle the std output with mbuffer, we must activate pipefail to get the correct error code!"\
+        "set -o pipefail"\
+        ""\
+        "# Run jobs from different directories"
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
         __static__AddToJobscriptFile\
             "mkdir -p \$workdir$INDEX || exit 2"\
@@ -140,14 +137,10 @@ function ProduceJobscript_SLURM(){
         "   printf \"\nTerminating job with non zero exit code... (\$(date))\n\""\
         "   exit 255"\
         "fi"\
-        ""
-    if [ $CLUSTER_NAME = "LCSC" ]; then
-        __static__AddToJobscriptFile\
-            "# Unset pipefail since not needed anymore"\
-            "set +o pipefail"\
-            ""
-    fi
-    __static__AddToJobscriptFile\
+        ""\
+        "# Unset pipefail since not needed anymore"\
+        "set +o pipefail"\
+        ""\
         "echo \"---------------------------\""\
         ""\
         "echo \"Date and time: \$(date)\""\

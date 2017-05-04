@@ -99,14 +99,12 @@ function ProduceInverterJobscript_SLURM(){
         "echo \"---------------------------\""\
         "export DISPLAY=:0"\
         "echo \"\\\"export DISPLAY=:0\\\" done!\""\
-        "echo \"---------------------------\""
-    if [ $CLUSTER_NAME = "LCSC" ]; then
-        __static__AddToInverterJobscriptFile\
-            "# Since we run the job with a pipeline to handle the std output with mbuffer, we must activate pipefail to get the correct error code!"\
-            "set -o pipefail"\
-            ""
-    fi
-    __static__AddToInverterJobscriptFile "# Run jobs from different directories"
+        "echo \"---------------------------\""\
+        ""\
+        "# Since we could run the job with a pipeline to handle the std output with mbuffer, we must activate pipefail to get the correct error code!"\
+        "set -o pipefail"\
+        ""\
+        "# Run jobs from different directories"
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
         #The following check is done twice. During the creation of the jobscript for the case in which the $SRUN_COMMANDSFILE_FOR_INVERSION does not exist from the beginning on and
         #in the jobscript itself for the case in which it exists during the creation of the jobscript but accidentally gets deleted later on after the creation.
@@ -148,14 +146,11 @@ function ProduceInverterJobscript_SLURM(){
         __static__AddToInverterJobscriptFile\
             "wait \$PID_FOR_$INDEX || { printf \"\nError occurred in simulation at b${BETA_FOR_JOBSCRIPT[$INDEX]%_*}. Please check (process id \${PID_FOR_$INDEX})...\n\"; }"
     done
-    __static__AddToInverterJobscriptFile ""
-    if [ $CLUSTER_NAME = "LCSC" ]; then
-        __static__AddToInverterJobscriptFile\
-            "# Unset pipefail since not needed anymore"\
-            "set +o pipefail"\
-            ""
-    fi
     __static__AddToInverterJobscriptFile\
+        ""\
+        "# Unset pipefail since not needed anymore"\
+        "set +o pipefail"\
+        ""\
         "echo \"---------------------------\""\
         ""\
         "echo \"Date and time: \$(date)\""\
