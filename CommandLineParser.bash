@@ -97,28 +97,13 @@ function ParseCommandLineOption(){
                 shift ;;
 
             --partition=* )
-                CLUSTER_PARTITION=${1#*=};
-                if [[ $CLUSTER_NAME != "LOEWE" ]]; then
-                    printf "\n\e[0;31m The options --partition can be used only on the LOEWE! Aborting...\n\n\e[0m"
-                    exit -1
-                fi
-                shift ;;
+                CLUSTER_PARTITION=${1#*=}; shift ;;
 
             --constraint=* )
-                CLUSTER_CONSTRAINT=${1#*=};
-                if [[ $CLUSTER_NAME != "LOEWE" ]]; then
-                    printf "\n\e[0;31m The options --constraint can be used only on the LOEWE! Aborting...\n\n\e[0m"
-                    exit -1
-                fi
-                shift ;;
+                CLUSTER_CONSTRAINT=${1#*=}; shift ;;
 
             --node=* )
-                CLUSTER_NODE=${1#*=};
-                if [[ $CLUSTER_NAME != "LOEWE" ]]; then
-                    printf "\n\e[0;31m The options --node can be used only on the LOEWE! Aborting...\n\n\e[0m"
-                    exit -1
-                fi
-                shift ;;
+                CLUSTER_NODE=${1#*=}; shift ;;
 
             -s | --submit )
                 MUTUALLYEXCLUSIVEOPTS_PASSED+=( "$1" )
