@@ -1,24 +1,25 @@
 #!/bin/bash
 
-#------------------------------------------------------------------------#
-#         ____             __  __            __  ___    ___    _____     #
-#        / __ )  ____ _   / / / /  ____ _   /  |/  /   /   |  / ___/     #
-#       / __  | / __ `/  / /_/ /  / __ `/  / /|_/ /   / /| |  \__ \      #
-#      / /_/ / / /_/ /  / __  /  / /_/ /  / /  / /   / ___ | ___/ /      #
-#     /_____/  \__,_/  /_/ /_/   \__,_/  /_/  /_/   /_/  |_|/____/       #
-#                                                                        #
-#------------------------------------------------------------------------#
-#                                                                        #
-#      Copyright (c)  2014  Alessandro Sciarra, Christopher Czaban       #
-#                     2015  Alessandro Sciarra, Christopher Czaban       #
-#                     2016  Alessandro Sciarra, Christopher Czaban       #
-#                     2017  Alessandro Sciarra, Christopher Czaban       #
-#                                                                        #
-#------------------------------------------------------------------------#
+#-------------------------------------------------------------------------#
+#         ____              __  __            __  ___   ___     _____     #
+#        / __ )   ____ _   / / / /  ____ _   /  |/  /  /   |   / ___/     #
+#       / __  |  / __ `/  / /_/ /  / __ `/  / /|_/ /  / /| |   \__ \      #
+#      / /_/ /  / /_/ /  / __  /  / /_/ /  / /  / /  / ___ |  ___/ /      #
+#     /_____/   \__,_/  /_/ /_/   \__,_/  /_/  /_/  /_/  |_| /____/       #
+#                                                                         #
+#-------------------------------------------------------------------------#
+#                                                                         #
+#      Copyright (c)  2014  Alessandro Sciarra, Christopher Czaban        #
+#                     2015  Alessandro Sciarra, Christopher Czaban        #
+#                     2016  Alessandro Sciarra, Christopher Czaban        #
+#                     2017  Alessandro Sciarra, Christopher Czaban        #
+#                                                                         #
+#-------------------------------------------------------------------------#
 
-#-----------------------------------------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------------------------------#
 # Load auxiliary bash files that will be used.
 BaHaMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"
+source ${BaHaMAS_repositoryTopLevelPath}/UtilityFunctions.bash            || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/GlobalVariables.bash             || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/OutputFunctionality.bash         || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/PathManagementFunctionality.bash || exit -2

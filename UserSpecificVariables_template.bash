@@ -1,61 +1,65 @@
-# Paths on any cluster to handle simulations that use CL2QCD
+# User provided variables necessary in order to use BaHaMAS
 #
-# Note, this is only a template, you MUST copy it to another file called UserSpecificVariables.bash
-# and complete it setting all the variables to proper values. Remove also the "echo lines" in the
-# formulations you are going to use.
+# NOTE: This is only a template file and it MUST be copied into another file
+#       called "UserSpecificVariables.bash" and completed, setting all the
+#       variables to proper values. Feel free to customize your checks, but
+#       consider that this function is called at the beginning of BaHaMAS.
 #
 # ATTENTION: Do not put slashes "/" at the end of the paths variables!!
 
-BaHaMAS_colouredOutput='TRUE'
-USER_MAIL=""
-HMC_BUILD_PATH=""
-HOME_DIR=""
-WORK_DIR=""
-GPU_PER_NODE=
-JOBSCRIPT_LOCALFOLDER=""
-FILE_WITH_WHICH_NODES_TO_EXCLUDE=""
+function DeclareUserDefinedGlobalVariables() {
 
-if [ $WILSON = "TRUE" ]; then
+    BaHaMAS_colouredOutput='TRUE'
+    USER_MAIL=""
+    HMC_BUILD_PATH=""
+    HOME_DIR=""
+    WORK_DIR=""
+    GPU_PER_NODE=
+    JOBSCRIPT_LOCALFOLDER=""
+    FILE_WITH_WHICH_NODES_TO_EXCLUDE=""
 
-    cecho lr " Parameters for Wilson case unset in \"UserSpecificVariables.bash\" file! Aborting..." && exit -1;
+    if [ $WILSON = "TRUE" ]; then
 
-    SIMULATION_PATH=""
-    HMC_FILENAME=""
-    INPUTFILE_NAME=""
-    JOBSCRIPT_PREFIX=""
-    OUTPUTFILE_NAME=""
-    ACCEPTANCE_COLUMN=""
-    PROJECT_DATABASE_FILENAME=""
-    PROJECT_DATABASE_DIRECTORY=""
-    SRUN_COMMANDSFILE_FOR_INVERSION=""
-    INVERTER_FILENAME=""
-    THERMALIZED_CONFIGURATIONS_PATH=""
-fi
+        cecho lr " Parameters for Wilson case unset in \"UserSpecificVariables.bash\" file! Aborting..." && exit -1;
 
-if [ $STAGGERED = "TRUE" ]; then
+        SIMULATION_PATH=""
+        HMC_FILENAME=""
+        INPUTFILE_NAME=""
+        JOBSCRIPT_PREFIX=""
+        OUTPUTFILE_NAME=""
+        ACCEPTANCE_COLUMN=""
+        PROJECT_DATABASE_FILENAME=""
+        PROJECT_DATABASE_DIRECTORY=""
+        SRUN_COMMANDSFILE_FOR_INVERSION=""
+        INVERTER_FILENAME=""
+        THERMALIZED_CONFIGURATIONS_PATH=""
+    fi
 
-    cecho lr " Parameters for Staggered case unset in \"UserSpecificVariables.bash\" file! Aborting..." && exit -1;
+    if [ $STAGGERED = "TRUE" ]; then
 
-    SIMULATION_PATH=""
-    HMC_FILENAME=""
-    INPUTFILE_NAME=""
-    JOBSCRIPT_PREFIX=""
-    OUTPUTFILE_NAME=""
-    ACCEPTANCE_COLUMN=""
-    RATIONAL_APPROXIMATIONS_PATH=""
-    APPROX_HEATBATH_NAME=""
-    APPROX_MD_NAME=""
-    APPROX_METROPOLIS_NAME=""
-    PROJECT_DATABASE_FILENAME=""
-    PROJECT_DATABASE_DIRECTORY=""
-    SRUN_COMMANDSFILE_FOR_INVERSION=""
-    INVERTER_FILENAME=""
-    THERMALIZED_CONFIGURATIONS_PATH=""
-fi
+        cecho lr " Parameters for Staggered case unset in \"UserSpecificVariables.bash\" file! Aborting..." && exit -1;
 
-HMC_GLOBALPATH="${HOME}/$HMC_BUILD_PATH/$HMC_FILENAME"
-INVERTER_GLOBALPATH="${HOME}/$HMC_BUILD_PATH/$INVERTER_FILENAME"
+        SIMULATION_PATH=""
+        HMC_FILENAME=""
+        INPUTFILE_NAME=""
+        JOBSCRIPT_PREFIX=""
+        OUTPUTFILE_NAME=""
+        ACCEPTANCE_COLUMN=""
+        RATIONAL_APPROXIMATIONS_PATH=""
+        APPROX_HEATBATH_NAME=""
+        APPROX_MD_NAME=""
+        APPROX_METROPOLIS_NAME=""
+        PROJECT_DATABASE_FILENAME=""
+        PROJECT_DATABASE_DIRECTORY=""
+        SRUN_COMMANDSFILE_FOR_INVERSION=""
+        INVERTER_FILENAME=""
+        THERMALIZED_CONFIGURATIONS_PATH=""
+    fi
 
+    HMC_GLOBALPATH="${HOME}/$HMC_BUILD_PATH/$HMC_FILENAME"
+    INVERTER_GLOBALPATH="${HOME}/$HMC_BUILD_PATH/$INVERTER_FILENAME"
+
+}
 
 # Documentation:
 #
