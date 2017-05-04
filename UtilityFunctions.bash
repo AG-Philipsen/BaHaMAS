@@ -155,17 +155,26 @@ function FindValueOfClosestElementInArrayToGivenValue(){
                            END{print result}' <<< "${ARRAY[@]}"
 }
 
-function PrintArray(){
-    local NAME_OF_THE_ARRAY=$1
-    if [[ ! $NAME_OF_THE_ARRAY =~ ^[[:alpha:]_]+$ ]]; then #http://mywiki.wooledge.org/BashFAQ/048
-        printf "Not able to print the array! Only letters/underscores are allowed in array name!\n"; return
+function PrintArray() {
+    local NAME_OF_THE_ARRAY="$1[@]"
+    local ARRAY_CONTENT=( "${!NAME_OF_THE_ARRAY}" )
+    [ ${#ARRAY_CONTENT[@]} -eq 0 ] && printf "Array $1 is empty or undeclared!\n" && return 1
+    local ARRAY_DECLARATION=$(declare -p "$1")
+    if [[ $ARRAY_DECLARATION =~ ^declare\ -a ]]; then # normal array
+        for INDEX in "${!ARRAY_CONTENT[@]}"; do
+            printf "$1[$INDEX]=${ARRAY_CONTENT[$INDEX]}\n"
+        done
+        return 0
+    elif [[ $ARRAY_DECLARATION =~ ^declare\ -A ]]; then # associative array
+        eval "declare -A ARRAY=${ARRAY_DECLARATION#*=}"
+        for INDEX in "${!ARRAY[@]}"; do
+            echo "$1[\"$INDEX\"]=${ARRAY[""$INDEX""]}"
+        done
+        return 0
+    else
+        printf "\"$1\" does not seem to be an array!\n"
+        return 1
     fi
-    local INDEX
-    local ARRAY_SIZE=$(eval printf "\${#$NAME_OF_THE_ARRAY[@]}")
-    [ $ARRAY_SIZE -eq 0 ] && printf "Array $NAME_OF_THE_ARRAY is empty!\n" && return
-    for (( INDEX=0; INDEX<$ARRAY_SIZE; INDEX++ )); do
-        printf "$NAME_OF_THE_ARRAY[$INDEX]=$(eval printf "\${$NAME_OF_THE_ARRAY[$INDEX]}")\n"
-    done
 }
 
 
