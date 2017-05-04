@@ -25,21 +25,11 @@ function ProduceInverterJobscript_SLURM(){
         "#SBATCH --output=${INVERTER_FILENAME}.%j.out"\
         "#SBATCH --error=${INVERTER_FILENAME}.%j.err"\
         "#SBATCH --no-requeue"
-    if [ $CLUSTER_NAME = "LOEWE" ]; then
-        __static__AddToInverterJobscriptFile "#SBATCH --partition=$CLUSTER_PARTITION"
-        if [[ "$CLUSTER_PARTITION" == "parallel" ]]; then
-            __static__AddToInverterJobscriptFile "#SBATCH --constraint=$CLUSTER_CONSTRAINT"
-        fi
-        if [ "$CLUSTER_NODE" != '' ]; then
-            __static__AddToInverterJobscriptFile "#SBATCH -w $CLUSTER_NODE"
-        fi
-    elif [ $CLUSTER_NAME = "LCSC" ]; then
-        __static__AddToInverterJobscriptFile\
-            "#SBATCH --partition=lcsc"\
-            "#SBATCH --mem=64000"\
-            "#SBATCH --gres=gpu:$GPU_PER_NODE"\
-            "#SBATCH --constrain=hawaii" #Option to choose only a node with 'hawaii' GPU hardware
-    fi
+
+    [ "$CLUSTER_PARTITION"        != '' ] && __static__AddToJobscriptFile "#SBATCH --partition=$CLUSTER_PARTITION"
+    [ "$CLUSTER_NODE"             != '' ] && __static__AddToJobscriptFile "#SBATCH --nodelist=$CLUSTER_NODE"
+    [ "$CLUSTER_CONSTRAINT"       != '' ] && __static__AddToJobscriptFile "#SBATCH --constraint=$CLUSTER_CONSTRAINT"
+    [ "$CLUSTER_GENERIC_RESOURCE" != '' ] && __static__AddToJobscriptFile "#SBATCH --gres=$CLUSTER_GENERIC_RESOURCE"
 
     #Trying to retrieve information about the list of nodes to be excluded
     if [ -f "$FILE_WITH_WHICH_NODES_TO_EXCLUDE" ]; then
