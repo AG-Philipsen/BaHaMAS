@@ -98,7 +98,6 @@ function DeclareBaHaMASGlobalVariables(){
     CGBS=50
     MEASURE_PBP='TRUE'
     USE_MULTIPLE_CHAINS='TRUE'
-    CLUSTER_NAME='LOEWE'
     JOBS_STATUS_PREFIX='jobs_status_'
     USE_RATIONAL_APPROXIMATION_FILE='TRUE'
 

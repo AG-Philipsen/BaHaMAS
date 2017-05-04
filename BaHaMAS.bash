@@ -68,16 +68,6 @@ DATABASE_OPTIONS=()
 
 
 #-----------------------------------------------------------------------------------------------------------------#
-# Extract options and their arguments into variables, saving a copy of the specified options in an array for later use.
-# NOTE: The CLUSTER_NAME variable has not been so far put in the parser since
-#       it can be either LOEWE or LCSC or JUQUEEN. It is set using whoami/hostname. Change this in future if needed!
-if [[ $(whoami) =~ ^hkf[[:digit:]]{3} ]]; then
-    CLUSTER_NAME="JUQUEEN"
-    WALLTIME="00:30:00"
-elif [ "$(hostname)" = "lxlcsc0001" ]; then
-    CLUSTER_NAME="LCSC"
-fi
-
 
 ParseCommandLineOption "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}"
 
@@ -102,11 +92,8 @@ fi
 
 #-----------------------------------------------------------------------------------------------------------------#
 # Perform all the checks on the path, reading out some variables
-if [ "$CLUSTER_NAME" = "JUQUEEN" ]; then
-    CheckSingleOccurrenceInPath "homeb" "hkf8/" "hkf8[[:digit:]]\+" "${NFLAVOUR_PREFIX}${NFLAVOUR_REGEX}" "${CHEMPOT_PREFIX}${CHEMPOT_REGEX}" "${MASS_PREFIX}${MASS_REGEX}" "${NTIME_PREFIX}${NTIME_REGEX}" "${NSPACE_PREFIX}${NSPACE_REGEX}"
-else
-    CheckSingleOccurrenceInPath $(echo $HOME_DIR | sed 's/\// /g') "${NFLAVOUR_PREFIX}${NFLAVOUR_REGEX}" "${CHEMPOT_PREFIX}${CHEMPOT_REGEX}" "${MASS_PREFIX}${MASS_REGEX}" "${NTIME_PREFIX}${NTIME_REGEX}" "${NSPACE_PREFIX}${NSPACE_REGEX}"
-fi
+
+CheckSingleOccurrenceInPath $(echo $HOME_DIR | sed 's/\// /g') "${NFLAVOUR_PREFIX}${NFLAVOUR_REGEX}" "${CHEMPOT_PREFIX}${CHEMPOT_REGEX}" "${MASS_PREFIX}${MASS_REGEX}" "${NTIME_PREFIX}${NTIME_REGEX}" "${NSPACE_PREFIX}${NSPACE_REGEX}"
 
 ReadParametersFromPath $(pwd)
 
