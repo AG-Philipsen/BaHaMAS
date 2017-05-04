@@ -60,6 +60,7 @@ function DeclareUserDefinedGlobalVariables() {
     INVERTER_GLOBALPATH="${HOME}/$HMC_BUILD_PATH/$INVERTER_FILENAME"
 
     #Possible default value for options which can then not be given via command line
+    WALLTIME=""
     CLUSTER_PARTITION=""
     CLUSTER_NODE=""
     CLUSTER_CONSTRAINT=""
@@ -93,11 +94,11 @@ function DeclareUserDefinedGlobalVariables() {
 #     SRUN_COMMANDSFILE_FOR_INVERSION       name of the file where the execution commands for the inversions are being stored
 #     PROJECT_DATABASE_DIRECTORY            directory where the the simulation status files are stored (it MUST be a GLOBALPATH)
 #     PROJECT_DATABASE_FILENAME             name of the file containing the database
+#     WALLTIME                              jobs walltime in the format 'days-hours:min:sec'
 #     CLUSTER_PARTITION                     name of the partition of the cluster that has to be used
 #     CLUSTER_NODE                          list of nodes that have to be used
 #     CLUSTER_CONSTRAINT                    constraint on hardware of the cluster
 #     CLUSTER_GENERIC_RESOURCE              cluster resource selection
-#
 #
 # Some further information:
 #

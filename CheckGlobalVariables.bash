@@ -34,7 +34,8 @@ function CheckUserDefinedVariables(){
                                   CLUSTER_PARTITION
                                   CLUSTER_NODE
                                   CLUSTER_CONSTRAINT
-                                  CLUSTER_GENERIC_RESOURCE )
+                                  CLUSTER_GENERIC_RESOURCE
+                                  WALLTIME )
 
     #Check variables and unset them if they are fine
     for index in "${!variablesThatMustBeNotEmpty[@]}"; do

@@ -89,7 +89,6 @@ function DeclareBaHaMASGlobalVariables(){
     BaHaMAS_clusterScheduler="$(SelectClusterSchedulerName)"
     BETASFILE='betas'
     BETA_POSTFIX='_continueWithNewChain' #Here we set the BETA_POSTFIX supposing it is not a thermalization. If indeed it is, the postfix will be overwritten in the thermalize case in the main!
-    WALLTIME='7-00:00:00'
     MEASUREMENTS=20000
     NSAVE=100
     NSAVEPOINT=20
