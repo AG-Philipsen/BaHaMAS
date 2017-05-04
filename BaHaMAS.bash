@@ -21,16 +21,34 @@
 BaHaMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"
 source ${BaHaMAS_repositoryTopLevelPath}/UtilityFunctions.bash            || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/GlobalVariables.bash             || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/UserSpecificVariables.bash       || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/CheckGlobalVariables.bash        || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/OutputFunctionality.bash         || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/PathManagementFunctionality.bash || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/UserSpecificVariables.bash       || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/FindClusterScheduler.bash        || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParser.bash           || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/AuxiliaryFunctions.bash          || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/AcceptanceRateReport.bash        || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/BuildRegexPath.bash              || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/ProjectStatisticsDatabase.bash   || exit -2
-#-----------------------------------------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------------------------------#
+
+#If the help is asked, it doesn't matter which other options are given to the script
+if ElementInArray '-h' "$@" || ElementInArray '--help' "$@"; then
+    ParseCommandLineOption '--help'
+elif ElementInArray '--helpDatabase' "$@"; then
+    ParseCommandLineOption '-d' '-h'
+else
+    SPECIFIED_COMMAND_LINE_OPTIONS=( $@ )
+fi
+
+#Declare all variables
+DeclarePathRelatedGlobalVariables
+CheckWilsonStaggeredVariables
+DeclareUserDefinedGlobalVariables
+CheckUserDefinedVariables
+DeclareBaHaMASGlobalVariables
+
 
 #####################################CREATE OPTIONS FOR COMMAND-LINE-PARSER######################################
 #Inverter Options
@@ -57,16 +75,9 @@ elif [ "$(hostname)" = "lxlcsc0001" ]; then
     CLUSTER_NAME="LCSC"
 fi
 
-SPECIFIED_COMMAND_LINE_OPTIONS=( $@ )
-#If the help is asked, it doesn't matter which other options are given to the script
-if ElementInArray "-h" ${SPECIFIED_COMMAND_LINE_OPTIONS[@]} || ElementInArray "--help" ${SPECIFIED_COMMAND_LINE_OPTIONS[@]}; then
-    SPECIFIED_COMMAND_LINE_OPTIONS=( "--help" )
-elif ElementInArray "--helpDatabase" ${SPECIFIED_COMMAND_LINE_OPTIONS[@]}; then
-    SPECIFIED_COMMAND_LINE_OPTIONS=( "-d" "-h" )
-fi
 
 ParseCommandLineOption "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}"
-CheckWilsonStaggeredVariables
+
 
 if [ "$CALL_DATABASE" = "TRUE" ]; then
     projectStatisticsDatabase ${DATABASE_OPTIONS[@]}
