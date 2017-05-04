@@ -64,7 +64,7 @@ function cecho() {
         esac
         shift
         if [ "$format" != '' ]; then
-            [ $BaHaMAS_colouredOutput = 'TRUE' ] && outputString+="$format"
+            [ "$BaHaMAS_colouredOutput" = 'TRUE' ] && outputString+="$format"
         fi
         if [ "$text" != '' ]; then
             outputString+="$text"

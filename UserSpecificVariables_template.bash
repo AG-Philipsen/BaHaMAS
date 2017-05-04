@@ -59,6 +59,12 @@ function DeclareUserDefinedGlobalVariables() {
     HMC_GLOBALPATH="${HOME}/$HMC_BUILD_PATH/$HMC_FILENAME"
     INVERTER_GLOBALPATH="${HOME}/$HMC_BUILD_PATH/$INVERTER_FILENAME"
 
+    #Possible default value for options which can then not be given via command line
+    CLUSTER_PARTITION=""
+    CLUSTER_NODE=""
+    CLUSTER_CONSTRAINT=""
+    CLUSTER_GENERIC_RESOURCE=""
+
 }
 
 # Documentation:
@@ -83,10 +89,14 @@ function DeclareUserDefinedGlobalVariables() {
 #     APPROX_METROPOLIS_NAME                rational approximation used for the metropolis test
 #     HMC_GLOBALPATH                        executable global path
 #     THERMALIZED_CONFIGURATIONS_PATH       global path to the folder containing the thermalized configurations
-#     INVERTER_FILENAME                     Name of the inverter executable that comes with the cl2qcd code
+#     INVERTER_FILENAME                     name of the inverter executable that comes with the cl2qcd code
 #     SRUN_COMMANDSFILE_FOR_INVERSION       name of the file where the execution commands for the inversions are being stored
 #     PROJECT_DATABASE_DIRECTORY            directory where the the simulation status files are stored (it MUST be a GLOBALPATH)
 #     PROJECT_DATABASE_FILENAME             name of the file containing the database
+#     CLUSTER_PARTITION                     name of the partition of the cluster that has to be used
+#     CLUSTER_NODE                          list of nodes that have to be used
+#     CLUSTER_CONSTRAINT                    constraint on hardware of the cluster
+#     CLUSTER_GENERIC_RESOURCE              cluster resource selection
 #
 #
 # Some further information:

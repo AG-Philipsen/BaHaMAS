@@ -26,12 +26,12 @@ function ProduceInverterJobscript_SLURM(){
         "#SBATCH --error=${INVERTER_FILENAME}.%j.err"\
         "#SBATCH --no-requeue"
     if [ $CLUSTER_NAME = "LOEWE" ]; then
-        __static__AddToInverterJobscriptFile "#SBATCH --partition=$LOEWE_PARTITION"
-        if [[ "$LOEWE_PARTITION" == "parallel" ]]; then
-            __static__AddToInverterJobscriptFile "#SBATCH --constraint=$LOEWE_CONSTRAINT"
+        __static__AddToInverterJobscriptFile "#SBATCH --partition=$CLUSTER_PARTITION"
+        if [[ "$CLUSTER_PARTITION" == "parallel" ]]; then
+            __static__AddToInverterJobscriptFile "#SBATCH --constraint=$CLUSTER_CONSTRAINT"
         fi
-        if [[ "$LOEWE_NODE" != "unset" ]]; then
-            __static__AddToInverterJobscriptFile "#SBATCH -w $LOEWE_NODE"
+        if [ "$CLUSTER_NODE" != '' ]; then
+            __static__AddToInverterJobscriptFile "#SBATCH -w $CLUSTER_NODE"
         fi
     elif [ $CLUSTER_NAME = "LCSC" ]; then
         __static__AddToInverterJobscriptFile\

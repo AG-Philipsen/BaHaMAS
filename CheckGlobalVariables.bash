@@ -30,7 +30,11 @@ function CheckUserDefinedVariables(){
                                   RATIONAL_APPROXIMATIONS_PATH
                                   APPROX_HEATBATH_NAME
                                   APPROX_MD_NAME
-                                  APPROX_METROPOLIS_NAME )
+                                  APPROX_METROPOLIS_NAME
+                                  CLUSTER_PARTITION
+                                  CLUSTER_NODE
+                                  CLUSTER_CONSTRAINT
+                                  CLUSTER_GENERIC_RESOURCE )
 
     #Check variables and unset them if they are fine
     for index in "${!variablesThatMustBeNotEmpty[@]}"; do
@@ -90,8 +94,15 @@ function CheckUserDefinedVariables(){
     if [ $(( ${#variablesThatMustBeNotEmpty[@]} + ${#variablesThatMustBeTrueOrFalse[@]} + ${#variablesThatMustBeDeclared[@]})) -eq 0 ]; then
         return
     else
-        cecho lr "\n\n Please set properly the user variables and run " B "BaHaMAS" uB " again.\n"
+        cecho lr "\n Please set properly the user variables and run " B "BaHaMAS" uB " again.\n"
         exit -1
     fi
+}
+
+
+function CheckBaHaMASVariables() {
+
+    :
+
 
 }

@@ -87,42 +87,43 @@ function DeclarePathRelatedGlobalVariables(){
 
 function DeclareBaHaMASGlobalVariables(){
     BaHaMAS_clusterScheduler="$(SelectClusterSchedulerName)"
-    BETASFILE="betas"
-    BETA_POSTFIX="_continueWithNewChain" #Here we set the BETA_POSTFIX supposing it is not a thermalization. If indeed it is, the postfix will be overwritten in the thermalize case in the main!
-    WALLTIME="7-00:00:00"
-    MEASUREMENTS="20000"
-    NSAVE="100"
-    NSAVEPOINT="20"
-    INTSTEPS0="7"
-    INTSTEPS1="5"
-    INTSTEPS2="5"
-    CGBS="50"
-    MEASURE_PBP="TRUE"
-    INTERVAL="1000"
-    USE_MULTIPLE_CHAINS="TRUE"
-    SUBMIT="FALSE"
-    SUBMITONLY="FALSE"
-    THERMALIZE="FALSE"
-    CONTINUE="FALSE"
-    CONTINUE_NUMBER="0"
-    CONTINUE_THERMALIZATION="FALSE"
-    LISTSTATUS="FALSE"
-    LISTSTATUS_MEASURE_TIME="FALSE"
-    LISTSTATUS_SHOW_ONLY_QUEUED="FALSE"
-    CLUSTER_NAME="LOEWE"
-    LOEWE_PARTITION="gpu"
-    LOEWE_NODE="unset"
-    JOBS_STATUS_PREFIX="jobs_status_"
-    ACCRATE_REPORT="FALSE"
-    CLEAN_OUTPUT_FILES="FALSE"
-    SECONDARY_OPTION_ALL="FALSE"
-    COMPLETE_BETAS_FILE="FALSE"
-    UNCOMMENT_BETAS="FALSE"
-    COMMENT_BETAS="FALSE"
-    INVERT_CONFIGURATIONS="FALSE"
-    CALL_DATABASE="FALSE"
-    NUMBER_OF_CHAINS_TO_BE_IN_THE_BETAS_FILE="4"
-    [ $STAGGERED = "TRUE" ] && USE_RATIONAL_APPROXIMATION_FILE="TRUE"
+    BETASFILE='betas'
+    BETA_POSTFIX='_continueWithNewChain' #Here we set the BETA_POSTFIX supposing it is not a thermalization. If indeed it is, the postfix will be overwritten in the thermalize case in the main!
+    WALLTIME='7-00:00:00'
+    MEASUREMENTS=20000
+    NSAVE=100
+    NSAVEPOINT=20
+    INTSTEPS0=7
+    INTSTEPS1=5
+    INTSTEPS2=5
+    CGBS=50
+    MEASURE_PBP='TRUE'
+    USE_MULTIPLE_CHAINS='TRUE'
+    CLUSTER_NAME='LOEWE'
+    JOBS_STATUS_PREFIX='jobs_status_'
+    USE_RATIONAL_APPROXIMATION_FILE='TRUE'
+
+    #Mutually exclusive options variables
+    SUBMIT='FALSE'
+    SUBMITONLY='FALSE'
+    THERMALIZE='FALSE'
+    CONTINUE='FALSE'
+    CONTINUE_NUMBER=0
+    CONTINUE_THERMALIZATION='FALSE'
+    LISTSTATUS='FALSE'
+    LISTSTATUS_MEASURE_TIME='FALSE'
+    LISTSTATUS_SHOW_ONLY_QUEUED='FALSE'
+    ACCRATE_REPORT='FALSE'
+    INTERVAL=1000
+    CLEAN_OUTPUT_FILES='FALSE'
+    SECONDARY_OPTION_ALL='FALSE'
+    COMPLETE_BETAS_FILE='FALSE'
+    NUMBER_OF_CHAINS_TO_BE_IN_THE_BETAS_FILE=4
+    UNCOMMENT_BETAS='FALSE'
+    COMMENT_BETAS='FALSE'
+    INVERT_CONFIGURATIONS='FALSE'
+    CALL_DATABASE='FALSE'
+
     #Variables for output color
     DEFAULT_LISTSTATUS_COLOR="\e[0;36m"
     SUSPICIOUS_BETA_LISTSTATUS_COLOR="\e[0;33m"
@@ -139,6 +140,7 @@ function DeclareBaHaMASGlobalVariables(){
     CLEANING_LISTSTATUS_COLOR="\e[0;31m"
     STUCK_SIMULATION_LISTSTATUS_COLOR="\e[0;91m"
     FINE_SIMULATION_LISTSTATUS_COLOR="\e[0;32m"
+
     #Variables for acceptances/deltaS thresholds
     TOO_LOW_ACCEPTANCE_THRESHOLD=68
     LOW_ACCEPTANCE_THRESHOLD=70
