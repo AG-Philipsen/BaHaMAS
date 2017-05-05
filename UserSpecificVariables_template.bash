@@ -11,7 +11,6 @@ function DeclareUserDefinedGlobalVariables() {
 
     BaHaMAS_colouredOutput='TRUE'
     USER_MAIL=""
-    HMC_BUILD_PATH=""
     HOME_DIR=""
     WORK_DIR=""
     GPU_PER_NODE=
@@ -19,45 +18,38 @@ function DeclareUserDefinedGlobalVariables() {
     FILE_WITH_WHICH_NODES_TO_EXCLUDE=""
 
     if [ $WILSON = "TRUE" ]; then
-
-        cecho lr " Parameters for Wilson case unset in \"UserSpecificVariables.bash\" file! Aborting..." && exit -1;
-
         SIMULATION_PATH=""
-        HMC_FILENAME=""
+        HMC_GLOBALPATH=""
         INPUTFILE_NAME=""
         JOBSCRIPT_PREFIX=""
         OUTPUTFILE_NAME=""
-        ACCEPTANCE_COLUMN=""
-        PROJECT_DATABASE_FILENAME=""
-        PROJECT_DATABASE_DIRECTORY=""
-        SRUN_COMMANDSFILE_FOR_INVERSION=""
-        INVERTER_FILENAME=""
-        THERMALIZED_CONFIGURATIONS_PATH=""
-    fi
-
-    if [ $STAGGERED = "TRUE" ]; then
-
-        cecho lr " Parameters for Staggered case unset in \"UserSpecificVariables.bash\" file! Aborting..." && exit -1;
-
-        SIMULATION_PATH=""
-        HMC_FILENAME=""
-        INPUTFILE_NAME=""
-        JOBSCRIPT_PREFIX=""
-        OUTPUTFILE_NAME=""
-        ACCEPTANCE_COLUMN=""
+        ACCEPTANCE_COLUMN=
         RATIONAL_APPROXIMATIONS_PATH=""
         APPROX_HEATBATH_NAME=""
         APPROX_MD_NAME=""
         APPROX_METROPOLIS_NAME=""
         PROJECT_DATABASE_FILENAME=""
         PROJECT_DATABASE_DIRECTORY=""
-        SRUN_COMMANDSFILE_FOR_INVERSION=""
-        INVERTER_FILENAME=""
+        INVERTER_GLOBALPATH=""
         THERMALIZED_CONFIGURATIONS_PATH=""
     fi
 
-    HMC_GLOBALPATH="${HOME}/$HMC_BUILD_PATH/$HMC_FILENAME"
-    INVERTER_GLOBALPATH="${HOME}/$HMC_BUILD_PATH/$INVERTER_FILENAME"
+    if [ $STAGGERED = "TRUE" ]; then
+        SIMULATION_PATH=""
+        HMC_GLOBALPATH=""
+        INPUTFILE_NAME=""
+        JOBSCRIPT_PREFIX=""
+        OUTPUTFILE_NAME=""
+        ACCEPTANCE_COLUMN=
+        RATIONAL_APPROXIMATIONS_PATH=""
+        APPROX_HEATBATH_NAME=""
+        APPROX_MD_NAME=""
+        APPROX_METROPOLIS_NAME=""
+        PROJECT_DATABASE_FILENAME=""
+        PROJECT_DATABASE_DIRECTORY=""
+        INVERTER_GLOBALPATH=""
+        THERMALIZED_CONFIGURATIONS_PATH=""
+    fi
 
     #Possible default value for options which can then not be given via command line
     WALLTIME=""
@@ -72,14 +64,13 @@ function DeclareUserDefinedGlobalVariables() {
 #
 #     BaHaMAS_colouredOutput                it can be 'TRUE' or 'FALSE' and can be used to disable coloured output
 #     USER_MAIL                             mail to which job information (e.g. failures) is sent to
-#     HMC_BUILD_PATH                        path to the folder where the executable is (from user's HOME directory)
 #     HOME_DIR                              path to the disk from which the jobs are submitted (see further informations below)
 #     WORK_DIR                              path to the disk from which the jobs are run (see further informations below)
 #     GPU_PER_NODE                          number of GPUs per node
 #     JOBSCRIPT_LOCALFOLDER                 name of the folder where the job scripts are collected
 #     FILE_WITH_WHICH_NODES_TO_EXCLUDE      local or remote global path to file containing the sbatch directive to exclude nodes (--exclude=...)
 #     SIMULATION_PATH                       path to the folder containing the parameters folders structure (see further informations below)
-#     HMC_FILENAME                          name of the executable
+#     HMC_GLOBALPATH                        production executable global path
 #     INPUTFILE_NAME                        name of the inputfile
 #     JOBSCRIPT_PREFIX                      prefix of the jobscript name
 #     OUTPUTFILE_NAME                       name of the outputfile
@@ -88,10 +79,8 @@ function DeclareUserDefinedGlobalVariables() {
 #     APPROX_HEATBATH_NAME                  rational approximation used for the pseudofermion fields
 #     APPROX_MD_NAME                        rational approximation used for the molecular dynamis
 #     APPROX_METROPOLIS_NAME                rational approximation used for the metropolis test
-#     HMC_GLOBALPATH                        executable global path
+#     INVERTER_GLOBALPATH                   inverter executable global path
 #     THERMALIZED_CONFIGURATIONS_PATH       global path to the folder containing the thermalized configurations
-#     INVERTER_FILENAME                     name of the inverter executable that comes with the cl2qcd code
-#     SRUN_COMMANDSFILE_FOR_INVERSION       name of the file where the execution commands for the inversions are being stored
 #     PROJECT_DATABASE_DIRECTORY            directory where the the simulation status files are stored (it MUST be a GLOBALPATH)
 #     PROJECT_DATABASE_FILENAME             name of the file containing the database
 #     WALLTIME                              jobs walltime in the format 'days-hours:min:sec'
@@ -108,5 +97,5 @@ function DeclareUserDefinedGlobalVariables() {
 #       - folder global path from which jobs are submitted:  $HOME_DIR/$SIMULATION_PATH/$PARAMETERS_PATH
 #       -       folder global path from which jobs are run:  $WORK_DIR/$SIMULATION_PATH/$PARAMETERS_PATH
 #
-#   where $PARAMETERS_PATH is the folder structure like 'muiPiT/k1550/nt6/ns12' or like 'mui0/mass0250/nt4/ns8'.
+#   where $PARAMETERS_PATH is the folder structure like 'Nf2/muiPiT/k1550/nt6/ns12' or like 'Nf3/mui0/mass0250/nt4/ns8'.
 #

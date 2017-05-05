@@ -53,14 +53,11 @@ fi
 
 #Make checks on all variables
 CheckWilsonStaggeredVariables
-CheckUserDefinedVariables
+CheckUserDefinedVariablesAndDefineDependentAdditionalVariables
 
 exit
 
 #####################################CREATE OPTIONS FOR COMMAND-LINE-PARSER######################################
-#Inverter Options
-CORRELATOR_DIRECTION="0"
-NUMBER_SOURCES_FOR_CORRELATORS="8"
 
 
 #Important arrays for uncomment functionality. PUT THEM ELSEWHERE?
@@ -74,7 +71,7 @@ DATABASE_OPTIONS=()
 #-----------------------------------------------------------------------------------------------------------------#
 
 ParseCommandLineOption "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}"
-
+CheckBaHaMASVariablesDependingOnUserCase
 
 if [ "$CALL_DATABASE" = "TRUE" ]; then
     projectStatisticsDatabase ${DATABASE_OPTIONS[@]}

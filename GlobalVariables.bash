@@ -67,7 +67,7 @@ function DeclarePathRelatedGlobalVariables(){
     #Beta and seed information
     BETA_PREFIX="b"
     SEED_PREFIX="s"
-    BETA_POSTFIX=""
+    BETA_POSTFIX='_continueWithNewChain' #Here we set it supposing it is not a thermalization. If indeed it is, the postfix will be overwritten!
     BETA_PREFIX="b"
     SEED_PREFIX="s"
     SEED_REGEX='[[:digit:]]\{4\}'
@@ -88,7 +88,6 @@ function DeclarePathRelatedGlobalVariables(){
 function DeclareBaHaMASGlobalVariables(){
     BaHaMAS_clusterScheduler="$(SelectClusterSchedulerName)"
     BETASFILE='betas'
-    BETA_POSTFIX='_continueWithNewChain' #Here we set the BETA_POSTFIX supposing it is not a thermalization. If indeed it is, the postfix will be overwritten in the thermalize case in the main!
     MEASUREMENTS=20000
     NSAVE=100
     NSAVEPOINT=20
@@ -100,6 +99,10 @@ function DeclareBaHaMASGlobalVariables(){
     USE_MULTIPLE_CHAINS='TRUE'
     JOBS_STATUS_PREFIX='jobs_status_'
     USE_RATIONAL_APPROXIMATION_FILE='TRUE'
+    #Inverter Options for the moment hard-coded
+    SRUN_COMMANDSFILE_FOR_INVERSION="srunCommandsFileForInversions"
+    CORRELATOR_DIRECTION="0"
+    NUMBER_SOURCES_FOR_CORRELATORS="8"
 
     #Mutually exclusive options variables
     SUBMIT='FALSE'
