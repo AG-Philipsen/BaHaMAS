@@ -118,7 +118,7 @@ errecho "\n"
 
 #-----------------------------------------------------------------------------
 #If there are still whitespace errors, print the offending file names and fail.
-if ! git diff-index --check --cached $againstSHAToCompareWidth
+if ! git diff-index --check --cached $againstSHAToCompareWidth >/dev/null 2>&1
 then
     AbortCommit "Whitespace errors present in staged files!" GiveAdviceAboutWhitespaceError
 fi
