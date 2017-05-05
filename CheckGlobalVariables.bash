@@ -142,6 +142,15 @@ function CheckBaHaMASVariablesDependingOnUserCase() {
     schedulerVariables=(GPU_PER_NODE  WALLTIME  USER_MAIL)
     variablesThatMustBeNotEmpty=(HOME_DIR  WORK_DIR  SIMULATION_PATH)
 
+    #If user wants to read the rational approximation from file check relative variables
+    if [ $USE_RATIONAL_APPROXIMATION_FILE = 'TRUE' ]; then
+        jobsNeededVariables+=( RATIONAL_APPROXIMATIONS_PATH
+                               APPROX_HEATBATH_NAME
+                               APPROX_MD_NAME
+                               APPROX_METROPOLIS_NAME )
+    fi
+
+    #Check variables depending on BaHaMAS invocation
     if [ $SUBMIT = 'TRUE' ]; then
         option="$(cecho "with the " B "--submit")"
         variablesThatMustBeNotEmpty+=( jobsNeededVariables  schedulerVariables
