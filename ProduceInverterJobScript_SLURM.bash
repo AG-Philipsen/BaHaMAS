@@ -31,29 +31,31 @@ function ProduceInverterJobscript_SLURM(){
     [ "$CLUSTER_CONSTRAINT"       != '' ] && __static__AddToJobscriptFile "#SBATCH --constraint=$CLUSTER_CONSTRAINT"
     [ "$CLUSTER_GENERIC_RESOURCE" != '' ] && __static__AddToJobscriptFile "#SBATCH --gres=$CLUSTER_GENERIC_RESOURCE"
 
-    #Trying to retrieve information about the list of nodes to be excluded
-    if [ -f "$FILE_WITH_WHICH_NODES_TO_EXCLUDE" ]; then
-        EXCLUDE_STRING=$(grep -oE '\-\-exclude=.*\[.*\]' $FILE_WITH_WHICH_NODES_TO_EXCLUDE 2>/dev/null)
-    elif [[ $FILE_WITH_WHICH_NODES_TO_EXCLUDE =~ : ]]; then
-        EXCLUDE_STRING=$(ssh ${FILE_WITH_WHICH_NODES_TO_EXCLUDE%%:*} "grep -oE '\-\-exclude=.*\[.*\]' ${FILE_WITH_WHICH_NODES_TO_EXCLUDE#*:} 2>/dev/null")
-    fi
-    if [ "$EXCLUDE_STRING" != "" ]; then
-        __static__AddToInverterJobscriptFile "#SBATCH $EXCLUDE_STRING"
-        cecho "\e[1A\e[80C\t$EXCLUDE_STRING"
-    else
-        cecho "\n" ly B U "WARNING" uU ":" uB " No exclude string to exclude nodes in jobscript found!\n"\
-              "         Do you still want to continue with jobscript creation? [Y/N]"
-        while read CONFIRM; do
-            if [ "$CONFIRM" = "Y" ]; then
-                break
-            elif [ "$CONFIRM" = "N" ]; then
-                cecho "\n" B lr "Exiting from job script creation process...\n"
-                rm -f $JOBSCRIPT_GLOBALPATH
-                exit
-            else
-                cecho -n lc B " Please enter Y (yes) or N (no): "
-            fi
-        done
+    #Trying to retrieve information about the list of nodes to be excluded if user gave file
+    if [ "$FILE_WITH_WHICH_NODES_TO_EXCLUDE" != '' ]; then
+        if [ -f "$FILE_WITH_WHICH_NODES_TO_EXCLUDE" ]; then
+            EXCLUDE_STRING=$(grep -oE '\-\-exclude=.*\[.*\]' $FILE_WITH_WHICH_NODES_TO_EXCLUDE 2>/dev/null)
+        elif [[ $FILE_WITH_WHICH_NODES_TO_EXCLUDE =~ : ]]; then
+            EXCLUDE_STRING=$(ssh ${FILE_WITH_WHICH_NODES_TO_EXCLUDE%%:*} "grep -oE '\-\-exclude=.*\[.*\]' ${FILE_WITH_WHICH_NODES_TO_EXCLUDE#*:} 2>/dev/null")
+        fi
+        if [ "$EXCLUDE_STRING" != "" ]; then
+            __static__AddToInverterJobscriptFile "#SBATCH $EXCLUDE_STRING"
+            cecho "\e[1A\e[80C\t$EXCLUDE_STRING"
+        else
+            cecho "\n" ly B U "WARNING" uU ":" uB " No exclude string to exclude nodes in jobscript found!\n"\
+                  "         Do you still want to continue with jobscript creation? [Y/N]"
+            while read CONFIRM; do
+                if [ "$CONFIRM" = "Y" ]; then
+                    break
+                elif [ "$CONFIRM" = "N" ]; then
+                    cecho "\n" B lr "Exiting from job script creation process...\n"
+                    rm -f $JOBSCRIPT_GLOBALPATH
+                    exit
+                else
+                    cecho -n lc B " Please enter Y (yes) or N (no): "
+                fi
+            done
+        fi
     fi
 
     __static__AddToInverterJobscriptFile "#SBATCH --ntasks=$GPU_PER_NODE" ""
