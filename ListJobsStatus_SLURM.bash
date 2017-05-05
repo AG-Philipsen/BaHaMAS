@@ -179,10 +179,10 @@ function ListJobStatus_SLURM(){
                 local TRAJECTORIES_DONE=$(awk 'NR==1{startTr=$1}END{print $1 - startTr + 1}' $OUTPUTFILE_GLOBALPATH)
             fi
             local NUMBER_LAST_TRAJECTORY=$(awk 'END{print $1}' $OUTPUTFILE_GLOBALPATH)
-            local ACCEPTANCE=$(awk '{ sum+=$11} END {printf "%5.2f", 100*sum/(NR)}' $OUTPUTFILE_GLOBALPATH)
+            local ACCEPTANCE=$(awk '{ sum+=$'$ACCEPTANCE_COLUMN'} END {printf "%5.2f", 100*sum/(NR)}' $OUTPUTFILE_GLOBALPATH)
 
             if [ $TRAJECTORIES_DONE -ge 1000 ]; then
-                local ACCEPTANCE_LAST=$(tail -n1000 $OUTPUTFILE_GLOBALPATH | awk '{ sum+=$11} END {printf "%5.2f", 100*sum/(NR)}')
+                local ACCEPTANCE_LAST=$(tail -n1000 $OUTPUTFILE_GLOBALPATH | awk '{ sum+=$'$ACCEPTANCE_COLUMN'} END {printf "%5.2f", 100*sum/(NR)}')
             else
                 local ACCEPTANCE_LAST=" --- "
             fi
