@@ -51,31 +51,17 @@ else
     SPECIFIED_COMMAND_LINE_OPTIONS=( $@ )
 fi
 
-#Make checks on all variables
+#Do some checks on variables, parse user option and do some more checks
 CheckWilsonStaggeredVariables
 CheckUserDefinedVariablesAndDefineDependentAdditionalVariables
-
-exit
-
-#####################################CREATE OPTIONS FOR COMMAND-LINE-PARSER######################################
-
-
-#Important arrays for uncomment functionality. PUT THEM ELSEWHERE?
-UNCOMMENT_BETAS_SEED_ARRAY=()
-UNCOMMENT_BETAS_ARRAY=()
-
-#Array for the options string
-DATABASE_OPTIONS=()
-
-
-#-----------------------------------------------------------------------------------------------------------------#
-
 ParseCommandLineOption "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}"
 CheckBaHaMASVariablesDependingOnUserCase
 
+
+#-----------------------------------------------------------------------------------------------------------------#
 if [ "$CALL_DATABASE" = "TRUE" ]; then
     projectStatisticsDatabase ${DATABASE_OPTIONS[@]}
-    exit
+    exit 0
 fi
 #-----------------------------------------------------------------------------------------------------------------#
 
