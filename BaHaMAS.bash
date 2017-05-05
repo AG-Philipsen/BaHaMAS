@@ -33,6 +33,10 @@ source ${BaHaMAS_repositoryTopLevelPath}/BuildRegexPath.bash              || exi
 source ${BaHaMAS_repositoryTopLevelPath}/ProjectStatisticsDatabase.bash   || exit -2
 #------------------------------------------------------------------------------------------------------#
 
+#Set stricter shell mode. This implies for the developer to be aware of what is going on,
+#but it is worth so. Good reference http://redsymbol.net/articles/unofficial-bash-strict-mode
+#set -euo pipefail
+
 #Declare all variables
 DeclarePathRelatedGlobalVariables
 DeclareUserDefinedGlobalVariables
