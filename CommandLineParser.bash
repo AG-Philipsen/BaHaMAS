@@ -7,7 +7,7 @@ source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParser_aux.bash
 function ParseCommandLineOption(){
 
     local commandLineOptions mutuallyExclusiveOptions
-    commandLineOptions=( $(SplitCombinedShortOptionsInSingleOptions $@) )
+    commandLineOptions=( $(SplitCombinedShortOptionsInSingleOptions "$@") )
     mutuallyExclusiveOptions=( "-s | --submit"        "-c | --continue"    "-C | --continueThermalization"
                                "-t | --thermalize"    "-l | --liststatus"  "-U | --uncommentBetas"
                                "-u | --commentBetas"  "-d | --dataBase"    "-i | --invertConfigurations"
@@ -86,7 +86,6 @@ function ParseCommandLineOption(){
                 MEASURE_PBP="FALSE"; shift ;;
 
             --doNotUseRAfiles )
-                [ $WILSON = "TRUE" ] && printf "\n\e[0;31m The option --doNotUseRAfiles can be used only in STAGGERED simulations! Aborting...\n\n\e[0m" && exit -1
                 USE_RATIONAL_APPROXIMATION_FILE="FALSE"; shift ;;
 
             --doNotUseMultipleChains )
@@ -225,7 +224,7 @@ function ParseCommandLineOption(){
                 shift
                 ;;
 
-            -d | --database)
+            -d | --dataBase)
                 CALL_DATABASE="TRUE"
                 MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--database" )
                 shift
