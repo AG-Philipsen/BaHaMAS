@@ -24,6 +24,7 @@ function DeclareUserDefinedGlobalVariables() {
         JOBSCRIPT_PREFIX=""
         OUTPUTFILE_NAME=""
         ACCEPTANCE_COLUMN=
+        USE_RATIONAL_APPROXIMATION_FILE='FALSE'
         RATIONAL_APPROXIMATIONS_PATH=""
         APPROX_HEATBATH_NAME=""
         APPROX_MD_NAME=""
@@ -41,6 +42,7 @@ function DeclareUserDefinedGlobalVariables() {
         JOBSCRIPT_PREFIX=""
         OUTPUTFILE_NAME=""
         ACCEPTANCE_COLUMN=
+        USE_RATIONAL_APPROXIMATION_FILE='FALSE'
         RATIONAL_APPROXIMATIONS_PATH=""
         APPROX_HEATBATH_NAME=""
         APPROX_MD_NAME=""

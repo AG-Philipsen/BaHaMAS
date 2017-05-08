@@ -85,9 +85,6 @@ function ParseCommandLineOption(){
             -p | --doNotMeasurePbp )
                 MEASURE_PBP="FALSE"; shift ;;
 
-            --doNotUseRAfiles )
-                USE_RATIONAL_APPROXIMATION_FILE="FALSE"; shift ;;
-
             --doNotUseMultipleChains )
                 USE_MULTIPLE_CHAINS="FALSE"
                 if [ $THERMALIZE = "FALSE" ]; then

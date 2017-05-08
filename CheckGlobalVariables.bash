@@ -69,6 +69,11 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables(){
         #if this was wrongly set, let us set it to 'FALSE' but still report on it
         BaHaMAS_colouredOutput='FALSE'
         cecho lr "\n " B "BaHaMAS_colouredOutput" uB " variable must be set either to " ly "TRUE" lr " or to " ly "FALSE"
+        mustReturn='FALSE'
+    fi
+    if [ "$USE_RATIONAL_APPROXIMATION_FILE" != 'TRUE' ] && [ "$USE_RATIONAL_APPROXIMATION_FILE" != 'FALSE' ]; then
+        cecho lr "\n " B "USE_RATIONAL_APPROXIMATION_FILE" uB " variable must be set either to " ly "TRUE" lr " or to " ly "FALSE"
+        mustReturn='FALSE'
     fi
     if [ "$WALLTIME" != '' ] && [[ ! $WALLTIME =~ ^([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]]; then
         cecho lr "\n " B "WALLTIME" uB " variable format invalid. Correct format: " ly "days-hours:min:sec" lr " or " ly "hours:min:sec"
@@ -87,13 +92,6 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables(){
     if [ ${#variablesThatMustBeNotEmpty[@]} -ne 0 ]; then
         cecho "\n " ly "The following variable(s) must be " B "set" uB " and " B "not empty" uB ":\n"
         for variable in "${variablesThatMustBeNotEmpty[@]}"; do
-            cecho lo "   " B "$variable"
-        done
-        mustReturn='FALSE'
-    fi
-    if [ ${#variablesThatMustBeTrueOrFalse[@]} -ne 0 ]; then
-        cecho "\n " ly "The following variable(s) must be set either to " B "TRUE" uB " or to " B "FALSE" uB ":\n"
-        for variable in "${variablesThatMustBeTrueOrFalse[@]}"; do
             cecho lo "   " B "$variable"
         done
         mustReturn='FALSE'

@@ -20,6 +20,7 @@ function SplitCombinedShortOptionsInSingleOptions() {
     printf "%s " "${NEW_OPTIONS[@]}"
 }
 
+
 function __static__AddOptionToHelper() {
     local name description color lengthOption indentation
     lengthOption=38; indentation='    '
@@ -35,7 +36,6 @@ function __static__AddOptionToHelper() {
         shift
     done
 }
-
 
 function PrintHelper(){
     local helperColor normalColor mutuallyExclusiveColor
@@ -64,7 +64,6 @@ function PrintHelper(){
     __static__AddOptionToHelper "--partition"                "default value = '$CLUSTER_PARTITION'"
     __static__AddOptionToHelper "--constraint"               "default value = '$CLUSTER_CONSTRAINT'"
     __static__AddOptionToHelper "--node"                     "default value = '$CLUSTER_NODE'"
-    __static__AddOptionToHelper "--doNotUseRAfiles" "the Rational Approximations are evaluated (Staggered Case ONLY)"
     cecho ""
     __static__AddOptionToHelper -e "-s | --submit"                "jobs will be submitted"
     __static__AddOptionToHelper -e "--submitonly"                 "jobs will be submitted (no files are created)"

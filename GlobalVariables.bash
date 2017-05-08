@@ -98,7 +98,6 @@ function DeclareBaHaMASGlobalVariables(){
     MEASURE_PBP='TRUE'
     USE_MULTIPLE_CHAINS='TRUE'
     JOBS_STATUS_PREFIX='jobs_status_'
-    USE_RATIONAL_APPROXIMATION_FILE='TRUE'
     #Inverter Options for the moment hard-coded
     SRUN_COMMANDSFILE_FOR_INVERSION="srunCommandsFileForInversions"
     CORRELATOR_DIRECTION="0"
