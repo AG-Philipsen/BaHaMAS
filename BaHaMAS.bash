@@ -48,7 +48,7 @@ if ElementInArray '-h' "$@" || ElementInArray '--help' "$@"; then
 elif ElementInArray '--helpDatabase' "$@"; then
     ParseCommandLineOption '-d' '-h'
 else
-    SPECIFIED_COMMAND_LINE_OPTIONS=( $@ )
+    SPECIFIED_COMMAND_LINE_OPTIONS=( "$@" )
 fi
 
 #Do some checks on variables, parse user option and do some more checks
