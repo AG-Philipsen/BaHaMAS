@@ -130,11 +130,11 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables(){
 }
 
 
-# Make logical checks on variables that must be necessary set only in some cases and therefore not always used
+# Make logical checks on variables that must be necessarily set only in some cases and therefore not always used
 # EXAMPLE: If user wants only to produce confs, INVERTER_FILENAME can be unset
 # Checks also existence directories/files depending on what BaHaMAS should do
-function CheckBaHaMASVariablesDependingOnUserCase() {
     local index variablesThatMustBeNotEmpty option jobsNeededVariables schedulerVariables
+function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase() {
     mustReturn='TRUE'
     jobsNeededVariables=(INPUTFILE_NAME  OUTPUTFILE_NAME  HMC_GLOBALPATH  JOBSCRIPT_PREFIX  JOBSCRIPT_LOCALFOLDER)
     schedulerVariables=(GPU_PER_NODE  WALLTIME  USER_MAIL)
