@@ -151,26 +151,26 @@ function CheckBaHaMASVariablesDependingOnUserCase() {
     #Check variables depending on BaHaMAS invocation
     if [ $SUBMIT = 'TRUE' ]; then
         option="$(cecho "with the " B "--submit")"
-        variablesThatMustBeNotEmpty+=( jobsNeededVariables  schedulerVariables
+        variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]}  ${schedulerVariables[@]}
                                        THERMALIZED_CONFIGURATIONS_PATH )
 
     elif [ $SUBMITONLY = 'TRUE' ]; then
         option="$(cecho "with the " B "--submitonly")"
-        variablesThatMustBeNotEmpty+=( jobsNeededVariables schedulerVariables
+        variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
                                        THERMALIZED_CONFIGURATIONS_PATH )
 
     elif [ $THERMALIZE = 'TRUE' ]; then
         option="$(cecho "with the " B "--thermalize")"
-        variablesThatMustBeNotEmpty+=( jobsNeededVariables schedulerVariables
+        variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
                                        THERMALIZED_CONFIGURATIONS_PATH )
 
     elif [ $CONTINUE = 'TRUE' ]; then
         option="$(cecho "with the " B "--continue")"
-        variablesThatMustBeNotEmpty+=( jobsNeededVariables  schedulerVariables )
+        variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]}  ${schedulerVariables[@]} )
 
     elif [ $CONTINUE_THERMALIZATION = 'TRUE' ]; then
         option="$(cecho "with the " B "--continueThermalization")"
-        variablesThatMustBeNotEmpty+=( jobsNeededVariables schedulerVariables
+        variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
                                        THERMALIZED_CONFIGURATIONS_PATH )
 
     elif [ $ACCRATE_REPORT = 'TRUE' ]; then
@@ -195,7 +195,7 @@ function CheckBaHaMASVariablesDependingOnUserCase() {
         variablesThatMustBeNotEmpty+=( JOBSCRIPT_PREFIX
                                        JOBSCRIPT_LOCALFOLDER
                                        INVERTER_GLOBALPATH
-                                       schedulerVariables )
+                                       ${schedulerVariables[@]} )
 
     elif [ $LISTSTATUS = 'TRUE' ]; then
         option="$(cecho "with the " B "--liststatus")"
@@ -213,7 +213,7 @@ function CheckBaHaMASVariablesDependingOnUserCase() {
 
     else
         option='without any mutually exclusive'
-        variablesThatMustBeNotEmpty+=( jobsNeededVariables schedulerVariables
+        variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
                                        THERMALIZED_CONFIGURATIONS_PATH )
     fi
 
