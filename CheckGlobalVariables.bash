@@ -133,12 +133,17 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables(){
 # Make logical checks on variables that must be necessarily set only in some cases and therefore not always used
 # EXAMPLE: If user wants only to produce confs, INVERTER_FILENAME can be unset
 # Checks also existence directories/files depending on what BaHaMAS should do
-    local index variablesThatMustBeNotEmpty option jobsNeededVariables schedulerVariables
 function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase() {
+    local index variable option variablesThatMustBeNotEmpty jobsNeededVariables schedulerVariables\
+          neededFolders neededFiles rationalApproxFolder rationalApproxFiles
     mustReturn='TRUE'
     jobsNeededVariables=(INPUTFILE_NAME  OUTPUTFILE_NAME  HMC_GLOBALPATH  JOBSCRIPT_PREFIX  JOBSCRIPT_LOCALFOLDER)
     schedulerVariables=(GPU_PER_NODE  WALLTIME  USER_MAIL)
     variablesThatMustBeNotEmpty=(HOME_DIR  WORK_DIR  SIMULATION_PATH)
+    neededFolders=( "$HOME_DIR" "${HOME_DIR}/$SIMULATION_PATH"  "$WORK_DIR" "${WORK_DIR}/$SIMULATION_PATH")
+    neededFiles=()
+    rationalApproxFolder=()
+    rationalApproxFiles=()
 
     #If user wants to read the rational approximation from file check relative variables
     if [ $USE_RATIONAL_APPROXIMATION_FILE = 'TRUE' ]; then
@@ -146,6 +151,10 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
                                APPROX_HEATBATH_NAME
                                APPROX_MD_NAME
                                APPROX_METROPOLIS_NAME )
+        rationalApproxFolder+=( "$RATIONAL_APPROXIMATIONS_PATH" )
+        rationalApproxFiles+=( "${RATIONAL_APPROXIMATIONS_PATH}/$APPROX_HEATBATH_NAME"
+                               "${RATIONAL_APPROXIMATIONS_PATH}/$APPROX_MD_NAME"
+                               "${RATIONAL_APPROXIMATIONS_PATH}/$APPROX_METROPOLIS_NAME" )
     fi
 
     #Check variables depending on BaHaMAS invocation
@@ -153,25 +162,35 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
         option="$(cecho "with the " B "--submit")"
         variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]}  ${schedulerVariables[@]}
                                        THERMALIZED_CONFIGURATIONS_PATH )
+        neededFolders+=( "$THERMALIZED_CONFIGURATIONS_PATH" ${rationalApproxFolder[@]} )
+        neededFiles+=( "$HMC_GLOBALPATH" ${rationalApproxFiles[@]} )
 
     elif [ $SUBMITONLY = 'TRUE' ]; then
         option="$(cecho "with the " B "--submitonly")"
         variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
                                        THERMALIZED_CONFIGURATIONS_PATH )
+        neededFolders+=( "$THERMALIZED_CONFIGURATIONS_PATH" ${rationalApproxFolder[@]} )
+        neededFiles+=( "$HMC_GLOBALPATH" ${rationalApproxFiles[@]} )
 
     elif [ $THERMALIZE = 'TRUE' ]; then
         option="$(cecho "with the " B "--thermalize")"
         variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
                                        THERMALIZED_CONFIGURATIONS_PATH )
+        neededFolders+=( "$THERMALIZED_CONFIGURATIONS_PATH" ${rationalApproxFolder[@]} )
+        neededFiles+=( "$HMC_GLOBALPATH" ${rationalApproxFiles[@]} )
 
     elif [ $CONTINUE = 'TRUE' ]; then
         option="$(cecho "with the " B "--continue")"
         variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]}  ${schedulerVariables[@]} )
+        neededFiles+=( ${rationalApproxFolder[@]} )
+        neededFiles+=( "$HMC_GLOBALPATH" ${rationalApproxFiles[@]} )
 
     elif [ $CONTINUE_THERMALIZATION = 'TRUE' ]; then
         option="$(cecho "with the " B "--continueThermalization")"
         variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
                                        THERMALIZED_CONFIGURATIONS_PATH )
+        neededFolders+=( "$THERMALIZED_CONFIGURATIONS_PATH" ${rationalApproxFolder[@]} )
+        neededFiles+=( "$HMC_GLOBALPATH" ${rationalApproxFiles[@]} )
 
     elif [ $ACCRATE_REPORT = 'TRUE' ]; then
         option="$(cecho "with the " B "--accRateReport")"
@@ -196,6 +215,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
                                        JOBSCRIPT_LOCALFOLDER
                                        INVERTER_GLOBALPATH
                                        ${schedulerVariables[@]} )
+        neededFiles+=( "$INVERTER_GLOBALPATH" )
 
     elif [ $LISTSTATUS = 'TRUE' ]; then
         option="$(cecho "with the " B "--liststatus")"
@@ -210,11 +230,15 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
                                        ACCEPTANCE_COLUMN
                                        PROJECT_DATABASE_DIRECTORY
                                        PROJECT_DATABASE_FILENAME )
+        neededFolders+=( "$PROJECT_DATABASE_DIRECTORY" )
+        neededFiles+=( "${PROJECT_DATABASE_DIRECTORY}/$PROJECT_DATABASE_FILENAME" )
 
     else
         option='without any mutually exclusive'
         variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
                                        THERMALIZED_CONFIGURATIONS_PATH )
+        neededFolders+=( "$THERMALIZED_CONFIGURATIONS_PATH" ${rationalApproxFolder[@]} )
+        neededFiles+=( "$HMC_GLOBALPATH" ${rationalApproxFiles[@]} )
     fi
 
     #Check if variables are defined and not empty
@@ -224,14 +248,39 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
         fi
     done
 
-    #If variables remained, print error
+    #If variables remained, print error otherwise check needed files/folders
     if [ ${#variablesThatMustBeNotEmpty[@]} -ne 0 ]; then
-        cecho "\n " ly "To run " B "BaHaMAS" uB "$option"\
-              "option, the following variable(s) must be " B "set" uB " and " B "not empty" uB ":\n"
+        cecho "\n " lo "To run " B "BaHaMAS" uB " $option "\
+              lo "option, the following " ly "variable(s)" lo " must be " B "set" uB " and " B "not empty" uB ":\n"
         for variable in "${variablesThatMustBeNotEmpty[@]}"; do
-            cecho lo "   " B "$variable"
+            cecho ly "   " B "$variable"
         done
         cecho lr "\n Please set the above variables properly and run " B "BaHaMAS" uB " again.\n"
+        exit -1
+    else
+        for index in "${!neededFolders[@]}"; do
+            if [ -d "${neededFolders[$index]}" ]; then
+                unset -v 'neededFolders[$index]'
+            fi
+        done
+        for index in "${!neededFiles[@]}"; do
+            if [ -f "${neededFiles[$index]}" ]; then
+                unset -v 'neededFiles[$index]'
+            fi
+        done
+    fi
+
+    #If required files/folders were not found, print error and exit
+    if [ ${#neededFolders[@]} -ne 0 ] || [ ${#neededFiles[@]} -ne 0 ]; then
+        cecho "\n " lo "To run " B "BaHaMAS" uB " $option "\
+              lo "option, the following specified " lb B "folder(s)" uB lo " or " wg "file(s)" lo " must " B "exist" uB ":\n"
+        for variable in "${neededFolders[@]}"; do
+            cecho lb "   " B "$variable"
+        done
+        for variable in "${neededFiles[@]}"; do
+            cecho wg "   $variable"
+        done
+        cecho lr "\n Please check the path variables in the " B "BaHaMAS" uB " setup and run the program again.\n"
         exit -1
     fi
 }
