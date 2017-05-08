@@ -284,3 +284,24 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
         exit -1
     fi
 }
+
+
+#Make final additional checks on paths to beta folders
+function CheckBetaFoldersPathsVariables() {
+    if [ $HOME_DIR_WITH_BETAFOLDERS != "$(pwd)" ]; then
+        cecho "\n"\
+              lr " Constructed path to directory containing beta folders\n"\
+              ly "   $HOME_DIR_WITH_BETAFOLDERS"\
+              lr " does not match the actual position"\
+              ly "   $(pwd)"\
+              lr " Aborting...\n"
+        exit -1
+    fi
+    if [ ! -d $WORK_DIR_WITH_BETAFOLDERS ]; then
+        cecho "\n"\
+              lr " Constructed path to directory containing beta folders on scratch\n"\
+              ly "   $WORK_DIR_WITH_BETAFOLDERS"\
+              lr " seems not to exist! Aborting...\n"
+        exit -1
+    fi
+}

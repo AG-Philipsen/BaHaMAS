@@ -65,37 +65,17 @@ if [ "$CALL_DATABASE" = "TRUE" ]; then
 fi
 #-----------------------------------------------------------------------------------------------------------------#
 
-
-#-----------------------------------------------------------------------------------------------------------------#
-# Check if the necessary scripts exist.
-if [ ! -f $HMC_GLOBALPATH ]; then
-    printf "\n\e[0;31m The following file has not been found:\n\e[0m"
-    printf "\n\e[0;31m   - $HMC_GLOBALPATH\e[0m"
-    printf "\n\n\e[0;31m Aborting...\n\n\e[0m"
-    exit -1
-fi
-#-----------------------------------------------------------------------------------------------------------------#
-
-
-#-----------------------------------------------------------------------------------------------------------------#
-# Perform all the checks on the path, reading out some variables
-
-CheckSingleOccurrenceInPath $(echo $HOME_DIR | sed 's/\// /g') "${NFLAVOUR_PREFIX}${NFLAVOUR_REGEX}" "${CHEMPOT_PREFIX}${CHEMPOT_REGEX}" "${MASS_PREFIX}${MASS_REGEX}" "${NTIME_PREFIX}${NTIME_REGEX}" "${NSPACE_PREFIX}${NSPACE_REGEX}"
-
-ReadParametersFromPath $(pwd)
-
-HOME_DIR_WITH_BETAFOLDERS="$HOME_DIR/$SIMULATION_PATH$PARAMETERS_PATH"
-WORK_DIR_WITH_BETAFOLDERS="$WORK_DIR/$SIMULATION_PATH$PARAMETERS_PATH"
-
-if [ "$HOME_DIR_WITH_BETAFOLDERS" != "$(pwd)" ]; then
-    printf "\n\e[0;31m HOME_DIR_WITH_BETAFOLDERS=$HOME_DIR_WITH_BETAFOLDERS\n"
-    printf "\e[0;31m Constructed path to directory containing beta folders does not match the actual position! Aborting...\n\n\e[0m"
-    exit -1
-fi
-if [ ! -d $WORK_DIR_WITH_BETAFOLDERS ]; then
-    printf "\n\e[0;31m WORK_DIR_WITH_BETAFOLDERS=$WORK_DIR_WITH_BETAFOLDERS\n"
-    printf "\e[0;31m seems not to be an existing folder! Aborting...\n\n\e[0m"
-    exit -1
+if [ $CALL_DATABASE = 'FALSE' ]; then
+    #Perform all the checks on the path, reading out parameters and testing additional paths
+    CheckSingleOccurrenceInPath $(sed 's/\// /g' <<< "$HOME_DIR")\
+                                "${NFLAVOUR_PREFIX}${NFLAVOUR_REGEX}"\
+                                "${CHEMPOT_PREFIX}${CHEMPOT_REGEX}"\
+                                "${MASS_PREFIX}${MASS_REGEX}"\
+                                "${NTIME_PREFIX}${NTIME_REGEX}"\
+                                "${NSPACE_PREFIX}${NSPACE_REGEX}"
+    ReadParametersFromPath $(pwd)
+    DeclareBetaFoldersPathsAsGlobalVariables
+    CheckBetaFoldersPathsVariables
 fi
 
 #-----------------------------------------------------------------------------------------------------------------#
@@ -104,15 +84,6 @@ fi
 #-----------------------------------------------------------------------------------------------------------------#
 # Treat each mutually exclusive option separately, even if some steps are in common. This improves readability!
 # It is also evident what the script does in the various options!
-
-SUBMIT_BETA_ARRAY=()
-PROBLEM_BETA_ARRAY=() #Arrays that will contain the beta values that actually will be processed
-declare -A INTSTEPS0_ARRAY
-declare -A INTSTEPS1_ARRAY
-declare -A CONTINUE_RESUMETRAJ_ARRAY
-declare -A MASS_PRECONDITIONING_ARRAY
-declare -A STARTCONFIGURATION_GLOBALPATH #NOTE: Before bash 4.2 associative array are LOCAL by default (from bash 4.2 one can do "declare -g ARRAY" to make it global).
-                                         #      This is the reason why they are declared here and not in ReadBetaValuesFromFile where it would be natural!!
 
 if [ ${#MUTUALLYEXCLUSIVEOPTS_PASSED[@]} = 0 ]; then
 

@@ -86,7 +86,8 @@ function DeclarePathRelatedGlobalVariables(){
 #----------------------------------------------------------------------------------#
 
 function DeclareBaHaMASGlobalVariables(){
-    BaHaMAS_clusterScheduler="$(SelectClusterSchedulerName)"
+
+    #Variables about general options
     BETASFILE='betas'
     MEASUREMENTS=20000
     NSAVE=100
@@ -95,13 +96,19 @@ function DeclareBaHaMASGlobalVariables(){
     INTSTEPS1=5
     INTSTEPS2=5
     CGBS=50
-    MEASURE_PBP='TRUE'
     USE_MULTIPLE_CHAINS='TRUE'
+    MEASURE_PBP='TRUE'
     JOBS_STATUS_PREFIX='jobs_status_'
-    #Inverter Options for the moment hard-coded
-    SRUN_COMMANDSFILE_FOR_INVERSION="srunCommandsFileForInversions"
-    CORRELATOR_DIRECTION="0"
-    NUMBER_SOURCES_FOR_CORRELATORS="8"
+
+    #Internal BaHaMAS variables
+    BaHaMAS_clusterScheduler="$(SelectClusterSchedulerName)"
+    SUBMIT_BETA_ARRAY=()
+    PROBLEM_BETA_ARRAY=()
+    declare -A INTSTEPS0_ARRAY
+    declare -A INTSTEPS1_ARRAY
+    declare -A CONTINUE_RESUMETRAJ_ARRAY
+    declare -A MASS_PRECONDITIONING_ARRAY
+    declare -A STARTCONFIGURATION_GLOBALPATH
 
     #Mutually exclusive options variables
     SUBMIT='FALSE'
@@ -124,6 +131,9 @@ function DeclareBaHaMASGlobalVariables(){
     UNCOMMENT_BETAS_SEED_ARRAY=()
     UNCOMMENT_BETAS_ARRAY=()
     INVERT_CONFIGURATIONS='FALSE'
+    SRUN_COMMANDSFILE_FOR_INVERSION="srunCommandsFileForInversions"
+    CORRELATOR_DIRECTION="0"
+    NUMBER_SOURCES_FOR_CORRELATORS="8"
     CALL_DATABASE='FALSE'
     DATABASE_OPTIONS=()
 
@@ -150,4 +160,12 @@ function DeclareBaHaMASGlobalVariables(){
     HIGH_ACCEPTANCE_THRESHOLD=78
     TOO_HIGH_ACCEPTANCE_THRESHOLD=90
     DELTA_S_THRESHOLD=6
+}
+
+# The following variables cannot be declared at the
+# beginning of BaHaMAS, since they need some information
+# which needs to be extracted from the path.
+function DeclareBetaFoldersPathsAsGlobalVariables(){
+    HOME_DIR_WITH_BETAFOLDERS="$HOME_DIR/$SIMULATION_PATH$PARAMETERS_PATH"
+    WORK_DIR_WITH_BETAFOLDERS="$WORK_DIR/$SIMULATION_PATH$PARAMETERS_PATH"
 }
