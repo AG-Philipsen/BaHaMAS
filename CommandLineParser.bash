@@ -6,13 +6,13 @@ source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParser_aux.bash
 
 function ParseCommandLineOption(){
 
-    local commandLineOptions mutuallyExclusiveOptions
+    local commandLineOptions mutuallyExclusiveOptions mutuallyExclusiveOptionsPassed
     commandLineOptions=( $(SplitCombinedShortOptionsInSingleOptions "$@") )
     mutuallyExclusiveOptions=( "-s | --submit"        "-c | --continue"    "-C | --continueThermalization"
                                "-t | --thermalize"    "-l | --liststatus"  "-U | --uncommentBetas"
                                "-u | --commentBetas"  "-d | --dataBase"    "-i | --invertConfigurations"
                                "--submitonly"  "--accRateReport"  "--cleanOutputFiles"  "--completeBetasFile")
-    MUTUALLYEXCLUSIVEOPTS_PASSED=()
+    mutuallyExclusiveOptionsPassed=()
 
     while [ "$1" != "" ]; do
         case $1 in
@@ -102,27 +102,27 @@ function ParseCommandLineOption(){
                 CLUSTER_NODE=${1#*=}; shift ;;
 
             -s | --submit )
-                MUTUALLYEXCLUSIVEOPTS_PASSED+=( "$1" )
+                mutuallyExclusiveOptionsPassed+=( "$1" )
                 SUBMIT="TRUE"
                 shift;;
 
             --submitonly )
-                MUTUALLYEXCLUSIVEOPTS_PASSED+=( "$1" )
+                mutuallyExclusiveOptionsPassed+=( "$1" )
                 SUBMITONLY="TRUE"
                 shift;;
 
             -t | --thermalize )
-                MUTUALLYEXCLUSIVEOPTS_PASSED+=( "$1" )
+                mutuallyExclusiveOptionsPassed+=( "$1" )
                 THERMALIZE="TRUE"
                 shift;;
 
             -c | --continue )
-                MUTUALLYEXCLUSIVEOPTS_PASSED+=( "$1" )
+                mutuallyExclusiveOptionsPassed+=( "$1" )
                 CONTINUE="TRUE"
                 shift;;
 
             -c=* | --continue=* )
-                MUTUALLYEXCLUSIVEOPTS_PASSED+=( "$1" )
+                mutuallyExclusiveOptionsPassed+=( "$1" )
                 CONTINUE="TRUE"
                 CONTINUE_NUMBER=${1#*=};
                 if [[ ! $CONTINUE_NUMBER =~ ^[[:digit:]]+$ ]];then
@@ -132,12 +132,12 @@ function ParseCommandLineOption(){
                 shift;;
 
             -C | --continueThermalization )
-                MUTUALLYEXCLUSIVEOPTS_PASSED+=( "$1" )
+                mutuallyExclusiveOptionsPassed+=( "$1" )
                 CONTINUE_THERMALIZATION="TRUE"
                 shift;;
 
             -C=* | --continueThermalization=* )
-                MUTUALLYEXCLUSIVEOPTS_PASSED+=( "$1" )
+                mutuallyExclusiveOptionsPassed+=( "$1" )
                 CONTINUE_THERMALIZATION="TRUE"
                 CONTINUE_NUMBER=${1#*=};
                 if [[ ! $CONTINUE_NUMBER =~ ^[[:digit:]]+$ ]];then
@@ -147,7 +147,7 @@ function ParseCommandLineOption(){
                 shift;;
 
             -l | --liststatus )
-                MUTUALLYEXCLUSIVEOPTS_PASSED+=( "$1" )
+                mutuallyExclusiveOptionsPassed+=( "$1" )
                 LISTSTATUS="TRUE"
                 shift;;
 
@@ -164,12 +164,12 @@ function ParseCommandLineOption(){
             --accRateReport=* )
                 INTERVAL=${1#*=}
                 [[ ! $INTERVAL =~ [[:digit:]]+ ]] && printf "\n\e[0;31m Interval for --accRateReport option must be an integer number! Aborting...\n\n\e[0m" && exit -1
-                MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--accRateReport" )
+                mutuallyExclusiveOptionsPassed+=( "--accRateReport" )
                 ACCRATE_REPORT="TRUE"
                 shift ;;
 
             --cleanOutputFiles )
-                MUTUALLYEXCLUSIVEOPTS_PASSED+=( "$1" )
+                mutuallyExclusiveOptionsPassed+=( "$1" )
                 CLEAN_OUTPUT_FILES="TRUE"
                 shift ;;
 
@@ -179,7 +179,7 @@ function ParseCommandLineOption(){
                 shift;;
 
             --completeBetasFile* )
-                MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--completeBetasFile" )
+                mutuallyExclusiveOptionsPassed+=( "--completeBetasFile" )
                 COMPLETE_BETAS_FILE="TRUE"
                 local TMP_STRING=${1#*File}
                 if [ "$TMP_STRING" != "" ]; then
@@ -192,7 +192,7 @@ function ParseCommandLineOption(){
                 shift ;;
 
             -U | --uncommentBetas | -u | --commentBetas )
-                MUTUALLYEXCLUSIVEOPTS_PASSED+=( "$1" )
+                mutuallyExclusiveOptionsPassed+=( "$1" )
                 if [ $1 = '-U' ] || [ $1 = '--uncommentBetas' ]; then
                     COMMENT_BETAS="FALSE"
                     UNCOMMENT_BETAS="TRUE"
@@ -216,14 +216,14 @@ function ParseCommandLineOption(){
                 ;;
 
             -i | --invertConfigurations)
-                MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--invertConfigurations" )
+                mutuallyExclusiveOptionsPassed+=( "--invertConfigurations" )
                 INVERT_CONFIGURATIONS="TRUE"
                 shift
                 ;;
 
             -d | --dataBase)
                 CALL_DATABASE="TRUE"
-                MUTUALLYEXCLUSIVEOPTS_PASSED+=( "--database" )
+                mutuallyExclusiveOptionsPassed+=( "--database" )
                 shift
                 DATABASE_OPTIONS=( $@ )
                 shift $#
@@ -233,7 +233,7 @@ function ParseCommandLineOption(){
         esac
     done
 
-    if [ ${#MUTUALLYEXCLUSIVEOPTS_PASSED[@]} -gt 1 ]; then
+    if [ ${#mutuallyExclusiveOptionsPassed[@]} -gt 1 ]; then
         printf "\n\e[0;31m The options\n\n\e[1m"
         for OPT in "${MUTUALLYEXCLUSIVEOPTS[@]}"; do
             printf "  %s\n" "$OPT"

@@ -57,14 +57,6 @@ CheckUserDefinedVariablesAndDefineDependentAdditionalVariables
 ParseCommandLineOption "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}"
 CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase
 
-
-#-----------------------------------------------------------------------------------------------------------------#
-if [ "$CALL_DATABASE" = "TRUE" ]; then
-    projectStatisticsDatabase ${DATABASE_OPTIONS[@]}
-    exit 0
-fi
-#-----------------------------------------------------------------------------------------------------------------#
-
 if [ $CALL_DATABASE = 'FALSE' ]; then
     #Perform all the checks on the path, reading out parameters and testing additional paths
     CheckSingleOccurrenceInPath $(sed 's/\// /g' <<< "$HOME_DIR")\
@@ -79,34 +71,30 @@ if [ $CALL_DATABASE = 'FALSE' ]; then
 fi
 
 #-----------------------------------------------------------------------------------------------------------------#
-
-
+#  Treat each mutually exclusive option separately, even if some steps are in common. This improves readability!  #
 #-----------------------------------------------------------------------------------------------------------------#
-# Treat each mutually exclusive option separately, even if some steps are in common. This improves readability!
-# It is also evident what the script does in the various options!
 
-if [ ${#MUTUALLYEXCLUSIVEOPTS_PASSED[@]} = 0 ]; then
+if [ $CALL_DATABASE = 'TRUE' ]; then
 
-    ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
-    ProduceInputFileAndJobScriptForEachBeta
+    projectStatisticsDatabase ${DATABASE_OPTIONS[@]}
 
-elif [ $SUBMITONLY = "TRUE" ]; then
+elif [ $SUBMITONLY = 'TRUE' ]; then
 
     ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
     ProcessBetaValuesForSubmitOnly
     SubmitJobsForValidBetaValues #TODO: Declare all possible local variable in this function as local!
 
-elif [ $SUBMIT = "TRUE" ]; then
+elif [ $SUBMIT = 'TRUE' ]; then
 
     ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
     ProduceInputFileAndJobScriptForEachBeta
     SubmitJobsForValidBetaValues #TODO: Declare all possible local variable in this function as local!
 
-elif [ $THERMALIZE = "TRUE" ] || [ $CONTINUE_THERMALIZATION = "TRUE" ]; then
+elif [ $THERMALIZE = 'TRUE' ] || [ $CONTINUE_THERMALIZATION = 'TRUE' ]; then
 
-    if [ $USE_MULTIPLE_CHAINS = "FALSE" ]; then
-        [ $THERMALIZE = "TRUE" ] && printf "\n\e[0;31m Option -t | --thermalize implemented ONLY combined not with --doNotUseMultipleChains option! Aborting...\n\n\e[0m"
-        [ $CONTINUE_THERMALIZATION = "TRUE" ] && printf "\n\e[0;31m Option -C | --continueThermalization implemented ONLY combined not with --doNotUseMultipleChains option! Aborting...\n\n\e[0m"
+    if [ $USE_MULTIPLE_CHAINS = 'FALSE' ]; then
+        [ $THERMALIZE = 'TRUE' ] && printf "\n\e[0;31m Option -t | --thermalize implemented ONLY combined not with --doNotUseMultipleChains option! Aborting...\n\n\e[0m"
+        [ $CONTINUE_THERMALIZATION = 'TRUE' ] && printf "\n\e[0;31m Option -C | --continueThermalization implemented ONLY combined not with --doNotUseMultipleChains option! Aborting...\n\n\e[0m"
         exit -1
     fi
     #Here we fix the beta postfix just looking for thermalized conf from hot at the actual parameters (no matter at which beta);
@@ -120,14 +108,14 @@ elif [ $THERMALIZE = "TRUE" ] || [ $CONTINUE_THERMALIZATION = "TRUE" ]; then
     else
         BETA_POSTFIX="_thermalizeFromConf"
     fi
-    if [ $MEASURE_PBP = "TRUE" ]; then
+    if [ $MEASURE_PBP = 'TRUE' ]; then
         printf "\n \e[1;33;4mMeasurement of PBP switched off during thermalization!!\n\e[0m"
-        MEASURE_PBP="FALSE"
+        MEASURE_PBP='FALSE'
     fi
 
     ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
 
-    if [ $THERMALIZE = "TRUE" ]; then
+    if [ $THERMALIZE = 'TRUE' ]; then
         ProduceInputFileAndJobScriptForEachBeta
         CONFIRM="";
         printf "\n\e[0;33m Check if everything is fine. Would you like to submit the jobs (Y/N)? \e[0m"
@@ -142,48 +130,54 @@ elif [ $THERMALIZE = "TRUE" ] || [ $CONTINUE_THERMALIZATION = "TRUE" ]; then
             fi
         done
         unset -v 'CONFIRM'
-    elif [ $CONTINUE_THERMALIZATION = "TRUE" ]; then
+    elif [ $CONTINUE_THERMALIZATION = 'TRUE' ]; then
         ProcessBetaValuesForContinue
     fi
     SubmitJobsForValidBetaValues #TODO: Declare all possible local variable in this function as local!
 
-elif [ $CONTINUE = "TRUE" ]; then
+elif [ $CONTINUE = 'TRUE' ]; then
 
     ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
     ProcessBetaValuesForContinue #TODO: Declare all possible local variable in this function as local! Use also only capital letters!
     SubmitJobsForValidBetaValues #TODO: Declare all possible local variable in this function as local!
 
-elif [ $LISTSTATUS = "TRUE" ]; then
+elif [ $LISTSTATUS = 'TRUE' ]; then
 
     ListJobStatus
 
-elif [ $ACCRATE_REPORT = "TRUE" ]; then
+elif [ $ACCRATE_REPORT = 'TRUE' ]; then
 
     ReadBetaValuesFromFile
     AcceptanceRateReport
 
-elif [ $CLEAN_OUTPUT_FILES = "TRUE" ]; then
+elif [ $CLEAN_OUTPUT_FILES = 'TRUE' ]; then
 
-    if [ $SECONDARY_OPTION_ALL = "TRUE" ]; then
+    if [ $SECONDARY_OPTION_ALL = 'TRUE' ]; then
         BETAVALUES=( $( ls $WORK_DIR_WITH_BETAFOLDERS | grep "^${BETA_PREFIX}${BETA_REGEX}" | awk '{print substr($1,2)}') )
     else
         ReadBetaValuesFromFile
     fi
     CleanOutputFiles
 
-elif [ $COMPLETE_BETAS_FILE = "TRUE" ]; then
+elif [ $COMPLETE_BETAS_FILE = 'TRUE' ]; then
 
     CompleteBetasFile
 
-elif [ $UNCOMMENT_BETAS = "TRUE" ] || [ $COMMENT_BETAS = "TRUE" ]; then
+elif [ $UNCOMMENT_BETAS = 'TRUE' ] || [ $COMMENT_BETAS = 'TRUE' ]; then
 
     UncommentEntriesInBetasFile
 
-elif [ $INVERT_CONFIGURATIONS = "TRUE" ]; then
+elif [ $INVERT_CONFIGURATIONS = 'TRUE' ]; then
 
     ReadBetaValuesFromFile
     ProcessBetaValuesForInversion
     SubmitJobsForValidBetaValues
+
+else
+
+    ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
+    ProduceInputFileAndJobScriptForEachBeta
+
 fi
 
 
