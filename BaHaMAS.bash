@@ -19,6 +19,7 @@
 #------------------------------------------------------------------------------------------------------#
 # Load auxiliary bash files that will be used.
 BaHaMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"
+source ${BaHaMAS_repositoryTopLevelPath}/SystemRequirements.bash          || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/UtilityFunctions.bash            || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/GlobalVariables.bash             || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/UserSpecificVariables.bash       || exit -2
@@ -37,7 +38,7 @@ source ${BaHaMAS_repositoryTopLevelPath}/ProjectStatisticsDatabase.bash   || exi
 #but it is worth so. Good reference http://redsymbol.net/articles/unofficial-bash-strict-mode
 #set -euo pipefail
 
-#Declare all variables
+#Declare all variables (color user decisions for output needed from very beginning)
 DeclarePathRelatedGlobalVariables
 DeclareUserDefinedGlobalVariables
 DeclareBaHaMASGlobalVariables
@@ -51,7 +52,8 @@ else
     SPECIFIED_COMMAND_LINE_OPTIONS=( "$@" )
 fi
 
-#Do some checks on variables, parse user option and do some more checks
+#Do some checks on system and variables, parse user option and do some more checks
+CheckSystemRequirements
 CheckWilsonStaggeredVariables
 CheckUserDefinedVariablesAndDefineDependentAdditionalVariables
 ParseCommandLineOption "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}"
