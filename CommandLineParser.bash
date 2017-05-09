@@ -4,10 +4,27 @@
 
 source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParser_aux.bash
 
+__static__PrintInvalidOptionErrorAndExit() {
+    cecho lr "\n Invalid option " ly "$1" lr " specified! Run " B "BaHaMAS" uB " with " ly "--help" lr " to get further information. Aborting...\n"; exit -1
+}
+__static__PrintOptionSpecificationErrorAndExit() {
+    cecho lr "\n The value of the option " ly "$1" lr " was not correctly specified! Aborting...\n"; exit -1
+}
+__static__PrintSecondaryOptionSpecificationErrorAndExit() {
+    cecho lr "\n The option " ly "$2" lr " is a secondary option of " ly "$1" lr " and it has to be given after it! Aborting...\n"; exit -1
+}
+
 function ParseCommandLineOption(){
 
-    local commandLineOptions mutuallyExclusiveOptions mutuallyExclusiveOptionsPassed
-    commandLineOptions=( $(SplitCombinedShortOptionsInSingleOptions "$@") )
+    local commandLineOptions mutuallyExclusiveOptions mutuallyExclusiveOptionsPassed option
+
+    #The following two lines are not combined to respect potential spaces in options
+    readarray -t commandLineOptions <<< "$(PrepareGivenOptionToBeProcessed "$@")"
+    readarray -t commandLineOptions <<< "$(SplitCombinedShortOptionsInSingleOptions "${commandLineOptions[@]}")"
+
+    #Reset argument function to be able to parse them
+    set -- "${commandLineOptions[@]}"
+
     mutuallyExclusiveOptions=( "-s | --submit"        "-c | --continue"    "-C | --continueThermalization"
                                "-t | --thermalize"    "-l | --liststatus"  "-U | --uncommentBetas"
                                "-u | --commentBetas"  "-d | --dataBase"    "-i | --invertConfigurations"
@@ -21,66 +38,120 @@ function ParseCommandLineOption(){
                 exit 0
                 shift;;
 
-            --jobscript_prefix=* )
-                JOBSCRIPT_PREFIX=${1#*=}; shift ;;
+            --jobscript_prefix )
+                if [[ $2 =~ ^- ]]; then
+                    __static__PrintOptionSpecificationErrorAndExit $1
+                else
+                    JOBSCRIPT_PREFIX="$2"
+                fi
+                shift 2 ;;
 
-            --chempot_prefix=* )
-                CHEMPOT_PREFIX=${1#*=}; shift ;;
+            --chempot_prefix )
+                if [[ $2 =~ ^- ]]; then
+                    __static__PrintOptionSpecificationErrorAndExit $1
+                else
+                    CHEMPOT_PREFIX="$2"
+                fi
+                shift 2 ;;
 
-            --kappa_prefix=* )
-                [ $STAGGERED = "TRUE" ] && printf "\n\e[0;31m The option --kappa_prefix can be used only in WILSON simulations! Aborting...\n\n\e[0m" && exit -1
-                MASS_PREFIX=${1#*=}; shift ;;
+            --mass_prefix )
+                if [[ $2 =~ ^- ]]; then
+                    __static__PrintOptionSpecificationErrorAndExit $1
+                else
+                    MASS_PREFIX="$2"
+                fi
+                shift 2 ;;
 
-            --mass_prefix=* )
-                [ $WILSON = "TRUE" ] && printf "\n\e[0;31m The option --mass_prefix can be used only in STAGGERED simulations! Aborting...\n\n\e[0m" && exit -1
-                MASS_PREFIX=${1#*=}; shift ;;
+            --ntime_prefix )
+                if [[ $2 =~ ^- ]]; then
+                    __static__PrintOptionSpecificationErrorAndExit $1
+                else
+                    NTIME_PREFIX="$2"
+                fi
+                shift 2 ;;
 
-            --ntime_prefix=* )
-                NTIME_PREFIX=${1#*=}; shift ;;
+            --nspace_prefix )
+                if [[ $2 =~ ^- ]]; then
+                    __static__PrintOptionSpecificationErrorAndExit $1
+                else
+                    NSPACE_PREFIX="$2"
+                fi
+                shift 2 ;;
 
-            --nspace_prefix=* )
-                NSPACE_PREFIX=${1#*=}; shift ;;
+            --beta_prefix )
+                if [[ $2 =~ ^- ]]; then
+                    __static__PrintOptionSpecificationErrorAndExit $1
+                else
+                    BETA_PREFIX"$2"
+                fi
+                shift 2 ;;
 
-            --beta_prefix=* )
-                BETA_PREFIX=${1#*=}; shift ;;
+            --betasfile )
+                if [[ $2 =~ ^- ]]; then
+                    __static__PrintOptionSpecificationErrorAndExit $1
+                else
+                    BETASFILE="$2"
+                fi
+                shift 2 ;;
 
-            --betasfile=* )
-                BETASFILE=${1#*=}; shift ;;
-
-            --chempot=* )
-                CHEMPOT=${1#*=}; shift ;;
-
-            --kappa=* )
-                MASS=${1#*=}; shift ;;
-
-            -w=* | --walltime=* )
-                WALLTIME=${1#*=}
-                if [[ $WALLTIME =~ ^([[:digit:]]+[dhms])+$ ]]; then
-                    WALLTIME=$(TimeStringToSecond $WALLTIME)
-                    WALLTIME=$(SecondsToTimeStringWithDays $WALLTIME)
+            -w | --walltime )
+                if [[ $2 =~ ^([0-9]+[dhms])+$ ]]; then
+                    WALLTIME=$(SecondsToTimeStringWithDays $(TimeStringToSecond $2) )
+                else
+                    WALLTIME="$2"
                 fi
                 if [[ ! $WALLTIME =~ ^([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]]; then
-                    printf "\n\e[0;31m Specified walltime format invalid! Aborting...\n\n\e[0m" && exit -1
+                    __static__PrintOptionSpecificationErrorAndExit $1
                 fi
-                shift ;;
+                shift 2 ;;
 
-            -m=* | --measurements=* )
-                MEASUREMENTS=${1#*=}; shift ;;
+            -m | --measurements )
+                if [[ ! $2 =~ ^[0-9]+$ ]]; then
+                    __static__PrintOptionSpecificationErrorAndExit $1
+                else
+                    MEASUREMENTS=$2
+                fi
+                shift 2 ;;
 
-            -f=* | --confSaveFrequency=* )
-                NSAVE=${1#*=}; shift ;;
+            -f | --confSaveFrequency )
+                if [[ ! $2 =~ ^[0-9]+$ ]]; then
+                    __static__PrintOptionSpecificationErrorAndExit $1
+                else
+                    NSAVE=$2
+                fi
+                shift 2 ;;
 
-            -F=* | --confSavePointFrequency=* )
-                NSAVEPOINT=${1#*=}; shift ;;
+            -F | --confSavePointFrequency )
+                if [[ ! $2 =~ ^[0-9]+$ ]]; then
+                    __static__PrintOptionSpecificationErrorAndExit $1
+                else
+                    NSAVEPOINT=$2
+                fi
+                shift 2 ;;
 
-            --intsteps0=* )
-                INTSTEPS0=${1#*=}; shift ;;
+            --intsteps0 )
+                if [[ ! $2 =~ ^[0-9]+$ ]]; then
+                    __static__PrintOptionSpecificationErrorAndExit $1
+                else
+                    INTSTEPS0=$2
+                fi
+                shift 2 ;;
 
-            --intsteps1=* )
-                INTSTEPS1=${1#*=}; shift ;;
+            --intsteps1 )
+                if [[ ! $2 =~ ^[0-9]+$ ]]; then
+                    __static__PrintOptionSpecificationErrorAndExit $1
+                else
+                    INTSTEPS1=$2
+                fi
+                shift 2 ;;
 
-            --cgbs=* )
-                CGBS=${1#*=}; shift ;;
+            --cgbs )
+                if [[ ! $2 =~ ^[0-9]+$ ]]; then
+                    __static__PrintOptionSpecificationErrorAndExit $1
+                else
+                    CGBS=$2
+                fi
+                shift 2 ;;
 
             -p | --doNotMeasurePbp )
                 MEASURE_PBP="FALSE"; shift ;;
@@ -92,107 +163,133 @@ function ParseCommandLineOption(){
                 fi
                 shift ;;
 
-            --partition=* )
-                CLUSTER_PARTITION=${1#*=}; shift ;;
+            --partition )
+                if [[ $2 =~ ^- ]]; then
+                    __static__PrintOptionSpecificationErrorAndExit $1
+                else
+                    CLUSTER_PARTITION="$2"
+                fi
+                shift 2 ;;
 
-            --constraint=* )
-                CLUSTER_CONSTRAINT=${1#*=}; shift ;;
+            --constraint )
+                if [[ $2 =~ ^- ]]; then
+                    __static__PrintOptionSpecificationErrorAndExit $1
+                else
+                    CLUSTER_CONSTRAINT="$2"
+                fi
+                shift 2 ;;
 
-            --node=* )
-                CLUSTER_NODE=${1#*=}; shift ;;
+            --node )
+                if [[ $2 =~ ^- ]]; then
+                    __static__PrintOptionSpecificationErrorAndExit $1
+                else
+                    CLUSTER_NODE="$2"
+                fi
+                shift 2 ;;
 
             -s | --submit )
-                mutuallyExclusiveOptionsPassed+=( "$1" )
+                mutuallyExclusiveOptionsPassed+=( $1 )
                 SUBMIT="TRUE"
                 shift;;
 
             --submitonly )
-                mutuallyExclusiveOptionsPassed+=( "$1" )
+                mutuallyExclusiveOptionsPassed+=( $1 )
                 SUBMITONLY="TRUE"
                 shift;;
 
             -t | --thermalize )
-                mutuallyExclusiveOptionsPassed+=( "$1" )
+                mutuallyExclusiveOptionsPassed+=( $1 )
                 THERMALIZE="TRUE"
                 shift;;
 
             -c | --continue )
-                mutuallyExclusiveOptionsPassed+=( "$1" )
+                mutuallyExclusiveOptionsPassed+=( $1 )
                 CONTINUE="TRUE"
-                shift;;
-
-            -c=* | --continue=* )
-                mutuallyExclusiveOptionsPassed+=( "$1" )
-                CONTINUE="TRUE"
-                CONTINUE_NUMBER=${1#*=};
-                if [[ ! $CONTINUE_NUMBER =~ ^[[:digit:]]+$ ]];then
-                    printf "\n\e[0;31m The specified number for --continue=[number] must be an integer containing at least one or more digits! Aborting...\n\n\e[0m"
-                    exit -1
+                if [[ ! $2 =~ ^- ]]; then
+                    if [[ ! $2 =~ ^[0-9]+$ ]];then
+                        __static__PrintOptionSpecificationErrorAndExit $1
+                    else
+                        CONTINUE_NUMBER=$2
+                        shift
+                    fi
                 fi
-                shift;;
+                shift ;;
 
             -C | --continueThermalization )
-                mutuallyExclusiveOptionsPassed+=( "$1" )
+                mutuallyExclusiveOptionsPassed+=( $1 )
                 CONTINUE_THERMALIZATION="TRUE"
-                shift;;
-
-            -C=* | --continueThermalization=* )
-                mutuallyExclusiveOptionsPassed+=( "$1" )
-                CONTINUE_THERMALIZATION="TRUE"
-                CONTINUE_NUMBER=${1#*=};
-                if [[ ! $CONTINUE_NUMBER =~ ^[[:digit:]]+$ ]];then
-                    printf "\n\e[0;31m The specified number for --continueThermalization=[number] must be an integer containing at least one or more digits! Aborting...\n\n\e[0m"
-                    exit -1
+                if [[ ! $2 =~ ^- ]]; then
+                    if [[ ! $2 =~ ^[0-9]+$ ]];then
+                        __static__PrintOptionSpecificationErrorAndExit $1
+                    else
+                        CONTINUE_NUMBER=$2
+                        shift
+                    fi
                 fi
-                shift;;
+                shift ;;
 
             -l | --liststatus )
-                mutuallyExclusiveOptionsPassed+=( "$1" )
+                mutuallyExclusiveOptionsPassed+=( $1 )
                 LISTSTATUS="TRUE"
                 shift;;
 
             --measureTime )
-                [ $LISTSTATUS = "FALSE" ] && printf "\n\e[0;31mSecondary option --measureTime must be given after the primary one \"-l | --liststatus\"! Aborting...\n\n\e[0m" && exit -1
-                LISTSTATUS_MEASURE_TIME="TRUE"
-                shift;;
+                if [ $LISTSTATUS = "FALSE" ]; then
+                    __static__PrintSecondaryOptionSpecificationErrorAndExit "-l | --liststatus" $1
+                else
+                    LISTSTATUS_MEASURE_TIME="TRUE"
+                fi
+                shift ;;
 
             --showOnlyQueued )
-                [ $LISTSTATUS = "FALSE" ] && printf "\n\e[0;31mSecondary option --showOnlyQueued must be given after the primary one \"-l | --liststatus\"! Aborting...\n\n\e[0m" && exit -1
-                LISTSTATUS_SHOW_ONLY_QUEUED="TRUE"
-                shift;;
+                if [ $LISTSTATUS = "FALSE" ]; then
+                    __static__PrintSecondaryOptionSpecificationErrorAndExit "-l | --liststatus" $1
+                else
+                    LISTSTATUS_SHOW_ONLY_QUEUED="TRUE"
+                fi
+                shift ;;
 
-            --accRateReport=* )
-                INTERVAL=${1#*=}
-                [[ ! $INTERVAL =~ [[:digit:]]+ ]] && printf "\n\e[0;31m Interval for --accRateReport option must be an integer number! Aborting...\n\n\e[0m" && exit -1
-                mutuallyExclusiveOptionsPassed+=( "--accRateReport" )
+            --accRateReport )
+                mutuallyExclusiveOptionsPassed+=( $1 )
                 ACCRATE_REPORT="TRUE"
+                if [[ ! $2 =~ ^- ]]; then
+                    if [[ ! $2 =~ ^[0-9]+$ ]];then
+                        __static__PrintOptionSpecificationErrorAndExit $1
+                    else
+                        INTERVAL=$2
+                        shift
+                    fi
+                fi
                 shift ;;
 
             --cleanOutputFiles )
-                mutuallyExclusiveOptionsPassed+=( "$1" )
+                mutuallyExclusiveOptionsPassed+=( $1 )
                 CLEAN_OUTPUT_FILES="TRUE"
                 shift ;;
 
             --all )
-                [ $CLEAN_OUTPUT_FILES = "FALSE" ] && printf "\n\e[0;31mSecondary option --all must be given after the primary one! Aborting...\n\n\e[0m" && exit -1
-                SECONDARY_OPTION_ALL="TRUE"
-                shift;;
+                if [ $CLEAN_OUTPUT_FILES = "FALSE" ]; then
+                    __static__PrintSecondaryOptionSpecificationErrorAndExit "--cleanOutputFiles" $1
+                else
+                    SECONDARY_OPTION_ALL="TRUE"
+                fi
+                shift ;;
 
-            --completeBetasFile* )
-                mutuallyExclusiveOptionsPassed+=( "--completeBetasFile" )
+            --completeBetasFile )
+                mutuallyExclusiveOptionsPassed+=( $1 )
                 COMPLETE_BETAS_FILE="TRUE"
-                local TMP_STRING=${1#*File}
-                if [ "$TMP_STRING" != "" ]; then
-                    if [ ${TMP_STRING:0:1} == "=" ]; then
-                        NUMBER_OF_CHAINS_TO_BE_IN_THE_BETAS_FILE=${1#*=}
+                if [[ ! $2 =~ ^- ]]; then
+                    if [[ ! $2 =~ ^[0-9]+$ ]];then
+                        __static__PrintOptionSpecificationErrorAndExit $1
                     else
-                        printf "\n\e[0;31m Invalid option \e[1m$1\e[0;31m (see help for further information)! Aborting...\n\n\e[0m"
+                        NUMBER_OF_CHAINS_TO_BE_IN_THE_BETAS_FILE=$2
+                        shift
                     fi
                 fi
                 shift ;;
 
             -U | --uncommentBetas | -u | --commentBetas )
-                mutuallyExclusiveOptionsPassed+=( "$1" )
+                mutuallyExclusiveOptionsPassed+=( $1 )
                 if [ $1 = '-U' ] || [ $1 = '--uncommentBetas' ]; then
                     COMMENT_BETAS="FALSE"
                     UNCOMMENT_BETAS="TRUE"
@@ -212,33 +309,31 @@ function ParseCommandLineOption(){
                     fi
                     shift
                 done
-                shift
-                ;;
+                shift ;;
 
             -i | --invertConfigurations)
-                mutuallyExclusiveOptionsPassed+=( "--invertConfigurations" )
+                mutuallyExclusiveOptionsPassed+=( $1 )
                 INVERT_CONFIGURATIONS="TRUE"
-                shift
-                ;;
+                shift ;;
 
             -d | --dataBase)
                 CALL_DATABASE="TRUE"
-                mutuallyExclusiveOptionsPassed+=( "--database" )
+                mutuallyExclusiveOptionsPassed+=( $1 )
                 shift
                 DATABASE_OPTIONS=( $@ )
-                shift $#
-                ;;
+                shift $# ;;
 
-            * ) printf "\n\e[0;31m Invalid option \e[1m$1\e[0;31m (see help for further information)! Aborting...\n\n\e[0m" ; exit -1 ;;
+            * )
+                __static__PrintInvalidOptionErrorAndExit $1
         esac
     done
 
     if [ ${#mutuallyExclusiveOptionsPassed[@]} -gt 1 ]; then
-        printf "\n\e[0;31m The options\n\n\e[1m"
-        for OPT in "${MUTUALLYEXCLUSIVEOPTS[@]}"; do
-            printf "  %s\n" "$OPT"
+        cecho lr "\n The options"
+        for option in "${mutuallyExclusiveOptions[@]}"; do
+            cecho ly "   $option"
         done
-        printf "\n\e[0;31m are mutually exclusive and must not be combined! Aborting...\n\n\e[0m"
+        cecho lr " are mutually exclusive and cannot be combined! Aborting...\n"
         exit -1
     fi
 }
