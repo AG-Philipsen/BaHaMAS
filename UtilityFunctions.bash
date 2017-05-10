@@ -206,26 +206,3 @@ function ConvertFromBytesToHumanReadable()
         }
         {print human($1)}' <<< "$BYTES"
 }
-
-function UserSaidYes()
-{
-    local userAnswer
-    while read userAnswer; do
-        if [ "$userAnswer" = "Y" ]; then
-            return 0
-        elif [ "$userAnswer" = "N" ]; then
-            return 1
-        else
-            printf "\n Please enter Y (yes) or N (no): "
-        fi
-    done
-}
-
-function UserSaidNo()
-{
-    if UserSaidYes; then
-        return 1
-    else
-        return 0
-    fi
-}
