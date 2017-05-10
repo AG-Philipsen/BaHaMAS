@@ -21,7 +21,7 @@ function AcceptanceRateReport()
     else
         BETAVALUES_COPY=( ${BETAVALUES_COPY[@]} )
     fi
-      #Auxialiary arrays
+    #Auxialiary arrays
     local NRLINES_ARRAY=()
     local DATA_ARRAY=()
     local POSITION_BETA_STRING_IN_DATA_ARRAY=()

@@ -125,7 +125,7 @@ if [ $CLUSTER_NAME = 'LOEWE' ] && [ "$SQUEUE_OUTPUT" != "" ]; then
         unset -v 'EXTRACTED_JOB_INFORMATION'
     done && unset 'ID'
     SQUEUE_OUTPUT=$(awk --posix -v subFolder="${JOB_SUBMISSION_FOLDER:1}" \
-                                -v subTime="${JOB_SUBMISSION_TIME:1}" '
+                        -v subTime="${JOB_SUBMISSION_TIME:1}" '
                                 BEGIN{
                                     split(subFolder, tmpSubFold, "|")
                                     split(subTime, tmpSubTime, "|")
@@ -148,7 +148,7 @@ if [ $CLUSTER_NAME = 'LOEWE' ] && [ "$SQUEUE_OUTPUT" != "" ]; then
 fi
 
 if [ $LOCAL_JOBS = 'TRUE' ]; then
-        SQUEUE_OUTPUT="$(grep --color=never "${PWD}" <<< "$SQUEUE_OUTPUT")"
+    SQUEUE_OUTPUT="$(grep --color=never "${PWD}" <<< "$SQUEUE_OUTPUT")"
 fi
 
 #If any field is empty, fill it with empty word in order to have later all arrays with same number of elements

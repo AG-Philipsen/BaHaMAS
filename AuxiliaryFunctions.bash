@@ -119,7 +119,7 @@ function ReadBetaValuesFromFile()
                 else
                     cecho ""
                 fi
-            exit -1
+                exit -1
             fi
         done
 

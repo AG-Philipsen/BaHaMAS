@@ -55,10 +55,10 @@ function __static__CheckAboutProgram()
     if [[ ! $foundVersion =~ ^[0-9]([.0-9])* ]]; then
         cecho ly B "\n WARNING" uB ": Unable to recover " lo "$program" ly " version, skipping check on minimum requirement!"
     else
-       if __static__IsFoundVersionOlderThanRequired $requiredVersion $foundVersion; then
-           cecho lr "\n Version " ly "$foundVersion" lr " of " ly "$program" lr " was found but version " lg "$requiredVersion" lr " is required!"
-           return 1
-       fi
+        if __static__IsFoundVersionOlderThanRequired $requiredVersion $foundVersion; then
+            cecho lr "\n Version " ly "$foundVersion" lr " of " ly "$program" lr " was found but version " lg "$requiredVersion" lr " is required!"
+            return 1
+        fi
     fi
     return 0
 }

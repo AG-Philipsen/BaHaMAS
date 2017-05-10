@@ -21,10 +21,10 @@ function ProduceInputFileAndJobScriptForEachBeta_SLURM()
         local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$INDEX]}"
         if [ -d "$HOME_BETADIRECTORY" ]; then
             if [ $(ls $HOME_BETADIRECTORY | wc -l) -gt 0 ]; then
-            printf "\n\e[0;31m There are already files in $HOME_BETADIRECTORY.\n The value BETA = ${BETAVALUES_COPY[$INDEX]} will be skipped!\n\n\e[0m"
-            PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$INDEX]} )
-            unset BETAVALUES_COPY[$INDEX] #Here BETAVALUES_COPY becomes sparse
-            continue
+                printf "\n\e[0;31m There are already files in $HOME_BETADIRECTORY.\n The value BETA = ${BETAVALUES_COPY[$INDEX]} will be skipped!\n\n\e[0m"
+                PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$INDEX]} )
+                unset BETAVALUES_COPY[$INDEX] #Here BETAVALUES_COPY becomes sparse
+                continue
             fi
         fi
     done
@@ -54,33 +54,33 @@ function ProcessBetaValuesForSubmitOnly_SLURM()
     local BETAVALUES_COPY=(${BETAVALUES[@]})
     #-----------------------------------------#
     for BETA in "${!BETAVALUES_COPY[@]}"; do
-    local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$BETA]}"
-    local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$INPUTFILE_NAME"
-    if [ ! -d $HOME_BETADIRECTORY ]; then
-        printf "\n\e[0;31m Directory $HOME_BETADIRECTORY not existing. The value beta = ${BETAVALUES_COPY[$BETA]} will be skipped!\n\n\e[0m"
-        PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$BETA]} )
-        unset BETAVALUES_COPY[$BETA] #Here BETAVALUES_COPY becomes sparse
-        continue
-    else
-        #$HOME_BETADIRECTORY already exists. Check if there are files in $HOME_BETADIRECTORY.
-        if [ -f "$INPUTFILE_GLOBALPATH" ]; then
-        # In the home betadirectory there should be ONLY the inputfile
-        if [ $(ls $HOME_BETADIRECTORY | wc -l) -ne 1 ]; then
-            printf "\n\e[0;31m There are already files in $HOME_BETADIRECTORY beyond the input file."
-            printf " The value beta = ${BETAVALUES_COPY[$BETA]} will be skipped!\n\n\e[0m"
+        local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$BETA]}"
+        local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$INPUTFILE_NAME"
+        if [ ! -d $HOME_BETADIRECTORY ]; then
+            printf "\n\e[0;31m Directory $HOME_BETADIRECTORY not existing. The value beta = ${BETAVALUES_COPY[$BETA]} will be skipped!\n\n\e[0m"
             PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$BETA]} )
             unset BETAVALUES_COPY[$BETA] #Here BETAVALUES_COPY becomes sparse
             continue
-        fi
         else
-        printf "\n\e[0;31m The following intput-file is missing:\n\e[0m"
-        printf "\n\e[0;31m    $INPUTFILE_GLOBALPATH\e[0m"
-        printf "\n\e[0;31m The value beta = ${BETAVALUES_COPY[$BETA]} will be skipped!\n\n\e[0m"
-        PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$BETA]} )
-        unset BETAVALUES_COPY[$BETA] #Here BETAVALUES_COPY becomes sparse
-        continue
+            #$HOME_BETADIRECTORY already exists. Check if there are files in $HOME_BETADIRECTORY.
+            if [ -f "$INPUTFILE_GLOBALPATH" ]; then
+                # In the home betadirectory there should be ONLY the inputfile
+                if [ $(ls $HOME_BETADIRECTORY | wc -l) -ne 1 ]; then
+                    printf "\n\e[0;31m There are already files in $HOME_BETADIRECTORY beyond the input file."
+                    printf " The value beta = ${BETAVALUES_COPY[$BETA]} will be skipped!\n\n\e[0m"
+                    PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$BETA]} )
+                    unset BETAVALUES_COPY[$BETA] #Here BETAVALUES_COPY becomes sparse
+                    continue
+                fi
+            else
+                printf "\n\e[0;31m The following intput-file is missing:\n\e[0m"
+                printf "\n\e[0;31m    $INPUTFILE_GLOBALPATH\e[0m"
+                printf "\n\e[0;31m The value beta = ${BETAVALUES_COPY[$BETA]} will be skipped!\n\n\e[0m"
+                PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$BETA]} )
+                unset BETAVALUES_COPY[$BETA] #Here BETAVALUES_COPY becomes sparse
+                continue
+            fi
         fi
-    fi
     done
     __static__PackBetaValuesPerGpuAndCreateJobScriptFiles "${BETAVALUES_COPY[@]}"
 }
@@ -171,7 +171,7 @@ function ProcessBetaValuesForContinue_SLURM()
     #Remove -c | --continue option from command line
     for INDEX in "${!SPECIFIED_COMMAND_LINE_OPTIONS[@]}"; do
         if [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == --continue* ]] || [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == -c* ]] ||
-           [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == --continueThermalization* ]] || [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == -C* ]]; then
+               [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == --continueThermalization* ]] || [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == -C* ]]; then
             unset SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]
             SPECIFIED_COMMAND_LINE_OPTIONS=( "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}" )
         fi
@@ -229,18 +229,18 @@ function ProcessBetaValuesForContinue_SLURM()
                 fi
             fi
             printf "\e[0;35m\e[1m\e[4mATTENTION\e[24m: The simulation for beta = ${BETA%_*} will be resumed from trajectory ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}.\n\e[0m"
-#printtf " ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}. Is it what you would like to do (Y/N)? \e[0m"
-#local CONFIRM="";
-#while read CONFIRM; do
-#    if [ "$CONFIRM" = "Y" ]; then
-#        break;
-#    elif [ "$CONFIRM" = "N" ]; then
-#        printf "\n\e[1;31m Leaving out beta = $BETA\e[0m\n\n"
-#        continue 2
-#    else
-#        printf "\e[0;36m\e[1m Please enter Y (yes) or N (no): \e[0m"
-#    fi
-#done
+            #printtf " ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}. Is it what you would like to do (Y/N)? \e[0m"
+            #local CONFIRM="";
+            #while read CONFIRM; do
+            #    if [ "$CONFIRM" = "Y" ]; then
+            #        break;
+            #    elif [ "$CONFIRM" = "N" ]; then
+            #        printf "\n\e[1;31m Leaving out beta = $BETA\e[0m\n\n"
+            #        continue 2
+            #    else
+            #        printf "\e[0;36m\e[1m Please enter Y (yes) or N (no): \e[0m"
+            #    fi
+            #done
             #If the user wants to resume from a given trajectory, first check that the conf is available
             if [ -f $WORK_BETADIRECTORY/$(printf "conf.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}") ];then
                 local NAME_LAST_CONFIGURATION=$(printf "conf.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}")
@@ -294,7 +294,7 @@ function ProcessBetaValuesForContinue_SLURM()
             #By doing head -n -$LINES_TO_BE_CANCELED_IN_OUTPUTFILE also the line with the number ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} is deleted
             head -n -$LINES_TO_BE_CANCELED_IN_OUTPUTFILE $OUTPUTFILE_GLOBALPATH > ${OUTPUTFILE_GLOBALPATH}.temporaryCopyThatHopefullyDoesNotExist || exit -2
             mv ${OUTPUTFILE_GLOBALPATH}.temporaryCopyThatHopefullyDoesNotExist $OUTPUTFILE_GLOBALPATH || exit -2
-        #If resumefrom has not been given in the betasfile check in the WORK_BETADIRECTORY if conf.save is present: if yes, use it, otherwise use the last checkpoint
+            #If resumefrom has not been given in the betasfile check in the WORK_BETADIRECTORY if conf.save is present: if yes, use it, otherwise use the last checkpoint
         elif [ -f $WORK_BETADIRECTORY/conf.save ]; then
             local NAME_LAST_CONFIGURATION="conf.save"
             #If conf.save is found then prng.save should be there, if not I will use a random seed
@@ -344,11 +344,11 @@ function ProcessBetaValuesForContinue_SLURM()
         fi
         if [ $(grep -o "measure_pbp" $INPUTFILE_GLOBALPATH | wc -l) -eq 0 ]; then
             if  [ $(grep -o "sourcetype" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] ||
-                [ $(grep -o "sourcecontent" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] ||
-                [ $(grep -o "num_sources" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] ||
-                [ $(grep -o "pbp_measurements" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] ||
-                [ $(grep -o "ferm_obs_to_single_file" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] ||
-                [ $(grep -o "ferm_obs_pbp_prefix" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ]; then
+                    [ $(grep -o "sourcecontent" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] ||
+                    [ $(grep -o "num_sources" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] ||
+                    [ $(grep -o "pbp_measurements" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] ||
+                    [ $(grep -o "ferm_obs_to_single_file" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] ||
+                    [ $(grep -o "ferm_obs_pbp_prefix" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ]; then
                 printf "\e[0;31m The option \"measure_pbp\" is not present in the input file but one or more specification about how to calculate\n"
                 printf " the chiral condensate are present. Suspicious situation, investigate! Skipping beta = $BETA .\n\n\e[0m"
                 PROBLEM_BETA_ARRAY+=( $BETA )
@@ -390,29 +390,29 @@ function ProcessBetaValuesForContinue_SLURM()
                 case $(grep -o "use_mp" $INPUTFILE_GLOBALPATH | wc -l) in
                     0 )
                         if [ $(grep -o "solver_mp" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] || [ $(grep -o "kappa_mp" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] ||
-                        [ $(grep -o "integrator2" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] || [ $(grep -o "integrationsteps2" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ]; then
-                        printf "\e[0;31m The option \"use_mp\" is not present in the input file but one or more specification about how to use\n"
-                        printf " mass preconditioning are present. Suspicious situation, investigate! Skipping beta = $BETA .\n\n\e[0m"
-                        PROBLEM_BETA_ARRAY+=( $BETA )
-                        mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
+                               [ $(grep -o "integrator2" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] || [ $(grep -o "integrationsteps2" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ]; then
+                            printf "\e[0;31m The option \"use_mp\" is not present in the input file but one or more specification about how to use\n"
+                            printf " mass preconditioning are present. Suspicious situation, investigate! Skipping beta = $BETA .\n\n\e[0m"
+                            PROBLEM_BETA_ARRAY+=( $BETA )
+                            mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
                         else
-                        printf "use_mp=1\n" >> $INPUTFILE_GLOBALPATH
-                        printf "solver_mp=cg\n" >> $INPUTFILE_GLOBALPATH
-                        printf "kappa_mp=0.${MASS_PRECONDITIONING_ARRAY[$BETA]#*,}\n" >> $INPUTFILE_GLOBALPATH
-                        printf "integrator2=twomn\n" >> $INPUTFILE_GLOBALPATH
-                        printf "integrationsteps2=${MASS_PRECONDITIONING_ARRAY[$BETA]%,*}\n" >> $INPUTFILE_GLOBALPATH
-                        printf "\e[0;32m Added options \e[0;35muse_mp=1\n"
-                        printf "\e[0;32m               \e[0;35msolver_mp=cg\n"
-                        printf "\e[0;32m               \e[0;35mkappa_mp=0.${MASS_PRECONDITIONING_ARRAY[$BETA]#*,}\n"
-                        printf "\e[0;32m               \e[0;35mintegrator2=twomn\n"
-                        printf "\e[0;32m               \e[0;35mintegrationsteps2=${MASS_PRECONDITIONING_ARRAY[$BETA]%,*}"
-                        printf "\e[0;32m to the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
-                        __static__ModifyOptionInInputFile "num_timescales=3"
-                        [ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
-                        printf "\e[0;32m Set option \e[0;35mnum_timescales=3\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
-                        __static__ModifyOptionInInputFile "cg_iteration_block_size=10"
-                        [ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
-                        printf "\e[0;32m Set option \e[0;35mcg_iteration_block_size=10\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
+                            printf "use_mp=1\n" >> $INPUTFILE_GLOBALPATH
+                            printf "solver_mp=cg\n" >> $INPUTFILE_GLOBALPATH
+                            printf "kappa_mp=0.${MASS_PRECONDITIONING_ARRAY[$BETA]#*,}\n" >> $INPUTFILE_GLOBALPATH
+                            printf "integrator2=twomn\n" >> $INPUTFILE_GLOBALPATH
+                            printf "integrationsteps2=${MASS_PRECONDITIONING_ARRAY[$BETA]%,*}\n" >> $INPUTFILE_GLOBALPATH
+                            printf "\e[0;32m Added options \e[0;35muse_mp=1\n"
+                            printf "\e[0;32m               \e[0;35msolver_mp=cg\n"
+                            printf "\e[0;32m               \e[0;35mkappa_mp=0.${MASS_PRECONDITIONING_ARRAY[$BETA]#*,}\n"
+                            printf "\e[0;32m               \e[0;35mintegrator2=twomn\n"
+                            printf "\e[0;32m               \e[0;35mintegrationsteps2=${MASS_PRECONDITIONING_ARRAY[$BETA]%,*}"
+                            printf "\e[0;32m to the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
+                            __static__ModifyOptionInInputFile "num_timescales=3"
+                            [ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
+                            printf "\e[0;32m Set option \e[0;35mnum_timescales=3\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
+                            __static__ModifyOptionInInputFile "cg_iteration_block_size=10"
+                            [ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
+                            printf "\e[0;32m Set option \e[0;35mcg_iteration_block_size=10\e[0;32m into the \e[0;35m${INPUTFILE_GLOBALPATH#$(pwd)/}\e[0;32m file.\n\e[0m"
                         fi
                         ;;
                     1 )
@@ -444,8 +444,8 @@ function ProcessBetaValuesForContinue_SLURM()
             else
                 case $(grep -o "use_mp" $INPUTFILE_GLOBALPATH | wc -l) in
                     0 )
-                        #Assume that no other option regarding mass preconditioning is in the file (it should be the case) and just continue
-                        ;;
+                    #Assume that no other option regarding mass preconditioning is in the file (it should be the case) and just continue
+                    ;;
                     1 )
                         #Switch off the mass preconditioning and set timescales to 2, as well as the cg_iteration_block_size to 50
                         __static__ModifyOptionInInputFile "use_mp=0"
@@ -755,21 +755,21 @@ function __static__GetJobBetasStringUsing()
     local BETAVALUES_TO_BE_USED=( $@ )
     declare -A BETAS_WITH_SEED
     for INDEX in "${BETAVALUES_TO_BE_USED[@]}"; do
-    BETAS_WITH_SEED[${INDEX%%_*}]="${BETAS_WITH_SEED[${INDEX%%_*}]}_$(awk '{split($0, res, "_"); print res[2]}' <<< "$INDEX")"
+        BETAS_WITH_SEED[${INDEX%%_*}]="${BETAS_WITH_SEED[${INDEX%%_*}]}_$(awk '{split($0, res, "_"); print res[2]}' <<< "$INDEX")"
     done
     local BETAS_STRING_TO_BE_RETURNED=""
     #Here I iterate again on BETAVALUES_TO_BE_USED and not on ${!BETAS_WITH_SEED[@]} in order to guarantee an order in BETAS_STRING
     #(remember that associative arrays keys are not sorted in general, if it is, it is by coincidence). Note that now I have to use
     #the same BETA only once and this is easily achieved unsetting the BETAS_WITH_SEED array entry once used it
     for BETA in "${BETAVALUES_TO_BE_USED[@]}"; do
-    BETA=${BETA%%_*}
-    if KeyInArray $BETA BETAS_WITH_SEED; then
-        BETAS_STRING_TO_BE_RETURNED="${BETAS_STRING_TO_BE_RETURNED}__${BETA_PREFIX}${BETA}${BETAS_WITH_SEED[${BETA}]}"
-             unset 'BETAS_WITH_SEED[${BETA}]'
-    fi
+        BETA=${BETA%%_*}
+        if KeyInArray $BETA BETAS_WITH_SEED; then
+            BETAS_STRING_TO_BE_RETURNED="${BETAS_STRING_TO_BE_RETURNED}__${BETA_PREFIX}${BETA}${BETAS_WITH_SEED[${BETA}]}"
+            unset 'BETAS_WITH_SEED[${BETA}]'
+        fi
     done
     if [ $USE_MULTIPLE_CHAINS == "FALSE" ]; then
-    BETAS_STRING_TO_BE_RETURNED="$(sed -e 's/___/_/g' -e 's/_$//' <<< "$BETAS_STRING_TO_BE_RETURNED")"
+        BETAS_STRING_TO_BE_RETURNED="$(sed -e 's/___/_/g' -e 's/_$//' <<< "$BETAS_STRING_TO_BE_RETURNED")"
     fi
 
     printf "${BETAS_STRING_TO_BE_RETURNED:2}" #I cut here the two initial underscores
