@@ -165,9 +165,15 @@ elif [ $COMPLETE_BETAS_FILE = 'TRUE' ]; then
 
     CompleteBetasFile
 
-elif [ $UNCOMMENT_BETAS = 'TRUE' ] || [ $COMMENT_BETAS = 'TRUE' ]; then
+elif [ $UNCOMMENT_BETAS = 'TRUE' ]; then
 
     UncommentEntriesInBetasFile
+    less "$BETASFILE"
+
+elif [ $COMMENT_BETAS = 'TRUE' ]; then
+
+    CommentEntriesInBetasFile
+    less "$BETASFILE"
 
 elif [ $INVERT_CONFIGURATIONS = 'TRUE' ]; then
 
