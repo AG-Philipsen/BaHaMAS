@@ -9,7 +9,7 @@ source ${BaHaMAS_repositoryTopLevelPath}/CleanOutputFiles.bash         || exit -
 function ReadBetaValuesFromFile()
 {
     if [ ! -e $BETASFILE ]; then
-        cecho lr "\n  File " ly "$BETASFILE" lr " not found in $(pwd). Aborting...\n"
+        cecho lr "\n  File " emph "$BETASFILE" " not found in $(pwd). Aborting...\n"
         exit -1
     fi
 
@@ -42,14 +42,14 @@ function ReadBetaValuesFromFile()
         case ${#SEARCH_RESULT[@]} in
             0 ) CONTINUE_RESUMETRAJ_TEMP+=( "notFound" );;
             1 ) CONTINUE_RESUMETRAJ_TEMP+=( ${SEARCH_RESULT[0]}); LINE=$( sed 's/'$RESUME_REGEXPR'//g' <<< "$LINE" );;
-            * ) cecho lr "\n String " ly "resumefrom=*" lr " specified multiple times per line in betasfile! Aborting...\n"; exit -1;;
+            * ) cecho lr "\n String " emph "resumefrom=*" " specified multiple times per line in betasfile! Aborting...\n"; exit -1;;
         esac
         #Look for "MP=(*,*)" check it, save the content and delete it
         SEARCH_RESULT=( $(grep -o "$MP_REGEXPR" <<< "$LINE") )
         case ${#SEARCH_RESULT[@]} in
             0 ) MASS_PRECONDITIONING_TEMP+=( "notFound" );;
             1 ) MASS_PRECONDITIONING_TEMP+=( ${SEARCH_RESULT[0]}); LINE=$( sed 's/'$MP_REGEXPR'//g' <<< "$LINE" );;
-            * ) cecho lr "\n String " ly "MP=(*,*)" lr " specified multiple times per line in betasfile! Aborting...\n"; exit -1;;
+            * ) cecho lr "\n String " emph "MP=(*,*)" " specified multiple times per line in betasfile! Aborting...\n"; exit -1;;
         esac
         #Read the rest
         BETAVALUES+=( $(awk '{print $1}' <<< "$LINE") )
@@ -159,7 +159,7 @@ function ReadBetaValuesFromFile()
             #Build associative array for later use
             if [[ ! $TEMP_STR =~ ^[[:digit:]]{1,2},[[:digit:]]{3,4}$ ]]; then
                 cecho lr "\n Invalid Mass Preconditioning parameters in betasfile! The string must match the regular\n"\
-                      " expression " ly  '^MP=([[:digit:]]{1,2},[[:digit:]]{3,4})$' lr "! Aborting...\n"
+                      " expression " emph  '^MP=([[:digit:]]{1,2},[[:digit:]]{3,4})$' "! Aborting...\n"
                 exit -1
             fi
             MASS_PRECONDITIONING_ARRAY["${BETAVALUES[$INDEX]}"]="$TEMP_STR"
@@ -192,16 +192,16 @@ function ReadBetaValuesFromFile()
                 elif [ ${#FOUND_CONFIGURATIONS[@]} -eq 1 ]; then
                     STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERMALIZED_CONFIGURATIONS_PATH}/${FOUND_CONFIGURATIONS[0]}"
                 else
-                    cecho lr "\n No valid starting configuration found for " ly "beta = ${BETA}" lr " in " lp "$THERMALIZED_CONFIGURATIONS_PATH" lr "\n"\
-                          lr " More than 1 configuration matches " ly "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA}.*" lr "! Aborting...\n"
+                    cecho lr "\n No valid starting configuration found for " emph "beta = ${BETA}" " in " dir "$THERMALIZED_CONFIGURATIONS_PATH" "\n"\
+                          " More than 1 configuration matches " file "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA}.*" "! Aborting...\n"
                     exit -1
                 fi
             elif [ $BETA_POSTFIX == "_continueWithNewChain" ]; then
                 local FOUND_CONFIGURATIONS=( $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "^conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%_*}_fromConf[[:digit:]]\+.*") )
                 if [ ${#FOUND_CONFIGURATIONS[@]} -eq 0 ]; then
-                    cecho -n ly B U "\n WARNING" uU ":" uB " No valid starting configuration found for " ly "beta = ${BETA%_*}" lr " in " p "$THERMALIZED_CONFIGURATIONS_PATH" lr ".\n"\
+                    cecho -n ly B U "\n WARNING" uU ":" uB " No valid starting configuration found for " emph "beta = ${BETA%_*}" " in " dir "$THERMALIZED_CONFIGURATIONS_PATH" ".\n"\
                           "          Looking for configuration with not exactely the same seed, matching "\
-                          ly "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%%_*}_${SEED_PREFIX}${SEED_REGEX}_fromConf.*" lr "..."
+                          file "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%%_*}_${SEED_PREFIX}${SEED_REGEX}_fromConf.*" "..."
                     FOUND_CONFIGURATIONS=( $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "^conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%%_*}_${SEED_PREFIX}${SEED_REGEX}_fromConf[[:digit:]]\+.*") )
                     if [ ${#FOUND_CONFIGURATIONS[@]} -eq 0 ]; then
                         cecho lr " none found! Aborting...\n"
@@ -225,9 +225,9 @@ function ReadBetaValuesFromFile()
                 elif [ ${#FOUND_CONFIGURATIONS[@]} -eq 1 ]; then
                     STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERMALIZED_CONFIGURATIONS_PATH}/${FOUND_CONFIGURATIONS[0]}"
                 else
-                    cecho ly B U "\n WARNING" uU ":" uB " More than one valid starting configuration found for " lo "beta = ${BETA%%_*}" ly " in " p "$THERMALIZED_CONFIGURATIONS_PATH" lr ".\n"\
-                          "Which should be used?\n" bb
-                    PS3=$(cecho -d "\n" yg "Enter the number corresponding to the desired configuration: " bb)
+                    cecho ly B U "\n WARNING" uU ":" uB " More than one valid starting configuration found for " emph "beta = ${BETA%%_*}" " in "\
+                          dir "$THERMALIZED_CONFIGURATIONS_PATH" ".\nWhich should be used?\n" bc
+                    PS3=$(cecho -d "\n" yg "Enter the number corresponding to the desired configuration: " bc)
                     select CONFIGURATION_CHOSEN_BY_USER in "${FOUND_CONFIGURATIONS[@]}"; do
                         if ! ElementInArray "$CONFIGURATION_CHOSEN_BY_USER" "${FOUND_CONFIGURATIONS[@]}"; then
                             continue
@@ -240,7 +240,7 @@ function ReadBetaValuesFromFile()
                 fi
             elif [ $BETA_POSTFIX == "_thermalizeFromConf" ]; then
                 if [ $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "^conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%_*}_fromConf[[:digit:]]\+.*" | wc -l) -ne 0 ]; then
-                    cecho lr "\n It seems that there is already a thermalized configuration for " ly "beta = ${BETA%_*}" lr " in " p "$THERMALIZED_CONFIGURATIONS_PATH" lr "! Aborting...\n"
+                    cecho lr "\n It seems that there is already a thermalized configuration for " emph "beta = ${BETA%_*}" " in " dir "$THERMALIZED_CONFIGURATIONS_PATH" "! Aborting...\n"
                     exit -1
                 fi
                 local FOUND_CONFIGURATIONS=( $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "^conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA_REGEX}_${SEED_PREFIX}${SEED_REGEX}_fromHot[[:digit:]]\+.*") )
@@ -259,7 +259,7 @@ function ReadBetaValuesFromFile()
             elif [ $BETA_POSTFIX == "_thermalizeFromHot" ]; then
                 STARTCONFIGURATION_GLOBALPATH[$BETA]="notFoundHenceStartFromHot"
             else
-                cecho lr "\n Something really strange happened! BETA_POSTFIX set to unknown value " ly "BETA_POSTFIX = $BETA_POSTFIX" lr "! Aborting...\n"
+                cecho lr "\n Something really strange happened! BETA_POSTFIX set to unknown value " emph "BETA_POSTFIX = $BETA_POSTFIX" "! Aborting...\n"
                 exit -1
             fi
         done
@@ -314,7 +314,7 @@ function CompleteBetasFile()
             REST_OF_THE_LINE=$(awk '{$1=""; print $0}' <<< "$REST_OF_THE_LINE")
         else
             if [[ $(awk '{print $1}' <<< "$REST_OF_THE_LINE") =~ ^[[:digit:]]{4}$ ]]; then
-                cecho ly B U "\n WARNING" uU ":" uB " It seems you put seeds in betas file but you invoked this script without the " lm "-u" ly " option."
+                cecho ly B U "\n WARNING" uU ":" uB " It seems you put seeds in betas file but you invoked this script with the " emph "--doNotUseMultipleChains" " option."
                 AskUser "Would you like to continue?"
                 if UserSaidNo; then
                     return
@@ -456,7 +456,7 @@ function __static__CheckExistenceOfFunctionAndCallIt()
     local nameOfTheFunction
     nameOfTheFunction=$1
     if [ "$(type -t $nameOfTheFunction)" = 'function' ]; then
-        cecho "\n" lr "Function " B "$nameOfTheFunction" uB " implemented for " B "$BaHaMAS_clusterScheduler" uB " scheduler not found as defined!"
+        cecho "\n" lr "Function " emph "$nameOfTheFunction" " for " emph "$BaHaMAS_clusterScheduler" " scheduler not found!"
         cecho "\n" lr "Please provide an implementation following the " B "$BaHaMAS" uB " documentation and source the file. Aborting...\n"
         exit -1
     else
