@@ -305,16 +305,9 @@ function CompleteBetasFile(){
             if [[ $(awk '{print $1}' <<< "$REST_OF_THE_LINE") =~ ^[[:digit:]]{4}$ ]]; then
                 printf "\n\e[0;33m \e[1m\e[4mWARNING\e[24m:\e[0;33m It seems you put seeds in betas file but you invoked\n"
                 printf "          this script without \"-u\" option. Would you like to continue (Y/N)? \e[0m"
-                local CONFIRM="";
-                while read CONFIRM; do
-                    if [ "$CONFIRM" = "Y" ]; then
-                        break;
-                    elif [ "$CONFIRM" = "N" ]; then
-                        return
-                    else
-                        printf "\n\e[0;33m Please enter Y (yes) or N (no): \e[0m"
-                    fi
-                done
+                if UserSaidNo; then
+                    return
+                fi
             fi
         fi
         #Check each entry

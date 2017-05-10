@@ -597,17 +597,10 @@ function ProcessBetaValuesForContinue_SLURM() {
 
     #Ask the user if he want to continue submitting job
     printf "\n\e[0;33m Check if the continue option did its job correctly. Would you like to submit the jobs (Y/N)? \e[0m"
-    local CONFIRM="";
-    while read CONFIRM; do
-        if [ "$CONFIRM" = "Y" ]; then
-            break;
-        elif [ "$CONFIRM" = "N" ]; then
-            printf "\n\e[1;37;41mNo jobs will be submitted.\e[0m\n\n"
-            exit 0;
-        else
-            printf "\n\e[0;33m Please enter Y (yes) or N (no): \e[0m"
-        fi
-    done
+    if UserSaidNo; then
+        printf "\n\e[1;37;41mNo jobs will be submitted.\e[0m\n\n"
+        exit 0;
+    fi
 }
 
 #=======================================================================================================================#
@@ -664,17 +657,10 @@ function SubmitJobsForValidBetaValues_SLURM() {
             if [ $(grep -o "${PREFIX_TO_BE_GREPPED_FOR}\([[:digit:]][.]\)\?[[:alnum:]]\{4\}" <<< "$BETA" | wc -l) -ne $GPU_PER_NODE ]; then
                 printf "\n\e[0;33m \e[1m\e[4mWARNING\e[24m:\e[0;33m At least one job is being submitted with less than\n"
                 printf "          $GPU_PER_NODE runs inside. Would you like to submit in any case (Y/N)? \e[0m"
-                local CONFIRM="";
-                while read CONFIRM; do
-                    if [ "$CONFIRM" = "Y" ]; then
-                        break;
-                    elif [ "$CONFIRM" = "N" ]; then
-                        printf "\n\e[1;37;41mNo jobs will be submitted.\e[0m\n"
-                        return
-                    else
-                        printf "\n\e[0;33m Please enter Y (yes) or N (no): \e[0m"
-                    fi
-                done
+                if UserSaidNo; then
+                    printf "\n\e[1;37;41mNo jobs will be submitted.\e[0m\n"
+                    return
+                fi
             fi
         done
 
