@@ -422,57 +422,6 @@ function CommentEntriesInBetasFile() {
 }
 
 
-
-function ProduceInputFileAndJobScriptForEachBeta()
-{
-    if [ "$(type -t ${FUNCNAME}_${BaHaMAS_clusterScheduler})" = 'function' ]; then
-        cecho "\n" lr "Function " B "$FUNCNAME" uB " not yet implemented for " B "$BaHaMAS_clusterScheduler" uB " scheduler! Aborting...\n"; exit -1
-    else
-        ${FUNCNAME}_$BaHaMAS_clusterScheduler
-    fi
-}
-
-
-function ProcessBetaValuesForSubmitOnly()
-{
-    if [ "$(type -t ${FUNCNAME}_${BaHaMAS_clusterScheduler})" = 'function' ]; then
-        cecho "\n" lr "Function " B "$FUNCNAME" uB " not yet implemented for " B "$BaHaMAS_clusterScheduler" uB " scheduler! Aborting...\n"; exit -1
-    else
-        ${FUNCNAME}_$BaHaMAS_clusterScheduler
-    fi
-}
-
-
-function ProcessBetaValuesForContinue()
-{
-    if [ "$(type -t ${FUNCNAME}_${BaHaMAS_clusterScheduler})" = 'function' ]; then
-        cecho "\n" lr "Function " B "$FUNCNAME" uB " not yet implemented for " B "$BaHaMAS_clusterScheduler" uB " scheduler! Aborting...\n"; exit -1
-    else
-        ${FUNCNAME}_$BaHaMAS_clusterScheduler
-    fi
-}
-
-
-function ProcessBetaValuesForInversion()
-{
-    if [ "$(type -t ${FUNCNAME}_${BaHaMAS_clusterScheduler})" = 'function' ]; then
-        cecho "\n" lr "Function " B "$FUNCNAME" uB " not yet implemented for " B "$BaHaMAS_clusterScheduler" uB " scheduler! Aborting...\n"; exit -1
-    else
-        ${FUNCNAME}_$BaHaMAS_clusterScheduler
-    fi
-}
-
-
-function SubmitJobsForValidBetaValues()
-{
-    if [ "$(type -t ${FUNCNAME}_${BaHaMAS_clusterScheduler})" = 'function' ]; then
-        cecho "\n" lr "Function " B "$FUNCNAME" uB " not yet implemented for " B "$BaHaMAS_clusterScheduler" uB " scheduler! Aborting...\n"; exit -1
-    else
-        ${FUNCNAME}_$BaHaMAS_clusterScheduler
-    fi
-}
-
-
 function PrintReportForProblematicBeta() {
 
     if [ ${#PROBLEM_BETA_ARRAY[@]} -gt "0" ]; then
@@ -486,12 +435,52 @@ function PrintReportForProblematicBeta() {
     fi
 }
 
+#------------------------------------------------------------------------------------------------------------------------------#
+
+function __static__CheckExistenceOfFunctionAndCallIt() {
+    local nameOfTheFunction
+    nameOfTheFunction=$1
+    if [ "$(type -t $nameOfTheFunction)" = 'function' ]; then
+        cecho "\n" lr "Function " B "$nameOfTheFunction" uB " implemented for " B "$BaHaMAS_clusterScheduler" uB " scheduler not found as defined!"
+        cecho "\n" lr "Please provide an implementation following the " B "$BaHaMAS" uB " documentation and source the file. Aborting...\n"
+        exit -1
+    else
+        $nameOfTheFunction
+    fi
+}
+
+
+function ProduceInputFileAndJobScriptForEachBeta()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_$BaHaMAS_clusterScheduler
+}
+
+
+function ProcessBetaValuesForSubmitOnly()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_$BaHaMAS_clusterScheduler
+}
+
+
+function ProcessBetaValuesForContinue()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_$BaHaMAS_clusterScheduler
+}
+
+
+function ProcessBetaValuesForInversion()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_$BaHaMAS_clusterScheduler
+}
+
+
+function SubmitJobsForValidBetaValues()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_$BaHaMAS_clusterScheduler
+}
+
 
 function ListJobStatus()
 {
-    if [ "$(type -t ${FUNCNAME}_${BaHaMAS_clusterScheduler})" = 'function' ]; then
-        cecho "\n" lr "Function " B "$FUNCNAME" uB " not yet implemented for " B "$BaHaMAS_clusterScheduler" uB " scheduler! Aborting...\n"; exit -1
-    else
-        ${FUNCNAME}_$BaHaMAS_clusterScheduler
-    fi
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_$BaHaMAS_clusterScheduler
 }
