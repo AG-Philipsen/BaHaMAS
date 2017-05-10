@@ -17,48 +17,102 @@
 #      background. Implement here some functionality to provide a
 #      version of colors which are well suited for light bg terminal.
 
+function __static__SetFormatCodes()
+{
+    formatCodes[B]="${escape}1m"   # bold
+    formatCodes[U]="${escape}4m"   # underlined
+    formatCodes[uB]="${escape}21m" # u-bold
+    formatCodes[uU]="${escape}24m" # u-underlined
+}
+
+function __static__SetColorCodes()
+{
+    #Default format
+    colorCodes[d]="${escape}0m"          # default
+    #Font standard 8 color
+    colorCodes[bk]="${escape}30m"        # black
+    colorCodes[r]="${escape}31m"         # red
+    colorCodes[g]="${escape}32m"         # green
+    colorCodes[y]="${escape}33m"         # yellow
+    colorCodes[b]="${escape}34m"         # blue
+    colorCodes[m]="${escape}35m"         # magenta
+    colorCodes[c]="${escape}36m"         # cyan
+    colorCodes[gr]="${escape}37m"        # gray
+    #Font standard bright 8 color
+    colorCodes[dgr]="${escape}90m"       # d-gray
+    colorCodes[lr]="${escape}91m"        # light red
+    colorCodes[lg]="${escape}92m"        # light green
+    colorCodes[ly]="${escape}93m"        # light yellow
+    colorCodes[lb]="${escape}94m"        # light blue
+    colorCodes[lm]="${escape}95m"        # light magenta
+    colorCodes[lc]="${escape}96m"        # light cyan
+    colorCodes[w]="${escape}97m"         # white
+    #Font 256 colors
+    colorCodes[bb]="${escape}38;5;26m"   # bright blue
+    colorCodes[bc]="${escape}38;5;45m"   # bright cyan
+    colorCodes[wg]="${escape}38;5;48m"   # water green
+    colorCodes[yg]="${escape}38;5;118m"  # yellow green
+    colorCodes[p]="${escape}38;5;135m"   # purple
+    colorCodes[lp]="${escape}38;5;147m"  # light purple
+    colorCodes[pk]="${escape}38;5;198m"  # pink
+    colorCodes[o]="${escape}38;5;202m"   # orange
+    colorCodes[lo]="${escape}38;5;208m"  # light orange
+}
+
+function __static__SetEmphasizeCodes()
+{
+    local code
+    for code in "${!colorCodes[@]}"; do
+        emphCodes[$code]=d
+    done
+    emphCodes[r]=y
+    emphCodes[y]=r
+    emphCodes[b]=m
+    emphCodes[m]=c
+    emphCodes[c]=b
+    emphCodes[lr]=ly
+    emphCodes[ly]=lr
+    emphCodes[lb]=lm
+    emphCodes[lm]=lc
+    emphCodes[lc]=lb
+    emphCodes[bb]=lc
+    emphCodes[bc]=lc
+    emphCodes[p]=lm
+    emphCodes[lp]=pk
+    emphCodes[pk]=lc
+    emphCodes[o]=ly
+    emphCodes[lo]=ly
+}
+
 function cecho()
 {
-    local escape endline format text outputString defaultFormat
+    local escape endline format previousFormat previousColor\
+          text outputString defaultFormat fileFormat dirsFormat restore
+    declare -A formatCodes colorCodes emphCodes
     escape="\033["; endline="\n"; defaultFormat="${escape}0m"
-    format=''; text=''; outputString=''
+    format=''; previousFormat=''; previousColor=''; text=''; outputString=''
+    fileFormat="${escape}0;38;5;48m"; dirsFormat="${escape}0;94m"; restore='FALSE'
+    __static__SetFormatCodes
+    __static__SetColorCodes
+    __static__SetEmphasizeCodes
     while [ "$1" != '' ]; do
         case "$1" in
             #Font format
-            bold         |   B) format="${escape}1m" ;;
-            underlined   |   U) format="${escape}4m" ;;
-            u-bold       |  uB) format="${escape}21m" ;;
-            u-underlined |  uU) format="${escape}24m" ;;
-            #Font standard 8 color
-            black   | bk) format="${escape}30m" ;;
-            red     |  r) format="${escape}31m" ;;
-            green   |  g) format="${escape}32m" ;;
-            yellow  |  y) format="${escape}33m" ;;
-            blue    |  b) format="${escape}34m" ;;
-            magenta |  m) format="${escape}35m" ;;
-            cyan    |  c) format="${escape}36m" ;;
-            gray    | gr) format="${escape}37m" ;;
-            #Font standard bright 8 color
-            d-gray    | dgr) format="${escape}90m" ;;
-            l-red     |  lr) format="${escape}91m" ;;
-            l-green   |  lg) format="${escape}92m" ;;
-            l-yellow  |  ly) format="${escape}93m" ;;
-            l-blue    |  lb) format="${escape}94m" ;;
-            l-magenta |  lm) format="${escape}95m" ;;
-            l-cyan    |  lc) format="${escape}96m" ;;
-            white     |   w) format="${escape}97m" ;;
-            #Font 256 colors
-            b-blue   | bb) format="${escape}38;5;26m"  ;;
-            b-cyan   | bc) format="${escape}38;5;45m"  ;;
-            w-green  | wg) format="${escape}38;5;48m"  ;;
-            y-green  | yg) format="${escape}38;5;118m" ;;
-            purple   |  p) format="${escape}38;5;135m" ;;
-            l-purple | lp) format="${escape}38;5;147m" ;;
-            pink     | pk) format="${escape}38;5;198m" ;;
-            orange   |  o) format="${escape}38;5;202m" ;;
-            l-orange | lo) format="${escape}38;5;208m" ;;
-            #other possibilities
-            default | d) format="${escape}0m" ;;
+            B | U | uB | uU )
+                format="${formatCodes[$1]}"
+                previousFormat+="$format" ;;
+            d | bk | r | g | y | b | m | c | gr | dgr | lr | lg | ly | lb | lm | lc | w | bb | bc | wg | yg | p | lp | pk | o | lo )
+                format="${colorCodes[$1]}"
+                previousColor="$1"; previousFormat="$format" ;;
+            #classes of strings to highlight
+            file) format="$fileFormat"; shift; text="$1"; restore='TRUE' ;;
+            dir)  format="$dirsFormat"; shift; text="$1"; restore='TRUE' ;;
+            emph)
+                if [ "$previousColor" != '' ]; then
+                    format="${colorCodes[${emphCodes[$previousColor]}]}"
+                    shift; text="$1"; restore='TRUE'
+                fi ;;
+            #Other options
             -n) endline='' ;;
             -d) defaultFormat='' ;;
             *) text="$1"
@@ -69,6 +123,10 @@ function cecho()
         fi
         if [ "$text" != '' ]; then
             outputString+="$text"
+            if [ $restore = 'TRUE' ]; then
+                [ "$BaHaMAS_colouredOutput" = 'TRUE' ] && outputString+="$previousFormat"
+            fi
+            restore='FALSE'
         fi
         format=''; text='' #To avoid to put them again in outputString
     done
