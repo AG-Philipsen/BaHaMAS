@@ -183,7 +183,7 @@ function PrintArray()
     elif [[ $ARRAY_DECLARATION =~ ^declare\ -A ]]; then # associative array
         eval "declare -A ARRAY=${ARRAY_DECLARATION#*=}"
         for INDEX in "${!ARRAY[@]}"; do
-            echo "$1[\"$INDEX\"]=${ARRAY[""$INDEX""]}"
+            printf "%s%s%s\n" "$1[\"$INDEX\"]=${ARRAY[" "$INDEX" "]}"
         done
         return 0
     else

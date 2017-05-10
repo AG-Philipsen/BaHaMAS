@@ -118,7 +118,7 @@ function ProduceInputFile_SLURM()
             "sourcefile=${STARTCONFIGURATION_GLOBALPATH[${BETAVALUES_COPY[$INDEX]}]}"
     fi
     if [ $USE_MULTIPLE_CHAINS == "TRUE" ]; then
-        local SEED_EXTRACTED_FROM_BETA="$(echo ${BETAVALUES_COPY[$INDEX]} | awk '{split($1, result, "_"); print substr(result[2],2)}')"
+        local SEED_EXTRACTED_FROM_BETA="$(awk '{split($1, result, "_"); print substr(result[2],2)}' <<< "${BETAVALUES_COPY[$INDEX]}")"
         if [[ ! $SEED_EXTRACTED_FROM_BETA =~ ^[[:digit:]]{4}$ ]] || [[ $SEED_EXTRACTED_FROM_BETA == "0000" ]]; then
             cecho "\n" r " Seed not allowed to be put in inputfile for CL2QCD! Aborting...\n"
             exit -1
