@@ -7,7 +7,8 @@ source ${BaHaMAS_repositoryTopLevelPath}/ProduceInverterJobScript_SLURM.bash    
 
 # Collection of function needed in the job handler script (mostly in AuxiliaryFunctions).
 
-function ProduceInputFileAndJobScriptForEachBeta_SLURM(){
+function ProduceInputFileAndJobScriptForEachBeta_SLURM()
+{
     #---------------------------------------------------------------------------------------------------------------------#
     #NOTE: Since this function has to iterate over the betas either doing something and putting the value into
     #      SUBMIT_BETA_ARRAY or putting the beta value into PROBLEM_BETA_ARRAY, it is better to make a local copy
@@ -47,7 +48,8 @@ function ProduceInputFileAndJobScriptForEachBeta_SLURM(){
 
 #=======================================================================================================================#
 
-function ProcessBetaValuesForSubmitOnly_SLURM() {
+function ProcessBetaValuesForSubmitOnly_SLURM()
+{
     #-----------------------------------------#
     local BETAVALUES_COPY=(${BETAVALUES[@]})
     #-----------------------------------------#
@@ -85,14 +87,16 @@ function ProcessBetaValuesForSubmitOnly_SLURM() {
 
 #=======================================================================================================================#
 
-function __static__GetStatusOfJobsContainingBetavalues_SLURM(){
+function __static__GetStatusOfJobsContainingBetavalues_SLURM()
+{
     local JOBINFO_STRING="$(squeue --noheader -u $(whoami) -o "%i@%j@%T")"
     for BETA in ${BETAVALUES[@]}; do
         STATUS_OF_JOBS_CONTAINING_BETA_VALUES["$BETA"]="$(grep "$BETA_PREFIX${BETA%%_*}" <<< "$JOBINFO_STRING" | grep $(cut -d'_' -f2 <<< "$BETA") | grep "$PARAMETERS_STRING")"
     done
 }
 
-function __static__CheckIfJobIsInQueueForGivenBeta_SLURM(){
+function __static__CheckIfJobIsInQueueForGivenBeta_SLURM()
+{
     if [ "${STATUS_OF_JOBS_CONTAINING_BETA_VALUES[$1]}" = "" ]; then
         return 1
     else
@@ -107,7 +111,8 @@ function __static__CheckIfJobIsInQueueForGivenBeta_SLURM(){
 }
 
 #This function must be called with 3 parameters: filename (global path), string to be found, replace string
-function __static__FindAndReplaceSingleOccurenceInFile(){
+function __static__FindAndReplaceSingleOccurenceInFile()
+{
     if [ $# -ne 3 ]; then
         printf "\n\e[0;31m The function __static__FindAndReplaceSingleOccurenceInFile() has been wrongly called! Aborting...\n\n\e[0m"
         exit -1
@@ -125,7 +130,8 @@ function __static__FindAndReplaceSingleOccurenceInFile(){
     return 0
 }
 
-function __static__ModifyOptionInInputFile(){
+function __static__ModifyOptionInInputFile()
+{
     if [ $# -ne 1 ]; then
         printf "\n\e[0;31m The function __static__ModifyOptionInInputFile() has been wrongly called! Aborting...\n\n\e[0m"
         exit -1
@@ -159,7 +165,8 @@ function __static__ModifyOptionInInputFile(){
 
 
 
-function ProcessBetaValuesForContinue_SLURM() {
+function ProcessBetaValuesForContinue_SLURM()
+{
     local LOCAL_SUBMIT_BETA_ARRAY=()
     #Remove -c | --continue option from command line
     for INDEX in "${!SPECIFIED_COMMAND_LINE_OPTIONS[@]}"; do
@@ -605,7 +612,8 @@ function ProcessBetaValuesForContinue_SLURM() {
 
 #=======================================================================================================================#
 
-function ProcessBetaValuesForInversion_SLURM(){
+function ProcessBetaValuesForInversion_SLURM()
+{
 
     local LOCAL_SUBMIT_BETA_ARRAY=()
 
@@ -639,7 +647,8 @@ function ProcessBetaValuesForInversion_SLURM(){
 
 #=======================================================================================================================#
 
-function SubmitJobsForValidBetaValues_SLURM() {
+function SubmitJobsForValidBetaValues_SLURM()
+{
     if [ ${#SUBMIT_BETA_ARRAY[@]} -gt "0" ]; then
         printf "\n\e[0;36m===================================================================================\n\e[0m"
         printf "\e[0;34m Jobs will be submitted for the following beta values:\n\e[0m"
@@ -694,7 +703,8 @@ function SubmitJobsForValidBetaValues_SLURM() {
 #============================ STATIC FUNCTIONS USED MORE THAN IN ONE OTHER FUNCTION ====================================#
 #=======================================================================================================================#
 
-function __static__PackBetaValuesPerGpuAndCreateJobScriptFiles(){
+function __static__PackBetaValuesPerGpuAndCreateJobScriptFiles()
+{
     local BETAVALUES_ARRAY_TO_BE_SPLIT=( $@ )
     printf "\n\e[0;36m=================================================================================\n\e[0m"
     printf "\e[0;36m  The following beta values have been grouped (together with the seed if used):\e[0m\n"
@@ -740,7 +750,8 @@ function __static__PackBetaValuesPerGpuAndCreateJobScriptFiles(){
 }
 
 
-function __static__GetJobBetasStringUsing(){
+function __static__GetJobBetasStringUsing()
+{
     local BETAVALUES_TO_BE_USED=( $@ )
     declare -A BETAS_WITH_SEED
     for INDEX in "${BETAVALUES_TO_BE_USED[@]}"; do
@@ -765,7 +776,8 @@ function __static__GetJobBetasStringUsing(){
 }
 
 
-function __static__GetJobScriptName(){
+function __static__GetJobScriptName()
+{
     local STRING_WITH_BETAVALUES="$1"
 
     if [ $INVERT_CONFIGURATIONS = "TRUE" ]; then

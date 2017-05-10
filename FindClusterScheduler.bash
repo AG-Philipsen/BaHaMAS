@@ -7,7 +7,8 @@
 #       on the cluster, so I check for the existence of
 #       the command to get the cluster jobs queue information.
 
-function SelectClusterSchedulerName() {
+function SelectClusterSchedulerName()
+{
     declare -A schedulerMap
     local availableScheduler scheduler
     availableScheduler=()

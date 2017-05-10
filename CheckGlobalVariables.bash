@@ -2,7 +2,8 @@
 #   Copyright (c)  2017  Alessandro Sciarra   #
 #---------------------------------------------#
 
-function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables(){
+function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
+{
     local variablesThatMustBeNotEmpty\
           variablesThatMustBeDeclared\
           variablesThatIfNotEmptyMustNotEndWithSlash\
@@ -133,7 +134,8 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables(){
 # Make logical checks on variables that must be necessarily set only in some cases and therefore not always used
 # EXAMPLE: If user wants only to produce confs, INVERTER_FILENAME can be unset
 # Checks also existence directories/files depending on what BaHaMAS should do
-function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase() {
+function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
+{
     local index variable option variablesThatMustBeNotEmpty jobsNeededVariables schedulerVariables\
           neededFolders neededFiles rationalApproxFolder rationalApproxFiles
     mustReturn='TRUE'
@@ -287,7 +289,8 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
 
 
 #Make final additional checks on paths to beta folders
-function CheckBetaFoldersPathsVariables() {
+function CheckBetaFoldersPathsVariables()
+{
     if [ $HOME_DIR_WITH_BETAFOLDERS != "$(pwd)" ]; then
         cecho "\n"\
               lr " Constructed path to directory containing beta folders\n"\

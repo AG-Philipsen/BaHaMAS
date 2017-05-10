@@ -21,7 +21,8 @@
 #            the code and this approach is open to future new cases.               #
 #----------------------------------------------------------------------------------#
 
-function DeclarePathRelatedGlobalVariables(){
+function DeclarePathRelatedGlobalVariables()
+{
     #Setting of the correct formulation based on the path.
     STAGGERED="FALSE"
     WILSON="FALSE"
@@ -85,7 +86,8 @@ function DeclarePathRelatedGlobalVariables(){
 # necessary for the implementation of the different features.                      #
 #----------------------------------------------------------------------------------#
 
-function DeclareBaHaMASGlobalVariables(){
+function DeclareBaHaMASGlobalVariables()
+{
 
     #Variables about general options
     BETASFILE='betas'
@@ -165,7 +167,8 @@ function DeclareBaHaMASGlobalVariables(){
 # The following variables cannot be declared at the
 # beginning of BaHaMAS, since they need some information
 # which needs to be extracted from the path.
-function DeclareBetaFoldersPathsAsGlobalVariables(){
+function DeclareBetaFoldersPathsAsGlobalVariables()
+{
     HOME_DIR_WITH_BETAFOLDERS="$HOME_DIR/$SIMULATION_PATH$PARAMETERS_PATH"
     WORK_DIR_WITH_BETAFOLDERS="$WORK_DIR/$SIMULATION_PATH$PARAMETERS_PATH"
 }

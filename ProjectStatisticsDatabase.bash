@@ -8,9 +8,14 @@
 #*Everytime the database is updated, actually create a new file with the date and time in the name? This way it possible to track how the statistics
 # grow over longer periods.
 
-function join { local IFS="$1"; shift; printf "$*"; } # "$*" expands to a single argument with all the elements delimited by the first character of $IFS
+function join()
+{
+    local IFS="$1"; shift
+    printf "$*" # "$*" expands to a single argument with all the elements delimited by the first character of $IFS
+}
 
-function projectStatisticsDatabase(){
+function projectStatisticsDatabase()
+{
 
     local FILENAME_GIVEN_AS_INPUT=""
     local CURRENT_DIRECTORY=$(pwd)
@@ -1038,7 +1043,8 @@ if(criticalSituation ==1){exit 1}else{exit 0}
 
 
 
-function __static__DisplayDatabaseFile() {
+function __static__DisplayDatabaseFile()
+{
 
     if [ "$CUSTOMIZE_COLUMNS" = "FALSE" ]; then
         NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=( nfC muC kC ntC nsC betaC trajNoC accRateC accRateLast1KC maxDsC statusC lastTrajC )

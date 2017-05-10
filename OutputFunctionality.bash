@@ -17,7 +17,8 @@
 #      background. Implement here some functionality to provide a
 #      version of colors which are well suited for light bg terminal.
 
-function cecho() {
+function cecho()
+{
     local escape endline format text outputString defaultFormat
     escape="\033["; endline="\n"; defaultFormat="${escape}0m"
     format=''; text=''; outputString=''

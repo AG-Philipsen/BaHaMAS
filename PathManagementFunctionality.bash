@@ -1,4 +1,5 @@
-function CheckWilsonStaggeredVariables(){
+function CheckWilsonStaggeredVariables()
+{
     if [ "$WILSON" == "$STAGGERED" ]; then
         printf "\n\e[0;31m Variables WILSON and STAGGERED both set to the same value (please check the position from where the script was run)! Aborting...\n\n\e[0m"
         exit -1
@@ -6,7 +7,8 @@ function CheckWilsonStaggeredVariables(){
 }
 
 #Function that returns true if any parameters corresponding to the given prefixes is unset
-function IsAnyParameterUnsetAmong(){
+function IsAnyParameterUnsetAmong()
+{
     for PREFIX in $@; do
         [[ -z ${PARAMETER_VARIABLE_NAMES[$PREFIX]:+x} ]] &&  printf "\n\e[0;31m Accessing PARAMETER_VARIABLE_NAMES array with not existing prefix! Aborting...\n\n\e[0m" && exit -1
         if [ "${!PARAMETER_VARIABLE_NAMES[$PREFIX]}" = "" ]; then
@@ -17,7 +19,8 @@ function IsAnyParameterUnsetAmong(){
 }
 
 #This function get the prefixes of parameters with which the string has to be built (order as given) -> e.g. Nf2_mui0_ns8
-function GetParametersString(){
+function GetParametersString()
+{
     IsAnyParameterUnsetAmong $@ &&  printf "\n\e[0;31m Function \"$FUNCNAME\" called before extracting parameters! Aborting...\n\n\e[0m" && exit -1
     local RESULTING_STRING=""
     for PREFIX in $@; do
@@ -27,7 +30,8 @@ function GetParametersString(){
 }
 
 #This function get the prefixes of parameters with which the path has to be built (order as given) -> e,g, /Nf2/nt4/ns8
-function GetParametersPath(){
+function GetParametersPath()
+{
     IsAnyParameterUnsetAmong $@ &&  printf "\n\e[0;31m Function \"$FUNCNAME\" called before extracting parameters! Aborting...\n\n\e[0m" && exit -1
     local RESULTING_PATH=""
     for PREFIX in $@; do
@@ -37,7 +41,8 @@ function GetParametersPath(){
 }
 
 #This function set the global variables PARAMETERS_PATH and PARAMETERS_STRING after having checked that the parameters have been extracted
-function SetParametersPathAndString(){
+function SetParametersPathAndString()
+{
 
     #TODO: Use function GetParametersString giving ${PARAMETER_PREFIXES[@]} to it and build PARAMETERS_PATH as "/${PARAMETERS_STRING[@]//_/\/}"
     IsAnyParameterUnsetAmong $@ &&  printf "\n\e[0;31m Function \"$FUNCNAME\" called before extracting parameters! Aborting...\n\n\e[0m" && exit -1
@@ -51,7 +56,8 @@ function SetParametersPathAndString(){
 
 #This function takes the path to be used as first argument and the prefix of the parameters to be extracted as second argument
 #NOTE: The prefix must appear after a slash in the path!
-function ReadSingleParameterFromPath(){
+function ReadSingleParameterFromPath()
+{
     [ $# -ne 2 ] &&  printf "\n\e[0;31m Function \"$FUNCNAME\" called with wrong number of parameters! Aborting...\n\n\e[0m" && exit -1
     [ -z ${PARAMETER_VARIABLE_NAMES[$2]:+x} ] &&  printf "\n\e[0;31m Function \"$FUNCNAME\" called with unknown prefix! Aborting...\n\n\e[0m" && exit -1
     local PATH_TO_SEARCH_IN="/$1/" #Add in front and back a "/" just to be general in the search
@@ -67,7 +73,8 @@ function ReadSingleParameterFromPath(){
 # This function takes the path to be used as first argument and the prefix of the parameters to be extracted as second argument
 # but it considers that the prefix is present multiple times in the path, so the slash before the prefix is not considered.
 # At the moment the global variable is set to a readonly array value.
-function ReadSingleParameterFromPathWithMultipleOccurence(){
+function ReadSingleParameterFromPathWithMultipleOccurence()
+{
     [ $# -ne 2 ] &&  printf "\n\e[0;31m Function \"$FUNCNAME\" called with wrong number of parameters! Aborting...\n\n\e[0m" && exit -1
     [ -z ${PARAMETER_VARIABLE_NAMES[$2]:+x} ] &&  printf "\n\e[0;31m Function \"$FUNCNAME\" called with unknown prefix! Aborting...\n\n\e[0m" && exit -1
     local PATH_TO_SEARCH_IN="$1"
@@ -82,7 +89,8 @@ function ReadSingleParameterFromPathWithMultipleOccurence(){
 
 
 #This function get a bunch of prefixes and checks that the corresponding variable has a value that makes sense
-function CheckParametersExtractedFromPath(){
+function CheckParametersExtractedFromPath()
+{
     IsAnyParameterUnsetAmong $@ &&  printf "\n\e[0;31m Function \"$FUNCNAME\" called before extracting parameters! Aborting...\n\n\e[0m" && exit -1
     for PREFIX in $@; do
         case "${PARAMETER_VARIABLE_NAMES[$PREFIX]}" in
@@ -122,7 +130,8 @@ function CheckParametersExtractedFromPath(){
     done && unset -v 'PREFIX'
 }
 
-function ReadParametersFromPath(){
+function ReadParametersFromPath()
+{
 
     # TODO: This function should become something like (Bash >= 4.2 otherwise declare -g not supported!)
     #
@@ -172,7 +181,8 @@ function ReadParametersFromPath(){
     SetParametersPathAndString
 }
 
-function CheckSingleOccurrenceInPath(){
+function CheckSingleOccurrenceInPath()
+{
     for var in $@; do
         Var=$(grep -o "$var" <<< "$(pwd)" | wc -l)
         if [ $Var -ne 1 ] ; then

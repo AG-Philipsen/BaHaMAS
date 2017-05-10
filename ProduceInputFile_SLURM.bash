@@ -1,11 +1,13 @@
-function __static__AddToInputFile() {
+function __static__AddToInputFile()
+{
     while [ $# -ne 0 ]; do
         printf "%s\n" "$1" >> $INPUTFILE_GLOBALPATH
         shift
     done
 }
 
-function ProduceInputFile_SLURM() {
+function ProduceInputFile_SLURM()
+{
     rm -f $INPUTFILE_GLOBALPATH || exit -2
     touch $INPUTFILE_GLOBALPATH || exit -2
 

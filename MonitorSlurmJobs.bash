@@ -7,7 +7,8 @@
 BaHaMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)" #To be removed!
 source ${BaHaMAS_repositoryTopLevelPath}/UtilityFunctions.bash || exit -2
 
-function ParseCommandLineOptions(){
+function ParseCommandLineOptions()
+{
 
     while [ "$1" != "" ]; do
         case $1 in
@@ -54,7 +55,8 @@ function ParseCommandLineOptions(){
 }
 
 #Unused function left here in case in future some more information is needed (for which squeue has not a format option)
-function ExtractParametersFromJobInformation(){
+function ExtractParametersFromJobInformation()
+{
     local JOB_ID_NUMBER="$1"; shift
     local PARAMETERS_NAME=("$@")
     local SCONTROL_OUTPUT="$(scontrol show job $JOB_ID_NUMBER)"

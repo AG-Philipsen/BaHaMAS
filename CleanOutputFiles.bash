@@ -1,4 +1,5 @@
-function __static__CheckFileForSuspiciousTrajectory(){
+function __static__CheckFileForSuspiciousTrajectory()
+{
     local FILE_GLOBALPATH="$1"
     #Check whether there is any trajectory repeated but with different observables
     # TODO: Adjust the following line for JUQUEEN where there is the time in the output file!
@@ -9,7 +10,8 @@ function __static__CheckFileForSuspiciousTrajectory(){
     fi
 }
 
-function __static__CleanFile(){
+function __static__CleanFile()
+{
     local FILE_GLOBALPATH="$1"
     local CHECK_FOR_SUSPICIOUS_TR="$2"
     #Do a backup of the file

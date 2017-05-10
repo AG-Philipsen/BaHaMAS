@@ -2,7 +2,8 @@
 source ${BaHaMAS_repositoryTopLevelPath}/UtilityFunctions.bash || exit -2
 #------------------------------------------------------------------------------------#
 
-function __static__ExtractBetasFromJOBNAME(){
+function __static__ExtractBetasFromJOBNAME()
+{
     #Here it is supposed that the name of the job is ${PARAMETERS_STRING}_(...)
     #The goal of this function is to get an array whose elements are bx.xxxx_syyyy and since we use involved bash lines it is better to say that:
     #  1) from JOBNAME we take everything after the BETA_PREFIX
@@ -25,7 +26,8 @@ function __static__ExtractBetasFromJOBNAME(){
     printf "%s " "${BETAVALUES_ARRAY[@]}"
 }
 
-function __static__ExtractPostfixFromJOBNAME(){
+function __static__ExtractPostfixFromJOBNAME()
+{
     local POSTFIX=${JOBNAME##*_}
     if [ "$POSTFIX" == "TC" ]; then
         printf "thermalizeFromConf"
@@ -43,7 +45,8 @@ function __static__ExtractPostfixFromJOBNAME(){
     fi
 }
 
-function __static__ExtractMetaInformationFromJOBNAME(){
+function __static__ExtractMetaInformationFromJOBNAME()
+{
     local METAINFORMATION_ARRAY=()
     local JOBINFO_STRING="$(squeue --noheader -u $(whoami) -o "%j@%T")" #here JOBINFO_STRING contains spaces at the end of the line
 
@@ -63,7 +66,8 @@ function __static__ExtractMetaInformationFromJOBNAME(){
     printf "%s " "${METAINFORMATION_ARRAY[@]}"
 }
 
-function ListJobStatus_SLURM(){
+function ListJobStatus_SLURM()
+{
 
     # This function can be called by the JobHandler either in the LISTSTATUS setup or in the DATABASE setup.
     # The crucial difference is that in the first case the PARAMETERS_STRING and PARAMETERS_PATH variable
@@ -263,7 +267,8 @@ $(ColorTime $TIME_FROM_LAST_MODIFICATION)%s${DEFAULT_LISTSTATUS_COLOR}      \
     printf "${DEFAULT_LISTSTATUS_COLOR}===============================================================================================================================================\n\e[0m"
 }
 
-function GetShortenedBetaString(){
+function GetShortenedBetaString()
+{
     if [ "$POSTFIX_FROM_FOLDER" == "continueWithNewChain" ]; then
         printf "${BETA%_*}_NC"
     elif [ "$POSTFIX_FROM_FOLDER" == "thermalizeFromHot" ]; then
@@ -275,7 +280,8 @@ function GetShortenedBetaString(){
     fi
 }
 
-function GoodAcc(){
+function GoodAcc()
+{
     awk -v tl="${TOO_LOW_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
         -v l="${LOW_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
         -v op="${OPTIMAL_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
@@ -287,7 +293,8 @@ function GoodAcc(){
         -v tht="$TOO_HIGH_ACCEPTANCE_THRESHOLD" '{if($1<tlt){print tl}else if($1<lt){print l}else if($1>tht){print th}else if($1>ht){print h}else{print op}}' <<< "$1"
 }
 
-function ColorStatus(){
+function ColorStatus()
+{
     if [[ $1 == "RUNNING" ]]; then
         printf $RUNNING_LISTSTATUS_COLOR
     elif [[ $1 == "PENDING" ]]; then
@@ -297,7 +304,8 @@ function ColorStatus(){
     fi
 }
 
-function ColorTime(){
+function ColorTime()
+{
     if [[ ! $1 =~ ^[[:digit:]]+$ ]]; then
         printf $DEFAULT_LISTSTATUS_COLOR
     else
@@ -305,11 +313,13 @@ function ColorTime(){
     fi
 }
 
-function ColorClean(){
+function ColorClean()
+{
     [ $1 -eq 0 ] && printf $DEFAULT_LISTSTATUS_COLOR || printf $CLEANING_LISTSTATUS_COLOR
 }
 
-function ColorBeta(){
+function ColorBeta()
+{
     #Columns here below ranges from 1 on, since they are used in awk
     declare -A OBSERVABLES_COLUMNS
     OBSERVABLES_COLUMNS["TrajectoryNr"]=1
@@ -341,7 +351,8 @@ function ColorBeta(){
 }
 
 
-function ColorDeltaS(){
+function ColorDeltaS()
+{
     if [[ ! $1 =~ [+-]?[[:digit:]]+[.]?[[:digit:]]* ]]; then
         printf $DEFAULT_LISTSTATUS_COLOR
     else

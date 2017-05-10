@@ -2,7 +2,8 @@
 source ${BaHaMAS_repositoryTopLevelPath}/ListJobsStatus_SLURM.bash || exit -2
 #------------------------------------------------------------------------------------#
 
-function AcceptanceRateReport(){
+function AcceptanceRateReport()
+{
     #-----------------------------------------#
     local BETAVALUES_COPY=(${BETAVALUES[@]})
     #-----------------------------------------#

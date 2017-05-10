@@ -12,7 +12,8 @@
 #NOTE: The following two functions will be used with readarray and therefore
 #      the printf in the end uses '\n' as separator (this preserves spaces
 #      in options)
-function PrepareGivenOptionToBeProcessed(){
+function PrepareGivenOptionToBeProcessed()
+{
     local newOptions value tmp
     newOptions=()
     for value in "$@"; do
@@ -28,7 +29,8 @@ function PrepareGivenOptionToBeProcessed(){
     printf "%s\n" "${newOptions[@]}"
 }
 
-function SplitCombinedShortOptionsInSingleOptions() {
+function SplitCombinedShortOptionsInSingleOptions()
+{
     local newOptions value option splittedOptions
     newOptions=()
     for value in "$@"; do
@@ -45,7 +47,8 @@ function SplitCombinedShortOptionsInSingleOptions() {
 }
 
 
-function __static__AddOptionToHelper() {
+function __static__AddOptionToHelper()
+{
     local name description color lengthOption indentation
     lengthOption=38; indentation='    '
     if [ "$1" = '-e' ]; then
@@ -61,7 +64,8 @@ function __static__AddOptionToHelper() {
     done
 }
 
-function PrintHelper(){
+function PrintHelper()
+{
     local helperColor normalColor mutuallyExclusiveColor
     helperColor='g'; normalColor='m'; mutuallyExclusiveColor='b'
     cecho -d $helperColor

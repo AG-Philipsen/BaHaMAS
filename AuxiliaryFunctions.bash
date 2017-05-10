@@ -6,7 +6,8 @@ source ${BaHaMAS_repositoryTopLevelPath}/ListJobsStatus_SLURM.bash     || exit -
 source ${BaHaMAS_repositoryTopLevelPath}/CleanOutputFiles.bash         || exit -2
 #------------------------------------------------------------------------------------#
 
-function ReadBetaValuesFromFile(){
+function ReadBetaValuesFromFile()
+{
 
     if [ ! -e $BETASFILE ]; then
         printf "\n\e[0;31m  File \"$BETASFILE\" not found in $(pwd). Aborting...\n\n\e[0m"
@@ -260,7 +261,8 @@ function ReadBetaValuesFromFile(){
 
 
 #TODO: After having refactored the function ReadBetaValuesFromFile, one could reuse some functionality of there.
-function __static__PrintOldLineToBetasFileAndShiftArrays(){
+function __static__PrintOldLineToBetasFileAndShiftArrays()
+{
     if [ $USE_MULTIPLE_CHAINS == "TRUE" ]; then
         printf "${BETA_ARRAY[0]}\t${SEED_ARRAY[0]}\t${REST_OF_THE_LINE_ARRAY[0]}\n"  >> $BETASFILE
         SEED_JUST_PRINTED_TO_FILE="${SEED_ARRAY[0]}"
@@ -274,11 +276,13 @@ function __static__PrintOldLineToBetasFileAndShiftArrays(){
     REST_OF_THE_LINE_ARRAY=("${REST_OF_THE_LINE_ARRAY[@]:1}")
 }
 
-function __static__PrintNewLineToBetasFile(){
+function __static__PrintNewLineToBetasFile()
+{
     printf "$BETA_JUST_PRINTED_TO_FILE\t$NEW_SEED\t$REST_OF_THE_LINE_JUST_PRINTED_TO_FILE\n" >> $BETASFILE
 }
 
-function CompleteBetasFile(){
+function CompleteBetasFile()
+{
     local OLD_IFS=$IFS      # save the field separator
     local IFS=$'\n'         # new field separator, the end of line
     local BETA=""
@@ -377,7 +381,8 @@ function CompleteBetasFile(){
 }
 
 
-function UncommentEntriesInBetasFile() {
+function UncommentEntriesInBetasFile()
+{
     #at first comment all lines
     sed -i "s/^\([^#].*\)/#\1/" $BETASFILE
 
@@ -399,7 +404,8 @@ function UncommentEntriesInBetasFile() {
     done
 }
 
-function CommentEntriesInBetasFile() {
+function CommentEntriesInBetasFile()
+{
     #at first uncomment all lines
     sed -i "s/^#\(.*\)/\1/" $BETASFILE
 
@@ -422,7 +428,8 @@ function CommentEntriesInBetasFile() {
 }
 
 
-function PrintReportForProblematicBeta() {
+function PrintReportForProblematicBeta()
+{
 
     if [ ${#PROBLEM_BETA_ARRAY[@]} -gt "0" ]; then
         printf "\n\e[0;31m===================================================================================\n\e[0m"
@@ -437,7 +444,8 @@ function PrintReportForProblematicBeta() {
 
 #------------------------------------------------------------------------------------------------------------------------------#
 
-function __static__CheckExistenceOfFunctionAndCallIt() {
+function __static__CheckExistenceOfFunctionAndCallIt()
+{
     local nameOfTheFunction
     nameOfTheFunction=$1
     if [ "$(type -t $nameOfTheFunction)" = 'function' ]; then

@@ -2,12 +2,14 @@
 #
 # TODO: Implement checks on parameters to functions
 
-function TimeToSeconds(){
+function TimeToSeconds()
+{
     local T=$1; shift
     printf $((10#${T:0:2} * 3600 + 10#${T:3:2} * 60 + 10#${T:6:2}))
 }
 
-function SecondsToTime(){
+function SecondsToTime()
+{
     local T=$1; shift
     local hours=$(( $T/3600 ))
     local minutes=$(( ($T - $hours*3600)/60 ))
@@ -15,7 +17,8 @@ function SecondsToTime(){
     printf "%02d:%02d:%02d" "${hours}" "${minutes}" "${seconds}"
 }
 
-function SecondsToTimeString(){
+function SecondsToTimeString()
+{
     local T=$1; shift
     local hours=$(( $T/3600 ))
     local minutes=$(( ($T - $hours*3600)/60 ))
@@ -23,7 +26,8 @@ function SecondsToTimeString(){
     printf "%02dh %02dm %02ds"  "${hours}" "${minutes}" "${seconds}"
 }
 
-function TimeStringToSecond(){
+function TimeStringToSecond()
+{
     #The string can contain s,m,h,d preceded by digits, NO SPACES
     local STRING_SEPARATED=( $(sed 's/\([smhd]\)/\1 /g' <<< "$1") )
     local TOTAL_TIME_IN_SECONDS=0
@@ -38,7 +42,8 @@ function TimeStringToSecond(){
     printf "$TOTAL_TIME_IN_SECONDS"
 }
 
-function SecondsToTimeStringWithDays(){
+function SecondsToTimeStringWithDays()
+{
     local T=$1; shift
     local days=$(( $T/86400))
     local hours=$(( ($T - $days*86400)/3600 ))
@@ -47,7 +52,8 @@ function SecondsToTimeStringWithDays(){
     printf "%d-%02d:%02d:%02d" "${days}" "${hours}" "${minutes}" "${seconds}"
 }
 
-function MinimumOfArray(){
+function MinimumOfArray()
+{
     local MIN=$1; shift
     while [ "$1" != "" ]; do
         if [ $(awk '{print ($1<$2)}' <<< "$1 $MIN") -eq 1 ]; then
@@ -58,7 +64,8 @@ function MinimumOfArray(){
     printf "$MIN"
 }
 
-function KeyOfMinimumOfArray(){
+function KeyOfMinimumOfArray()
+{
     local COUNTER=0
     local KEY_AT_MIN=0
     local MIN=$1; shift
@@ -73,7 +80,8 @@ function KeyOfMinimumOfArray(){
     printf "$KEY_AT_MIN"
 }
 
-function MaximumOfArray(){
+function MaximumOfArray()
+{
     local MAX=$1; shift
     while [ "$1" != "" ]; do
         if [ $(awk '{print ($1>$2)}' <<< "$1 $MAX") -eq 1 ]; then
@@ -84,7 +92,8 @@ function MaximumOfArray(){
     printf "$MAX"
 }
 
-function KeyOfMaximumOfArray(){
+function KeyOfMaximumOfArray()
+{
     local COUNTER=0
     local KEY_AT_MAX=0
     local MAX=$1; shift
@@ -99,7 +108,8 @@ function KeyOfMaximumOfArray(){
     printf "$KEY_AT_MAX"
 }
 
-function FindPositionOfFirstMinimumOfArray(){
+function FindPositionOfFirstMinimumOfArray()
+{
     local ARRAY_TMP=("$@")
     local ARRAY=("$@")
     local MIN=$(MinimumOfArray "${ARRAY_TMP[@]}")
@@ -111,7 +121,8 @@ function FindPositionOfFirstMinimumOfArray(){
     done
 }
 
-function LengthOfLongestEntryInArray(){
+function LengthOfLongestEntryInArray()
+{
     local LENGTH_MAX=${#1}; shift
     while [ "$1" != "" ]; do
         if [ ${#1} -gt $LENGTH_MAX ]; then
@@ -123,14 +134,16 @@ function LengthOfLongestEntryInArray(){
 }
 
 
-function ElementInArray() {
+function ElementInArray()
+{
     #Remember in BASH 0 means true and >0 means false
     local ELEMENT
     for ELEMENT in "${@:2}"; do [[ "$ELEMENT" == "$1" ]] && return 0; done
     return 1
 }
 
-function KeyInArray() {
+function KeyInArray()
+{
     #ATTENTION: the array has to be passed as name, not as ${name[@]};
     #           the following function does not work if there are spaces in KEY;
     #           the following function does not work if there are spaces in ARRAY
@@ -145,7 +158,8 @@ function KeyInArray() {
     fi
 }
 
-function FindValueOfClosestElementInArrayToGivenValue(){
+function FindValueOfClosestElementInArrayToGivenValue()
+{
     local VALUE=$1
     shift
     local ARRAY=( $@ )
@@ -155,7 +169,8 @@ function FindValueOfClosestElementInArrayToGivenValue(){
                            END{print result}' <<< "${ARRAY[@]}"
 }
 
-function PrintArray() {
+function PrintArray()
+{
     local NAME_OF_THE_ARRAY="$1[@]"
     local ARRAY_CONTENT=( "${!NAME_OF_THE_ARRAY}" )
     [ ${#ARRAY_CONTENT[@]} -eq 0 ] && printf "Array $1 is empty or undeclared!\n" && return 1
@@ -178,7 +193,8 @@ function PrintArray() {
 }
 
 
-function ConvertFromBytesToHumanReadable(){
+function ConvertFromBytesToHumanReadable()
+{
     local BYTES=$1
     awk '
         function human(x) {
@@ -191,7 +207,8 @@ function ConvertFromBytesToHumanReadable(){
         {print human($1)}' <<< "$BYTES"
 }
 
-function UserSaidYes(){
+function UserSaidYes()
+{
     local userAnswer
     while read userAnswer; do
         if [ "$userAnswer" = "Y" ]; then
@@ -204,7 +221,8 @@ function UserSaidYes(){
     done
 }
 
-function UserSaidNo(){
+function UserSaidNo()
+{
     if UserSaidYes; then
         return 1
     else

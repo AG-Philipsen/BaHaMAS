@@ -1,11 +1,13 @@
-function __static__AddToJobscriptFile() {
+function __static__AddToJobscriptFile()
+{
     while [ $# -ne 0 ]; do
         printf "%s\n" "$1" >> $JOBSCRIPT_GLOBALPATH
         shift
     done
 }
 
-function ProduceJobscript_SLURM(){
+function ProduceJobscript_SLURM()
+{
     rm -f $JOBSCRIPT_GLOBALPATH || exit -2
     touch $JOBSCRIPT_GLOBALPATH || exit -2
 

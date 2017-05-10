@@ -2,7 +2,8 @@
 #   Copyright (c)  2017  Alessandro Sciarra   #
 #---------------------------------------------#
 
-function __static__CheckAvailabilityOfProgram() {
+function __static__CheckAvailabilityOfProgram()
+{
     if hash $1 2>/dev/null; then
         return 0
     else
@@ -10,7 +11,8 @@ function __static__CheckAvailabilityOfProgram() {
     fi
 }
 
-function __static__IsFoundVersionOlderThanRequired() {
+function __static__IsFoundVersionOlderThanRequired()
+{
     [ $1 = $2 ] && return 1
     #Here I suppose 'sort -V' is available, even though it is part
     #of Linux coreutils. In any case we use coreutils functionalities
@@ -25,7 +27,8 @@ function __static__IsFoundVersionOlderThanRequired() {
     fi
 }
 
-function __static__CheckAboutProgram() {
+function __static__CheckAboutProgram()
+{
     local requiredVersion foundVersion program
     program=$1; foundVersion=''
     __static__CheckAvailabilityOfProgram $program
@@ -61,7 +64,8 @@ function __static__CheckAboutProgram() {
 }
 
 
-function CheckSystemRequirements() {
+function CheckSystemRequirements()
+{
     local programsToBeChecked program returnValue
     returnValue=0
     programsToBeChecked=(bash awk sed)

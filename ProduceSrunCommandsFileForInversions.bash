@@ -1,4 +1,5 @@
-function ProduceSrunCommandsFileForInversionsPerBeta(){
+function ProduceSrunCommandsFileForInversionsPerBeta()
+{
 
     if [ "$CHEMPOT" != '0' ]; then
         printf "\n\e[0;91m Inversion of configuration with nonzero chemical potential not allowed!\n\n\e[0m"

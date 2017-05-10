@@ -7,7 +7,8 @@
 #
 # ATTENTION: Do not put slashes "/" at the end of the paths variables!!
 
-function DeclareUserDefinedGlobalVariables() {
+function DeclareUserDefinedGlobalVariables()
+{
 
     BaHaMAS_colouredOutput='TRUE'
     USER_MAIL=""
