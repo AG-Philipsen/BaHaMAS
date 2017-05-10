@@ -95,8 +95,8 @@ elif [ $SUBMIT = 'TRUE' ]; then
 elif [ $THERMALIZE = 'TRUE' ] || [ $CONTINUE_THERMALIZATION = 'TRUE' ]; then
 
     if [ $USE_MULTIPLE_CHAINS = 'FALSE' ]; then
-        [ $THERMALIZE = 'TRUE' ] && printf "\n\e[0;31m Option -t | --thermalize implemented ONLY combined not with --doNotUseMultipleChains option! Aborting...\n\n\e[0m"
-        [ $CONTINUE_THERMALIZATION = 'TRUE' ] && printf "\n\e[0;31m Option -C | --continueThermalization implemented ONLY combined not with --doNotUseMultipleChains option! Aborting...\n\n\e[0m"
+        [ $THERMALIZE = 'TRUE' ] && cecho lr "\n Option -t | --thermalize implemented ONLY combined not with --doNotUseMultipleChains option! Aborting...\n"
+        [ $CONTINUE_THERMALIZATION = 'TRUE' ] && cecho lr "\n Option -C | --continueThermalization implemented ONLY combined not with --doNotUseMultipleChains option! Aborting...\n"
         exit -1
     fi
     #Here we fix the beta postfix just looking for thermalized conf from hot at the actual parameters (no matter at which beta);
@@ -111,7 +111,7 @@ elif [ $THERMALIZE = 'TRUE' ] || [ $CONTINUE_THERMALIZATION = 'TRUE' ]; then
         BETA_POSTFIX="_thermalizeFromConf"
     fi
     if [ $MEASURE_PBP = 'TRUE' ]; then
-        printf "\n \e[1;33;4mMeasurement of PBP switched off during thermalization!!\n\e[0m"
+        cecho ly B "\n Measurement of PBP switched off during thermalization!!\n"
         MEASURE_PBP='FALSE'
     fi
 
@@ -119,9 +119,9 @@ elif [ $THERMALIZE = 'TRUE' ] || [ $CONTINUE_THERMALIZATION = 'TRUE' ]; then
 
     if [ $THERMALIZE = 'TRUE' ]; then
         ProduceInputFileAndJobScriptForEachBeta
-        printf "\n\e[0;33m Check if everything is fine. Would you like to submit the jobs (Y/N)? \e[0m"
+        AskUser "Check if everything is fine. Would you like to submit the jobs?"
         if UserSaidNo; then
-            printf "\n\e[1;37;41mNo jobs will be submitted.\e[0m\n"
+            cecho lr "\n No job will be submitted!\n"
             exit 0
         fi
     elif [ $CONTINUE_THERMALIZATION = 'TRUE' ]; then
@@ -187,6 +187,6 @@ fi
 PrintReportForProblematicBeta
 #------------------------------------------------------------------------------------------------------------------------------#
 
-printf "\e[0;32m \n ...done!\n\n\e[0m"
+cecho lg "\n ...done!\n"
 
 exit 0

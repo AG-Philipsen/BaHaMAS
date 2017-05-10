@@ -8,16 +8,15 @@ source ${BaHaMAS_repositoryTopLevelPath}/CleanOutputFiles.bash         || exit -
 
 function ReadBetaValuesFromFile()
 {
-
     if [ ! -e $BETASFILE ]; then
-        printf "\n\e[0;31m  File \"$BETASFILE\" not found in $(pwd). Aborting...\n\n\e[0m"
+        cecho lr "\n  File " ly "$BETASFILE" lr " not found in $(pwd). Aborting...\n"
         exit -1
     fi
 
     #For syncronization reason the betas file MUST contain the beta value in the first column! Check:
     for ENTRY in $(awk '{split($0, res, "#"); print res[1]}' $BETASFILE |  awk '{print $1}'); do
         if [[ ! "$ENTRY" =~ ^[[:digit:]][.][[:digit:]]{4}$ ]]; then
-            printf "\n\e[0;31m The betas file MUST contain the beta value in the first column! Aborting...\n\n\e[0m"
+            cecho lr "\n The betas file MUST contain the beta value in the first column! Aborting...\n"
             exit -1
         fi
     done
@@ -43,14 +42,14 @@ function ReadBetaValuesFromFile()
         case ${#SEARCH_RESULT[@]} in
             0 ) CONTINUE_RESUMETRAJ_TEMP+=( "notFound" );;
             1 ) CONTINUE_RESUMETRAJ_TEMP+=( ${SEARCH_RESULT[0]}); LINE=$( sed 's/'$RESUME_REGEXPR'//g' <<< "$LINE" );;
-            * ) printf "\n\e[0;31m String \"resumefrom=*\" specified multiple times per line in betasfile! Aborting...\n\n\e[0m"; exit -1;;
+            * ) cecho lr "\n String " ly "resumefrom=*" lr " specified multiple times per line in betasfile! Aborting...\n"; exit -1;;
         esac
         #Look for "MP=(*,*)" check it, save the content and delete it
         SEARCH_RESULT=( $(grep -o "$MP_REGEXPR" <<< "$LINE") )
         case ${#SEARCH_RESULT[@]} in
             0 ) MASS_PRECONDITIONING_TEMP+=( "notFound" );;
             1 ) MASS_PRECONDITIONING_TEMP+=( ${SEARCH_RESULT[0]}); LINE=$( sed 's/'$MP_REGEXPR'//g' <<< "$LINE" );;
-            * ) printf "\n\e[0;31m String \"MP=(*,*)\" specified multiple times per line in betasfile! Aborting...\n\n\e[0m"; exit -1;;
+            * ) cecho lr "\n String " ly "MP=(*,*)" lr " specified multiple times per line in betasfile! Aborting...\n"; exit -1;;
         esac
         #Read the rest
         BETAVALUES+=( $(awk '{print $1}' <<< "$LINE") )
@@ -67,28 +66,28 @@ function ReadBetaValuesFromFile()
 
     #Check whether the entries in the file have the right format, otherwise abort
     if [ ${#BETAVALUES[@]} -eq 0 ]; then
-        printf "\n\e[0;31m  No beta values in betas file. Aborting...\n\n\e[0m"
+        cecho lr "\n  No beta values in betas file. Aborting...\n"
         exit -1
     fi
 
     #NOTE: The following check on beta is redundant ---> TODO: Think deeply about and in case remove it!
     for BETA in ${BETAVALUES[@]}; do
         if [[ ! $BETA =~ ^[[:digit:]].[[:digit:]]{4}$ ]]; then
-            printf "\n\e[0;31m Invalid beta entry in betas file! Aborting...\n\n\e[0m"
+            cecho lr "\n Invalid beta entry in betas file! Aborting...\n"
             exit -1
         fi
     done
 
     if [ $USE_MULTIPLE_CHAINS == "TRUE" ]; then
         if [ ${#SEED_ARRAY_TEMP[@]} -ne ${#BETAVALUES[@]} ]; then
-            printf "\n\e[0;31m  Number of provided seeds differ from the number of provided beta values in betas file. Aborting...\n\n\e[0m"
+            cecho lr "\n  Number of provided seeds differ from the number of provided beta values in betas file. Aborting...\n"
             exit -1
         fi
 
         for SEED in ${SEED_ARRAY_TEMP[@]}; do
             if [[ ! $SEED =~ ^[[:alnum:]]{4}$ ]]; then
-            printf "\n\e[0;31m Invalid seed entry in betas file! Aborting...\n\n\e[0m"
-            exit -1
+                cecho lr "\n Invalid seed entry in betas file! Aborting...\n"
+                exit -1
             fi
         done
 
@@ -96,7 +95,7 @@ function ReadBetaValuesFromFile()
         if [ "$(awk '{split($0, res, "'#'"); print res[1]}' $BETASFILE |\
                 sed -e 's/'$RESUME_REGEXPR'//g' -e 's/'$MP_REGEXPR'//g' -e '/^[[:space:]]*$/d' |\
                 awk '{array[$1,$2]++}END{for(ind in array){if(array[ind]>1){print -1; exit}}}')" == -1 ]; then
-            printf "\n\e[0;31m Same seed provided multiple times for same beta!! Aborting...\n\n\e[0m"
+            cecho lr "\n Same seed provided multiple times for same beta!! Aborting...\n"
             exit -1
         fi
 
@@ -114,19 +113,18 @@ function ReadBetaValuesFromFile()
     if [ ${#INTSTEPS0_ARRAY_TEMP[@]} -ne 0 ]; then #If the first intsteps array is empty the second CANNOT be not empty (because of how I read them with awk from file)
         for STEPS in ${INTSTEPS0_ARRAY_TEMP[@]} ${INTSTEPS1_ARRAY_TEMP[@]}; do
             if [[ ! $STEPS =~ ^[[:digit:]]{1,2}$ ]]; then
-                printf "\n\e[0;31m Invalid integrator step entry in betas file (only one or two digits admitted)! Aborting...\n\e[0m"
+                cecho lr "\n Invalid integrator step entry in betas file (only one or two digits admitted)! Aborting..."
                 if [[ $STEPS =~ ^[[:digit:]]{4}$ ]]; then
-                    printf "\e[0;31m   \e[4mHINT\e[0;31m: Maybe your intention was to use Multiple Chains...\n\n\e[0m"
-                    exit -1
+                    cecho lr B "   HINT" uB ": Maybe your intention was to use Multiple Chains...\n"
                 else
-                    printf "\n"
+                    cecho ""
                 fi
             exit -1
             fi
         done
 
         if [ ${#INTSTEPS0_ARRAY_TEMP[@]} -ne ${#BETAVALUES[@]} ] || [ ${#INTSTEPS1_ARRAY_TEMP[@]} -ne ${#BETAVALUES[@]} ]; then
-            printf "\n\e[0;31m Integrators steps not specified for ALL beta in betas file! Aborting...\n\n\e[0m"
+            cecho lr "\n Integrators steps not specified for ALL beta in betas file! Aborting...\n"
             exit -1
         fi
 
@@ -148,7 +146,7 @@ function ReadBetaValuesFromFile()
         if [[ $TEMP_STR != "notFound" ]]; then
             TEMP_STR=${TEMP_STR#"resumefrom="}
             if [[ ! $TEMP_STR =~ ^[1-9][[:digit:]]*$ ]] && [ $TEMP_STR != "last" ]; then
-                printf "\n\e[0;31m Invalid resume trajectory number in betasfile! Aborting...\n\n\e[0m"
+                cecho lr "\n Invalid resume trajectory number in betasfile! Aborting...\n"
                 exit -1
             fi
             #Build associative array for later use
@@ -160,29 +158,29 @@ function ReadBetaValuesFromFile()
             TEMP_STR=${TEMP_STR%")"}
             #Build associative array for later use
             if [[ ! $TEMP_STR =~ ^[[:digit:]]{1,2},[[:digit:]]{3,4}$ ]]; then
-                printf "\n\e[0;31m Invalid Mass Preconditioning parameters in betasfile! The string must match the regular\n"
-                printf " expression \e[1m^MP=([[:digit:]]{1,2},[[:digit:]]{3,4})\$\e[0;31m but it doesn't! Aborting...\n\n\e[0m"
+                cecho lr "\n Invalid Mass Preconditioning parameters in betasfile! The string must match the regular\n"\
+                      " expression " ly  '^MP=([[:digit:]]{1,2},[[:digit:]]{3,4})$' lr "! Aborting...\n"
                 exit -1
             fi
             MASS_PRECONDITIONING_ARRAY["${BETAVALUES[$INDEX]}"]="$TEMP_STR"
         fi
     done
 
-    printf "\n\e[0;36m============================================================================================================\n\e[0m"
-    printf "\e[0;34m Read beta values:\n\e[0m"
+    cecho lc "\n============================================================================================================"
+    cecho lb " Read beta values:"
     for BETA in ${BETAVALUES[@]}; do
-        printf "  - $BETA\t [Integrator steps ${INTSTEPS0_ARRAY[$BETA]}-${INTSTEPS1_ARRAY[$BETA]}]"
+        cecho -n "  - $BETA\t [Integrator steps ${INTSTEPS0_ARRAY[$BETA]}-${INTSTEPS1_ARRAY[$BETA]}]"
         if KeyInArray $BETA CONTINUE_RESUMETRAJ_ARRAY; then
-            printf "   [resume from tr. %+6s]" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}"
+            cecho -n "   [resume from tr. %+6s]" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}"
         else
-            printf "                          "
+            cecho -n "                          "
         fi
         if KeyInArray $BETA MASS_PRECONDITIONING_ARRAY; then
-            printf "   MP=(%d-0.%4d)" "${MASS_PRECONDITIONING_ARRAY[$BETA]%,*}" "${MASS_PRECONDITIONING_ARRAY[$BETA]#*,}"
+            cecho -n "   MP=(%d-0.%4d)" "${MASS_PRECONDITIONING_ARRAY[$BETA]%,*}" "${MASS_PRECONDITIONING_ARRAY[$BETA]#*,}"
         fi
-            printf "\n"
+        cecho ''
     done
-    printf "\e[0;36m============================================================================================================\n\e[0m"
+    cecho lc "\n============================================================================================================"
 
     #If we are not in the continue scenario (and not in other script use cases), look for the correct configuration to start from and set the global path
     if [ $CONTINUE = "FALSE" ] && [ $CLEAN_OUTPUT_FILES = "FALSE" ] && [ $INVERT_CONFIGURATIONS = "FALSE" ] && [ $ACCRATE_REPORT = "FALSE" ]; then
@@ -194,25 +192,26 @@ function ReadBetaValuesFromFile()
                 elif [ ${#FOUND_CONFIGURATIONS[@]} -eq 1 ]; then
                     STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERMALIZED_CONFIGURATIONS_PATH}/${FOUND_CONFIGURATIONS[0]}"
                 else
-                    printf "\n\e[0;31m No valid starting configuration found for beta = ${BETA} in \"$THERMALIZED_CONFIGURATIONS_PATH\"\n"
-                    printf " More than 1 configuration matches the following name: \"conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA}.*\"! Aborting...\n\n\e[0m"
+                    cecho lr "\n No valid starting configuration found for " ly "beta = ${BETA}" lr " in " lp "$THERMALIZED_CONFIGURATIONS_PATH" lr "\n"\
+                          lr " More than 1 configuration matches " ly "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA}.*" lr "! Aborting...\n"
                     exit -1
                 fi
             elif [ $BETA_POSTFIX == "_continueWithNewChain" ]; then
                 local FOUND_CONFIGURATIONS=( $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "^conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%_*}_fromConf[[:digit:]]\+.*") )
                 if [ ${#FOUND_CONFIGURATIONS[@]} -eq 0 ]; then
-                    printf "\n\e[0;33m \e[1m\e[4mWARNING\e[24m:\e[0;33m No valid starting configuration found for beta = ${BETA%_*} in \"$THERMALIZED_CONFIGURATIONS_PATH\".\n"
-                    printf "          Looking for configuration with not exactely the same seed (i.e. matching \"conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%%_*}_${SEED_PREFIX}${SEED_REGEX}_fromConf.*\")..."
+                    cecho -n ly B U "\n WARNING" uU ":" uB " No valid starting configuration found for " ly "beta = ${BETA%_*}" lr " in " p "$THERMALIZED_CONFIGURATIONS_PATH" lr ".\n"\
+                          "          Looking for configuration with not exactely the same seed, matching "\
+                          ly "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%%_*}_${SEED_PREFIX}${SEED_REGEX}_fromConf.*" lr "..."
                     FOUND_CONFIGURATIONS=( $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "^conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%%_*}_${SEED_PREFIX}${SEED_REGEX}_fromConf[[:digit:]]\+.*") )
                     if [ ${#FOUND_CONFIGURATIONS[@]} -eq 0 ]; then
-                        printf "\e[38;5;9m none found! Aborting...\n\n\e[0m"
+                        cecho lr " none found! Aborting...\n"
                         exit -1
                     elif [ ${#FOUND_CONFIGURATIONS[@]} -eq 1 ]; then
-                        printf "\e[0;32m found a valid one!\n\n\e[0m"
+                        cecho lg " found a valid one!\n"
                         STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERMALIZED_CONFIGURATIONS_PATH}/${FOUND_CONFIGURATIONS[0]}"
                     else
-                        printf "\e[38;5;202m found more than one! Which should be used?\n\n\e[38;5;27m"
-                        PS3=$'\n\e[38;5;118mEnter the number corresponding to the desired set: \e[38;5;27m'
+                        cecho -d o " found more than one! Which should be used?\n" bb
+                        PS3=$(cecho -d "\n" yg "Enter the number corresponding to the desired configuration: " bb)
                         select CONFIGURATION_CHOSEN_BY_USER in "${FOUND_CONFIGURATIONS[@]}"; do
                             if ! ElementInArray "$CONFIGURATION_CHOSEN_BY_USER" "${FOUND_CONFIGURATIONS[@]}"; then
                                 continue
@@ -220,20 +219,28 @@ function ReadBetaValuesFromFile()
                                 break
                             fi
                         done
-                        printf "\n\e[0m"
+                        cecho "" #Restore also default color
                         STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERMALIZED_CONFIGURATIONS_PATH}/$CONFIGURATION_CHOSEN_BY_USER"
                     fi
                 elif [ ${#FOUND_CONFIGURATIONS[@]} -eq 1 ]; then
                     STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERMALIZED_CONFIGURATIONS_PATH}/${FOUND_CONFIGURATIONS[0]}"
                 else
-                    printf "\n\e[0;31m No valid starting configuration found for beta = ${BETA%%_*} in \"$THERMALIZED_CONFIGURATIONS_PATH\"\n"
-                    printf " More than 1 configuration matches the following name: \"conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%_*}_fromConf.*\"! Aborting...\n\n\e[0m"
-                    exit -1
+                    cecho ly B U "\n WARNING" uU ":" uB " More than one valid starting configuration found for " lo "beta = ${BETA%%_*}" ly " in " p "$THERMALIZED_CONFIGURATIONS_PATH" lr ".\n"\
+                          "Which should be used?\n" bb
+                    PS3=$(cecho -d "\n" yg "Enter the number corresponding to the desired configuration: " bb)
+                    select CONFIGURATION_CHOSEN_BY_USER in "${FOUND_CONFIGURATIONS[@]}"; do
+                        if ! ElementInArray "$CONFIGURATION_CHOSEN_BY_USER" "${FOUND_CONFIGURATIONS[@]}"; then
+                            continue
+                        else
+                            break
+                        fi
+                    done
+                    cecho "" #Restore also default color
+                    STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERMALIZED_CONFIGURATIONS_PATH}/$CONFIGURATION_CHOSEN_BY_USER"
                 fi
             elif [ $BETA_POSTFIX == "_thermalizeFromConf" ]; then
                 if [ $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "^conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%_*}_fromConf[[:digit:]]\+.*" | wc -l) -ne 0 ]; then
-                    printf "\n\e[0;31m It seems that there is already a thermalized configuration for beta = ${BETA%_*}\n"
-                    printf " in \"$THERMALIZED_CONFIGURATIONS_PATH\"! Aborting...\n\n\e[0m"
+                    cecho lr "\n It seems that there is already a thermalized configuration for " ly "beta = ${BETA%_*}" lr " in " p "$THERMALIZED_CONFIGURATIONS_PATH" lr "! Aborting...\n"
                     exit -1
                 fi
                 local FOUND_CONFIGURATIONS=( $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "^conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA_REGEX}_${SEED_PREFIX}${SEED_REGEX}_fromHot[[:digit:]]\+.*") )
@@ -245,14 +252,14 @@ function ReadBetaValuesFromFile()
                 done
                 local CLOSEST_BETA=$(FindValueOfClosestElementInArrayToGivenValue ${BETA%%_*} "${!FOUND_CONFIGURATIONS_WITH_BETA_AS_KEY[@]}")
                 if [ "$CLOSEST_BETA" = "" ]; then
-                    printf "\n\e[0;31m Something went wrong in determinig the closest beta value to the actual one to pick up the correct thermalized from Hot configuration! Aborting...\n\n\e[0m"
+                    cecho lr "\n Something went wrong in determinig the closest beta value to the actual one to pick up the correct thermalized from Hot configuration! Aborting...\n"
                     exit -1
                 fi
                 STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERMALIZED_CONFIGURATIONS_PATH}/${FOUND_CONFIGURATIONS_WITH_BETA_AS_KEY[$CLOSEST_BETA]}"
             elif [ $BETA_POSTFIX == "_thermalizeFromHot" ]; then
                 STARTCONFIGURATION_GLOBALPATH[$BETA]="notFoundHenceStartFromHot"
             else
-                printf "\n\e[0;31m Something really strange happened! BETA_POSTFIX set to unknown value (${BETA_POSTFIX})! Aborting...\n\n\e[0m"
+                cecho lr "\n Something really strange happened! BETA_POSTFIX set to unknown value " ly "BETA_POSTFIX = $BETA_POSTFIX" lr "! Aborting...\n"
                 exit -1
             fi
         done
@@ -264,11 +271,11 @@ function ReadBetaValuesFromFile()
 function __static__PrintOldLineToBetasFileAndShiftArrays()
 {
     if [ $USE_MULTIPLE_CHAINS == "TRUE" ]; then
-        printf "${BETA_ARRAY[0]}\t${SEED_ARRAY[0]}\t${REST_OF_THE_LINE_ARRAY[0]}\n"  >> $BETASFILE
+        cecho "${BETA_ARRAY[0]}\t${SEED_ARRAY[0]}\t${REST_OF_THE_LINE_ARRAY[0]}"  >> $BETASFILE
         SEED_JUST_PRINTED_TO_FILE="${SEED_ARRAY[0]}"
         SEED_ARRAY=("${SEED_ARRAY[@]:1}")
     else
-        printf "${BETA_ARRAY[0]}\t${REST_OF_THE_LINE_ARRAY[0]}\n" >> $BETASFILE
+        cecho "${BETA_ARRAY[0]}\t${REST_OF_THE_LINE_ARRAY[0]}" >> $BETASFILE
     fi
     BETA_JUST_PRINTED_TO_FILE="${BETA_ARRAY[0]}"
     REST_OF_THE_LINE_JUST_PRINTED_TO_FILE="${REST_OF_THE_LINE_ARRAY[0]}"
@@ -278,7 +285,7 @@ function __static__PrintOldLineToBetasFileAndShiftArrays()
 
 function __static__PrintNewLineToBetasFile()
 {
-    printf "$BETA_JUST_PRINTED_TO_FILE\t$NEW_SEED\t$REST_OF_THE_LINE_JUST_PRINTED_TO_FILE\n" >> $BETASFILE
+    cecho "$BETA_JUST_PRINTED_TO_FILE\t$NEW_SEED\t$REST_OF_THE_LINE_JUST_PRINTED_TO_FILE" >> $BETASFILE
 }
 
 function CompleteBetasFile()
@@ -307,8 +314,8 @@ function CompleteBetasFile()
             REST_OF_THE_LINE=$(awk '{$1=""; print $0}' <<< "$REST_OF_THE_LINE")
         else
             if [[ $(awk '{print $1}' <<< "$REST_OF_THE_LINE") =~ ^[[:digit:]]{4}$ ]]; then
-                printf "\n\e[0;33m \e[1m\e[4mWARNING\e[24m:\e[0;33m It seems you put seeds in betas file but you invoked\n"
-                printf "          this script without \"-u\" option. Would you like to continue (Y/N)? \e[0m"
+                cecho ly B U "\n WARNING" uU ":" uB " It seems you put seeds in betas file but you invoked this script without the " lm "-u" ly " option."
+                AskUser "Would you like to continue?"
                 if UserSaidNo; then
                     return
                 fi
@@ -316,12 +323,12 @@ function CompleteBetasFile()
         fi
         #Check each entry
         if [[ ! $BETA =~ ^[[:digit:]].[[:digit:]]{4}$ ]]; then
-            printf "\n\e[0;31m Invalid beta entry in betas file! Aborting...\n\n\e[0m"
+            cecho lr "\n Invalid beta entry in betas file! Aborting...\n"
             exit -1
         fi
         if [ $USE_MULTIPLE_CHAINS == "TRUE" ]; then
             if [[ ! $SEED =~ ^[[:digit:]]{4}$ ]]; then
-                printf "\n\e[0;31m Invalid seed entry in betas file! Aborting...\n\n\e[0m"
+                cecho lr "\n Invalid seed entry in betas file! Aborting...\n"
                 exit -1
             fi
         fi
@@ -377,7 +384,7 @@ function CompleteBetasFile()
     done
     rm $BETASFILE_BACKUP
 
-    printf "\n\e[38;5;13m New betasfile successfully created!\e[0m\n"
+    cecho lm "\n New betasfile successfully created!"
 }
 
 
@@ -432,13 +439,13 @@ function PrintReportForProblematicBeta()
 {
 
     if [ ${#PROBLEM_BETA_ARRAY[@]} -gt "0" ]; then
-        printf "\n\e[0;31m===================================================================================\n\e[0m"
-        printf "\e[0;31m For the following beta values something went wrong and hence\n\e[0m"
-        printf "\e[0;31m they were left out during file creation and/or job submission:\n"
+        cecho lr "\n==================================================================================="\
+              " For the following beta values something went wrong and hence"\
+              " they were left out during file creation and/or job submission:"
         for BETA in ${PROBLEM_BETA_ARRAY[@]}; do
-            printf "  - \e[1m$BETA\e[0;31m\n"
+            cecho lr "  - " B "$BETA"
         done
-        printf "\e[0;31m===================================================================================\n\e[0m"
+        cecho lr "==================================================================================="
     fi
 }
 

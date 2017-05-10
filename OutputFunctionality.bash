@@ -76,6 +76,11 @@ function cecho()
     printf "$outputString"
 }
 
+function AskUser()
+{
+    cecho -n "\n" lc " $1" "[Y/N] "
+}
+
 function UserSaidYes()
 {
     local userAnswer
