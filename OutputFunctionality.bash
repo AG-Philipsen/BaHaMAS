@@ -66,12 +66,12 @@ function __static__SetEmphasizeCodes()
         emphCodes[$code]=d
     done
     emphCodes[r]=y
-    emphCodes[y]=r
+    emphCodes[y]=c
     emphCodes[b]=m
     emphCodes[m]=c
     emphCodes[c]=b
     emphCodes[lr]=ly
-    emphCodes[ly]=lr
+    emphCodes[ly]=lc
     emphCodes[lb]=lm
     emphCodes[lm]=lc
     emphCodes[lc]=lb
