@@ -12,7 +12,7 @@
 #      Copyright (c)  2014  Alessandro Sciarra, Christopher Czaban        #
 #                     2015  Alessandro Sciarra, Christopher Czaban        #
 #                     2016  Alessandro Sciarra, Christopher Czaban        #
-#                     2017  Alessandro Sciarra, Christopher Czaban        #
+#                     2017  Alessandro Sciarra                            #
 #                                                                         #
 #-------------------------------------------------------------------------#
 
