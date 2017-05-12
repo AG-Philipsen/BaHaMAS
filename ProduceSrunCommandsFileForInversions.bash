@@ -2,12 +2,13 @@ function ProduceSrunCommandsFileForInversionsPerBeta()
 {
 
     if [ "$CHEMPOT" != '0' ]; then
-        printf "\n\e[0;91m Inversion of configuration with nonzero chemical potential not allowed!\n\n\e[0m"
+        cecho lr "\n Inversion of configuration with nonzero chemical potential not allowed!\n"
         exit -1
     fi
 
     if [ $(($NSPACE*$NSPACE*$NSPACE*$NTIME)) -lt $NUMBER_SOURCES_FOR_CORRELATORS ]; then
-        printf "\n\e[0;91m Number of required sources bigger than available positions ($(($NSPACE*$NSPACE*$NSPACE*$NTIME)) <= $NUMBER_SOURCES_FOR_CORRELATORS)! Not allowed...\n\n\e[0m"
+        cecho lr "\n Number of required sources bigger than available positions ("\
+              emph "$(($NSPACE*$NSPACE*$NSPACE*$NTIME)) <= $NUMBER_SOURCES_FOR_CORRELATORS" ")! Not allowed...\n"
         exit -1
     fi
 
