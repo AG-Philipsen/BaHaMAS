@@ -256,7 +256,7 @@ function ParseCommandLineOption()
             --accRateReport )
                 mutuallyExclusiveOptionsPassed+=( $1 )
                 ACCRATE_REPORT="TRUE"
-                if [[ ! $2 =~ ^- ]]; then
+                if [[ ! $2 =~ ^- ]] && [ "$2" != '' ]; then
                     if [[ ! $2 =~ ^[0-9]+$ ]];then
                         __static__PrintOptionSpecificationErrorAndExit $1
                     else
