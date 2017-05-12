@@ -66,15 +66,12 @@ function DeclarePathRelatedGlobalVariables()
     PARAMETERS_PATH=""     # --> e.g. /Nf2/muiPiT/k1550/nt6/ns12    or   /Nf2/mui0/mass0250/nt4/ns8
     PARAMETERS_STRING=""   # --> e.g.  Nf2_muiPiT_k1550_nt6_ns12    or    Nf2_mui0_mass0250_nt4_ns8
     #Beta and seed information
+    BETA_POSITION=5
     BETA_PREFIX="b"
-    SEED_PREFIX="s"
     BETA_POSTFIX='_continueWithNewChain' #Here we set it supposing it is not a thermalization. If indeed it is, the postfix will be overwritten!
-    BETA_PREFIX="b"
+    BETA_REGEX='[[:digit:]][.][[:digit:]]\{4\}'
     SEED_PREFIX="s"
     SEED_REGEX='[[:digit:]]\{4\}'
-    BETA_POSTFIX=""
-    BETA_POSITION=5
-    BETA_REGEX='[[:digit:]][.][[:digit:]]\{4\}'
     BETA_FOLDER_SHORT_REGEX=$BETA_REGEX'_'$SEED_PREFIX'[[:digit:]]\{4\}_[[:alpha:]]\+'
     BETA_FOLDER_REGEX=$BETA_PREFIX$BETA_FOLDER_SHORT_REGEX
 }
@@ -106,11 +103,11 @@ function DeclareBaHaMASGlobalVariables()
     BaHaMAS_clusterScheduler="$(SelectClusterSchedulerName)"
     SUBMIT_BETA_ARRAY=()
     PROBLEM_BETA_ARRAY=()
-    declare -A INTSTEPS0_ARRAY
-    declare -A INTSTEPS1_ARRAY
-    declare -A CONTINUE_RESUMETRAJ_ARRAY
-    declare -A MASS_PRECONDITIONING_ARRAY
-    declare -A STARTCONFIGURATION_GLOBALPATH
+    declare -A -g INTSTEPS0_ARRAY
+    declare -A -g INTSTEPS1_ARRAY
+    declare -A -g CONTINUE_RESUMETRAJ_ARRAY
+    declare -A -g MASS_PRECONDITIONING_ARRAY
+    declare -A -g STARTCONFIGURATION_GLOBALPATH
 
     #Mutually exclusive options variables
     SUBMIT='FALSE'
