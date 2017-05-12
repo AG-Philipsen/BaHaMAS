@@ -57,9 +57,9 @@ function AcceptanceRateReport()
     printf -v LINE_OF_EQUAL '%*s' $((9 + (${#BETAVALUES_COPY[@]} + 1) * (2 *  ${#EMPTY_SEPARATOR}) + ${#BETAVALUES_COPY[@]} * ${#DATA_ARRAY[0]} )) ''
     cecho lc "\n${SPACE_AT_THE_BEGINNING_OF_EACH_LINE}${LINE_OF_EQUAL// /=}"
     local BETA_COUNTER=0
-    cecho b -n "${SPACE_AT_THE_BEGINNING_OF_EACH_LINE}${EMPTY_SEPARATOR}Intervals$EMPTY_SEPARATOR"
+    cecho lp -n "${SPACE_AT_THE_BEGINNING_OF_EACH_LINE}${EMPTY_SEPARATOR}Intervals$EMPTY_SEPARATOR"
     while [ $BETA_COUNTER -lt ${#BETAVALUES_COPY[@]} ]; do
-        cecho -n "${EMPTY_SEPARATOR}%s${EMPTY_SEPARATOR}" ${DATA_ARRAY[${POSITION_BETA_STRING_IN_DATA_ARRAY[$BETA_COUNTER]}]}
+        cecho lp -n "$(printf "${EMPTY_SEPARATOR}%s${EMPTY_SEPARATOR}" ${DATA_ARRAY[${POSITION_BETA_STRING_IN_DATA_ARRAY[$BETA_COUNTER]}]})"
         (( BETA_COUNTER++ ))
     done
     cecho lc "\n${SPACE_AT_THE_BEGINNING_OF_EACH_LINE}${LINE_OF_EQUAL// /=}"

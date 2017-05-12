@@ -167,20 +167,20 @@ function ReadBetaValuesFromFile()
     done
 
     cecho lc "\n============================================================================================================"
-    cecho lb " Read beta values:"
+    cecho lp " Read beta values:"
     for BETA in ${BETAVALUES[@]}; do
         cecho -n "  - $BETA\t [Integrator steps ${INTSTEPS0_ARRAY[$BETA]}-${INTSTEPS1_ARRAY[$BETA]}]"
         if KeyInArray $BETA CONTINUE_RESUMETRAJ_ARRAY; then
-            cecho -n "   [resume from tr. %+6s]" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}"
+            cecho -n "$(printf "   [resume from tr. %+6s]" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}")"
         else
             cecho -n "                          "
         fi
         if KeyInArray $BETA MASS_PRECONDITIONING_ARRAY; then
-            cecho -n "   MP=(%d-0.%4d)" "${MASS_PRECONDITIONING_ARRAY[$BETA]%,*}" "${MASS_PRECONDITIONING_ARRAY[$BETA]#*,}"
+            cecho -n "$(printf "   MP=(%d-0.%4d)" "${MASS_PRECONDITIONING_ARRAY[$BETA]%,*}" "${MASS_PRECONDITIONING_ARRAY[$BETA]#*,}")"
         fi
         cecho ''
     done
-    cecho lc "\n============================================================================================================"
+    cecho lc "============================================================================================================"
 
     #If we are not in the continue scenario (and not in other script use cases), look for the correct configuration to start from and set the global path
     if [ $CONTINUE = "FALSE" ] && [ $CLEAN_OUTPUT_FILES = "FALSE" ] && [ $INVERT_CONFIGURATIONS = "FALSE" ] && [ $ACCRATE_REPORT = "FALSE" ]; then
@@ -439,8 +439,8 @@ function PrintReportForProblematicBeta()
 {
 
     if [ ${#PROBLEM_BETA_ARRAY[@]} -gt "0" ]; then
-        cecho lr "\n==================================================================================="\
-              " For the following beta values something went wrong and hence"\
+        cecho lr "\n===================================================================================\n"\
+              " For the following beta values something went wrong and hence\n"\
               " they were left out during file creation and/or job submission:"
         for BETA in ${PROBLEM_BETA_ARRAY[@]}; do
             cecho lr "  - " B "$BETA"
