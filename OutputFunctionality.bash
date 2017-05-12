@@ -76,7 +76,8 @@ function __static__SetEmphasizeCodes()
     emphCodes[lm]=lc
     emphCodes[lc]=lb
     emphCodes[bb]=lc
-    emphCodes[bc]=lc
+    emphCodes[bc]=lm
+    emphCodes[wg]=bc
     emphCodes[p]=lm
     emphCodes[lp]=pk
     emphCodes[pk]=lc
