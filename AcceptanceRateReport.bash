@@ -10,7 +10,8 @@ function AcceptanceRateReport()
     for INDEX in "${!BETAVALUES_COPY[@]}"; do
         local OUTPUTFILE_GLOBALPATH=$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$INDEX]}/$OUTPUTFILE_NAME
         if [ ! -f $OUTPUTFILE_GLOBALPATH ]; then
-            printf "\n\e[31m File $OUTPUTFILE_NAME not found in $WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$INDEX]} folder! Skipping this beta...\e[0m"
+            cecho lr "\n File " file "$OUTPUTFILE_NAME" " not found in " dir "$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$INDEX]}"\
+                  " folder! The value " emph "beta = ${BETAVALUES_COPY[$INDEX]}" " will be skipped!\n"
             PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$INDEX]} )
             unset BETAVALUES_COPY[$INDEX] #Here BETAVALUES_COPY becomes sparse
         fi
@@ -54,39 +55,39 @@ function AcceptanceRateReport()
     local ACCEPTANCE_FIELD_LENGTH=$(( ${#DATA_ARRAY[0]} - $SPACE_AFTER_ACCEPTANCE_FIELD ))
     #Header
     printf -v LINE_OF_EQUAL '%*s' $((9 + (${#BETAVALUES_COPY[@]} + 1) * (2 *  ${#EMPTY_SEPARATOR}) + ${#BETAVALUES_COPY[@]} * ${#DATA_ARRAY[0]} )) ''
-    printf "\n\e[0;36m$SPACE_AT_THE_BEGINNING_OF_EACH_LINE${LINE_OF_EQUAL// /=}\e[0m\n"
+    cecho lc "\n${SPACE_AT_THE_BEGINNING_OF_EACH_LINE}${LINE_OF_EQUAL// /=}"
     local BETA_COUNTER=0
-    printf "\e[38;5;39m${SPACE_AT_THE_BEGINNING_OF_EACH_LINE}${EMPTY_SEPARATOR}Intervals$EMPTY_SEPARATOR"
+    cecho b -n "${SPACE_AT_THE_BEGINNING_OF_EACH_LINE}${EMPTY_SEPARATOR}Intervals$EMPTY_SEPARATOR"
     while [ $BETA_COUNTER -lt ${#BETAVALUES_COPY[@]} ]; do
-        printf "$EMPTY_SEPARATOR%s$EMPTY_SEPARATOR" ${DATA_ARRAY[${POSITION_BETA_STRING_IN_DATA_ARRAY[$BETA_COUNTER]}]}
+        cecho -n "${EMPTY_SEPARATOR}%s${EMPTY_SEPARATOR}" ${DATA_ARRAY[${POSITION_BETA_STRING_IN_DATA_ARRAY[$BETA_COUNTER]}]}
         (( BETA_COUNTER++ ))
     done
-    printf "\n\e[0;36m$SPACE_AT_THE_BEGINNING_OF_EACH_LINE${LINE_OF_EQUAL// /=}\e[0m\n"
+    cecho lc "\n${SPACE_AT_THE_BEGINNING_OF_EACH_LINE}${LINE_OF_EQUAL// /=}"
     #Body
     local COUNTER=1
     while [ $COUNTER -le $LENGTH_LONGEST_COLUMN ];do
-        printf "${SPACE_AT_THE_BEGINNING_OF_EACH_LINE}${EMPTY_SEPARATOR}%6d   $EMPTY_SEPARATOR\e[0m" $COUNTER
+        cecho -n "$(printf "${SPACE_AT_THE_BEGINNING_OF_EACH_LINE}${EMPTY_SEPARATOR}%6d   $EMPTY_SEPARATOR" $COUNTER)"
         local POS_INDEX=1
         for POS in ${POSITION_BETA_STRING_IN_DATA_ARRAY[@]}; do
             DATA_INDEX=$(expr $POS + $COUNTER)
             if [ $POS_INDEX -eq ${#POSITION_BETA_STRING_IN_DATA_ARRAY[@]} ]; then                  # "If I am printing the last column"
                 if [ $DATA_INDEX -lt ${#DATA_ARRAY[@]} ]; then                                     # "If there are still data to print, print"
-                    printf "$(GoodAcc ${DATA_ARRAY[$DATA_INDEX]})$EMPTY_SEPARATOR%${ACCEPTANCE_FIELD_LENGTH}s%${SPACE_AFTER_ACCEPTANCE_FIELD}s$EMPTY_SEPARATOR\e[0m" ${DATA_ARRAY[$DATA_INDEX]} ""
+                    cecho -n "$(printf "$(GoodAcc ${DATA_ARRAY[$DATA_INDEX]})$EMPTY_SEPARATOR%${ACCEPTANCE_FIELD_LENGTH}s%${SPACE_AFTER_ACCEPTANCE_FIELD}s$EMPTY_SEPARATOR\e[0m" ${DATA_ARRAY[$DATA_INDEX]} "")"
                 else                                                                               # "otherwise print blank space"
-                    printf "$EMPTY_SEPARATOR$EMPTY_SEPARATOR"
+                    cecho -n "{$EMPTY_SEPARATOR}${EMPTY_SEPARATOR}"
                 fi
             elif [ $POS_INDEX -lt ${#POSITION_BETA_STRING_IN_DATA_ARRAY[@]} ]; then                # "If I am printing not the last column"
                 if [ $DATA_INDEX -lt ${POSITION_BETA_STRING_IN_DATA_ARRAY[$POS_INDEX]} ]; then     # "If there are still data to print, print"
-                    printf "$(GoodAcc ${DATA_ARRAY[$DATA_INDEX]})$EMPTY_SEPARATOR%${ACCEPTANCE_FIELD_LENGTH}s%${SPACE_AFTER_ACCEPTANCE_FIELD}s$EMPTY_SEPARATOR\e[0m" ${DATA_ARRAY[$DATA_INDEX]} ""
+                    cecho -n "$(printf "$(GoodAcc ${DATA_ARRAY[$DATA_INDEX]})$EMPTY_SEPARATOR%${ACCEPTANCE_FIELD_LENGTH}s%${SPACE_AFTER_ACCEPTANCE_FIELD}s$EMPTY_SEPARATOR\e[0m" ${DATA_ARRAY[$DATA_INDEX]} "")"
                 else                                                                               # "otherwise print blank space"
-                    printf "$EMPTY_SEPARATOR$EMPTY_SEPARATOR"
+                    cecho -n "${EMPTY_SEPARATOR}${EMPTY_SEPARATOR}"
                 fi
             fi
             POS_INDEX=$(expr $POS_INDEX + 1)
         done
-        printf "\n"
+        cecho ''
         (( COUNTER++ ))
     done
-    printf "\e[0;36m$SPACE_AT_THE_BEGINNING_OF_EACH_LINE${LINE_OF_EQUAL// /=}\e[0m\n"
+    cecho lc "${SPACE_AT_THE_BEGINNING_OF_EACH_LINE}${LINE_OF_EQUAL// /=}"
 
 }
