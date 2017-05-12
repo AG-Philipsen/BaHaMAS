@@ -117,8 +117,8 @@ function projectStatisticsDatabase()
     #If the option -l | --local is given, then the option -l is replaced by mu,mass,nt,ns options with local values
     if ElementInArray "-l" $@ || ElementInArray "--local" $@;  then
         if ElementInArray "--$MASS_PARAMETER" $@ || ElementInArray "--mu" $@ || ElementInArray "--nt" $@ || ElementInArray "--ns" $@; then
-            printf "\n\e[91m Option \e[1m-l | --local\e[21m not compatible with any of \e[1m--mu\e[21m, \e[1m--$MASS_PARAMETER\e[21m, \e[1m--nt\e[21m, \e[1m--ns\e[21m! Exiting...\e[0m\n\n"
-            return
+            cecho lr "\n Option " emph "-l | --local" " not compatible with any of " emph "--mu" ", " emph "--$MASS_PARAMETER" ", " emph "--nt" ", " emph "--ns" "! Aborting...\n"
+            exit -1
         fi
         local NEW_OPTIONS=()
         for VALUE in "$@"; do
@@ -185,8 +185,8 @@ function projectStatisticsDatabase()
                             shift
                             ;;
                         *)
-                            printf "\n\e[91m Option \e[1m$2\e[21m unrecognized! Exiting...\e[0m\n\n"
-                            return
+                            cecho lr "\n Option " emph "$2" " unrecognized! Aborting...\n"
+                            exit -1
                             ;;
                     esac
                 done
@@ -202,7 +202,7 @@ function projectStatisticsDatabase()
                     NF_ARRAY+=( $2 )
                     shift
                 done
-                [ ${#NF_ARRAY[@]} -eq 0 ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
+                [ ${#NF_ARRAY[@]} -eq 0 ] && cecho lr "\n You did not correctly specify filtering values for " emph "$1" " option! Aborting...\n" && exit -1
                 ;;
             --mu)
                 DISPLAY="TRUE"
@@ -218,11 +218,11 @@ function projectStatisticsDatabase()
                             shift
                             ;;
                         *)
-                            printf "\n\e[33m Value \e[1m$2\e[21m for option \e[1m$1\e[21m is invalid! Skipping it!\e[0m\n"
+                            cecho ly "\n Value " emph "$2" " for option " emph "$1" " is invalid! Skipping it!"
                             shift
                     esac
                 done
-                [ ${#MU_ARRAY[@]} -eq 0 ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
+                [ ${#MU_ARRAY[@]} -eq 0 ] && cecho lr "\n You did not correctly specify filtering values for " emph "$1" " option! Aborting...\n" && exit -1
                 ;;
             --$MASS_PARAMETER)
                 DISPLAY="TRUE"
@@ -231,7 +231,7 @@ function projectStatisticsDatabase()
                     MASS_ARRAY+=( $2 )
                     shift
                 done
-                [ ${#MASS_ARRAY[@]} -eq 0 ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
+                [ ${#MASS_ARRAY[@]} -eq 0 ] && cecho lr "\n You did not correctly specify filtering values for " emph "$1" " option! Aborting...\n" && exit -1
                 ;;
             --nt)
                 DISPLAY="TRUE"
@@ -240,7 +240,7 @@ function projectStatisticsDatabase()
                     NT_ARRAY+=( $2 )
                     shift
                 done
-                [ ${#NT_ARRAY[@]} -eq 0 ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
+                [ ${#NT_ARRAY[@]} -eq 0 ] && cecho lr "\n You did not correctly specify filtering values for " emph "$1" " option! Aborting...\n" && exit -1
                 ;;
             --ns)
                 DISPLAY="TRUE"
@@ -249,7 +249,7 @@ function projectStatisticsDatabase()
                     NS_ARRAY+=( $2 )
                     shift
                 done
-                [ ${#NS_ARRAY[@]} -eq 0 ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
+                [ ${#NS_ARRAY[@]} -eq 0 ] && cecho lr "\n You did not correctly specify filtering values for " emph "$1" " option! Aborting...\n" && exit -1
                 ;;
             --beta)
                 DISPLAY="TRUE"
@@ -258,7 +258,7 @@ function projectStatisticsDatabase()
                     BETA_ARRAY+=( $2 )
                     shift
                 done
-                [ ${#BETA_ARRAY[@]} -eq 0 ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
+                [ ${#BETA_ARRAY[@]} -eq 0 ] && cecho lr "\n You did not correctly specify filtering values for " emph "$1" " option! Aborting...\n" && exit -1
                 ;;
             --type)
                 DISPLAY="TRUE"
@@ -278,11 +278,11 @@ function projectStatisticsDatabase()
                             shift
                             ;;
                         *)
-                            printf "\n\e[33m Value \e[1m$2\e[21m for option \e[1m$1\e[21m is invalid! Skipping it!\e[0m\n"
+                            cecho ly "\n Value " emph "$2" " for option " emph "$1" " is invalid! Skipping it!"
                             shift
                     esac
                 done
-                [ ${#TYPE_ARRAY[@]} -eq 0 ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
+                [ ${#TYPE_ARRAY[@]} -eq 0 ] && cecho lr "\n You did not correctly specify filtering values for " emph "$1" " option! Aborting...\n" && exit -1
                 ;;
             --traj)
                 DISPLAY="TRUE"
@@ -292,7 +292,7 @@ function projectStatisticsDatabase()
                     [[ $2 =~ ^\<[[:digit:]]+ ]] && TRAJ_HIGH_VALUE=${2#\<*}
                     shift
                 done
-                [ "$TRAJ_LOW_VALUE" = "" ] && [ "$TRAJ_HIGH_VALUE" = "" ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
+                [ "$TRAJ_LOW_VALUE" = "" ] && [ "$TRAJ_HIGH_VALUE" = "" ] && cecho lr "\n You did not correctly specify filtering values for " emph "$1" " option! Aborting...\n" && exit -1
                 ;;
             --acc)
                 DISPLAY="TRUE"
@@ -302,7 +302,7 @@ function projectStatisticsDatabase()
                     [[ $2 =~ ^\<[[:digit:]]+ ]] && ACCRATE_HIGH_VALUE=${2#\<*}
                     shift
                 done
-                [ "$ACCRATE_LOW_VALUE" = "" ] && [ "$ACCRATE_HIGH_VALUE" = "" ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
+                [ "$ACCRATE_LOW_VALUE" = "" ] && [ "$ACCRATE_HIGH_VALUE" = "" ] && cecho lr "\n You did not correctly specify filtering values for " emph "$1" " option! Aborting...\n" && exit -1
                 ;;
             --accLast1K)
                 DISPLAY="TRUE"
@@ -312,7 +312,7 @@ function projectStatisticsDatabase()
                     [[ $2 =~ ^\<[[:digit:]]+ ]] && ACCRATE_LAST1K_HIGH_VALUE=${2#\<*}
                     shift
                 done
-                [ "$ACCRATE_LAST1K_LOW_VALUE" = "" ] && [ "$ACCRATE_LAST1K_HIGH_VALUE" = "" ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
+                [ "$ACCRATE_LAST1K_LOW_VALUE" = "" ] && [ "$ACCRATE_LAST1K_HIGH_VALUE" = "" ] && cecho lr "\n You did not correctly specify filtering values for " emph "$1" " option! Aborting...\n" && exit -1
                 ;;
             --maxDS)
                 DISPLAY="TRUE"
@@ -336,11 +336,11 @@ function projectStatisticsDatabase()
                             shift
                             ;;
                         *)
-                            printf "\n\e[33m Value \e[1m$2\e[21m for option \e[1m$1\e[21m is invalid! Skipping it!\e[0m\n"
+                            cecho ly "\n Value " emph "$2" " for option " emph "$1" " is invalid! Skipping it!"
                             shift
                     esac
                 done
-                [ ${#STATUS_ARRAY[@]} -eq 0 ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
+                [ ${#STATUS_ARRAY[@]} -eq 0 ] && cecho lr "\n You did not correctly specify filtering values for " emph "$1" " option! Aborting...\n" && exit -1
                 ;;
             --lastTraj)
                 DISPLAY="TRUE"
@@ -349,7 +349,7 @@ function projectStatisticsDatabase()
                     LAST_TRAJ_TIME=$2
                     shift
                 fi
-                [ "$LAST_TRAJ_TIME" = "" ] && printf "\n\e[91m You did not correctly specify filtering values for \e[1m$1\e[21m option! Exiting...\e[0m\n\n" && return
+                [ "$LAST_TRAJ_TIME" = "" ] && cecho lr "\n You did not correctly specify filtering values for " emph "$1" " option! Aborting...\n" && exit -1
                 ;;
             -u | --update)
                 if [[ $2 =~ ^[[:digit:]]+[s|m|h|d]$ ]]; then
@@ -357,9 +357,18 @@ function projectStatisticsDatabase()
                     shift
                 fi
                 if [[ $2 =~ ^[[:digit:]]{1,2}(:[[:digit:]]{1,2}(:[[:digit:]]{1,2})?)?$ ]]; then
-                    [ "$(awk '{split($0,hms,":"); print hms[1]}' <<< "$2")" -ge 24 ] &&     printf "\n\e[91m For the update at a specific time option only hours < 24, minutes < 60 and seconds < 60 are allowed! Exiting...\e[0m\n\n" && return
-                    [ "$(awk '{split($0,hms,":"); print hms[2]}' <<< "$2")" != "" ] && [ "$(awk '{split($0,hms,":"); print hms[2]}' <<< "$2")" -ge 60 ] &&     printf "\n\e[91m For the update at a specific time option only hours < 24, minutes < 60 and seconds < 60 are allowed! Exiting...\e[0m\n\n" && return
-                    [ "$(awk '{split($0,hms,":"); print hms[3]}' <<< "$2")" != "" ] && [ "$(awk '{split($0,hms,":"); print hms[3]}' <<< "$2")" -ge 60 ] &&     printf "\n\e[91m For the update at a specific time option only hours < 24, minutes < 60 and seconds < 60 are allowed! Exiting...\e[0m\n\n" && return
+                    if [ "$(awk '{split($0,hms,":"); print hms[1]}' <<< "$2")" -ge 24 ]; then
+                        cecho lr "\n For the update at a specific time option only " emph "hours < 24, minutes < 60 and seconds < 60" " are allowed! Aborting...\n"
+                        exit -1
+                    fi
+                    if [ "$(awk '{split($0,hms,":"); print hms[2]}' <<< "$2")" != "" ] && [ "$(awk '{split($0,hms,":"); print hms[2]}' <<< "$2")" -ge 60 ]; then
+                        cecho lr "\n For the update at a specific time option only " emph "hours < 24, minutes < 60 and seconds < 60" " are allowed! Aborting...\n"
+                        exit -1
+                    fi
+                    if [ "$(awk '{split($0,hms,":"); print hms[3]}' <<< "$2")" != "" ] && [ "$(awk '{split($0,hms,":"); print hms[3]}' <<< "$2")" -ge 60 ]; then
+                        cecho lr "\n For the update at a specific time option only " emph "hours < 24, minutes < 60 and seconds < 60" " are allowed! Aborting...\n"
+                        exit -1
+                    fi
                     UPDATE_TIME=$2
                     shift
                 fi
@@ -374,8 +383,8 @@ function projectStatisticsDatabase()
             -f | --file)
                 case $2 in
                     -*)
-                        printf "\n\e[91m Filename \e[1m$1\e[21m invalid! Filenames starting with - are not allowed! Exiting...\e[0m\n\n"
-                        return
+                        cecho lr "\n Filename " file "$1" " invalid! Filenames starting with - are not allowed! Aborting...\n"
+                        exit -1
                         ;;
                     *) FILENAME_GIVEN_AS_INPUT=$2 ;;
                 esac
@@ -448,15 +457,15 @@ function projectStatisticsDatabase()
                 echo -e "   "
                 echo -e "    \e[4m\e[1m\e[91mNOTE\e[24m:\e[21m\e[38;5;34m The \e[38;5;69mblue\e[38;5;34m, the \e[38;5;123mcyan\e[38;5;34m and the \e[38;5;198mpink\e[38;5;34m options are not compatible!"
                 printf "\e[0m\n"
-                return
+                exit -1
                 ;;
             -*)
-                printf "\n\e[91m Option \e[1m$1\e[21m unrecognized! Exiting...\e[0m\n\n"
-                return
+                cecho lr "\n Option " emph "$1" " unrecognized! Aborting...\n"
+                exit -1
                 ;;
             *)
-                printf "\n\e[91m Option \e[1m$1\e[21m invalid! Exiting...\e[0m\n\n"
-                return
+                cecho lr "\n Option " emph "$1" " invalid! Aborting...\n"
+                exit -1
                 ;;
         esac
         shift
@@ -471,8 +480,8 @@ function projectStatisticsDatabase()
     [ $REPORT = "TRUE" ] || [ $SHOW = "TRUE" ] && (( MUTUALLY_EXCLUSIVE_OPTIONS_PASSED++ ))
 
     if [ $MUTUALLY_EXCLUSIVE_OPTIONS_PASSED -gt 1 ]; then
-        printf "\n\e[91m Option for UPDATE,  DISPLAY/FILTERING and REPORT scenarios cannot be mixed!\e[0m\n\n"
-        return
+        cecho lr "\n Option for " emph "UPDATE" ", " emph "DISPLAY/FILTERING" " and " emph "REPORT" " scenarios cannot be mixed!\n"
+        exit -1
     fi
 
     cecho ''
@@ -481,11 +490,14 @@ function projectStatisticsDatabase()
     if [ "$UPDATE" = "FALSE" ]; then
         if [ "$FILENAME_GIVEN_AS_INPUT" = "" ]; then
             LATEST_DATABASE_FILE=$(ls $PROJECT_DATABASE_DIRECTORY | grep -E [[:digit:]]{2}_[[:digit:]]{2}_[[:digit:]]{2}_$PROJECT_DATABASE_FILENAME | sort -t "_" -k 1,1 -k 2,2 -k 3,3 | tail -n1)
-            [ "$LATEST_DATABASE_FILE" = "" ] && printf "\n\e[91m No older database versions found! Exiting...\e[0m\n\n" && return
+            if [ "$LATEST_DATABASE_FILE" = "" ]; then
+                cecho lr "\n No older database versions found! Aborting...\n"
+                exit -1
+            fi
             local PROJECT_DATABASE_FILE=$PROJECT_DATABASE_DIRECTORY/$LATEST_DATABASE_FILE
         else
             if [ ! f $FILENAME_GIVEN_AS_INPUT ]; then
-                printf "\n\e[91m File \"$FILENAME_GIVEN_AS_INPUT\" does not exist! Exiting...\e[0m\n\n"
+                cecho lr "\n File " file "$FILENAME_GIVEN_AS_INPUT" " does not exist! Aborting...\n"
                 return
             fi
             local PROJECT_DATABASE_FILE=$FILENAME_GIVEN_AS_INPUT
@@ -493,7 +505,7 @@ function projectStatisticsDatabase()
     else
         if [ "$FILENAME_GIVEN_AS_INPUT" != "" ] ; then
             if [ ! -f $FILENAME_GIVEN_AS_INPUT ]; then
-                printf "\n\e[91m File \"$FILENAME_GIVEN_AS_INPUT\" does not exist! Exiting...\e[0m\n\n"
+                cecho lr "\n File " emph "$FILENAME_GIVEN_AS_INPUT" " does not exist! Aborting...\n"
                 return
             fi
             local FILE_WITH_DIRECTORIES=$FILENAME_GIVEN_AS_INPUT
@@ -709,7 +721,7 @@ function projectStatisticsDatabase()
                     }
         ' $PROJECT_DATABASE_FILE
 
-        printf "\n Last update ended on \e[1m$(date -r $PROJECT_DATABASE_FILE +"%d.%m.%Y\e[21m at \e[1m%H:%M")\e[21m  \e[38;5;202m--->\e[38;5;207m  $PROJECT_DATABASE_FILE\n\n\e[0m"
+        cecho "\n Last update ended on " B "$(date -r $PROJECT_DATABASE_FILE +"%d.%m.%Y\e[21m at \e[1m%H:%M")" uB o "  --->  " file "$PROJECT_DATABASE_FILE" "\n"
     fi
 
     #==========================================================================================================================================================================================#
@@ -717,7 +729,8 @@ function projectStatisticsDatabase()
     if [ $UPDATE = "TRUE" ]; then
 
         if [ "$SLEEP_TIME" != "" ] && [ "$UPDATE_TIME" != "" ]; then
-            printf "\n\e[91m  Values for both, sleep time and update time are specified but are mutually exclusive. Please investigate! Exiting...\e[0m\n\n" && return
+            cecho lr "\n Values for both sleep time and update time are specified but are mutually exclusive. Please investigate! Aborting...\n"
+            exit -1
         fi
 
         local TEMPORARY_FILE_WITH_DIRECTORIES="${PROJECT_DATABASE_DIRECTORY}/temporaryFileWithDirectoriesForDatabaseUpdate.dat"
@@ -737,10 +750,10 @@ function projectStatisticsDatabase()
                 CURRENT_EPOCH=$(date +%s)
                 if [ $CURRENT_EPOCH -gt $(date -d "$UPDATE_TIME" +%s) ]; then
                     TARGET_EPOCH=$(date -d "$UPDATE_TIME tomorrow" +%s)
-                    printf "\n\t\e[1m\e[38;5;147mEntering sleeping mode. Performing next update on \e[38;5;86m$(date -d "$UPDATE_TIME tomorrow" +"%d.%m.%Y \e[38;5;147mat\e[38;5;86m %H:%M")\e[0m\n\n"
+                    cecho lp B "\n\tEntering sleeping mode. Performing next update on " emph "$(date -d "$UPDATE_TIME tomorrow" +"%d.%m.%Y \e[38;5;147mat\e[38;5;86m %H:%M")" "\n"
                 else
                     TARGET_EPOCH=$(date -d "$UPDATE_TIME" +%s)
-                    printf "\n\t\e[1m\e[38;5;147mEntering sleeping mode. Performing next update today at \e[38;5;86m$(date -d "$UPDATE_TIME" +"%H:%M")\e[0m\n\n"
+                    cecho lp B "\n\tEntering sleeping mode. Performing next update today at " emph "$(date -d "$UPDATE_TIME" +"%H:%M")" "\n"
                 fi
                 SLEEP_SECONDS=$(( $TARGET_EPOCH - $CURRENT_EPOCH ))
                 sleep $SLEEP_SECONDS
@@ -751,7 +764,6 @@ function projectStatisticsDatabase()
 
             while read line
             do
-                #printf "%+15s: %s\n" "line" "$line"
                 if [[ "$line" =~ ^[^#] ]]; then
                     PARAMS=( $(awk 'BEGIN{FS="/"}{print $(NF-4) " " $(NF-3) " " $(NF-2) " " $(NF-1) " " $(NF)}' <<< "$line") )
                 else
@@ -759,10 +771,10 @@ function projectStatisticsDatabase()
                 fi
 
                 if [ -d $line ]; then
-                    printf "\t\e[38;5;208m\e[48;5;16mUpdating:\e[38;5;49m $line "
+                    cecho lo "\tUpdating: " wg "$line "
                     cd $line
                 else
-                    printf "\n\e[91m Directory \"$line\" skipped!\n\e[0m"
+                    cecho lr "\n Directory " dir "$line" " not found, skipped!"
                     continue
                 fi
 
@@ -780,14 +792,15 @@ function projectStatisticsDatabase()
                         ' >> $TEMPORARY_DATABASE_FILE
 
                 cd $CURRENT_DIRECTORY
-                printf "\e[38;5;10m...done!\e[0m\n"
+                cecho lg "...done!"
             done < <(cat $TEMPORARY_FILE_WITH_DIRECTORIES)
 
             if [ ! -f $TEMPORARY_DATABASE_FILE ] || [ "$(wc -l < $TEMPORARY_DATABASE_FILE)" -eq 0 ]; then
-                printf "\n\e[91m After the database procedure, the database seems to be empty! Temporary files\n"
-                printf "   $TEMPORARY_DATABASE_FILE\n   $TEMPORARY_FILE_WITH_DIRECTORIES\n"
-                printf " have been left for further investigation! Aborting...\e[0m\n\n"
-                return
+                cecho lr "\n After the database procedure, the database seems to be empty! Temporary files\n"\
+                      file "   $TEMPORARY_DATABASE_FILE" "\n"\
+                      file "   $TEMPORARY_FILE_WITH_DIRECTORIES\n"\
+                      " have been left for further investigation! Aborting...\n"
+                exit -1
             fi
 
             #Updating the content of PROJECT_DATABASE_FILE
@@ -799,7 +812,7 @@ function projectStatisticsDatabase()
             rm $TEMPORARY_FILE_WITH_DIRECTORIES
 
             if [ "$SLEEP_TIME" != "" ]; then
-                printf "\n\t\e[1m\e[38;5;147mSleeping \e[38;5;86m$SLEEP_TIME\e[38;5;147m starting on $(date +"%d.%m.%Y at %H:%M:%S")\e[0m\n\n"
+                cecho lp B "\n\tSleeping " emph "$SLEEP_TIME" " starting on " emph "$(date +"%d.%m.%Y at %H:%M:%S")" "\n"
                 sleep $SLEEP_TIME
             fi
 
@@ -814,7 +827,8 @@ function projectStatisticsDatabase()
 
     if [ $REPORT = "TRUE" ]; then
 
-        printf "\t\t\t  \e[95m\e[4mAUTOMATIC REPORT FROM DATABASE (status on \e[1m$(date -r $PROJECT_DATABASE_FILE +"%d.%m.%Y\e[21m at \e[1m%H:%M")\e[21m)\n\n\e[0m"
+        cecho lm "\t\t\t  " U "AUTOMATIC REPORT FROM DATABASE (status on "\
+              B "$(date -r $PROJECT_DATABASE_FILE $(cecho -n -d '+%%d.%%m.%%Y' uB ' at ' B '%%H:%%M'))" uB ")\n"
 
         awk --posix -v betaColorColumn="$((${COLUMNS[betaC]} -1 ))" \
             -v trajNoColorColumn="$((${COLUMNS[trajNoC]} -1 ))" \
@@ -918,11 +932,11 @@ if(criticalSituation ==1){exit 1}else{exit 0}
         }' $PROJECT_DATABASE_FILE
 
         if [ $? -ne 0 ]; then
-            printf "\n\t\t\t\e[38;5;9m"
+            cecho -d lr "\n\t\t\t"
         else
-            printf "\n\t\t\t\e[38;5;83m"
+            cecho -d wg "\n\t\t\t"
         fi
-        printf "Use \e[1m-\e[4mds\e[24m\e[21m | \e[1m--\e[4mdataBase\e[24m\e[21m \e[1m--\e[4mshow\e[24m\e[21m option to display set of simulations.\n\n"
+        cecho "Use " B "-" U "ds" uU uB " | " B "--" U "dataBase" uU " --" U "show" uU uB " option to display set of simulations.\n"
     fi
 
     #==========================================================================================================================================================================================#
@@ -948,8 +962,8 @@ if(criticalSituation ==1){exit 1}else{exit 0}
                                              "Running simulations"
                                              "Pending simulations" )
 
-        printf "\e[38;5;118mWhich simulations would you like to show?\n\e[38;5;135m"
-        PS3=$'\n\e[38;5;118mEnter the number corresponding to the desired set: \e[38;5;135m'
+        cecho yg "Which simulations would you like to show?\n" p
+        PS3=$(cecho yg '\nEnter the number corresponding to the desired set: ' p)
         select SIMULATION in "${POSSIBLE_SIMULATIONS_TO_SHOW[@]}"; do
             if ! ElementInArray "$SIMULATION" "${POSSIBLE_SIMULATIONS_TO_SHOW[@]}"; then
                 continue
@@ -1021,7 +1035,7 @@ if(criticalSituation ==1){exit 1}else{exit 0}
                 break
             fi
         done
-        printf "\n\e[0m"
+        cecho ''
 
         for i in ${!COLUMNS_TO_FILTER[@]}
         do
@@ -1029,10 +1043,12 @@ if(criticalSituation ==1){exit 1}else{exit 0}
         done
 
         if [ $(wc -l < $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE) -eq 0 ]; then
-            printf " \e[38;5;202m $SIMULATION not found in database (last update ended on \e[1m$(date -r $PROJECT_DATABASE_FILE +"%d.%m.%Y\e[21m at \e[1m%H:%M")\e[21m).\n\n\e[0m"
+            cecho o emph "  $SIMULATION" " not found in database (last update ended on "\
+                  B "$(date -r $PROJECT_DATABASE_FILE $(cecho -n -d '+%%d.%%m.%%Y' uB ' at ' B '%H:%M'))" uB ").\n"
         else
             __static__DisplayDatabaseFile <(sort $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE | uniq)
-            printf "\n Last update ended on \e[1m$(date -r $PROJECT_DATABASE_FILE +"%d.%m.%Y\e[21m at \e[1m%H:%M")\e[21m  \e[38;5;202m--->\e[38;5;207m  $PROJECT_DATABASE_FILE\n\n\e[0m"
+            cecho "\n Last update ended on " B "$(date -r $PROJECT_DATABASE_FILE $(cecho -n -d '+%%d.%%m.%%Y' uB ' at ' B '%H:%M'))"\
+                  uB o "  --->  " file "$PROJECT_DATABASE_FILE" "\n"
         fi
 
         rm $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE
