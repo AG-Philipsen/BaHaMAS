@@ -92,8 +92,8 @@ function ListJobStatus_SLURM()
     local JOBS_STATUS_FILE="jobs_status_$LOCAL_PARAMETERS_STRING.txt"
     rm -f $JOBS_STATUS_FILE
 
-    printf "\n${DEFAULT_LISTSTATUS_COLOR}===============================================================================================================================================\n\e[0m"
-    printf "\e[0;35m%s\t\t  %s\t  %s\t   %s\t  %s\t%s\n\e[0m"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" "Last tr. finished" " Tr: # (time last|av.)"
+    cecho "\n${DEFAULT_LISTSTATUS_COLOR}==============================================================================================================================================="
+    cecho lm "$(printf"%s\t\t  %s\t  %s\t   %s\t  %s\t%s\n\e[0m"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" "Last tr. finished" " Tr: # (time last|av.)")"
     printf "%s\t\t\t  %s\t  %s\t%s\t  %s\t%s\n"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" >> $JOBS_STATUS_FILE
 
     JOB_METAINFORMATION_ARRAY=( $(__static__ExtractMetaInformationFromJOBNAME) )
@@ -118,7 +118,7 @@ function ListJobStatus_SLURM()
         elif [ ${#STATUS[@]} -eq 1 ]; then
             STATUS=${STATUS[0]}
         else
-            printf "\n \e[1;37;41mWARNING:\e[0;31m \e[1mThere are more than one job with ${LOCAL_PARAMETERS_STRING} and BETA=$BETA as parameters! CHECK!!! Aborting...\n\n\e[0m\n"
+            cecho lr B "\n " U "WARNING" uU ":" uB " There are more than one job with " emph "${LOCAL_PARAMETERS_STRING}" " and " emph "BETA=$BETA" " as parameters! This should not happen! Aborting...\n"
             exit -1
         fi
 
@@ -228,7 +228,6 @@ function ListJobStatus_SLURM()
                 local K_MP="      "
             fi
         else
-            #printf "\n \e[0;31m File $INPUTFILE_GLOBALPATH not found. Integration stpes will not be printed!\n\n\e[0m\n"
             local INT0="--"
             local INT1="--"
             local INT2="--"
@@ -264,7 +263,7 @@ $(ColorTime $TIME_FROM_LAST_MODIFICATION)%s${DEFAULT_LISTSTATUS_COLOR}      \
         fi
 
     done #Loop on BETA
-    printf "${DEFAULT_LISTSTATUS_COLOR}===============================================================================================================================================\n\e[0m"
+    cecho  "${DEFAULT_LISTSTATUS_COLOR}==============================================================================================================================================="
 }
 
 function GetShortenedBetaString()
