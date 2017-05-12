@@ -498,7 +498,7 @@ function projectStatisticsDatabase()
         else
             if [ ! f $FILENAME_GIVEN_AS_INPUT ]; then
                 cecho lr "\n File " file "$FILENAME_GIVEN_AS_INPUT" " does not exist! Aborting...\n"
-                return
+                exit -1
             fi
             local PROJECT_DATABASE_FILE=$FILENAME_GIVEN_AS_INPUT
         fi
@@ -506,7 +506,7 @@ function projectStatisticsDatabase()
         if [ "$FILENAME_GIVEN_AS_INPUT" != "" ] ; then
             if [ ! -f $FILENAME_GIVEN_AS_INPUT ]; then
                 cecho lr "\n File " emph "$FILENAME_GIVEN_AS_INPUT" " does not exist! Aborting...\n"
-                return
+                exit -1
             fi
             local FILE_WITH_DIRECTORIES=$FILENAME_GIVEN_AS_INPUT
         fi
