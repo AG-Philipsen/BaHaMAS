@@ -32,6 +32,7 @@ source ${BaHaMAS_repositoryTopLevelPath}/AuxiliaryFunctions.bash          || exi
 source ${BaHaMAS_repositoryTopLevelPath}/AcceptanceRateReport.bash        || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/BuildRegexPath.bash              || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/ProjectStatisticsDatabase.bash   || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/Tests/SetupUserVariables.bash    || exit -2
 #------------------------------------------------------------------------------------------------------#
 
 #Set stricter shell mode. This implies for the developer to be aware of what is going on,
@@ -40,7 +41,11 @@ source ${BaHaMAS_repositoryTopLevelPath}/ProjectStatisticsDatabase.bash   || exi
 
 #Declare all variables (color user decisions for output needed from very beginning)
 DeclarePathRelatedGlobalVariables
-DeclareUserDefinedGlobalVariables
+if [ -n "${BaHaMAS_testModeOn:+x}" ] && [ ${BaHaMAS_testModeOn} = 'TRUE' ]; then
+    DeclareUserDefinedGlobalVariablesForTests
+else
+    DeclareUserDefinedGlobalVariables
+fi
 DeclareBaHaMASGlobalVariables
 
 #If the help is asked, it doesn't matter which other options are given to the script
