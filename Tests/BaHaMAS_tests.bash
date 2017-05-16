@@ -10,7 +10,7 @@
 # are not exhaustive tests, but they help refactoring the code.             #
 #---------------------------------------------------------------------------#
 
-readonly BaHaMAS_testModeOn='TRUE'
+#This is to have cecho functionality active here
 readonly BaHaMAS_colouredOutput='TRUE'
 
 #Retrieve information from git
@@ -32,7 +32,7 @@ reportLevel=3
 
 #Set up folder structure to run tests
 readonly testFolder="${BaHaMAS_testsFolder}/StaggeredFakeProject"
-readonly logFile='Tests.log'
+readonly logFile="${BaHaMAS_testsFolder}/Tests.log"
 readonly testParametersPath='/Nf2/muiPiT/mass0050/nt6/ns18'
 readonly listOfAuxiliaryFilesAndFolders=( "$testFolder" "$logFile" )
 CreateTestsFolderStructure
@@ -58,4 +58,4 @@ done && unset -v 'testToBeRun'
 
 #Print report and clean test folder
 PrintTestsReport
-CleanTestsEnvironment >>/dev/null
+#CleanTestsEnvironment >>/dev/null

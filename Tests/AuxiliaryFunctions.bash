@@ -16,7 +16,7 @@ function CreateTestsFolderStructure()
 function MakeTestPreliminaryOperations()
 {
     #Always use completed file and then in case overwrite
-    cp ${BaHaMAS_testsFolderAuxFiles}/fakeBetas ${testFolder}${testParametersPath}/.
+    cp "${BaHaMAS_testsFolderAuxFiles}/fakeBetas" "${testFolder}${testParametersPath}/betas"
     #Always go at betafolder level and then in case cd elsewhere
     cd "${testFolder}${testParametersPath}"
 
@@ -29,10 +29,11 @@ function MakeTestPreliminaryOperations()
     esac
 }
 
-function RunBaHaMAS()
+function RunBaHaMASInTestMode()
 {
     printf "\n\n$(date)\n  Running:\n    ${BaHaMAS_command} $@\n\n" >> $logFile
-    ( ${BaHaMAS_command} "$@" >> $logFile ) #In subshell to exclude any potential variables conflict
+    #In subshell to exclude any potential variables conflict and in test mode!
+    ( BaHaMAS_testModeOn='TRUE' ${BaHaMAS_command} "$@" >> $logFile )
     if [ $? -eq 0 ]; then
         return 0
     else
@@ -50,7 +51,7 @@ function RunTest()
         stringTest="${stringTest// /.}"
         cecho -n bb "  $(printf '%+2s' ${testsRun})/$(printf '%-2s' ${#availableTests[@]})" emph "${stringTest//_/ }"
     fi
-    RunBaHaMAS "$@"
+    RunBaHaMASInTestMode "$@"
     if [ $? -eq 0 ]; then
         (( testsPassed++ ))
         if [ $reportLevel -eq 3 ]; then

@@ -6,8 +6,8 @@ function DeclareUserDefinedGlobalVariablesForTests()
 {
     BaHaMAS_colouredOutput='TRUE'
     USER_MAIL="user@test.com"
-    HOME_DIR="$BaHaMAS_repositoryTopLevelPath/Tests"
-    WORK_DIR="$BaHaMAS_repositoryTopLevelPath/Tests"
+    HOME_DIR="${BaHaMAS_repositoryTopLevelPath}/Tests"
+    WORK_DIR="${BaHaMAS_repositoryTopLevelPath}/Tests"
     # NOTE: Here we put GPU_PER_NODE to a high number in order to make BaHaMAS ask the
     #       user about conifrmation that a node will not be fully used. It is just a trick
     #       to avoid that jobs are sumbitted in test phase!
@@ -16,14 +16,7 @@ function DeclareUserDefinedGlobalVariablesForTests()
     JOBSCRIPT_LOCALFOLDER="Jobscripts_TEST"
     FILE_WITH_WHICH_NODES_TO_EXCLUDE="${HOME_DIR}/ExcludeNodes_TEST"
 
-    if [ $WILSON = "TRUE" ]; then
-        SIMULATION_PATH="WilsonProject"
-    fi
-
-    if [ $STAGGERED = "TRUE" ]; then
-        SIMULATION_PATH="StaggeredProject"
-    fi
-
+    SIMULATION_PATH="StaggeredFakeProject"
     HMC_GLOBALPATH="${HOME_DIR}/AuxiliaryFiles/fakeExecutable"
     INPUTFILE_NAME="fakeInput"
     JOBSCRIPT_PREFIX="fakePrefix"
