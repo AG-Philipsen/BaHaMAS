@@ -110,7 +110,7 @@ function ParseCommandLineOption()
                 shift 2 ;;
 
             -m | --measurements )
-                if [[ ! $2 =~ ^[0-9]+$ ]]; then
+                if [[ ! $2 =~ ^[0-9]+$ ]] && [ "$2" != '' ]; then
                     __static__PrintOptionSpecificationErrorAndExit $1
                 else
                     MEASUREMENTS=$2
@@ -118,7 +118,7 @@ function ParseCommandLineOption()
                 shift 2 ;;
 
             -f | --confSaveFrequency )
-                if [[ ! $2 =~ ^[0-9]+$ ]]; then
+                if [[ ! $2 =~ ^[0-9]+$ ]] && [ "$2" != '' ]; then
                     __static__PrintOptionSpecificationErrorAndExit $1
                 else
                     NSAVE=$2
@@ -126,7 +126,7 @@ function ParseCommandLineOption()
                 shift 2 ;;
 
             -F | --confSavePointFrequency )
-                if [[ ! $2 =~ ^[0-9]+$ ]]; then
+                if [[ ! $2 =~ ^[0-9]+$ ]] && [ "$2" != '' ]; then
                     __static__PrintOptionSpecificationErrorAndExit $1
                 else
                     NSAVEPOINT=$2
@@ -134,7 +134,7 @@ function ParseCommandLineOption()
                 shift 2 ;;
 
             --intsteps0 )
-                if [[ ! $2 =~ ^[0-9]+$ ]]; then
+                if [[ ! $2 =~ ^[0-9]+$ ]] && [ "$2" != '' ]; then
                     __static__PrintOptionSpecificationErrorAndExit $1
                 else
                     INTSTEPS0=$2
@@ -142,7 +142,7 @@ function ParseCommandLineOption()
                 shift 2 ;;
 
             --intsteps1 )
-                if [[ ! $2 =~ ^[0-9]+$ ]]; then
+                if [[ ! $2 =~ ^[0-9]+$ ]] && [ "$2" != '' ]; then
                     __static__PrintOptionSpecificationErrorAndExit $1
                 else
                     INTSTEPS1=$2
@@ -150,7 +150,7 @@ function ParseCommandLineOption()
                 shift 2 ;;
 
             --cgbs )
-                if [[ ! $2 =~ ^[0-9]+$ ]]; then
+                if [[ ! $2 =~ ^[0-9]+$ ]] && [ "$2" != '' ]; then
                     __static__PrintOptionSpecificationErrorAndExit $1
                 else
                     CGBS=$2
@@ -209,7 +209,7 @@ function ParseCommandLineOption()
             -c | --continue )
                 mutuallyExclusiveOptionsPassed+=( $1 )
                 CONTINUE="TRUE"
-                if [[ ! $2 =~ ^- ]]; then
+                if [[ ! $2 =~ ^- ]] && [ "$2" != '' ]; then
                     if [[ ! $2 =~ ^[0-9]+$ ]];then
                         __static__PrintOptionSpecificationErrorAndExit $1
                     else
@@ -222,7 +222,7 @@ function ParseCommandLineOption()
             -C | --continueThermalization )
                 mutuallyExclusiveOptionsPassed+=( $1 )
                 CONTINUE_THERMALIZATION="TRUE"
-                if [[ ! $2 =~ ^- ]]; then
+                if [[ ! $2 =~ ^- ]] && [ "$2" != '' ]; then
                     if [[ ! $2 =~ ^[0-9]+$ ]];then
                         __static__PrintOptionSpecificationErrorAndExit $1
                     else
@@ -282,7 +282,7 @@ function ParseCommandLineOption()
             --completeBetasFile )
                 mutuallyExclusiveOptionsPassed+=( $1 )
                 COMPLETE_BETAS_FILE="TRUE"
-                if [[ ! $2 =~ ^- ]]; then
+                if [[ ! $2 =~ ^- ]] && [ "$2" != '' ]; then
                     if [[ ! $2 =~ ^[0-9]+$ ]];then
                         __static__PrintOptionSpecificationErrorAndExit $1
                     else
