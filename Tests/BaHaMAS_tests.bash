@@ -22,13 +22,29 @@ readonly BaHaMAS_testsFolderAuxFiles=${BaHaMAS_testsFolder}/AuxiliaryFiles
 #Load needed files
 source ${BaHaMAS_repositoryTopLevelPath}/OutputFunctionality.bash  || exit -2
 source ${BaHaMAS_testsFolder}/AuxiliaryFunctions.bash              || exit -2
+source ${BaHaMAS_testsFolder}/CommandLineParser.bash               || exit -2
 
-#Report level:
-# 0 = binary
-# 1 = summary
-# 2 = short
-# 3 = detailed
-reportLevel=3
+#BaHaMAS tests global variables
+cleanTestFolder='TRUE'
+reportLevel=1 #Report level: 0 = binary, 1 = summary, 2 = short, 3 = detailed
+testsRun=0
+testsPassed=0
+testsFailed=0
+whichFailed=()
+declare -A availableTests
+declare -a testsToBeRun #To keep tests in order and make user decide which to run
+
+
+#Possible Tests
+availableTests['help']="--help"
+availableTests['completeBetasFile']="--completeBetasFile"
+availableTests['completeBetasFile-eq']="--completeBetasFile=3"
+testsToBeRun=( 'help'
+               'completeBetasFile' 'completeBetasFile-eq'
+             )
+
+#Get user setup
+ParseCommandLineOption "$@"
 
 #Set up folder structure to run tests
 readonly testFolder="${BaHaMAS_testsFolder}/StaggeredFakeProject"
@@ -38,24 +54,16 @@ readonly listOfAuxiliaryFilesAndFolders=( "$testFolder" "$logFile" )
 CreateTestsFolderStructure
 
 #Run tests
-testsRun=0
-testsPassed=0
-testsFailed=0
-whichFailed=()
-declare -A availableTests
-availableTests['help']="--help"
-availableTests['completeBetasFile']="--completeBetasFile"
-availableTests['completeBetasFile-eq']="--completeBetasFile=3"
-
-cecho ''
 if [ $reportLevel -eq 3 ]; then
-    cecho bb " " U "Running " emph "${#availableTests[@]}" " tests" uU ":\n"
+    cecho bb "\n " U "Running " emph "${#testsToBeRun[@]}" " tests" uU ":\n"
 fi
-for testToBeRun in "${!availableTests[@]}"; do
-    MakeTestPreliminaryOperations "$testToBeRun"
-    RunTest "$testToBeRun" "${availableTests[$testToBeRun]}"
-done && unset -v 'testToBeRun'
+for testName in "${testsToBeRun[@]}"; do
+    MakeTestPreliminaryOperations "$testName"
+    RunTest "$testName" "${availableTests[$testName]}"
+done && unset -v 'testName'
 
 #Print report and clean test folder
 PrintTestsReport
-#CleanTestsEnvironment >>/dev/null
+if [ $cleanTestFolder = 'TRUE' ]; then
+    CleanTestsEnvironment
+fi
