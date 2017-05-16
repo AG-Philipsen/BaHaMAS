@@ -21,12 +21,18 @@ readonly BaHaMAS_testsFolderAuxFiles=${BaHaMAS_testsFolder}/AuxiliaryFiles
 
 #Load needed files
 source ${BaHaMAS_repositoryTopLevelPath}/OutputFunctionality.bash  || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/UtilityFunctions.bash     || exit -2
 source ${BaHaMAS_testsFolder}/AuxiliaryFunctions.bash              || exit -2
 source ${BaHaMAS_testsFolder}/CommandLineParser.bash               || exit -2
 
+#Helper has priority
+if ElementInArray '-h' "$@" || ElementInArray '--help' "$@"; then
+    ParseCommandLineOption '--help'
+fi
+
 #BaHaMAS tests global variables
 cleanTestFolder='TRUE'
-reportLevel=1 #Report level: 0 = binary, 1 = summary, 2 = short, 3 = detailed
+reportLevel=3 #Report level: 0 = binary, 1 = summary, 2 = short, 3 = detailed
 testsRun=0
 testsPassed=0
 testsFailed=0
@@ -36,11 +42,25 @@ declare -a testsToBeRun #To keep tests in order and make user decide which to ru
 
 
 #Possible Tests
-availableTests['help']="--help"
-availableTests['completeBetasFile']="--completeBetasFile"
-availableTests['completeBetasFile-eq']="--completeBetasFile=3"
+availableTests['help']='--help'
+availableTests['completeBetasFile']='--completeBetasFile'
+availableTests['completeBetasFile-eq']='--completeBetasFile=3'
+availableTests['commentBetas']='--commentBetas'
+availableTests['liststatus']='--liststatus'
+availableTests['liststatus-time']='--liststatus --measureTime'
+availableTests['liststatus-queued']='--liststatus --showOnlyQueued'
+availableTests['commentBetas-num']='--commentBetas 6.1111'
+availableTests['commentBetas-nums']='--commentBetas 6.1111 7.1111'
+availableTests['commentBetas-num-seed']='--commentBetas 6.1111_s2222_fH'
+availableTests['uncommentBetas']='--uncommentBetas'
+availableTests['uncommentBetas-num']='--uncommentBetas 5.1111'
+availableTests['uncommentBetas-nums']='--uncommentBetas 5.1111 6.1111'
+availableTests['uncommentBetas-num-seed']='--uncommentBetas 5.1111_s3333_NC'
 testsToBeRun=( 'help'
+               'liststatus' 'liststatus-time' 'liststatus-queued'
                'completeBetasFile' 'completeBetasFile-eq'
+               'commentBetas' 'commentBetas-num' 'commentBetas-nums' 'commentBetas-num-seed'
+               'uncommentBetas' 'uncommentBetas-num' 'uncommentBetas-nums' 'uncommentBetas-num-seed'
              )
 
 #Get user setup
@@ -50,12 +70,13 @@ ParseCommandLineOption "$@"
 readonly testFolder="${BaHaMAS_testsFolder}/StaggeredFakeProject"
 readonly logFile="${BaHaMAS_testsFolder}/Tests.log"
 readonly testParametersPath='/Nf2/muiPiT/mass0050/nt6/ns18'
+readonly betaFolder='b5.1111_s3333_continueWithNewChain'
 readonly listOfAuxiliaryFilesAndFolders=( "$testFolder" "$logFile" )
 CreateTestsFolderStructure
 
 #Run tests
 if [ $reportLevel -eq 3 ]; then
-    cecho bb "\n " U "Running " emph "${#testsToBeRun[@]}" " tests" uU ":\n"
+    cecho bb "\n " U "Running " emph "${#testsToBeRun[@]}" " test(s)" uU ":\n"
 fi
 for testName in "${testsToBeRun[@]}"; do
     MakeTestPreliminaryOperations "$testName"

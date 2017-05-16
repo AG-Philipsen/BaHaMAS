@@ -15,7 +15,7 @@ function __static__PrintOptionSpecificationErrorAndExit()
 function __static__AddOptionToHelper()
 {
     local name description color lengthOption indentation
-    lengthOption=25; indentation='    '
+    lengthOption=28; indentation='    '
     color="$normalColor"
     name="$1"; description="$2"; shift 2
     cecho $color "$(printf "%s%-${lengthOption}s" "$indentation" "$name")" d "  ->  " $helperColor "$description"
@@ -38,15 +38,15 @@ function __static__PrintHelper()
                                 "Comma-separated numbers or intervals (e.g. 1,3-5)"\
                                 "have to be specified. If no number is specified,"\
                                 "the available tests list is printed."
-    __static__AddOptionToHelper "--doNotCleanTestFolder" "Leave all the created folders and"\
+    __static__AddOptionToHelper "-l | --doNotCleanTestFolder" "Leave all the created folders and"\
                                 "files in the BaHaMAS test folder."
     cecho ''
 }
 function __static__PrintListOfTests(){
     local index list termCols longestString colsWidth maxNumCols formatString
-    cecho B lm "\n List of available tests" uB ":\n"
+    cecho B lm "\n " U "List of available tests" uU ":\n"
     list=( "${testsToBeRun[@]}" )
-    for index in "${!list[@]}" ; do  list[$index]="$(printf "%2d" $((index+1)))) ${list[$index]}"; done
+    for index in "${!list[@]}" ; do  list[$index]="$(cecho -d -n bb "$(printf "%2d)" "$((index+1))") " lp "${list[$index]}")"; done
     termCols=$(tput cols)
     longestString=$(printf "%s\n" "${list[@]}" | awk '{print length}' | sort -n | tail -n1)
     colsWidth=$((longestString+3))
@@ -103,7 +103,7 @@ function ParseCommandLineOption()
                     exit 0
                 fi
                 shift 2 ;;
-            --doNotCleanTestFolder )
+            -l | --doNotCleanTestFolder )
                 cleanTestFolder='FALSE'
                 shift ;;
             * )
