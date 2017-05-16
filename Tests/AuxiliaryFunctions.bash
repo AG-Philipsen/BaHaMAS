@@ -22,7 +22,7 @@ function MakeTestPreliminaryOperations()
 
     case "$1" in
         completeBetasFile* )
-            cp "${BaHaMAS_testsFolderAuxFiles}/fakeBetasToBeCompleted" ${testFolder}${testParametersPath}/.
+            cp "${BaHaMAS_testsFolderAuxFiles}/fakeBetasToBeCompleted" "${testFolder}${testParametersPath}/betas"
             ;;
         * )
             ;;
@@ -55,13 +55,13 @@ function RunTest()
     if [ $? -eq 0 ]; then
         (( testsPassed++ ))
         if [ $reportLevel -eq 3 ]; then
-            cecho lg " passed"
+            cecho lg "  passed"
         fi
     else
         (( testsFailed++ ))
         whichFailed+=( "$testName" )
         if [ $reportLevel -eq 3 ]; then
-            cecho lr " failed"
+            cecho lr "  failed"
         fi
     fi
 }
