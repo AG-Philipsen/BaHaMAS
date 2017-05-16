@@ -77,11 +77,15 @@ function PrintTestsReport()
               lr "${indentation}                 $(printf '%2d' $testsFailed) failed\n"\
               bb "${indentation}=============================="
     fi
-    if [ $reportLevel -ge 2 ] && [ $testsFailed -ne 0 ]; then
-        cecho lr "${indentation}  The following tests failed:"
-        for name in "${whichFailed[@]}"; do
-            cecho lr "${indentation}   - " emph "$name"
-        done
+    if [ $reportLevel -ge 2 ]; then
+        if [ $testsFailed -ne 0 ]; then
+            cecho lr "${indentation}  The following tests failed:"
+            for name in "${whichFailed[@]}"; do
+                cecho lr "${indentation}   - " emph "$name"
+            done
+        else
+            cecho wg "${indentation}       No test failed!"
+        fi
         cecho bb "${indentation}=============================="
     fi
     cecho ''
@@ -96,17 +100,17 @@ function CleanTestsEnvironment()
 {
     local name
     cd $BaHaMAS_testsFolder || exit -2
-    cecho bb "\n In $(pwd):"
+    [ $reportLevel -eq 3 ] && cecho bb "\n In $(pwd):"
     for name in "${listOfAuxiliaryFilesAndFolders[@]}"; do
         if [ $testsFailed -ne 0 ] && [ $name = $logFile ]; then
             continue
         fi
         if [ -d "$name" ]; then
-            cecho p " - Removing " dir "$name"
+            [ $reportLevel -eq 3 ] && cecho p " - Removing " dir "$name"
         elif [ -f "$name" ]; then
-            cecho p " - Removing " file "$name"
+            [ $reportLevel -eq 3 ] && cecho p " - Removing " file "$name"
         elif ls "$name" 1>/dev/null 2>&1; then
-            cecho lr "   Error in $FUNCNAME: " emph "$name" " neither file or directory!"
+            cecho lr "   Error in $FUNCNAME: " emph "$name" " neither file or directory, leaving it!"; continue
         fi
         rm -rf "$name"
     done
