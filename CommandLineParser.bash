@@ -4,15 +4,15 @@
 
 source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParser_aux.bash
 
-__static__PrintInvalidOptionErrorAndExit()
+function __static__PrintInvalidOptionErrorAndExit()
 {
     cecho lr "\n Invalid option " ly "$1" lr " specified! Run " B "BaHaMAS" uB " with " ly "--help" lr " to get further information. Aborting...\n"; exit -1
 }
-__static__PrintOptionSpecificationErrorAndExit()
+function __static__PrintOptionSpecificationErrorAndExit()
 {
     cecho lr "\n The value of the option " ly "$1" lr " was not correctly specified! Aborting...\n"; exit -1
 }
-__static__PrintSecondaryOptionSpecificationErrorAndExit()
+function __static__PrintSecondaryOptionSpecificationErrorAndExit()
 {
     cecho lr "\n The option " ly "$2" lr " is a secondary option of " ly "$1" lr " and it has to be given after it! Aborting...\n"; exit -1
 }
@@ -328,7 +328,7 @@ function ParseCommandLineOption()
                 shift $# ;;
 
             * )
-                __static__PrintInvalidOptionErrorAndExit $1
+                __static__PrintInvalidOptionErrorAndExit $1 ;;
         esac
     done
 
