@@ -142,7 +142,10 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
     jobsNeededVariables=(INPUTFILE_NAME  OUTPUTFILE_NAME  HMC_GLOBALPATH  JOBSCRIPT_PREFIX  JOBSCRIPT_LOCALFOLDER)
     schedulerVariables=(GPU_PER_NODE  WALLTIME  USER_MAIL)
     variablesThatMustBeNotEmpty=(HOME_DIR  WORK_DIR  SIMULATION_PATH)
-    neededFolders=( "$HOME_DIR" "${HOME_DIR}/$SIMULATION_PATH"  "$WORK_DIR" "${WORK_DIR}/$SIMULATION_PATH")
+    neededFolders=( "$HOME_DIR" "${HOME_DIR}/$SIMULATION_PATH" )
+    if [ "$HOME_DIR" != "$WORK_DIR" ]; then
+        neededFolders+=( "$WORK_DIR" "${WORK_DIR}/$SIMULATION_PATH" )
+    fi
     neededFiles=()
     rationalApproxFolder=()
     rationalApproxFiles=()
