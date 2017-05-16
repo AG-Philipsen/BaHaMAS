@@ -271,11 +271,11 @@ function ReadBetaValuesFromFile()
 function __static__PrintOldLineToBetasFileAndShiftArrays()
 {
     if [ $USE_MULTIPLE_CHAINS == "TRUE" ]; then
-        cecho "${BETA_ARRAY[0]}\t${SEED_ARRAY[0]}\t${REST_OF_THE_LINE_ARRAY[0]}"  >> $BETASFILE
+        cecho -d "${BETA_ARRAY[0]}\t${SEED_ARRAY[0]}\t${REST_OF_THE_LINE_ARRAY[0]}"  >> $BETASFILE
         SEED_JUST_PRINTED_TO_FILE="${SEED_ARRAY[0]}"
         SEED_ARRAY=("${SEED_ARRAY[@]:1}")
     else
-        cecho "${BETA_ARRAY[0]}\t${REST_OF_THE_LINE_ARRAY[0]}" >> $BETASFILE
+        cecho -d "${BETA_ARRAY[0]}\t${REST_OF_THE_LINE_ARRAY[0]}" >> $BETASFILE
     fi
     BETA_JUST_PRINTED_TO_FILE="${BETA_ARRAY[0]}"
     REST_OF_THE_LINE_JUST_PRINTED_TO_FILE="${REST_OF_THE_LINE_ARRAY[0]}"
@@ -285,7 +285,7 @@ function __static__PrintOldLineToBetasFileAndShiftArrays()
 
 function __static__PrintNewLineToBetasFile()
 {
-    cecho "$BETA_JUST_PRINTED_TO_FILE\t$NEW_SEED\t$REST_OF_THE_LINE_JUST_PRINTED_TO_FILE" >> $BETASFILE
+    cecho -d "$BETA_JUST_PRINTED_TO_FILE\t$NEW_SEED\t$REST_OF_THE_LINE_JUST_PRINTED_TO_FILE" >> $BETASFILE
 }
 
 function CompleteBetasFile()
@@ -376,11 +376,11 @@ function CompleteBetasFile()
             __static__PrintNewLineToBetasFile
             SEED_TO_GENERATE_NEW_SEED_FROM=$NEW_SEED
         done
-        cecho "" >> $BETASFILE
+        cecho -d "" >> $BETASFILE
     done
     #Print commented lines
     for LINE in "${COMMENTED_LINE_ARRAY[@]}"; do
-        cecho $LINE >> $BETASFILE
+        cecho -d $LINE >> $BETASFILE
     done
     rm $BETASFILE_BACKUP
 
