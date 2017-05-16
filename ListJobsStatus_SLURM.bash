@@ -93,7 +93,7 @@ function ListJobStatus_SLURM()
     rm -f $JOBS_STATUS_FILE
 
     cecho "\n${DEFAULT_LISTSTATUS_COLOR}==============================================================================================================================================="
-    cecho lm "$(printf"%s\t\t  %s\t  %s\t   %s\t  %s\t%s\n\e[0m"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" "Last tr. finished" " Tr: # (time last|av.)")"
+    cecho lm "$(printf "%s\t\t  %s\t  %s\t   %s\t  %s\t%s"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" "Last tr. finished" " Tr: # (time last|av.)")"
     printf "%s\t\t\t  %s\t  %s\t%s\t  %s\t%s\n"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" >> $JOBS_STATUS_FILE
 
     JOB_METAINFORMATION_ARRAY=( $(__static__ExtractMetaInformationFromJOBNAME) )
@@ -336,7 +336,7 @@ function ColorBeta()
         return
     fi
 
-    awk -v obsColumns="${AUX1%?}" -v obsNames="${AUX2%?}" -f ${HOME}/Script/CheckCorrectnessCl2qcdOutputFile.awk $OUTPUTFILE_GLOBALPATH
+    awk -v obsColumns="${AUX1%?}" -v obsNames="${AUX2%?}" -f ${BaHaMAS_repositoryTopLevelPath}/CheckCorrectnessCl2qcdOutputFile.awk $OUTPUTFILE_GLOBALPATH
     local ERROR_CODE=$?
 
     if [ $ERROR_CODE -eq 0 ]; then
