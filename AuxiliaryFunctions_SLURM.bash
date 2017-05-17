@@ -593,9 +593,10 @@ function ProcessBetaValuesForInversion_SLURM()
     for BETA in ${BETAVALUES[@]}; do
         #-------------------------------------------------------------------------#
         local WORK_BETADIRECTORY="$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
-        local NUMBER_OF_CONF_IN_BETADIRECTORY=$(ls $WORK_BETADIRECTORY/conf.[0-9]* | wc -l)
+        local NUMBER_OF_CONF_IN_BETADIRECTORY=$(find $WORK_BETADIRECTORY -regex "$WORK_BETADIRECTORY/conf[.][0-9]*" | wc -l)
         local NUMBER_OF_TOTAL_CORRELATORS=$(($NUMBER_OF_CONF_IN_BETADIRECTORY * $NUMBER_SOURCES_FOR_CORRELATORS))
-        local NUMBER_OF_MISSING_CORRELATORS=$(($NUMBER_OF_TOTAL_CORRELATORS - $(ls $WORK_BETADIRECTORY/conf.[0-9]*_corr 2>/dev/null | wc -l) ))
+        local NUMBER_OF_EXISTING_CORRELATORS=$(find $WORK_BETADIRECTORY -regextype posix-extended -regex "$WORK_BETADIRECTORY/conf[.][0-9]*(_[0-9]+){4}_corr" | wc -l)
+        local NUMBER_OF_MISSING_CORRELATORS=$(($NUMBER_OF_TOTAL_CORRELATORS - $NUMBER_OF_EXISTING_CORRELATORS))
         #-------------------------------------------------------------------------#
         ProduceSrunCommandsFileForInversionsPerBeta
         local NUMBER_OF_INVERSION_COMMANDS=$(wc -l < $WORK_BETADIRECTORY/$SRUN_COMMANDSFILE_FOR_INVERSION)
