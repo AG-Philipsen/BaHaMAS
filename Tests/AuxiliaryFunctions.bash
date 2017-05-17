@@ -117,7 +117,7 @@ function MakeTestPreliminaryOperations()
             ;;
         database* )
             mkdir -p "${testFolder}/SimulationsOverview"
-            cp "${BaHaMAS_testsFolderAuxFiles}/fakeOverviewDatabase" "${testFolder}/SimulationsOverview"
+            cp "${BaHaMAS_testsFolderAuxFiles}/fakeOverviewDatabase" "${testFolder}/SimulationsOverview/2222_01_01_OverviewDatabase"
             ;;
         * )
             ;;

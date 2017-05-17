@@ -27,7 +27,7 @@ function DeclareUserDefinedGlobalVariablesForTests()
     APPROX_HEATBATH_NAME="fakeApprox"
     APPROX_MD_NAME="fakeApprox"
     APPROX_METROPOLIS_NAME="fakeApprox"
-    PROJECT_DATABASE_FILENAME="fakeOverviewDatabase"
+    PROJECT_DATABASE_FILENAME="OverviewDatabase"
     PROJECT_DATABASE_DIRECTORY="${HOME_DIR}/${SIMULATION_PATH}/SimulationsOverview"
     INVERTER_GLOBALPATH="${HOME_DIR}/AuxiliaryFiles/fakeExecutable"
     THERMALIZED_CONFIGURATIONS_PATH="${HOME_DIR}/${SIMULATION_PATH}/Thermalized_Configurations"
