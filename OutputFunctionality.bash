@@ -137,7 +137,7 @@ function cecho()
 
 function AskUser()
 {
-    cecho -n "\n" lc " $1" "[Y/N] "
+    cecho -n "\n" lc " $1" "  [Y/N]  "
 }
 
 function UserSaidYes()
