@@ -34,6 +34,10 @@ function MakeTestPreliminaryOperations()
                 cp "${BaHaMAS_testsFolderAuxFiles}/${file}" "${testFolder}${testParametersPath}/${betaFolder}"
             done
             ;;
+        accRateReport* )
+            mkdir "$betaFolder" || exit -2
+            cp "${BaHaMAS_testsFolderAuxFiles}/fakeOutput" "${testFolder}${testParametersPath}/${betaFolder}"
+            ;;
         cleanOutputFiles* )
             mkdir "$betaFolder" || exit -2
             cp "${BaHaMAS_testsFolderAuxFiles}/fakeBetasToBeCleaned" "${testFolder}${testParametersPath}/betas"
@@ -41,6 +45,9 @@ function MakeTestPreliminaryOperations()
             ;;
         completeBetasFile* )
             cp "${BaHaMAS_testsFolderAuxFiles}/fakeBetasToBeCompleted" "${testFolder}${testParametersPath}/betas"
+            ;;
+        commentBetas* | uncommentBetas* )
+            cp "${BaHaMAS_testsFolderAuxFiles}/fakeBetasToBeCommented" "${testFolder}${testParametersPath}/betas"
             ;;
         * )
             ;;
