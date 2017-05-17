@@ -828,7 +828,7 @@ function projectStatisticsDatabase()
     if [ $REPORT = "TRUE" ]; then
 
         cecho lm "\t\t\t  " U "AUTOMATIC REPORT FROM DATABASE (status on "\
-              B "$(date -r $PROJECT_DATABASE_FILE $(cecho -n -d '+%%d.%%m.%%Y' uB ' at ' B '%%H:%%M'))" uB ")\n"
+              B "$(date -r $PROJECT_DATABASE_FILE "$(cecho -n -d '+%%d.%%m.%%Y' uB ' at ' B '%%H:%%M')")" uB ")\n"
 
         awk --posix -v betaColorColumn="$((${COLUMNS[betaC]} -1 ))" \
             -v trajNoColorColumn="$((${COLUMNS[trajNoC]} -1 ))" \
