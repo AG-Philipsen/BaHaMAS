@@ -199,9 +199,10 @@ function ReadBetaValuesFromFile()
             elif [ $BETA_POSTFIX == "_continueWithNewChain" ]; then
                 local FOUND_CONFIGURATIONS=( $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "^conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%_*}_fromConf[[:digit:]]\+.*") )
                 if [ ${#FOUND_CONFIGURATIONS[@]} -eq 0 ]; then
-                    cecho -n ly B U "\n WARNING" uU ":" uB " No valid starting configuration found for " emph "beta = ${BETA%_*}" " in " dir "$THERMALIZED_CONFIGURATIONS_PATH" ".\n"\
-                          "          Looking for configuration with not exactely the same seed, matching "\
-                          file "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%%_*}_${SEED_PREFIX}${SEED_REGEX}_fromConf.*" "..."
+                    cecho -n ly B "\n " U "WARNING" uU ":" uB " No valid starting configuration found for " emph "beta = ${BETA%_*}" "\n"\
+                          "          in " dir "$THERMALIZED_CONFIGURATIONS_PATH" ".\n"\
+                          "          Looking for configuration with not exactely the same seed,\n"\
+                          "          matching " file "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%%_*}_${SEED_PREFIX}${SEED_REGEX}_fromConf[[:digit:]]\+.*"
                     FOUND_CONFIGURATIONS=( $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "^conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%%_*}_${SEED_PREFIX}${SEED_REGEX}_fromConf[[:digit:]]\+.*") )
                     if [ ${#FOUND_CONFIGURATIONS[@]} -eq 0 ]; then
                         cecho lr " none found! Aborting...\n"
@@ -225,7 +226,7 @@ function ReadBetaValuesFromFile()
                 elif [ ${#FOUND_CONFIGURATIONS[@]} -eq 1 ]; then
                     STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERMALIZED_CONFIGURATIONS_PATH}/${FOUND_CONFIGURATIONS[0]}"
                 else
-                    cecho ly B U "\n WARNING" uU ":" uB " More than one valid starting configuration found for " emph "beta = ${BETA%%_*}" " in "\
+                    cecho ly B "\n " U "WARNING" uU ":" uB " More than one valid starting configuration found for " emph "beta = ${BETA%%_*}" " in "\
                           dir "$THERMALIZED_CONFIGURATIONS_PATH" ".\nWhich should be used?\n" bc
                     PS3=$(cecho -d "\n" yg "Enter the number corresponding to the desired configuration: " bc)
                     select CONFIGURATION_CHOSEN_BY_USER in "${FOUND_CONFIGURATIONS[@]}"; do
@@ -314,7 +315,7 @@ function CompleteBetasFile()
             REST_OF_THE_LINE=$(awk '{$1=""; print $0}' <<< "$REST_OF_THE_LINE")
         else
             if [[ $(awk '{print $1}' <<< "$REST_OF_THE_LINE") =~ ^[[:digit:]]{4}$ ]]; then
-                cecho ly B U "\n WARNING" uU ":" uB " It seems you put seeds in betas file but you invoked this script with the " emph "--doNotUseMultipleChains" " option."
+                cecho ly B "\n " U "WARNING" uU ":" uB " It seems you put seeds in betas file but you invoked this script with the " emph "--doNotUseMultipleChains" " option."
                 AskUser "Would you like to continue?"
                 if UserSaidNo; then
                     return
@@ -437,7 +438,6 @@ function CommentEntriesInBetasFile()
 
 function PrintReportForProblematicBeta()
 {
-
     if [ ${#PROBLEM_BETA_ARRAY[@]} -gt "0" ]; then
         cecho lr "\n===================================================================================\n"\
               " For the following beta values something went wrong and hence\n"\
@@ -445,7 +445,8 @@ function PrintReportForProblematicBeta()
         for BETA in ${PROBLEM_BETA_ARRAY[@]}; do
             cecho lr "  - " B "$BETA"
         done
-        cecho lr "==================================================================================="
+        cecho lr "===================================================================================\n"
+        exit -1
     fi
 }
 

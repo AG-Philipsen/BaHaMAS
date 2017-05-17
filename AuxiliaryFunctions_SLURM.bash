@@ -299,7 +299,7 @@ function ProcessBetaValuesForContinue_SLURM()
             continue
         fi
         if [ "$NAME_LAST_PRNG" == "" ]; then
-            cecho ly B U "\n WARNING" uU ":" uB " No prng state found in " dir "$WORK_BETADIRECTORY" ", using a random host_seed...\n"
+            cecho ly B "\n " U "WARNING" uU ":" uB " No prng state found in " dir "$WORK_BETADIRECTORY" ", using a random host_seed...\n"
         fi
         #Check that, in case the continue is done from a "numeric" configuration, the number of conf and prng is the same
         if [ "$NAME_LAST_CONFIGURATION" != "conf.save" ] && [ "$NAME_LAST_PRNG" != "prng.save" ] && [ "$NAME_LAST_PRNG" != "" ]; then
@@ -637,7 +637,7 @@ function SubmitJobsForValidBetaValues_SLURM()
             fi
             local TEMP_ARRAY=( $(sed 's/_/ /g' <<< "$BETA") )
             if [ $(grep -o "${PREFIX_TO_BE_GREPPED_FOR}\([[:digit:]][.]\)\?[[:alnum:]]\{4\}" <<< "$BETA" | wc -l) -ne $GPU_PER_NODE ]; then
-                cecho ly B U "\n WARNING" uU ":" uB " At least one job is being submitted with less than" emph "$GPU_PER_NODE runs inside."
+                cecho -n ly B "\n " U "WARNING" uU ":" uB " At least one job is being submitted with less than " emph "$GPU_PER_NODE" " runs inside."
                 AskUser "         Would you like to submit in any case?"
                 if UserSaidNo; then
                     cecho lr B "\n No jobs will be submitted."
