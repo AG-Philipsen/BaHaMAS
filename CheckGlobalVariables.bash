@@ -172,7 +172,9 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
 
     elif [ $SUBMITONLY = 'TRUE' ]; then
         option="$(cecho "with the " B "--submitonly")"
-        variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
+        variablesThatMustBeNotEmpty+=( INPUTFILE_NAME
+                                       JOBSCRIPT_PREFIX
+                                       JOBSCRIPT_LOCALFOLDER
                                        THERMALIZED_CONFIGURATIONS_PATH )
         neededFolders+=( "$THERMALIZED_CONFIGURATIONS_PATH" ${rationalApproxFolder[@]} )
         neededFiles+=( "$HMC_GLOBALPATH" ${rationalApproxFiles[@]} )
