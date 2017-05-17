@@ -552,15 +552,17 @@ function ProcessBetaValuesForContinue_SLURM()
         cecho wg " Set option " emph "intsteps0=${INTSTEPS0_ARRAY[$BETA]}" " into the " file "${INPUTFILE_GLOBALPATH#$(pwd)/}" " file."
         __static__ModifyOptionInInputFile "intsteps1=${INTSTEPS1_ARRAY[$BETA]}"
         cecho wg " Set option " emph "intsteps1=${INTSTEPS1_ARRAY[$BETA]}" " into the " file "${INPUTFILE_GLOBALPATH#$(pwd)/}" " file."
-        #Modify remaining command line specified options
-        local EXCLUDE_COMMAND_LINE_OPTIONS=( "-u" "--useMultipleChains" "-w" "--walltime" "-p" "--doNotMeasurePbp" "--intsteps0" "--intsteps1" )
-        for OPT in ${SPECIFIED_COMMAND_LINE_OPTIONS[@]}; do
-            if ElementInArray ${OPT%"="*} ${EXCLUDE_COMMAND_LINE_OPTIONS[@]}; then
+        #Modify input file according to remaining command line specified options (only -F, -f, -m)
+        local COMMAND_LINE_OPTIONS_TO_BE_CONSIDERED=( "-m" "--measurements" "-f" "--confSaveFrequency" "-F" "--confSavePointFrequency" )
+        local index option
+        for index in ${!SPECIFIED_COMMAND_LINE_OPTIONS[@]}; do #Here assume option value follows option name after a space
+            option=${SPECIFIED_COMMAND_LINE_OPTIONS[$index]}
+            if ! ElementInArray ${option} ${COMMAND_LINE_OPTIONS_TO_BE_CONSIDERED[@]}; then
                 continue
             fi
-            __static__ModifyOptionInInputFile ${OPT##*"-"}
+            __static__ModifyOptionInInputFile "${option##*-}=${SPECIFIED_COMMAND_LINE_OPTIONS[$((index+1))]}"
             [ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue 2
-            cecho wg " Set option " emph "${OPT##*"-"}" " into the " file "${INPUTFILE_GLOBALPATH#$(pwd)/}" " file."
+            cecho wg " Set option " emph "${option##*-}=${SPECIFIED_COMMAND_LINE_OPTIONS[$((index+1))]}" " into the " file "${INPUTFILE_GLOBALPATH#$(pwd)/}" " file."
         done
 
         #If the script runs fine and it arrives here, it means no bash continue command was done --> we can add BETA to the jobs to be submitted

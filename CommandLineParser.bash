@@ -26,8 +26,9 @@ function ParseCommandLineOption()
     readarray -t commandLineOptions <<< "$(PrepareGivenOptionToBeProcessed "$@")"
     readarray -t commandLineOptions <<< "$(SplitCombinedShortOptionsInSingleOptions "${commandLineOptions[@]}")"
 
-    #Reset argument function to be able to parse them
+    #Reset argument function to be able to parse them as well as global given option
     set -- "${commandLineOptions[@]}"
+    SPECIFIED_COMMAND_LINE_OPTIONS=( "${commandLineOptions[@]}" )
 
     mutuallyExclusiveOptions=( "-s | --submit"        "-c | --continue"    "-C | --continueThermalization"
                                "-t | --thermalize"    "-l | --liststatus"  "-U | --uncommentBetas"
@@ -35,6 +36,7 @@ function ParseCommandLineOption()
                                "--submitonly"  "--accRateReport"  "--cleanOutputFiles"  "--completeBetasFile")
     mutuallyExclusiveOptionsPassed=()
 
+    #Here it is fine to assume that option names and values are separated by spaces
     while [ "$1" != "" ]; do
         case $1 in
             -h | --help )
