@@ -126,10 +126,10 @@ function PrintHelper()
                                 "of the given beta value will be uncommented."
     __static__AddOptionToHelper -e "-u | --commentBetas" "$(cecho "The reverse option of " $mutuallyExclusiveColor "--uncommentBetas" $helperColor ".")"
     __static__AddOptionToHelper -e "-i | --invertConfigurations" "Invert configurations and produce correlator files for betas and seed specified in the betas file."
-    __static__AddOptionToHelper -e "-d | --dataBase" "Update, display and filter database. This is a subprogram plenty of functionality."\
+    __static__AddOptionToHelper -e "-d | --database" "Update, display and filter database. This is a subprogram plenty of functionality."\
                                 "$(cecho "Run this script with the option " $mutuallyExclusiveColor "--helpDatabase" $helperColor " to get an explanation about the various")"\
-                                "$(cecho "possibilities. To work with the database, specify the " $mutuallyExclusiveColor "--dataBase" $helperColor " option followed by all")"\
-                                "$(cecho "the database options. Differently said, all options given after " $mutuallyExclusiveColor "--dataBase" $helperColor " are options")"\
+                                "$(cecho "possibilities. To work with the database, specify the " $mutuallyExclusiveColor "--database" $helperColor " option followed by all")"\
+                                "$(cecho "the database options. Differently said, all options given after " $mutuallyExclusiveColor "--database" $helperColor " are options")"\
                                 "for the database subprogram."
     cecho ''
     cecho ly B\

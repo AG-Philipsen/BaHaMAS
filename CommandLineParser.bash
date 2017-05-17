@@ -32,7 +32,7 @@ function ParseCommandLineOption()
 
     mutuallyExclusiveOptions=( "-s | --submit"        "-c | --continue"    "-C | --continueThermalization"
                                "-t | --thermalize"    "-l | --liststatus"  "-U | --uncommentBetas"
-                               "-u | --commentBetas"  "-d | --dataBase"    "-i | --invertConfigurations"
+                               "-u | --commentBetas"  "-d | --database"    "-i | --invertConfigurations"
                                "--submitonly"  "--accRateReport"  "--cleanOutputFiles"  "--completeBetasFile")
     mutuallyExclusiveOptionsPassed=()
 
@@ -320,7 +320,7 @@ function ParseCommandLineOption()
                 INVERT_CONFIGURATIONS="TRUE"
                 shift ;;
 
-            -d | --dataBase)
+            -d | --database)
                 CALL_DATABASE="TRUE"
                 mutuallyExclusiveOptionsPassed+=( $1 )
                 shift
