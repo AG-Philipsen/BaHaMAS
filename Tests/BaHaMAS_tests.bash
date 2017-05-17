@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #---------------------------------------------#
 #   Copyright (c)  2017  Alessandro Sciarra   #
 #---------------------------------------------#
@@ -9,6 +11,10 @@
 # options and check that no unexpected failure occures. Clearly, these      #
 # are not exhaustive tests, but they help refactoring the code.             #
 #---------------------------------------------------------------------------#
+
+#Use extglob to facilitate some operations
+#NOTE: To be done here and not where used (see http://mywiki.wooledge.org/glob)
+shopt -s extglob
 
 #This is to have cecho functionality active here
 readonly BaHaMAS_colouredOutput='TRUE'
@@ -49,6 +55,8 @@ availableTests['commentBetas']='--commentBetas'
 availableTests['liststatus']='--liststatus'
 availableTests['liststatus-time']='--liststatus --measureTime'
 availableTests['liststatus-queued']='--liststatus --showOnlyQueued'
+availableTests['cleanOutputFiles']='--cleanOutputFiles'
+availableTests['cleanOutputFiles-all']='--cleanOutputFiles --all'
 availableTests['commentBetas-num']='--commentBetas 6.1111'
 availableTests['commentBetas-nums']='--commentBetas 6.1111 7.1111'
 availableTests['commentBetas-num-seed']='--commentBetas 6.1111_s2222_fH'
@@ -58,10 +66,12 @@ availableTests['uncommentBetas-nums']='--uncommentBetas 5.1111 6.1111'
 availableTests['uncommentBetas-num-seed']='--uncommentBetas 5.1111_s3333_NC'
 testsToBeRun=( 'help'
                'liststatus' 'liststatus-time' 'liststatus-queued'
+               'cleanOutputFiles' 'cleanOutputFiles-all'
                'completeBetasFile' 'completeBetasFile-eq'
                'commentBetas' 'commentBetas-num' 'commentBetas-nums' 'commentBetas-num-seed'
                'uncommentBetas' 'uncommentBetas-num' 'uncommentBetas-nums' 'uncommentBetas-num-seed'
              )
+
 
 #Get user setup
 ParseCommandLineOption "$@"

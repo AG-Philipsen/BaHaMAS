@@ -15,24 +15,33 @@ function CreateTestsFolderStructure()
 
 function MakeTestPreliminaryOperations()
 {
+    local trashFolderName file
     #Always go at betafolder level and then in case cd elsewhere
     cd "${testFolder}${testParametersPath}" || exit -2
-    #Always delete everything inside (paranoic check?!)
-    [ $(pwd) = "${testFolder}${testParametersPath}" ]  && rm -rf "$betaFolder" "betas"
+    #Always move everything inside a Trash folder if not empty
+    if [ "$(ls -A)" ]; then
+        trashFolderName="Trash_$(date +%H%M%S-%3N)"
+        mkdir "$trashFolderName" || exit -2
+        mv !("$trashFolderName") "$trashFolderName" || exit -2
+    fi
     #Always use completed file and then in case overwrite
     cp "${BaHaMAS_testsFolderAuxFiles}/fakeBetas" "${testFolder}${testParametersPath}/betas"
 
     case "$1" in
+        liststatus* )
+            mkdir "$betaFolder" || exit -2
+            for file in fakeExecutable.123456.out fakeInput fakeOutput; do
+                cp "${BaHaMAS_testsFolderAuxFiles}/${file}" "${testFolder}${testParametersPath}/${betaFolder}"
+            done
+            ;;
+        cleanOutputFiles* )
+            mkdir "$betaFolder" || exit -2
+            cp "${BaHaMAS_testsFolderAuxFiles}/fakeBetasToBeCleaned" "${testFolder}${testParametersPath}/betas"
+            cp "${BaHaMAS_testsFolderAuxFiles}/fakeOutput"?(|_pbp.dat) "${testFolder}${testParametersPath}/${betaFolder}"
+            ;;
         completeBetasFile* )
             cp "${BaHaMAS_testsFolderAuxFiles}/fakeBetasToBeCompleted" "${testFolder}${testParametersPath}/betas"
             ;;
-        liststatus* )
-            local file
-            mkdir "$betaFolder"
-            for file in fakeStdOutput fakeInput fakeOutput; do
-                cp "${BaHaMAS_testsFolderAuxFiles}/${file}" "${testFolder}${testParametersPath}/${betaFolder}"
-            done
-                ;;
         * )
             ;;
     esac
@@ -42,8 +51,10 @@ function InhibitBaHaMASCommands()
 {
     function less(){ cecho -d "less $@"; }
     function sbatch(){ cecho -d "sbatch $@"; }
-    function squeue(){ builtin squeue "$@"; } #Change this?!
-    export -f less sbatch
+    #To make liststatus find running job and then test measure time
+    export jobnameForSqueue="${testParametersPath//\//_}__${betaFolder%_*}@RUNNING"
+    function squeue(){ cecho -d -n "${jobnameForSqueue:1}"; }
+    export -f less sbatch squeue
 }
 
 function RunBaHaMASInTestMode()
@@ -93,25 +104,26 @@ function RunTest()
 
 function PrintTestsReport()
 {
-    local indentation name
+    local indentation name percentage
     indentation='          '
     if [ $reportLevel -ge 1 ]; then
-        cecho bb "\n${indentation}==============================\n"\
+        cecho bb "\n${indentation}===============================\n"\
               lp "${indentation}   Run " emph "$(printf '%2d' $testsRun)" " test(s): "\
               lg "$(printf '%2d' $testsPassed) passed\n"\
               lr "${indentation}                   $(printf '%2d' $testsFailed) failed\n"\
-              bb "${indentation}=============================="
+              bb "${indentation}==============================="
     fi
     if [ $reportLevel -ge 2 ]; then
+        percentage=$(awk '{printf "%3.0f%%%%", "100*$1/$2"}' <<< "$testsPassed $testsRun")
+        cecho wg "${indentation}     $percentage of tests passed!"
+        cecho bb "${indentation}==============================="
         if [ $testsFailed -ne 0 ]; then
             cecho lr "${indentation}  The following tests failed:"
             for name in "${whichFailed[@]}"; do
                 cecho lr "${indentation}   - " emph "$name"
             done
-        else
-            cecho wg "${indentation}       No test failed!"
+            cecho bb "${indentation}==============================="
         fi
-        cecho bb "${indentation}=============================="
     fi
     cecho ''
     if [ $testsFailed -ne 0 ]; then
