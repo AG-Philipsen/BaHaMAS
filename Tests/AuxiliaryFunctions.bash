@@ -8,8 +8,6 @@ function CreateTestsFolderStructure()
     mkdir -p "${testFolder}${testParametersPath}"
     mkdir -p "${testFolder}/Rational_Approximations"
     cp "${BaHaMAS_testsFolderAuxFiles}/fakeApprox" "${testFolder}/Rational_Approximations"
-    mkdir -p "${testFolder}/SimulationsOverview"
-    cp "${BaHaMAS_testsFolderAuxFiles}/fakeOverviewDatabase" "${testFolder}/SimulationsOverview"
     mkdir -p "${testFolder}/Thermalized_Configurations"
 }
 
@@ -116,6 +114,10 @@ function MakeTestPreliminaryOperations()
             if [[ $1 =~ some$ ]]; then
                 __static__CreateFilesInBetaFolder "conf.00100_2_3_7_1_corr" "conf.00100_1_2_3_1_corr"
             fi
+            ;;
+        database* )
+            mkdir -p "${testFolder}/SimulationsOverview"
+            cp "${BaHaMAS_testsFolderAuxFiles}/fakeOverviewDatabase" "${testFolder}/SimulationsOverview"
             ;;
         * )
             ;;

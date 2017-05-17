@@ -81,6 +81,7 @@ availableTests['uncommentBetas-nums']='--uncommentBetas 5.1111 6.1111'
 availableTests['uncommentBetas-num-seed']='--uncommentBetas 5.1111_s3333_NC'
 availableTests['invertConfs']='--invertConfigurations --walltime 1d'
 availableTests['invertConfs-some']='--invertConfigurations --walltime 1d'
+availableTests['database-help']='--helpDatabase'
 testsToBeRun=( 'help' 'default'
                'submit' 'submitonly'
                'thermalize-hot' 'thermalize-conf'
@@ -93,6 +94,7 @@ testsToBeRun=( 'help' 'default'
                'commentBetas' 'commentBetas-num' 'commentBetas-nums' 'commentBetas-num-seed'
                'uncommentBetas' 'uncommentBetas-num' 'uncommentBetas-nums' 'uncommentBetas-num-seed'
                'invertConfs' 'invertConfs-some'
+               'database-help'
              )
 
 

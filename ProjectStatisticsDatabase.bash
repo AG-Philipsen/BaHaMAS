@@ -457,7 +457,7 @@ function projectStatisticsDatabase()
                 echo -e "   "
                 echo -e "    \e[4m\e[1m\e[91mNOTE\e[24m:\e[21m\e[38;5;34m The \e[38;5;69mblue\e[38;5;34m, the \e[38;5;123mcyan\e[38;5;34m and the \e[38;5;198mpink\e[38;5;34m options are not compatible!"
                 printf "\e[0m\n"
-                exit -1
+                exit 0
                 ;;
             -*)
                 cecho lr "\n Option " emph "$1" " unrecognized! Aborting...\n"
