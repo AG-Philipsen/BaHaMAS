@@ -13,6 +13,39 @@ function CreateTestsFolderStructure()
     mkdir -p "${testFolder}/Thermalized_Configurations"
 }
 
+function __static__CreateBetaFolder()
+{
+    mkdir "${testFolder}${testParametersPath}/${betaFolder}" || exit -2
+}
+function __static__CreateFilesInBetaFolder()
+{
+    local file
+    for file in "$@"; do
+        touch "${testFolder}${testParametersPath}/${betaFolder}/${file}"
+    done
+}
+function __static__AddStringToFirstLineBetasFile()
+{
+    local line
+    line="$(head -n 1 "${testFolder}${testParametersPath}/betas")"
+    cecho -n -d "$line   $1" > "${testFolder}${testParametersPath}/betas"
+}
+function __static__CopyAuxiliaryFileAtBetaFolderLevel()
+{
+    cp "${BaHaMAS_testsFolderAuxFiles}/$1" "${testFolder}${testParametersPath}/$2"
+}
+function __static__CopyAuxiliaryFilesToBetaFolder()
+{
+    local file
+    for file in "$@"; do
+        cp "${BaHaMAS_testsFolderAuxFiles}/${file}" "${testFolder}${testParametersPath}/${betaFolder}"
+    done
+}
+function __static__CreateThermalizedConfiguration()
+{
+    touch "${testFolder}/Thermalized_Configurations/conf.${testParametersString}_${betaFolder%_*}_$1"
+}
+
 function MakeTestPreliminaryOperations()
 {
     local trashFolderName file folder
@@ -29,35 +62,50 @@ function MakeTestPreliminaryOperations()
 
     case "$1" in
         default | submit )
-            touch "${testFolder}/Thermalized_Configurations/conf.${testParametersString}_${betaFolder%_*}_fromConf4000"
+            __static__CreateThermalizedConfiguration "fromConf4000"
             ;;
         submitonly )
-            touch "${testFolder}/Thermalized_Configurations/conf.${testParametersString}_${betaFolder%_*}_fromConf4000"
-            for folder in "$betaFolder" "Jobscripts_TEST"; do
-                mkdir "$folder" || exit -2
-            done
-            cp "${BaHaMAS_testsFolderAuxFiles}/fakeInput" "${testFolder}${testParametersPath}/${betaFolder}"
+            __static__CreateThermalizedConfiguration "fromConf4000"
+            __static__CreateBetaFolder
+            __static__CopyAuxiliaryFilesToBetaFolder "fakeInput"
+            mkdir "Jobscripts_TEST" || exit -2
             echo "NOT EMPTY" > "${testFolder}${testParametersPath}/Jobscripts_TEST/fakePrefix_${testParametersString}__${betaFolder%_*}"
             ;;
+        thermalize-conf )
+            __static__CreateThermalizedConfiguration "fromHot1000"
+            ;;
+        continue-* )
+            __static__CreateBetaFolder
+            __static__CopyAuxiliaryFilesToBetaFolder "fakeInput" "fakeOutput"
+            __static__CreateFilesInBetaFolder "conf.save" "prng.save"
+            case "${1##*-}" in
+                last )
+                    __static__CreateFilesInBetaFolder "conf.01000" "prng.01000"
+                    __static__AddStringToFirstLineBetasFile "resumefrom=last"
+                    ;;
+                resume )
+                    __static__CreateFilesInBetaFolder "conf.00100" "prng.00100" "conf.00200" "prng.00200"
+                    __static__AddStringToFirstLineBetasFile "resumefrom=100"
+                    ;;
+            esac
+            ;;
         liststatus* )
-            mkdir "$betaFolder" || exit -2
-            for file in fakeExecutable.123456.out fakeInput fakeOutput; do
-                cp "${BaHaMAS_testsFolderAuxFiles}/${file}" "${testFolder}${testParametersPath}/${betaFolder}"
-            done
+            __static__CreateBetaFolder
+            __static__CopyAuxiliaryFilesToBetaFolder "fakeExecutable.123456.out" "fakeInput" "fakeOutput"
             ;;
         accRateReport* )
-            mkdir "$betaFolder" || exit -2
-            cp "${BaHaMAS_testsFolderAuxFiles}/fakeOutput" "${testFolder}${testParametersPath}/${betaFolder}"
+            __static__CreateBetaFolder
+            __static__CopyAuxiliaryFilesToBetaFolder "fakeOutput"
             ;;
         cleanOutputFiles* )
-            mkdir "$betaFolder" || exit -2
-            cp "${BaHaMAS_testsFolderAuxFiles}/fakeOutput"?(|_pbp.dat) "${testFolder}${testParametersPath}/${betaFolder}"
+            __static__CreateBetaFolder
+            __static__CopyAuxiliaryFilesToBetaFolder "fakeOutput?(|_pbp.dat)"
             ;;
         completeBetasFile* )
-            cp "${BaHaMAS_testsFolderAuxFiles}/fakeBetasToBeCompleted" "${testFolder}${testParametersPath}/betas"
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeBetasToBeCompleted" "betas"
             ;;
         commentBetas* | uncommentBetas* )
-            cp "${BaHaMAS_testsFolderAuxFiles}/fakeBetasToBeCommented" "${testFolder}${testParametersPath}/betas"
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeBetasToBeCommented" "betas"
             ;;
         * )
             ;;
@@ -69,13 +117,17 @@ function InhibitBaHaMASCommands()
     function less(){ cecho -d "less $@"; }
     function sbatch(){ cecho -d "sbatch $@"; }
     #To make liststatus find running job and then test measure time
-    export jobnameForSqueue="${testParametersString}__${betaFolder%_*}@RUNNING"
+    if [[ $1 =~ ^liststatus ]]; then
+        export jobnameForSqueue="${testParametersString}__${betaFolder%_*}@RUNNING"
+    fi
     function squeue(){ cecho -d -n "$jobnameForSqueue"; }
     export -f less sbatch squeue
 }
 
 function RunBaHaMASInTestMode()
 {
+    local testName
+    testName=$1; shift
     printf "\n===============================\n" >> $logFile
     printf " $(date)\n" >> $logFile
     printf "===============================\n" >> $logFile
@@ -88,7 +140,10 @@ function RunBaHaMASInTestMode()
     #       the string passed to this function. This will break also spaces inside options
     #       and it has to be taken in mind in future! Observe also that we want to avoid
     #       any interactve Y/N question of BaHaMAS and we do it answering always Y.
-    ( InhibitBaHaMASCommands; BaHaMAS_testModeOn='TRUE' ${BaHaMAS_command} $@ < <(yes 'Y') >> $logFile 2>&1 )
+    (
+        InhibitBaHaMASCommands "$testName"
+        BaHaMAS_testModeOn='TRUE' ${BaHaMAS_command} $@ < <(yes 'Y') >> $logFile 2>&1
+    )
     if [ $? -eq 0 ]; then
         return 0
     else
@@ -106,7 +161,7 @@ function RunTest()
         stringTest="${stringTest// /.}"
         cecho -n bb "  $(printf '%+2s' ${testsRun})/$(printf '%-2s' ${#testsToBeRun[@]})" emph "${stringTest//_/ }"
     fi
-    RunBaHaMASInTestMode "$@"
+    RunBaHaMASInTestMode "$testName" "$@"
     if [ $? -eq 0 ]; then
         (( testsPassed++ ))
         if [ $reportLevel -eq 3 ]; then

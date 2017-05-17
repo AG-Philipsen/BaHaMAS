@@ -116,7 +116,7 @@ elif [ $THERMALIZE = 'TRUE' ] || [ $CONTINUE_THERMALIZATION = 'TRUE' ]; then
         BETA_POSTFIX="_thermalizeFromConf"
     fi
     if [ $MEASURE_PBP = 'TRUE' ]; then
-        cecho ly B "\n Measurement of PBP switched off during thermalization!!\n"
+        cecho ly B "\n Measurement of PBP switched off during thermalization!"
         MEASURE_PBP='FALSE'
     fi
 
