@@ -49,6 +49,9 @@ declare -a testsToBeRun #To keep tests in order and make user decide which to ru
 
 #Possible Tests
 availableTests['help']='--help'
+availableTests['default']='-w=1d'
+availableTests['submit']='--submit -w=1d'
+availableTests['submitonly']='--submitonly'
 availableTests['completeBetasFile']='--completeBetasFile'
 availableTests['completeBetasFile-eq']='--completeBetasFile=3'
 availableTests['commentBetas']='--commentBetas'
@@ -66,7 +69,8 @@ availableTests['uncommentBetas']='--uncommentBetas'
 availableTests['uncommentBetas-num']='--uncommentBetas 5.1111'
 availableTests['uncommentBetas-nums']='--uncommentBetas 5.1111 6.1111'
 availableTests['uncommentBetas-num-seed']='--uncommentBetas 5.1111_s3333_NC'
-testsToBeRun=( 'help'
+testsToBeRun=( 'help' 'default'
+               'submit' 'submitonly'
                'liststatus' 'liststatus-time' 'liststatus-queued'
                'accRateReport' 'accRateReport-num'
                'cleanOutputFiles' 'cleanOutputFiles-all'
@@ -82,7 +86,8 @@ ParseCommandLineOption "$@"
 #Set up folder structure to run tests
 readonly testFolder="${BaHaMAS_testsFolder}/StaggeredFakeProject"
 readonly logFile="${BaHaMAS_testsFolder}/Tests.log"
-readonly testParametersPath='/Nf2/muiPiT/mass0050/nt6/ns18'
+readonly testParametersString='Nf2_muiPiT_mass0050_nt6_ns18'
+readonly testParametersPath="/${testParametersString//_/\/}"
 readonly betaFolder='b5.1111_s3333_continueWithNewChain'
 readonly listOfAuxiliaryFilesAndFolders=( "$testFolder" "$logFile" )
 CreateTestsFolderStructure

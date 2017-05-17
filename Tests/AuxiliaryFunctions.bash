@@ -15,7 +15,7 @@ function CreateTestsFolderStructure()
 
 function MakeTestPreliminaryOperations()
 {
-    local trashFolderName file
+    local trashFolderName file folder
     #Always go at betafolder level and then in case cd elsewhere
     cd "${testFolder}${testParametersPath}" || exit -2
     #Always move everything inside a Trash folder if not empty
@@ -28,6 +28,17 @@ function MakeTestPreliminaryOperations()
     cp "${BaHaMAS_testsFolderAuxFiles}/fakeBetas" "${testFolder}${testParametersPath}/betas"
 
     case "$1" in
+        default | submit )
+            touch "${testFolder}/Thermalized_Configurations/conf.${testParametersString}_${betaFolder%_*}_fromConf4000"
+            ;;
+        submitonly )
+            touch "${testFolder}/Thermalized_Configurations/conf.${testParametersString}_${betaFolder%_*}_fromConf4000"
+            for folder in "$betaFolder" "Jobscripts_TEST"; do
+                mkdir "$folder" || exit -2
+            done
+            cp "${BaHaMAS_testsFolderAuxFiles}/fakeInput" "${testFolder}${testParametersPath}/${betaFolder}"
+            echo "NOT EMPTY" > "${testFolder}${testParametersPath}/Jobscripts_TEST/fakePrefix_${testParametersString}__${betaFolder%_*}"
+            ;;
         liststatus* )
             mkdir "$betaFolder" || exit -2
             for file in fakeExecutable.123456.out fakeInput fakeOutput; do
@@ -40,7 +51,6 @@ function MakeTestPreliminaryOperations()
             ;;
         cleanOutputFiles* )
             mkdir "$betaFolder" || exit -2
-            cp "${BaHaMAS_testsFolderAuxFiles}/fakeBetasToBeCleaned" "${testFolder}${testParametersPath}/betas"
             cp "${BaHaMAS_testsFolderAuxFiles}/fakeOutput"?(|_pbp.dat) "${testFolder}${testParametersPath}/${betaFolder}"
             ;;
         completeBetasFile* )
@@ -59,8 +69,8 @@ function InhibitBaHaMASCommands()
     function less(){ cecho -d "less $@"; }
     function sbatch(){ cecho -d "sbatch $@"; }
     #To make liststatus find running job and then test measure time
-    export jobnameForSqueue="${testParametersPath//\//_}__${betaFolder%_*}@RUNNING"
-    function squeue(){ cecho -d -n "${jobnameForSqueue:1}"; }
+    export jobnameForSqueue="${testParametersString}__${betaFolder%_*}@RUNNING"
+    function squeue(){ cecho -d -n "$jobnameForSqueue"; }
     export -f less sbatch squeue
 }
 
@@ -75,8 +85,10 @@ function RunBaHaMASInTestMode()
     #       we inhibit some commands in order to avoid job summission. Observe also that
     #       at the moment there are no options or options value which have a space in them
     #       and, hence, we can pass $@ to BaHaMAS instead of "$@" in order to word split
-    #       the string passed to this function. This will break also spaces inside options!
-    ( InhibitBaHaMASCommands; BaHaMAS_testModeOn='TRUE' ${BaHaMAS_command} $@ >> $logFile )
+    #       the string passed to this function. This will break also spaces inside options
+    #       and it has to be taken in mind in future! Observe also that we want to avoid
+    #       any interactve Y/N question of BaHaMAS and we do it answering always Y.
+    ( InhibitBaHaMASCommands; BaHaMAS_testModeOn='TRUE' ${BaHaMAS_command} $@ < <(yes 'Y') >> $logFile 2>&1 )
     if [ $? -eq 0 ]; then
         return 0
     else
@@ -121,7 +133,7 @@ function PrintTestsReport()
               bb "${indentation}==============================="
     fi
     if [ $reportLevel -ge 2 ]; then
-        percentage=$(awk '{printf "%3.0f%%%%", "100*$1/$2"}' <<< "$testsPassed $testsRun")
+        percentage=$(awk '{printf "%3.0f%%%%", 100*$1/$2}' <<< "$testsPassed $testsRun")
         cecho wg "${indentation}     $percentage of tests passed!"
         cecho bb "${indentation}==============================="
         if [ $testsFailed -ne 0 ]; then
