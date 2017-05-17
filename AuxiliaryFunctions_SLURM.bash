@@ -744,7 +744,7 @@ function __static__GetJobBetasStringUsing()
         BETAS_STRING_TO_BE_RETURNED="$(sed -e 's/___/_/g' -e 's/_$//' <<< "$BETAS_STRING_TO_BE_RETURNED")"
     fi
 
-    cecho -n "${BETAS_STRING_TO_BE_RETURNED:2}" #I cut here the two initial underscores
+    printf "${BETAS_STRING_TO_BE_RETURNED:2}" #I cut here the two initial underscores
 }
 
 
@@ -753,14 +753,14 @@ function __static__GetJobScriptName()
     local STRING_WITH_BETAVALUES="$1"
 
     if [ $INVERT_CONFIGURATIONS = "TRUE" ]; then
-        cecho -n "${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}__${STRING_WITH_BETAVALUES}_INV"
+        printf "${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}__${STRING_WITH_BETAVALUES}_INV"
     else
         if [ "$BETA_POSTFIX" == "_thermalizeFromConf" ]; then
-            cecho -n "${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}__${STRING_WITH_BETAVALUES}_TC"
+            printf "${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}__${STRING_WITH_BETAVALUES}_TC"
         elif [ "$BETA_POSTFIX" == "_thermalizeFromHot" ]; then
-            cecho -n "${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}__${STRING_WITH_BETAVALUES}_TH"
+            printf "${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}__${STRING_WITH_BETAVALUES}_TH"
         else
-            cecho -n "${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}__${STRING_WITH_BETAVALUES}"
+            printf "${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}__${STRING_WITH_BETAVALUES}"
         fi
     fi
 }
