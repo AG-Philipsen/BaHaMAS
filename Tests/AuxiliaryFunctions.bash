@@ -54,6 +54,9 @@ function MakeTestPreliminaryOperations()
         trashFolderName="Trash_$(date +%H%M%S-%3N)"
         mkdir "$trashFolderName" || exit -2
         mv !("$trashFolderName") "$trashFolderName" || exit -2
+        if [ "$(ls -A ${testFolder}/Thermalized_Configurations)" ]; then
+            mv ${testFolder}/Thermalized_Configurations/* $trashFolderName || exit -2
+        fi
     fi
     #Always use completed file and then in case overwrite
     cp "${BaHaMAS_testsFolderAuxFiles}/fakeBetas" "${testFolder}${testParametersPath}/betas"
@@ -100,7 +103,7 @@ function MakeTestPreliminaryOperations()
             ;;
         cleanOutputFiles* )
             __static__CreateBetaFolder
-            __static__CopyAuxiliaryFilesToBetaFolder "fakeOutput?(|_pbp.dat)"
+            __static__CopyAuxiliaryFilesToBetaFolder "fakeOutput" "fakeOutput_pbp.dat"
             ;;
         completeBetasFile* )
             __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeBetasToBeCompleted" "betas"
