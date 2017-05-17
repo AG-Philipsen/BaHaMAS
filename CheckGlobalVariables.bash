@@ -238,7 +238,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
                                        PROJECT_DATABASE_DIRECTORY
                                        PROJECT_DATABASE_FILENAME )
         neededFolders+=( "$PROJECT_DATABASE_DIRECTORY" )
-        neededFiles+=( "${PROJECT_DATABASE_DIRECTORY}/$PROJECT_DATABASE_FILENAME" )
+        neededFiles+=( "${PROJECT_DATABASE_DIRECTORY}/*$PROJECT_DATABASE_FILENAME" )
 
     else
         option='without any mutually exclusive'
@@ -271,7 +271,8 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
             fi
         done
         for index in "${!neededFiles[@]}"; do
-            if [ -f "${neededFiles[$index]}" ]; then
+            #use stat in if instead of [ -f ] since we have a glob * in name (for database)
+            if stat -t ${neededFiles[$index]} >/dev/null 2>&1; then
                 unset -v 'neededFiles[$index]'
             fi
         done
