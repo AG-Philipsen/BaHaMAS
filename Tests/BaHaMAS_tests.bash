@@ -58,8 +58,12 @@ availableTests['continue-save']='--continue --walltime 1d -F 80 -f 140 -m=1234'
 availableTests['continue-last']='--continue --walltime 1d'
 availableTests['continue-resume']='--continue --walltime 1d'
 availableTests['continue-num']='--continue 10000 --walltime 1d'
+availableTests['continue-therm-save']='--continueThermalization --walltime 1d -F 80 -f 140 -m=1234'
+availableTests['continue-therm-last']='--continueThermalization --walltime 1d'
+availableTests['continue-therm-resume']='--continueThermalization --walltime 1d'
+availableTests['continue-therm-num']='--continueThermalization 5000 --walltime 1d'
 availableTests['completeBetasFile']='--completeBetasFile'
-availableTests['completeBetasFile-eq']='--completeBetasFile=3'
+availableTests['completeBetasFile-num']='--completeBetasFile=3'
 availableTests['commentBetas']='--commentBetas'
 availableTests['liststatus']='--liststatus'
 availableTests['liststatus-time']='--liststatus --measureTime'
@@ -75,16 +79,20 @@ availableTests['uncommentBetas']='--uncommentBetas'
 availableTests['uncommentBetas-num']='--uncommentBetas 5.1111'
 availableTests['uncommentBetas-nums']='--uncommentBetas 5.1111 6.1111'
 availableTests['uncommentBetas-num-seed']='--uncommentBetas 5.1111_s3333_NC'
+availableTests['invertConfs']='--invertConfigurations --walltime 1d'
+availableTests['invertConfs-some']='--invertConfigurations --walltime 1d'
 testsToBeRun=( 'help' 'default'
                'submit' 'submitonly'
                'thermalize-hot' 'thermalize-conf'
                'continue-save' 'continue-last' 'continue-resume' 'continue-num'
+               'continue-therm-save' 'continue-therm-last' 'continue-therm-resume' 'continue-therm-num'
                'liststatus' 'liststatus-time' 'liststatus-queued'
                'accRateReport' 'accRateReport-num'
                'cleanOutputFiles' 'cleanOutputFiles-all'
-               'completeBetasFile' 'completeBetasFile-eq'
+               'completeBetasFile' 'completeBetasFile-num'
                'commentBetas' 'commentBetas-num' 'commentBetas-nums' 'commentBetas-num-seed'
                'uncommentBetas' 'uncommentBetas-num' 'uncommentBetas-nums' 'uncommentBetas-num-seed'
+               'invertConfs' 'invertConfs-some'
              )
 
 
@@ -94,7 +102,7 @@ ParseCommandLineOption "$@"
 #Set up folder structure to run tests
 readonly testFolder="${BaHaMAS_testsFolder}/StaggeredFakeProject"
 readonly logFile="${BaHaMAS_testsFolder}/Tests.log"
-readonly testParametersString='Nf2_muiPiT_mass0050_nt6_ns18'
+readonly testParametersString='Nf2_mui0_mass0050_nt6_ns18'
 readonly testParametersPath="/${testParametersString//_/\/}"
 readonly betaFolder='b5.1111_s3333_continueWithNewChain'
 readonly listOfAuxiliaryFilesAndFolders=( "$testFolder" "$logFile" )
@@ -105,8 +113,13 @@ if [ $reportLevel -eq 3 ]; then
     cecho bb "\n " U "Running " emph "${#testsToBeRun[@]}" " test(s)" uU ":\n"
 fi
 for testName in "${testsToBeRun[@]}"; do
-    MakeTestPreliminaryOperations "$testName"
-    RunTest "$testName" "${availableTests[$testName]}"
+    if [ -n "${availableTests[$testName]:+x}" ]; then
+        MakeTestPreliminaryOperations "$testName"
+        RunTest "$testName" "${availableTests[$testName]}"
+    else
+        cecho lr "\n Test " emph "$testName" " not found among availableTests! Aborting...\n"
+        exit -1
+    fi
 done && unset -v 'testName'
 
 #Print report and clean test folder

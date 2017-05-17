@@ -80,7 +80,7 @@ function MakeTestPreliminaryOperations()
             __static__CreateFilesInBetaFolder "conf.save" "prng.save"
             case "${1##*-}" in
                 last )
-                    __static__CreateFilesInBetaFolder "conf.01000" "prng.01000"
+                    __static__CreateFilesInBetaFolder "conf.00800" "prng.00800"
                     __static__AddStringToFirstLineBetasFile "resumefrom=last"
                     ;;
                 resume )
@@ -88,6 +88,9 @@ function MakeTestPreliminaryOperations()
                     __static__AddStringToFirstLineBetasFile "resumefrom=100"
                     ;;
             esac
+            if [[ $1 =~ therm ]]; then
+                mv "$betaFolder" "${betaFolder/continueWithNewChain/thermalizeFromHot}"
+            fi
             ;;
         liststatus* )
             __static__CreateBetaFolder
@@ -106,6 +109,13 @@ function MakeTestPreliminaryOperations()
             ;;
         commentBetas* | uncommentBetas* )
             __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeBetasToBeCommented" "betas"
+            ;;
+        invertConfs* )
+            __static__CreateBetaFolder
+            __static__CreateFilesInBetaFolder "conf.00100" "conf.00200" "conf.00300" "conf.00400"
+            if [[ $1 =~ some$ ]]; then
+                __static__CreateFilesInBetaFolder "conf.00100_2_3_7_1_corr" "conf.00100_1_2_3_1_corr"
+            fi
             ;;
         * )
             ;;
