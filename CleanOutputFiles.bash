@@ -30,7 +30,7 @@ function __static__CleanFile()
         PROBLEM_BETA_ARRAY+=( $BETA )
         continue
     fi
-    cecho lg " The file " file "${BETA_PREFIX}${FILE_GLOBALPATH##*/$BETA_PREFIX}" " has been successfully cleaned!"\
+    cecho lg "        The file " file "${BETA_PREFIX}${FILE_GLOBALPATH##*/$BETA_PREFIX}" " has been successfully cleaned!"\
           " [removed " B "$(($(wc -l < $FILE_GLOBALPATH_BACKUP) - $(wc -l < $FILE_GLOBALPATH)))" uB " line(s)]!"
 }
 
