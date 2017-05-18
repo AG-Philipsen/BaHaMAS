@@ -2,5 +2,5 @@
 #*
 *#
 UserSpecificVariables.bash
-Tests/StaggeredFakeProject
+Tests/StaggeredFakeProject*
 Tests/Tests.log

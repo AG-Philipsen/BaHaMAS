@@ -45,6 +45,12 @@ testsFailed=0
 whichFailed=()
 declare -A availableTests
 declare -a testsToBeRun #To keep tests in order and make user decide which to run
+readonly testFolder="${BaHaMAS_testsFolder}/StaggeredFakeProject"
+readonly logFile="${BaHaMAS_testsFolder}/Tests.log"
+readonly testParametersString='Nf2_mui0_mass0050_nt6_ns18'
+readonly testParametersPath="/${testParametersString//_/\/}"
+readonly betaFolder='b5.1111_s3333_continueWithNewChain'
+readonly listOfAuxiliaryFilesAndFolders=( "$testFolder" "$logFile" )
 
 
 #Possible Tests
@@ -106,18 +112,11 @@ testsToBeRun=( 'help' 'default'
                'database-update' 'database-update-file'
              )
 
-
 #Get user setup
 ParseCommandLineOption "$@"
 
-#Set up folder structure to run tests
-readonly testFolder="${BaHaMAS_testsFolder}/StaggeredFakeProject"
-readonly logFile="${BaHaMAS_testsFolder}/Tests.log"
-readonly testParametersString='Nf2_mui0_mass0050_nt6_ns18'
-readonly testParametersPath="/${testParametersString//_/\/}"
-readonly betaFolder='b5.1111_s3333_continueWithNewChain'
-readonly listOfAuxiliaryFilesAndFolders=( "$testFolder" "$logFile" )
-CreateTestsFolderStructure
+#If auxiliary folder/files present, rename them
+CheckTestEnvironment
 
 #Run tests
 if [ $reportLevel -eq 3 ]; then
@@ -131,10 +130,11 @@ for testName in "${testsToBeRun[@]}"; do
         cecho lr "\n Test " emph "$testName" " not found among availableTests! Aborting...\n"
         exit -1
     fi
+    CleanTestsEnvironmentForFollowingTest "$testName"
 done && unset -v 'testName'
 
 #Print report and clean test folder
 PrintTestsReport
-if [ $cleanTestFolder = 'TRUE' ]; then
-    CleanTestsEnvironment
+if [ $cleanTestFolder = 'TRUE' ] && [ $testsFailed -eq 0 ]; then
+    DeleteAuxiliaryFilesAndFolders
 fi

@@ -22,7 +22,7 @@ function DeclareUserDefinedGlobalVariablesForTests()
     JOBSCRIPT_PREFIX="fakePrefix"
     OUTPUTFILE_NAME="fakeOutput"
     ACCEPTANCE_COLUMN=11
-    USE_RATIONAL_APPROXIMATION_FILE='FALSE'
+    USE_RATIONAL_APPROXIMATION_FILE='TRUE'
     RATIONAL_APPROXIMATIONS_PATH="${HOME_DIR}/${SIMULATION_PATH}/Rational_Approximations"
     APPROX_HEATBATH_NAME="fakeApprox"
     APPROX_MD_NAME="fakeApprox"
