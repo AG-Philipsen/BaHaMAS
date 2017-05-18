@@ -121,6 +121,11 @@ function MakeTestPreliminaryOperations()
         database* )
             mkdir -p "${testFolder}/SimulationsOverview"
             cp "${BaHaMAS_testsFolderAuxFiles}/fakeOverviewDatabase" "${testFolder}/SimulationsOverview/2222_01_01_OverviewDatabase"
+            if [[ $1 =~ update ]]; then
+                __static__CreateBetaFolder
+                __static__CopyAuxiliaryFilesToBetaFolder "fakeExecutable.123456.out" "fakeInput" "fakeOutput"
+                cecho -d "${testFolder}${testParametersPath}" > "fakeDatabasePath"
+            fi
             ;;
         * )
             ;;
