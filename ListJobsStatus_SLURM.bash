@@ -92,8 +92,8 @@ function ListJobStatus_SLURM()
     local JOBS_STATUS_FILE="jobs_status_$LOCAL_PARAMETERS_STRING.txt"
     rm -f $JOBS_STATUS_FILE
 
-    cecho "\n${DEFAULT_LISTSTATUS_COLOR}==============================================================================================================================================="
-    cecho lm "$(printf "%s\t\t  %s\t  %s\t   %s\t  %s\t%s"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" "Last tr. finished" " Tr: # (time last|av.)")"
+    cecho -d "\n${DEFAULT_LISTSTATUS_COLOR}==============================================================================================================================================="
+    cecho -n -d lm "$(printf "%s\t\t  %s\t  %s\t   %s\t  %s\t%s\n\e[0m"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" "Last tr. finished" " Tr: # (time last|av.)")"
     printf "%s\t\t\t  %s\t  %s\t%s\t  %s\t%s\n"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" >> $JOBS_STATUS_FILE
 
     JOB_METAINFORMATION_ARRAY=( $(__static__ExtractMetaInformationFromJOBNAME) )
@@ -263,7 +263,7 @@ $(ColorTime $TIME_FROM_LAST_MODIFICATION)%s${DEFAULT_LISTSTATUS_COLOR}      \
         fi
 
     done #Loop on BETA
-    cecho  "${DEFAULT_LISTSTATUS_COLOR}==============================================================================================================================================="
+    cecho -d "${DEFAULT_LISTSTATUS_COLOR}==============================================================================================================================================="
 }
 
 function GetShortenedBetaString()
