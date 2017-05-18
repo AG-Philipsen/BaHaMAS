@@ -8,9 +8,9 @@ function AcceptanceRateReport()
     local BETAVALUES_COPY=(${BETAVALUES[@]})
     #-----------------------------------------#
     for INDEX in "${!BETAVALUES_COPY[@]}"; do
-        local OUTPUTFILE_GLOBALPATH=$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$INDEX]}/$OUTPUTFILE_NAME
+        local OUTPUTFILE_GLOBALPATH=$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$INDEX]}/$OUTPUT_FILENAME
         if [ ! -f $OUTPUTFILE_GLOBALPATH ]; then
-            cecho lr "\n File " file "$OUTPUTFILE_NAME" " not found in " dir "$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$INDEX]}"\
+            cecho lr "\n File " file "$OUTPUT_FILENAME" " not found in " dir "$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$INDEX]}"\
                   " folder! The value " emph "beta = ${BETAVALUES_COPY[$INDEX]}" " will be skipped!\n"
             PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$INDEX]} )
             unset BETAVALUES_COPY[$INDEX] #Here BETAVALUES_COPY becomes sparse
@@ -28,7 +28,7 @@ function AcceptanceRateReport()
     local POSITION_BETA_STRING_IN_DATA_ARRAY=()
     #Loop on betas and calculate acceptance concatenating data in single array
     for BETA in ${BETAVALUES_COPY[@]}; do
-        OUTPUTFILE_GLOBALPATH=$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA/$OUTPUTFILE_NAME
+        OUTPUTFILE_GLOBALPATH=$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA/$OUTPUT_FILENAME
         NRLINES_ARRAY+=( $(awk '{if(NR%'$INTERVAL'==0){counter++;}}END{print counter}' $OUTPUTFILE_GLOBALPATH) )
         POSITION_BETA_STRING_IN_DATA_ARRAY+=( ${#DATA_ARRAY[@]} )
         DATA_ARRAY+=( "b${BETA%_*}" )

@@ -186,30 +186,30 @@ function ReadBetaValuesFromFile()
     if [ $CONTINUE = "FALSE" ] && [ $CLEAN_OUTPUT_FILES = "FALSE" ] && [ $INVERT_CONFIGURATIONS = "FALSE" ] && [ $ACCRATE_REPORT = "FALSE" ]; then
         for BETA in "${BETAVALUES[@]}"; do
             if [ "$BETA_POSTFIX" == "" ]; then #Old nomenclature case: no beta postfix!
-                local FOUND_CONFIGURATIONS=( $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "^conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA}.*") )
+                local FOUND_CONFIGURATIONS=( $(ls $THERM_CONFS_GLOBALPATH | grep "^conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA}.*") )
                 if [ ${#FOUND_CONFIGURATIONS[@]} -eq 0 ]; then
                     STARTCONFIGURATION_GLOBALPATH[$BETA]="notFoundHenceStartFromHot"
                 elif [ ${#FOUND_CONFIGURATIONS[@]} -eq 1 ]; then
-                    STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERMALIZED_CONFIGURATIONS_PATH}/${FOUND_CONFIGURATIONS[0]}"
+                    STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERM_CONFS_GLOBALPATH}/${FOUND_CONFIGURATIONS[0]}"
                 else
-                    cecho lr "\n No valid starting configuration found for " emph "beta = ${BETA}" " in " dir "$THERMALIZED_CONFIGURATIONS_PATH" "\n"\
+                    cecho lr "\n No valid starting configuration found for " emph "beta = ${BETA}" " in " dir "$THERM_CONFS_GLOBALPATH" "\n"\
                           " More than 1 configuration matches " file "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA}.*" "! Aborting...\n"
                     exit -1
                 fi
             elif [ $BETA_POSTFIX == "_continueWithNewChain" ]; then
-                local FOUND_CONFIGURATIONS=( $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "^conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%_*}_fromConf[[:digit:]]\+.*") )
+                local FOUND_CONFIGURATIONS=( $(ls $THERM_CONFS_GLOBALPATH | grep "^conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%_*}_fromConf[[:digit:]]\+.*") )
                 if [ ${#FOUND_CONFIGURATIONS[@]} -eq 0 ]; then
                     cecho -n ly B "\n " U "WARNING" uU ":" uB " No valid starting configuration found for " emph "beta = ${BETA%_*}" "\n"\
-                          "          in " dir "$THERMALIZED_CONFIGURATIONS_PATH" ".\n"\
+                          "          in " dir "$THERM_CONFS_GLOBALPATH" ".\n"\
                           "          Looking for configuration with not exactely the same seed,\n"\
                           "          matching " file "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%%_*}_${SEED_PREFIX}${SEED_REGEX}_fromConf[[:digit:]]\+.*"
-                    FOUND_CONFIGURATIONS=( $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "^conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%%_*}_${SEED_PREFIX}${SEED_REGEX}_fromConf[[:digit:]]\+.*") )
+                    FOUND_CONFIGURATIONS=( $(ls $THERM_CONFS_GLOBALPATH | grep "^conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%%_*}_${SEED_PREFIX}${SEED_REGEX}_fromConf[[:digit:]]\+.*") )
                     if [ ${#FOUND_CONFIGURATIONS[@]} -eq 0 ]; then
                         cecho lr " none found! Aborting...\n"
                         exit -1
                     elif [ ${#FOUND_CONFIGURATIONS[@]} -eq 1 ]; then
                         cecho lg " found a valid one!\n"
-                        STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERMALIZED_CONFIGURATIONS_PATH}/${FOUND_CONFIGURATIONS[0]}"
+                        STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERM_CONFS_GLOBALPATH}/${FOUND_CONFIGURATIONS[0]}"
                     else
                         cecho -d o " found more than one! Which should be used?\n" bb
                         PS3=$(cecho -d "\n" yg "Enter the number corresponding to the desired configuration: " bb)
@@ -221,13 +221,13 @@ function ReadBetaValuesFromFile()
                             fi
                         done
                         cecho "" #Restore also default color
-                        STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERMALIZED_CONFIGURATIONS_PATH}/$CONFIGURATION_CHOSEN_BY_USER"
+                        STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERM_CONFS_GLOBALPATH}/$CONFIGURATION_CHOSEN_BY_USER"
                     fi
                 elif [ ${#FOUND_CONFIGURATIONS[@]} -eq 1 ]; then
-                    STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERMALIZED_CONFIGURATIONS_PATH}/${FOUND_CONFIGURATIONS[0]}"
+                    STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERM_CONFS_GLOBALPATH}/${FOUND_CONFIGURATIONS[0]}"
                 else
                     cecho ly B "\n " U "WARNING" uU ":" uB " More than one valid starting configuration found for " emph "beta = ${BETA%%_*}" " in "\
-                          dir "$THERMALIZED_CONFIGURATIONS_PATH" ".\nWhich should be used?\n" bc
+                          dir "$THERM_CONFS_GLOBALPATH" ".\nWhich should be used?\n" bc
                     PS3=$(cecho -d "\n" yg "Enter the number corresponding to the desired configuration: " bc)
                     select CONFIGURATION_CHOSEN_BY_USER in "${FOUND_CONFIGURATIONS[@]}"; do
                         if ! ElementInArray "$CONFIGURATION_CHOSEN_BY_USER" "${FOUND_CONFIGURATIONS[@]}"; then
@@ -237,14 +237,14 @@ function ReadBetaValuesFromFile()
                         fi
                     done
                     cecho "" #Restore also default color
-                    STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERMALIZED_CONFIGURATIONS_PATH}/$CONFIGURATION_CHOSEN_BY_USER"
+                    STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERM_CONFS_GLOBALPATH}/$CONFIGURATION_CHOSEN_BY_USER"
                 fi
             elif [ $BETA_POSTFIX == "_thermalizeFromConf" ]; then
-                if [ $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "^conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%_*}_fromConf[[:digit:]]\+.*" | wc -l) -ne 0 ]; then
-                    cecho lr "\n It seems that there is already a thermalized configuration for " emph "beta = ${BETA%_*}" " in " dir "$THERMALIZED_CONFIGURATIONS_PATH" "! Aborting...\n"
+                if [ $(ls $THERM_CONFS_GLOBALPATH | grep "^conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%_*}_fromConf[[:digit:]]\+.*" | wc -l) -ne 0 ]; then
+                    cecho lr "\n It seems that there is already a thermalized configuration for " emph "beta = ${BETA%_*}" " in " dir "$THERM_CONFS_GLOBALPATH" "! Aborting...\n"
                     exit -1
                 fi
-                local FOUND_CONFIGURATIONS=( $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "^conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA_REGEX}_${SEED_PREFIX}${SEED_REGEX}_fromHot[[:digit:]]\+.*") )
+                local FOUND_CONFIGURATIONS=( $(ls $THERM_CONFS_GLOBALPATH | grep "^conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA_REGEX}_${SEED_PREFIX}${SEED_REGEX}_fromHot[[:digit:]]\+.*") )
                 #Here a 0 length of FOUND_CONFIGURATIONS is not checked since we rely on the fact that if this was the case we would have $BETA_POSTFIX == "_thermalizeFromHot" as set in JobHandler.bash (Thermalize case)
                 declare -A FOUND_CONFIGURATIONS_WITH_BETA_AS_KEY
                 for CONFNAME in "${FOUND_CONFIGURATIONS[@]}"; do
@@ -256,7 +256,7 @@ function ReadBetaValuesFromFile()
                     cecho lr "\n Something went wrong in determinig the closest beta value to the actual one to pick up the correct thermalized from Hot configuration! Aborting...\n"
                     exit -1
                 fi
-                STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERMALIZED_CONFIGURATIONS_PATH}/${FOUND_CONFIGURATIONS_WITH_BETA_AS_KEY[$CLOSEST_BETA]}"
+                STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERM_CONFS_GLOBALPATH}/${FOUND_CONFIGURATIONS_WITH_BETA_AS_KEY[$CLOSEST_BETA]}"
             elif [ $BETA_POSTFIX == "_thermalizeFromHot" ]; then
                 STARTCONFIGURATION_GLOBALPATH[$BETA]="notFoundHenceStartFromHot"
             else

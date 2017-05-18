@@ -10,38 +10,38 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
           index variable mustReturn
     mustReturn='TRUE'
     variablesThatMustBeNotEmpty=( USER_MAIL
-                                  HOME_DIR
-                                  WORK_DIR )
+                                  SUBMIT_DISK_GLOBALPATH
+                                  RUN_DISK_GLOBALPATH )
     variablesThatMustBeDeclared=( GPU_PER_NODE
-                                  JOBSCRIPT_LOCALFOLDER
-                                  SIMULATION_PATH
-                                  INPUTFILE_NAME
+                                  JOBSCRIPT_FOLDERNAME
+                                  PROJECT_SUBPATH
+                                  INPUT_FILENAME
                                   JOBSCRIPT_PREFIX
-                                  OUTPUTFILE_NAME
+                                  OUTPUT_FILENAME
                                   ACCEPTANCE_COLUMN
-                                  PROJECT_DATABASE_FILENAME
-                                  PROJECT_DATABASE_DIRECTORY
-                                  THERMALIZED_CONFIGURATIONS_PATH
+                                  DATABASE_FILENAME
+                                  DATABASE_GLOBALPATH
+                                  THERM_CONFS_GLOBALPATH
                                   HMC_GLOBALPATH
                                   INVERTER_GLOBALPATH
-                                  FILE_WITH_WHICH_NODES_TO_EXCLUDE
-                                  RATIONAL_APPROXIMATIONS_PATH
-                                  APPROX_HEATBATH_NAME
-                                  APPROX_MD_NAME
-                                  APPROX_METROPOLIS_NAME
+                                  EXCLUDE_NODES_GLOBALPATH
+                                  RATIONAL_APPROX_GLOBALPATH
+                                  APPROX_HEATBATH_FILENAME
+                                  APPROX_MD_FILENAME
+                                  APPROX_METROPOLIS_FILENAME
                                   CLUSTER_PARTITION
                                   CLUSTER_NODE
                                   CLUSTER_CONSTRAINT
                                   CLUSTER_GENERIC_RESOURCE
                                   WALLTIME )
-    variablesThatIfNotEmptyMustNotEndWithSlash=(HOME_DIR
-                                                WORK_DIR
-                                                SIMULATION_PATH
-                                                PROJECT_DATABASE_DIRECTORY
-                                                THERMALIZED_CONFIGURATIONS_PATH
+    variablesThatIfNotEmptyMustNotEndWithSlash=(SUBMIT_DISK_GLOBALPATH
+                                                RUN_DISK_GLOBALPATH
+                                                PROJECT_SUBPATH
+                                                DATABASE_GLOBALPATH
+                                                THERM_CONFS_GLOBALPATH
                                                 HMC_GLOBALPATH
                                                 INVERTER_GLOBALPATH
-                                                RATIONAL_APPROXIMATIONS_PATH )
+                                                RATIONAL_APPROX_GLOBALPATH )
 
     #Check variables and unset them if they are fine
     for index in "${!variablesThatMustBeNotEmpty[@]}"; do
@@ -139,12 +139,12 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
     local index variable option variablesThatMustBeNotEmpty jobsNeededVariables schedulerVariables\
           neededFolders neededFiles rationalApproxFolder rationalApproxFiles
     mustReturn='TRUE'
-    jobsNeededVariables=(INPUTFILE_NAME  OUTPUTFILE_NAME  HMC_GLOBALPATH  JOBSCRIPT_PREFIX  JOBSCRIPT_LOCALFOLDER)
+    jobsNeededVariables=(INPUT_FILENAME  OUTPUT_FILENAME  HMC_GLOBALPATH  JOBSCRIPT_PREFIX  JOBSCRIPT_FOLDERNAME)
     schedulerVariables=(GPU_PER_NODE  WALLTIME  USER_MAIL)
-    variablesThatMustBeNotEmpty=(HOME_DIR  WORK_DIR  SIMULATION_PATH)
-    neededFolders=( "$HOME_DIR" "${HOME_DIR}/$SIMULATION_PATH" )
-    if [ "$HOME_DIR" != "$WORK_DIR" ]; then
-        neededFolders+=( "$WORK_DIR" "${WORK_DIR}/$SIMULATION_PATH" )
+    variablesThatMustBeNotEmpty=(SUBMIT_DISK_GLOBALPATH  RUN_DISK_GLOBALPATH  PROJECT_SUBPATH)
+    neededFolders=( "$SUBMIT_DISK_GLOBALPATH" "${SUBMIT_DISK_GLOBALPATH}/$PROJECT_SUBPATH" )
+    if [ "$SUBMIT_DISK_GLOBALPATH" != "$RUN_DISK_GLOBALPATH" ]; then
+        neededFolders+=( "$RUN_DISK_GLOBALPATH" "${RUN_DISK_GLOBALPATH}/$PROJECT_SUBPATH" )
     fi
     neededFiles=()
     rationalApproxFolder=()
@@ -152,38 +152,38 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
 
     #If user wants to read the rational approximation from file check relative variables
     if [ $USE_RATIONAL_APPROXIMATION_FILE = 'TRUE' ]; then
-        jobsNeededVariables+=( RATIONAL_APPROXIMATIONS_PATH
-                               APPROX_HEATBATH_NAME
-                               APPROX_MD_NAME
-                               APPROX_METROPOLIS_NAME )
-        rationalApproxFolder+=( "$RATIONAL_APPROXIMATIONS_PATH" )
-        rationalApproxFiles+=( "${RATIONAL_APPROXIMATIONS_PATH}/$APPROX_HEATBATH_NAME"
-                               "${RATIONAL_APPROXIMATIONS_PATH}/$APPROX_MD_NAME"
-                               "${RATIONAL_APPROXIMATIONS_PATH}/$APPROX_METROPOLIS_NAME" )
+        jobsNeededVariables+=( RATIONAL_APPROX_GLOBALPATH
+                               APPROX_HEATBATH_FILENAME
+                               APPROX_MD_FILENAME
+                               APPROX_METROPOLIS_FILENAME )
+        rationalApproxFolder+=( "$RATIONAL_APPROX_GLOBALPATH" )
+        rationalApproxFiles+=( "${RATIONAL_APPROX_GLOBALPATH}/$APPROX_HEATBATH_FILENAME"
+                               "${RATIONAL_APPROX_GLOBALPATH}/$APPROX_MD_FILENAME"
+                               "${RATIONAL_APPROX_GLOBALPATH}/$APPROX_METROPOLIS_FILENAME" )
     fi
 
     #Check variables depending on BaHaMAS invocation
     if [ $SUBMIT = 'TRUE' ]; then
         option="$(cecho "with the " B "--submit")"
         variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]}  ${schedulerVariables[@]}
-                                       THERMALIZED_CONFIGURATIONS_PATH )
-        neededFolders+=( "$THERMALIZED_CONFIGURATIONS_PATH" ${rationalApproxFolder[@]} )
+                                       THERM_CONFS_GLOBALPATH )
+        neededFolders+=( "$THERM_CONFS_GLOBALPATH" ${rationalApproxFolder[@]} )
         neededFiles+=( "$HMC_GLOBALPATH" ${rationalApproxFiles[@]} )
 
     elif [ $SUBMITONLY = 'TRUE' ]; then
         option="$(cecho "with the " B "--submitonly")"
-        variablesThatMustBeNotEmpty+=( INPUTFILE_NAME
+        variablesThatMustBeNotEmpty+=( INPUT_FILENAME
                                        JOBSCRIPT_PREFIX
-                                       JOBSCRIPT_LOCALFOLDER
-                                       THERMALIZED_CONFIGURATIONS_PATH )
-        neededFolders+=( "$THERMALIZED_CONFIGURATIONS_PATH" ${rationalApproxFolder[@]} )
+                                       JOBSCRIPT_FOLDERNAME
+                                       THERM_CONFS_GLOBALPATH )
+        neededFolders+=( "$THERM_CONFS_GLOBALPATH" ${rationalApproxFolder[@]} )
         neededFiles+=( "$HMC_GLOBALPATH" ${rationalApproxFiles[@]} )
 
     elif [ $THERMALIZE = 'TRUE' ]; then
         option="$(cecho "with the " B "--thermalize")"
         variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
-                                       THERMALIZED_CONFIGURATIONS_PATH )
-        neededFolders+=( "$THERMALIZED_CONFIGURATIONS_PATH" ${rationalApproxFolder[@]} )
+                                       THERM_CONFS_GLOBALPATH )
+        neededFolders+=( "$THERM_CONFS_GLOBALPATH" ${rationalApproxFolder[@]} )
         neededFiles+=( "$HMC_GLOBALPATH" ${rationalApproxFiles[@]} )
 
     elif [ $CONTINUE = 'TRUE' ]; then
@@ -195,17 +195,17 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
     elif [ $CONTINUE_THERMALIZATION = 'TRUE' ]; then
         option="$(cecho "with the " B "--continueThermalization")"
         variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
-                                       THERMALIZED_CONFIGURATIONS_PATH )
-        neededFolders+=( "$THERMALIZED_CONFIGURATIONS_PATH" ${rationalApproxFolder[@]} )
+                                       THERM_CONFS_GLOBALPATH )
+        neededFolders+=( "$THERM_CONFS_GLOBALPATH" ${rationalApproxFolder[@]} )
         neededFiles+=( "$HMC_GLOBALPATH" ${rationalApproxFiles[@]} )
 
     elif [ $ACCRATE_REPORT = 'TRUE' ]; then
         option="$(cecho "with the " B "--accRateReport")"
-        variablesThatMustBeNotEmpty+=( ACCEPTANCE_COLUMN  OUTPUTFILE_NAME )
+        variablesThatMustBeNotEmpty+=( ACCEPTANCE_COLUMN  OUTPUT_FILENAME )
 
     elif [ $CLEAN_OUTPUT_FILES = 'TRUE' ]; then
         option="$(cecho "with the " B "--cleanOutputFiles")"
-        variablesThatMustBeNotEmpty+=( OUTPUTFILE_NAME )
+        variablesThatMustBeNotEmpty+=( OUTPUT_FILENAME )
 
     elif [ $COMPLETE_BETAS_FILE = 'TRUE' ]; then
         option="$(cecho "with the " B "--completeBetasFile")"
@@ -219,32 +219,32 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
     elif [ $INVERT_CONFIGURATIONS = 'TRUE' ]; then
         option="$(cecho "with the " B "--invertConfigurations")"
         variablesThatMustBeNotEmpty+=( JOBSCRIPT_PREFIX
-                                       JOBSCRIPT_LOCALFOLDER
+                                       JOBSCRIPT_FOLDERNAME
                                        INVERTER_GLOBALPATH
                                        ${schedulerVariables[@]} )
         neededFiles+=( "$INVERTER_GLOBALPATH" )
 
     elif [ $LISTSTATUS = 'TRUE' ]; then
         option="$(cecho "with the " B "--liststatus")"
-        variablesThatMustBeNotEmpty+=( INPUTFILE_NAME
-                                       OUTPUTFILE_NAME
+        variablesThatMustBeNotEmpty+=( INPUT_FILENAME
+                                       OUTPUT_FILENAME
                                        ACCEPTANCE_COLUMN )
 
     elif [ $CALL_DATABASE = 'TRUE' ]; then
         option="$(cecho "with the " B "--dataBase")"
-        variablesThatMustBeNotEmpty+=( INPUTFILE_NAME
-                                       OUTPUTFILE_NAME
+        variablesThatMustBeNotEmpty+=( INPUT_FILENAME
+                                       OUTPUT_FILENAME
                                        ACCEPTANCE_COLUMN
-                                       PROJECT_DATABASE_DIRECTORY
-                                       PROJECT_DATABASE_FILENAME )
-        neededFolders+=( "$PROJECT_DATABASE_DIRECTORY" )
-        neededFiles+=( "${PROJECT_DATABASE_DIRECTORY}/*$PROJECT_DATABASE_FILENAME" )
+                                       DATABASE_GLOBALPATH
+                                       DATABASE_FILENAME )
+        neededFolders+=( "$DATABASE_GLOBALPATH" )
+        neededFiles+=( "${DATABASE_GLOBALPATH}/*$DATABASE_FILENAME" )
 
     else
         option='without any mutually exclusive'
         variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
-                                       THERMALIZED_CONFIGURATIONS_PATH )
-        neededFolders+=( "$THERMALIZED_CONFIGURATIONS_PATH" ${rationalApproxFolder[@]} )
+                                       THERM_CONFS_GLOBALPATH )
+        neededFolders+=( "$THERM_CONFS_GLOBALPATH" ${rationalApproxFolder[@]} )
         neededFiles+=( "$HMC_GLOBALPATH" ${rationalApproxFiles[@]} )
     fi
 

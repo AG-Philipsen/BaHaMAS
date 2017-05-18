@@ -34,11 +34,11 @@ function ProduceInverterJobscript_SLURM()
     [ "$CLUSTER_GENERIC_RESOURCE" != '' ] && __static__AddToJobscriptFile "#SBATCH --gres=$CLUSTER_GENERIC_RESOURCE"
 
     #Trying to retrieve information about the list of nodes to be excluded if user gave file
-    if [ "$FILE_WITH_WHICH_NODES_TO_EXCLUDE" != '' ]; then
-        if [ -f "$FILE_WITH_WHICH_NODES_TO_EXCLUDE" ]; then
-            EXCLUDE_STRING=$(grep -oE '\-\-exclude=.*\[.*\]' $FILE_WITH_WHICH_NODES_TO_EXCLUDE 2>/dev/null)
-        elif [[ $FILE_WITH_WHICH_NODES_TO_EXCLUDE =~ : ]]; then
-            EXCLUDE_STRING=$(ssh ${FILE_WITH_WHICH_NODES_TO_EXCLUDE%%:*} "grep -oE '\-\-exclude=.*\[.*\]' ${FILE_WITH_WHICH_NODES_TO_EXCLUDE#*:} 2>/dev/null")
+    if [ "$EXCLUDE_NODES_GLOBALPATH" != '' ]; then
+        if [ -f "$EXCLUDE_NODES_GLOBALPATH" ]; then
+            EXCLUDE_STRING=$(grep -oE '\-\-exclude=.*\[.*\]' $EXCLUDE_NODES_GLOBALPATH 2>/dev/null)
+        elif [[ $EXCLUDE_NODES_GLOBALPATH =~ : ]]; then
+            EXCLUDE_STRING=$(ssh ${EXCLUDE_NODES_GLOBALPATH%%:*} "grep -oE '\-\-exclude=.*\[.*\]' ${EXCLUDE_NODES_GLOBALPATH#*:} 2>/dev/null")
         fi
         if [ "$EXCLUDE_STRING" != "" ]; then
             __static__AddToInverterJobscriptFile "#SBATCH $EXCLUDE_STRING"

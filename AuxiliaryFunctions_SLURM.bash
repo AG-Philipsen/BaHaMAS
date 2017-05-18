@@ -38,11 +38,11 @@ function ProduceInputFileAndJobScriptForEachBeta_SLURM()
         cecho lg " done!"
         cecho lc "   Configuration used: " file "${STARTCONFIGURATION_GLOBALPATH[${BETAVALUES_COPY[$INDEX]}]}"
         #Call the file to produce the input file
-        local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$INPUTFILE_NAME"
+        local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$INPUT_FILENAME"
         ProduceInputFile_SLURM
     done
     # Partition the BETAVALUES_COPY array into group of GPU_PER_NODE and create the JobScript files inside the JOBSCRIPT_FOLDER
-    mkdir -p ${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER || exit -2
+    mkdir -p ${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_FOLDERNAME || exit -2
     __static__PackBetaValuesPerGpuAndCreateJobScriptFiles "${BETAVALUES_COPY[@]}"
 }
 
@@ -55,7 +55,7 @@ function ProcessBetaValuesForSubmitOnly_SLURM()
     #-----------------------------------------#
     for BETA in "${!BETAVALUES_COPY[@]}"; do
         local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$BETA]}"
-        local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$INPUTFILE_NAME"
+        local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$INPUT_FILENAME"
         if [ ! -d $HOME_BETADIRECTORY ]; then
             cecho lr "\n The directory " dir "$HOME_BETADIRECTORY" " does not exist! \n The value " emph "beta = ${BETAVALUES_COPY[$BETA]}" " will be skipped!\n"
             PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$BETA]} )
@@ -183,8 +183,8 @@ function ProcessBetaValuesForContinue_SLURM()
         #-------------------------------------------------------------------------#
         local WORK_BETADIRECTORY="$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
         local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
-        local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$INPUTFILE_NAME"
-        local OUTPUTFILE_GLOBALPATH="${WORK_BETADIRECTORY}/$OUTPUTFILE_NAME"
+        local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$INPUT_FILENAME"
+        local OUTPUTFILE_GLOBALPATH="${WORK_BETADIRECTORY}/$OUTPUT_FILENAME"
         #-------------------------------------------------------------------------#
 
         if [ ! -d $WORK_BETADIRECTORY ]; then
@@ -241,9 +241,9 @@ function ProcessBetaValuesForContinue_SLURM()
             else
                 local NAME_LAST_PRNG="" #If the prng.xxxxx is not found, use random seed
             fi
-            #If the OUTPUTFILE_NAME is not in the WORK_BETADIRECTORY stop and not do anything
+            #If the OUTPUT_FILENAME is not in the WORK_BETADIRECTORY stop and not do anything
             if [ ! -f $OUTPUTFILE_GLOBALPATH ]; then
-                cecho lr " File " file "$OUTPUTFILE_NAME" " not found in " dir "$WORK_BETADIRECTORY" " folder.\n The value " emph "beta = $BETA" " will be skipped!\n"
+                cecho lr " File " file "$OUTPUT_FILENAME" " not found in " dir "$WORK_BETADIRECTORY" " folder.\n The value " emph "beta = $BETA" " will be skipped!\n"
                 PROBLEM_BETA_ARRAY+=( $BETA )
                 continue
             fi
@@ -345,7 +345,7 @@ function ProcessBetaValuesForContinue_SLURM()
                 cecho "num_sources=1\n"\
                       "pbp_measurements=8\n"\
                       "ferm_obs_to_single_file=1\n"\
-                      "ferm_obs_pbp_prefix=${OUTPUTFILE_NAME}" >> $INPUTFILE_GLOBALPATH
+                      "ferm_obs_pbp_prefix=${OUTPUT_FILENAME}" >> $INPUTFILE_GLOBALPATH
             fi
             cecho wg " Added options " emph "measure_pbp=$MEASURE_PBP_VALUE_FOR_INPUTFILE" "\n"\
                   emph "               sourcetype=volume" "\n"\
@@ -356,7 +356,7 @@ function ProcessBetaValuesForContinue_SLURM()
                 cecho -n wg emph "               num_sources=1\n"\
                       emph "               pbp_measurements=8\n"\
                       emph "               ferm_obs_to_single_file=1\n"\
-                      emph "               ferm_obs_pbp_prefix=${OUTPUTFILE_NAME}"
+                      emph "               ferm_obs_pbp_prefix=${OUTPUT_FILENAME}"
             fi
             cecho wg " to the " file "${INPUTFILE_GLOBALPATH#$(pwd)/}" " file."
         else
@@ -572,7 +572,7 @@ function ProcessBetaValuesForContinue_SLURM()
     done #loop on BETA
 
     #Partition of the LOCAL_SUBMIT_BETA_ARRAY into group of GPU_PER_NODE and create the JobScript files inside the JOBSCRIPT_FOLDER
-    mkdir -p ${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER || exit -2
+    mkdir -p ${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_FOLDERNAME || exit -2
     __static__PackBetaValuesPerGpuAndCreateJobScriptFiles "${LOCAL_SUBMIT_BETA_ARRAY[@]}"
 
     #Ask the user if he want to continue submitting job
@@ -617,7 +617,7 @@ function ProcessBetaValuesForInversion_SLURM()
     done
 
     #Partition of the LOCAL_SUBMIT_BETA_ARRAY into group of GPU_PER_NODE and create the JobScript files inside the JOBSCRIPT_FOLDER
-    mkdir -p ${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER || exit -2
+    mkdir -p ${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_FOLDERNAME || exit -2
     __static__PackBetaValuesPerGpuAndCreateJobScriptFiles "${LOCAL_SUBMIT_BETA_ARRAY[@]}"
 }
 
@@ -650,7 +650,7 @@ function SubmitJobsForValidBetaValues_SLURM()
         done
 
         for BETA in ${SUBMIT_BETA_ARRAY[@]}; do
-            local SUBMITTING_DIRECTORY="${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER"
+            local SUBMITTING_DIRECTORY="${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_FOLDERNAME"
             local JOBSCRIPT_NAME="$(__static__GetJobScriptName ${BETA})"
             cd $SUBMITTING_DIRECTORY
             cecho bb "\n Actual location: " dir "$(pwd)"\
@@ -693,7 +693,7 @@ function __static__PackBetaValuesPerGpuAndCreateJobScriptFiles()
         cecho ""
         local BETAS_STRING="$(__static__GetJobBetasStringUsing ${BETA_FOR_JOBSCRIPT[@]})"
         local JOBSCRIPT_NAME="$(__static__GetJobScriptName ${BETAS_STRING})"
-        local JOBSCRIPT_GLOBALPATH="${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_LOCALFOLDER/$JOBSCRIPT_NAME"
+        local JOBSCRIPT_GLOBALPATH="${HOME_DIR_WITH_BETAFOLDERS}/$JOBSCRIPT_FOLDERNAME/$JOBSCRIPT_NAME"
         if [ $SUBMITONLY = "FALSE" ]; then
             if [ -e $JOBSCRIPT_GLOBALPATH ]; then
                 mv $JOBSCRIPT_GLOBALPATH ${JOBSCRIPT_GLOBALPATH}_$(date +'%F_%H%M') || exit -2

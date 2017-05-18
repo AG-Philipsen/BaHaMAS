@@ -66,7 +66,7 @@ CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase
 
 if [ $CALL_DATABASE = 'FALSE' ]; then
     #Perform all the checks on the path, reading out parameters and testing additional paths
-    CheckSingleOccurrenceInPath $(sed 's/\// /g' <<< "$HOME_DIR")\
+    CheckSingleOccurrenceInPath $(sed 's/\// /g' <<< "$SUBMIT_DISK_GLOBALPATH")\
                                 "${NFLAVOUR_PREFIX}${NFLAVOUR_REGEX}"\
                                 "${CHEMPOT_PREFIX}${CHEMPOT_REGEX}"\
                                 "${MASS_PREFIX}${MASS_REGEX}"\
@@ -109,8 +109,8 @@ elif [ $THERMALIZE = 'TRUE' ] || [ $CONTINUE_THERMALIZATION = 'TRUE' ]; then
     #correct beta to be used is selected then later in the script ---> see where the array STARTCONFIGURATION_GLOBALPATH is filled
     #
     # TODO: If a thermalization from hot is finished but one other crashed and one wishes to resume it, the postfix should be
-    #       from Hot but it is from conf since in $THERMALIZED_CONFIGURATIONS_PATH a conf from hot is found. Think about how to fix this.
-    if [ $(ls $THERMALIZED_CONFIGURATIONS_PATH | grep "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA_REGEX}_${SEED_PREFIX}${SEED_REGEX}_fromHot[[:digit:]]\+.*" | wc -l) -eq 0 ]; then
+    #       from Hot but it is from conf since in $THERM_CONFS_GLOBALPATH a conf from hot is found. Think about how to fix this.
+    if [ $(ls $THERM_CONFS_GLOBALPATH | grep "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA_REGEX}_${SEED_PREFIX}${SEED_REGEX}_fromHot[[:digit:]]\+.*" | wc -l) -eq 0 ]; then
         BETA_POSTFIX="_thermalizeFromHot"
     else
         BETA_POSTFIX="_thermalizeFromConf"

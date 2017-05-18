@@ -21,9 +21,9 @@ function ProduceInputFile_SLURM()
         if [ $USE_RATIONAL_APPROXIMATION_FILE = "TRUE" ]; then
             __static__AddToInputFile \
                 "read_rational_approximations_from_file=1"\
-                "approx_heatbath_file=${RATIONAL_APPROXIMATIONS_PATH}/Nf${NFLAVOUR}_${APPROX_HEATBATH_NAME}"\
-                "approx_md_file=${RATIONAL_APPROXIMATIONS_PATH}/Nf${NFLAVOUR}_${APPROX_MD_NAME}"\
-                "approx_metropolis_file=${RATIONAL_APPROXIMATIONS_PATH}/Nf${NFLAVOUR}_${APPROX_METROPOLIS_NAME}"
+                "approx_heatbath_file=${RATIONAL_APPROX_GLOBALPATH}/Nf${NFLAVOUR}_${APPROX_HEATBATH_FILENAME}"\
+                "approx_md_file=${RATIONAL_APPROX_GLOBALPATH}/Nf${NFLAVOUR}_${APPROX_MD_FILENAME}"\
+                "approx_metropolis_file=${RATIONAL_APPROX_GLOBALPATH}/Nf${NFLAVOUR}_${APPROX_METROPOLIS_FILENAME}"
         else
             __static__AddToInputFile "read_rational_approximations_from_file=0"
         fi
@@ -64,7 +64,7 @@ function ProduceInputFile_SLURM()
         fi
         __static__AddToInputFile \
             "ferm_obs_to_single_file=1"\
-            "ferm_obs_pbp_prefix=${OUTPUTFILE_NAME}"
+            "ferm_obs_pbp_prefix=${OUTPUT_FILENAME}"
     fi
     #Information about integrators
     if [ $WILSON = "TRUE" ]; then

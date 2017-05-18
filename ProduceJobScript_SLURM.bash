@@ -34,11 +34,11 @@ function ProduceJobscript_SLURM()
     [ "$CLUSTER_GENERIC_RESOURCE" != '' ] && __static__AddToJobscriptFile "#SBATCH --gres=$CLUSTER_GENERIC_RESOURCE"
 
     #Trying to retrieve information about the list of nodes to be excluded if user gave file
-    if [ "$FILE_WITH_WHICH_NODES_TO_EXCLUDE" != '' ]; then
-        if [ -f "$FILE_WITH_WHICH_NODES_TO_EXCLUDE" ]; then
-            EXCLUDE_STRING=$(grep -oE '\-\-exclude=.*\[.*\]' $FILE_WITH_WHICH_NODES_TO_EXCLUDE 2>/dev/null)
-        elif [[ $FILE_WITH_WHICH_NODES_TO_EXCLUDE =~ : ]]; then
-            EXCLUDE_STRING=$(ssh ${FILE_WITH_WHICH_NODES_TO_EXCLUDE%%:*} "grep -oE '\-\-exclude=.*\[.*\]' ${FILE_WITH_WHICH_NODES_TO_EXCLUDE#*:} 2>/dev/null")
+    if [ "$EXCLUDE_NODES_GLOBALPATH" != '' ]; then
+        if [ -f "$EXCLUDE_NODES_GLOBALPATH" ]; then
+            EXCLUDE_STRING=$(grep -oE '\-\-exclude=.*\[.*\]' $EXCLUDE_NODES_GLOBALPATH 2>/dev/null)
+        elif [[ $EXCLUDE_NODES_GLOBALPATH =~ : ]]; then
+            EXCLUDE_STRING=$(ssh ${EXCLUDE_NODES_GLOBALPATH%%:*} "grep -oE '\-\-exclude=.*\[.*\]' ${EXCLUDE_NODES_GLOBALPATH#*:} 2>/dev/null")
         fi
         if [ "$EXCLUDE_STRING" != "" ]; then
             __static__AddToJobscriptFile "#SBATCH $EXCLUDE_STRING"
@@ -92,10 +92,10 @@ function ProduceJobscript_SLURM()
         __static__AddToJobscriptFile "rm -f \$dir$INDEX/$HMC_FILENAME && cp -a $HMC_GLOBALPATH \$dir$INDEX || exit 2"
     done
     __static__AddToJobscriptFile "echo \"...done!\"" ""
-    if [ "$HOME_DIR" != "$WORK_DIR" ]; then
+    if [ "$SUBMIT_DISK_GLOBALPATH" != "$RUN_DISK_GLOBALPATH" ]; then
         __static__AddToJobscriptFile "#Copy inputfile from home to work directories..."
         for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-            __static__AddToJobscriptFile "mkdir -p \$workdir$INDEX && cp \$dir$INDEX/$INPUTFILE_NAME \$workdir$INDEX/$INPUTFILE_NAME.\$SLURM_JOB_ID || exit 2"
+            __static__AddToJobscriptFile "mkdir -p \$workdir$INDEX && cp \$dir$INDEX/$INPUT_FILENAME \$workdir$INDEX/$INPUT_FILENAME.\$SLURM_JOB_ID || exit 2"
         done
         __static__AddToJobscriptFile "echo \"...done!\""
     fi
@@ -116,9 +116,9 @@ function ProduceJobscript_SLURM()
             "cd \$workdir$INDEX"\
             "pwd &"\
             "if hash mbuffer 2>/dev/null; then"\
-            "    time \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$INPUTFILE_NAME --device=$INDEX --beta=${BETA_FOR_JOBSCRIPT[$INDEX]%%_*} 2> \$dir$INDEX/\$errFile | mbuffer -q -m2M > \$dir$INDEX/\$outFile &"\
+            "    time \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$INPUT_FILENAME --device=$INDEX --beta=${BETA_FOR_JOBSCRIPT[$INDEX]%%_*} 2> \$dir$INDEX/\$errFile | mbuffer -q -m2M > \$dir$INDEX/\$outFile &"\
             "else"\
-            "    time srun -n 1 \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$INPUTFILE_NAME --device=$INDEX --beta=${BETA_FOR_JOBSCRIPT[$INDEX]%%_*} > \$dir$INDEX/\$outFile 2> \$dir$INDEX/\$errFile &"\
+            "    time srun -n 1 \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$INPUT_FILENAME --device=$INDEX --beta=${BETA_FOR_JOBSCRIPT[$INDEX]%%_*} > \$dir$INDEX/\$outFile 2> \$dir$INDEX/\$errFile &"\
             "fi"\
             "PID_SRUN_$INDEX=\${!}"\
             ""
@@ -142,14 +142,14 @@ function ProduceJobscript_SLURM()
         ""\
         "echo \"Date and time: \$(date)\""\
         "" ""
-    if [ "$HOME_DIR" != "$WORK_DIR" ]; then
+    if [ "$SUBMIT_DISK_GLOBALPATH" != "$RUN_DISK_GLOBALPATH" ]; then
         __static__AddToJobscriptFile "# Backup files"
         for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
             __static__AddToJobscriptFile "cd \$dir$INDEX || exit 2"
             if [ $MEASURE_PBP = "TRUE" ]; then
-                __static__AddToJobscriptFile "cp \$workdir$INDEX/${OUTPUTFILE_NAME}_pbp.dat \$dir$INDEX/${OUTPUTFILE_NAME}_pbp.\$SLURM_JOB_ID || exit 2"
+                __static__AddToJobscriptFile "cp \$workdir$INDEX/${OUTPUT_FILENAME}_pbp.dat \$dir$INDEX/${OUTPUT_FILENAME}_pbp.\$SLURM_JOB_ID || exit 2"
             fi
-            __static__AddToJobscriptFile "cp \$workdir$INDEX/$OUTPUTFILE_NAME \$dir$INDEX/$OUTPUTFILE_NAME.\$SLURM_JOB_ID || exit 2" ""
+            __static__AddToJobscriptFile "cp \$workdir$INDEX/$OUTPUT_FILENAME \$dir$INDEX/$OUTPUT_FILENAME.\$SLURM_JOB_ID || exit 2" ""
         done
     fi
     __static__AddToJobscriptFile "# Remove executable"
@@ -163,7 +163,7 @@ function ProduceJobscript_SLURM()
             for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
                 __static__AddToJobscriptFile\
                     "NUMBER_LAST_CONFIGURATION_IN_FOLDER=\$(ls \$workdir$INDEX | grep 'conf.[0-9]\+' | grep -o '[0-9]\+' | sort -V | tail -n1)" \
-                    "cp \$workdir$INDEX/conf.\${NUMBER_LAST_CONFIGURATION_IN_FOLDER} ${THERMALIZED_CONFIGURATIONS_PATH}/conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA_FOR_JOBSCRIPT[$INDEX]%_*}_fromHot\$(sed 's/^0*//' <<< \"\$NUMBER_LAST_CONFIGURATION_IN_FOLDER\") || exit 2"
+                    "cp \$workdir$INDEX/conf.\${NUMBER_LAST_CONFIGURATION_IN_FOLDER} ${THERM_CONFS_GLOBALPATH}/conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA_FOR_JOBSCRIPT[$INDEX]%_*}_fromHot\$(sed 's/^0*//' <<< \"\$NUMBER_LAST_CONFIGURATION_IN_FOLDER\") || exit 2"
             done
         elif [ $BETA_POSTFIX == "_thermalizeFromConf" ]; then
             for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
@@ -171,7 +171,7 @@ function ProduceJobscript_SLURM()
                 #TODO: For the moment we assume 1000 tr. are done from hot. Better to avoid it
                 __static__AddToJobscriptFile\
                     "TRAJECTORIES_DONE_FROM_CONF=\$(( \$(sed 's/^0*//' <<< \"\$NUMBER_LAST_CONFIGURATION_IN_FOLDER\") - 1000 ))"\
-                    "cp \$workdir$INDEX/conf.\${NUMBER_LAST_CONFIGURATION_IN_FOLDER} ${THERMALIZED_CONFIGURATIONS_PATH}/conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA_FOR_JOBSCRIPT[$INDEX]%_*}_fromConf\${TRAJECTORIES_DONE_FROM_CONF} || exit 2"
+                    "cp \$workdir$INDEX/conf.\${NUMBER_LAST_CONFIGURATION_IN_FOLDER} ${THERM_CONFS_GLOBALPATH}/conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA_FOR_JOBSCRIPT[$INDEX]%_*}_fromConf\${TRAJECTORIES_DONE_FROM_CONF} || exit 2"
             done
         fi
     fi

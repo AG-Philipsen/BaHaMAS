@@ -489,12 +489,12 @@ function projectStatisticsDatabase()
     # Then it has to be initialized accordingly!
     if [ "$UPDATE" = "FALSE" ]; then
         if [ "$FILENAME_GIVEN_AS_INPUT" = "" ]; then
-            LATEST_DATABASE_FILE=$(ls $PROJECT_DATABASE_DIRECTORY | grep -E [[:digit:]]{2}_[[:digit:]]{2}_[[:digit:]]{2}_$PROJECT_DATABASE_FILENAME | sort -t "_" -k 1,1 -k 2,2 -k 3,3 | tail -n1)
+            LATEST_DATABASE_FILE=$(ls $DATABASE_GLOBALPATH | grep -E [[:digit:]]{2}_[[:digit:]]{2}_[[:digit:]]{2}_$DATABASE_FILENAME | sort -t "_" -k 1,1 -k 2,2 -k 3,3 | tail -n1)
             if [ "$LATEST_DATABASE_FILE" = "" ]; then
                 cecho lr "\n No older database versions found! Aborting...\n"
                 exit -1
             fi
-            local PROJECT_DATABASE_FILE=$PROJECT_DATABASE_DIRECTORY/$LATEST_DATABASE_FILE
+            local PROJECT_DATABASE_FILE=$DATABASE_GLOBALPATH/$LATEST_DATABASE_FILE
         else
             if [ ! f $FILENAME_GIVEN_AS_INPUT ]; then
                 cecho lr "\n File " file "$FILENAME_GIVEN_AS_INPUT" " does not exist! Aborting...\n"
@@ -510,7 +510,7 @@ function projectStatisticsDatabase()
             fi
             local FILE_WITH_DIRECTORIES=$FILENAME_GIVEN_AS_INPUT
         fi
-        local PROJECT_DATABASE_FILE=$PROJECT_DATABASE_DIRECTORY/$(date +%Y_%m_%d)_$PROJECT_DATABASE_FILENAME
+        local PROJECT_DATABASE_FILE=$DATABASE_GLOBALPATH/$(date +%Y_%m_%d)_$DATABASE_FILENAME
     fi
 
 
@@ -733,9 +733,9 @@ function projectStatisticsDatabase()
             exit -1
         fi
 
-        local TEMPORARY_FILE_WITH_DIRECTORIES="${PROJECT_DATABASE_DIRECTORY}/temporaryFileWithDirectoriesForDatabaseUpdate.dat"
+        local TEMPORARY_FILE_WITH_DIRECTORIES="${DATABASE_GLOBALPATH}/temporaryFileWithDirectoriesForDatabaseUpdate.dat"
         rm -f $TEMPORARY_FILE_WITH_DIRECTORIES
-        local TEMPORARY_DATABASE_FILE="${PROJECT_DATABASE_DIRECTORY}/temporaryDatabaseForUpdate.dat"
+        local TEMPORARY_DATABASE_FILE="${DATABASE_GLOBALPATH}/temporaryDatabaseForUpdate.dat"
         rm -f $TEMPORARY_DATABASE_FILE
 
         REGEX_STRING=".*/"
@@ -759,7 +759,7 @@ function projectStatisticsDatabase()
                 sleep $SLEEP_SECONDS
             fi
 
-            [ "$FILE_WITH_DIRECTORIES" = "" ] && find $HOME_DIR/$SIMULATION_PATH -regextype grep -regex "$REGEX_STRING" -type d > $TEMPORARY_FILE_WITH_DIRECTORIES
+            [ "$FILE_WITH_DIRECTORIES" = "" ] && find $SUBMIT_DISK_GLOBALPATH/$PROJECT_SUBPATH -regextype grep -regex "$REGEX_STRING" -type d > $TEMPORARY_FILE_WITH_DIRECTORIES
             [ "$FILE_WITH_DIRECTORIES" != "" ] && cat $FILE_WITH_DIRECTORIES > $TEMPORARY_FILE_WITH_DIRECTORIES
 
             while read line
@@ -778,7 +778,7 @@ function projectStatisticsDatabase()
                     continue
                 fi
 
-                PARAMETER_DIRECTORY_STRUCTURE=${line##*$SIMULATION_PATH}
+                PARAMETER_DIRECTORY_STRUCTURE=${line##*$PROJECT_SUBPATH}
 
                 ListJobStatus_SLURM $PARAMETER_DIRECTORY_STRUCTURE | \
                     sed -r 's/[^(\x1b)]\[|\]|\(|\)|%//g' | \
@@ -804,7 +804,7 @@ function projectStatisticsDatabase()
             fi
 
             #Updating the content of PROJECT_DATABASE_FILE
-            local PROJECT_DATABASE_FILE=$PROJECT_DATABASE_DIRECTORY/$(date +%Y_%m_%d)_$PROJECT_DATABASE_FILENAME
+            local PROJECT_DATABASE_FILE=$DATABASE_GLOBALPATH/$(date +%Y_%m_%d)_$DATABASE_FILENAME
             cp $TEMPORARY_DATABASE_FILE $PROJECT_DATABASE_FILE
 
             #Clean up
@@ -944,7 +944,7 @@ if(criticalSituation ==1){exit 1}else{exit 0}
     if [ $SHOW = "TRUE" ]; then
 
         local TEMPORARY_DATABASE_FILE="tmpDatabaseForShowing.dat"
-        rm -f $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE
+        rm -f $DATABASE_GLOBALPATH/$TEMPORARY_DATABASE_FILE
 
         local POSSIBLE_SIMULATIONS_TO_SHOW=( "Simulations on broken GPU"
                                              "Simulations stuck (or finished)"
@@ -1039,19 +1039,19 @@ if(criticalSituation ==1){exit 1}else{exit 0}
 
         for i in ${!COLUMNS_TO_FILTER[@]}
         do
-            awk --posix -v columnToFilter="${COLUMNS_TO_FILTER[$i]}" -v valueToMatch="${VALUES_TO_MATCH[$i]}" '$columnToFilter == valueToMatch{print $0}' $PROJECT_DATABASE_FILE >> $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE
+            awk --posix -v columnToFilter="${COLUMNS_TO_FILTER[$i]}" -v valueToMatch="${VALUES_TO_MATCH[$i]}" '$columnToFilter == valueToMatch{print $0}' $PROJECT_DATABASE_FILE >> $DATABASE_GLOBALPATH/$TEMPORARY_DATABASE_FILE
         done
 
-        if [ $(wc -l < $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE) -eq 0 ]; then
+        if [ $(wc -l < $DATABASE_GLOBALPATH/$TEMPORARY_DATABASE_FILE) -eq 0 ]; then
             cecho o emph "  $SIMULATION" " not found in database (last update ended on "\
                   B "$(date -r $PROJECT_DATABASE_FILE $(cecho -n -d '+%%d.%%m.%%Y' uB ' at ' B '%H:%M'))" uB ").\n"
         else
-            __static__DisplayDatabaseFile <(sort $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE | uniq)
+            __static__DisplayDatabaseFile <(sort $DATABASE_GLOBALPATH/$TEMPORARY_DATABASE_FILE | uniq)
             cecho "\n Last update ended on " B "$(date -r $PROJECT_DATABASE_FILE $(cecho -n -d '+%%d.%%m.%%Y' uB ' at ' B '%H:%M'))"\
                   uB o "  --->  " file "$PROJECT_DATABASE_FILE" "\n"
         fi
 
-        rm $PROJECT_DATABASE_DIRECTORY/$TEMPORARY_DATABASE_FILE
+        rm $DATABASE_GLOBALPATH/$TEMPORARY_DATABASE_FILE
 
     fi
 
