@@ -45,12 +45,12 @@ function DeclarePathRelatedGlobalVariables()
                          [$MASS_POSITION]=$MASS_PREFIX
                          [$NTIME_POSITION]=$NTIME_PREFIX
                          [$NSPACE_POSITION]=$NSPACE_PREFIX )
-    #Parameters values
-    NFLAVOUR=""
-    CHEMPOT=""
-    MASS=0
-    NSPACE=0
-    NTIME=0
+    #Parameters variable names (declred as readonly when reading from path)
+    declare -A -g PARAMETER_VARIABLE_NAMES=( [$NFLAVOUR_PREFIX]="NFLAVOUR"
+                                             [$CHEMPOT_PREFIX]="CHEMPOT"
+                                             [$MASS_PREFIX]="MASS"
+                                             [$NTIME_PREFIX]="NTIME"
+                                             [$NSPACE_PREFIX]="NSPACE" )
     #Parameters regular expressions
     NFLAVOUR_REGEX='[[:digit:]]\([.][[:digit:]]\)\?'
     CHEMPOT_REGEX='\(0\|PiT\)'
@@ -63,8 +63,8 @@ function DeclarePathRelatedGlobalVariables()
                         [$NTIME_POSITION]=$NTIME_REGEX
                         [$NSPACE_POSITION]=$NSPACE_REGEX )
     #Parameters path and string
-    PARAMETERS_PATH=""     # --> e.g. /Nf2/muiPiT/k1550/nt6/ns12    or   /Nf2/mui0/mass0250/nt4/ns8
-    PARAMETERS_STRING=""   # --> e.g.  Nf2_muiPiT_k1550_nt6_ns12    or    Nf2_mui0_mass0250_nt4_ns8
+    PARAMETERS_PATH=''     # --> e.g. /Nf2/muiPiT/k1550/nt6/ns12    or   /Nf2/mui0/mass0250/nt4/ns8
+    PARAMETERS_STRING=''   # --> e.g.  Nf2_muiPiT_k1550_nt6_ns12    or    Nf2_mui0_mass0250_nt4_ns8
     #Beta and seed information
     BETA_POSITION=5
     BETA_PREFIX="b"
