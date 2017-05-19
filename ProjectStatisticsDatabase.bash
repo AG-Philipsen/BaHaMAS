@@ -124,7 +124,7 @@ function projectStatisticsDatabase()
         for VALUE in "$@"; do
             [[ $VALUE != "-l" ]] && [[ $VALUE != "--local" ]] && NEW_OPTIONS+=($VALUE)
         done && unset -v 'VALUE'
-        ReadParametersFromPath $(pwd)
+        ReadParametersFromPathAndSetRelatedVariables $(pwd)
         set -- ${NEW_OPTIONS[@]} "--mu" "$CHEMPOT" "--$MASS_PARAMETER" "$MASS" "--nt" "$NTIME" "--ns" "$NSPACE"
     fi
 

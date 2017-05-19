@@ -72,7 +72,7 @@ if [ $CALL_DATABASE = 'FALSE' ]; then
                                 "${MASS_PREFIX}${MASS_REGEX}"\
                                 "${NTIME_PREFIX}${NTIME_REGEX}"\
                                 "${NSPACE_PREFIX}${NSPACE_REGEX}"
-    ReadParametersFromPath $(pwd)
+    ReadParametersFromPathAndSetRelatedVariables $(pwd)
     DeclareBetaFoldersPathsAsGlobalVariables
     CheckBetaFoldersPathsVariables
 fi

@@ -123,7 +123,7 @@ function __static__CheckParametersExtractedFromPath()
     done
 }
 
-function ReadParametersFromPath()
+function ReadParametersFromPathAndSetRelatedVariables()
 {
     __static__CheckNoArguments "$FUNCNAME" $#
     for prefix in "${PARAMETER_PREFIXES[@]}"; do
