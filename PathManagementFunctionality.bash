@@ -72,8 +72,8 @@ function __static__GetParametersPath()
 function __static__SetParametersPathAndString()
 {
     __static__CheckUnsetParameters "$FUNCNAME" "$@"
-    PARAMETERS_STRING="$(__static__GetParametersString "${PARAMETER_PREFIXES[@]}")"
-    PARAMETERS_PATH="$(__static__GetParametersPath "${PARAMETER_PREFIXES[@]}")"
+    readonly PARAMETERS_STRING="$(__static__GetParametersString "${PARAMETER_PREFIXES[@]}")"
+    readonly PARAMETERS_PATH="$(__static__GetParametersPath "${PARAMETER_PREFIXES[@]}")"
 }
 
 #This function takes the path to be used as first argument and the prefix of the parameters to be extracted as second argument
@@ -131,6 +131,10 @@ function ReadParametersFromPathAndSetRelatedVariables()
     done
     __static__CheckParametersExtractedFromPath "${PARAMETER_PREFIXES[@]}"
     __static__SetParametersPathAndString
+    if [ -z "${PARAMETERS_STRING:+x}" ] || [ -z "${PARAMETERS_PATH:+x}" ]; then
+        cecho lr "\n Either " emph "PARAMETERS_STRING" " or " emph "PARAMETERS_PATH" " unset or empty! Aborting...\n"
+        exit -1
+    fi
 }
 
 function CheckSingleOccurrenceInPath()

@@ -21,59 +21,70 @@
 #            the code and this approach is open to future new cases.               #
 #----------------------------------------------------------------------------------#
 
+#NOTE: Here we want to use readonly for variable which are constant and global,
+#      but we must use declare instead of readonly for arrays since they seem to
+#      stay local and not global with the readonly keyword
+#      http://gnu-bash.2382.n7.nabble.com/4-4-5-trouble-declaring-readonly-array-variables-td18385.html
+#      http://lists.gnu.org/archive/html/bug-bash/2015-11/msg00140.html
 function DeclarePathRelatedGlobalVariables()
 {
     #Setting of the correct formulation based on the path.
-    STAGGERED="FALSE"
-    WILSON="FALSE"
-    [ $(grep "[sS]taggered" <<< "$PWD" | wc -l) -gt 0 ] && STAGGERED="TRUE"
-    [ $(grep    "[wW]ilson" <<< "$PWD" | wc -l) -gt 0 ] && WILSON="TRUE"
+    if [ $(grep "[sS]taggered" <<< "$PWD" | wc -l) -gt 0 ]; then
+        readonly STAGGERED='TRUE'
+    else
+        readonly STAGGERED='FALSE'
+    fi
+    if [ $(grep "[wW]ilson" <<< "$PWD" | wc -l) -gt 0 ]; then
+        readonly WILSON='TRUE'
+    else
+        readonly WILSON='FALSE'
+    fi
     #Parameters positions
-    NFLAVOUR_POSITION=0
-    CHEMPOT_POSITION=1
-    MASS_POSITION=2
-    NTIME_POSITION=3
-    NSPACE_POSITION=4
+    readonly NFLAVOUR_POSITION=0
+    readonly CHEMPOT_POSITION=1
+    readonly MASS_POSITION=2
+    readonly NTIME_POSITION=3
+    readonly NSPACE_POSITION=4
     #Parameters prefixes
-    NFLAVOUR_PREFIX="Nf"
-    CHEMPOT_PREFIX="mui"
-    [ $WILSON = "TRUE" ] && MASS_PREFIX="k" || MASS_PREFIX="mass"
-    NTIME_PREFIX="nt"
-    NSPACE_PREFIX="ns"
-    PARAMETER_PREFIXES=( [$NFLAVOUR_POSITION]=$NFLAVOUR_PREFIX
-                         [$CHEMPOT_POSITION]=$CHEMPOT_PREFIX
-                         [$MASS_POSITION]=$MASS_PREFIX
-                         [$NTIME_POSITION]=$NTIME_PREFIX
-                         [$NSPACE_POSITION]=$NSPACE_PREFIX )
+    readonly NFLAVOUR_PREFIX="Nf"
+    readonly CHEMPOT_PREFIX="mui"
+    [ $WILSON = "TRUE" ] && readonly MASS_PREFIX="k" || readonly MASS_PREFIX="mass"
+    readonly NTIME_PREFIX="nt"
+    readonly NSPACE_PREFIX="ns"
+    declare -rga PARAMETER_PREFIXES=( [$NFLAVOUR_POSITION]=$NFLAVOUR_PREFIX
+                                      [$CHEMPOT_POSITION]=$CHEMPOT_PREFIX
+                                      [$MASS_POSITION]=$MASS_PREFIX
+                                      [$NTIME_POSITION]=$NTIME_PREFIX
+                                      [$NSPACE_POSITION]=$NSPACE_PREFIX )
     #Parameters variable names (declred as readonly when reading from path)
-    declare -A -g PARAMETER_VARIABLE_NAMES=( [$NFLAVOUR_PREFIX]="NFLAVOUR"
-                                             [$CHEMPOT_PREFIX]="CHEMPOT"
-                                             [$MASS_PREFIX]="MASS"
-                                             [$NTIME_PREFIX]="NTIME"
-                                             [$NSPACE_PREFIX]="NSPACE" )
+    declare -rgA PARAMETER_VARIABLE_NAMES=( [$NFLAVOUR_PREFIX]="NFLAVOUR"
+                                            [$CHEMPOT_PREFIX]="CHEMPOT"
+                                            [$MASS_PREFIX]="MASS"
+                                            [$NTIME_PREFIX]="NTIME"
+                                            [$NSPACE_PREFIX]="NSPACE" )
     #Parameters regular expressions
-    NFLAVOUR_REGEX='[[:digit:]]\([.][[:digit:]]\)\?'
-    CHEMPOT_REGEX='\(0\|PiT\)'
-    MASS_REGEX='[[:digit:]]\{4\}'
-    NTIME_REGEX='[[:digit:]]\{1,2\}'
-    NSPACE_REGEX='[[:digit:]]\{1,2\}'
-    PARAMETER_REGEXES=( [$NFLAVOUR_POSITION]=$NFLAVOUR_REGEX
-                        [$CHEMPOT_POSITION]=$CHEMPOT_REGEX
-                        [$MASS_POSITION]=$MASS_REGEX
-                        [$NTIME_POSITION]=$NTIME_REGEX
-                        [$NSPACE_POSITION]=$NSPACE_REGEX )
-    #Parameters path and string
+    readonly NFLAVOUR_REGEX='[[:digit:]]\([.][[:digit:]]\)\?'
+    readonly CHEMPOT_REGEX='\(0\|PiT\)'
+    readonly MASS_REGEX='[[:digit:]]\{4\}'
+    readonly NTIME_REGEX='[[:digit:]]\{1,2\}'
+    readonly NSPACE_REGEX='[[:digit:]]\{1,2\}'
+    declare -rga PARAMETER_REGEXES=( [$NFLAVOUR_POSITION]=$NFLAVOUR_REGEX
+                                     [$CHEMPOT_POSITION]=$CHEMPOT_REGEX
+                                     [$MASS_POSITION]=$MASS_REGEX
+                                     [$NTIME_POSITION]=$NTIME_REGEX
+                                     [$NSPACE_POSITION]=$NSPACE_REGEX )
+    #Parameters path and string (initialized and made readonly later)
     PARAMETERS_PATH=''     # --> e.g. /Nf2/muiPiT/k1550/nt6/ns12    or   /Nf2/mui0/mass0250/nt4/ns8
     PARAMETERS_STRING=''   # --> e.g.  Nf2_muiPiT_k1550_nt6_ns12    or    Nf2_mui0_mass0250_nt4_ns8
     #Beta and seed information
-    BETA_POSITION=5
-    BETA_PREFIX="b"
-    BETA_POSTFIX='_continueWithNewChain' #Here we set it supposing it is not a thermalization. If indeed it is, the postfix will be overwritten!
-    BETA_REGEX='[[:digit:]][.][[:digit:]]\{4\}'
-    SEED_PREFIX="s"
-    SEED_REGEX='[[:digit:]]\{4\}'
-    BETA_FOLDER_SHORT_REGEX=$BETA_REGEX'_'$SEED_PREFIX'[[:digit:]]\{4\}_[[:alpha:]]\+'
-    BETA_FOLDER_REGEX=$BETA_PREFIX$BETA_FOLDER_SHORT_REGEX
+    readonly BETA_POSITION=5
+    readonly BETA_PREFIX="b"
+    readonly BETA_POSTFIX='_continueWithNewChain' #Here we set it supposing it is not a thermalization. If indeed it is, the postfix will be overwritten!
+    readonly BETA_REGEX='[[:digit:]][.][[:digit:]]\{4\}'
+    readonly SEED_PREFIX="s"
+    readonly SEED_REGEX='[[:digit:]]\{4\}'
+    readonly BETA_FOLDER_SHORT_REGEX=$BETA_REGEX'_'$SEED_PREFIX'[[:digit:]]\{4\}_[[:alpha:]]\+'
+    readonly BETA_FOLDER_REGEX=$BETA_PREFIX$BETA_FOLDER_SHORT_REGEX
 }
 
 #----------------------------------------------------------------------------------#
