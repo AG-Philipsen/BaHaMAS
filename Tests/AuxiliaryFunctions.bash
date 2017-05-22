@@ -86,7 +86,7 @@ function MakeTestPreliminaryOperations()
             __static__CreateBetaFolder
             __static__CopyAuxiliaryFilesToBetaFolder "fakeInput"
             mkdir "Jobscripts_TEST" || exit -2
-            echo "NOT EMPTY" > "${testFolder}${testParametersPath}/Jobscripts_TEST/fakePrefix_${testParametersString}__${betaFolder%_*}"
+            printf "NOT EMPTY\n" > "${testFolder}${testParametersPath}/Jobscripts_TEST/fakePrefix_${testParametersString}__${betaFolder%_*}"
             ;;
         thermalize* )
             __static__CreateRationalApproxFolderWithFiles
