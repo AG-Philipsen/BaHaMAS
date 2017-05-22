@@ -44,12 +44,12 @@ function ProduceInverterJobscript_SLURM()
             __static__AddToInverterJobscriptFile "#SBATCH $EXCLUDE_STRING"
             cecho "\e[1A\e[80C\t$EXCLUDE_STRING"
         else
-            cecho -n "\n" ly B U "WARNING" uU ":" uB " No exclude string to exclude nodes in jobscript found!\n"\
-                  "         Do you still want to continue with jobscript creation? [Y/N] "
+            cecho -n "\n " ly B U "WARNING" uU ":" uB " No exclude string to exclude nodes in jobscript found!\n"
+            AskUser "         Do you still want to continue with jobscript creation?"
             if UserSaidNo; then
                 cecho "\n" B lr "Exiting from job script creation process...\n"
                 rm -f $JOBSCRIPT_GLOBALPATH
-                exit
+                exit 0
             fi
         fi
     fi
