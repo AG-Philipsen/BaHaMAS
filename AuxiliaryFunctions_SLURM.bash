@@ -89,11 +89,12 @@ function __static__GetStatusOfJobsContainingBetavalues_SLURM()
 {
     local JOBINFO_STRING="$(squeue --noheader -u $(whoami) -o "%i@%j@%T")"
     for BETA in ${BETAVALUES[@]}; do
-        STATUS_OF_JOBS_CONTAINING_BETA_VALUES["$BETA"]="$(grep "$BETA_PREFIX${BETA%%_*}" <<< "$JOBINFO_STRING" | grep $(cut -d'_' -f2 <<< "$BETA") | grep "$PARAMETERS_STRING")"
+        # in sed !d deletes the non matching entries -> here we keep jobs with desired beta, seed and parameters
+        STATUS_OF_JOBS_CONTAINING_BETA_VALUES["$BETA"]="$(sed '/'$BETA_PREFIX${BETA%%_*}'/!d; /'$(cut -d'_' -f2 <<< "$BETA")'/!d; /'$PARAMETERS_STRING'/!d' <<< "$JOBINFO_STRING")"
     done
 }
 
-function __static__CheckIfJobIsInQueueForGivenBeta_SLURM()
+function __static__IsJobInQueueForGivenBeta_SLURM()
 {
     if [ "${STATUS_OF_JOBS_CONTAINING_BETA_VALUES[$1]}" = "" ]; then
         return 1
@@ -168,12 +169,11 @@ function ProcessBetaValuesForContinue_SLURM()
     local LOCAL_SUBMIT_BETA_ARRAY=()
     #Remove -c | --continue option from command line
     for INDEX in "${!SPECIFIED_COMMAND_LINE_OPTIONS[@]}"; do
-        if [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == --continue* ]] || [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == -c* ]] ||
-               [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == --continueThermalization* ]] || [[ "${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]}" == -C* ]]; then
-            unset SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]
-            SPECIFIED_COMMAND_LINE_OPTIONS=( "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}" )
+        if [[ ${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]} =~ ^--continue ]] || [[ ${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]} =~ ^-[cC][^[:alpha:]] ]]; then
+            unset -v 'SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]'
         fi
     done
+    SPECIFIED_COMMAND_LINE_OPTIONS=( "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}" )
 
     #Associative array filled in the function called immediately after
     declare -A STATUS_OF_JOBS_CONTAINING_BETA_VALUES
@@ -206,8 +206,7 @@ function ProcessBetaValuesForContinue_SLURM()
         fi
 
         cecho ""
-        __static__CheckIfJobIsInQueueForGivenBeta_SLURM $BETA
-        if [ $? == 0 ]; then
+        if __static__IsJobInQueueForGivenBeta_SLURM $BETA; then
             PROBLEM_BETA_ARRAY+=( $BETA )
             continue
         fi
