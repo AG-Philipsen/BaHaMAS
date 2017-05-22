@@ -40,7 +40,7 @@ function ProduceInverterJobscript_SLURM()
         elif [[ $EXCLUDE_NODES_GLOBALPATH =~ : ]]; then
             EXCLUDE_STRING=$(ssh ${EXCLUDE_NODES_GLOBALPATH%%:*} "grep -oE '\-\-exclude=.*\[.*\]' ${EXCLUDE_NODES_GLOBALPATH#*:} 2>/dev/null")
         fi
-        if [ "$EXCLUDE_STRING" != "" ]; then
+        if [ "${EXCLUDE_STRING:-}" != "" ]; then
             __static__AddToInverterJobscriptFile "#SBATCH $EXCLUDE_STRING"
             cecho "\e[1A\e[80C\t$EXCLUDE_STRING"
         else

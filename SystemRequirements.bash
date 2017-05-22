@@ -71,7 +71,7 @@ function CheckSystemRequirements()
     programsToBeChecked=(bash awk sed)
     for program in ${programsToBeChecked[@]}; do
         __static__CheckAboutProgram $program
-        (( returnValue+=$? ))
+        (( returnValue+=$? )) || true #'|| true' because of set -e option
     done
     if [ $returnValue -gt 0 ]; then
         cecho lr "\n Please (maybe locally) install the required versions of the above programs and run " B "BaHaMAS" uB " again.\n"

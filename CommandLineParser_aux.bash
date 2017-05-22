@@ -58,7 +58,7 @@ function __static__AddOptionToHelper()
     fi
     name="$1"; description="$2"; shift 2
     cecho $color "$(printf "%s%-${lengthOption}s" "$indentation" "$name")" d "  ->  " $helperColor "$description"
-    while [ "$1" != '' ]; do
+    while [ "${1:-}" != '' ]; do
         cecho "$(printf "%s%${lengthOption}s" "$indentation" "")      " $helperColor "$1"
         shift
     done

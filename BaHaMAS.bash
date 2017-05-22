@@ -37,7 +37,7 @@ source ${BaHaMAS_repositoryTopLevelPath}/Tests/SetupUserVariables.bash    || exi
 
 #Set stricter shell mode. This implies for the developer to be aware of what is going on,
 #but it is worth so. Good reference http://redsymbol.net/articles/unofficial-bash-strict-mode
-#set -euo pipefail
+set -euo pipefail
 
 #Declare all variables (color user decisions for output needed from very beginning)
 DeclarePathRelatedGlobalVariables

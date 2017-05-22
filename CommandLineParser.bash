@@ -37,7 +37,7 @@ function ParseCommandLineOption()
     mutuallyExclusiveOptionsPassed=()
 
     #Here it is fine to assume that option names and values are separated by spaces
-    while [ "$1" != "" ]; do
+    while [ "${1:-}" != "" ]; do
         case $1 in
             -h | --help )
                 PrintHelper
@@ -45,7 +45,7 @@ function ParseCommandLineOption()
                 shift;;
 
             --jobscript_prefix )
-                if [[ $2 =~ ^- ]]; then
+                if [[ ${2:-} =~ ^(-|$) ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
                     JOBSCRIPT_PREFIX="$2"
@@ -53,7 +53,7 @@ function ParseCommandLineOption()
                 shift 2 ;;
 
             --chempot_prefix )
-                if [[ $2 =~ ^- ]]; then
+                if [[ ${2:-} =~ ^(-|$) ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
                     CHEMPOT_PREFIX="$2"
@@ -61,7 +61,7 @@ function ParseCommandLineOption()
                 shift 2 ;;
 
             --mass_prefix )
-                if [[ $2 =~ ^- ]]; then
+                if [[ ${2:-} =~ ^(-|$) ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
                     MASS_PREFIX="$2"
@@ -69,7 +69,7 @@ function ParseCommandLineOption()
                 shift 2 ;;
 
             --ntime_prefix )
-                if [[ $2 =~ ^- ]]; then
+                if [[ ${2:-} =~ ^(-|$) ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
                     NTIME_PREFIX="$2"
@@ -77,7 +77,7 @@ function ParseCommandLineOption()
                 shift 2 ;;
 
             --nspace_prefix )
-                if [[ $2 =~ ^- ]]; then
+                if [[ ${2:-} =~ ^(-|$) ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
                     NSPACE_PREFIX="$2"
@@ -85,15 +85,15 @@ function ParseCommandLineOption()
                 shift 2 ;;
 
             --beta_prefix )
-                if [[ $2 =~ ^- ]]; then
+                if [[ ${2:-} =~ ^(-|$) ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
-                    BETA_PREFIX"$2"
+                    BETA_PREFIX="$2"
                 fi
                 shift 2 ;;
 
             --betasfile )
-                if [[ $2 =~ ^- ]]; then
+                if [[ ${2:-} =~ ^(-|$) ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BETASFILE="$2"
@@ -101,10 +101,10 @@ function ParseCommandLineOption()
                 shift 2 ;;
 
             -w | --walltime )
-                if [[ $2 =~ ^([0-9]+[dhms])+$ ]]; then
+                if [[ ${2:-} =~ ^([0-9]+[dhms])+$ ]]; then
                     WALLTIME=$(SecondsToTimeStringWithDays $(TimeStringToSecond $2) )
                 else
-                    WALLTIME="$2"
+                    WALLTIME="${2:-}"
                 fi
                 if [[ ! $WALLTIME =~ ^([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
@@ -112,7 +112,7 @@ function ParseCommandLineOption()
                 shift 2 ;;
 
             -m | --measurements )
-                if [[ ! $2 =~ ^[0-9]+$ ]] && [ "$2" != '' ]; then
+                if [[ ! ${2:-} =~ ^[0-9]+$ ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
                     MEASUREMENTS=$2
@@ -120,7 +120,7 @@ function ParseCommandLineOption()
                 shift 2 ;;
 
             -f | --confSaveFrequency )
-                if [[ ! $2 =~ ^[0-9]+$ ]] && [ "$2" != '' ]; then
+                if [[ ! ${2:-} =~ ^[0-9]+$ ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
                     NSAVE=$2
@@ -128,7 +128,7 @@ function ParseCommandLineOption()
                 shift 2 ;;
 
             -F | --confSavePointFrequency )
-                if [[ ! $2 =~ ^[0-9]+$ ]] && [ "$2" != '' ]; then
+                if [[ ! ${2:-} =~ ^[0-9]+$ ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
                     NSAVEPOINT=$2
@@ -136,7 +136,7 @@ function ParseCommandLineOption()
                 shift 2 ;;
 
             --intsteps0 )
-                if [[ ! $2 =~ ^[0-9]+$ ]] && [ "$2" != '' ]; then
+                if [[ ! ${2:-} =~ ^[0-9]+$ ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
                     INTSTEPS0=$2
@@ -144,7 +144,7 @@ function ParseCommandLineOption()
                 shift 2 ;;
 
             --intsteps1 )
-                if [[ ! $2 =~ ^[0-9]+$ ]] && [ "$2" != '' ]; then
+                if [[ ! ${2:-} =~ ^[0-9]+$ ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
                     INTSTEPS1=$2
@@ -152,7 +152,7 @@ function ParseCommandLineOption()
                 shift 2 ;;
 
             --cgbs )
-                if [[ ! $2 =~ ^[0-9]+$ ]] && [ "$2" != '' ]; then
+                if [[ ! ${2:-} =~ ^[0-9]+$ ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
                     CGBS=$2
@@ -170,7 +170,7 @@ function ParseCommandLineOption()
                 shift ;;
 
             --partition )
-                if [[ $2 =~ ^- ]]; then
+                if [[ ${2:-} =~ ^(-|$) ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
                     CLUSTER_PARTITION="$2"
@@ -178,7 +178,7 @@ function ParseCommandLineOption()
                 shift 2 ;;
 
             --constraint )
-                if [[ $2 =~ ^- ]]; then
+                if [[ ${2:-} =~ ^(-|$) ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
                     CLUSTER_CONSTRAINT="$2"
@@ -186,7 +186,7 @@ function ParseCommandLineOption()
                 shift 2 ;;
 
             --node )
-                if [[ $2 =~ ^- ]]; then
+                if [[ ${2:-} =~ ^(-|$) ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
                     CLUSTER_NODE="$2"
@@ -211,7 +211,7 @@ function ParseCommandLineOption()
             -c | --continue )
                 mutuallyExclusiveOptionsPassed+=( $1 )
                 CONTINUE="TRUE"
-                if [[ ! $2 =~ ^- ]] && [ "$2" != '' ]; then
+                if [[ ! ${2:-} =~ ^(-|$) ]]; then
                     if [[ ! $2 =~ ^[0-9]+$ ]];then
                         __static__PrintOptionSpecificationErrorAndExit "$1"
                     else
@@ -224,7 +224,7 @@ function ParseCommandLineOption()
             -C | --continueThermalization )
                 mutuallyExclusiveOptionsPassed+=( $1 )
                 CONTINUE_THERMALIZATION="TRUE"
-                if [[ ! $2 =~ ^- ]] && [ "$2" != '' ]; then
+                if [[ ! ${2:-} =~ ^(-|$) ]]; then
                     if [[ ! $2 =~ ^[0-9]+$ ]];then
                         __static__PrintOptionSpecificationErrorAndExit "$1"
                     else
@@ -258,7 +258,7 @@ function ParseCommandLineOption()
             --accRateReport )
                 mutuallyExclusiveOptionsPassed+=( $1 )
                 ACCRATE_REPORT="TRUE"
-                if [[ ! $2 =~ ^- ]] && [ "$2" != '' ]; then
+                if [[ ! ${2:-} =~ ^(-|$) ]]; then
                     if [[ ! $2 =~ ^[0-9]+$ ]];then
                         __static__PrintOptionSpecificationErrorAndExit "$1"
                     else
@@ -284,7 +284,7 @@ function ParseCommandLineOption()
             --completeBetasFile )
                 mutuallyExclusiveOptionsPassed+=( $1 )
                 COMPLETE_BETAS_FILE="TRUE"
-                if [[ ! $2 =~ ^- ]] && [ "$2" != '' ]; then
+                if [[ ! ${2:-} =~ ^(-|$) ]]; then
                     if [[ ! $2 =~ ^[0-9]+$ ]];then
                         __static__PrintOptionSpecificationErrorAndExit "$1"
                     else
@@ -303,7 +303,7 @@ function ParseCommandLineOption()
                     UNCOMMENT_BETAS="FALSE"
                     COMMENT_BETAS="TRUE"
                 fi
-                while [[ ! $2 =~ ^- ]] && [ "$2" != '' ]; do
+                while [[ ! ${2:-} =~ ^(-|$) ]]; do
                     if [[ $2 =~ ^[0-9]\.[0-9]{4}_${SEED_PREFIX}[0-9]{4}_(NC|fC|fH)$ ]]; then
                         UNCOMMENT_BETAS_SEED_ARRAY+=( $2 )
                     elif [[ $2 =~ ^[0-9]\.[0-9]*$ ]]; then

@@ -159,10 +159,10 @@ function InhibitBaHaMASCommands()
     function less(){ cecho -d "less $@"; }
     function sbatch(){ cecho -d "sbatch $@"; }
     #To make liststatus find running job and then test measure time
-    if [[ $1 =~ ^liststatus ]]; then
+    if [[ $1 =~ ^(liststatus|database) ]]; then
         export jobnameForSqueue="${testParametersString}__${betaFolder%_*}@RUNNING"
     fi
-    function squeue(){ cecho -d -n "$jobnameForSqueue"; }
+    function squeue(){ cecho -d -n "${jobnameForSqueue:-}"; }
     export -f less sbatch squeue
 }
 

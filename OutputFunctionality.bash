@@ -96,7 +96,7 @@ function cecho()
     __static__SetFormatCodes
     __static__SetColorCodes
     __static__SetEmphasizeCodes
-    while [ "$1" != '' ]; do
+    while [ "${1:-}" != '' ]; do
         case "$1" in
             #Font format
             B | U | uB | uU )

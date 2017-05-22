@@ -126,7 +126,7 @@ function projectStatisticsDatabase()
             [[ $VALUE != "-l" ]] && [[ $VALUE != "--local" ]] && NEW_OPTIONS+=($VALUE)
         done && unset -v 'VALUE'
         ReadParametersFromPathAndSetRelatedVariables $(pwd)
-        set -- ${NEW_OPTIONS[@]} "--mu" "$CHEMPOT" "--$MASS_PARAMETER" "$MASS" "--nt" "$NTIME" "--ns" "$NSPACE"
+        set -- ${NEW_OPTIONS[@]:-} "--mu" "$CHEMPOT" "--$MASS_PARAMETER" "$MASS" "--nt" "$NTIME" "--ns" "$NSPACE"
     fi
 
     while [ $# -gt 0 ]; do
@@ -135,7 +135,7 @@ function projectStatisticsDatabase()
                 OPTION=$1
                 DISPLAY="TRUE"
                 CUSTOMIZE_COLUMNS="TRUE"
-                while [[ "$2" =~ ^[^-] ]]; do
+                while [[ ! ${2:-} =~ ^- ]]; do
                     case $2 in
                         nf)
                             NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER+=( nfC )
@@ -199,7 +199,7 @@ function projectStatisticsDatabase()
             --nf)
                 DISPLAY="TRUE"
                 FILTER_NF="TRUE"
-                while [[ $2 =~ ^[[:digit:]](\.[[:digit:]][[:digit:]]?)?$ ]]; do
+                while [[ ${2:-} =~ ^[0-9](\.[0-9]+)?$ ]]; do
                     NF_ARRAY+=( $2 )
                     shift
                 done
@@ -208,7 +208,7 @@ function projectStatisticsDatabase()
             --mu)
                 DISPLAY="TRUE"
                 FILTER_MU="TRUE"
-                while [[ $2 =~ ^[^-] ]];do
+                while [[ ! ${2:-} =~ ^(-|$) ]];do
                     case $2 in
                         0)
                             MU_ARRAY+=( 0 )
@@ -228,7 +228,7 @@ function projectStatisticsDatabase()
             --$MASS_PARAMETER)
                 DISPLAY="TRUE"
                 FILTER_MASS="TRUE"
-                while [[ $2 =~ ^[[:digit:]]{4}$ ]]; do
+                while [[ ${2:-} =~ ^[0-9]{4}$ ]]; do
                     MASS_ARRAY+=( $2 )
                     shift
                 done
@@ -237,7 +237,7 @@ function projectStatisticsDatabase()
             --nt)
                 DISPLAY="TRUE"
                 FILTER_NT="TRUE"
-                while [[ $2 =~ ^[[:digit:]]{1,2}$ ]]; do
+                while [[ ${2:-} =~ ^[0-9]{1,2}$ ]]; do
                     NT_ARRAY+=( $2 )
                     shift
                 done
@@ -246,7 +246,7 @@ function projectStatisticsDatabase()
             --ns)
                 DISPLAY="TRUE"
                 FILTER_NS="TRUE"
-                while [[ $2 =~ ^[[:digit:]]{1,2}$ ]]; do
+                while [[ ${2:-} =~ ^[0-9]{1,2}$ ]]; do
                     NS_ARRAY+=( $2 )
                     shift
                 done
@@ -255,7 +255,7 @@ function projectStatisticsDatabase()
             --beta)
                 DISPLAY="TRUE"
                 FILTER_BETA="TRUE"
-                while [[ $2 =~ ^[[:digit:]]\.[[:digit:]]{4}$ ]]; do
+                while [[ ${2:-} =~ ^[0-9]\.[0-9]{4}$ ]]; do
                     BETA_ARRAY+=( $2 )
                     shift
                 done
@@ -264,7 +264,7 @@ function projectStatisticsDatabase()
             --type)
                 DISPLAY="TRUE"
                 FILTER_TYPE="TRUE"
-                while [[ $2 =~ ^[^-] ]];do
+                while [[ ! ${2:-} =~ ^(-|$) ]]; do
                     case $2 in
                         fC)
                             TYPE_ARRAY+=( fC )
@@ -288,9 +288,9 @@ function projectStatisticsDatabase()
             --traj)
                 DISPLAY="TRUE"
                 FILTER_TRAJNO="TRUE"
-                while [[ $2 =~ ^[\>|\<][[:digit:]]+ ]];do
-                    [[ $2 =~ ^\>[[:digit:]]+ ]] && TRAJ_LOW_VALUE=${2#\>*}
-                    [[ $2 =~ ^\<[[:digit:]]+ ]] && TRAJ_HIGH_VALUE=${2#\<*}
+                while [[ ${2:-} =~ ^[\>|\<][0-9]+ ]];do
+                    [[ ${2:-} =~ ^\>[0-9]+ ]] && TRAJ_LOW_VALUE=${2#\>*}
+                    [[ ${2:-} =~ ^\<[0-9]+ ]] && TRAJ_HIGH_VALUE=${2#\<*}
                     shift
                 done
                 [ "$TRAJ_LOW_VALUE" = "" ] && [ "$TRAJ_HIGH_VALUE" = "" ] && cecho lr "\n You did not correctly specify filtering values for " emph "$1" " option! Aborting...\n" && exit -1
@@ -298,9 +298,9 @@ function projectStatisticsDatabase()
             --acc)
                 DISPLAY="TRUE"
                 FILTER_ACCRATE="TRUE"
-                while [[ $2 =~ ^[\>|\<][[:digit:]]+\.[[:digit:]]+ ]];do
-                    [[ $2 =~ ^\>[[:digit:]]+ ]] && ACCRATE_LOW_VALUE=${2#\>*}
-                    [[ $2 =~ ^\<[[:digit:]]+ ]] && ACCRATE_HIGH_VALUE=${2#\<*}
+                while [[ ${2:-} =~ ^[\>|\<][0-9]+\.[0-9]+ ]];do
+                    [[ ${2:-} =~ ^\>[0-9]+ ]] && ACCRATE_LOW_VALUE=${2#\>*}
+                    [[ ${2:-} =~ ^\<[0-9]+ ]] && ACCRATE_HIGH_VALUE=${2#\<*}
                     shift
                 done
                 [ "$ACCRATE_LOW_VALUE" = "" ] && [ "$ACCRATE_HIGH_VALUE" = "" ] && cecho lr "\n You did not correctly specify filtering values for " emph "$1" " option! Aborting...\n" && exit -1
@@ -308,9 +308,9 @@ function projectStatisticsDatabase()
             --accLast1K)
                 DISPLAY="TRUE"
                 FILTER_ACCRATE_LAST1K="TRUE"
-                while [[ $2 =~ ^[\>|\<][[:digit:]]+\.[[:digit:]]+ ]];do
-                    [[ $2 =~ ^\>[[:digit:]]+ ]] && ACCRATE_LAST1K_LOW_VALUE=${2#\>*}
-                    [[ $2 =~ ^\<[[:digit:]]+ ]] && ACCRATE_LAST1K_HIGH_VALUE=${2#\<*}
+                while [[ ${2:-} =~ ^[\>|\<][0-9]+\.[0-9]+ ]];do
+                    [[ ${2:-} =~ ^\>[0-9]+ ]] && ACCRATE_LAST1K_LOW_VALUE=${2#\>*}
+                    [[ ${2:-} =~ ^\<[0-9]+ ]] && ACCRATE_LAST1K_HIGH_VALUE=${2#\<*}
                     shift
                 done
                 [ "$ACCRATE_LAST1K_LOW_VALUE" = "" ] && [ "$ACCRATE_LAST1K_HIGH_VALUE" = "" ] && cecho lr "\n You did not correctly specify filtering values for " emph "$1" " option! Aborting...\n" && exit -1
@@ -322,7 +322,7 @@ function projectStatisticsDatabase()
             --status)
                 DISPLAY="TRUE"
                 FILTER_STATUS="TRUE"
-                while [[ $2 =~ ^[^-] ]];do
+                while [[ ! ${2:-} =~ ^(-|$) ]];do
                     case $2 in
                         RUNNING)
                             STATUS_ARRAY+=( RUNNING )
@@ -346,18 +346,18 @@ function projectStatisticsDatabase()
             --lastTraj)
                 DISPLAY="TRUE"
                 FILTER_LASTTRAJ="TRUE"
-                if [[ "$2" =~ ^[[:digit:]]+ ]]; then
+                if [[ ${2:-} =~ ^[0-9]+ ]]; then
                     LAST_TRAJ_TIME=$2
                     shift
                 fi
                 [ "$LAST_TRAJ_TIME" = "" ] && cecho lr "\n You did not correctly specify filtering values for " emph "$1" " option! Aborting...\n" && exit -1
                 ;;
             -u | --update)
-                if [[ $2 =~ ^[[:digit:]]+[s|m|h|d]$ ]]; then
+                if [[ ${2:-} =~ ^[0-9]+[s|m|h|d]$ ]]; then
                     SLEEP_TIME=$2
                     shift
                 fi
-                if [[ $2 =~ ^[[:digit:]]{1,2}(:[[:digit:]]{1,2}(:[[:digit:]]{1,2})?)?$ ]]; then
+                if [[ ${2:-} =~ ^[0-9]{1,2}(:[0-9]{1,2}(:[0-9]{1,2})?)?$ ]]; then
                     if [ "$(awk '{split($0,hms,":"); print hms[1]}' <<< "$2")" -ge 24 ]; then
                         cecho lr "\n For the update at a specific time option only " emph "hours < 24, minutes < 60 and seconds < 60" " are allowed! Aborting...\n"
                         exit -1
@@ -382,7 +382,7 @@ function projectStatisticsDatabase()
                 SHOW="TRUE"
                 ;;
             -f | --file)
-                case $2 in
+                case ${2:-} in
                     -*)
                         cecho lr "\n Filename " file "$1" " invalid! Filenames starting with - are not allowed! Aborting...\n"
                         exit -1
@@ -472,13 +472,12 @@ function projectStatisticsDatabase()
         shift
     done
 
-
     [ $UPDATE = "FALSE" ] && [ $REPORT = "FALSE" ] && [ $SHOW = "FALSE" ] && DISPLAY="TRUE"
 
     local MUTUALLY_EXCLUSIVE_OPTIONS_PASSED=0
-    [ $UPDATE = "TRUE" ] && (( MUTUALLY_EXCLUSIVE_OPTIONS_PASSED++ ))
-    [ $DISPLAY = "TRUE" ] && (( MUTUALLY_EXCLUSIVE_OPTIONS_PASSED++ ))
-    [ $REPORT = "TRUE" ] || [ $SHOW = "TRUE" ] && (( MUTUALLY_EXCLUSIVE_OPTIONS_PASSED++ ))
+    [ $UPDATE = "TRUE" ] && { (( MUTUALLY_EXCLUSIVE_OPTIONS_PASSED++ )) || true; }  #'|| true' because of set -e option
+    [ $DISPLAY = "TRUE" ] && { (( MUTUALLY_EXCLUSIVE_OPTIONS_PASSED++ )) || true; } #'|| true' because of set -e option
+    [ $REPORT = "TRUE" ] || [ $SHOW = "TRUE" ] && { (( MUTUALLY_EXCLUSIVE_OPTIONS_PASSED++ )) || true; } #'|| true' because of set -e option
 
     if [ $MUTUALLY_EXCLUSIVE_OPTIONS_PASSED -gt 1 ]; then
         cecho lr "\n Option for " emph "UPDATE" ", " emph "DISPLAY/FILTERING" " and " emph "REPORT" " scenarios cannot be mixed!\n"
@@ -490,7 +489,7 @@ function projectStatisticsDatabase()
     # Then it has to be initialized accordingly!
     if [ "$UPDATE" = "FALSE" ]; then
         if [ "$FILENAME_GIVEN_AS_INPUT" = "" ]; then
-            LATEST_DATABASE_FILE=$(ls $DATABASE_GLOBALPATH | grep -E [[:digit:]]{2}_[[:digit:]]{2}_[[:digit:]]{2}_$DATABASE_FILENAME | sort -t "_" -k 1,1 -k 2,2 -k 3,3 | tail -n1)
+            LATEST_DATABASE_FILE=$(ls $DATABASE_GLOBALPATH | grep -E [0-9]{2}_[0-9]{2}_[0-9]{2}_$DATABASE_FILENAME | sort -t "_" -k 1,1 -k 2,2 -k 3,3 | tail -n1)
             if [ "$LATEST_DATABASE_FILE" = "" ]; then
                 cecho lr "\n No older database versions found! Aborting...\n"
                 exit -1
@@ -510,6 +509,8 @@ function projectStatisticsDatabase()
                 exit -1
             fi
             local FILE_WITH_DIRECTORIES=$FILENAME_GIVEN_AS_INPUT
+        else
+            local FILE_WITH_DIRECTORIES=''
         fi
         local PROJECT_DATABASE_FILE=$DATABASE_GLOBALPATH/$(date +%Y_%m_%d)_$DATABASE_FILENAME
     fi
@@ -518,14 +519,14 @@ function projectStatisticsDatabase()
 
     if [ $DISPLAY = "TRUE" ]; then
 
-        NF_STRING=$(join "|" "${NF_ARRAY[@]}")
-        MU_STRING=$(join "|" "${MU_ARRAY[@]}")
-        MASS_STRING=$(join "|" "${MASS_ARRAY[@]}")
-        NS_STRING=$(join "|" "${NS_ARRAY[@]}")
-        NT_STRING=$(join "|" "${NT_ARRAY[@]}")
-        BETA_STRING=$(join "|" "${BETA_ARRAY[@]}")
-        TYPE_STRING=$(join "|" "${TYPE_ARRAY[@]}")
-        STATUS_STRING=$(join "|" "${STATUS_ARRAY[@]}")
+        NF_STRING=$(join "|" "${NF_ARRAY[@]:-}")
+        MU_STRING=$(join "|" "${MU_ARRAY[@]:-}")
+        MASS_STRING=$(join "|" "${MASS_ARRAY[@]:-}")
+        NS_STRING=$(join "|" "${NS_ARRAY[@]:-}")
+        NT_STRING=$(join "|" "${NT_ARRAY[@]:-}")
+        BETA_STRING=$(join "|" "${BETA_ARRAY[@]:-}")
+        TYPE_STRING=$(join "|" "${TYPE_ARRAY[@]:-}")
+        STATUS_STRING=$(join "|" "${STATUS_ARRAY[@]:-}")
 
         [ "$FILTER_TRAJNO" = "TRUE" ] && [ "$TRAJ_LOW_VALUE" = "" ]  && TRAJ_LOW_VALUE=0
         [ "$FILTER_TRAJNO" = "TRUE" ] && [ "$TRAJ_HIGH_VALUE" = "" ]  && TRAJ_HIGH_VALUE=9999999
@@ -783,11 +784,11 @@ function projectStatisticsDatabase()
 
                 ListJobStatus_SLURM $PARAMETER_DIRECTORY_STRUCTURE | \
                     sed -r 's/[^(\x1b)]\[|\]|\(|\)|%//g' | \
-                    sed -r 's/(\x1B\[[[:digit:]]{1,2};[[:digit:]]{0,2};[[:digit:]]{0,3}m)(.)/\1 \2/g' | \
+                    sed -r 's/(\x1B\[[0-9]{1,2};[0-9]{0,2};[0-9]{0,3}m)(.)/\1 \2/g' | \
                     sed -r 's/(.)(\x1B\[.{1,2};.{1,2}m)/\1 \2/g' | \
                     sed -r 's/(\x1B\[.{1,2};.{1,2}m)(.)/\1 \2/g' |
                     awk --posix -v nf=${PARAMS[0]#$NFLAVOUR_PREFIX*} -v mu=${PARAMS[1]#$CHEMPOT_PREFIX*} -v k=${PARAMS[2]#$MASS_PREFIX*} -v nt=${PARAMS[3]#$NTIME_PREFIX*} -v ns=${PARAMS[4]#*$NSPACE_PREFIX} '
-                            $3 ~ /^[[:digit:]]\.[[:digit:]]{4}/{
+                            $3 ~ /^[0-9]\.[0-9]{4}/{
                             print "\033[36m " nf " \033[36m " mu " \033[36m " k " \033[36m " nt " \033[36m " ns " " $(3-1) " " $3 " " $(5-1) " " $5 " " $(8-1) " " $8 " " $(11-1) " " $(11) " " $(18-1) " " $(18) " " $(15-1) " " $15 " " $(21-1) " " $21 " " "\033[0m"
                             }
                         ' >> $TEMPORARY_DATABASE_FILE

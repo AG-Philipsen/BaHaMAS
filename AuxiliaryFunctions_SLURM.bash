@@ -729,7 +729,7 @@ function __static__GetJobBetasStringUsing()
     local BETAVALUES_TO_BE_USED=( $@ )
     declare -A BETAS_WITH_SEED
     for INDEX in "${BETAVALUES_TO_BE_USED[@]}"; do
-        BETAS_WITH_SEED[${INDEX%%_*}]="${BETAS_WITH_SEED[${INDEX%%_*}]}_$(awk '{split($0, res, "_"); print res[2]}' <<< "$INDEX")"
+        BETAS_WITH_SEED[${INDEX%%_*}]="${BETAS_WITH_SEED[${INDEX%%_*}]:-}_$(awk '{split($0, res, "_"); print res[2]}' <<< "$INDEX")"
     done
     local BETAS_STRING_TO_BE_RETURNED=""
     #Here I iterate again on BETAVALUES_TO_BE_USED and not on ${!BETAS_WITH_SEED[@]} in order to guarantee an order in BETAS_STRING

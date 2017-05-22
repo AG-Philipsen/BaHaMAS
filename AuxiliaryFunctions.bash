@@ -38,14 +38,14 @@ function ReadBetaValuesFromFile()
         fi
         LINE=`awk '{split($0, res, "#"); print res[1]}' <<< "$LINE"`
         #Look for "resumefrom=*" check it, save the content and delete it
-        SEARCH_RESULT=( $(grep -o "$RESUME_REGEXPR" <<< "$LINE") )
+        SEARCH_RESULT=( $(grep -o "$RESUME_REGEXPR" <<< "$LINE" || true) ) #'|| true' because of set -e
         case ${#SEARCH_RESULT[@]} in
             0 ) CONTINUE_RESUMETRAJ_TEMP+=( "notFound" );;
             1 ) CONTINUE_RESUMETRAJ_TEMP+=( ${SEARCH_RESULT[0]}); LINE=$( sed 's/'$RESUME_REGEXPR'//g' <<< "$LINE" );;
             * ) cecho lr "\n String " emph "resumefrom=*" " specified multiple times per line in betasfile! Aborting...\n"; exit -1;;
         esac
         #Look for "MP=(*,*)" check it, save the content and delete it
-        SEARCH_RESULT=( $(grep -o "$MP_REGEXPR" <<< "$LINE") )
+        SEARCH_RESULT=( $(grep -o "$MP_REGEXPR" <<< "$LINE" || true) ) #'|| true' because of set -e
         case ${#SEARCH_RESULT[@]} in
             0 ) MASS_PRECONDITIONING_TEMP+=( "notFound" );;
             1 ) MASS_PRECONDITIONING_TEMP+=( ${SEARCH_RESULT[0]}); LINE=$( sed 's/'$MP_REGEXPR'//g' <<< "$LINE" );;
@@ -351,10 +351,10 @@ function CompleteBetasFile()
         #In case multiple chains are used, the betas with already a seed are copied to file
         if [ $USE_MULTIPLE_CHAINS == "TRUE" ]; then
             __static__PrintOldLineToBetasFileAndShiftArrays
-            (( NUMBER_OF_BETA_PRINTED_TO_FILE++ ))
-            while [ "${BETA_ARRAY[0]}" = $BETA_JUST_PRINTED_TO_FILE ]; do #This while works because above we read the betasfile sorted!
+            (( NUMBER_OF_BETA_PRINTED_TO_FILE++ )) || true #'|| true' because of set -e option
+            while [ "${BETA_ARRAY[0]:-}" = $BETA_JUST_PRINTED_TO_FILE ]; do #This while works because above we read the betasfile sorted!
                 __static__PrintOldLineToBetasFileAndShiftArrays
-                (( NUMBER_OF_BETA_PRINTED_TO_FILE++ ))
+                (( NUMBER_OF_BETA_PRINTED_TO_FILE++ )) || true #'|| true' because of set -e option
             done
         fi
         #Then complete file
@@ -370,7 +370,7 @@ function CompleteBetasFile()
             #Print first line with starting seed
             NEW_SEED=$SEED_TO_GENERATE_NEW_SEED_FROM
             __static__PrintNewLineToBetasFile
-            (( NUMBER_OF_BETA_PRINTED_TO_FILE++ ))
+            (( NUMBER_OF_BETA_PRINTED_TO_FILE++ )) || true #'|| true' because of set -e option
         fi
         for((INDEX=$NUMBER_OF_BETA_PRINTED_TO_FILE; INDEX<$NUMBER_OF_CHAINS_TO_BE_IN_THE_BETAS_FILE; INDEX++)); do
             local NEW_SEED=$(sed -e 's/\(.\)/\n\1/g' <<< "$SEED_TO_GENERATE_NEW_SEED_FROM"  | awk 'BEGIN{ORS=""}NR>1{print ($1+1)%10}')
@@ -379,8 +379,8 @@ function CompleteBetasFile()
         done
         cecho -d "" >> $BETASFILE
     done
-    #Print commented lines
-    for LINE in "${COMMENTED_LINE_ARRAY[@]}"; do
+    #Print commented lines http://stackoverflow.com/a/34361807
+    for LINE in ${COMMENTED_LINE_ARRAY[@]+"COMMENTED_LINE_ARRAY[@]"}; do
         cecho -d $LINE >> $BETASFILE
     done
     rm $BETASFILE_BACKUP
@@ -396,7 +396,7 @@ function UncommentEntriesInBetasFile()
 
     local IFS=' '
     local OLD_IFS=$IFS
-    for i in ${UNCOMMENT_BETAS_SEED_ARRAY[@]}; do
+    for i in ${UNCOMMENT_BETAS_SEED_ARRAY[@]+"UNCOMMENT_BETAS_SEED_ARRAY[@]"}; do
         IFS='_'
         local U_ARRAY=( $i )
         local U_BETA=${U_ARRAY[0]}
@@ -406,7 +406,7 @@ function UncommentEntriesInBetasFile()
     done
     IFS=$OLD_IFS
 
-    for i in ${UNCOMMENT_BETAS_ARRAY[@]}; do
+    for i in ${UNCOMMENT_BETAS_ARRAY[@]+"UNCOMMENT_BETAS_ARRAY[@]"}; do
         U_BETA=$i
         sed -i "s/^#\(.*$U_BETA.*\)$/\1/" $BETASFILE #If there is a "#" in front of the line, remove it
     done
@@ -419,7 +419,7 @@ function CommentEntriesInBetasFile()
 
     local IFS=' '
     local OLD_IFS=$IFS
-    for i in ${UNCOMMENT_BETAS_SEED_ARRAY[@]}; do
+    for i in ${UNCOMMENT_BETAS_SEED_ARRAY[@]+"UNCOMMENT_BETAS_SEED_ARRAY"}; do
         IFS='_'
         local U_ARRAY=( $i )
         local U_BETA=${U_ARRAY[0]}
@@ -429,7 +429,7 @@ function CommentEntriesInBetasFile()
     done
     IFS=$OLD_IFS
 
-    for i in ${UNCOMMENT_BETAS_ARRAY[@]}; do
+    for i in ${UNCOMMENT_BETAS_ARRAY[@]+"UNCOMMENT_BETAS_ARRAY"}; do
         U_BETA=$i
         sed -i "s/^\($U_BETA.*\)$/#\1/" $BETASFILE #If there is no "#" in front of the line, put one
     done

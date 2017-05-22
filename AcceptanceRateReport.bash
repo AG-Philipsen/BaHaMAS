@@ -60,7 +60,7 @@ function AcceptanceRateReport()
     cecho lp -n "${SPACE_AT_THE_BEGINNING_OF_EACH_LINE}${EMPTY_SEPARATOR}Intervals$EMPTY_SEPARATOR"
     while [ $BETA_COUNTER -lt ${#BETAVALUES_COPY[@]} ]; do
         cecho lp -n "$(printf "${EMPTY_SEPARATOR}%s${EMPTY_SEPARATOR}" ${DATA_ARRAY[${POSITION_BETA_STRING_IN_DATA_ARRAY[$BETA_COUNTER]}]})"
-        (( BETA_COUNTER++ ))
+        (( BETA_COUNTER++ )) || true #'|| true' because of set -e option
     done
     cecho lc "\n${SPACE_AT_THE_BEGINNING_OF_EACH_LINE}${LINE_OF_EQUAL// /=}"
     #Body
