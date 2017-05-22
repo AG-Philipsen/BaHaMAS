@@ -201,7 +201,7 @@ function RunTest()
     if [ $reportLevel -eq 3 ]; then
         printf -v stringTest "%-38s" "__${testName}$(cecho -d bb)_"
         stringTest="${stringTest// /.}"
-        cecho -n bb "  $(printf '%+2s' ${testsRun})/$(printf '%-2s' ${#testsToBeRun[@]})" emph "${stringTest//_/ }"
+        cecho -n lp "  $(printf '%+2s' ${testsRun})/$(printf '%-2s' ${#testsToBeRun[@]})" lc "${stringTest//_/ }"
     fi
     RunBaHaMASInTestMode "$testName" "$@"
     if [ $? -eq 0 ]; then

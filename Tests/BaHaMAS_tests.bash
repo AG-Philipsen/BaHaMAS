@@ -120,7 +120,7 @@ CheckTestEnvironment
 
 #Run tests
 if [ $reportLevel -eq 3 ]; then
-    cecho bb "\n " U "Running " emph "${#testsToBeRun[@]}" " test(s)" uU ":\n"
+    cecho wg "\n " U "Running " emph "${#testsToBeRun[@]}" " test(s)" uU ":\n"
 fi
 for testName in "${testsToBeRun[@]}"; do
     if [ -n "${availableTests[$testName]:+x}" ]; then
