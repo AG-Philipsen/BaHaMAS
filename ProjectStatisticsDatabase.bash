@@ -75,6 +75,7 @@ function projectStatisticsDatabase()
     local READ_DIRECTORIES_FROM_FILE="FALSE"
     local FILTER_SPECIFIC_DATABASE_FILE="FALSE"
 
+    local FILTER_NF="FALSE"
     local FILTER_MU="FALSE"
     local FILTER_MASS="FALSE"
     local FILTER_NT="FALSE"
@@ -628,7 +629,7 @@ function projectStatisticsDatabase()
                      {critFailedCounter=0}
 
                      ######################################################################## FILTERING PART BEGIN ############################################################################
-                     filterNF == "TRUE" {if($(columnNameColumnNumber["nfC"]) !~ nfString) {critFailedCounter--;}}
+                     filterNf == "TRUE" {if($(columnNameColumnNumber["nfC"]) !~ nfString) {critFailedCounter--;}}
                      filterMu == "TRUE" {if($(columnNameColumnNumber["muC"]) !~ muString) {critFailedCounter--;}}
                      filterKappa == "TRUE" {if($(columnNameColumnNumber["kC"]) !~ kappaString) {critFailedCounter--;}}
                      filterNs == "TRUE" {if($(columnNameColumnNumber["nsC"]) !~ nsString) {critFailedCounter--;}}
