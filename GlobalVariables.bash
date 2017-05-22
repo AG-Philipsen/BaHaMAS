@@ -79,7 +79,7 @@ function DeclarePathRelatedGlobalVariables()
     #Beta and seed information
     readonly BETA_POSITION=5
     readonly BETA_PREFIX="b"
-    readonly BETA_POSTFIX='_continueWithNewChain' #Here we set it supposing it is not a thermalization. If indeed it is, the postfix will be overwritten!
+    BETA_POSTFIX='_continueWithNewChain' #Here we set it supposing it is not a thermalization. If indeed it is, the postfix will be overwritten!
     readonly BETA_REGEX='[[:digit:]][.][[:digit:]]\{4\}'
     readonly SEED_PREFIX="s"
     readonly SEED_REGEX='[[:digit:]]\{4\}'
@@ -157,7 +157,6 @@ function DeclareBaHaMASGlobalVariables()
     readonly OPTIMAL_ACCEPTANCE_LISTSTATUS_COLOR="\e[38;5;10m"
     readonly HIGH_ACCEPTANCE_LISTSTATUS_COLOR="\e[38;5;11m"
     readonly TOO_HIGH_ACCEPTANCE_LISTSTATUS_COLOR="\e[38;5;202m"
-    readonly TOO_HIGH_DELTA_S_LISTSTATUS_COLOR="\e[0;91m"
     readonly RUNNING_LISTSTATUS_COLOR="\e[0;32m"
     readonly PENDING_LISTSTATUS_COLOR="\e[0;33m"
     readonly CLEANING_LISTSTATUS_COLOR="\e[0;31m"
