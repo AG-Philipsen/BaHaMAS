@@ -21,9 +21,9 @@
 #            the code and this approach is open to future new cases.               #
 #----------------------------------------------------------------------------------#
 
-#NOTE: Here we want to use readonly for variable which are constant and global,
-#      but we must use declare instead of readonly for arrays since they seem to
-#      stay local and not global with the readonly keyword
+#NOTE: Here we want to use 'readonly' for variable which are constant and global,
+#      but we must use 'declare' instead of 'readonly' for arrays since they seem to
+#      stay local and not global with the 'readonly' keyword
 #      http://gnu-bash.2382.n7.nabble.com/4-4-5-trouble-declaring-readonly-array-variables-td18385.html
 #      http://lists.gnu.org/archive/html/bug-bash/2015-11/msg00140.html
 function DeclarePathRelatedGlobalVariables()
@@ -108,17 +108,17 @@ function DeclareBaHaMASGlobalVariables()
     CGBS=50
     USE_MULTIPLE_CHAINS='TRUE'
     MEASURE_PBP='TRUE'
-    JOBS_STATUS_PREFIX='jobs_status_'
+    readonly JOBS_STATUS_PREFIX='jobs_status_'
 
     #Internal BaHaMAS variables
-    BaHaMAS_clusterScheduler="$(SelectClusterSchedulerName)"
+    readonly BaHaMAS_clusterScheduler="$(SelectClusterSchedulerName)"
     SUBMIT_BETA_ARRAY=()
     PROBLEM_BETA_ARRAY=()
-    declare -A -g INTSTEPS0_ARRAY
-    declare -A -g INTSTEPS1_ARRAY
-    declare -A -g CONTINUE_RESUMETRAJ_ARRAY
-    declare -A -g MASS_PRECONDITIONING_ARRAY
-    declare -A -g STARTCONFIGURATION_GLOBALPATH
+    declare -gA INTSTEPS0_ARRAY
+    declare -gA INTSTEPS1_ARRAY
+    declare -gA CONTINUE_RESUMETRAJ_ARRAY
+    declare -gA MASS_PRECONDITIONING_ARRAY
+    declare -gA STARTCONFIGURATION_GLOBALPATH
 
     #Mutually exclusive options variables
     SUBMIT='FALSE'
@@ -141,35 +141,35 @@ function DeclareBaHaMASGlobalVariables()
     UNCOMMENT_BETAS_SEED_ARRAY=()
     UNCOMMENT_BETAS_ARRAY=()
     INVERT_CONFIGURATIONS='FALSE'
-    SRUN_COMMANDSFILE_FOR_INVERSION="srunCommandsFileForInversions"
-    CORRELATOR_DIRECTION="0"
-    NUMBER_SOURCES_FOR_CORRELATORS="8"
+    readonly SRUN_COMMANDSFILE_FOR_INVERSION="srunCommandsFileForInversions"
+    readonly CORRELATOR_DIRECTION="0"
+    readonly NUMBER_SOURCES_FOR_CORRELATORS="8"
     CALL_DATABASE='FALSE'
     DATABASE_OPTIONS=()
 
     #Variables for output color
-    DEFAULT_LISTSTATUS_COLOR="\e[0;36m"
-    SUSPICIOUS_BETA_LISTSTATUS_COLOR="\e[0;33m"
-    WRONG_BETA_LISTSTATUS_COLOR="\e[0;91m"
-    TOO_HIGH_DELTA_S_LISTSTATUS_COLOR="\e[0;91m"
-    TOO_LOW_ACCEPTANCE_LISTSTATUS_COLOR="\e[38;5;9m"
-    LOW_ACCEPTANCE_LISTSTATUS_COLOR="\e[38;5;208m"
-    OPTIMAL_ACCEPTANCE_LISTSTATUS_COLOR="\e[38;5;10m"
-    HIGH_ACCEPTANCE_LISTSTATUS_COLOR="\e[38;5;11m"
-    TOO_HIGH_ACCEPTANCE_LISTSTATUS_COLOR="\e[38;5;202m"
-    TOO_HIGH_DELTA_S_LISTSTATUS_COLOR="\e[0;91m"
-    RUNNING_LISTSTATUS_COLOR="\e[0;32m"
-    PENDING_LISTSTATUS_COLOR="\e[0;33m"
-    CLEANING_LISTSTATUS_COLOR="\e[0;31m"
-    STUCK_SIMULATION_LISTSTATUS_COLOR="\e[0;91m"
-    FINE_SIMULATION_LISTSTATUS_COLOR="\e[0;32m"
+    readonly DEFAULT_LISTSTATUS_COLOR="\e[0;36m"
+    readonly SUSPICIOUS_BETA_LISTSTATUS_COLOR="\e[0;33m"
+    readonly WRONG_BETA_LISTSTATUS_COLOR="\e[0;91m"
+    readonly TOO_HIGH_DELTA_S_LISTSTATUS_COLOR="\e[0;91m"
+    readonly TOO_LOW_ACCEPTANCE_LISTSTATUS_COLOR="\e[38;5;9m"
+    readonly LOW_ACCEPTANCE_LISTSTATUS_COLOR="\e[38;5;208m"
+    readonly OPTIMAL_ACCEPTANCE_LISTSTATUS_COLOR="\e[38;5;10m"
+    readonly HIGH_ACCEPTANCE_LISTSTATUS_COLOR="\e[38;5;11m"
+    readonly TOO_HIGH_ACCEPTANCE_LISTSTATUS_COLOR="\e[38;5;202m"
+    readonly TOO_HIGH_DELTA_S_LISTSTATUS_COLOR="\e[0;91m"
+    readonly RUNNING_LISTSTATUS_COLOR="\e[0;32m"
+    readonly PENDING_LISTSTATUS_COLOR="\e[0;33m"
+    readonly CLEANING_LISTSTATUS_COLOR="\e[0;31m"
+    readonly STUCK_SIMULATION_LISTSTATUS_COLOR="\e[0;91m"
+    readonly FINE_SIMULATION_LISTSTATUS_COLOR="\e[0;32m"
 
     #Variables for acceptances/deltaS thresholds
-    TOO_LOW_ACCEPTANCE_THRESHOLD=68
-    LOW_ACCEPTANCE_THRESHOLD=70
-    HIGH_ACCEPTANCE_THRESHOLD=78
-    TOO_HIGH_ACCEPTANCE_THRESHOLD=90
-    DELTA_S_THRESHOLD=6
+    readonly TOO_LOW_ACCEPTANCE_THRESHOLD=68
+    readonly LOW_ACCEPTANCE_THRESHOLD=70
+    readonly HIGH_ACCEPTANCE_THRESHOLD=78
+    readonly TOO_HIGH_ACCEPTANCE_THRESHOLD=90
+    readonly DELTA_S_THRESHOLD=6
 }
 
 # The following variables cannot be declared at the
@@ -177,6 +177,6 @@ function DeclareBaHaMASGlobalVariables()
 # which needs to be extracted from the path.
 function DeclareBetaFoldersPathsAsGlobalVariables()
 {
-    HOME_DIR_WITH_BETAFOLDERS="$SUBMIT_DISK_GLOBALPATH/$PROJECT_SUBPATH$PARAMETERS_PATH"
-    WORK_DIR_WITH_BETAFOLDERS="$RUN_DISK_GLOBALPATH/$PROJECT_SUBPATH$PARAMETERS_PATH"
+    readonly HOME_DIR_WITH_BETAFOLDERS="$SUBMIT_DISK_GLOBALPATH/$PROJECT_SUBPATH$PARAMETERS_PATH"
+    readonly WORK_DIR_WITH_BETAFOLDERS="$RUN_DISK_GLOBALPATH/$PROJECT_SUBPATH$PARAMETERS_PATH"
 }

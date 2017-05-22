@@ -10,51 +10,30 @@
 function DeclareUserDefinedGlobalVariables()
 {
 
-    BaHaMAS_colouredOutput='TRUE'
-    USER_MAIL=""
-    SUBMIT_DISK_GLOBALPATH=""
-    RUN_DISK_GLOBALPATH=""
-    GPU_PER_NODE=
-    JOBSCRIPT_FOLDERNAME=""
-    EXCLUDE_NODES_GLOBALPATH=""
+    readonly BaHaMAS_colouredOutput='TRUE'
+    readonly USER_MAIL=""
+    readonly SUBMIT_DISK_GLOBALPATH=""
+    readonly RUN_DISK_GLOBALPATH=""
+    readonly GPU_PER_NODE=
+    readonly JOBSCRIPT_FOLDERNAME=""
+    readonly EXCLUDE_NODES_GLOBALPATH=""
+    readonly PROJECT_SUBPATH=""
+    readonly HMC_GLOBALPATH=""
+    readonly INPUT_FILENAME=""
+    readonly JOBSCRIPT_PREFIX=""
+    readonly OUTPUT_FILENAME=""
+    readonly ACCEPTANCE_COLUMN=
+    readonly USE_RATIONAL_APPROXIMATION_FILE='FALSE'
+    readonly RATIONAL_APPROX_GLOBALPATH=""
+    readonly APPROX_HEATBATH_FILENAME=""
+    readonly APPROX_MD_FILENAME=""
+    readonly APPROX_METROPOLIS_FILENAME=""
+    readonly DATABASE_FILENAME=""
+    readonly DATABASE_GLOBALPATH=""
+    readonly INVERTER_GLOBALPATH=""
+    readonly THERM_CONFS_GLOBALPATH=""
 
-    if [ $WILSON = "TRUE" ]; then
-        PROJECT_SUBPATH=""
-        HMC_GLOBALPATH=""
-        INPUT_FILENAME=""
-        JOBSCRIPT_PREFIX=""
-        OUTPUT_FILENAME=""
-        ACCEPTANCE_COLUMN=
-        USE_RATIONAL_APPROXIMATION_FILE='FALSE'
-        RATIONAL_APPROX_GLOBALPATH=""
-        APPROX_HEATBATH_FILENAME=""
-        APPROX_MD_FILENAME=""
-        APPROX_METROPOLIS_FILENAME=""
-        DATABASE_FILENAME=""
-        DATABASE_GLOBALPATH=""
-        INVERTER_GLOBALPATH=""
-        THERM_CONFS_GLOBALPATH=""
-    fi
-
-    if [ $STAGGERED = "TRUE" ]; then
-        PROJECT_SUBPATH=""
-        HMC_GLOBALPATH=""
-        INPUT_FILENAME=""
-        JOBSCRIPT_PREFIX=""
-        OUTPUT_FILENAME=""
-        ACCEPTANCE_COLUMN=
-        USE_RATIONAL_APPROXIMATION_FILE='FALSE'
-        RATIONAL_APPROX_GLOBALPATH=""
-        APPROX_HEATBATH_FILENAME=""
-        APPROX_MD_FILENAME=""
-        APPROX_METROPOLIS_FILENAME=""
-        DATABASE_FILENAME=""
-        DATABASE_GLOBALPATH=""
-        INVERTER_GLOBALPATH=""
-        THERM_CONFS_GLOBALPATH=""
-    fi
-
-    #Possible default value for options which can then not be given via command line
+    #Possible default value for options which then may not be given via command line
     WALLTIME=""
     CLUSTER_PARTITION=""
     CLUSTER_NODE=""
