@@ -2,35 +2,35 @@
 #   Copyright (c)  2017  Alessandro Sciarra   #
 #---------------------------------------------#
 
+function DeclareOutputRelatedGlobalVariables()
+{
+    readonly BaHaMAS_colouredOutput='TRUE'
+}
+
 function DeclareUserDefinedGlobalVariablesForTests()
 {
-    BaHaMAS_colouredOutput='TRUE'
-    USER_MAIL="user@test.com"
-    SUBMIT_DISK_GLOBALPATH="${BaHaMAS_repositoryTopLevelPath}/Tests"
-    RUN_DISK_GLOBALPATH="${BaHaMAS_repositoryTopLevelPath}/Tests"
-    # NOTE: Here we put GPU_PER_NODE to a high number in order to make BaHaMAS ask the
-    #       user about conifrmation that a node will not be fully used. It is just a trick
-    #       to avoid that jobs are sumbitted in test phase!
-    # TODO: Avoid this hack.
-    GPU_PER_NODE=999
-    JOBSCRIPT_FOLDERNAME="Jobscripts_TEST"
-    EXCLUDE_NODES_GLOBALPATH="${SUBMIT_DISK_GLOBALPATH}/ExcludeNodes_TEST"
+    readonly USER_MAIL="user@test.com"
+    readonly SUBMIT_DISK_GLOBALPATH="${BaHaMAS_repositoryTopLevelPath}/Tests"
+    readonly RUN_DISK_GLOBALPATH="${BaHaMAS_repositoryTopLevelPath}/Tests"
+    readonly GPU_PER_NODE=999
+    readonly JOBSCRIPT_FOLDERNAME="Jobscripts_TEST"
+    readonly EXCLUDE_NODES_GLOBALPATH="${SUBMIT_DISK_GLOBALPATH}/ExcludeNodes_TEST"
 
-    PROJECT_SUBPATH="StaggeredFakeProject"
-    HMC_GLOBALPATH="${SUBMIT_DISK_GLOBALPATH}/AuxiliaryFiles/fakeExecutable"
-    INPUT_FILENAME="fakeInput"
-    JOBSCRIPT_PREFIX="fakePrefix"
-    OUTPUT_FILENAME="fakeOutput"
-    ACCEPTANCE_COLUMN=11
-    USE_RATIONAL_APPROXIMATION_FILE='TRUE'
-    RATIONAL_APPROX_GLOBALPATH="${SUBMIT_DISK_GLOBALPATH}/${PROJECT_SUBPATH}/Rational_Approximations"
-    APPROX_HEATBATH_FILENAME="fakeApprox"
-    APPROX_MD_FILENAME="fakeApprox"
-    APPROX_METROPOLIS_FILENAME="fakeApprox"
-    DATABASE_FILENAME="OverviewDatabase"
-    DATABASE_GLOBALPATH="${SUBMIT_DISK_GLOBALPATH}/${PROJECT_SUBPATH}/SimulationsOverview"
-    INVERTER_GLOBALPATH="${SUBMIT_DISK_GLOBALPATH}/AuxiliaryFiles/fakeExecutable"
-    THERM_CONFS_GLOBALPATH="${SUBMIT_DISK_GLOBALPATH}/${PROJECT_SUBPATH}/Thermalized_Configurations"
+    readonly PROJECT_SUBPATH="StaggeredFakeProject"
+    readonly HMC_GLOBALPATH="${SUBMIT_DISK_GLOBALPATH}/AuxiliaryFiles/fakeExecutable"
+    readonly INPUT_FILENAME="fakeInput"
+    readonly JOBSCRIPT_PREFIX="fakePrefix"
+    readonly OUTPUT_FILENAME="fakeOutput"
+    readonly ACCEPTANCE_COLUMN=11
+    readonly USE_RATIONAL_APPROXIMATION_FILE='TRUE'
+    readonly RATIONAL_APPROX_GLOBALPATH="${SUBMIT_DISK_GLOBALPATH}/${PROJECT_SUBPATH}/Rational_Approximations"
+    readonly APPROX_HEATBATH_FILENAME="fakeApprox"
+    readonly APPROX_MD_FILENAME="fakeApprox"
+    readonly APPROX_METROPOLIS_FILENAME="fakeApprox"
+    readonly DATABASE_FILENAME="OverviewDatabase"
+    readonly DATABASE_GLOBALPATH="${SUBMIT_DISK_GLOBALPATH}/${PROJECT_SUBPATH}/SimulationsOverview"
+    readonly INVERTER_GLOBALPATH="${SUBMIT_DISK_GLOBALPATH}/AuxiliaryFiles/fakeExecutable"
+    readonly THERM_CONFS_GLOBALPATH="${SUBMIT_DISK_GLOBALPATH}/${PROJECT_SUBPATH}/Thermalized_Configurations"
 
     #Possible default value for options which can then not be given via command line
     WALLTIME=""

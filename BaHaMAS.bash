@@ -22,7 +22,6 @@ BaHaMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-pars
 source ${BaHaMAS_repositoryTopLevelPath}/SystemRequirements.bash          || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/UtilityFunctions.bash            || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/GlobalVariables.bash             || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/UserSpecificVariables.bash       || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/CheckGlobalVariables.bash        || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/OutputFunctionality.bash         || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/PathManagementFunctionality.bash || exit -2
@@ -32,7 +31,13 @@ source ${BaHaMAS_repositoryTopLevelPath}/AuxiliaryFunctions.bash          || exi
 source ${BaHaMAS_repositoryTopLevelPath}/AcceptanceRateReport.bash        || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/BuildRegexPath.bash              || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/ProjectStatisticsDatabase.bash   || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/Tests/SetupUserVariables.bash    || exit -2
+#------------------------------------------------------------------------------------------------------#
+# User file to be sourced depending on test mode
+if [ -n "${BaHaMAS_testModeOn:+x}" ] && [ ${BaHaMAS_testModeOn} = 'TRUE' ]; then
+    source ${BaHaMAS_repositoryTopLevelPath}/Tests/SetupUserVariables.bash || exit -2
+else
+    source ${BaHaMAS_repositoryTopLevelPath}/UserSpecificVariables.bash    || exit -2
+fi
 #------------------------------------------------------------------------------------------------------#
 
 #Set stricter shell mode. This implies for the developer to be aware of what is going on,
