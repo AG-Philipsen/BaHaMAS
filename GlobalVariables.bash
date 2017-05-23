@@ -30,61 +30,61 @@ function DeclarePathRelatedGlobalVariables()
 {
     #Setting of the correct formulation based on the path.
     if [ $(grep "[sS]taggered" <<< "$PWD" | wc -l) -gt 0 ]; then
-        readonly STAGGERED='TRUE'
+        readonly BHMAS_staggered='TRUE'
     else
-        readonly STAGGERED='FALSE'
+        readonly BHMAS_staggered='FALSE'
     fi
     if [ $(grep "[wW]ilson" <<< "$PWD" | wc -l) -gt 0 ]; then
-        readonly WILSON='TRUE'
+        readonly BHMAS_wilson='TRUE'
     else
-        readonly WILSON='FALSE'
+        readonly BHMAS_wilson='FALSE'
     fi
     #Parameters positions
-    readonly NFLAVOUR_POSITION=0
-    readonly CHEMPOT_POSITION=1
-    readonly MASS_POSITION=2
-    readonly NTIME_POSITION=3
-    readonly NSPACE_POSITION=4
+    readonly BHMAS_nflavourPosition=0
+    readonly BHMAS_chempotPosition=1
+    readonly BHMAS_massPosition=2
+    readonly BHMAS_ntimePosition=3
+    readonly BHMAS_nspacePosition=4
     #Parameters prefixes
-    readonly NFLAVOUR_PREFIX="Nf"
-    readonly CHEMPOT_PREFIX="mui"
-    [ $WILSON = "TRUE" ] && readonly MASS_PREFIX="k" || readonly MASS_PREFIX="mass"
-    readonly NTIME_PREFIX="nt"
-    readonly NSPACE_PREFIX="ns"
-    declare -rga PARAMETER_PREFIXES=( [$NFLAVOUR_POSITION]=$NFLAVOUR_PREFIX
-                                      [$CHEMPOT_POSITION]=$CHEMPOT_PREFIX
-                                      [$MASS_POSITION]=$MASS_PREFIX
-                                      [$NTIME_POSITION]=$NTIME_PREFIX
-                                      [$NSPACE_POSITION]=$NSPACE_PREFIX )
+    readonly BHMAS_nflavourPrefix="Nf"
+    readonly BHMAS_chempotPrefix="mui"
+    [ $BHMAS_wilson = "TRUE" ] && readonly BHMAS_massPrefix="k" || readonly BHMAS_massPrefix="mass"
+    readonly BHMAS_ntimePrefix="nt"
+    readonly BHMAS_nspacePrefix="ns"
+    declare -rga BHMAS_parameterPrefixes=( [$BHMAS_nflavourPosition]=$BHMAS_nflavourPrefix
+                                           [$BHMAS_chempotPosition]=$BHMAS_chempotPrefix
+                                           [$BHMAS_massPosition]=$BHMAS_massPrefix
+                                           [$BHMAS_ntimePosition]=$BHMAS_ntimePrefix
+                                           [$BHMAS_nspacePosition]=$BHMAS_nspacePrefix )
     #Parameters variable names (declred as readonly when reading from path)
-    declare -rgA PARAMETER_VARIABLE_NAMES=( [$NFLAVOUR_PREFIX]="NFLAVOUR"
-                                            [$CHEMPOT_PREFIX]="CHEMPOT"
-                                            [$MASS_PREFIX]="MASS"
-                                            [$NTIME_PREFIX]="NTIME"
-                                            [$NSPACE_PREFIX]="NSPACE" )
+    declare -rgA BHMAS_parameterVariableNames=( [$BHMAS_nflavourPrefix]="BHMAS_nflavour"
+                                                [$BHMAS_chempotPrefix]="BHMAS_chempot"
+                                                [$BHMAS_massPrefix]="BHMAS_mass"
+                                                [$BHMAS_ntimePrefix]="BHMAS_ntime"
+                                                [$BHMAS_nspacePrefix]="BHMAS_nspace" )
     #Parameters regular expressions
-    readonly NFLAVOUR_REGEX='[[:digit:]]\([.][[:digit:]]\)\?'
-    readonly CHEMPOT_REGEX='\(0\|PiT\)'
-    readonly MASS_REGEX='[[:digit:]]\{4\}'
-    readonly NTIME_REGEX='[[:digit:]]\{1,2\}'
-    readonly NSPACE_REGEX='[[:digit:]]\{1,2\}'
-    declare -rga PARAMETER_REGEXES=( [$NFLAVOUR_POSITION]=$NFLAVOUR_REGEX
-                                     [$CHEMPOT_POSITION]=$CHEMPOT_REGEX
-                                     [$MASS_POSITION]=$MASS_REGEX
-                                     [$NTIME_POSITION]=$NTIME_REGEX
-                                     [$NSPACE_POSITION]=$NSPACE_REGEX )
+    readonly BHMAS_nflavourRegex='[[:digit:]]\([.][[:digit:]]\)\?'
+    readonly BHMAS_chempotRegex='\(0\|PiT\)'
+    readonly BHMAS_massRegex='[[:digit:]]\{4\}'
+    readonly BHMAS_ntimeRegex='[[:digit:]]\{1,2\}'
+    readonly BHMAS_nspaceRegex='[[:digit:]]\{1,2\}'
+    declare -rga BHMAS_parameterRegexes=( [$BHMAS_nflavourPosition]=$BHMAS_nflavourRegex
+                                          [$BHMAS_chempotPosition]=$BHMAS_chempotRegex
+                                          [$BHMAS_massPosition]=$BHMAS_massRegex
+                                          [$BHMAS_ntimePosition]=$BHMAS_ntimeRegex
+                                          [$BHMAS_nspacePosition]=$BHMAS_nspaceRegex )
     #Parameters path and string (initialized and made readonly later)
-    PARAMETERS_PATH=''     # --> e.g. /Nf2/muiPiT/k1550/nt6/ns12    or   /Nf2/mui0/mass0250/nt4/ns8
-    PARAMETERS_STRING=''   # --> e.g.  Nf2_muiPiT_k1550_nt6_ns12    or    Nf2_mui0_mass0250_nt4_ns8
-    #Beta and seed information
-    readonly BETA_POSITION=5
-    readonly BETA_PREFIX='b'
-    BETA_POSTFIX='_continueWithNewChain' #Here we set it supposing it is not a thermalization. If indeed it is, the postfix will be overwritten!
-    readonly BETA_REGEX='[[:digit:]][.][[:digit:]]\{4\}'
-    readonly SEED_PREFIX='s'
-    readonly SEED_REGEX='[[:digit:]]\{4\}'
-    readonly BETA_FOLDER_SHORT_REGEX=$BETA_REGEX'_'$SEED_PREFIX'[[:digit:]]\{4\}_[[:alpha:]]\+'
-    readonly BETA_FOLDER_REGEX=$BETA_PREFIX$BETA_FOLDER_SHORT_REGEX
+    BHMAS_parametersPath=''     # --> e.g. /Nf2/muiPiT/k1550/nt6/ns12    or   /Nf2/mui0/mass0250/nt4/ns8
+    BHMAS_parametersString=''   # --> e.g.  Nf2_muiPiT_k1550_nt6_ns12    or    Nf2_mui0_mass0250_nt4_ns8
+    #Beta and seed information (intentionally not in arrays of prefixes, regexes, etc.)
+    readonly BHMAS_betaPosition=5
+    readonly BHMAS_betaPrefix='b'
+    BHMAS_betaPostfix='_continueWithNewChain' #Here we set it supposing it is not a thermalization. If indeed it is, the postfix will be overwritten!
+    readonly BHMAS_betaRegex='[[:digit:]][.][[:digit:]]\{4\}'
+    readonly BHMAS_seedPrefix='s'
+    readonly BHMAS_seedRegex='[[:digit:]]\{4\}'
+    readonly BHMAS_betaFolderShortRegex=$BHMAS_betaRegex'_'$BHMAS_seedPrefix'[[:digit:]]\{4\}_[[:alpha:]]\+'
+    readonly BHMAS_betaFolderRegex=$BHMAS_betaPrefix$BHMAS_betaFolderShortRegex
 }
 
 #----------------------------------------------------------------------------------#
@@ -176,6 +176,6 @@ function DeclareBaHaMASGlobalVariables()
 # which needs to be extracted from the path.
 function DeclareBetaFoldersPathsAsGlobalVariables()
 {
-    readonly HOME_DIR_WITH_BETAFOLDERS="$SUBMIT_DISK_GLOBALPATH/$PROJECT_SUBPATH$PARAMETERS_PATH"
-    readonly WORK_DIR_WITH_BETAFOLDERS="$RUN_DISK_GLOBALPATH/$PROJECT_SUBPATH$PARAMETERS_PATH"
+    readonly HOME_DIR_WITH_BETAFOLDERS="$SUBMIT_DISK_GLOBALPATH/$PROJECT_SUBPATH$BHMAS_parametersPath"
+    readonly WORK_DIR_WITH_BETAFOLDERS="$RUN_DISK_GLOBALPATH/$PROJECT_SUBPATH$BHMAS_parametersPath"
 }

@@ -30,7 +30,7 @@ function __static__CleanFile()
         PROBLEM_BETA_ARRAY+=( $BETA )
         continue
     fi
-    cecho lg "        The file " file "${BETA_PREFIX}${FILE_GLOBALPATH##*/$BETA_PREFIX}" " has been successfully cleaned!"\
+    cecho lg "        The file " file "${BHMAS_betaPrefix}${FILE_GLOBALPATH##*/$BHMAS_betaPrefix}" " has been successfully cleaned!"\
           " [removed " B "$(($(wc -l < $FILE_GLOBALPATH_BACKUP) - $(wc -l < $FILE_GLOBALPATH)))" uB " line(s)]!"
 }
 
@@ -40,7 +40,7 @@ function CleanOutputFiles()
     cecho lc B "\n " U "Cleaning" uU ":"
     for BETA in ${BETAVALUES[@]}; do
         #-------------------------------------------------------------------------#
-        local WORK_BETADIRECTORY="$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
+        local WORK_BETADIRECTORY="$WORK_DIR_WITH_BETAFOLDERS/$BHMAS_betaPrefix$BETA"
         local MAINFILE_GLOBALPATH="${WORK_BETADIRECTORY}/$OUTPUT_FILENAME"
         local PBPFILE_GLOBALPATH="${MAINFILE_GLOBALPATH}_pbp.dat"
         #-------------------------------------------------------------------------#
@@ -53,14 +53,14 @@ function CleanOutputFiles()
         cecho lc "\n   - $BETA"
 
         if $(sort --numeric-sort --unique --check=silent --key 1,1 ${MAINFILE_GLOBALPATH}); then
-            cecho lm "        The file " file "${BETA_PREFIX}${MAINFILE_GLOBALPATH##*/$BETA_PREFIX}" " has not to be cleaned!"
+            cecho lm "        The file " file "${BHMAS_betaPrefix}${MAINFILE_GLOBALPATH##*/$BHMAS_betaPrefix}" " has not to be cleaned!"
         else
             __static__CleanFile "$MAINFILE_GLOBALPATH" "TRUE"
         fi
 
         if [ -f $PBPFILE_GLOBALPATH ]; then
             if $(sort --numeric-sort --unique --check=silent --key 1,1 ${PBPFILE_GLOBALPATH}); then
-                cecho lm "        The file " file "${BETA_PREFIX}${PBPFILE_GLOBALPATH##*/$BETA_PREFIX}" " has not to be cleaned!"
+                cecho lm "        The file " file "${BHMAS_betaPrefix}${PBPFILE_GLOBALPATH##*/$BHMAS_betaPrefix}" " has not to be cleaned!"
             else
                 __static__CleanFile "$PBPFILE_GLOBALPATH" "FALSE"
             fi

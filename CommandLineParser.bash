@@ -56,7 +56,7 @@ function ParseCommandLineOption()
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
-                    CHEMPOT_PREFIX="$2"
+                    BHMAS_chempotPrefix="$2"
                 fi
                 shift 2 ;;
 
@@ -64,7 +64,7 @@ function ParseCommandLineOption()
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
-                    MASS_PREFIX="$2"
+                    BHMAS_massPrefix="$2"
                 fi
                 shift 2 ;;
 
@@ -72,7 +72,7 @@ function ParseCommandLineOption()
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
-                    NTIME_PREFIX="$2"
+                    BHMAS_ntimePrefix="$2"
                 fi
                 shift 2 ;;
 
@@ -80,7 +80,7 @@ function ParseCommandLineOption()
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
-                    NSPACE_PREFIX="$2"
+                    BHMAS_nspacePrefix="$2"
                 fi
                 shift 2 ;;
 
@@ -88,7 +88,7 @@ function ParseCommandLineOption()
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
-                    BETA_PREFIX="$2"
+                    BHMAS_betaPrefix="$2"
                 fi
                 shift 2 ;;
 
@@ -165,7 +165,7 @@ function ParseCommandLineOption()
             --doNotUseMultipleChains )
                 USE_MULTIPLE_CHAINS="FALSE"
                 if [ $THERMALIZE = "FALSE" ]; then
-                    BETA_POSTFIX=""
+                    BHMAS_betaPostfix=""
                 fi
                 shift ;;
 
@@ -304,7 +304,7 @@ function ParseCommandLineOption()
                     COMMENT_BETAS="TRUE"
                 fi
                 while [[ ! ${2:-} =~ ^(-|$) ]]; do
-                    if [[ $2 =~ ^[0-9]\.[0-9]{4}_${SEED_PREFIX}[0-9]{4}_(NC|fC|fH)$ ]]; then
+                    if [[ $2 =~ ^[0-9]\.[0-9]{4}_${BHMAS_seedPrefix}[0-9]{4}_(NC|fC|fH)$ ]]; then
                         UNCOMMENT_BETAS_SEED_ARRAY+=( $2 )
                     elif [[ $2 =~ ^[0-9]\.[0-9]*$ ]]; then
                         UNCOMMENT_BETAS_ARRAY+=( $(awk '{printf "%1.4f", $1}' <<< "$2") )

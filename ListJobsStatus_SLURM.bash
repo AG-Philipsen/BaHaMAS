@@ -4,23 +4,23 @@ source ${BaHaMAS_repositoryTopLevelPath}/UtilityFunctions.bash || exit -2
 
 function __static__ExtractBetasFromJOBNAME()
 {
-    #Here it is supposed that the name of the job is ${PARAMETERS_STRING}_(...)
+    #Here it is supposed that the name of the job is ${BHMAS_parametersString}_(...)
     #The goal of this function is to get an array whose elements are bx.xxxx_syyyy and since we use involved bash lines it is better to say that:
-    #  1) from JOBNAME we take everything after the BETA_PREFIX
-    local BETAS_STRING=$(awk -v pref="$BETA_PREFIX" '{print substr($0, index($0, pref))}' <<< "$JOBNAME")
-    #  2) we split on the BETA_PREFIX in order to get all the seeds referred to the same beta
-    local TEMPORAL_ARRAY=( $(awk -v pref="$BETA_PREFIX" '{split($1, res, pref); for (i in res) print res[i]}' <<< "$BETAS_STRING") )
+    #  1) from JOBNAME we take everything after the BHMAS_betaPrefix
+    local BETAS_STRING=$(awk -v pref="$BHMAS_betaPrefix" '{print substr($0, index($0, pref))}' <<< "$JOBNAME")
+    #  2) we split on the BHMAS_betaPrefix in order to get all the seeds referred to the same beta
+    local TEMPORAL_ARRAY=( $(awk -v pref="$BHMAS_betaPrefix" '{split($1, res, pref); for (i in res) print res[i]}' <<< "$BETAS_STRING") )
     #  3) we take the value of the beta and of the seeds building up the final array
     local BETAVALUES_ARRAY=()
     for ELEMENT in "${TEMPORAL_ARRAY[@]}"; do
         local BETAVALUE=${ELEMENT%%_*}
-        local SEEDS_ARRAY=( $(grep -o "${SEED_PREFIX}[[:alnum:]]\{4\}" <<< "${ELEMENT#*_}") )
+        local SEEDS_ARRAY=( $(grep -o "${BHMAS_seedPrefix}[[:alnum:]]\{4\}" <<< "${ELEMENT#*_}") )
         if [ ${#SEEDS_ARRAY[@]} -gt 0 ]; then
             for SEED in "${SEEDS_ARRAY[@]}"; do
-                BETAVALUES_ARRAY+=( "${BETA_PREFIX}${BETAVALUE}_${SEED}" )
+                BETAVALUES_ARRAY+=( "${BHMAS_betaPrefix}${BETAVALUE}_${SEED}" )
             done
         else
-            BETAVALUES_ARRAY+=( "${BETA_PREFIX}${BETAVALUE}" )
+            BETAVALUES_ARRAY+=( "${BHMAS_betaPrefix}${BETAVALUE}" )
         fi
     done
     printf "%s " "${BETAVALUES_ARRAY[@]}"
@@ -38,7 +38,7 @@ function __static__ExtractPostfixFromJOBNAME()
     elif [ "$POSTFIX" == "Tuning" ]; then
         printf "tuning"
         #Also in the "TC" and "TH" cases we have seeds in the name, but such a cases are exluded from the elif
-    elif [ $(grep -o "_${SEED_PREFIX}[[:alnum:]]\{4\}" <<< "$JOBNAME" | wc -l) -ne 0 ]; then
+    elif [ $(grep -o "_${BHMAS_seedPrefix}[[:alnum:]]\{4\}" <<< "$JOBNAME" | wc -l) -ne 0 ]; then
         printf "continueWithNewChain"
     else
         printf ""
@@ -70,18 +70,18 @@ function ListJobStatus_SLURM()
 {
 
     # This function can be called by the JobHandler either in the LISTSTATUS setup or in the DATABASE setup.
-    # The crucial difference is that in the first case the PARAMETERS_STRING and PARAMETERS_PATH variable
+    # The crucial difference is that in the first case the BHMAS_parametersString and BHMAS_parametersPath variable
     # must be the global ones, otherwise they have to be built on the basis of some given information.
     # Then we make this function accept one and ONLY ONE argument (given only in the DATABASE setup)
-    # containing the PARAMETERS_PATH (e.g. /muiPiT/k1550/nt6/ns12) and we will define local
-    # PARAMETERS_STRING and PARAMETERS_PATH variables filled differently in the two cases.
-    # In the DATABASE setup the PARAMETERS_STRING is built using the argument given.
+    # containing the BHMAS_parametersPath (e.g. /muiPiT/k1550/nt6/ns12) and we will define local
+    # BHMAS_parametersString and BHMAS_parametersPath variables filled differently in the two cases.
+    # In the DATABASE setup the BHMAS_parametersString is built using the argument given.
     if [ $# -eq 0 ]; then
-        local LOCAL_PARAMETERS_STRING="$PARAMETERS_STRING"
-        local LOCAL_PARAMETERS_PATH="$PARAMETERS_PATH"
+        local LOCAL_PARAMETERS_PATH="$BHMAS_parametersPath"
+        local LOCAL_PARAMETERS_STRING="$BHMAS_parametersString"
     elif [ $# -eq 1 ]; then
         local LOCAL_PARAMETERS_PATH="$1"
-        local LOCAL_PARAMETERS_STRING=$(sed 's@/@_@g' <<< "$LOCAL_PARAMETERS_PATH")
+        local LOCAL_PARAMETERS_STRING=${LOCAL_PARAMETERS_PATH//\//_}
         LOCAL_PARAMETERS_STRING=${LOCAL_PARAMETERS_STRING:1}
     else
         cecho "\e[31m Wrong invocation of ListJobStatus_SLURM: Invalid number of arguments. Please investigate...exiting."
@@ -98,19 +98,19 @@ function ListJobStatus_SLURM()
 
     JOB_METAINFORMATION_ARRAY=( $(__static__ExtractMetaInformationFromJOBNAME) )
 
-    for BETA in ${BETA_PREFIX}[[:digit:]]*; do
+    for BETA in ${BHMAS_betaPrefix}[[:digit:]]*; do
 
         #Select only folders with old or new names
-        BETA=${BETA#$BETA_PREFIX}
+        BETA=${BETA#$BHMAS_betaPrefix}
         if [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}$ ]] &&
-               [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}_"$SEED_PREFIX"[[:alnum:]]{4}_continueWithNewChain$ ]] &&
-               [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}_"$SEED_PREFIX"[[:alnum:]]{4}_thermalizeFromHot$ ]] &&
-               [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}_"$SEED_PREFIX"[[:alnum:]]{4}_thermalizeFromCold$ ]] &&
-               [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}_"$SEED_PREFIX"[[:alnum:]]{4}_thermalizeFromConf$ ]]; then continue; fi
+               [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}_"$BHMAS_seedPrefix"[[:alnum:]]{4}_continueWithNewChain$ ]] &&
+               [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}_"$BHMAS_seedPrefix"[[:alnum:]]{4}_thermalizeFromHot$ ]] &&
+               [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}_"$BHMAS_seedPrefix"[[:alnum:]]{4}_thermalizeFromCold$ ]] &&
+               [[ ! $BETA =~ ^[[:digit:]][.][[:digit:]]{4}_"$BHMAS_seedPrefix"[[:alnum:]]{4}_thermalizeFromConf$ ]]; then continue; fi
 
         local POSTFIX_FROM_FOLDER=$(grep -o "[[:alpha:]]\+\$" <<< "${BETA##*_}")
 
-        local STATUS=( $(sed 's/ /\n/g' <<< "${JOB_METAINFORMATION_ARRAY[@]}" | grep "${LOCAL_PARAMETERS_STRING}" | grep "${BETA_PREFIX}${BETA%_*}" | grep "postfix=${POSTFIX_FROM_FOLDER}|" | cut -d'|' -f4) )
+        local STATUS=( $(sed 's/ /\n/g' <<< "${JOB_METAINFORMATION_ARRAY[@]}" | grep "${LOCAL_PARAMETERS_STRING}" | grep "${BHMAS_betaPrefix}${BETA%_*}" | grep "postfix=${POSTFIX_FROM_FOLDER}|" | cut -d'|' -f4) )
 
         if [ ${#STATUS[@]} -eq 0 ]; then
             [ $LISTSTATUS_SHOW_ONLY_QUEUED = "TRUE" ] && continue
@@ -123,10 +123,10 @@ function ListJobStatus_SLURM()
         fi
 
         #----Constructing WORK_BETADIRECTORY, HOME_BETADIRECTORY, JOBSCRIPT_NAME, JOBSCRIPT_GLOBALPATH and INPUTFILE_GLOBALPATH---#
-        local OUTPUTFILE_GLOBALPATH="$RUN_DISK_GLOBALPATH/$PROJECT_SUBPATH$LOCAL_PARAMETERS_PATH/$BETA_PREFIX$BETA/$OUTPUT_FILENAME"
-        local INPUTFILE_GLOBALPATH="$SUBMIT_DISK_GLOBALPATH/$PROJECT_SUBPATH$LOCAL_PARAMETERS_PATH/$BETA_PREFIX$BETA/$INPUT_FILENAME"
-        local STDOUTPUT_FILE=`ls -t1 $BETA_PREFIX$BETA 2>/dev/null | awk -v filename="$HMC_FILENAME" 'BEGIN{regexp="^"filename".[[:digit:]]+.out$"}{if($1 ~ regexp){print $1}}' | head -n1`
-        local STDOUTPUT_GLOBALPATH="$SUBMIT_DISK_GLOBALPATH/$PROJECT_SUBPATH$LOCAL_PARAMETERS_PATH/$BETA_PREFIX$BETA/$STDOUTPUT_FILE"
+        local OUTPUTFILE_GLOBALPATH="$RUN_DISK_GLOBALPATH/$PROJECT_SUBPATH$LOCAL_PARAMETERS_PATH/$BHMAS_betaPrefix$BETA/$OUTPUT_FILENAME"
+        local INPUTFILE_GLOBALPATH="$SUBMIT_DISK_GLOBALPATH/$PROJECT_SUBPATH$LOCAL_PARAMETERS_PATH/$BHMAS_betaPrefix$BETA/$INPUT_FILENAME"
+        local STDOUTPUT_FILE=`ls -t1 $BHMAS_betaPrefix$BETA 2>/dev/null | awk -v filename="$HMC_FILENAME" 'BEGIN{regexp="^"filename".[[:digit:]]+.out$"}{if($1 ~ regexp){print $1}}' | head -n1`
+        local STDOUTPUT_GLOBALPATH="$SUBMIT_DISK_GLOBALPATH/$PROJECT_SUBPATH$LOCAL_PARAMETERS_PATH/$BHMAS_betaPrefix$BETA/$STDOUTPUT_FILE"
         #-------------------------------------------------------------------------------------------------------------------------#
         if [ $LISTSTATUS_MEASURE_TIME = "TRUE" ]; then
             if [ -f $STDOUTPUT_GLOBALPATH ] && [[ $STATUS == "RUNNING" ]]; then

@@ -1,33 +1,33 @@
 function ProduceSrunCommandsFileForInversionsPerBeta()
 {
 
-    if [ "$CHEMPOT" != '0' ]; then
+    if [ "$BHMAS_chempot" != '0' ]; then
         cecho lr "\n Inversion of configuration with nonzero chemical potential not allowed!\n"
         exit -1
     fi
 
-    if [ $(($NSPACE*$NSPACE*$NSPACE*$NTIME)) -lt $NUMBER_SOURCES_FOR_CORRELATORS ]; then
+    if [ $(($BHMAS_nspace*$BHMAS_nspace*$BHMAS_nspace*$BHMAS_ntime)) -lt $NUMBER_SOURCES_FOR_CORRELATORS ]; then
         cecho lr "\n Number of required sources bigger than available positions ("\
-              emph "$(($NSPACE*$NSPACE*$NSPACE*$NTIME)) <= $NUMBER_SOURCES_FOR_CORRELATORS" ")! Not allowed...\n"
+              emph "$(($BHMAS_nspace*$BHMAS_nspace*$BHMAS_nspace*$BHMAS_ntime)) <= $NUMBER_SOURCES_FOR_CORRELATORS" ")! Not allowed...\n"
         exit -1
     fi
 
-    ls $WORK_BETADIRECTORY | grep "^conf\.[[:digit:]]\{5\}" | awk -v ns="$NSPACE" \
-                                                                  -v nt="$NTIME" \
+    ls $WORK_BETADIRECTORY | grep "^conf\.[[:digit:]]\{5\}" | awk -v ns="$BHMAS_nspace" \
+                                                                  -v nt="$BHMAS_ntime" \
                                                                   -v useCpu="false"   \
                                                                   -v startcondition="continue" \
                                                                   -v logLevel="info" \
                                                                   -v beta="${BETA%%_*}" \
-                                                                  -v mass="0.$MASS" \
+                                                                  -v mass="0.$BHMAS_mass" \
                                                                   -v corrDir="$CORRELATOR_DIRECTION" \
                                                                   -v solver="cg" \
                                                                   -v cgmax="30000" \
                                                                   -v cgIterationBlockSize="50" \
                                                                   -v thetaFermionTemporal="1" \
                                                                   -v maxNrCorrs="$NUMBER_SOURCES_FOR_CORRELATORS" \
-                                                                  -v chemPot="$CHEMPOT" \
-                                                                  -v wilson="$WILSON" \
-                                                                  -v staggered="$STAGGERED" '
+                                                                  -v chemPot="$BHMAS_chempot" \
+                                                                  -v wilson="$BHMAS_wilson" \
+                                                                  -v staggered="$BHMAS_staggered" '
         BEGIN{
             srand();
             if(chemPot == 0){

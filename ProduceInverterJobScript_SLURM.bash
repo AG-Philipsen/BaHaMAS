@@ -56,11 +56,11 @@ function ProduceInverterJobscript_SLURM()
 
     __static__AddToInverterJobscriptFile "#SBATCH --ntasks=$GPU_PER_NODE" ""
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-        __static__AddToInverterJobscriptFile "dir$INDEX=${HOME_DIR_WITH_BETAFOLDERS}/$BETA_PREFIX${BETA_FOR_JOBSCRIPT[$INDEX]}"
+        __static__AddToInverterJobscriptFile "dir$INDEX=${HOME_DIR_WITH_BETAFOLDERS}/$BHMAS_betaPrefix${BETA_FOR_JOBSCRIPT[$INDEX]}"
     done
     __static__AddToInverterJobscriptFile ""
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-        __static__AddToInverterJobscriptFile "workdir$INDEX=${WORK_DIR_WITH_BETAFOLDERS}/$BETA_PREFIX${BETA_FOR_JOBSCRIPT[$INDEX]}"
+        __static__AddToInverterJobscriptFile "workdir$INDEX=${WORK_DIR_WITH_BETAFOLDERS}/$BHMAS_betaPrefix${BETA_FOR_JOBSCRIPT[$INDEX]}"
     done
     __static__AddToInverterJobscriptFile\
         ""\
@@ -87,7 +87,7 @@ function ProduceInverterJobscript_SLURM()
         ""\
         "# TODO: this is necessary because the log file is produced in the directoy"\
         "#       of the exec. Copying it later does not guarantee that it is still the same..."\
-        "echo \"Copy executable to beta directories in ${WORK_DIR_WITH_BETAFOLDERS}/${BETA_PREFIX}x.xxxx...\""
+        "echo \"Copy executable to beta directories in ${WORK_DIR_WITH_BETAFOLDERS}/${BHMAS_betaPrefix}x.xxxx...\""
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
         __static__AddToInverterJobscriptFile "rm -f \$dir$INDEX/$INVERTER_FILENAME && cp -a $INVERTER_GLOBALPATH \$dir$INDEX || exit 2"
     done
@@ -107,8 +107,8 @@ function ProduceInverterJobscript_SLURM()
         #The following check is done twice. During the creation of the jobscript for the case in which the $SRUN_COMMANDSFILE_FOR_INVERSION does not exist from the beginning on and
         #in the jobscript itself for the case in which it exists during the creation of the jobscript but accidentally gets deleted later on after the creation.
         #if [ ! -e $workdir$INDEX/$SRUN_COMMANDSFILE_FOR_INVERSION ]; then #SHOULD BE LIKE THIS??
-        if [ ! -e ${WORK_DIR_WITH_BETAFOLDERS}/$BETA_PREFIX${BETA_FOR_JOBSCRIPT[$INDEX]}/$SRUN_COMMANDSFILE_FOR_INVERSION ]; then #I THINK WORK_BETADIRECTORY has to be replaced!!!!
-            cecho lr "File ${WORK_DIR_WITH_BETAFOLDERS}/$BETA_PREFIX${BETA_FOR_JOBSCRIPT[$INDEX]}/$SRUN_COMMANDSFILE_FOR_INVERSION with execution commands for the inversion does not exist...aborting"
+        if [ ! -e ${WORK_DIR_WITH_BETAFOLDERS}/$BHMAS_betaPrefix${BETA_FOR_JOBSCRIPT[$INDEX]}/$SRUN_COMMANDSFILE_FOR_INVERSION ]; then #I THINK WORK_BETADIRECTORY has to be replaced!!!!
+            cecho lr "File ${WORK_DIR_WITH_BETAFOLDERS}/$BHMAS_betaPrefix${BETA_FOR_JOBSCRIPT[$INDEX]}/$SRUN_COMMANDSFILE_FOR_INVERSION with execution commands for the inversion does not exist...aborting"
             exit 30
         fi
         __static__AddToInverterJobscriptFile\

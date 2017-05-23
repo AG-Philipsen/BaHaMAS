@@ -12,18 +12,18 @@ function ProduceInputFile_SLURM()
     touch $INPUTFILE_GLOBALPATH || exit -2
 
     #This input file is for CL2QCD only!
-    if [ $WILSON = "TRUE" ]; then
+    if [ $BHMAS_wilson = "TRUE" ]; then
         __static__AddToInputFile "fermact=wilson"
-    elif [ $STAGGERED = "TRUE" ]; then
+    elif [ $BHMAS_staggered = "TRUE" ]; then
         __static__AddToInputFile \
             "fermact=rooted_stagg"\
-            "num_tastes=$NFLAVOUR"
+            "num_tastes=$BHMAS_nflavour"
         if [ $USE_RATIONAL_APPROXIMATION_FILE = "TRUE" ]; then
             __static__AddToInputFile \
                 "read_rational_approximations_from_file=1"\
-                "approx_heatbath_file=${RATIONAL_APPROX_GLOBALPATH}/Nf${NFLAVOUR}_${APPROX_HEATBATH_FILENAME}"\
-                "approx_md_file=${RATIONAL_APPROX_GLOBALPATH}/Nf${NFLAVOUR}_${APPROX_MD_FILENAME}"\
-                "approx_metropolis_file=${RATIONAL_APPROX_GLOBALPATH}/Nf${NFLAVOUR}_${APPROX_METROPOLIS_FILENAME}"
+                "approx_heatbath_file=${RATIONAL_APPROX_GLOBALPATH}/Nf${BHMAS_nflavour}_${APPROX_HEATBATH_FILENAME}"\
+                "approx_md_file=${RATIONAL_APPROX_GLOBALPATH}/Nf${BHMAS_nflavour}_${APPROX_MD_FILENAME}"\
+                "approx_metropolis_file=${RATIONAL_APPROX_GLOBALPATH}/Nf${BHMAS_nflavour}_${APPROX_METROPOLIS_FILENAME}"
         else
             __static__AddToInputFile "read_rational_approximations_from_file=0"
         fi
@@ -34,11 +34,11 @@ function ProduceInputFile_SLURM()
         "theta_fermion_spatial=0"\
         "theta_fermion_temporal=1"\
         "use_eo=1"
-    if [ $CHEMPOT = "0" ]; then
+    if [ $BHMAS_chempot = "0" ]; then
         __static__AddToInputFile "use_chem_pot_im=0"
     else
         __static__AddToInputFile "use_chem_pot_im=1"
-        if [ $CHEMPOT = "PiT" ]; then
+        if [ $BHMAS_chempot = "PiT" ]; then
             __static__AddToInputFile "chem_pot_im=0.523598775598299"
         else
             cecho "\n" r " Unknown value of imaginary chemical potential for input file! Aborting...\n"
@@ -55,9 +55,9 @@ function ProduceInputFile_SLURM()
             "measure_pbp=1"\
             "sourcetype=volume"\
             "sourcecontent=gaussian"
-        if [ $WILSON = "TRUE" ]; then
+        if [ $BHMAS_wilson = "TRUE" ]; then
             __static__AddToInputFile "num_sources=16"
-        elif [ $STAGGERED = "TRUE" ]; then
+        elif [ $BHMAS_staggered = "TRUE" ]; then
             __static__AddToInputFile \
                 "num_sources=1"\
                 "pbp_measurements=8"
@@ -67,7 +67,7 @@ function ProduceInputFile_SLURM()
             "ferm_obs_pbp_prefix=${OUTPUT_FILENAME}"
     fi
     #Information about integrators
-    if [ $WILSON = "TRUE" ]; then
+    if [ $BHMAS_wilson = "TRUE" ]; then
         __static__AddToInputFile \
             "iter_refresh=2000"\
             "use_merge_kernels_fermion=1"
@@ -85,7 +85,7 @@ function ProduceInputFile_SLURM()
                 "cg_iteration_block_size=$CGBS"\
                 "num_timescales=2"
         fi
-    elif [ $STAGGERED = "TRUE" ]; then
+    elif [ $BHMAS_staggered = "TRUE" ]; then
         __static__AddToInputFile \
             "cg_iteration_block_size=$CGBS"\
             "num_timescales=2"
@@ -96,15 +96,15 @@ function ProduceInputFile_SLURM()
         "integrator1=twomn"\
         "integrationsteps0=${INTSTEPS0_ARRAY[${BETAVALUES_COPY[$INDEX]}]}"\
         "integrationsteps1=${INTSTEPS1_ARRAY[${BETAVALUES_COPY[$INDEX]}]}"\
-        "nspace=$NSPACE"\
-        "ntime=$NTIME"
-    if [ $WILSON = "TRUE" ]; then
+        "nspace=$BHMAS_nspace"\
+        "ntime=$BHMAS_ntime"
+    if [ $BHMAS_wilson = "TRUE" ]; then
         __static__AddToInputFile \
-            "kappa=0.$MASS"\
+            "kappa=0.$BHMAS_mass"\
             "hmcsteps=$MEASUREMENTS"
-    elif [ $STAGGERED = "TRUE" ]; then
+    elif [ $BHMAS_staggered = "TRUE" ]; then
         __static__AddToInputFile \
-            "mass=0.$MASS"\
+            "mass=0.$BHMAS_mass"\
             "rhmcsteps=$MEASUREMENTS"
     fi
     __static__AddToInputFile \

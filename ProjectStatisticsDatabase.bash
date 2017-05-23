@@ -46,10 +46,10 @@ function projectStatisticsDatabase()
     declare -A HEADER_PRINTF_FORMAT_SPECIFIER_ARRAY=( [nfC]="%+$((${FSNA[nfC]}+1))s" [muC]="%+$((${FSNA[muC]}+1))s" [kC]="%+$((${FSNA[kC]}+1))s" [ntC]="%+$((${FSNA[ntC]}+1))s" [nsC]="%+$((${FSNA[nsC]}+1))s" [betaC]="%+$((${FSNA[betaC]}+1))s" \
                                                            [trajNoC]="%+$((${FSNA[trajNoC]}+1))s" [accRateC]="%+$((${FSNA[accRateC]}+1))s" [accRateLast1KC]="%+$((${FSNA[accRateLast1KC]}+1))s" [maxDsC]="%+$((${FSNA[maxDsC]}+1))s" [statusC]="%+$((${FSNA[statusC]}+1))s" [lastTrajC]="%+$((${FSNA[lastTrajC]}+1))s" )
 
-    [ $WILSON = "TRUE" ] && MASS_PARAMETER="kappa"
-    [ $STAGGERED = "TRUE" ] && MASS_PARAMETER="mass"
+    [ $BHMAS_wilson = "TRUE" ] && MASS_PARAMETER="kappa"
+    [ $BHMAS_staggered = "TRUE" ] && MASS_PARAMETER="mass"
 
-    declare -A HEADER_PRINTF_PARAMETER_ARRAY=( [nfC]="nf" [muC]=$CHEMPOT_PREFIX [kC]=$MASS_PARAMETER [ntC]=$NTIME_PREFIX [nsC]=$NSPACE_PREFIX [betaC]="beta_chain_type" [trajNoC]="trajNo" \
+    declare -A HEADER_PRINTF_PARAMETER_ARRAY=( [nfC]="nf" [muC]=$BHMAS_chempotPrefix [kC]=$MASS_PARAMETER [ntC]=$BHMAS_ntimePrefix [nsC]=$BHMAS_nspacePrefix [betaC]="beta_chain_type" [trajNoC]="trajNo" \
                                                     [accRateC]="acc" [accRateLast1KC]="accLast1K" [maxDsC]="maxDS" [statusC]="status" [lastTrajC]="l.T.[s]" )
 
     declare -a NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=()
@@ -126,7 +126,7 @@ function projectStatisticsDatabase()
             [[ $VALUE != "-l" ]] && [[ $VALUE != "--local" ]] && NEW_OPTIONS+=($VALUE)
         done && unset -v 'VALUE'
         ReadParametersFromPathAndSetRelatedVariables $(pwd)
-        set -- ${NEW_OPTIONS[@]:-} "--mu" "$CHEMPOT" "--$MASS_PARAMETER" "$MASS" "--nt" "$NTIME" "--ns" "$NSPACE"
+        set -- ${NEW_OPTIONS[@]:-} "--mu" "$BHMAS_chempot" "--$MASS_PARAMETER" "$BHMAS_mass" "--nt" "$BHMAS_ntime" "--ns" "$BHMAS_nspace"
     fi
 
     while [ $# -gt 0 ]; do
@@ -560,7 +560,7 @@ function projectStatisticsDatabase()
         done
         NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN=$((NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN+${FSNA[trajNoC]}+1))
         STATISTICS_PRINTF_FORMAT_SPECIFIER_STRING="%${NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN}s\n"
-        LENGTH_OF_HEADER_SEPERATOR=$(($LENGTH_OF_HEADER_SEPERATOR+${FSNA[nfC]}+1-${#NFLAVOUR_PREFIX})) #Add dynamicly to symmetrize the line under the header (the +1 is the space that is at the beginning of the line)
+        LENGTH_OF_HEADER_SEPERATOR=$(($LENGTH_OF_HEADER_SEPERATOR+${FSNA[nfC]}+1-${#BHMAS_nflavourPrefix})) #Add dynamicly to symmetrize the line under the header (the +1 is the space that is at the beginning of the line)
         #STRIPPING OF THE LAST | SYMBOL FROM THE STRING
         NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL="${NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL%|}"
         NAME_OF_COLUMN_NR_OF_COLUMN_STRING="${NAME_OF_COLUMN_NR_OF_COLUMN_STRING%|})"
@@ -741,8 +741,8 @@ function projectStatisticsDatabase()
         rm -f $TEMPORARY_DATABASE_FILE
 
         REGEX_STRING=".*/"
-        for i in ${!PARAMETER_PREFIXES[@]}; do
-            REGEX_STRING=$REGEX_STRING${PARAMETER_PREFIXES[$i]}${PARAMETER_REGEXES[$i]}/
+        for i in ${!BHMAS_parameterPrefixes[@]}; do
+            REGEX_STRING=$REGEX_STRING${BHMAS_parameterPrefixes[$i]}${BHMAS_parameterRegexes[$i]}/
         done
         REGEX_STRING=${REGEX_STRING%/}
 
@@ -787,7 +787,7 @@ function projectStatisticsDatabase()
                     sed -r 's/(\x1B\[[0-9]{1,2};[0-9]{0,2};[0-9]{0,3}m)(.)/\1 \2/g' | \
                     sed -r 's/(.)(\x1B\[.{1,2};.{1,2}m)/\1 \2/g' | \
                     sed -r 's/(\x1B\[.{1,2};.{1,2}m)(.)/\1 \2/g' |
-                    awk --posix -v nf=${PARAMS[0]#$NFLAVOUR_PREFIX*} -v mu=${PARAMS[1]#$CHEMPOT_PREFIX*} -v k=${PARAMS[2]#$MASS_PREFIX*} -v nt=${PARAMS[3]#$NTIME_PREFIX*} -v ns=${PARAMS[4]#*$NSPACE_PREFIX} '
+                    awk --posix -v nf=${PARAMS[0]#$BHMAS_nflavourPrefix*} -v mu=${PARAMS[1]#$BHMAS_chempotPrefix*} -v k=${PARAMS[2]#$BHMAS_massPrefix*} -v nt=${PARAMS[3]#$BHMAS_ntimePrefix*} -v ns=${PARAMS[4]#*$BHMAS_nspacePrefix} '
                             $3 ~ /^[0-9]\.[0-9]{4}/{
                             print "\033[36m " nf " \033[36m " mu " \033[36m " k " \033[36m " nt " \033[36m " ns " " $(3-1) " " $3 " " $(5-1) " " $5 " " $(8-1) " " $8 " " $(11-1) " " $(11) " " $(18-1) " " $(18) " " $(15-1) " " $15 " " $(21-1) " " $21 " " "\033[0m"
                             }
@@ -1080,7 +1080,7 @@ function __static__DisplayDatabaseFile()
         LENGTH_OF_HEADER_SEPERATOR=$(($LENGTH_OF_HEADER_SEPERATOR+${FSNA[$NAME_OF_COLUMN]}+1))
     done
 
-    LENGTH_OF_HEADER_SEPERATOR=$(($LENGTH_OF_HEADER_SEPERATOR+${FSNA[muC]}+1-${#CHEMPOT_PREFIX})) #Add dynamicly to simmetrize the line under the header (the +1 is the space that is at the beginning of the line)
+    LENGTH_OF_HEADER_SEPERATOR=$(($LENGTH_OF_HEADER_SEPERATOR+${FSNA[muC]}+1-${#BHMAS_chempotPrefix})) #Add dynamicly to simmetrize the line under the header (the +1 is the space that is at the beginning of the line)
     #STRIPPING OF THE LAST | SYMBOL FROM THE STRING
     NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL="${NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL%|}"
     NAME_OF_COLUMN_NR_OF_COLUMN_STRING="${NAME_OF_COLUMN_NR_OF_COLUMN_STRING%|}"

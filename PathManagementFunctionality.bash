@@ -1,7 +1,7 @@
 function CheckWilsonStaggeredVariables()
 {
-    if [ "$WILSON" == "$STAGGERED" ]; then
-        cecho lr "\n The variables " emph "WILSON" " and " emph "STAGGERED"\
+    if [ "$BHMAS_wilson" == "$BHMAS_staggered" ]; then
+        cecho lr "\n The variables " emph "BHMAS_wilson" " and " emph "BHMAS_staggered"\
               " are both set to the same value (please check the position from where the script was run)! Aborting...\n"
         exit -1
     fi
@@ -9,8 +9,8 @@ function CheckWilsonStaggeredVariables()
 
 function __static__CheckPrefixExistence()
 {
-    if [[ -z "${PARAMETER_VARIABLE_NAMES[$1]:+x}" ]]; then
-        cecho lr "\n Accessing " emph "PARAMETER_VARIABLE_NAMES" " array with not existing prefix " emph "$1" "! Aborting...\n"
+    if [[ -z "${BHMAS_parameterVariableNames[$1]:+x}" ]]; then
+        cecho lr "\n Accessing " emph "BHMAS_parameterVariableNames" " array with not existing prefix " emph "$1" "! Aborting...\n"
         exit -1
     fi
 }
@@ -21,7 +21,7 @@ function __static__IsAnyParameterUnsetAmong()
     local prefix
     for prefix in "$@"; do
         __static__CheckPrefixExistence "$prefix"
-        if [ -z "${!PARAMETER_VARIABLE_NAMES[$prefix]:+x}" ]; then
+        if [ -z "${!BHMAS_parameterVariableNames[$prefix]:+x}" ]; then
             return 0
         fi
     done
@@ -53,7 +53,7 @@ function __static__GetParametersString()
     local prefix resultingString
     resultingString=''
     for prefix in "$@"; do
-        resultingString+="${prefix}${!PARAMETER_VARIABLE_NAMES[$prefix]}_"
+        resultingString+="${prefix}${!BHMAS_parameterVariableNames[$prefix]}_"
     done
     printf "${resultingString%?}" #Remove last underscore
 }
@@ -64,16 +64,16 @@ function __static__GetParametersPath()
     __static__CheckNoArguments "$FUNCNAME" $#
     __static__CheckUnsetParameters "$FUNCNAME" "$@"
     local prefix resultingPath
-    resultingPath=$(__static__GetParametersString "${PARAMETER_PREFIXES[@]}")
+    resultingPath=$(__static__GetParametersString "${BHMAS_parameterPrefixes[@]}")
     printf "/${resultingPath//_/\/}"
 }
 
-#This function set the global variables PARAMETERS_PATH and PARAMETERS_STRING after having checked that the parameters have been extracted
+#This function set the global variables BHMAS_parametersPath and BHMAS_parametersString after having checked that the parameters have been extracted
 function __static__SetParametersPathAndString()
 {
     __static__CheckUnsetParameters "$FUNCNAME" "$@"
-    readonly PARAMETERS_STRING="$(__static__GetParametersString "${PARAMETER_PREFIXES[@]}")"
-    readonly PARAMETERS_PATH="$(__static__GetParametersPath "${PARAMETER_PREFIXES[@]}")"
+    readonly BHMAS_parametersString="$(__static__GetParametersString "${BHMAS_parameterPrefixes[@]}")"
+    readonly BHMAS_parametersPath="$(__static__GetParametersPath "${BHMAS_parameterPrefixes[@]}")"
 }
 
 #This function takes the path to be used as first argument and the prefix of the parameters to be extracted as second argument
@@ -94,7 +94,7 @@ function __static__ReadSingleParameterFromPath()
             exit -1 ;;
         1)
             pieceOfPathWithParameter="$(grep -o "/${prefixToBeUsed}[^/]*" <<< "$pathToBeSearchedIn")"
-            declare -gr ${PARAMETER_VARIABLE_NAMES["$prefixToBeUsed"]}="${pieceOfPathWithParameter##*$prefixToBeUsed}"
+            declare -gr ${BHMAS_parameterVariableNames["$prefixToBeUsed"]}="${pieceOfPathWithParameter##*$prefixToBeUsed}"
             ;;
         *)
             cecho lr "\n Prefix " emph "$prefixToBeUsed" " found several times in path " dir "$1" ". Aborting...\n"
@@ -111,8 +111,8 @@ function __static__CheckParametersExtractedFromPath()
     __static__CheckUnsetParameters "$FUNCNAME" "$@"
     local prefix value variableName variableRegex
     for prefix in "$@"; do
-        variableName="${PARAMETER_VARIABLE_NAMES[$prefix]}"
-        variableRegex="${variableName}_REGEX"
+        variableName="${BHMAS_parameterVariableNames[$prefix]}"
+        variableRegex="${variableName}Regex"
         variableName+="[@]" #See NOTE above
         for value in ${!variableName}; do
             if [[ ! $value =~ ^${!variableRegex//\\/}$ ]]; then
@@ -126,13 +126,13 @@ function __static__CheckParametersExtractedFromPath()
 function ReadParametersFromPathAndSetRelatedVariables()
 {
     __static__CheckNoArguments "$FUNCNAME" $#
-    for prefix in "${PARAMETER_PREFIXES[@]}"; do
+    for prefix in "${BHMAS_parameterPrefixes[@]}"; do
         __static__ReadSingleParameterFromPath "$1" "$prefix"
     done
-    __static__CheckParametersExtractedFromPath "${PARAMETER_PREFIXES[@]}"
+    __static__CheckParametersExtractedFromPath "${BHMAS_parameterPrefixes[@]}"
     __static__SetParametersPathAndString
-    if [ -z "${PARAMETERS_STRING:+x}" ] || [ -z "${PARAMETERS_PATH:+x}" ]; then
-        cecho lr "\n Either " emph "PARAMETERS_STRING" " or " emph "PARAMETERS_PATH" " unset or empty! Aborting...\n"
+    if [ -z "${BHMAS_parametersString:+x}" ] || [ -z "${BHMAS_parametersPath:+x}" ]; then
+        cecho lr "\n Either " emph "BHMAS_parametersString" " or " emph "BHMAS_parametersPath" " unset or empty! Aborting...\n"
         exit -1
     fi
 }

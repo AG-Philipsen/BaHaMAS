@@ -106,7 +106,7 @@ function ReadBetaValuesFromFile()
 
         #Modify the content of BETAVALUES[@] from x.xxxx to x.xxxx_syyyy in order to use this new label in the associative arrays everyehere!
         for INDEX in "${!BETAVALUES[@]}"; do
-            BETAVALUES[$INDEX]="${BETAVALUES[$INDEX]}_s${SEED_ARRAY_TEMP[$INDEX]}$BETA_POSTFIX"
+            BETAVALUES[$INDEX]="${BETAVALUES[$INDEX]}_s${SEED_ARRAY_TEMP[$INDEX]}$BHMAS_betaPostfix"
         done
     fi
 
@@ -185,25 +185,25 @@ function ReadBetaValuesFromFile()
     #If we are not in the continue scenario (and not in other script use cases), look for the correct configuration to start from and set the global path
     if [ $CONTINUE = "FALSE" ] && [ $CLEAN_OUTPUT_FILES = "FALSE" ] && [ $INVERT_CONFIGURATIONS = "FALSE" ] && [ $ACCRATE_REPORT = "FALSE" ]; then
         for BETA in "${BETAVALUES[@]}"; do
-            if [ "$BETA_POSTFIX" == "" ]; then #Old nomenclature case: no beta postfix!
-                local FOUND_CONFIGURATIONS=( $(ls $THERM_CONFS_GLOBALPATH | grep "^conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA}.*") )
+            if [ "$BHMAS_betaPostfix" == "" ]; then #Old nomenclature case: no beta postfix!
+                local FOUND_CONFIGURATIONS=( $(ls $THERM_CONFS_GLOBALPATH | grep "^conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA}.*") )
                 if [ ${#FOUND_CONFIGURATIONS[@]} -eq 0 ]; then
                     STARTCONFIGURATION_GLOBALPATH[$BETA]="notFoundHenceStartFromHot"
                 elif [ ${#FOUND_CONFIGURATIONS[@]} -eq 1 ]; then
                     STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERM_CONFS_GLOBALPATH}/${FOUND_CONFIGURATIONS[0]}"
                 else
                     cecho lr "\n No valid starting configuration found for " emph "beta = ${BETA}" " in " dir "$THERM_CONFS_GLOBALPATH" "\n"\
-                          " More than 1 configuration matches " file "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA}.*" "! Aborting...\n"
+                          " More than 1 configuration matches " file "conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA}.*" "! Aborting...\n"
                     exit -1
                 fi
-            elif [ $BETA_POSTFIX == "_continueWithNewChain" ]; then
-                local FOUND_CONFIGURATIONS=( $(ls $THERM_CONFS_GLOBALPATH | grep "^conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%_*}_fromConf[[:digit:]]\+.*") )
+            elif [ $BHMAS_betaPostfix == "_continueWithNewChain" ]; then
+                local FOUND_CONFIGURATIONS=( $(ls $THERM_CONFS_GLOBALPATH | grep "^conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA%_*}_fromConf[[:digit:]]\+.*") )
                 if [ ${#FOUND_CONFIGURATIONS[@]} -eq 0 ]; then
                     cecho -n ly B "\n " U "WARNING" uU ":" uB " No valid starting configuration found for " emph "beta = ${BETA%_*}" "\n"\
                           "          in " dir "$THERM_CONFS_GLOBALPATH" ".\n"\
                           "          Looking for configuration with not exactely the same seed,\n"\
-                          "          matching " file "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%%_*}_${SEED_PREFIX}${SEED_REGEX}_fromConf[[:digit:]]\+.*"
-                    FOUND_CONFIGURATIONS=( $(ls $THERM_CONFS_GLOBALPATH | grep "^conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%%_*}_${SEED_PREFIX}${SEED_REGEX}_fromConf[[:digit:]]\+.*") )
+                          "          matching " file "conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA%%_*}_${BHMAS_seedPrefix}${BHMAS_seedRegex}_fromConf[[:digit:]]\+.*"
+                    FOUND_CONFIGURATIONS=( $(ls $THERM_CONFS_GLOBALPATH | grep "^conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA%%_*}_${BHMAS_seedPrefix}${BHMAS_seedRegex}_fromConf[[:digit:]]\+.*") )
                     if [ ${#FOUND_CONFIGURATIONS[@]} -eq 0 ]; then
                         cecho lr " none found! Aborting...\n"
                         exit -1
@@ -239,16 +239,16 @@ function ReadBetaValuesFromFile()
                     cecho "" #Restore also default color
                     STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERM_CONFS_GLOBALPATH}/$CONFIGURATION_CHOSEN_BY_USER"
                 fi
-            elif [ $BETA_POSTFIX == "_thermalizeFromConf" ]; then
-                if [ $(ls $THERM_CONFS_GLOBALPATH | grep "^conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA%_*}_fromConf[[:digit:]]\+.*" | wc -l) -ne 0 ]; then
+            elif [ $BHMAS_betaPostfix == "_thermalizeFromConf" ]; then
+                if [ $(ls $THERM_CONFS_GLOBALPATH | grep "^conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA%_*}_fromConf[[:digit:]]\+.*" | wc -l) -ne 0 ]; then
                     cecho lr "\n It seems that there is already a thermalized configuration for " emph "beta = ${BETA%_*}" " in " dir "$THERM_CONFS_GLOBALPATH" "! Aborting...\n"
                     exit -1
                 fi
-                local FOUND_CONFIGURATIONS=( $(ls $THERM_CONFS_GLOBALPATH | grep "^conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA_REGEX}_${SEED_PREFIX}${SEED_REGEX}_fromHot[[:digit:]]\+.*") )
-                #Here a 0 length of FOUND_CONFIGURATIONS is not checked since we rely on the fact that if this was the case we would have $BETA_POSTFIX == "_thermalizeFromHot" as set in JobHandler.bash (Thermalize case)
+                local FOUND_CONFIGURATIONS=( $(ls $THERM_CONFS_GLOBALPATH | grep "^conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${BHMAS_betaRegex}_${BHMAS_seedPrefix}${BHMAS_seedRegex}_fromHot[[:digit:]]\+.*") )
+                #Here a 0 length of FOUND_CONFIGURATIONS is not checked since we rely on the fact that if this was the case we would have $BHMAS_betaPostfix == "_thermalizeFromHot" as set in JobHandler.bash (Thermalize case)
                 declare -A FOUND_CONFIGURATIONS_WITH_BETA_AS_KEY
                 for CONFNAME in "${FOUND_CONFIGURATIONS[@]}"; do
-                    local BETAVALUE_RECOVERED_FROM_NAME=$(awk '{split($1, res, "_fromHot"); print res[1]}' <<< "$CONFNAME" | sed 's/.*\('${BETA_REGEX}'\).*/\1/')
+                    local BETAVALUE_RECOVERED_FROM_NAME=$(awk '{split($1, res, "_fromHot"); print res[1]}' <<< "$CONFNAME" | sed 's/.*\('${BHMAS_betaRegex}'\).*/\1/')
                     FOUND_CONFIGURATIONS_WITH_BETA_AS_KEY["$BETAVALUE_RECOVERED_FROM_NAME"]=$CONFNAME
                 done
                 local CLOSEST_BETA=$(FindValueOfClosestElementInArrayToGivenValue ${BETA%%_*} "${!FOUND_CONFIGURATIONS_WITH_BETA_AS_KEY[@]}")
@@ -257,10 +257,10 @@ function ReadBetaValuesFromFile()
                     exit -1
                 fi
                 STARTCONFIGURATION_GLOBALPATH[$BETA]="${THERM_CONFS_GLOBALPATH}/${FOUND_CONFIGURATIONS_WITH_BETA_AS_KEY[$CLOSEST_BETA]}"
-            elif [ $BETA_POSTFIX == "_thermalizeFromHot" ]; then
+            elif [ $BHMAS_betaPostfix == "_thermalizeFromHot" ]; then
                 STARTCONFIGURATION_GLOBALPATH[$BETA]="notFoundHenceStartFromHot"
             else
-                cecho lr "\n Something really strange happened! BETA_POSTFIX set to unknown value " emph "BETA_POSTFIX = $BETA_POSTFIX" "! Aborting...\n"
+                cecho lr "\n Something really strange happened! BHMAS_betaPostfix set to unknown value " emph "BHMAS_betaPostfix = $BHMAS_betaPostfix" "! Aborting...\n"
                 exit -1
             fi
         done

@@ -18,7 +18,7 @@ function ProduceInputFileAndJobScriptForEachBeta_SLURM()
     local BETAVALUES_COPY=(${BETAVALUES[@]})
     #---------------------------------------------------------------------------------------------------------------------#
     for INDEX in "${!BETAVALUES_COPY[@]}"; do
-        local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$INDEX]}"
+        local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BHMAS_betaPrefix${BETAVALUES_COPY[$INDEX]}"
         if [ -d "$HOME_BETADIRECTORY" ]; then
             if [ $(ls $HOME_BETADIRECTORY | wc -l) -gt 0 ]; then
                 cecho lr "\n There are already files in " dir "$HOME_BETADIRECTORY" ".\n The value " emph "beta = ${BETAVALUES_COPY[$INDEX]}" " will be skipped!\n"
@@ -32,8 +32,8 @@ function ProduceInputFileAndJobScriptForEachBeta_SLURM()
     BETAVALUES_COPY=(${BETAVALUES_COPY[@]})
     #If the previous for loop went through, we create the beta folders (just to avoid to create some folders and then abort)
     for INDEX in "${!BETAVALUES_COPY[@]}"; do
-        local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$INDEX]}"
-        cecho -n lb " Creating directory " dir "$BETA_PREFIX${BETAVALUES_COPY[$INDEX]}" "..."
+        local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BHMAS_betaPrefix${BETAVALUES_COPY[$INDEX]}"
+        cecho -n lb " Creating directory " dir "$BHMAS_betaPrefix${BETAVALUES_COPY[$INDEX]}" "..."
         mkdir $HOME_BETADIRECTORY || exit -2
         cecho lg " done!"
         cecho lc "   Configuration used: " file "${STARTCONFIGURATION_GLOBALPATH[${BETAVALUES_COPY[$INDEX]}]}"
@@ -54,7 +54,7 @@ function ProcessBetaValuesForSubmitOnly_SLURM()
     local BETAVALUES_COPY=(${BETAVALUES[@]})
     #-----------------------------------------#
     for BETA in "${!BETAVALUES_COPY[@]}"; do
-        local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX${BETAVALUES_COPY[$BETA]}"
+        local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BHMAS_betaPrefix${BETAVALUES_COPY[$BETA]}"
         local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$INPUT_FILENAME"
         if [ ! -d $HOME_BETADIRECTORY ]; then
             cecho lr "\n The directory " dir "$HOME_BETADIRECTORY" " does not exist! \n The value " emph "beta = ${BETAVALUES_COPY[$BETA]}" " will be skipped!\n"
@@ -90,7 +90,7 @@ function __static__GetStatusOfJobsContainingBetavalues_SLURM()
     local JOBINFO_STRING="$(squeue --noheader -u $(whoami) -o "%i@%j@%T")"
     for BETA in ${BETAVALUES[@]}; do
         # in sed !d deletes the non matching entries -> here we keep jobs with desired beta, seed and parameters
-        STATUS_OF_JOBS_CONTAINING_BETA_VALUES["$BETA"]="$(sed '/'$BETA_PREFIX${BETA%%_*}'/!d; /'$(cut -d'_' -f2 <<< "$BETA")'/!d; /'$PARAMETERS_STRING'/!d' <<< "$JOBINFO_STRING")"
+        STATUS_OF_JOBS_CONTAINING_BETA_VALUES["$BETA"]="$(sed '/'$BHMAS_betaPrefix${BETA%%_*}'/!d; /'$(cut -d'_' -f2 <<< "$BETA")'/!d; /'$BHMAS_parametersString'/!d' <<< "$JOBINFO_STRING")"
     done
 }
 
@@ -181,8 +181,8 @@ function ProcessBetaValuesForContinue_SLURM()
 
     for BETA in ${BETAVALUES[@]}; do
         #-------------------------------------------------------------------------#
-        local WORK_BETADIRECTORY="$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
-        local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
+        local WORK_BETADIRECTORY="$WORK_DIR_WITH_BETAFOLDERS/$BHMAS_betaPrefix$BETA"
+        local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BHMAS_betaPrefix$BETA"
         local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$INPUT_FILENAME"
         local OUTPUTFILE_GLOBALPATH="${WORK_BETADIRECTORY}/$OUTPUT_FILENAME"
         #-------------------------------------------------------------------------#
@@ -338,9 +338,9 @@ function ProcessBetaValuesForContinue_SLURM()
             cecho "measure_pbp=$MEASURE_PBP_VALUE_FOR_INPUTFILE\n"\
                   "sourcetype=volume\n"\
                   "sourcecontent=gaussian" >> $INPUTFILE_GLOBALPATH
-            if [ $WILSON = "TRUE" ]; then
+            if [ $BHMAS_wilson = "TRUE" ]; then
                 cecho "num_sources=16" >> $INPUTFILE_GLOBALPATH
-            elif [ $STAGGERED = "TRUE" ]; then
+            elif [ $BHMAS_staggered = "TRUE" ]; then
                 cecho "num_sources=1\n"\
                       "pbp_measurements=8\n"\
                       "ferm_obs_to_single_file=1\n"\
@@ -349,7 +349,7 @@ function ProcessBetaValuesForContinue_SLURM()
             cecho wg " Added options " emph "measure_pbp=$MEASURE_PBP_VALUE_FOR_INPUTFILE" "\n"\
                   emph "               sourcetype=volume" "\n"\
                   emph "               sourcecontent=gaussian"
-            if [ $WILSON = "TRUE" ]; then
+            if [ $BHMAS_wilson = "TRUE" ]; then
                 cecho -n wg emph "               num_sources=16"
             else
                 cecho -n wg emph "               num_sources=1\n"\
@@ -364,7 +364,7 @@ function ProcessBetaValuesForContinue_SLURM()
             cecho wg " Set option " emph "measure_pbp=$MEASURE_PBP_VALUE_FOR_INPUTFILE" " into the " file "${INPUTFILE_GLOBALPATH#$(pwd)/}" " file."
         fi
 
-        if [ $WILSON = "TRUE" ]; then
+        if [ $BHMAS_wilson = "TRUE" ]; then
             #If the option MP=() is given in the betasfile we have to do some work on the INPUTFILE to check if it was already given or not and act accordingly
             if KeyInArray $BETA MASS_PRECONDITIONING_ARRAY; then
                 case $(grep -o "use_mp" $INPUTFILE_GLOBALPATH | wc -l) in
@@ -466,8 +466,8 @@ function ProcessBetaValuesForContinue_SLURM()
             if [ $(grep -o "[[:digit:]]\+" <<< "$NAME_LAST_CONFIGURATION" | wc -l) -ne 0 ]; then
                 local NUMBER_DONE_TRAJECTORIES=$(grep -o "[[:digit:]]\+" <<< "$NAME_LAST_CONFIGURATION" | sed 's/^0*//g')
             else
-                local STDOUTPUT_FILE=`ls -lt $BETA_PREFIX$BETA | awk -v filename="$HMC_FILENAME" 'BEGIN{regexp="^"filename".[[:digit:]]+.out$"}{if($9 ~ regexp){print $9}}' | head -n1`
-                local STDOUTPUT_GLOBALPATH="$HOME_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA/$STDOUTPUT_FILE"
+                local STDOUTPUT_FILE=`ls -lt $BHMAS_betaPrefix$BETA | awk -v filename="$HMC_FILENAME" 'BEGIN{regexp="^"filename".[[:digit:]]+.out$"}{if($9 ~ regexp){print $9}}' | head -n1`
+                local STDOUTPUT_GLOBALPATH="$HOME_DIR_WITH_BETAFOLDERS/$BHMAS_betaPrefix$BETA/$STDOUTPUT_FILE"
                 if [ -f $STDOUTPUT_GLOBALPATH ] && [ $(grep "writing gaugefield at tr. [[:digit:]]\+" $STDOUTPUT_GLOBALPATH | wc -l) -ne 0 ]; then
                     local NUMBER_DONE_TRAJECTORIES=$(grep -o "writing gaugefield at tr. [[:digit:]]\+" $STDOUTPUT_GLOBALPATH | grep -o "[[:digit:]]\+" | tail -n1)
                     #If the simulation was resumed from a previous configuration, here NUMBER_DONE_TRAJECTORIES is wrong, correct it.
@@ -591,7 +591,7 @@ function ProcessBetaValuesForInversion_SLURM()
 
     for BETA in ${BETAVALUES[@]}; do
         #-------------------------------------------------------------------------#
-        local WORK_BETADIRECTORY="$WORK_DIR_WITH_BETAFOLDERS/$BETA_PREFIX$BETA"
+        local WORK_BETADIRECTORY="$WORK_DIR_WITH_BETAFOLDERS/$BHMAS_betaPrefix$BETA"
         local NUMBER_OF_CONF_IN_BETADIRECTORY=$(find $WORK_BETADIRECTORY -regex "$WORK_BETADIRECTORY/conf[.][0-9]*" | wc -l)
         local NUMBER_OF_TOTAL_CORRELATORS=$(($NUMBER_OF_CONF_IN_BETADIRECTORY * $NUMBER_SOURCES_FOR_CORRELATORS))
         local NUMBER_OF_EXISTING_CORRELATORS=$(find $WORK_BETADIRECTORY -regextype posix-extended -regex "$WORK_BETADIRECTORY/conf[.][0-9]*(_[0-9]+){4}_corr" | wc -l)
@@ -633,9 +633,9 @@ function SubmitJobsForValidBetaValues_SLURM()
 
         for BETA in ${SUBMIT_BETA_ARRAY[@]}; do
             if [ $USE_MULTIPLE_CHAINS == "FALSE" ]; then
-                local PREFIX_TO_BE_GREPPED_FOR="$BETA_PREFIX"
+                local PREFIX_TO_BE_GREPPED_FOR="$BHMAS_betaPrefix"
             else
-                local PREFIX_TO_BE_GREPPED_FOR="$SEED_PREFIX"
+                local PREFIX_TO_BE_GREPPED_FOR="$BHMAS_seedPrefix"
             fi
             local TEMP_ARRAY=( $(sed 's/_/ /g' <<< "$BETA") )
             if [ $(grep -o "${PREFIX_TO_BE_GREPPED_FOR}\([[:digit:]][.]\)\?[[:alnum:]]\{4\}" <<< "$BETA" | wc -l) -ne $GPU_PER_NODE ]; then
@@ -687,7 +687,7 @@ function __static__PackBetaValuesPerGpuAndCreateJobScriptFiles()
         BETAVALUES_ARRAY_TO_BE_SPLIT=(${BETAVALUES_ARRAY_TO_BE_SPLIT[@]:$GPU_PER_NODE})
         cecho -n "   ->"
         for BETA in "${BETA_FOR_JOBSCRIPT[@]}"; do
-            cecho -n "    ${BETA_PREFIX}${BETA%_*}"
+            cecho -n "    ${BHMAS_betaPrefix}${BETA%_*}"
         done
         cecho ""
         local BETAS_STRING="$(__static__GetJobBetasStringUsing ${BETA_FOR_JOBSCRIPT[@]})"
@@ -738,7 +738,7 @@ function __static__GetJobBetasStringUsing()
     for BETA in "${BETAVALUES_TO_BE_USED[@]}"; do
         BETA=${BETA%%_*}
         if KeyInArray $BETA BETAS_WITH_SEED; then
-            BETAS_STRING_TO_BE_RETURNED="${BETAS_STRING_TO_BE_RETURNED}__${BETA_PREFIX}${BETA}${BETAS_WITH_SEED[${BETA}]}"
+            BETAS_STRING_TO_BE_RETURNED="${BETAS_STRING_TO_BE_RETURNED}__${BHMAS_betaPrefix}${BETA}${BETAS_WITH_SEED[${BETA}]}"
             unset 'BETAS_WITH_SEED[${BETA}]'
         fi
     done
@@ -755,14 +755,14 @@ function __static__GetJobScriptName()
     local STRING_WITH_BETAVALUES="$1"
 
     if [ $INVERT_CONFIGURATIONS = "TRUE" ]; then
-        printf "${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}__${STRING_WITH_BETAVALUES}_INV"
+        printf "${JOBSCRIPT_PREFIX}_${BHMAS_parametersString}__${STRING_WITH_BETAVALUES}_INV"
     else
-        if [ "$BETA_POSTFIX" == "_thermalizeFromConf" ]; then
-            printf "${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}__${STRING_WITH_BETAVALUES}_TC"
-        elif [ "$BETA_POSTFIX" == "_thermalizeFromHot" ]; then
-            printf "${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}__${STRING_WITH_BETAVALUES}_TH"
+        if [ "$BHMAS_betaPostfix" == "_thermalizeFromConf" ]; then
+            printf "${JOBSCRIPT_PREFIX}_${BHMAS_parametersString}__${STRING_WITH_BETAVALUES}_TC"
+        elif [ "$BHMAS_betaPostfix" == "_thermalizeFromHot" ]; then
+            printf "${JOBSCRIPT_PREFIX}_${BHMAS_parametersString}__${STRING_WITH_BETAVALUES}_TH"
         else
-            printf "${JOBSCRIPT_PREFIX}_${PARAMETERS_STRING}__${STRING_WITH_BETAVALUES}"
+            printf "${JOBSCRIPT_PREFIX}_${BHMAS_parametersString}__${STRING_WITH_BETAVALUES}"
         fi
     fi
 }

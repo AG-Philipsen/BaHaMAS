@@ -29,7 +29,6 @@ source ${BaHaMAS_repositoryTopLevelPath}/FindClusterScheduler.bash        || exi
 source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParser.bash           || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/AuxiliaryFunctions.bash          || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/AcceptanceRateReport.bash        || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/BuildRegexPath.bash              || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/ProjectStatisticsDatabase.bash   || exit -2
 #------------------------------------------------------------------------------------------------------#
 # User file to be sourced depending on test mode
@@ -74,11 +73,11 @@ CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase
 if [ $CALL_DATABASE = 'FALSE' ]; then
     #Perform all the checks on the path, reading out parameters and testing additional paths
     CheckSingleOccurrenceInPath $(sed 's/\// /g' <<< "$SUBMIT_DISK_GLOBALPATH")\
-                                "${NFLAVOUR_PREFIX}${NFLAVOUR_REGEX}"\
-                                "${CHEMPOT_PREFIX}${CHEMPOT_REGEX}"\
-                                "${MASS_PREFIX}${MASS_REGEX}"\
-                                "${NTIME_PREFIX}${NTIME_REGEX}"\
-                                "${NSPACE_PREFIX}${NSPACE_REGEX}"
+                                "${BHMAS_nflavourPrefix}${BHMAS_nflavourRegex}"\
+                                "${BHMAS_chempotPrefix}${BHMAS_chempotRegex}"\
+                                "${BHMAS_massPrefix}${BHMAS_massRegex}"\
+                                "${BHMAS_ntimePrefix}${BHMAS_ntimeRegex}"\
+                                "${BHMAS_nspacePrefix}${BHMAS_nspaceRegex}"
     ReadParametersFromPathAndSetRelatedVariables $(pwd)
     DeclareBetaFoldersPathsAsGlobalVariables
     CheckBetaFoldersPathsVariables
@@ -117,10 +116,10 @@ elif [ $THERMALIZE = 'TRUE' ] || [ $CONTINUE_THERMALIZATION = 'TRUE' ]; then
     #
     # TODO: If a thermalization from hot is finished but one other crashed and one wishes to resume it, the postfix should be
     #       from Hot but it is from conf since in $THERM_CONFS_GLOBALPATH a conf from hot is found. Think about how to fix this.
-    if [ $(ls $THERM_CONFS_GLOBALPATH | grep "conf.${PARAMETERS_STRING}_${BETA_PREFIX}${BETA_REGEX}_${SEED_PREFIX}${SEED_REGEX}_fromHot[[:digit:]]\+.*" | wc -l) -eq 0 ]; then
-        BETA_POSTFIX="_thermalizeFromHot"
+    if [ $(ls $THERM_CONFS_GLOBALPATH | grep "conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${BHMAS_betaRegex}_${BHMAS_seedPrefix}${BHMAS_seedRegex}_fromHot[[:digit:]]\+.*" | wc -l) -eq 0 ]; then
+        BHMAS_betaPostfix="_thermalizeFromHot"
     else
-        BETA_POSTFIX="_thermalizeFromConf"
+        BHMAS_betaPostfix="_thermalizeFromConf"
     fi
     if [ $MEASURE_PBP = 'TRUE' ]; then
         cecho ly B "\n Measurement of PBP switched off during thermalization!"
@@ -159,7 +158,7 @@ elif [ $ACCRATE_REPORT = 'TRUE' ]; then
 elif [ $CLEAN_OUTPUT_FILES = 'TRUE' ]; then
 
     if [ $SECONDARY_OPTION_ALL = 'TRUE' ]; then
-        BETAVALUES=( $( ls $WORK_DIR_WITH_BETAFOLDERS | grep "^${BETA_PREFIX}${BETA_REGEX}" | awk '{print substr($1,2)}') )
+        BETAVALUES=( $( ls $WORK_DIR_WITH_BETAFOLDERS | grep "^${BHMAS_betaPrefix}${BHMAS_betaRegex}" | awk '{print substr($1,2)}') )
     else
         ReadBetaValuesFromFile
     fi

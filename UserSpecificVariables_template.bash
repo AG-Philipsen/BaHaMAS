@@ -79,8 +79,8 @@ function DeclareUserDefinedGlobalVariables()
 #   The SUBMIT_DISK_GLOBALPATH, RUN_DISK_GLOBALPATH, PROJECT_SUBPATH variables above could be a bit confusing. Basically, they are used to build the global
 #   path of the folders from which the jobs are submitted and run. In particular:
 #
-#       - folder global path from which jobs are submitted:  $SUBMIT_DISK_GLOBALPATH/$PROJECT_SUBPATH/$PARAMETERS_PATH
-#       -       folder global path from which jobs are run:  $RUN_DISK_GLOBALPATH/$PROJECT_SUBPATH/$PARAMETERS_PATH
+#       - folder global path from which jobs are submitted:  $SUBMIT_DISK_GLOBALPATH/$PROJECT_SUBPATH/$BHMAS_parametersPath
+#       -       folder global path from which jobs are run:  $RUN_DISK_GLOBALPATH/$PROJECT_SUBPATH/$BHMAS_parametersPath
 #
-#   where $PARAMETERS_PATH is the folder structure like 'Nf2/muiPiT/k1550/nt6/ns12' or like 'Nf3/mui0/mass0250/nt4/ns8'.
+#   where $BHMAS_parametersPath is the folder structure like 'Nf2/muiPiT/k1550/nt6/ns12' or like 'Nf3/mui0/mass0250/nt4/ns8'.
 #
