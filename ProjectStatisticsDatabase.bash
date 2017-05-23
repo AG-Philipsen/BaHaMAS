@@ -773,7 +773,7 @@ function projectStatisticsDatabase()
                 fi
 
                 if [ -d $line ]; then
-                    cecho lo "\tUpdating: " wg "$line "
+                    cecho -n lo "\tUpdating: " wg "$line "
                     cd $line
                 else
                     cecho lr "\n Directory " dir "$line" " not found, skipped!"
