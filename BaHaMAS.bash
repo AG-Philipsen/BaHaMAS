@@ -42,11 +42,11 @@ set -euo pipefail
 #Declare all variables (color user decisions for output needed from very beginning)
 DeclareOutputRelatedGlobalVariables
 DeclarePathRelatedGlobalVariables
-CheckWilsonStaggeredVariables
 if [ -n "${BaHaMAS_testModeOn:+x}" ] && [ ${BaHaMAS_testModeOn} = 'TRUE' ]; then
     DeclareUserDefinedGlobalVariablesForTests
 else
-    DeclareUserDefinedGlobalVariables
+    #Here be more friendly with user (no unbound errors, he could type wrong)
+    set +u; DeclareUserDefinedGlobalVariables; set -u
 fi
 DeclareBaHaMASGlobalVariables
 
@@ -61,6 +61,7 @@ fi
 
 #Do some checks on system and variables, parse user option and do some more checks
 CheckSystemRequirements
+CheckWilsonStaggeredVariables
 CheckUserDefinedVariablesAndDefineDependentAdditionalVariables
 ParseCommandLineOption "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}"
 CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase

@@ -64,6 +64,18 @@ function __static__AddOptionToHelper()
     done
 }
 
+function __static__PrintDefault()
+{
+    if [ "${1:-}" = '' ]; then
+        cecho -n -d o 'unset' $helperColor
+    else
+        #The ' \e[1D' insert a space and then moves back the cursor by one column.
+        #This is a hack to avoid not to have $1 printed in case it matches a color
+        #option of cecho. TODO: Think about better way!
+        cecho -n -d $helperColor " \e[1D$1"
+    fi
+}
+
 function PrintHelper()
 {
     local helperColor normalColor mutuallyExclusiveColor
@@ -71,26 +83,26 @@ function PrintHelper()
     cecho -d $helperColor
     cecho -d " Call " B "BaHaMAS" uB " with the following optional arguments:" "\n"
     __static__AddOptionToHelper "-h | --help"                      ""
-    __static__AddOptionToHelper "--jobscript_prefix"               "default value = $JOBSCRIPT_PREFIX"
-    __static__AddOptionToHelper "--chempot_prefix"                 "default value = $CHEMPOT_PREFIX"
-    __static__AddOptionToHelper "--mass_prefix"                    "default value = $MASS_PREFIX"
-    __static__AddOptionToHelper "--ntime_prefix"                   "default value = $NTIME_PREFIX"
-    __static__AddOptionToHelper "--nspace_prefix"                  "default value = $NSPACE_PREFIX"
-    __static__AddOptionToHelper "--beta_prefix"                    "default value = $BETA_PREFIX"
-    __static__AddOptionToHelper "--betasfile"                      "default value = $BETASFILE"
-    __static__AddOptionToHelper "-m | --measurements"              "default value = $MEASUREMENTS"
-    __static__AddOptionToHelper "-f | --confSaveFrequency"         "default value = $NSAVE"
-    __static__AddOptionToHelper "-F | --confSavePointFrequency"    "default value = $NSAVEPOINT"
-    __static__AddOptionToHelper "--intsteps0"                      "default value = $INTSTEPS0"
-    __static__AddOptionToHelper "--intsteps1"                      "default value = $INTSTEPS1"
-    __static__AddOptionToHelper "--cgbs"                           "default value = $CGBS (cg_iteration_block_size)"
+    __static__AddOptionToHelper "--jobscript_prefix"               "default value = $(__static__PrintDefault ${JOBSCRIPT_PREFIX:-})"
+    __static__AddOptionToHelper "--chempot_prefix"                 "default value = $(__static__PrintDefault ${CHEMPOT_PREFIX:-})"
+    __static__AddOptionToHelper "--mass_prefix"                    "default value = $(__static__PrintDefault ${MASS_PREFIX:-})"
+    __static__AddOptionToHelper "--ntime_prefix"                   "default value = $(__static__PrintDefault ${NTIME_PREFIX:-})"
+    __static__AddOptionToHelper "--nspace_prefix"                  "default value = $(__static__PrintDefault ${NSPACE_PREFIX:-})"
+    __static__AddOptionToHelper "--beta_prefix"                    "default value = $(__static__PrintDefault ${BETA_PREFIX:-})"
+    __static__AddOptionToHelper "--betasfile"                      "default value = $(__static__PrintDefault ${BETASFILE:-})"
+    __static__AddOptionToHelper "-m | --measurements"              "default value = $(__static__PrintDefault ${MEASUREMENTS:-})"
+    __static__AddOptionToHelper "-f | --confSaveFrequency"         "default value = $(__static__PrintDefault ${NSAVE:-})"
+    __static__AddOptionToHelper "-F | --confSavePointFrequency"    "default value = $(__static__PrintDefault ${NSAVEPOINT:-})"
+    __static__AddOptionToHelper "--intsteps0"                      "default value = $(__static__PrintDefault ${INTSTEPS0:-})"
+    __static__AddOptionToHelper "--intsteps1"                      "default value = $(__static__PrintDefault ${INTSTEPS1:-})"
+    __static__AddOptionToHelper "--cgbs"                           "default value = $(__static__PrintDefault ${CGBS:-}) (cg_iteration_block_size)"
     __static__AddOptionToHelper "--doNotUseMultipleChains"         "multiple chain usage and nomenclature are disabled"\
                                 "(in the betas file the seed column is NOT present)"
     __static__AddOptionToHelper "-p | --doNotMeasurePbp"     "the chiral condensate measurement is switched off"
-    __static__AddOptionToHelper "-w | --walltime"            "default value = $WALLTIME [days-hours:min:sec]"
-    __static__AddOptionToHelper "--partition"                "default value = '$CLUSTER_PARTITION'"
-    __static__AddOptionToHelper "--constraint"               "default value = '$CLUSTER_CONSTRAINT'"
-    __static__AddOptionToHelper "--node"                     "default value = '$CLUSTER_NODE'"
+    __static__AddOptionToHelper "-w | --walltime"            "default value = $(__static__PrintDefault ${WALLTIME:-}) [days-hours:min:sec]"
+    __static__AddOptionToHelper "--partition"                "default value = $(__static__PrintDefault ${CLUSTER_PARTITION:-})"
+    __static__AddOptionToHelper "--constraint"               "default value = $(__static__PrintDefault ${CLUSTER_CONSTRAINT:-})"
+    __static__AddOptionToHelper "--node"                     "default value = $(__static__PrintDefault ${CLUSTER_NODE:-})"
     cecho ""
     __static__AddOptionToHelper -e "-s | --submit"                "jobs will be submitted"
     __static__AddOptionToHelper -e "--submitonly"                 "jobs will be submitted (no files are created)"

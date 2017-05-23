@@ -78,10 +78,10 @@ function DeclarePathRelatedGlobalVariables()
     PARAMETERS_STRING=''   # --> e.g.  Nf2_muiPiT_k1550_nt6_ns12    or    Nf2_mui0_mass0250_nt4_ns8
     #Beta and seed information
     readonly BETA_POSITION=5
-    readonly BETA_PREFIX="b"
+    readonly BETA_PREFIX='b'
     BETA_POSTFIX='_continueWithNewChain' #Here we set it supposing it is not a thermalization. If indeed it is, the postfix will be overwritten!
     readonly BETA_REGEX='[[:digit:]][.][[:digit:]]\{4\}'
-    readonly SEED_PREFIX="s"
+    readonly SEED_PREFIX='s'
     readonly SEED_REGEX='[[:digit:]]\{4\}'
     readonly BETA_FOLDER_SHORT_REGEX=$BETA_REGEX'_'$SEED_PREFIX'[[:digit:]]\{4\}_[[:alpha:]]\+'
     readonly BETA_FOLDER_REGEX=$BETA_PREFIX$BETA_FOLDER_SHORT_REGEX
