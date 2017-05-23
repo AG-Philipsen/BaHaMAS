@@ -83,7 +83,7 @@ function PrintHelper()
     cecho -d $helperColor
     cecho -d " Call " B "BaHaMAS" uB " with the following optional arguments:" "\n"
     __static__AddOptionToHelper "-h | --help"                      ""
-    __static__AddOptionToHelper "--jobscript_prefix"               "default value = $(__static__PrintDefault ${JOBSCRIPT_PREFIX:-})"
+    __static__AddOptionToHelper "--jobscript_prefix"               "default value = $(__static__PrintDefault ${BHMAS_jobScriptPrefix:-})"
     __static__AddOptionToHelper "--chempot_prefix"                 "default value = $(__static__PrintDefault ${BHMAS_chempotPrefix:-})"
     __static__AddOptionToHelper "--mass_prefix"                    "default value = $(__static__PrintDefault ${BHMAS_massPrefix:-})"
     __static__AddOptionToHelper "--ntime_prefix"                   "default value = $(__static__PrintDefault ${BHMAS_ntimePrefix:-})"
@@ -99,10 +99,10 @@ function PrintHelper()
     __static__AddOptionToHelper "--doNotUseMultipleChains"         "multiple chain usage and nomenclature are disabled"\
                                 "(in the betas file the seed column is NOT present)"
     __static__AddOptionToHelper "-p | --doNotMeasurePbp"     "the chiral condensate measurement is switched off"
-    __static__AddOptionToHelper "-w | --walltime"            "default value = $(__static__PrintDefault ${WALLTIME:-}) [days-hours:min:sec]"
-    __static__AddOptionToHelper "--partition"                "default value = $(__static__PrintDefault ${CLUSTER_PARTITION:-})"
-    __static__AddOptionToHelper "--constraint"               "default value = $(__static__PrintDefault ${CLUSTER_CONSTRAINT:-})"
-    __static__AddOptionToHelper "--node"                     "default value = $(__static__PrintDefault ${CLUSTER_NODE:-})"
+    __static__AddOptionToHelper "-w | --walltime"            "default value = $(__static__PrintDefault ${BHMAS_walltime:-}) [days-hours:min:sec]"
+    __static__AddOptionToHelper "--partition"                "default value = $(__static__PrintDefault ${BHMAS_clusterPartition:-})"
+    __static__AddOptionToHelper "--constraint"               "default value = $(__static__PrintDefault ${BHMAS_clusterConstraint:-})"
+    __static__AddOptionToHelper "--node"                     "default value = $(__static__PrintDefault ${BHMAS_clusterNode:-})"
     cecho ""
     __static__AddOptionToHelper -e "-s | --submit"                "jobs will be submitted"
     __static__AddOptionToHelper -e "--submitonly"                 "jobs will be submitted (no files are created)"

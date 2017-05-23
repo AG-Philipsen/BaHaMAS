@@ -17,7 +17,7 @@ function ParseCommandLineOptions()
                 printf "Call the script $0 with the following optional arguments:\n"
                 printf "  -h | --help\n"
                 printf "  -u | --user       ->    user for which jobs should be displayed (DEFAULT = $(whoami))\n"
-                printf "  -a | --allUsers   ->    display jobs information for all users (on $CLUSTER_PARTITION partition)\n"
+                printf "  -a | --allUsers   ->    display jobs information for all users (on $BHMAS_clusterPartition partition)\n"
                 printf "  -l | --local      ->    display information for jobs submitted from a folder whose path match the present directory\n"
                 if [ $CLUSTER_NAME = "LCSC" ]; then
                     printf "  -n | --nodeUsage  ->    display information ONLY about which nodes are used\n"
@@ -68,10 +68,10 @@ function ExtractParametersFromJobInformation()
 #-----------------------------------------------------------------------------------------------#
 #Variable for the script
 CLUSTER_NAME="LOEWE"
-CLUSTER_PARTITION="gpu"
+BHMAS_clusterPartition="gpu"
 if [ "$(hostname)" = "lxlcsc0001" ]; then
     CLUSTER_NAME="LCSC"
-    CLUSTER_PARTITION="lcsc"
+    BHMAS_clusterPartition="lcsc"
 fi
 MUTUALLYEXCLUSIVEOPTS=( "-n | --nodeUsage" "-g | --groupBetas" "-l | --local" )
 MUTUALLYEXCLUSIVEOPTS_PASSED=( )
@@ -108,7 +108,7 @@ ParseCommandLineOptions $@
 #Get information via squeue and in case filter jobs -> ATTENTION: Double quoting here is CRUCIAL (to respect endlines)!!
 #NOTE: It seems that the sacct command can give a similar result, but at the moment there is no analog to the %Z field.
 if [ $DISPLAY_ALL_JOBS = 'TRUE' ]; then
-    SQUEUE_OUTPUT="$(squeue --noheader -p $CLUSTER_PARTITION -o ${SQUEUE_FORMAT_CODE_STRING:1} 2>/dev/null)"
+    SQUEUE_OUTPUT="$(squeue --noheader -p $BHMAS_clusterPartition -o ${SQUEUE_FORMAT_CODE_STRING:1} 2>/dev/null)"
 else
     SQUEUE_OUTPUT="$(squeue --noheader -u $SELECTED_USER -o "${SQUEUE_FORMAT_CODE_STRING:1}" 2>/dev/null)"
 fi
@@ -168,21 +168,21 @@ JOB_SUBMISSION_FOLDER=( $(cut -d'@' -f10 <<< "$SQUEUE_OUTPUT") )
 JOB_NUM_NODES=(         $(cut -d'@' -f11 <<< "$SQUEUE_OUTPUT") )
 
 if [ $CLUSTER_NAME = 'LOEWE' ]; then
-    SUBMIT_DISK_GLOBALPATH=${HOME}
-    RUN_DISK_GLOBALPATH="/home/hfftheo/$SELECTED_USER"
+    BHMAS_submitDiskGlobalPath=${HOME}
+    BHMAS_runDiskGlobalPath="/home/hfftheo/$SELECTED_USER"
     DATA1_DIR="/data01/hfftheo/$SELECTED_USER"
     DATA2_DIR="/data02/hfftheo/$SELECTED_USER"
 else
-    SUBMIT_DISK_GLOBALPATH=${HOME}
-    RUN_DISK_GLOBALPATH="/lustre/nyx/lcsc/$SELECTED_USER"
+    BHMAS_submitDiskGlobalPath=${HOME}
+    BHMAS_runDiskGlobalPath="/lustre/nyx/lcsc/$SELECTED_USER"
 fi
 
 for ((j=0; j<${#JOB_SUBMISSION_FOLDER[@]}; j++)); do
-    JOB_SUBMISSION_FOLDER[$j]=${JOB_SUBMISSION_FOLDER[$j]/$SUBMIT_DISK_GLOBALPATH/HOME}
-    JOB_SUBMISSION_FOLDER[$j]=${JOB_SUBMISSION_FOLDER[$j]/$RUN_DISK_GLOBALPATH/SCRATCH}
+    JOB_SUBMISSION_FOLDER[$j]=${JOB_SUBMISSION_FOLDER[$j]/$BHMAS_submitDiskGlobalPath/HOME}
+    JOB_SUBMISSION_FOLDER[$j]=${JOB_SUBMISSION_FOLDER[$j]/$BHMAS_runDiskGlobalPath/SCRATCH}
     JOB_SUBMISSION_FOLDER[$j]=${JOB_SUBMISSION_FOLDER[$j]/$DATA1_DIR/DATA01}
     JOB_SUBMISSION_FOLDER[$j]=${JOB_SUBMISSION_FOLDER[$j]/$DATA2_DIR/DATA02}
-done && unset -v 'SUBMIT_DISK_GLOBALPATH' 'RUN_DISK_GLOBALPATH' 'DATA1_DIR' 'DATA2_DIR'
+done && unset -v 'BHMAS_submitDiskGlobalPath' 'BHMAS_runDiskGlobalPath' 'DATA1_DIR' 'DATA2_DIR'
 
 #Some counting for the table
 LONGEST_NAME=${JOB_NAME[0]}

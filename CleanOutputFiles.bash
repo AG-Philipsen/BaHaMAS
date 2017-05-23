@@ -41,7 +41,7 @@ function CleanOutputFiles()
     for BETA in ${BETAVALUES[@]}; do
         #-------------------------------------------------------------------------#
         local WORK_BETADIRECTORY="$WORK_DIR_WITH_BETAFOLDERS/$BHMAS_betaPrefix$BETA"
-        local MAINFILE_GLOBALPATH="${WORK_BETADIRECTORY}/$OUTPUT_FILENAME"
+        local MAINFILE_GLOBALPATH="${WORK_BETADIRECTORY}/$BHMAS_outputFilename"
         local PBPFILE_GLOBALPATH="${MAINFILE_GLOBALPATH}_pbp.dat"
         #-------------------------------------------------------------------------#
         if [ ! -f $MAINFILE_GLOBALPATH ]; then

@@ -4,39 +4,39 @@
 
 function DeclareOutputRelatedGlobalVariables()
 {
-    readonly BaHaMAS_colouredOutput='TRUE'
+    readonly BHMAS_colouredOutput='TRUE'
 }
 
 function DeclareUserDefinedGlobalVariablesForTests()
 {
-    readonly USER_MAIL="user@test.com"
-    readonly SUBMIT_DISK_GLOBALPATH="${BaHaMAS_repositoryTopLevelPath}/Tests"
-    readonly RUN_DISK_GLOBALPATH="${BaHaMAS_repositoryTopLevelPath}/Tests"
-    readonly GPU_PER_NODE=999
-    readonly JOBSCRIPT_FOLDERNAME="Jobscripts_TEST"
-    readonly EXCLUDE_NODES_GLOBALPATH="${SUBMIT_DISK_GLOBALPATH}/ExcludeNodes_TEST"
+    readonly BHMAS_userEmail="user@test.com"
+    readonly BHMAS_submitDiskGlobalPath="${BaHaMAS_repositoryTopLevelPath}/Tests"
+    readonly BHMAS_runDiskGlobalPath="${BaHaMAS_repositoryTopLevelPath}/Tests"
+    readonly BHMAS_GPUsPerNode=999
+    readonly BHMAS_jobScriptFolderName="Jobscripts_TEST"
+    readonly BHMAS_excludeNodesGlobalPath="${BHMAS_submitDiskGlobalPath}/ExcludeNodes_TEST"
 
-    readonly PROJECT_SUBPATH="StaggeredFakeProject"
-    readonly HMC_GLOBALPATH="${SUBMIT_DISK_GLOBALPATH}/AuxiliaryFiles/fakeExecutable"
-    readonly INPUT_FILENAME="fakeInput"
-    readonly JOBSCRIPT_PREFIX="fakePrefix"
-    readonly OUTPUT_FILENAME="fakeOutput"
-    readonly ACCEPTANCE_COLUMN=11
-    readonly USE_RATIONAL_APPROXIMATION_FILE='TRUE'
-    readonly RATIONAL_APPROX_GLOBALPATH="${SUBMIT_DISK_GLOBALPATH}/${PROJECT_SUBPATH}/Rational_Approximations"
-    readonly APPROX_HEATBATH_FILENAME="fakeApprox"
-    readonly APPROX_MD_FILENAME="fakeApprox"
-    readonly APPROX_METROPOLIS_FILENAME="fakeApprox"
-    readonly DATABASE_FILENAME="OverviewDatabase"
-    readonly DATABASE_GLOBALPATH="${SUBMIT_DISK_GLOBALPATH}/${PROJECT_SUBPATH}/SimulationsOverview"
-    readonly INVERTER_GLOBALPATH="${SUBMIT_DISK_GLOBALPATH}/AuxiliaryFiles/fakeExecutable"
-    readonly THERM_CONFS_GLOBALPATH="${SUBMIT_DISK_GLOBALPATH}/${PROJECT_SUBPATH}/Thermalized_Configurations"
+    readonly BHMAS_projectSubpath="StaggeredFakeProject"
+    readonly BHMAS_hmcGlobalPath="${BHMAS_submitDiskGlobalPath}/AuxiliaryFiles/fakeExecutable"
+    readonly BHMAS_inputFilename="fakeInput"
+    readonly BHMAS_jobScriptPrefix="fakePrefix"
+    readonly BHMAS_outputFilename="fakeOutput"
+    readonly BHMAS_acceptanceColumn=11
+    readonly BHMAS_useRationalApproxFiles='TRUE'
+    readonly BHMAS_rationalApproxGlobalPath="${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath}/Rational_Approximations"
+    readonly BHMAS_approxHeatbathFilename="fakeApprox"
+    readonly BHMAS_approxMDFilename="fakeApprox"
+    readonly BHMAS_approxMetropolisFilename="fakeApprox"
+    readonly BHMAS_databaseFilename="OverviewDatabase"
+    readonly BHMAS_databaseGlobalPath="${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath}/SimulationsOverview"
+    readonly BHMAS_inverterGlobalPath="${BHMAS_submitDiskGlobalPath}/AuxiliaryFiles/fakeExecutable"
+    readonly BHMAS_thermConfsGlobalPath="${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath}/Thermalized_Configurations"
 
     #Possible default value for options which can then not be given via command line
-    WALLTIME=""
-    CLUSTER_PARTITION=""
-    CLUSTER_NODE=""
-    CLUSTER_CONSTRAINT=""
-    CLUSTER_GENERIC_RESOURCE=""
+    BHMAS_walltime=""
+    BHMAS_clusterPartition=""
+    BHMAS_clusterNode=""
+    BHMAS_clusterConstraint=""
+    BHMAS_clusterGenericResource=""
 
 }

@@ -176,6 +176,6 @@ function DeclareBaHaMASGlobalVariables()
 # which needs to be extracted from the path.
 function DeclareBetaFoldersPathsAsGlobalVariables()
 {
-    readonly HOME_DIR_WITH_BETAFOLDERS="$SUBMIT_DISK_GLOBALPATH/$PROJECT_SUBPATH$BHMAS_parametersPath"
-    readonly WORK_DIR_WITH_BETAFOLDERS="$RUN_DISK_GLOBALPATH/$PROJECT_SUBPATH$BHMAS_parametersPath"
+    readonly HOME_DIR_WITH_BETAFOLDERS="$BHMAS_submitDiskGlobalPath/$BHMAS_projectSubpath$BHMAS_parametersPath"
+    readonly WORK_DIR_WITH_BETAFOLDERS="$BHMAS_runDiskGlobalPath/$BHMAS_projectSubpath$BHMAS_parametersPath"
 }

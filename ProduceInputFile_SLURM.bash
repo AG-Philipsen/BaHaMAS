@@ -18,12 +18,12 @@ function ProduceInputFile_SLURM()
         __static__AddToInputFile \
             "fermact=rooted_stagg"\
             "num_tastes=$BHMAS_nflavour"
-        if [ $USE_RATIONAL_APPROXIMATION_FILE = "TRUE" ]; then
+        if [ $BHMAS_useRationalApproxFiles = "TRUE" ]; then
             __static__AddToInputFile \
                 "read_rational_approximations_from_file=1"\
-                "approx_heatbath_file=${RATIONAL_APPROX_GLOBALPATH}/Nf${BHMAS_nflavour}_${APPROX_HEATBATH_FILENAME}"\
-                "approx_md_file=${RATIONAL_APPROX_GLOBALPATH}/Nf${BHMAS_nflavour}_${APPROX_MD_FILENAME}"\
-                "approx_metropolis_file=${RATIONAL_APPROX_GLOBALPATH}/Nf${BHMAS_nflavour}_${APPROX_METROPOLIS_FILENAME}"
+                "approx_heatbath_file=${BHMAS_rationalApproxGlobalPath}/Nf${BHMAS_nflavour}_${BHMAS_approxHeatbathFilename}"\
+                "approx_md_file=${BHMAS_rationalApproxGlobalPath}/Nf${BHMAS_nflavour}_${BHMAS_approxMDFilename}"\
+                "approx_metropolis_file=${BHMAS_rationalApproxGlobalPath}/Nf${BHMAS_nflavour}_${BHMAS_approxMetropolisFilename}"
         else
             __static__AddToInputFile "read_rational_approximations_from_file=0"
         fi
@@ -64,7 +64,7 @@ function ProduceInputFile_SLURM()
         fi
         __static__AddToInputFile \
             "ferm_obs_to_single_file=1"\
-            "ferm_obs_pbp_prefix=${OUTPUT_FILENAME}"
+            "ferm_obs_pbp_prefix=${BHMAS_outputFilename}"
     fi
     #Information about integrators
     if [ $BHMAS_wilson = "TRUE" ]; then

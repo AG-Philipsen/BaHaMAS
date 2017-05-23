@@ -9,78 +9,78 @@
 
 function DeclareOutputRelatedGlobalVariables()
 {
-    readonly BaHaMAS_colouredOutput='TRUE'
+    readonly BHMAS_colouredOutput='TRUE'
 }
 
 function DeclareUserDefinedGlobalVariables()
 {
-    readonly USER_MAIL=""
-    readonly SUBMIT_DISK_GLOBALPATH=""
-    readonly RUN_DISK_GLOBALPATH=""
-    readonly GPU_PER_NODE=
-    readonly JOBSCRIPT_FOLDERNAME=""
-    readonly EXCLUDE_NODES_GLOBALPATH=""
-    readonly PROJECT_SUBPATH=""
-    readonly HMC_GLOBALPATH=""
-    readonly INPUT_FILENAME=""
-    readonly JOBSCRIPT_PREFIX=""
-    readonly OUTPUT_FILENAME=""
-    readonly ACCEPTANCE_COLUMN=
-    readonly USE_RATIONAL_APPROXIMATION_FILE='FALSE'
-    readonly RATIONAL_APPROX_GLOBALPATH=""
-    readonly APPROX_HEATBATH_FILENAME=""
-    readonly APPROX_MD_FILENAME=""
-    readonly APPROX_METROPOLIS_FILENAME=""
-    readonly DATABASE_FILENAME=""
-    readonly DATABASE_GLOBALPATH=""
-    readonly INVERTER_GLOBALPATH=""
-    readonly THERM_CONFS_GLOBALPATH=""
+    readonly BHMAS_userEmail=""
+    readonly BHMAS_submitDiskGlobalPath=""
+    readonly BHMAS_runDiskGlobalPath=""
+    readonly BHMAS_GPUsPerNode=
+    readonly BHMAS_jobScriptFolderName=""
+    readonly BHMAS_excludeNodesGlobalPath=""
+    readonly BHMAS_projectSubpath=""
+    readonly BHMAS_hmcGlobalPath=""
+    readonly BHMAS_inputFilename=""
+    readonly BHMAS_jobScriptPrefix=""
+    readonly BHMAS_outputFilename=""
+    readonly BHMAS_acceptanceColumn=
+    readonly BHMAS_useRationalApproxFiles='FALSE'
+    readonly BHMAS_rationalApproxGlobalPath=""
+    readonly BHMAS_approxHeatbathFilename=""
+    readonly BHMAS_approxMDFilename=""
+    readonly BHMAS_approxMetropolisFilename=""
+    readonly BHMAS_databaseFilename=""
+    readonly BHMAS_databaseGlobalPath=""
+    readonly BHMAS_inverterGlobalPath=""
+    readonly BHMAS_thermConfsGlobalPath=""
 
     #Possible default value for options which then may not be given via command line
-    WALLTIME=""
-    CLUSTER_PARTITION=""
-    CLUSTER_NODE=""
-    CLUSTER_CONSTRAINT=""
-    CLUSTER_GENERIC_RESOURCE=""
+    BHMAS_walltime=""
+    BHMAS_clusterPartition=""
+    BHMAS_clusterNode=""
+    BHMAS_clusterConstraint=""
+    BHMAS_clusterGenericResource=""
 
 }
 
 # Documentation:
 #
-#     BaHaMAS_colouredOutput        -->  it can be 'TRUE' or 'FALSE' and can be used to disable coloured output
-#     USER_MAIL                     -->  mail to which job information (e.g. failures) is sent to
-#     SUBMIT_DISK_GLOBALPATH        -->  global path to the disk from which the jobs are submitted (see further informations below)
-#     RUN_DISK_GLOBALPATH           -->  global path to the disk from which the jobs are run (see further informations below)
-#     GPU_PER_NODE                  -->  number of GPUs per node
-#     JOBSCRIPT_FOLDERNAME          -->  name of the folder where the job scripts are collected
-#     EXCLUDE_NODES_GLOBALPATH      -->  local or remote global path to file containing the directive to exclude nodes
-#     PROJECT_SUBPATH               -->  path from HOME and WORK to the folder containing the parameters folders structure (see further informations below)
-#     HMC_GLOBALPATH                -->  production executable global path
-#     INPUT_FILENAME                -->  name of the inputfile
-#     JOBSCRIPT_PREFIX              -->  prefix of the jobscript name
-#     OUTPUT_FILENAME               -->  name of the outputfile
-#     ACCEPTANCE_COLUMN             -->  number of column containing outcomes (zeros or ones) of Metropolis test [first column is column number 1].
-#     RATIONAL_APPROX_GLOBALPATH    -->  global path to the folder containing the rational approximations
-#     APPROX_HEATBATH_FILENAME      -->  rational approximation used for the pseudofermion fields
-#     APPROX_MD_FILENAME            -->  rational approximation used for the molecular dynamis
-#     APPROX_METROPOLIS_FILENAME    -->  rational approximation used for the metropolis test
-#     INVERTER_GLOBALPATH           -->  inverter executable global path
-#     THERM_CONFS_GLOBALPATH        -->  global path to the folder containing the thermalized configurations
-#     DATABASE_GLOBALPATH           -->  directory where the the simulation status files are stored (it MUST be a GLOBALPATH)
-#     DATABASE_FILENAME             -->  name of the file containing the database
-#     WALLTIME                      -->  jobs walltime in the format 'days-hours:min:sec'
-#     CLUSTER_PARTITION             -->  name of the partition of the cluster that has to be used
-#     CLUSTER_NODE                  -->  list of nodes that have to be used
-#     CLUSTER_CONSTRAINT            -->  constraint on hardware of the cluster
-#     CLUSTER_GENERIC_RESOURCE      -->  cluster resource selection
+#     BHMAS_colouredOutput             -->  it can be 'TRUE' or 'FALSE' and can be used to disable coloured output
+#     BHMAS_userEmail                  -->  mail to which job information (e.g. failures) is sent to
+#     BHMAS_submitDiskGlobalPath       -->  global path to the disk from which the jobs are submitted (see further informations below)
+#     BHMAS_runDiskGlobalPath          -->  global path to the disk from which the jobs are run (see further informations below)
+#     BHMAS_GPUsPerNode                -->  number of GPUs per node
+#     BHMAS_jobScriptFolderName        -->  name of the folder where the job scripts are collected
+#     BHMAS_excludeNodesGlobalPath     -->  local or remote global path to file containing the directive to exclude nodes
+#     BHMAS_projectSubpath             -->  path from HOME and WORK to the folder containing the parameters folders structure (see further informations below)
+#     BHMAS_hmcGlobalPath              -->  production executable global path
+#     BHMAS_inputFilename              -->  name of the inputfile
+#     BHMAS_jobScriptPrefix            -->  prefix of the jobscript name
+#     BHMAS_outputFilename             -->  name of the outputfile
+#     BHMAS_acceptanceColumn           -->  number of column containing outcomes (zeros or ones) of Metropolis test [first column is column number 1].
+#     BHMAS_rationalApproxGlobalPath   -->  global path to the folder containing the rational approximations
+#     BHMAS_approxHeatbathFilename     -->  rational approximation used for the pseudofermion fields
+#     BHMAS_approxMDFilename           -->  rational approximation used for the molecular dynamis
+#     BHMAS_approxMetropolisFilename   -->  rational approximation used for the metropolis test
+#     BHMAS_inverterGlobalPath         -->  inverter executable global path
+#     BHMAS_thermConfsGlobalPath       -->  global path to the folder containing the thermalized configurations
+#     BHMAS_databaseGlobalPath         -->  directory where the the simulation status files are stored (it MUST be a GLOBALPATH)
+#     BHMAS_databaseFilename           -->  name of the file containing the database
+#     BHMAS_walltime                   -->  jobs walltime in the format 'days-hours:min:sec'
+#     BHMAS_clusterPartition           -->  name of the partition of the cluster that has to be used
+#     BHMAS_clusterNode                -->  list of nodes that have to be used
+#     BHMAS_clusterConstraint          -->  constraint on hardware of the cluster
+#     BHMAS_clusterGenericResource     -->  cluster resource selection
 #
 # Some further information:
 #
-#   The SUBMIT_DISK_GLOBALPATH, RUN_DISK_GLOBALPATH, PROJECT_SUBPATH variables above could be a bit confusing. Basically, they are used to build the global
+#   The BHMAS_submitDiskGlobalPath, BHMAS_runDiskGlobalPath, BHMAS_projectSubpath variables above could be a bit confusing. Basically, they are used to build the global
 #   path of the folders from which the jobs are submitted and run. In particular:
 #
-#       - folder global path from which jobs are submitted:  $SUBMIT_DISK_GLOBALPATH/$PROJECT_SUBPATH/$BHMAS_parametersPath
-#       -       folder global path from which jobs are run:  $RUN_DISK_GLOBALPATH/$PROJECT_SUBPATH/$BHMAS_parametersPath
+#       - folder global path from which jobs are submitted:  $BHMAS_submitDiskGlobalPath/$BHMAS_projectSubpath/$BHMAS_parametersPath
+#       -       folder global path from which jobs are run:  $BHMAS_runDiskGlobalPath/$BHMAS_projectSubpath/$BHMAS_parametersPath
 #
 #   where $BHMAS_parametersPath is the folder structure like 'Nf2/muiPiT/k1550/nt6/ns12' or like 'Nf3/mui0/mass0250/nt4/ns8'.
 #

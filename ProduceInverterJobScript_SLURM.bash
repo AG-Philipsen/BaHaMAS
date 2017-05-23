@@ -20,25 +20,25 @@ function ProduceInverterJobscript_SLURM()
     __static__AddToInverterJobscriptFile\
         "#!/bin/bash"\
         ""\
-        "#SBATCH --job-name=${JOBSCRIPT_NAME#${JOBSCRIPT_PREFIX}_*}"\
+        "#SBATCH --job-name=${JOBSCRIPT_NAME#${BHMAS_jobScriptPrefix}_*}"\
         "#SBATCH --mail-type=FAIL"\
-        "#SBATCH --mail-user=$USER_MAIL"\
-        "#SBATCH --time=$WALLTIME"\
+        "#SBATCH --mail-user=$BHMAS_userEmail"\
+        "#SBATCH --time=$BHMAS_walltime"\
         "#SBATCH --output=${INVERTER_FILENAME}.%j.out"\
         "#SBATCH --error=${INVERTER_FILENAME}.%j.err"\
         "#SBATCH --no-requeue"
 
-    [ "$CLUSTER_PARTITION"        != '' ] && __static__AddToJobscriptFile "#SBATCH --partition=$CLUSTER_PARTITION"
-    [ "$CLUSTER_NODE"             != '' ] && __static__AddToJobscriptFile "#SBATCH --nodelist=$CLUSTER_NODE"
-    [ "$CLUSTER_CONSTRAINT"       != '' ] && __static__AddToJobscriptFile "#SBATCH --constraint=$CLUSTER_CONSTRAINT"
-    [ "$CLUSTER_GENERIC_RESOURCE" != '' ] && __static__AddToJobscriptFile "#SBATCH --gres=$CLUSTER_GENERIC_RESOURCE"
+    [ "$BHMAS_clusterPartition"        != '' ] && __static__AddToJobscriptFile "#SBATCH --partition=$BHMAS_clusterPartition"
+    [ "$BHMAS_clusterNode"             != '' ] && __static__AddToJobscriptFile "#SBATCH --nodelist=$BHMAS_clusterNode"
+    [ "$BHMAS_clusterConstraint"       != '' ] && __static__AddToJobscriptFile "#SBATCH --constraint=$BHMAS_clusterConstraint"
+    [ "$BHMAS_clusterGenericResource" != '' ] && __static__AddToJobscriptFile "#SBATCH --gres=$BHMAS_clusterGenericResource"
 
     #Trying to retrieve information about the list of nodes to be excluded if user gave file
-    if [ "$EXCLUDE_NODES_GLOBALPATH" != '' ]; then
-        if [ -f "$EXCLUDE_NODES_GLOBALPATH" ]; then
-            EXCLUDE_STRING=$(grep -oE '\-\-exclude=.*\[.*\]' $EXCLUDE_NODES_GLOBALPATH 2>/dev/null)
-        elif [[ $EXCLUDE_NODES_GLOBALPATH =~ : ]]; then
-            EXCLUDE_STRING=$(ssh ${EXCLUDE_NODES_GLOBALPATH%%:*} "grep -oE '\-\-exclude=.*\[.*\]' ${EXCLUDE_NODES_GLOBALPATH#*:} 2>/dev/null")
+    if [ "$BHMAS_excludeNodesGlobalPath" != '' ]; then
+        if [ -f "$BHMAS_excludeNodesGlobalPath" ]; then
+            EXCLUDE_STRING=$(grep -oE '\-\-exclude=.*\[.*\]' $BHMAS_excludeNodesGlobalPath 2>/dev/null)
+        elif [[ $BHMAS_excludeNodesGlobalPath =~ : ]]; then
+            EXCLUDE_STRING=$(ssh ${BHMAS_excludeNodesGlobalPath%%:*} "grep -oE '\-\-exclude=.*\[.*\]' ${BHMAS_excludeNodesGlobalPath#*:} 2>/dev/null")
         fi
         if [ "${EXCLUDE_STRING:-}" != "" ]; then
             __static__AddToInverterJobscriptFile "#SBATCH $EXCLUDE_STRING"
@@ -54,7 +54,7 @@ function ProduceInverterJobscript_SLURM()
         fi
     fi
 
-    __static__AddToInverterJobscriptFile "#SBATCH --ntasks=$GPU_PER_NODE" ""
+    __static__AddToInverterJobscriptFile "#SBATCH --ntasks=$BHMAS_GPUsPerNode" ""
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
         __static__AddToInverterJobscriptFile "dir$INDEX=${HOME_DIR_WITH_BETAFOLDERS}/$BHMAS_betaPrefix${BETA_FOR_JOBSCRIPT[$INDEX]}"
     done
@@ -89,7 +89,7 @@ function ProduceInverterJobscript_SLURM()
         "#       of the exec. Copying it later does not guarantee that it is still the same..."\
         "echo \"Copy executable to beta directories in ${WORK_DIR_WITH_BETAFOLDERS}/${BHMAS_betaPrefix}x.xxxx...\""
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-        __static__AddToInverterJobscriptFile "rm -f \$dir$INDEX/$INVERTER_FILENAME && cp -a $INVERTER_GLOBALPATH \$dir$INDEX || exit 2"
+        __static__AddToInverterJobscriptFile "rm -f \$dir$INDEX/$INVERTER_FILENAME && cp -a $BHMAS_inverterGlobalPath \$dir$INDEX || exit 2"
     done
     __static__AddToInverterJobscriptFile\
         "echo \"...done!\""\

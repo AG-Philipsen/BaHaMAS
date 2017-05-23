@@ -48,7 +48,7 @@ function ParseCommandLineOption()
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
-                    JOBSCRIPT_PREFIX="$2"
+                    BHMAS_jobScriptPrefix="$2"
                 fi
                 shift 2 ;;
 
@@ -102,11 +102,11 @@ function ParseCommandLineOption()
 
             -w | --walltime )
                 if [[ ${2:-} =~ ^([0-9]+[dhms])+$ ]]; then
-                    WALLTIME=$(SecondsToTimeStringWithDays $(TimeStringToSecond $2) )
+                    BHMAS_walltime=$(SecondsToTimeStringWithDays $(TimeStringToSecond $2) )
                 else
-                    WALLTIME="${2:-}"
+                    BHMAS_walltime="${2:-}"
                 fi
-                if [[ ! $WALLTIME =~ ^([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]]; then
+                if [[ ! $BHMAS_walltime =~ ^([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 fi
                 shift 2 ;;
@@ -173,7 +173,7 @@ function ParseCommandLineOption()
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
-                    CLUSTER_PARTITION="$2"
+                    BHMAS_clusterPartition="$2"
                 fi
                 shift 2 ;;
 
@@ -181,7 +181,7 @@ function ParseCommandLineOption()
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
-                    CLUSTER_CONSTRAINT="$2"
+                    BHMAS_clusterConstraint="$2"
                 fi
                 shift 2 ;;
 
@@ -189,7 +189,7 @@ function ParseCommandLineOption()
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
-                    CLUSTER_NODE="$2"
+                    BHMAS_clusterNode="$2"
                 fi
                 shift 2 ;;
 

@@ -123,10 +123,10 @@ function ListJobStatus_SLURM()
         fi
 
         #----Constructing WORK_BETADIRECTORY, HOME_BETADIRECTORY, JOBSCRIPT_NAME, JOBSCRIPT_GLOBALPATH and INPUTFILE_GLOBALPATH---#
-        local OUTPUTFILE_GLOBALPATH="$RUN_DISK_GLOBALPATH/$PROJECT_SUBPATH$LOCAL_PARAMETERS_PATH/$BHMAS_betaPrefix$BETA/$OUTPUT_FILENAME"
-        local INPUTFILE_GLOBALPATH="$SUBMIT_DISK_GLOBALPATH/$PROJECT_SUBPATH$LOCAL_PARAMETERS_PATH/$BHMAS_betaPrefix$BETA/$INPUT_FILENAME"
+        local OUTPUTFILE_GLOBALPATH="$BHMAS_runDiskGlobalPath/$BHMAS_projectSubpath$LOCAL_PARAMETERS_PATH/$BHMAS_betaPrefix$BETA/$BHMAS_outputFilename"
+        local INPUTFILE_GLOBALPATH="$BHMAS_submitDiskGlobalPath/$BHMAS_projectSubpath$LOCAL_PARAMETERS_PATH/$BHMAS_betaPrefix$BETA/$BHMAS_inputFilename"
         local STDOUTPUT_FILE=`ls -t1 $BHMAS_betaPrefix$BETA 2>/dev/null | awk -v filename="$HMC_FILENAME" 'BEGIN{regexp="^"filename".[[:digit:]]+.out$"}{if($1 ~ regexp){print $1}}' | head -n1`
-        local STDOUTPUT_GLOBALPATH="$SUBMIT_DISK_GLOBALPATH/$PROJECT_SUBPATH$LOCAL_PARAMETERS_PATH/$BHMAS_betaPrefix$BETA/$STDOUTPUT_FILE"
+        local STDOUTPUT_GLOBALPATH="$BHMAS_submitDiskGlobalPath/$BHMAS_projectSubpath$LOCAL_PARAMETERS_PATH/$BHMAS_betaPrefix$BETA/$STDOUTPUT_FILE"
         #-------------------------------------------------------------------------------------------------------------------------#
         if [ $LISTSTATUS_MEASURE_TIME = "TRUE" ]; then
             if [ -f $STDOUTPUT_GLOBALPATH ] && [[ $STATUS == "RUNNING" ]]; then
@@ -183,10 +183,10 @@ function ListJobStatus_SLURM()
                 local TRAJECTORIES_DONE=$(awk 'NR==1{startTr=$1}END{print $1 - startTr + 1}' $OUTPUTFILE_GLOBALPATH)
             fi
             local NUMBER_LAST_TRAJECTORY=$(awk 'END{print $1}' $OUTPUTFILE_GLOBALPATH)
-            local ACCEPTANCE=$(awk '{ sum+=$'$ACCEPTANCE_COLUMN'} END {printf "%5.2f", 100*sum/(NR)}' $OUTPUTFILE_GLOBALPATH)
+            local ACCEPTANCE=$(awk '{ sum+=$'$BHMAS_acceptanceColumn'} END {printf "%5.2f", 100*sum/(NR)}' $OUTPUTFILE_GLOBALPATH)
 
             if [ $TRAJECTORIES_DONE -ge 1000 ]; then
-                local ACCEPTANCE_LAST=$(tail -n1000 $OUTPUTFILE_GLOBALPATH | awk '{ sum+=$'$ACCEPTANCE_COLUMN'} END {printf "%5.2f", 100*sum/(NR)}')
+                local ACCEPTANCE_LAST=$(tail -n1000 $OUTPUTFILE_GLOBALPATH | awk '{ sum+=$'$BHMAS_acceptanceColumn'} END {printf "%5.2f", 100*sum/(NR)}')
             else
                 local ACCEPTANCE_LAST=" --- "
             fi

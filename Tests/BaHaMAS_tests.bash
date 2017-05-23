@@ -17,7 +17,7 @@
 shopt -s extglob
 
 #This is to have cecho functionality active here
-readonly BaHaMAS_colouredOutput='TRUE'
+readonly BHMAS_colouredOutput='TRUE'
 
 #Retrieve information from git
 readonly BaHaMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"

@@ -120,12 +120,12 @@ function cecho()
         esac
         shift
         if [ "$format" != '' ]; then
-            [ "$BaHaMAS_colouredOutput" = 'TRUE' ] && outputString+="$format"
+            [ "$BHMAS_colouredOutput" = 'TRUE' ] && outputString+="$format"
         fi
         if [ "$text" != '' ]; then
             outputString+="$text"
             if [ $restore = 'TRUE' ]; then
-                [ "$BaHaMAS_colouredOutput" = 'TRUE' ] && outputString+="$previousFormat"
+                [ "$BHMAS_colouredOutput" = 'TRUE' ] && outputString+="$previousFormat"
             fi
             restore='FALSE'
         fi
