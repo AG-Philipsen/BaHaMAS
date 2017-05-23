@@ -7,10 +7,13 @@
 #
 # ATTENTION: Do not put slashes "/" at the end of the paths variables!!
 
+function DeclareOutputRelatedGlobalVariables()
+{
+    readonly BaHaMAS_colouredOutput='TRUE'
+}
+
 function DeclareUserDefinedGlobalVariables()
 {
-
-    readonly BaHaMAS_colouredOutput='TRUE'
     readonly USER_MAIL=""
     readonly SUBMIT_DISK_GLOBALPATH=""
     readonly RUN_DISK_GLOBALPATH=""

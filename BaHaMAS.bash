@@ -40,7 +40,9 @@ source ${BaHaMAS_repositoryTopLevelPath}/Tests/SetupUserVariables.bash    || exi
 set -euo pipefail
 
 #Declare all variables (color user decisions for output needed from very beginning)
+DeclareOutputRelatedGlobalVariables
 DeclarePathRelatedGlobalVariables
+CheckWilsonStaggeredVariables
 if [ -n "${BaHaMAS_testModeOn:+x}" ] && [ ${BaHaMAS_testModeOn} = 'TRUE' ]; then
     DeclareUserDefinedGlobalVariablesForTests
 else
@@ -59,7 +61,6 @@ fi
 
 #Do some checks on system and variables, parse user option and do some more checks
 CheckSystemRequirements
-CheckWilsonStaggeredVariables
 CheckUserDefinedVariablesAndDefineDependentAdditionalVariables
 ParseCommandLineOption "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}"
 CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase
