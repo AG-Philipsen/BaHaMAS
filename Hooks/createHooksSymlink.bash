@@ -4,10 +4,10 @@
 #
 #-----------------------------------------------------------------------------#
 
-repositoryTopLevelPath="$(git rev-parse --show-toplevel)"
-source $repositoryTopLevelPath/hooks/AuxiliaryFunctions.bash || exit -2
-hookGitFolder=$repositoryTopLevelPath/.git/hooks
-hookDistributedFolder=$repositoryTopLevelPath/hooks
+readonly repositoryTopLevelPath="$(git rev-parse --show-toplevel)"
+readonly hookGitFolder=$repositoryTopLevelPath/.git/hooks
+readonly hookDistributedFolder=$repositoryTopLevelPath/Hooks
+source $hookDistributedFolder/AuxiliaryFunctions.bash || exit -2
 
 cd $hookGitFolder
 
@@ -26,7 +26,15 @@ for hook in $(find $hookDistributedFolder -maxdepth 1 -perm -111 -type f -printf
                 continue
             fi
         else
-            ln -s -f ../../hooks/$hook $hook
+            commandToBeRun="ln -s -f ../../Hooks/$hook $hook"
+            errecho "Symlinking hook \"$hook\"" 13
+            errecho "$commandToBeRun"
+            $commandToBeRun
+            if [ ! -e $hook ]; then
+                errecho "...failed!\n" 9
+            else
+                errecho "...done!\n" 10
+            fi
         fi
     fi
 done

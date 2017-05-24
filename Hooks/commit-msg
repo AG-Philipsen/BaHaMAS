@@ -22,7 +22,7 @@
 #-----------------------------------------------------------------------------#
 
 repositoryTopLevelPath="$(git rev-parse --show-toplevel)"
-source $repositoryTopLevelPath/hooks/AuxiliaryFunctions.bash || exit -2
+source $repositoryTopLevelPath/Hooks/AuxiliaryFunctions.bash || exit -2
 
 #Abort immediately on empty commit
 if IsCommitMessageEmpty "$1"; then
