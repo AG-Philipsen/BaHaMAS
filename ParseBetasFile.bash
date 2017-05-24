@@ -2,6 +2,25 @@
 #   Copyright (c)  2017  Alessandro Sciarra   #
 #---------------------------------------------#
 
+function __static__PrintReportOnExtractedInformationFromBetasFile()
+{
+    cecho lc "\n============================================================================================================"
+    cecho lp " Read beta values:"
+    for BETA in ${BHMAS_betaValues[@]}; do
+        cecho -n "  - $BETA\t [Integrator steps ${BHMAS_scaleZeroIntegrationSteps[$BETA]}-${BHMAS_scaleOneIntegrationSteps[$BETA]}]"
+        if KeyInArray $BETA BHMAS_trajectoriesToBeResumedFrom; then
+            cecho -n "$(printf "   [resume from tr. %+7s]" "${BHMAS_trajectoriesToBeResumedFrom[$BETA]}")"
+        else
+            cecho -n "                          "
+        fi
+        if KeyInArray $BETA BHMAS_massPreconditioningValues; then
+            cecho -n "$(printf "   MP=(%d-0.%4d)" "${BHMAS_massPreconditioningValues[$BETA]%,*}" "${BHMAS_massPreconditioningValues[$BETA]#*,}")"
+        fi
+        cecho ''
+    done
+    cecho lc "============================================================================================================"
+}
+
 function ParseBetasFile()
 {
     if [ ! -e $BHMAS_betasFilename ]; then
@@ -161,19 +180,5 @@ function ParseBetasFile()
         fi
     done
 
-    cecho lc "\n============================================================================================================"
-    cecho lp " Read beta values:"
-    for BETA in ${BHMAS_betaValues[@]}; do
-        cecho -n "  - $BETA\t [Integrator steps ${BHMAS_scaleZeroIntegrationSteps[$BETA]}-${BHMAS_scaleOneIntegrationSteps[$BETA]}]"
-        if KeyInArray $BETA BHMAS_trajectoriesToBeResumedFrom; then
-            cecho -n "$(printf "   [resume from tr. %+6s]" "${BHMAS_trajectoriesToBeResumedFrom[$BETA]}")"
-        else
-            cecho -n "                          "
-        fi
-        if KeyInArray $BETA BHMAS_massPreconditioningValues; then
-            cecho -n "$(printf "   MP=(%d-0.%4d)" "${BHMAS_massPreconditioningValues[$BETA]%,*}" "${BHMAS_massPreconditioningValues[$BETA]#*,}")"
-        fi
-        cecho ''
-    done
-    cecho lc "============================================================================================================"
+    __static__PrintReportOnExtractedInformationFromBetasFile
 }
