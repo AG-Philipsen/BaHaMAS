@@ -93,15 +93,17 @@ if [ $BHMAS_databaseOption = 'TRUE' ]; then
 
 elif [ $BHMAS_submitonlyOption = 'TRUE' ]; then
 
-    ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
+    ParseBetasFile
+    FindConfigurationGlobalPathFromWhichToStartTheSimulation #TODO: This should not be needed! Check if it is true!
     ProcessBetaValuesForSubmitOnly
-    SubmitJobsForValidBetaValues #TODO: Declare all possible local variable in this function as local!
+    SubmitJobsForValidBetaValues
 
 elif [ $BHMAS_submitOption = 'TRUE' ]; then
 
-    ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
+    ParseBetasFile
+    FindConfigurationGlobalPathFromWhichToStartTheSimulation
     ProduceInputFileAndJobScriptForEachBeta
-    SubmitJobsForValidBetaValues #TODO: Declare all possible local variable in this function as local!
+    SubmitJobsForValidBetaValues
 
 elif [ $BHMAS_thermalizeOption = 'TRUE' ] || [ $BHMAS_continueThermalizationOption = 'TRUE' ]; then
 
@@ -125,9 +127,8 @@ elif [ $BHMAS_thermalizeOption = 'TRUE' ] || [ $BHMAS_continueThermalizationOpti
         cecho ly B "\n Measurement of PBP switched off during thermalization!"
         BHMAS_measurePbp='FALSE'
     fi
-
-    ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
-
+    ParseBetasFile
+    FindConfigurationGlobalPathFromWhichToStartTheSimulation
     if [ $BHMAS_thermalizeOption = 'TRUE' ]; then
         ProduceInputFileAndJobScriptForEachBeta
         AskUser "Check if everything is fine. Would you like to submit the jobs?"
@@ -138,13 +139,13 @@ elif [ $BHMAS_thermalizeOption = 'TRUE' ] || [ $BHMAS_continueThermalizationOpti
     elif [ $BHMAS_continueThermalizationOption = 'TRUE' ]; then
         ProcessBetaValuesForContinue
     fi
-    SubmitJobsForValidBetaValues #TODO: Declare all possible local variable in this function as local!
+    SubmitJobsForValidBetaValues
 
 elif [ $BHMAS_continueOption = 'TRUE' ]; then
 
-    ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
-    ProcessBetaValuesForContinue #TODO: Declare all possible local variable in this function as local! Use also only capital letters!
-    SubmitJobsForValidBetaValues #TODO: Declare all possible local variable in this function as local!
+    ParseBetasFile
+    ProcessBetaValuesForContinue
+    SubmitJobsForValidBetaValues
 
 elif [ $BHMAS_liststatusOption = 'TRUE' ]; then
 
@@ -152,7 +153,7 @@ elif [ $BHMAS_liststatusOption = 'TRUE' ]; then
 
 elif [ $BHMAS_accRateReportOption = 'TRUE' ]; then
 
-    ReadBetaValuesFromFile
+    ParseBetasFile
     AcceptanceRateReport
 
 elif [ $BHMAS_cleanOutputFilesOption = 'TRUE' ]; then
@@ -160,7 +161,7 @@ elif [ $BHMAS_cleanOutputFilesOption = 'TRUE' ]; then
     if [ $BHMAS_cleanAllOutputFiles = 'TRUE' ]; then
         BETAVALUES=( $( ls $BHMAS_runDirWithBetaFolders | grep "^${BHMAS_betaPrefix}${BHMAS_betaRegex}" | awk '{print substr($1,2)}') )
     else
-        ReadBetaValuesFromFile
+        ParseBetasFile
     fi
     CleanOutputFiles
 
@@ -180,13 +181,14 @@ elif [ $BHMAS_commentBetasOption = 'TRUE' ]; then
 
 elif [ $BHMAS_invertConfigurationsOption = 'TRUE' ]; then
 
-    ReadBetaValuesFromFile
+    ParseBetasFile
     ProcessBetaValuesForInversion
     SubmitJobsForValidBetaValues
 
 else
 
-    ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
+    ParseBetasFile
+    FindConfigurationGlobalPathFromWhichToStartTheSimulation
     ProduceInputFileAndJobScriptForEachBeta
 
 fi
