@@ -38,7 +38,7 @@ function __static__CleanFile()
 function CleanOutputFiles()
 {
     cecho lc B "\n " U "Cleaning" uU ":"
-    for BETA in ${BETAVALUES[@]}; do
+    for BETA in ${BHMAS_betaValues[@]}; do
         #-------------------------------------------------------------------------#
         local WORK_BETADIRECTORY="$BHMAS_runDirWithBetaFolders/$BHMAS_betaPrefix$BETA"
         local MAINFILE_GLOBALPATH="${WORK_BETADIRECTORY}/$BHMAS_outputFilename"

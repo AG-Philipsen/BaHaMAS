@@ -112,6 +112,8 @@ function DeclareBaHaMASGlobalVariables()
 
     #Internal BaHaMAS variables
     readonly BHMAS_clusterScheduler="$(SelectClusterSchedulerName)"
+
+    BHMAS_betaValues=()
     BHMAS_betaValuesToBeSubmitted=()
     BHMAS_problematicBetaValues=()
     declare -gA BHMAS_scaleZeroIntegrationSteps

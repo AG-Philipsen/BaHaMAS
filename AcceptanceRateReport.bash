@@ -5,7 +5,7 @@ source ${BaHaMAS_repositoryTopLevelPath}/ListJobsStatus_SLURM.bash || exit -2
 function AcceptanceRateReport()
 {
     #-----------------------------------------#
-    local BETAVALUES_COPY=(${BETAVALUES[@]})
+    local BETAVALUES_COPY=(${BHMAS_betaValues[@]})
     #-----------------------------------------#
     for INDEX in "${!BETAVALUES_COPY[@]}"; do
         local OUTPUTFILE_GLOBALPATH=$BHMAS_runDirWithBetaFolders/$BHMAS_betaPrefix${BETAVALUES_COPY[$INDEX]}/$BHMAS_outputFilename

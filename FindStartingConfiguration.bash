@@ -4,7 +4,7 @@
 
 function FindConfigurationGlobalPathFromWhichToStartTheSimulation()
 {
-    for BETA in "${BETAVALUES[@]}"; do
+    for BETA in "${BHMAS_betaValues[@]}"; do
         if [ "$BHMAS_betaPostfix" == "" ]; then #Old nomenclature case: no beta postfix!
             local FOUND_CONFIGURATIONS=( $(ls $BHMAS_thermConfsGlobalPath | grep "^conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA}.*") )
             if [ ${#FOUND_CONFIGURATIONS[@]} -eq 0 ]; then

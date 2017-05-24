@@ -161,7 +161,7 @@ elif [ $BHMAS_accRateReportOption = 'TRUE' ]; then
 elif [ $BHMAS_cleanOutputFilesOption = 'TRUE' ]; then
 
     if [ $BHMAS_cleanAllOutputFiles = 'TRUE' ]; then
-        BETAVALUES=( $( ls $BHMAS_runDirWithBetaFolders | grep "^${BHMAS_betaPrefix}${BHMAS_betaRegex}" | awk '{print substr($1,2)}') )
+        BHMAS_betaValues=( $( ls $BHMAS_runDirWithBetaFolders | grep "^${BHMAS_betaPrefix}${BHMAS_betaRegex}" | awk '{print substr($1,2)}') )
     else
         ParseBetasFile
     fi

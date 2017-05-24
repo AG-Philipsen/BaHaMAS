@@ -12,10 +12,10 @@ function ProduceInputFileAndJobScriptForEachBeta_SLURM()
     #---------------------------------------------------------------------------------------------------------------------#
     #NOTE: Since this function has to iterate over the betas either doing something and putting the value into
     #      BHMAS_betaValuesToBeSubmitted or putting the beta value into BHMAS_problematicBetaValues, it is better to make a local copy
-    #      of BETAVALUES in order not to alter the original global array. Actually on the LOEWE the jobs are packed
+    #      of BHMAS_betaValues in order not to alter the original global array. Actually on the LOEWE the jobs are packed
     #      and this implies that whenever a problematic beta is encoutered it MUST be removed from the betavalues array
     #      (otherwise the authomatic packing would fail in the sense that it would include a problematic beta).
-    local BETAVALUES_COPY=(${BETAVALUES[@]})
+    local BETAVALUES_COPY=(${BHMAS_betaValues[@]})
     #---------------------------------------------------------------------------------------------------------------------#
     for INDEX in "${!BETAVALUES_COPY[@]}"; do
         local HOME_BETADIRECTORY="$BHMAS_submitDirWithBetaFolders/$BHMAS_betaPrefix${BETAVALUES_COPY[$INDEX]}"
@@ -51,7 +51,7 @@ function ProduceInputFileAndJobScriptForEachBeta_SLURM()
 function ProcessBetaValuesForSubmitOnly_SLURM()
 {
     #-----------------------------------------#
-    local BETAVALUES_COPY=(${BETAVALUES[@]})
+    local BETAVALUES_COPY=(${BHMAS_betaValues[@]})
     #-----------------------------------------#
     for BETA in "${!BETAVALUES_COPY[@]}"; do
         local HOME_BETADIRECTORY="$BHMAS_submitDirWithBetaFolders/$BHMAS_betaPrefix${BETAVALUES_COPY[$BETA]}"
@@ -88,7 +88,7 @@ function ProcessBetaValuesForSubmitOnly_SLURM()
 function __static__GetStatusOfJobsContainingBetavalues_SLURM()
 {
     local JOBINFO_STRING="$(squeue --noheader -u $(whoami) -o "%i@%j@%T")"
-    for BETA in ${BETAVALUES[@]}; do
+    for BETA in ${BHMAS_betaValues[@]}; do
         # in sed !d deletes the non matching entries -> here we keep jobs with desired beta, seed and parameters
         STATUS_OF_JOBS_CONTAINING_BETA_VALUES["$BETA"]="$(sed '/'$BHMAS_betaPrefix${BETA%%_*}'/!d; /'$(cut -d'_' -f2 <<< "$BETA")'/!d; /'$BHMAS_parametersString'/!d' <<< "$JOBINFO_STRING")"
     done
@@ -179,7 +179,7 @@ function ProcessBetaValuesForContinue_SLURM()
     declare -A STATUS_OF_JOBS_CONTAINING_BETA_VALUES
     __static__GetStatusOfJobsContainingBetavalues_SLURM
 
-    for BETA in ${BETAVALUES[@]}; do
+    for BETA in ${BHMAS_betaValues[@]}; do
         #-------------------------------------------------------------------------#
         local WORK_BETADIRECTORY="$BHMAS_runDirWithBetaFolders/$BHMAS_betaPrefix$BETA"
         local HOME_BETADIRECTORY="$BHMAS_submitDirWithBetaFolders/$BHMAS_betaPrefix$BETA"
@@ -589,7 +589,7 @@ function ProcessBetaValuesForInversion_SLURM()
 
     local LOCAL_BHMAS_betaValuesToBeSubmitted=()
 
-    for BETA in ${BETAVALUES[@]}; do
+    for BETA in ${BHMAS_betaValues[@]}; do
         #-------------------------------------------------------------------------#
         local WORK_BETADIRECTORY="$BHMAS_runDirWithBetaFolders/$BHMAS_betaPrefix$BETA"
         local NUMBER_OF_CONF_IN_BETADIRECTORY=$(find $WORK_BETADIRECTORY -regex "$WORK_BETADIRECTORY/conf[.][0-9]*" | wc -l)

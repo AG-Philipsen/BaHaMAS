@@ -17,7 +17,6 @@ function ParseBetasFile()
         fi
     done
 
-    BETAVALUES=()
     local SEED_ARRAY_TEMP=()
     local BHMAS_scaleZeroIntegrationSteps_TEMP=()
     local BHMAS_scaleOneIntegrationSteps_TEMP=()
@@ -48,7 +47,7 @@ function ParseBetasFile()
             * ) cecho lr "\n String " emph "MP=(*,*)" " specified multiple times per line in betasfile! Aborting...\n"; exit -1;;
         esac
         #Read the rest
-        BETAVALUES+=( $(awk '{print $1}' <<< "$LINE") )
+        BHMAS_betaValues+=( $(awk '{print $1}' <<< "$LINE") )
         if [ $BHMAS_useMultipleChains == "FALSE" ]; then
             BHMAS_scaleZeroIntegrationSteps_TEMP+=( $(awk '{print $2}' <<< "$LINE") )
             BHMAS_scaleOneIntegrationSteps_TEMP+=( $(awk '{print $3}' <<< "$LINE") )
@@ -61,13 +60,13 @@ function ParseBetasFile()
     IFS=$OLD_IFS     # restore default field separator
 
     #Check whether the entries in the file have the right format, otherwise abort
-    if [ ${#BETAVALUES[@]} -eq 0 ]; then
+    if [ ${#BHMAS_betaValues[@]} -eq 0 ]; then
         cecho lr "\n  No beta values in betas file. Aborting...\n"
         exit -1
     fi
 
     #NOTE: The following check on beta is redundant ---> TODO: Think deeply about and in case remove it!
-    for BETA in ${BETAVALUES[@]}; do
+    for BETA in ${BHMAS_betaValues[@]}; do
         if [[ ! $BETA =~ ^[[:digit:]].[[:digit:]]{4}$ ]]; then
             cecho lr "\n Invalid beta entry in betas file! Aborting...\n"
             exit -1
@@ -75,7 +74,7 @@ function ParseBetasFile()
     done
 
     if [ $BHMAS_useMultipleChains == "TRUE" ]; then
-        if [ ${#SEED_ARRAY_TEMP[@]} -ne ${#BETAVALUES[@]} ]; then
+        if [ ${#SEED_ARRAY_TEMP[@]} -ne ${#BHMAS_betaValues[@]} ]; then
             cecho lr "\n  Number of provided seeds differ from the number of provided beta values in betas file. Aborting...\n"
             exit -1
         fi
@@ -100,9 +99,9 @@ function ParseBetasFile()
         #      are used. In the case in which the first integrator steps is a 4-digit number, the script will do its job without
         #      throwing any exception. We didn't cure this case since it is a very remote case................
 
-        #Modify the content of BETAVALUES[@] from x.xxxx to x.xxxx_syyyy in order to use this new label in the associative arrays everyehere!
-        for INDEX in "${!BETAVALUES[@]}"; do
-            BETAVALUES[$INDEX]="${BETAVALUES[$INDEX]}_s${SEED_ARRAY_TEMP[$INDEX]}$BHMAS_betaPostfix"
+        #Modify the content of BHMAS_betaValues[@] from x.xxxx to x.xxxx_syyyy in order to use this new label in the associative arrays everyehere!
+        for INDEX in "${!BHMAS_betaValues[@]}"; do
+            BHMAS_betaValues[$INDEX]="${BHMAS_betaValues[$INDEX]}_s${SEED_ARRAY_TEMP[$INDEX]}$BHMAS_betaPostfix"
         done
     fi
 
@@ -119,25 +118,25 @@ function ParseBetasFile()
             fi
         done
 
-        if [ ${#BHMAS_scaleZeroIntegrationSteps_TEMP[@]} -ne ${#BETAVALUES[@]} ] || [ ${#BHMAS_scaleOneIntegrationSteps_TEMP[@]} -ne ${#BETAVALUES[@]} ]; then
+        if [ ${#BHMAS_scaleZeroIntegrationSteps_TEMP[@]} -ne ${#BHMAS_betaValues[@]} ] || [ ${#BHMAS_scaleOneIntegrationSteps_TEMP[@]} -ne ${#BHMAS_betaValues[@]} ]; then
             cecho lr "\n Integrators steps not specified for ALL beta in betas file! Aborting...\n"
             exit -1
         fi
 
         #Now that all the checks have been done, build associative arrays for later use of integration steps
-        for INDEX in "${!BETAVALUES[@]}"; do
-            BHMAS_scaleZeroIntegrationSteps["${BETAVALUES[$INDEX]}"]="${BHMAS_scaleZeroIntegrationSteps_TEMP[$INDEX]}"
-            BHMAS_scaleOneIntegrationSteps["${BETAVALUES[$INDEX]}"]="${BHMAS_scaleOneIntegrationSteps_TEMP[$INDEX]}"
+        for INDEX in "${!BHMAS_betaValues[@]}"; do
+            BHMAS_scaleZeroIntegrationSteps["${BHMAS_betaValues[$INDEX]}"]="${BHMAS_scaleZeroIntegrationSteps_TEMP[$INDEX]}"
+            BHMAS_scaleOneIntegrationSteps["${BHMAS_betaValues[$INDEX]}"]="${BHMAS_scaleOneIntegrationSteps_TEMP[$INDEX]}"
         done
     else
         #Build associative arrays for later use of integration steps with the same value for all betas
-        for INDEX in "${!BETAVALUES[@]}"; do
-            BHMAS_scaleZeroIntegrationSteps["${BETAVALUES[$INDEX]}"]=$INTSTEPS0
-            BHMAS_scaleOneIntegrationSteps["${BETAVALUES[$INDEX]}"]=$INTSTEPS1
+        for INDEX in "${!BHMAS_betaValues[@]}"; do
+            BHMAS_scaleZeroIntegrationSteps["${BHMAS_betaValues[$INDEX]}"]=$INTSTEPS0
+            BHMAS_scaleOneIntegrationSteps["${BHMAS_betaValues[$INDEX]}"]=$INTSTEPS1
         done
     fi
 
-    for INDEX in "${!BETAVALUES[@]}"; do
+    for INDEX in "${!BHMAS_betaValues[@]}"; do
         local TEMP_STR=${CONTINUE_RESUMETRAJ_TEMP[$INDEX]}
         if [[ $TEMP_STR != "notFound" ]]; then
             TEMP_STR=${TEMP_STR#"resumefrom="}
@@ -146,7 +145,7 @@ function ParseBetasFile()
                 exit -1
             fi
             #Build associative array for later use
-            BHMAS_trajectoriesToBeResumedFrom["${BETAVALUES[$INDEX]}"]="$TEMP_STR"
+            BHMAS_trajectoriesToBeResumedFrom["${BHMAS_betaValues[$INDEX]}"]="$TEMP_STR"
         fi
         TEMP_STR=${MASS_PRECONDITIONING_TEMP[$INDEX]}
         if [[ $TEMP_STR != "notFound" ]]; then
@@ -158,13 +157,13 @@ function ParseBetasFile()
                       " expression " emph  '^MP=([[:digit:]]{1,2},[[:digit:]]{3,4})$' "! Aborting...\n"
                 exit -1
             fi
-            BHMAS_massPreconditioningValues["${BETAVALUES[$INDEX]}"]="$TEMP_STR"
+            BHMAS_massPreconditioningValues["${BHMAS_betaValues[$INDEX]}"]="$TEMP_STR"
         fi
     done
 
     cecho lc "\n============================================================================================================"
     cecho lp " Read beta values:"
-    for BETA in ${BETAVALUES[@]}; do
+    for BETA in ${BHMAS_betaValues[@]}; do
         cecho -n "  - $BETA\t [Integrator steps ${BHMAS_scaleZeroIntegrationSteps[$BETA]}-${BHMAS_scaleOneIntegrationSteps[$BETA]}]"
         if KeyInArray $BETA BHMAS_trajectoriesToBeResumedFrom; then
             cecho -n "$(printf "   [resume from tr. %+6s]" "${BHMAS_trajectoriesToBeResumedFrom[$BETA]}")"
