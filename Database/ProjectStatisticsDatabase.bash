@@ -568,9 +568,9 @@ if(criticalSituation ==1){exit 1}else{exit 0}
         }' $PROJECT_DATABASE_FILE
 
         if [ $? -ne 0 ]; then
-            cecho -d lr "\n\t\t\t"
+            cecho -d -n lr "\n\t\t\t"
         else
-            cecho -d wg "\n\t\t\t"
+            cecho -d -n wg "\n\t\t\t"
         fi
         cecho "Use " B "-" U "ds" uU uB " | " B "--" U "dataBase" uU " --" U "show" uU uB " option to display set of simulations.\n"
     fi
