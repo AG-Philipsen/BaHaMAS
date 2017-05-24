@@ -9,7 +9,7 @@
 
 function DeclareOutputRelatedGlobalVariables()
 {
-    readonly BHMAS_colouredOutput='TRUE'
+    readonly BHMAS_coloredOutput='TRUE'
 }
 
 function DeclareUserDefinedGlobalVariables()
@@ -47,7 +47,7 @@ function DeclareUserDefinedGlobalVariables()
 
 # Documentation:
 #
-#     BHMAS_colouredOutput             -->  it can be 'TRUE' or 'FALSE' and can be used to disable coloured output
+#     BHMAS_coloredOutput              -->  it can be 'TRUE' or 'FALSE' and can be used to disable coloured output
 #     BHMAS_userEmail                  -->  mail to which job information (e.g. failures) is sent to
 #     BHMAS_submitDiskGlobalPath       -->  global path to the disk from which the jobs are submitted (see further informations below)
 #     BHMAS_runDiskGlobalPath          -->  global path to the disk from which the jobs are run (see further informations below)

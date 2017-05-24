@@ -19,17 +19,17 @@
 #------------------------------------------------------------------------------------------------------#
 # Load auxiliary bash files that will be used.
 BaHaMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"
-source ${BaHaMAS_repositoryTopLevelPath}/SystemRequirements.bash          || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/UtilityFunctions.bash            || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/GlobalVariables.bash             || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/CheckGlobalVariables.bash        || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/OutputFunctionality.bash         || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/PathManagementFunctionality.bash || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/FindClusterScheduler.bash        || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParser.bash           || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/AuxiliaryFunctions.bash          || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/AcceptanceRateReport.bash        || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/ProjectStatisticsDatabase.bash   || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/SystemRequirements.bash                   || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/UtilityFunctions.bash                     || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/GlobalVariables.bash                      || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/CheckGlobalVariables.bash                 || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/OutputFunctionality.bash                  || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/PathManagementFunctionality.bash          || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/FindClusterScheduler.bash                 || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/MainParser.bash        || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/AuxiliaryFunctions.bash                   || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/AcceptanceRateReport.bash                 || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/Database/ProjectStatisticsDatabase.bash   || exit -2
 #------------------------------------------------------------------------------------------------------#
 # User file to be sourced depending on test mode
 if [ -n "${BaHaMAS_testModeOn:+x}" ] && [ ${BaHaMAS_testModeOn} = 'TRUE' ]; then

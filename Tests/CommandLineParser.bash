@@ -2,7 +2,7 @@
 #   Copyright (c)  2017  Alessandro Sciarra   #
 #---------------------------------------------#
 
-source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParser_aux.bash
+source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/CommonFunctionality.bash || exit -2
 
 function __static__PrintInvalidOptionErrorAndExit()
 {

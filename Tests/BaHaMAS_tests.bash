@@ -17,7 +17,7 @@
 shopt -s extglob
 
 #This is to have cecho functionality active here
-readonly BHMAS_colouredOutput='TRUE'
+readonly BHMAS_coloredOutput='TRUE'
 
 #Retrieve information from git
 readonly BaHaMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"
@@ -90,7 +90,7 @@ availableTests['invertConfs-some']='--invertConfigurations --walltime 1d'
 availableTests['database-help']='--helpDatabase'
 availableTests['database-display']='--database --sum'
 availableTests['database-local']='--database --local'
-availableTests['database-filter1']='--database --type NC --ns 18 --beta 5.4360 '
+availableTests['database-filter1']='--database --type NC --ns 18 --beta 5.4360'
 availableTests['database-filter2']='--database --status RUNNING --lastTraj 115'
 availableTests['database-report']='--database --report'
 availableTests['database-update']='--database --update'

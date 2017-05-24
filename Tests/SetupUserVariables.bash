@@ -4,7 +4,7 @@
 
 function DeclareOutputRelatedGlobalVariables()
 {
-    readonly BHMAS_colouredOutput='TRUE'
+    readonly BHMAS_coloredOutput='TRUE'
 }
 
 function DeclareUserDefinedGlobalVariablesForTests()

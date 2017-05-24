@@ -2,7 +2,8 @@
 #       --startcondition and/or --host_seed (CL2QCD) one should think whether
 #       the continue part should be modified or not.
 
-source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParser_aux.bash
+source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/CommonFunctionality.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/MainHelper.bash          || exit -2
 
 function __static__PrintInvalidOptionErrorAndExit()
 {
@@ -40,7 +41,7 @@ function ParseCommandLineOption()
     while [ "${1:-}" != "" ]; do
         case $1 in
             -h | --help )
-                PrintHelper
+                PrintMainHelper
                 exit 0
                 shift;;
 

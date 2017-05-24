@@ -65,11 +65,11 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
     done
 
     #Check variables values (those not checked have no requirement at this point)
-    if [ "$BHMAS_colouredOutput" != 'TRUE' ] && [ "$BHMAS_colouredOutput" != 'FALSE' ]; then
-        #Since in the following we use cecho which rely on the variable "BHMAS_colouredOutput",
+    if [ "$BHMAS_coloredOutput" != 'TRUE' ] && [ "$BHMAS_coloredOutput" != 'FALSE' ]; then
+        #Since in the following we use cecho which rely on the variable "BHMAS_coloredOutput",
         #if this was wrongly set, let us set it to 'FALSE' but still report on it
-        BHMAS_colouredOutput='FALSE'
-        cecho lr "\n " B "BHMAS_colouredOutput" uB " variable must be set either to " ly "TRUE" lr " or to " ly "FALSE"
+        BHMAS_coloredOutput='FALSE'
+        cecho lr "\n " B "BHMAS_coloredOutput" uB " variable must be set either to " ly "TRUE" lr " or to " ly "FALSE"
         mustReturn='FALSE'
     fi
     if [ "$BHMAS_useRationalApproxFiles" != 'TRUE' ] && [ "$BHMAS_useRationalApproxFiles" != 'FALSE' ]; then

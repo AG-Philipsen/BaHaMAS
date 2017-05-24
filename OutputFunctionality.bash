@@ -96,7 +96,7 @@ function cecho()
     __static__SetFormatCodes
     __static__SetColorCodes
     __static__SetEmphasizeCodes
-    while [ "${1:-}" != '' ]; do
+    while [ $# -ne 0 ]; do
         case "$1" in
             #Font format
             B | U | uB | uU )
@@ -120,12 +120,12 @@ function cecho()
         esac
         shift
         if [ "$format" != '' ]; then
-            [ "$BHMAS_colouredOutput" = 'TRUE' ] && outputString+="$format"
+            [ "$BHMAS_coloredOutput" = 'TRUE' ] && outputString+="$format"
         fi
         if [ "$text" != '' ]; then
             outputString+="$text"
             if [ $restore = 'TRUE' ]; then
-                [ "$BHMAS_colouredOutput" = 'TRUE' ] && outputString+="$previousFormat"
+                [ "$BHMAS_coloredOutput" = 'TRUE' ] && outputString+="$previousFormat"
             fi
             restore='FALSE'
         fi
