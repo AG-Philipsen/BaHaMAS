@@ -56,11 +56,11 @@ function ProduceInverterJobscript_SLURM()
 
     __static__AddToInverterJobscriptFile "#SBATCH --ntasks=$BHMAS_GPUsPerNode" ""
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-        __static__AddToInverterJobscriptFile "dir$INDEX=${HOME_DIR_WITH_BETAFOLDERS}/$BHMAS_betaPrefix${BETA_FOR_JOBSCRIPT[$INDEX]}"
+        __static__AddToInverterJobscriptFile "dir$INDEX=${BHMAS_submitDirWithBetaFolders}/$BHMAS_betaPrefix${BETA_FOR_JOBSCRIPT[$INDEX]}"
     done
     __static__AddToInverterJobscriptFile ""
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-        __static__AddToInverterJobscriptFile "workdir$INDEX=${WORK_DIR_WITH_BETAFOLDERS}/$BHMAS_betaPrefix${BETA_FOR_JOBSCRIPT[$INDEX]}"
+        __static__AddToInverterJobscriptFile "workdir$INDEX=${BHMAS_runDirWithBetaFolders}/$BHMAS_betaPrefix${BETA_FOR_JOBSCRIPT[$INDEX]}"
     done
     __static__AddToInverterJobscriptFile\
         ""\
@@ -87,7 +87,7 @@ function ProduceInverterJobscript_SLURM()
         ""\
         "# TODO: this is necessary because the log file is produced in the directoy"\
         "#       of the exec. Copying it later does not guarantee that it is still the same..."\
-        "echo \"Copy executable to beta directories in ${WORK_DIR_WITH_BETAFOLDERS}/${BHMAS_betaPrefix}x.xxxx...\""
+        "echo \"Copy executable to beta directories in ${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}x.xxxx...\""
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
         __static__AddToInverterJobscriptFile "rm -f \$dir$INDEX/$INVERTER_FILENAME && cp -a $BHMAS_inverterGlobalPath \$dir$INDEX || exit 2"
     done
@@ -104,24 +104,24 @@ function ProduceInverterJobscript_SLURM()
         ""\
         "# Run jobs from different directories"
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-        #The following check is done twice. During the creation of the jobscript for the case in which the $SRUN_COMMANDSFILE_FOR_INVERSION does not exist from the beginning on and
+        #The following check is done twice. During the creation of the jobscript for the case in which the $BHMAS_inversionSrunCommandsFilename does not exist from the beginning on and
         #in the jobscript itself for the case in which it exists during the creation of the jobscript but accidentally gets deleted later on after the creation.
-        #if [ ! -e $workdir$INDEX/$SRUN_COMMANDSFILE_FOR_INVERSION ]; then #SHOULD BE LIKE THIS??
-        if [ ! -e ${WORK_DIR_WITH_BETAFOLDERS}/$BHMAS_betaPrefix${BETA_FOR_JOBSCRIPT[$INDEX]}/$SRUN_COMMANDSFILE_FOR_INVERSION ]; then #I THINK WORK_BETADIRECTORY has to be replaced!!!!
-            cecho lr "File ${WORK_DIR_WITH_BETAFOLDERS}/$BHMAS_betaPrefix${BETA_FOR_JOBSCRIPT[$INDEX]}/$SRUN_COMMANDSFILE_FOR_INVERSION with execution commands for the inversion does not exist...aborting"
+        #if [ ! -e $workdir$INDEX/$BHMAS_inversionSrunCommandsFilename ]; then #SHOULD BE LIKE THIS??
+        if [ ! -e ${BHMAS_runDirWithBetaFolders}/$BHMAS_betaPrefix${BETA_FOR_JOBSCRIPT[$INDEX]}/$BHMAS_inversionSrunCommandsFilename ]; then #I THINK WORK_BETADIRECTORY has to be replaced!!!!
+            cecho lr "File ${BHMAS_runDirWithBetaFolders}/$BHMAS_betaPrefix${BETA_FOR_JOBSCRIPT[$INDEX]}/$BHMAS_inversionSrunCommandsFilename with execution commands for the inversion does not exist...aborting"
             exit 30
         fi
         __static__AddToInverterJobscriptFile\
             "mkdir -p \$workdir$INDEX || exit 2"\
             "cd \$workdir$INDEX"\
             "pwd"\
-            "if [ ! -e \$workdir$INDEX/$SRUN_COMMANDSFILE_FOR_INVERSION ]; then"\
-            "  echo \"File \$workdir$INDEX/$SRUN_COMMANDSFILE_FOR_INVERSION with execution commands for the inversion does not exist...aborting\""\
+            "if [ ! -e \$workdir$INDEX/$BHMAS_inversionSrunCommandsFilename ]; then"\
+            "  echo \"File \$workdir$INDEX/$BHMAS_inversionSrunCommandsFilename with execution commands for the inversion does not exist...aborting\""\
             "  exit 30"\
             "fi"\
             "OLD_IFS=\$IFS"\
             "IFS=\$'\n'"\
-            "for line in \$(cat \$workdir$INDEX/$SRUN_COMMANDSFILE_FOR_INVERSION); do"\
+            "for line in \$(cat \$workdir$INDEX/$BHMAS_inversionSrunCommandsFilename); do"\
             "    IFS=\$OLD_IFS #Restore here old IFS to give separated options (and not only one)to CL2QCD!"\
             "    if hash mbuffer 2>/dev/null; then"\
             "        time \$dir$INDEX/$INVERTER_FILENAME \$line --device=$INDEX 2>> \$dir$INDEX/\$errFile | mbuffer -q -m2M >> \$dir$INDEX/\$outFile"\

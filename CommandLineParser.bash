@@ -96,7 +96,7 @@ function ParseCommandLineOption()
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
-                    BETASFILE="$2"
+                    BHMAS_betasFilename="$2"
                 fi
                 shift 2 ;;
 
@@ -115,7 +115,7 @@ function ParseCommandLineOption()
                 if [[ ! ${2:-} =~ ^[0-9]+$ ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
-                    MEASUREMENTS=$2
+                    BHMAS_numberOfTrajectories=$2
                 fi
                 shift 2 ;;
 
@@ -123,7 +123,7 @@ function ParseCommandLineOption()
                 if [[ ! ${2:-} =~ ^[0-9]+$ ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
-                    NSAVE=$2
+                    BHMAS_checkpointFrequency=$2
                 fi
                 shift 2 ;;
 
@@ -131,7 +131,7 @@ function ParseCommandLineOption()
                 if [[ ! ${2:-} =~ ^[0-9]+$ ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
-                    NSAVEPOINT=$2
+                    BHMAS_savepointFrequency=$2
                 fi
                 shift 2 ;;
 
@@ -160,11 +160,11 @@ function ParseCommandLineOption()
                 shift 2 ;;
 
             -p | --doNotMeasurePbp )
-                MEASURE_PBP="FALSE"; shift ;;
+                BHMAS_measurePbp="FALSE"; shift ;;
 
             --doNotUseMultipleChains )
-                USE_MULTIPLE_CHAINS="FALSE"
-                if [ $THERMALIZE = "FALSE" ]; then
+                BHMAS_useMultipleChains="FALSE"
+                if [ $BHMAS_thermalizeOption = "FALSE" ]; then
                     BHMAS_betaPostfix=""
                 fi
                 shift ;;
@@ -195,27 +195,27 @@ function ParseCommandLineOption()
 
             -s | --submit )
                 mutuallyExclusiveOptionsPassed+=( $1 )
-                SUBMIT="TRUE"
+                BHMAS_submitOption="TRUE"
                 shift;;
 
             --submitonly )
                 mutuallyExclusiveOptionsPassed+=( $1 )
-                SUBMITONLY="TRUE"
+                BHMAS_submitonlyOption="TRUE"
                 shift;;
 
             -t | --thermalize )
                 mutuallyExclusiveOptionsPassed+=( $1 )
-                THERMALIZE="TRUE"
+                BHMAS_thermalizeOption="TRUE"
                 shift;;
 
             -c | --continue )
                 mutuallyExclusiveOptionsPassed+=( $1 )
-                CONTINUE="TRUE"
+                BHMAS_continueOption="TRUE"
                 if [[ ! ${2:-} =~ ^(-|$) ]]; then
                     if [[ ! $2 =~ ^[0-9]+$ ]];then
                         __static__PrintOptionSpecificationErrorAndExit "$1"
                     else
-                        CONTINUE_NUMBER=$2
+                        BHMAS_trajectoryNumberUpToWhichToContinue=$2
                         shift
                     fi
                 fi
@@ -223,12 +223,12 @@ function ParseCommandLineOption()
 
             -C | --continueThermalization )
                 mutuallyExclusiveOptionsPassed+=( $1 )
-                CONTINUE_THERMALIZATION="TRUE"
+                BHMAS_continueThermalizationOption="TRUE"
                 if [[ ! ${2:-} =~ ^(-|$) ]]; then
                     if [[ ! $2 =~ ^[0-9]+$ ]];then
                         __static__PrintOptionSpecificationErrorAndExit "$1"
                     else
-                        CONTINUE_NUMBER=$2
+                        BHMAS_trajectoryNumberUpToWhichToContinue=$2
                         shift
                     fi
                 fi
@@ -236,33 +236,33 @@ function ParseCommandLineOption()
 
             -l | --liststatus )
                 mutuallyExclusiveOptionsPassed+=( $1 )
-                LISTSTATUS="TRUE"
+                BHMAS_liststatusOption="TRUE"
                 shift;;
 
             --measureTime )
-                if [ $LISTSTATUS = "FALSE" ]; then
+                if [ $BHMAS_liststatusOption = "FALSE" ]; then
                     __static__PrintSecondaryOptionSpecificationErrorAndExit "-l | --liststatus" "$1"
                 else
-                    LISTSTATUS_MEASURE_TIME="TRUE"
+                    BHMAS_liststatusMeasureTimeOption="TRUE"
                 fi
                 shift ;;
 
             --showOnlyQueued )
-                if [ $LISTSTATUS = "FALSE" ]; then
+                if [ $BHMAS_liststatusOption = "FALSE" ]; then
                     __static__PrintSecondaryOptionSpecificationErrorAndExit "-l | --liststatus" "$1"
                 else
-                    LISTSTATUS_SHOW_ONLY_QUEUED="TRUE"
+                    BHMAS_liststatusShowOnlyQueuedOption="TRUE"
                 fi
                 shift ;;
 
             --accRateReport )
                 mutuallyExclusiveOptionsPassed+=( $1 )
-                ACCRATE_REPORT="TRUE"
+                BHMAS_accRateReportOption="TRUE"
                 if [[ ! ${2:-} =~ ^(-|$) ]]; then
                     if [[ ! $2 =~ ^[0-9]+$ ]];then
                         __static__PrintOptionSpecificationErrorAndExit "$1"
                     else
-                        INTERVAL=$2
+                        BHMAS_accRateReportInterval=$2
                         shift
                     fi
                 fi
@@ -270,25 +270,25 @@ function ParseCommandLineOption()
 
             --cleanOutputFiles )
                 mutuallyExclusiveOptionsPassed+=( $1 )
-                CLEAN_OUTPUT_FILES="TRUE"
+                BHMAS_cleanOutputFilesOption="TRUE"
                 shift ;;
 
             --all )
-                if [ $CLEAN_OUTPUT_FILES = "FALSE" ]; then
+                if [ $BHMAS_cleanOutputFilesOption = "FALSE" ]; then
                     __static__PrintSecondaryOptionSpecificationErrorAndExit "--cleanOutputFiles" "$1"
                 else
-                    SECONDARY_OPTION_ALL="TRUE"
+                    BHMAS_cleanAllOutputFiles="TRUE"
                 fi
                 shift ;;
 
             --completeBetasFile )
                 mutuallyExclusiveOptionsPassed+=( $1 )
-                COMPLETE_BETAS_FILE="TRUE"
+                BHMAS_completeBetasFileOption="TRUE"
                 if [[ ! ${2:-} =~ ^(-|$) ]]; then
                     if [[ ! $2 =~ ^[0-9]+$ ]];then
                         __static__PrintOptionSpecificationErrorAndExit "$1"
                     else
-                        NUMBER_OF_CHAINS_TO_BE_IN_THE_BETAS_FILE=$2
+                        BHMAS_numberOfChainsToBeInTheBetasFile=$2
                         shift
                     fi
                 fi
@@ -297,17 +297,17 @@ function ParseCommandLineOption()
             -U | --uncommentBetas | -u | --commentBetas )
                 mutuallyExclusiveOptionsPassed+=( $1 )
                 if [ $1 = '-U' ] || [ $1 = '--uncommentBetas' ]; then
-                    COMMENT_BETAS="FALSE"
-                    UNCOMMENT_BETAS="TRUE"
+                    BHMAS_commentBetasOption="FALSE"
+                    BHMAS_uncommentBetasOption="TRUE"
                 elif [ $1 = '-u' ] || [ $1 = '--commentBetas' ]; then
-                    UNCOMMENT_BETAS="FALSE"
-                    COMMENT_BETAS="TRUE"
+                    BHMAS_uncommentBetasOption="FALSE"
+                    BHMAS_commentBetasOption="TRUE"
                 fi
                 while [[ ! ${2:-} =~ ^(-|$) ]]; do
                     if [[ $2 =~ ^[0-9]\.[0-9]{4}_${BHMAS_seedPrefix}[0-9]{4}_(NC|fC|fH)$ ]]; then
-                        UNCOMMENT_BETAS_SEED_ARRAY+=( $2 )
+                        BHMAS_betasWithSeedToBeToggled+=( $2 )
                     elif [[ $2 =~ ^[0-9]\.[0-9]*$ ]]; then
-                        UNCOMMENT_BETAS_ARRAY+=( $(awk '{printf "%1.4f", $1}' <<< "$2") )
+                        BHMAS_betasToBeToggled+=( $(awk '{printf "%1.4f", $1}' <<< "$2") )
                     else
                         __static__PrintOptionSpecificationErrorAndExit "$1"
                     fi
@@ -317,14 +317,14 @@ function ParseCommandLineOption()
 
             -i | --invertConfigurations)
                 mutuallyExclusiveOptionsPassed+=( $1 )
-                INVERT_CONFIGURATIONS="TRUE"
+                BHMAS_invertConfigurationsOption="TRUE"
                 shift ;;
 
             -d | --database)
-                CALL_DATABASE="TRUE"
+                BHMAS_databaseOption="TRUE"
                 mutuallyExclusiveOptionsPassed+=( $1 )
                 shift
-                DATABASE_OPTIONS=( $@ )
+                BHMAS_optionsToBePassedToDatabase=( $@ )
                 shift $# ;;
 
             * )

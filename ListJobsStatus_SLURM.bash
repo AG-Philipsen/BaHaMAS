@@ -69,7 +69,7 @@ function __static__ExtractMetaInformationFromJOBNAME()
 function ListJobStatus_SLURM()
 {
 
-    # This function can be called by the JobHandler either in the LISTSTATUS setup or in the DATABASE setup.
+    # This function can be called by the JobHandler either in the BHMAS_liststatusOption setup or in the DATABASE setup.
     # The crucial difference is that in the first case the BHMAS_parametersString and BHMAS_parametersPath variable
     # must be the global ones, otherwise they have to be built on the basis of some given information.
     # Then we make this function accept one and ONLY ONE argument (given only in the DATABASE setup)
@@ -92,7 +92,7 @@ function ListJobStatus_SLURM()
     local JOBS_STATUS_FILE="jobs_status_$LOCAL_PARAMETERS_STRING.txt"
     rm -f $JOBS_STATUS_FILE
 
-    cecho -d "\n${DEFAULT_LISTSTATUS_COLOR}==============================================================================================================================================="
+    cecho -d "\n${BHMAS_defaultListstatusColor}==============================================================================================================================================="
     cecho -n -d lm "$(printf "%s\t\t  %s\t  %s\t   %s\t  %s\t%s\n\e[0m"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" "Last tr. finished" " Tr: # (time last|av.)")"
     printf "%s\t\t\t  %s\t  %s\t%s\t  %s\t%s\n"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" >> $JOBS_STATUS_FILE
 
@@ -113,7 +113,7 @@ function ListJobStatus_SLURM()
         local STATUS=( $(sed 's/ /\n/g' <<< "${JOB_METAINFORMATION_ARRAY[@]}" | grep "${LOCAL_PARAMETERS_STRING}" | grep "${BHMAS_betaPrefix}${BETA%_*}" | grep "postfix=${POSTFIX_FROM_FOLDER}|" | cut -d'|' -f4) )
 
         if [ ${#STATUS[@]} -eq 0 ]; then
-            [ $LISTSTATUS_SHOW_ONLY_QUEUED = "TRUE" ] && continue
+            [ $BHMAS_liststatusShowOnlyQueuedOption = "TRUE" ] && continue
             STATUS="notQueued"
         elif [ ${#STATUS[@]} -eq 1 ]; then
             STATUS=${STATUS[0]}
@@ -128,7 +128,7 @@ function ListJobStatus_SLURM()
         local STDOUTPUT_FILE=`ls -t1 $BHMAS_betaPrefix$BETA 2>/dev/null | awk -v filename="$HMC_FILENAME" 'BEGIN{regexp="^"filename".[[:digit:]]+.out$"}{if($1 ~ regexp){print $1}}' | head -n1`
         local STDOUTPUT_GLOBALPATH="$BHMAS_submitDiskGlobalPath/$BHMAS_projectSubpath$LOCAL_PARAMETERS_PATH/$BHMAS_betaPrefix$BETA/$STDOUTPUT_FILE"
         #-------------------------------------------------------------------------------------------------------------------------#
-        if [ $LISTSTATUS_MEASURE_TIME = "TRUE" ]; then
+        if [ $BHMAS_liststatusMeasureTimeOption = "TRUE" ]; then
             if [ -f $STDOUTPUT_GLOBALPATH ] && [[ $STATUS == "RUNNING" ]]; then
                 #Since in CL2QCD std. output there is only the time of saving and not the day, I have to go through the std. output and count the
                 #number of days (done looking at the hours). One could sum up all the tr. times but it is not really efficient!
@@ -236,13 +236,13 @@ function ListJobStatus_SLURM()
 
         printf \
             "$(ColorBeta)%-15s\t  \
-$(ColorClean $TO_BE_CLEANED)%8s${DEFAULT_LISTSTATUS_COLOR} \
-($(GoodAcc $ACCEPTANCE)%s %%${DEFAULT_LISTSTATUS_COLOR}) \
-[$(GoodAcc $ACCEPTANCE_LAST)%s %%${DEFAULT_LISTSTATUS_COLOR}] \
+$(ColorClean $TO_BE_CLEANED)%8s${BHMAS_defaultListstatusColor} \
+($(GoodAcc $ACCEPTANCE)%s %%${BHMAS_defaultListstatusColor}) \
+[$(GoodAcc $ACCEPTANCE_LAST)%s %%${BHMAS_defaultListstatusColor}] \
 %s-%s%s%s\t\
-$(ColorStatus $STATUS)%9s${DEFAULT_LISTSTATUS_COLOR}\t\
-$(ColorDeltaS $MAX_DELTAS)%9s${DEFAULT_LISTSTATUS_COLOR}\t   \
-$(ColorTime $TIME_FROM_LAST_MODIFICATION)%s${DEFAULT_LISTSTATUS_COLOR}      \
+$(ColorStatus $STATUS)%9s${BHMAS_defaultListstatusColor}\t\
+$(ColorDeltaS $MAX_DELTAS)%9s${BHMAS_defaultListstatusColor}\t   \
+$(ColorTime $TIME_FROM_LAST_MODIFICATION)%s${BHMAS_defaultListstatusColor}      \
 %6s \
 ( %s ) \
 \n\e[0m" \
@@ -263,7 +263,7 @@ $(ColorTime $TIME_FROM_LAST_MODIFICATION)%s${DEFAULT_LISTSTATUS_COLOR}      \
         fi
 
     done #Loop on BETA
-    cecho -d "${DEFAULT_LISTSTATUS_COLOR}==============================================================================================================================================="
+    cecho -d "${BHMAS_defaultListstatusColor}==============================================================================================================================================="
 }
 
 function GetShortenedBetaString()
@@ -281,40 +281,40 @@ function GetShortenedBetaString()
 
 function GoodAcc()
 {
-    awk -v tl="${TOO_LOW_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
-        -v l="${LOW_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
-        -v op="${OPTIMAL_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
-        -v h="${HIGH_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
-        -v th="${TOO_HIGH_ACCEPTANCE_LISTSTATUS_COLOR/\\/\\\\}" \
-        -v tlt="$TOO_LOW_ACCEPTANCE_THRESHOLD" \
-        -v lt="$LOW_ACCEPTANCE_THRESHOLD" \
-        -v ht="$HIGH_ACCEPTANCE_THRESHOLD" \
-        -v tht="$TOO_HIGH_ACCEPTANCE_THRESHOLD" '{if($1<tlt){print tl}else if($1<lt){print l}else if($1>tht){print th}else if($1>ht){print h}else{print op}}' <<< "$1"
+    awk -v tl="${BHMAS_tooLowAcceptanceListstatusColor/\\/\\\\}" \
+        -v l="${BHMAS_lowAcceptanceListstatusColor/\\/\\\\}" \
+        -v op="${BHMAS_optimalAcceptanceListstatusColor/\\/\\\\}" \
+        -v h="${BHMAS_highAcceptanceListstatusColor/\\/\\\\}" \
+        -v th="${BHMAS_tooHighAcceptanceListstatusColor/\\/\\\\}" \
+        -v tlt="$BHMAS_tooLowAcceptanceThreshold" \
+        -v lt="$BHMAS_lowAcceptanceThreshold" \
+        -v ht="$BHMAS_highAcceptanceThreshold" \
+        -v tht="$BHMAS_tooHighAcceptanceThreshold" '{if($1<tlt){print tl}else if($1<lt){print l}else if($1>tht){print th}else if($1>ht){print h}else{print op}}' <<< "$1"
 }
 
 function ColorStatus()
 {
     if [[ $1 == "RUNNING" ]]; then
-        printf $RUNNING_LISTSTATUS_COLOR
+        printf $BHMAS_runningListstatusColor
     elif [[ $1 == "PENDING" ]]; then
-        printf $PENDING_LISTSTATUS_COLOR
+        printf $BHMAS_pendingListstatusColor
     else
-        printf $DEFAULT_LISTSTATUS_COLOR
+        printf $BHMAS_defaultListstatusColor
     fi
 }
 
 function ColorTime()
 {
     if [[ ! $1 =~ ^[[:digit:]]+$ ]]; then
-        printf $DEFAULT_LISTSTATUS_COLOR
+        printf $BHMAS_defaultListstatusColor
     else
-        [ $1 -gt 450 ] && printf $STUCK_SIMULATION_LISTSTATUS_COLOR || printf $FINE_SIMULATION_LISTSTATUS_COLOR
+        [ $1 -gt 450 ] && printf $BHMAS_stuckSimulationListstatusColor || printf $BHMAS_fineSimulationListstatusColor
     fi
 }
 
 function ColorClean()
 {
-    [ $1 -eq 0 ] && printf $DEFAULT_LISTSTATUS_COLOR || printf $CLEANING_LISTSTATUS_COLOR
+    [ $1 -eq 0 ] && printf $BHMAS_defaultListstatusColor || printf $BHMAS_toBeCleanedListstatusColor
 }
 
 function ColorBeta()
@@ -332,7 +332,7 @@ function ColorBeta()
     local AUX1=$(printf "%s," "${OBSERVABLES_COLUMNS[@]}")
     local AUX2=$(printf "%s," "${!OBSERVABLES_COLUMNS[@]}")
     if [ ! -f $OUTPUTFILE_GLOBALPATH ]; then
-        printf $DEFAULT_LISTSTATUS_COLOR
+        printf $BHMAS_defaultListstatusColor
         return
     fi
 
@@ -340,11 +340,11 @@ function ColorBeta()
     local ERROR_CODE=$?
 
     if [ $ERROR_CODE -eq 0 ]; then
-        printf $DEFAULT_LISTSTATUS_COLOR
+        printf $BHMAS_defaultListstatusColor
     elif [ $ERROR_CODE -eq 1 ]; then
-        printf $WRONG_BETA_LISTSTATUS_COLOR
+        printf $BHMAS_wrongBetaListstatusColor
     else
-        printf $SUSPICIOUS_BETA_LISTSTATUS_COLOR
+        printf $BHMAS_suspiciousBetaListstatusColor
     fi
 
 }
@@ -353,12 +353,12 @@ function ColorBeta()
 function ColorDeltaS()
 {
     if [[ ! $1 =~ [+-]?[[:digit:]]+[.]?[[:digit:]]* ]]; then
-        printf $DEFAULT_LISTSTATUS_COLOR
+        printf $BHMAS_defaultListstatusColor
     else
-        if [ "$POSTFIX_FROM_FOLDER" == "continueWithNewChain" ] && [ $(awk -v threshold=$DELTA_S_THRESHOLD -v value=$1 'BEGIN{if(value >= threshold)print 1; else print 0;}') -eq 1 ]; then
-            printf $TOO_HIGH_DELTA_S_LISTSTATUS_COLOR
+        if [ "$POSTFIX_FROM_FOLDER" == "continueWithNewChain" ] && [ $(awk -v threshold=$BHMAS_deltaSThreshold -v value=$1 'BEGIN{if(value >= threshold)print 1; else print 0;}') -eq 1 ]; then
+            printf $BHMAS_tooHighDeltaSListstatusColor
         else
-            printf $DEFAULT_LISTSTATUS_COLOR
+            printf $BHMAS_defaultListstatusColor
         fi
     fi
 }

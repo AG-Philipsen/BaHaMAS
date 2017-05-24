@@ -839,25 +839,25 @@ function projectStatisticsDatabase()
             -v maxDsColorColumn="$((${COLUMNS[maxDsC]} -1 ))" \
             -v statusColorColumn="$((${COLUMNS[statusC]} -1 ))" \
             -v lastTrajColorColumn="$((${COLUMNS[lastTrajC]} -1 ))" \
-            -v defaultColor="${DEFAULT_LISTSTATUS_COLOR/e/033}" \
-            -v suspiciousBetaColor="${SUSPICIOUS_BETA_LISTSTATUS_COLOR/e/033}" \
-            -v wrongBetaColor="${WRONG_BETA_LISTSTATUS_COLOR/e/033}" \
-            -v tooLowAccColor="${TOO_LOW_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" \
-            -v lowAccColor="${LOW_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" \
-            -v optimalAccColor="${OPTIMAL_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" \
-            -v highAccColor="${HIGH_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" \
-            -v tooHighAccColor="${TOO_HIGH_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" \
-            -v tooHighMaxDsColor="${TOO_HIGH_DELTA_S_LISTSTATUS_COLOR/e/033}" \
-            -v runningColor="${RUNNING_LISTSTATUS_COLOR/e/033}" \
-            -v pendingColor="${PENDING_LISTSTATUS_COLOR/e/033}" \
-            -v toBeCleanedColor="${CLEANING_LISTSTATUS_COLOR/e/033}" \
-            -v stuckColor="${STUCK_SIMULATION_LISTSTATUS_COLOR/e/033}" \
-            -v fineColor="${FINE_SIMULATION_LISTSTATUS_COLOR/e/033}" \
-            -v tooLowAccThreshold="${TOO_LOW_ACCEPTANCE_THRESHOLD}" \
-            -v lowAccThreshold="${LOW_ACCEPTANCE_THRESHOLD}" \
-            -v highAccThreshold="${HIGH_ACCEPTANCE_THRESHOLD}" \
-            -v tooHighAccThreshold="${TOO_HIGH_ACCEPTANCE_THRESHOLD}" \
-            -v tooHighMaxDsThreshold="${DELTA_S_THRESHOLD}" '
+            -v defaultColor="${BHMAS_defaultListstatusColor/e/033}" \
+            -v suspiciousBetaColor="${BHMAS_suspiciousBetaListstatusColor/e/033}" \
+            -v wrongBetaColor="${BHMAS_wrongBetaListstatusColor/e/033}" \
+            -v tooLowAccColor="${BHMAS_tooLowAcceptanceListstatusColor/e/033}" \
+            -v lowAccColor="${BHMAS_lowAcceptanceListstatusColor/e/033}" \
+            -v optimalAccColor="${BHMAS_optimalAcceptanceListstatusColor/e/033}" \
+            -v highAccColor="${BHMAS_highAcceptanceListstatusColor/e/033}" \
+            -v tooHighAccColor="${BHMAS_tooHighAcceptanceListstatusColor/e/033}" \
+            -v tooHighMaxDsColor="${BHMAS_tooHighDeltaSListstatusColor/e/033}" \
+            -v runningColor="${BHMAS_runningListstatusColor/e/033}" \
+            -v pendingColor="${BHMAS_pendingListstatusColor/e/033}" \
+            -v toBeCleanedColor="${BHMAS_toBeCleanedListstatusColor/e/033}" \
+            -v stuckColor="${BHMAS_stuckSimulationListstatusColor/e/033}" \
+            -v fineColor="${BHMAS_fineSimulationListstatusColor/e/033}" \
+            -v tooLowAccThreshold="${BHMAS_tooLowAcceptanceThreshold}" \
+            -v lowAccThreshold="${BHMAS_lowAcceptanceThreshold}" \
+            -v highAccThreshold="${BHMAS_highAcceptanceThreshold}" \
+            -v tooHighAccThreshold="${BHMAS_tooHighAcceptanceThreshold}" \
+            -v tooHighMaxDsThreshold="${BHMAS_deltaSThreshold}" '
 BEGIN{
 filesToBeCleaned = 0
 simTooLowAcc = 0
@@ -974,64 +974,64 @@ if(criticalSituation ==1){exit 1}else{exit 0}
                     "Simulations on broken GPU")
                         local COLUMNS_TO_FILTER=( "$((${COLUMNS[betaC]} -1 ))" )
                         COLUMNS_TO_FILTER+=( "$((${COLUMNS[maxDsC]} -1 ))" )
-                        local VALUES_TO_MATCH=( "${WRONG_BETA_LISTSTATUS_COLOR/e/033}" )
-                        VALUES_TO_MATCH+=( "${TOO_HIGH_DELTA_S_LISTSTATUS_COLOR/e/033}" )
+                        local VALUES_TO_MATCH=( "${BHMAS_wrongBetaListstatusColor/e/033}" )
+                        VALUES_TO_MATCH+=( "${BHMAS_tooHighDeltaSListstatusColor/e/033}" )
                         ;;
                     "Simulations stuck (or finished)")
                         local COLUMNS_TO_FILTER=( "$((${COLUMNS[lastTrajC]} -1 ))" )
-                        local VALUES_TO_MATCH=( "${STUCK_SIMULATION_LISTSTATUS_COLOR/e/033}" )
+                        local VALUES_TO_MATCH=( "${BHMAS_stuckSimulationListstatusColor/e/033}" )
                         ;;
                     "Simulations with output file to be cleaned")
                         local COLUMNS_TO_FILTER=( "$((${COLUMNS[trajNoC]} -1 ))" )
-                        local VALUES_TO_MATCH=( "${CLEANING_LISTSTATUS_COLOR/e/033}" )
+                        local VALUES_TO_MATCH=( "${BHMAS_toBeCleanedListstatusColor/e/033}" )
                         ;;
                     "Simulations with too low acceptance rate")
                         local COLUMNS_TO_FILTER=( "$((${COLUMNS[accRateC]} -1 ))" )
-                        local VALUES_TO_MATCH=( "${TOO_LOW_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" )
+                        local VALUES_TO_MATCH=( "${BHMAS_tooLowAcceptanceListstatusColor/e/033}" )
                         ;;
                     "Simulations with low acceptance rate")
                         local COLUMNS_TO_FILTER=( "$((${COLUMNS[accRateC]} -1 ))" )
-                        local VALUES_TO_MATCH=( "${LOW_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" )
+                        local VALUES_TO_MATCH=( "${BHMAS_lowAcceptanceListstatusColor/e/033}" )
                         ;;
                     "Simulations with optimal acceptance rate")
                         local COLUMNS_TO_FILTER=( "$((${COLUMNS[accRateC]} -1 ))" )
-                        local VALUES_TO_MATCH=( "${OPTIMAL_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" )
+                        local VALUES_TO_MATCH=( "${BHMAS_optimalAcceptanceListstatusColor/e/033}" )
                         ;;
                     "Simulations with high acceptance rate")
                         local COLUMNS_TO_FILTER=( "$((${COLUMNS[accRateC]} -1 ))" )
-                        local VALUES_TO_MATCH=( "${HIGH_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" )
+                        local VALUES_TO_MATCH=( "${BHMAS_highAcceptanceListstatusColor/e/033}" )
                         ;;
                     "Simulations with too high acceptance rate")
                         local COLUMNS_TO_FILTER=( "$((${COLUMNS[accRateC]} -1 ))" )
-                        local VALUES_TO_MATCH=( "${TOO_HIGH_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" )
+                        local VALUES_TO_MATCH=( "${BHMAS_tooHighAcceptanceListstatusColor/e/033}" )
                         ;;
                     "Simulations with too low acceptance rate in last 1k trajectories")
                         local COLUMNS_TO_FILTER=( "$((${COLUMNS[accRateLast1KC]} -1 ))" )
-                        local VALUES_TO_MATCH=( "${TOO_LOW_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" )
+                        local VALUES_TO_MATCH=( "${BHMAS_tooLowAcceptanceListstatusColor/e/033}" )
                         ;;
                     "Simulations with low acceptance rate in last 1k trajectories")
                         local COLUMNS_TO_FILTER=( "$((${COLUMNS[accRateLast1KC]} -1 ))" )
-                        local VALUES_TO_MATCH=( "${LOW_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" )
+                        local VALUES_TO_MATCH=( "${BHMAS_lowAcceptanceListstatusColor/e/033}" )
                         ;;
                     "Simulations with optimal acceptance rate in last 1k trajectories")
                         local COLUMNS_TO_FILTER=( "$((${COLUMNS[accRateLast1KC]} -1 ))" )
-                        local VALUES_TO_MATCH=( "${OPTIMAL_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" )
+                        local VALUES_TO_MATCH=( "${BHMAS_optimalAcceptanceListstatusColor/e/033}" )
                         ;;
                     "Simulations with high acceptance rate in last 1k trajectories")
                         local COLUMNS_TO_FILTER=( "$((${COLUMNS[accRateLast1KC]} -1 ))" )
-                        local VALUES_TO_MATCH=( "${HIGH_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" )
+                        local VALUES_TO_MATCH=( "${BHMAS_highAcceptanceListstatusColor/e/033}" )
                         ;;
                     "Simulations with too high acceptance rate in last 1k trajectories")
                         local COLUMNS_TO_FILTER=( "$((${COLUMNS[accRateLast1KC]} -1 ))" )
-                        local VALUES_TO_MATCH=( "${TOO_HIGH_ACCEPTANCE_LISTSTATUS_COLOR/e/033}" )
+                        local VALUES_TO_MATCH=( "${BHMAS_tooHighAcceptanceListstatusColor/e/033}" )
                         ;;
                     "Running simulations")
                         local COLUMNS_TO_FILTER=( "$((${COLUMNS[statusC]} -1 ))" )
-                        local VALUES_TO_MATCH=( "${RUNNING_LISTSTATUS_COLOR/e/033}" )
+                        local VALUES_TO_MATCH=( "${BHMAS_runningListstatusColor/e/033}" )
                         ;;
                     "Pending simulations")
                         local COLUMNS_TO_FILTER=( "$((${COLUMNS[statusC]} -1 ))" )
-                        local VALUES_TO_MATCH=( "${PENDING_LISTSTATUS_COLOR/e/033}" )
+                        local VALUES_TO_MATCH=( "${BHMAS_pendingListstatusColor/e/033}" )
                         ;;
                 esac
                 break

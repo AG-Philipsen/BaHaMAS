@@ -50,7 +50,7 @@ function ProduceInputFile_SLURM()
         "solver=cg"\
         "cgmax=15000"\
         "measure_correlators=0"
-    if [ $MEASURE_PBP = "TRUE" ]; then
+    if [ $BHMAS_measurePbp = "TRUE" ]; then
         __static__AddToInputFile \
             "measure_pbp=1"\
             "sourcetype=volume"\
@@ -71,15 +71,15 @@ function ProduceInputFile_SLURM()
         __static__AddToInputFile \
             "iter_refresh=2000"\
             "use_merge_kernels_fermion=1"
-        if KeyInArray "${BETAVALUES_COPY[$INDEX]}" MASS_PRECONDITIONING_ARRAY; then
+        if KeyInArray "${BETAVALUES_COPY[$INDEX]}" BHMAS_massPreconditioningValues; then
             __static__AddToInputFile \
                 "cg_iteration_block_size=10"\
                 "use_mp=1"\
                 "solver_mp=cg"\
-                "kappa_mp=0.${MASS_PRECONDITIONING_ARRAY[${BETAVALUES_COPY[$INDEX]}]#*,}"\
+                "kappa_mp=0.${BHMAS_massPreconditioningValues[${BETAVALUES_COPY[$INDEX]}]#*,}"\
                 "num_timescales=3"\
                 "integrator2=twomn"\
-                "integrationsteps2=${MASS_PRECONDITIONING_ARRAY[${BETAVALUES_COPY[$INDEX]}]%,*}"
+                "integrationsteps2=${BHMAS_massPreconditioningValues[${BETAVALUES_COPY[$INDEX]}]%,*}"
         else
             __static__AddToInputFile \
                 "cg_iteration_block_size=$CGBS"\
@@ -94,30 +94,30 @@ function ProduceInputFile_SLURM()
         "tau=1"\
         "integrator0=twomn"\
         "integrator1=twomn"\
-        "integrationsteps0=${INTSTEPS0_ARRAY[${BETAVALUES_COPY[$INDEX]}]}"\
-        "integrationsteps1=${INTSTEPS1_ARRAY[${BETAVALUES_COPY[$INDEX]}]}"\
+        "integrationsteps0=${BHMAS_scaleZeroIntegrationSteps[${BETAVALUES_COPY[$INDEX]}]}"\
+        "integrationsteps1=${BHMAS_scaleOneIntegrationSteps[${BETAVALUES_COPY[$INDEX]}]}"\
         "nspace=$BHMAS_nspace"\
         "ntime=$BHMAS_ntime"
     if [ $BHMAS_wilson = "TRUE" ]; then
         __static__AddToInputFile \
             "kappa=0.$BHMAS_mass"\
-            "hmcsteps=$MEASUREMENTS"
+            "hmcsteps=$BHMAS_numberOfTrajectories"
     elif [ $BHMAS_staggered = "TRUE" ]; then
         __static__AddToInputFile \
             "mass=0.$BHMAS_mass"\
-            "rhmcsteps=$MEASUREMENTS"
+            "rhmcsteps=$BHMAS_numberOfTrajectories"
     fi
     __static__AddToInputFile \
-        "savefrequency=$NSAVE"\
-        "savepointfrequency=$NSAVEPOINT"
-    if [ ${STARTCONFIGURATION_GLOBALPATH[${BETAVALUES_COPY[$INDEX]}]} == "notFoundHenceStartFromHot" ]; then
+        "savefrequency=$BHMAS_checkpointFrequency"\
+        "savepointfrequency=$BHMAS_savepointFrequency"
+    if [ ${BHMAS_startConfigurationGlobalPath[${BETAVALUES_COPY[$INDEX]}]} == "notFoundHenceStartFromHot" ]; then
         __static__AddToInputFile "startcondition=hot"
     else
         __static__AddToInputFile \
             "startcondition=continue"\
-            "sourcefile=${STARTCONFIGURATION_GLOBALPATH[${BETAVALUES_COPY[$INDEX]}]}"
+            "sourcefile=${BHMAS_startConfigurationGlobalPath[${BETAVALUES_COPY[$INDEX]}]}"
     fi
-    if [ $USE_MULTIPLE_CHAINS == "TRUE" ]; then
+    if [ $BHMAS_useMultipleChains == "TRUE" ]; then
         local SEED_EXTRACTED_FROM_BETA="$(awk '{split($1, result, "_"); print substr(result[2],2)}' <<< "${BETAVALUES_COPY[$INDEX]}")"
         if [[ ! $SEED_EXTRACTED_FROM_BETA =~ ^[[:digit:]]{4}$ ]] || [[ $SEED_EXTRACTED_FROM_BETA == "0000" ]]; then
             cecho "\n" r " Seed not allowed to be put in inputfile for CL2QCD! Aborting...\n"

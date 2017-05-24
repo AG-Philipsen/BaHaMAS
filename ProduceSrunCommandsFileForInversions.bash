@@ -6,9 +6,9 @@ function ProduceSrunCommandsFileForInversionsPerBeta()
         exit -1
     fi
 
-    if [ $(($BHMAS_nspace*$BHMAS_nspace*$BHMAS_nspace*$BHMAS_ntime)) -lt $NUMBER_SOURCES_FOR_CORRELATORS ]; then
+    if [ $(($BHMAS_nspace*$BHMAS_nspace*$BHMAS_nspace*$BHMAS_ntime)) -lt $BHMAS_numberOfSourcesForCorrelators ]; then
         cecho lr "\n Number of required sources bigger than available positions ("\
-              emph "$(($BHMAS_nspace*$BHMAS_nspace*$BHMAS_nspace*$BHMAS_ntime)) <= $NUMBER_SOURCES_FOR_CORRELATORS" ")! Not allowed...\n"
+              emph "$(($BHMAS_nspace*$BHMAS_nspace*$BHMAS_nspace*$BHMAS_ntime)) <= $BHMAS_numberOfSourcesForCorrelators" ")! Not allowed...\n"
         exit -1
     fi
 
@@ -19,12 +19,12 @@ function ProduceSrunCommandsFileForInversionsPerBeta()
                                                                   -v logLevel="info" \
                                                                   -v beta="${BETA%%_*}" \
                                                                   -v mass="0.$BHMAS_mass" \
-                                                                  -v corrDir="$CORRELATOR_DIRECTION" \
+                                                                  -v corrDir="$BHMAS_correlatorDirection" \
                                                                   -v solver="cg" \
                                                                   -v cgmax="30000" \
                                                                   -v cgIterationBlockSize="50" \
                                                                   -v thetaFermionTemporal="1" \
-                                                                  -v maxNrCorrs="$NUMBER_SOURCES_FOR_CORRELATORS" \
+                                                                  -v maxNrCorrs="$BHMAS_numberOfSourcesForCorrelators" \
                                                                   -v chemPot="$BHMAS_chempot" \
                                                                   -v wilson="$BHMAS_wilson" \
                                                                   -v staggered="$BHMAS_staggered" '
@@ -70,6 +70,6 @@ function ProduceSrunCommandsFileForInversionsPerBeta()
                 split(list_of_correlators_to_calculate[i], parts_of_correlator_name, "_");
                 print "--sourcefile=" parts_of_correlator_name[1] " --use_cpu=" useCpu " --startcondition=" startcondition " --log-level=" logLevel " --ns=" ns " --nt=" nt " --source_x=" parts_of_correlator_name[2] " --source_y=" parts_of_correlator_name[3] " --source_z=" parts_of_correlator_name[4] " --source_t=" parts_of_correlator_name[5] " --beta=" beta " --corr_dir=" corrDir " --solver=" solver " --cgmax=" cgmax " --cg_iteration_block_size=" cgIterationBlockSize " --theta_fermion_temporal=" thetaFermionTemporal " --ferm_obs_corr_postfix=" "_" parts_of_correlator_name[2] "_" parts_of_correlator_name[3] "_" parts_of_correlator_name[4] "_" parts_of_correlator_name[5] "_corr" " " chemPotString " " options_discretization;
             }
-        }' > $WORK_BETADIRECTORY/$SRUN_COMMANDSFILE_FOR_INVERSION
+        }' > $WORK_BETADIRECTORY/$BHMAS_inversionSrunCommandsFilename
 
 }

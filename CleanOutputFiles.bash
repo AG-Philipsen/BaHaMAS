@@ -27,7 +27,7 @@ function __static__CleanFile()
     if [ $? -ne 0 ]; then
         cecho lr "      Problem occurred cleaning file " file "$FILE_GLOBALPATH" "! The value " emph "beta = ${BETA%_*}" " will be skipped!\n"
         mv $FILE_GLOBALPATH_BACKUP $FILE_GLOBALPATH || exit -2
-        PROBLEM_BETA_ARRAY+=( $BETA )
+        BHMAS_problematicBetaValues+=( $BETA )
         continue
     fi
     cecho lg "        The file " file "${BHMAS_betaPrefix}${FILE_GLOBALPATH##*/$BHMAS_betaPrefix}" " has been successfully cleaned!"\
@@ -40,13 +40,13 @@ function CleanOutputFiles()
     cecho lc B "\n " U "Cleaning" uU ":"
     for BETA in ${BETAVALUES[@]}; do
         #-------------------------------------------------------------------------#
-        local WORK_BETADIRECTORY="$WORK_DIR_WITH_BETAFOLDERS/$BHMAS_betaPrefix$BETA"
+        local WORK_BETADIRECTORY="$BHMAS_runDirWithBetaFolders/$BHMAS_betaPrefix$BETA"
         local MAINFILE_GLOBALPATH="${WORK_BETADIRECTORY}/$BHMAS_outputFilename"
         local PBPFILE_GLOBALPATH="${MAINFILE_GLOBALPATH}_pbp.dat"
         #-------------------------------------------------------------------------#
         if [ ! -f $MAINFILE_GLOBALPATH ]; then
             cecho lr "\n    File " file "$MAINFILE_GLOBALPATH" " does not exist! The value " emph "beta = ${BETA%_*}" " will be skipped!\n"
-            PROBLEM_BETA_ARRAY+=( $BETA )
+            BHMAS_problematicBetaValues+=( $BETA )
             continue
         fi
 

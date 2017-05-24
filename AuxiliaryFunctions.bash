@@ -8,13 +8,13 @@ source ${BaHaMAS_repositoryTopLevelPath}/CleanOutputFiles.bash         || exit -
 
 function ReadBetaValuesFromFile()
 {
-    if [ ! -e $BETASFILE ]; then
-        cecho lr "\n  File " emph "$BETASFILE" " not found in $(pwd). Aborting...\n"
+    if [ ! -e $BHMAS_betasFilename ]; then
+        cecho lr "\n  File " emph "$BHMAS_betasFilename" " not found in $(pwd). Aborting...\n"
         exit -1
     fi
 
     #For syncronization reason the betas file MUST contain the beta value in the first column! Check:
-    for ENTRY in $(awk '{split($0, res, "#"); print res[1]}' $BETASFILE |  awk '{print $1}'); do
+    for ENTRY in $(awk '{split($0, res, "#"); print res[1]}' $BHMAS_betasFilename |  awk '{print $1}'); do
         if [[ ! "$ENTRY" =~ ^[[:digit:]][.][[:digit:]]{4}$ ]]; then
             cecho lr "\n The betas file MUST contain the beta value in the first column! Aborting...\n"
             exit -1
@@ -23,8 +23,8 @@ function ReadBetaValuesFromFile()
 
     BETAVALUES=()
     local SEED_ARRAY_TEMP=()
-    local INTSTEPS0_ARRAY_TEMP=()
-    local INTSTEPS1_ARRAY_TEMP=()
+    local BHMAS_scaleZeroIntegrationSteps_TEMP=()
+    local BHMAS_scaleOneIntegrationSteps_TEMP=()
     local CONTINUE_RESUMETRAJ_TEMP=()
     local MASS_PRECONDITIONING_TEMP=()
     local RESUME_REGEXPR="resumefrom=\([[:digit:]]\+\|last\)"
@@ -32,7 +32,7 @@ function ReadBetaValuesFromFile()
     local SEARCH_RESULT=""  # Auxiliary variable to help to parse the file
     local OLD_IFS=$IFS      # save the field separator
     local IFS=$'\n'         # new field separator, the end of line
-    for LINE in $(cat $BETASFILE); do
+    for LINE in $(cat $BHMAS_betasFilename); do
         if [[ $LINE =~ ^[[:blank:]]*# ]] || [[ $LINE =~ ^[[:blank:]]*$ ]]; then
             continue
         fi
@@ -53,13 +53,13 @@ function ReadBetaValuesFromFile()
         esac
         #Read the rest
         BETAVALUES+=( $(awk '{print $1}' <<< "$LINE") )
-        if [ $USE_MULTIPLE_CHAINS == "FALSE" ]; then
-            INTSTEPS0_ARRAY_TEMP+=( $(awk '{print $2}' <<< "$LINE") )
-            INTSTEPS1_ARRAY_TEMP+=( $(awk '{print $3}' <<< "$LINE") )
+        if [ $BHMAS_useMultipleChains == "FALSE" ]; then
+            BHMAS_scaleZeroIntegrationSteps_TEMP+=( $(awk '{print $2}' <<< "$LINE") )
+            BHMAS_scaleOneIntegrationSteps_TEMP+=( $(awk '{print $3}' <<< "$LINE") )
         else
             SEED_ARRAY_TEMP+=( $(awk '{print $2}' <<< "$LINE") )
-            INTSTEPS0_ARRAY_TEMP+=( $(awk '{print $3}' <<< "$LINE") )
-            INTSTEPS1_ARRAY_TEMP+=( $(awk '{print $4}' <<< "$LINE") )
+            BHMAS_scaleZeroIntegrationSteps_TEMP+=( $(awk '{print $3}' <<< "$LINE") )
+            BHMAS_scaleOneIntegrationSteps_TEMP+=( $(awk '{print $4}' <<< "$LINE") )
         fi
     done
     IFS=$OLD_IFS     # restore default field separator
@@ -78,7 +78,7 @@ function ReadBetaValuesFromFile()
         fi
     done
 
-    if [ $USE_MULTIPLE_CHAINS == "TRUE" ]; then
+    if [ $BHMAS_useMultipleChains == "TRUE" ]; then
         if [ ${#SEED_ARRAY_TEMP[@]} -ne ${#BETAVALUES[@]} ]; then
             cecho lr "\n  Number of provided seeds differ from the number of provided beta values in betas file. Aborting...\n"
             exit -1
@@ -92,7 +92,7 @@ function ReadBetaValuesFromFile()
         done
 
         #Check whether same seed is provided multiple times for same beta --> do it with an associative array in awk after having removed "resumefrom=", EMPTYLINES and comments
-        if [ "$(awk '{split($0, res, "'#'"); print res[1]}' $BETASFILE |\
+        if [ "$(awk '{split($0, res, "'#'"); print res[1]}' $BHMAS_betasFilename |\
                 sed -e 's/'$RESUME_REGEXPR'//g' -e 's/'$MP_REGEXPR'//g' -e '/^[[:space:]]*$/d' |\
                 awk '{array[$1,$2]++}END{for(ind in array){if(array[ind]>1){print -1; exit}}}')" == -1 ]; then
             cecho lr "\n Same seed provided multiple times for same beta!! Aborting...\n"
@@ -110,8 +110,8 @@ function ReadBetaValuesFromFile()
         done
     fi
 
-    if [ ${#INTSTEPS0_ARRAY_TEMP[@]} -ne 0 ]; then #If the first intsteps array is empty the second CANNOT be not empty (because of how I read them with awk from file)
-        for STEPS in ${INTSTEPS0_ARRAY_TEMP[@]} ${INTSTEPS1_ARRAY_TEMP[@]}; do
+    if [ ${#BHMAS_scaleZeroIntegrationSteps_TEMP[@]} -ne 0 ]; then #If the first intsteps array is empty the second CANNOT be not empty (because of how I read them with awk from file)
+        for STEPS in ${BHMAS_scaleZeroIntegrationSteps_TEMP[@]} ${BHMAS_scaleOneIntegrationSteps_TEMP[@]}; do
             if [[ ! $STEPS =~ ^[[:digit:]]{1,2}$ ]]; then
                 cecho lr "\n Invalid integrator step entry in betas file (only one or two digits admitted)! Aborting..."
                 if [[ $STEPS =~ ^[[:digit:]]{4}$ ]]; then
@@ -123,21 +123,21 @@ function ReadBetaValuesFromFile()
             fi
         done
 
-        if [ ${#INTSTEPS0_ARRAY_TEMP[@]} -ne ${#BETAVALUES[@]} ] || [ ${#INTSTEPS1_ARRAY_TEMP[@]} -ne ${#BETAVALUES[@]} ]; then
+        if [ ${#BHMAS_scaleZeroIntegrationSteps_TEMP[@]} -ne ${#BETAVALUES[@]} ] || [ ${#BHMAS_scaleOneIntegrationSteps_TEMP[@]} -ne ${#BETAVALUES[@]} ]; then
             cecho lr "\n Integrators steps not specified for ALL beta in betas file! Aborting...\n"
             exit -1
         fi
 
         #Now that all the checks have been done, build associative arrays for later use of integration steps
         for INDEX in "${!BETAVALUES[@]}"; do
-            INTSTEPS0_ARRAY["${BETAVALUES[$INDEX]}"]="${INTSTEPS0_ARRAY_TEMP[$INDEX]}"
-            INTSTEPS1_ARRAY["${BETAVALUES[$INDEX]}"]="${INTSTEPS1_ARRAY_TEMP[$INDEX]}"
+            BHMAS_scaleZeroIntegrationSteps["${BETAVALUES[$INDEX]}"]="${BHMAS_scaleZeroIntegrationSteps_TEMP[$INDEX]}"
+            BHMAS_scaleOneIntegrationSteps["${BETAVALUES[$INDEX]}"]="${BHMAS_scaleOneIntegrationSteps_TEMP[$INDEX]}"
         done
     else
         #Build associative arrays for later use of integration steps with the same value for all betas
         for INDEX in "${!BETAVALUES[@]}"; do
-            INTSTEPS0_ARRAY["${BETAVALUES[$INDEX]}"]=$INTSTEPS0
-            INTSTEPS1_ARRAY["${BETAVALUES[$INDEX]}"]=$INTSTEPS1
+            BHMAS_scaleZeroIntegrationSteps["${BETAVALUES[$INDEX]}"]=$INTSTEPS0
+            BHMAS_scaleOneIntegrationSteps["${BETAVALUES[$INDEX]}"]=$INTSTEPS1
         done
     fi
 
@@ -150,7 +150,7 @@ function ReadBetaValuesFromFile()
                 exit -1
             fi
             #Build associative array for later use
-            CONTINUE_RESUMETRAJ_ARRAY["${BETAVALUES[$INDEX]}"]="$TEMP_STR"
+            BHMAS_trajectoriesToBeResumedFrom["${BETAVALUES[$INDEX]}"]="$TEMP_STR"
         fi
         TEMP_STR=${MASS_PRECONDITIONING_TEMP[$INDEX]}
         if [[ $TEMP_STR != "notFound" ]]; then
@@ -162,35 +162,35 @@ function ReadBetaValuesFromFile()
                       " expression " emph  '^MP=([[:digit:]]{1,2},[[:digit:]]{3,4})$' "! Aborting...\n"
                 exit -1
             fi
-            MASS_PRECONDITIONING_ARRAY["${BETAVALUES[$INDEX]}"]="$TEMP_STR"
+            BHMAS_massPreconditioningValues["${BETAVALUES[$INDEX]}"]="$TEMP_STR"
         fi
     done
 
     cecho lc "\n============================================================================================================"
     cecho lp " Read beta values:"
     for BETA in ${BETAVALUES[@]}; do
-        cecho -n "  - $BETA\t [Integrator steps ${INTSTEPS0_ARRAY[$BETA]}-${INTSTEPS1_ARRAY[$BETA]}]"
-        if KeyInArray $BETA CONTINUE_RESUMETRAJ_ARRAY; then
-            cecho -n "$(printf "   [resume from tr. %+6s]" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}")"
+        cecho -n "  - $BETA\t [Integrator steps ${BHMAS_scaleZeroIntegrationSteps[$BETA]}-${BHMAS_scaleOneIntegrationSteps[$BETA]}]"
+        if KeyInArray $BETA BHMAS_trajectoriesToBeResumedFrom; then
+            cecho -n "$(printf "   [resume from tr. %+6s]" "${BHMAS_trajectoriesToBeResumedFrom[$BETA]}")"
         else
             cecho -n "                          "
         fi
-        if KeyInArray $BETA MASS_PRECONDITIONING_ARRAY; then
-            cecho -n "$(printf "   MP=(%d-0.%4d)" "${MASS_PRECONDITIONING_ARRAY[$BETA]%,*}" "${MASS_PRECONDITIONING_ARRAY[$BETA]#*,}")"
+        if KeyInArray $BETA BHMAS_massPreconditioningValues; then
+            cecho -n "$(printf "   MP=(%d-0.%4d)" "${BHMAS_massPreconditioningValues[$BETA]%,*}" "${BHMAS_massPreconditioningValues[$BETA]#*,}")"
         fi
         cecho ''
     done
     cecho lc "============================================================================================================"
 
     #If we are not in the continue scenario (and not in other script use cases), look for the correct configuration to start from and set the global path
-    if [ $CONTINUE = "FALSE" ] && [ $CLEAN_OUTPUT_FILES = "FALSE" ] && [ $INVERT_CONFIGURATIONS = "FALSE" ] && [ $ACCRATE_REPORT = "FALSE" ]; then
+    if [ $BHMAS_continueOption = "FALSE" ] && [ $BHMAS_cleanOutputFilesOption = "FALSE" ] && [ $BHMAS_invertConfigurationsOption = "FALSE" ] && [ $BHMAS_accRateReportOption = "FALSE" ]; then
         for BETA in "${BETAVALUES[@]}"; do
             if [ "$BHMAS_betaPostfix" == "" ]; then #Old nomenclature case: no beta postfix!
                 local FOUND_CONFIGURATIONS=( $(ls $BHMAS_thermConfsGlobalPath | grep "^conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA}.*") )
                 if [ ${#FOUND_CONFIGURATIONS[@]} -eq 0 ]; then
-                    STARTCONFIGURATION_GLOBALPATH[$BETA]="notFoundHenceStartFromHot"
+                    BHMAS_startConfigurationGlobalPath[$BETA]="notFoundHenceStartFromHot"
                 elif [ ${#FOUND_CONFIGURATIONS[@]} -eq 1 ]; then
-                    STARTCONFIGURATION_GLOBALPATH[$BETA]="${BHMAS_thermConfsGlobalPath}/${FOUND_CONFIGURATIONS[0]}"
+                    BHMAS_startConfigurationGlobalPath[$BETA]="${BHMAS_thermConfsGlobalPath}/${FOUND_CONFIGURATIONS[0]}"
                 else
                     cecho lr "\n No valid starting configuration found for " emph "beta = ${BETA}" " in " dir "$BHMAS_thermConfsGlobalPath" "\n"\
                           " More than 1 configuration matches " file "conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA}.*" "! Aborting...\n"
@@ -209,7 +209,7 @@ function ReadBetaValuesFromFile()
                         exit -1
                     elif [ ${#FOUND_CONFIGURATIONS[@]} -eq 1 ]; then
                         cecho lg " found a valid one!\n"
-                        STARTCONFIGURATION_GLOBALPATH[$BETA]="${BHMAS_thermConfsGlobalPath}/${FOUND_CONFIGURATIONS[0]}"
+                        BHMAS_startConfigurationGlobalPath[$BETA]="${BHMAS_thermConfsGlobalPath}/${FOUND_CONFIGURATIONS[0]}"
                     else
                         cecho -d o " found more than one! Which should be used?\n" bb
                         PS3=$(cecho -d "\n" yg "Enter the number corresponding to the desired configuration: " bb)
@@ -221,10 +221,10 @@ function ReadBetaValuesFromFile()
                             fi
                         done
                         cecho "" #Restore also default color
-                        STARTCONFIGURATION_GLOBALPATH[$BETA]="${BHMAS_thermConfsGlobalPath}/$CONFIGURATION_CHOSEN_BY_USER"
+                        BHMAS_startConfigurationGlobalPath[$BETA]="${BHMAS_thermConfsGlobalPath}/$CONFIGURATION_CHOSEN_BY_USER"
                     fi
                 elif [ ${#FOUND_CONFIGURATIONS[@]} -eq 1 ]; then
-                    STARTCONFIGURATION_GLOBALPATH[$BETA]="${BHMAS_thermConfsGlobalPath}/${FOUND_CONFIGURATIONS[0]}"
+                    BHMAS_startConfigurationGlobalPath[$BETA]="${BHMAS_thermConfsGlobalPath}/${FOUND_CONFIGURATIONS[0]}"
                 else
                     cecho ly B "\n " U "WARNING" uU ":" uB " More than one valid starting configuration found for " emph "beta = ${BETA%%_*}" " in "\
                           dir "$BHMAS_thermConfsGlobalPath" ".\nWhich should be used?\n" bc
@@ -237,7 +237,7 @@ function ReadBetaValuesFromFile()
                         fi
                     done
                     cecho "" #Restore also default color
-                    STARTCONFIGURATION_GLOBALPATH[$BETA]="${BHMAS_thermConfsGlobalPath}/$CONFIGURATION_CHOSEN_BY_USER"
+                    BHMAS_startConfigurationGlobalPath[$BETA]="${BHMAS_thermConfsGlobalPath}/$CONFIGURATION_CHOSEN_BY_USER"
                 fi
             elif [ $BHMAS_betaPostfix == "_thermalizeFromConf" ]; then
                 if [ $(ls $BHMAS_thermConfsGlobalPath | grep "^conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA%_*}_fromConf[[:digit:]]\+.*" | wc -l) -ne 0 ]; then
@@ -256,9 +256,9 @@ function ReadBetaValuesFromFile()
                     cecho lr "\n Something went wrong in determinig the closest beta value to the actual one to pick up the correct thermalized from Hot configuration! Aborting...\n"
                     exit -1
                 fi
-                STARTCONFIGURATION_GLOBALPATH[$BETA]="${BHMAS_thermConfsGlobalPath}/${FOUND_CONFIGURATIONS_WITH_BETA_AS_KEY[$CLOSEST_BETA]}"
+                BHMAS_startConfigurationGlobalPath[$BETA]="${BHMAS_thermConfsGlobalPath}/${FOUND_CONFIGURATIONS_WITH_BETA_AS_KEY[$CLOSEST_BETA]}"
             elif [ $BHMAS_betaPostfix == "_thermalizeFromHot" ]; then
-                STARTCONFIGURATION_GLOBALPATH[$BETA]="notFoundHenceStartFromHot"
+                BHMAS_startConfigurationGlobalPath[$BETA]="notFoundHenceStartFromHot"
             else
                 cecho lr "\n Something really strange happened! BHMAS_betaPostfix set to unknown value " emph "BHMAS_betaPostfix = $BHMAS_betaPostfix" "! Aborting...\n"
                 exit -1
@@ -271,12 +271,12 @@ function ReadBetaValuesFromFile()
 #TODO: After having refactored the function ReadBetaValuesFromFile, one could reuse some functionality of there.
 function __static__PrintOldLineToBetasFileAndShiftArrays()
 {
-    if [ $USE_MULTIPLE_CHAINS == "TRUE" ]; then
-        printf "${BETA_ARRAY[0]}\t${SEED_ARRAY[0]}\t${REST_OF_THE_LINE_ARRAY[0]}"  >> $BETASFILE
+    if [ $BHMAS_useMultipleChains == "TRUE" ]; then
+        printf "${BETA_ARRAY[0]}\t${SEED_ARRAY[0]}\t${REST_OF_THE_LINE_ARRAY[0]}"  >> $BHMAS_betasFilename
         SEED_JUST_PRINTED_TO_FILE="${SEED_ARRAY[0]}"
         SEED_ARRAY=("${SEED_ARRAY[@]:1}")
     else
-        printf "${BETA_ARRAY[0]}\t${REST_OF_THE_LINE_ARRAY[0]}" >> $BETASFILE
+        printf "${BETA_ARRAY[0]}\t${REST_OF_THE_LINE_ARRAY[0]}" >> $BHMAS_betasFilename
     fi
     BETA_JUST_PRINTED_TO_FILE="${BETA_ARRAY[0]}"
     REST_OF_THE_LINE_JUST_PRINTED_TO_FILE="${REST_OF_THE_LINE_ARRAY[0]}"
@@ -286,7 +286,7 @@ function __static__PrintOldLineToBetasFileAndShiftArrays()
 
 function __static__PrintNewLineToBetasFile()
 {
-    printf "$BETA_JUST_PRINTED_TO_FILE\t$NEW_SEED\t$REST_OF_THE_LINE_JUST_PRINTED_TO_FILE" >> $BETASFILE
+    printf "$BETA_JUST_PRINTED_TO_FILE\t$NEW_SEED\t$REST_OF_THE_LINE_JUST_PRINTED_TO_FILE" >> $BHMAS_betasFilename
 }
 
 function CompleteBetasFile()
@@ -298,8 +298,8 @@ function CompleteBetasFile()
     local REST_OF_THE_LINE=""
     local REST_OF_THE_LINE_ARRAY=()
     local COMMENTED_LINE_ARRAY=()
-    [ $USE_MULTIPLE_CHAINS == "TRUE" ] && local SEED="" && local SEED_ARRAY=()
-    for LINE in $(sort -k1n $BETASFILE); do
+    [ $BHMAS_useMultipleChains == "TRUE" ] && local SEED="" && local SEED_ARRAY=()
+    for LINE in $(sort -k1n $BHMAS_betasFilename); do
         if [[ $LINE =~ ^[[:blank:]]*$ ]]; then
             continue
         fi
@@ -310,7 +310,7 @@ function CompleteBetasFile()
         LINE=$(awk '{split($0, res, "#"); print res[1]}' <<< "$LINE")
         BETA=$(awk '{print $1}' <<< "$LINE")
         REST_OF_THE_LINE=$(awk '{$1=""; print $0}' <<< "$LINE")
-        if [ $USE_MULTIPLE_CHAINS == "TRUE" ]; then
+        if [ $BHMAS_useMultipleChains == "TRUE" ]; then
             SEED=$(awk '{print $1}' <<< "$REST_OF_THE_LINE")
             REST_OF_THE_LINE=$(awk '{$1=""; print $0}' <<< "$REST_OF_THE_LINE")
         else
@@ -327,7 +327,7 @@ function CompleteBetasFile()
             cecho lr "\n Invalid beta entry in betas file! Aborting...\n"
             exit -1
         fi
-        if [ $USE_MULTIPLE_CHAINS == "TRUE" ]; then
+        if [ $BHMAS_useMultipleChains == "TRUE" ]; then
             if [[ ! $SEED =~ ^[[:digit:]]{4}$ ]]; then
                 cecho lr "\n Invalid seed entry in betas file! Aborting...\n"
                 exit -1
@@ -335,21 +335,21 @@ function CompleteBetasFile()
         fi
         #Checks done, fill arrays
         BETA_ARRAY+=( $BETA )
-        [ $USE_MULTIPLE_CHAINS == "TRUE" ] && SEED_ARRAY+=( $SEED )
+        [ $BHMAS_useMultipleChains == "TRUE" ] && SEED_ARRAY+=( $SEED )
         REST_OF_THE_LINE_ARRAY+=( "$REST_OF_THE_LINE" )
     done
     IFS=$OLD_IFS     # restore default field separator
 
     #Produce complete betas file
-    local BETASFILE_BACKUP="${BETASFILE}_backup"
-    mv $BETASFILE $BETASFILE_BACKUP || exit -2
+    local betasFilenameBackup="${BHMAS_betasFilename}_backup"
+    mv $BHMAS_betasFilename $betasFilenameBackup || exit -2
     while [ "${#BETA_ARRAY[@]}" -ne 0 ]; do
         local BETA_JUST_PRINTED_TO_FILE=""
         local SEED_JUST_PRINTED_TO_FILE=""
         local REST_OF_THE_LINE_JUST_PRINTED_TO_FILE=""
         local NUMBER_OF_BETA_PRINTED_TO_FILE=0
         #In case multiple chains are used, the betas with already a seed are copied to file
-        if [ $USE_MULTIPLE_CHAINS == "TRUE" ]; then
+        if [ $BHMAS_useMultipleChains == "TRUE" ]; then
             __static__PrintOldLineToBetasFileAndShiftArrays
             (( NUMBER_OF_BETA_PRINTED_TO_FILE++ )) || true #'|| true' because of set -e option
             while [ "${BETA_ARRAY[0]:-}" = $BETA_JUST_PRINTED_TO_FILE ]; do #This while works because above we read the betasfile sorted!
@@ -358,7 +358,7 @@ function CompleteBetasFile()
             done
         fi
         #Then complete file
-        if [ $USE_MULTIPLE_CHAINS == "TRUE" ]; then
+        if [ $BHMAS_useMultipleChains == "TRUE" ]; then
             local SEED_TO_GENERATE_NEW_SEED_FROM="$SEED_JUST_PRINTED_TO_FILE"
         else
             local SEED_TO_GENERATE_NEW_SEED_FROM="${BETA_ARRAY[0]##*[.]}"
@@ -372,18 +372,18 @@ function CompleteBetasFile()
             __static__PrintNewLineToBetasFile
             (( NUMBER_OF_BETA_PRINTED_TO_FILE++ )) || true #'|| true' because of set -e option
         fi
-        for((INDEX=$NUMBER_OF_BETA_PRINTED_TO_FILE; INDEX<$NUMBER_OF_CHAINS_TO_BE_IN_THE_BETAS_FILE; INDEX++)); do
+        for((INDEX=$NUMBER_OF_BETA_PRINTED_TO_FILE; INDEX<$BHMAS_numberOfChainsToBeInTheBetasFile; INDEX++)); do
             local NEW_SEED=$(sed -e 's/\(.\)/\n\1/g' <<< "$SEED_TO_GENERATE_NEW_SEED_FROM"  | awk 'BEGIN{ORS=""}NR>1{print ($1+1)%10}')
             __static__PrintNewLineToBetasFile
             SEED_TO_GENERATE_NEW_SEED_FROM=$NEW_SEED
         done
-        cecho -d "" >> $BETASFILE
+        cecho -d "" >> $BHMAS_betasFilename
     done
     #Print commented lines http://stackoverflow.com/a/34361807
     for LINE in ${COMMENTED_LINE_ARRAY[@]+"COMMENTED_LINE_ARRAY[@]"}; do
-        cecho -d $LINE >> $BETASFILE
+        cecho -d $LINE >> $BHMAS_betasFilename
     done
-    rm $BETASFILE_BACKUP
+    rm $betasFilenameBackup
 
     cecho lm "\n New betasfile successfully created!"
 }
@@ -392,57 +392,57 @@ function CompleteBetasFile()
 function UncommentEntriesInBetasFile()
 {
     #at first comment all lines
-    sed -i "s/^\([^#].*\)/#\1/" $BETASFILE
+    sed -i "s/^\([^#].*\)/#\1/" $BHMAS_betasFilename
 
     local IFS=' '
     local OLD_IFS=$IFS
-    for i in ${UNCOMMENT_BETAS_SEED_ARRAY[@]+"UNCOMMENT_BETAS_SEED_ARRAY[@]"}; do
+    for i in ${BHMAS_betasWithSeedToBeToggled[@]+"BHMAS_betasWithSeedToBeToggled[@]"}; do
         IFS='_'
         local U_ARRAY=( $i )
         local U_BETA=${U_ARRAY[0]}
         local U_SEED=${U_ARRAY[1]}
         local U_SEED=${U_SEED#s}
-        sed -i "s/^#\(.*$U_BETA.*$U_SEED.*\)$/\1/" $BETASFILE #If there is a "#" in front of the line, remove it
+        sed -i "s/^#\(.*$U_BETA.*$U_SEED.*\)$/\1/" $BHMAS_betasFilename #If there is a "#" in front of the line, remove it
     done
     IFS=$OLD_IFS
 
-    for i in ${UNCOMMENT_BETAS_ARRAY[@]+"UNCOMMENT_BETAS_ARRAY[@]"}; do
+    for i in ${BHMAS_betasToBeToggled[@]+"BHMAS_betasToBeToggled[@]"}; do
         U_BETA=$i
-        sed -i "s/^#\(.*$U_BETA.*\)$/\1/" $BETASFILE #If there is a "#" in front of the line, remove it
+        sed -i "s/^#\(.*$U_BETA.*\)$/\1/" $BHMAS_betasFilename #If there is a "#" in front of the line, remove it
     done
 }
 
 function CommentEntriesInBetasFile()
 {
     #at first uncomment all lines
-    sed -i "s/^#\(.*\)/\1/" $BETASFILE
+    sed -i "s/^#\(.*\)/\1/" $BHMAS_betasFilename
 
     local IFS=' '
     local OLD_IFS=$IFS
-    for i in ${UNCOMMENT_BETAS_SEED_ARRAY[@]+"UNCOMMENT_BETAS_SEED_ARRAY"}; do
+    for i in ${BHMAS_betasWithSeedToBeToggled[@]+"BHMAS_betasWithSeedToBeToggled"}; do
         IFS='_'
         local U_ARRAY=( $i )
         local U_BETA=${U_ARRAY[0]}
         local U_SEED=${U_ARRAY[1]}
         local U_SEED=${U_SEED#s}
-        sed -i "s/^\($U_BETA.*$U_SEED.*\)$/#\1/" $BETASFILE #If there is no "#" in front of the line, put one
+        sed -i "s/^\($U_BETA.*$U_SEED.*\)$/#\1/" $BHMAS_betasFilename #If there is no "#" in front of the line, put one
     done
     IFS=$OLD_IFS
 
-    for i in ${UNCOMMENT_BETAS_ARRAY[@]+"UNCOMMENT_BETAS_ARRAY"}; do
+    for i in ${BHMAS_betasToBeToggled[@]+"BHMAS_betasToBeToggled"}; do
         U_BETA=$i
-        sed -i "s/^\($U_BETA.*\)$/#\1/" $BETASFILE #If there is no "#" in front of the line, put one
+        sed -i "s/^\($U_BETA.*\)$/#\1/" $BHMAS_betasFilename #If there is no "#" in front of the line, put one
     done
 }
 
 
 function PrintReportForProblematicBeta()
 {
-    if [ ${#PROBLEM_BETA_ARRAY[@]} -gt "0" ]; then
+    if [ ${#BHMAS_problematicBetaValues[@]} -gt "0" ]; then
         cecho lr "\n===================================================================================\n"\
               " For the following beta values something went wrong and hence\n"\
               " they were left out during file creation and/or job submission:"
-        for BETA in ${PROBLEM_BETA_ARRAY[@]}; do
+        for BETA in ${BHMAS_problematicBetaValues[@]}; do
             cecho lr "  - " B "$BETA"
         done
         cecho lr "===================================================================================\n"
@@ -459,7 +459,7 @@ function __static__CheckExistenceOfFunctionAndCallIt()
     if [ "$(type -t $nameOfTheFunction)" = 'function' ]; then
         $nameOfTheFunction
     else
-        cecho "\n" lr "Function " emph "$nameOfTheFunction" " for " emph "$BaHaMAS_clusterScheduler" " scheduler not found!"
+        cecho "\n" lr "Function " emph "$nameOfTheFunction" " for " emph "$BHMAS_clusterScheduler" " scheduler not found!"
         cecho "\n" lr "Please provide an implementation following the " B "BaHaMAS" uB " documentation and source the file. Aborting...\n"
         exit -1
     fi
@@ -468,35 +468,35 @@ function __static__CheckExistenceOfFunctionAndCallIt()
 
 function ProduceInputFileAndJobScriptForEachBeta()
 {
-    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_$BaHaMAS_clusterScheduler
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_$BHMAS_clusterScheduler
 }
 
 
 function ProcessBetaValuesForSubmitOnly()
 {
-    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_$BaHaMAS_clusterScheduler
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_$BHMAS_clusterScheduler
 }
 
 
 function ProcessBetaValuesForContinue()
 {
-    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_$BaHaMAS_clusterScheduler
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_$BHMAS_clusterScheduler
 }
 
 
 function ProcessBetaValuesForInversion()
 {
-    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_$BaHaMAS_clusterScheduler
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_$BHMAS_clusterScheduler
 }
 
 
 function SubmitJobsForValidBetaValues()
 {
-    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_$BaHaMAS_clusterScheduler
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_$BHMAS_clusterScheduler
 }
 
 
 function ListJobStatus()
 {
-    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_$BaHaMAS_clusterScheduler
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_$BHMAS_clusterScheduler
 }

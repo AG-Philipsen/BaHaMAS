@@ -11,18 +11,18 @@ function ProduceInputFileAndJobScriptForEachBeta_SLURM()
 {
     #---------------------------------------------------------------------------------------------------------------------#
     #NOTE: Since this function has to iterate over the betas either doing something and putting the value into
-    #      SUBMIT_BETA_ARRAY or putting the beta value into PROBLEM_BETA_ARRAY, it is better to make a local copy
+    #      BHMAS_betaValuesToBeSubmitted or putting the beta value into BHMAS_problematicBetaValues, it is better to make a local copy
     #      of BETAVALUES in order not to alter the original global array. Actually on the LOEWE the jobs are packed
     #      and this implies that whenever a problematic beta is encoutered it MUST be removed from the betavalues array
     #      (otherwise the authomatic packing would fail in the sense that it would include a problematic beta).
     local BETAVALUES_COPY=(${BETAVALUES[@]})
     #---------------------------------------------------------------------------------------------------------------------#
     for INDEX in "${!BETAVALUES_COPY[@]}"; do
-        local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BHMAS_betaPrefix${BETAVALUES_COPY[$INDEX]}"
+        local HOME_BETADIRECTORY="$BHMAS_submitDirWithBetaFolders/$BHMAS_betaPrefix${BETAVALUES_COPY[$INDEX]}"
         if [ -d "$HOME_BETADIRECTORY" ]; then
             if [ $(ls $HOME_BETADIRECTORY | wc -l) -gt 0 ]; then
                 cecho lr "\n There are already files in " dir "$HOME_BETADIRECTORY" ".\n The value " emph "beta = ${BETAVALUES_COPY[$INDEX]}" " will be skipped!\n"
-                PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$INDEX]} )
+                BHMAS_problematicBetaValues+=( ${BETAVALUES_COPY[$INDEX]} )
                 unset BETAVALUES_COPY[$INDEX] #Here BETAVALUES_COPY becomes sparse
                 continue
             fi
@@ -32,17 +32,17 @@ function ProduceInputFileAndJobScriptForEachBeta_SLURM()
     BETAVALUES_COPY=(${BETAVALUES_COPY[@]})
     #If the previous for loop went through, we create the beta folders (just to avoid to create some folders and then abort)
     for INDEX in "${!BETAVALUES_COPY[@]}"; do
-        local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BHMAS_betaPrefix${BETAVALUES_COPY[$INDEX]}"
+        local HOME_BETADIRECTORY="$BHMAS_submitDirWithBetaFolders/$BHMAS_betaPrefix${BETAVALUES_COPY[$INDEX]}"
         cecho -n lb " Creating directory " dir "$BHMAS_betaPrefix${BETAVALUES_COPY[$INDEX]}" "..."
         mkdir $HOME_BETADIRECTORY || exit -2
         cecho lg " done!"
-        cecho lc "   Configuration used: " file "${STARTCONFIGURATION_GLOBALPATH[${BETAVALUES_COPY[$INDEX]}]}"
+        cecho lc "   Configuration used: " file "${BHMAS_startConfigurationGlobalPath[${BETAVALUES_COPY[$INDEX]}]}"
         #Call the file to produce the input file
         local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$BHMAS_inputFilename"
         ProduceInputFile_SLURM
     done
     # Partition the BETAVALUES_COPY array into group of BHMAS_GPUsPerNode and create the JobScript files inside the JOBSCRIPT_FOLDER
-    mkdir -p ${HOME_DIR_WITH_BETAFOLDERS}/$BHMAS_jobScriptFolderName || exit -2
+    mkdir -p ${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName || exit -2
     __static__PackBetaValuesPerGpuAndCreateJobScriptFiles "${BETAVALUES_COPY[@]}"
 }
 
@@ -54,11 +54,11 @@ function ProcessBetaValuesForSubmitOnly_SLURM()
     local BETAVALUES_COPY=(${BETAVALUES[@]})
     #-----------------------------------------#
     for BETA in "${!BETAVALUES_COPY[@]}"; do
-        local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BHMAS_betaPrefix${BETAVALUES_COPY[$BETA]}"
+        local HOME_BETADIRECTORY="$BHMAS_submitDirWithBetaFolders/$BHMAS_betaPrefix${BETAVALUES_COPY[$BETA]}"
         local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$BHMAS_inputFilename"
         if [ ! -d $HOME_BETADIRECTORY ]; then
             cecho lr "\n The directory " dir "$HOME_BETADIRECTORY" " does not exist! \n The value " emph "beta = ${BETAVALUES_COPY[$BETA]}" " will be skipped!\n"
-            PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$BETA]} )
+            BHMAS_problematicBetaValues+=( ${BETAVALUES_COPY[$BETA]} )
             unset BETAVALUES_COPY[$BETA] #Here BETAVALUES_COPY becomes sparse
             continue
         else
@@ -68,13 +68,13 @@ function ProcessBetaValuesForSubmitOnly_SLURM()
                 if [ $(ls $HOME_BETADIRECTORY | wc -l) -ne 1 ]; then
                     cecho lr "\n There are already files in " dir "$HOME_BETADIRECTORY" " beyond the input file.\n"\
                           " The value " emph "beta = ${BETAVALUES_COPY[$BETA]}" " will be skipped!\n"
-                    PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$BETA]} )
+                    BHMAS_problematicBetaValues+=( ${BETAVALUES_COPY[$BETA]} )
                     unset BETAVALUES_COPY[$BETA] #Here BETAVALUES_COPY becomes sparse
                     continue
                 fi
             else
                 cecho lr "\n The file " file "$INPUTFILE_GLOBALPATH" " does not exist!\n The value " emph "beta = ${BETAVALUES_COPY[$BETA]}" " will be skipped!\n"
-                PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$BETA]} )
+                BHMAS_problematicBetaValues+=( ${BETAVALUES_COPY[$BETA]} )
                 unset BETAVALUES_COPY[$BETA] #Here BETAVALUES_COPY becomes sparse
                 continue
             fi
@@ -120,7 +120,7 @@ function __static__FindAndReplaceSingleOccurenceInFile()
     elif [ $(grep -o "$2" $1 | wc -l) -ne 1 ]; then
         cecho lr "\n Error occurred in " emph "$FUNCNAME" ": string " emph "$2" " occurs 0 times or more than 1 time in file\n "\
               file "$1" "! The value " emph "beta = $BETA" " will be skipped!\n"
-        PROBLEM_BETA_ARRAY+=( $BETA )
+        BHMAS_problematicBetaValues+=( $BETA )
         return 1
     fi
 
@@ -155,7 +155,7 @@ function __static__ModifyOptionInInputFile()
 
         * )
             cecho lr "\n The option " emph "$1" " cannot be handled in the continue scenario.\n Simulation cannot be continued. The value " emph "beta = $BETA" " will be skipped!\n"
-            PROBLEM_BETA_ARRAY+=( $BETA )
+            BHMAS_problematicBetaValues+=( $BETA )
             return 1 ;;
     esac
 
@@ -166,7 +166,7 @@ function __static__ModifyOptionInInputFile()
 
 function ProcessBetaValuesForContinue_SLURM()
 {
-    local LOCAL_SUBMIT_BETA_ARRAY=()
+    local LOCAL_BHMAS_betaValuesToBeSubmitted=()
     #Remove -c | --continue option from command line
     for INDEX in "${!SPECIFIED_COMMAND_LINE_OPTIONS[@]}"; do
         if [[ ${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]} =~ ^--continue ]] || [[ ${SPECIFIED_COMMAND_LINE_OPTIONS[$INDEX]} =~ ^-[cC][^[:alpha:]] ]]; then
@@ -181,82 +181,82 @@ function ProcessBetaValuesForContinue_SLURM()
 
     for BETA in ${BETAVALUES[@]}; do
         #-------------------------------------------------------------------------#
-        local WORK_BETADIRECTORY="$WORK_DIR_WITH_BETAFOLDERS/$BHMAS_betaPrefix$BETA"
-        local HOME_BETADIRECTORY="$HOME_DIR_WITH_BETAFOLDERS/$BHMAS_betaPrefix$BETA"
+        local WORK_BETADIRECTORY="$BHMAS_runDirWithBetaFolders/$BHMAS_betaPrefix$BETA"
+        local HOME_BETADIRECTORY="$BHMAS_submitDirWithBetaFolders/$BHMAS_betaPrefix$BETA"
         local INPUTFILE_GLOBALPATH="${HOME_BETADIRECTORY}/$BHMAS_inputFilename"
         local OUTPUTFILE_GLOBALPATH="${WORK_BETADIRECTORY}/$BHMAS_outputFilename"
         #-------------------------------------------------------------------------#
 
         if [ ! -d $WORK_BETADIRECTORY ]; then
             cecho lr "\n The directory " dir "$WORK_BETADIRECTORY" " does not exist! \n The value " emph "beta = $BETA" " will be skipped!\n"
-            PROBLEM_BETA_ARRAY+=( $BETA )
+            BHMAS_problematicBetaValues+=( $BETA )
             continue
         fi
 
         if [ ! -d $HOME_BETADIRECTORY ]; then
             cecho lr "\n The directory " dir "$HOME_BETADIRECTORY" " does not exist! \n The value " emph "beta = $BETA" " will be skipped!\n"
-            PROBLEM_BETA_ARRAY+=( $BETA )
+            BHMAS_problematicBetaValues+=( $BETA )
             continue
         fi
 
         if [ ! -f $INPUTFILE_GLOBALPATH ]; then
             cecho lr "\n The file " file "$INPUTFILE_GLOBALPATH" " does not exist!\n The value " emph "beta = $BETA" " will be skipped!\n"
-            PROBLEM_BETA_ARRAY+=( $BETA )
+            BHMAS_problematicBetaValues+=( $BETA )
             continue
         fi
 
         cecho ""
         if __static__IsJobInQueueForGivenBeta_SLURM $BETA; then
-            PROBLEM_BETA_ARRAY+=( $BETA )
+            BHMAS_problematicBetaValues+=( $BETA )
             continue
         fi
 
         #If the option resumefrom is given in the betasfile we have to clean the $WORK_BETADIRECTORY, otherwise just set the name of conf and prng
-        if KeyInArray $BETA CONTINUE_RESUMETRAJ_ARRAY; then
+        if KeyInArray $BETA BHMAS_trajectoriesToBeResumedFrom; then
             #If the user wishes to resume from the last avialable trajectory, then find here which number is "last"
-            if [ ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} = "last" ]; then
-                CONTINUE_RESUMETRAJ_ARRAY[$BETA]=$(ls $WORK_BETADIRECTORY/conf.* | grep -o "[[:digit:]]\+$" | sort -n | tail -n1 | sed 's/^0*//')
-                if [[ ! ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} =~ ^[[:digit:]]+$ ]]; then
+            if [ ${BHMAS_trajectoriesToBeResumedFrom[$BETA]} = "last" ]; then
+                BHMAS_trajectoriesToBeResumedFrom[$BETA]=$(ls $WORK_BETADIRECTORY/conf.* | grep -o "[[:digit:]]\+$" | sort -n | tail -n1 | sed 's/^0*//')
+                if [[ ! ${BHMAS_trajectoriesToBeResumedFrom[$BETA]} =~ ^[[:digit:]]+$ ]]; then
                     cecho lr "\n Unable to find " emph "last configuration" " to resume from!\n The value " emph "beta = $BETA" " will be skipped!\n"
-                    PROBLEM_BETA_ARRAY+=( $BETA )
+                    BHMAS_problematicBetaValues+=( $BETA )
                     continue
                 fi
             fi
-            cecho o B U "ATTENTION" uU ":" bc uB " The simulation for " emph "beta = ${BETA%_*}" " will be resumed from trajectory " emph "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}" "."
+            cecho o B U "ATTENTION" uU ":" bc uB " The simulation for " emph "beta = ${BETA%_*}" " will be resumed from trajectory " emph "${BHMAS_trajectoriesToBeResumedFrom[$BETA]}" "."
             # TODO: Previously here was put an AskUser directive to prevent to mess up the folder moving files in Trash in case the user
             #       forgot some resumefrom label in betas file. It is however annoying when the user really wants to resume many simulations.
             #       Implement mechanism to undo file move/modification maybe trapping CTRL-C or acting in case of UserSaidNo at the end of this
             #       function (ideally asking the user again if he wants to restore everything as it was).
-            if [ -f $WORK_BETADIRECTORY/$(printf "conf.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}") ];then
-                local NAME_LAST_CONFIGURATION=$(printf "conf.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}")
+            if [ -f $WORK_BETADIRECTORY/$(printf "conf.%05d" "${BHMAS_trajectoriesToBeResumedFrom[$BETA]}") ];then
+                local NAME_LAST_CONFIGURATION=$(printf "conf.%05d" "${BHMAS_trajectoriesToBeResumedFrom[$BETA]}")
             else
-                cecho lr " Configuration " emph "$(printf "conf.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}")" " not found in "\
+                cecho lr " Configuration " emph "$(printf "conf.%05d" "${BHMAS_trajectoriesToBeResumedFrom[$BETA]}")" " not found in "\
                       dir "$WORK_BETADIRECTORY" " folder.\n The value " emph "beta = $BETA" " will be skipped!\n"
-                PROBLEM_BETA_ARRAY+=( $BETA )
+                BHMAS_problematicBetaValues+=( $BETA )
                 continue
             fi
-            if [ -f $WORK_BETADIRECTORY/$(printf "prng.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}") ]; then
-                local NAME_LAST_PRNG=$(printf "prng.%05d" "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}")
+            if [ -f $WORK_BETADIRECTORY/$(printf "prng.%05d" "${BHMAS_trajectoriesToBeResumedFrom[$BETA]}") ]; then
+                local NAME_LAST_PRNG=$(printf "prng.%05d" "${BHMAS_trajectoriesToBeResumedFrom[$BETA]}")
             else
                 local NAME_LAST_PRNG="" #If the prng.xxxxx is not found, use random seed
             fi
             #If the BHMAS_outputFilename is not in the WORK_BETADIRECTORY stop and not do anything
             if [ ! -f $OUTPUTFILE_GLOBALPATH ]; then
                 cecho lr " File " file "$BHMAS_outputFilename" " not found in " dir "$WORK_BETADIRECTORY" " folder.\n The value " emph "beta = $BETA" " will be skipped!\n"
-                PROBLEM_BETA_ARRAY+=( $BETA )
+                BHMAS_problematicBetaValues+=( $BETA )
                 continue
             fi
             #Now it should be feasable to resume simulation ---> clean WORK_BETADIRECTORY
-            #Create in WORK_BETADIRECTORY a folder named Trash_$(date) where to mv all the file produced after the traj. ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}
+            #Create in WORK_BETADIRECTORY a folder named Trash_$(date) where to mv all the file produced after the traj. ${BHMAS_trajectoriesToBeResumedFrom[$BETA]}
             local TRASH_NAME="$WORK_BETADIRECTORY/Trash_$(date +'%F_%H%M%S')"
             mkdir $TRASH_NAME || exit 2
             for FILE in $WORK_BETADIRECTORY/conf.* $WORK_BETADIRECTORY/prng.*; do
                 #Move to trash only conf.xxxxx prng.xxxxx files or conf.xxxxx_pbp.dat files where xxxxx are digits
                 local NUMBER_FROM_FILE=$(grep -o "\(\(conf.\)\|\(prng.\)\)[[:digit:]]\+\(_pbp.dat\)\?$" <<< "$FILE" | sed 's/\(\(conf.\)\|\(prng.\)\)\([[:digit:]]\+\).*/\4/' | sed 's/^0*//')
                 if [ "$NUMBER_FROM_FILE" != "" ]; then
-                    if [ $NUMBER_FROM_FILE -gt ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} ]; then
+                    if [ $NUMBER_FROM_FILE -gt ${BHMAS_trajectoriesToBeResumedFrom[$BETA]} ]; then
                         mv $FILE $TRASH_NAME
-                    elif [ $NUMBER_FROM_FILE -eq ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} ] && [ $(grep -o "conf[.][[:digit:]]\+_pbp[.]dat$" <<< "$FILE" | wc -l) -eq 1 ]; then
+                    elif [ $NUMBER_FROM_FILE -eq ${BHMAS_trajectoriesToBeResumedFrom[$BETA]} ] && [ $(grep -o "conf[.][[:digit:]]\+_pbp[.]dat$" <<< "$FILE" | wc -l) -eq 1 ]; then
                         mv $FILE $TRASH_NAME
                     fi
                 fi
@@ -266,15 +266,15 @@ function ProcessBetaValuesForContinue_SLURM()
             if [ -f $WORK_BETADIRECTORY/prng.save ]; then mv $WORK_BETADIRECTORY/prng.save $TRASH_NAME; fi
             if [ -f $WORK_BETADIRECTORY/conf.save_backup ]; then mv $WORK_BETADIRECTORY/conf.save_backup $TRASH_NAME; fi
             if [ -f $WORK_BETADIRECTORY/prng.save_backup ]; then mv $WORK_BETADIRECTORY/prng.save_backup $TRASH_NAME; fi
-            #Copy the output file to Trash, edit it leaving out all the trajectories after ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}, including ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}
+            #Copy the output file to Trash, edit it leaving out all the trajectories after ${BHMAS_trajectoriesToBeResumedFrom[$BETA]}, including ${BHMAS_trajectoriesToBeResumedFrom[$BETA]}
             cp $OUTPUTFILE_GLOBALPATH $TRASH_NAME || exit -2
-            local LINES_TO_BE_CANCELED_IN_OUTPUTFILE=$(tac $OUTPUTFILE_GLOBALPATH | awk -v resumeFrom=${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} 'BEGIN{found=0}{if($1==(resumeFrom-1)){found=1; print NR-1; exit}}END{if(found==0){print -1}}')
+            local LINES_TO_BE_CANCELED_IN_OUTPUTFILE=$(tac $OUTPUTFILE_GLOBALPATH | awk -v resumeFrom=${BHMAS_trajectoriesToBeResumedFrom[$BETA]} 'BEGIN{found=0}{if($1==(resumeFrom-1)){found=1; print NR-1; exit}}END{if(found==0){print -1}}')
             if [ $LINES_TO_BE_CANCELED_IN_OUTPUTFILE -eq -1 ]; then
-                cecho lr "\n Measurement for trajectory " emph "${CONTINUE_RESUMETRAJ_ARRAY[$BETA]}" " not found in outputfile.\n The value " emph "beta = $BETA" " will be skipped!\n"
-                PROBLEM_BETA_ARRAY+=( $BETA )
+                cecho lr "\n Measurement for trajectory " emph "${BHMAS_trajectoriesToBeResumedFrom[$BETA]}" " not found in outputfile.\n The value " emph "beta = $BETA" " will be skipped!\n"
+                BHMAS_problematicBetaValues+=( $BETA )
                 continue
             fi
-            #By doing head -n -$LINES_TO_BE_CANCELED_IN_OUTPUTFILE also the line with the number ${CONTINUE_RESUMETRAJ_ARRAY[$BETA]} is deleted
+            #By doing head -n -$LINES_TO_BE_CANCELED_IN_OUTPUTFILE also the line with the number ${BHMAS_trajectoriesToBeResumedFrom[$BETA]} is deleted
             head -n -$LINES_TO_BE_CANCELED_IN_OUTPUTFILE $OUTPUTFILE_GLOBALPATH > ${OUTPUTFILE_GLOBALPATH}.temporaryCopyThatHopefullyDoesNotExist || exit -2
             mv ${OUTPUTFILE_GLOBALPATH}.temporaryCopyThatHopefullyDoesNotExist $OUTPUTFILE_GLOBALPATH || exit -2
             #If resumefrom has not been given in the betasfile check in the WORK_BETADIRECTORY if conf.save is present: if yes, use it, otherwise use the last checkpoint
@@ -294,7 +294,7 @@ function ProcessBetaValuesForContinue_SLURM()
         #The variable NAME_LAST_CONFIGURATION should have been set above, if not it means no conf was available!
         if [ "$NAME_LAST_CONFIGURATION" == "" ]; then
             cecho lr "\n No configuration found in " dir "$WORK_BETADIRECTORY.\n The value " emph "beta = $BETA" " will be skipped!\n"
-            PROBLEM_BETA_ARRAY+=( $BETA )
+            BHMAS_problematicBetaValues+=( $BETA )
             continue
         fi
         if [ "$NAME_LAST_PRNG" == "" ]; then
@@ -304,7 +304,7 @@ function ProcessBetaValuesForContinue_SLURM()
         if [ "$NAME_LAST_CONFIGURATION" != "conf.save" ] && [ "$NAME_LAST_PRNG" != "prng.save" ] && [ "$NAME_LAST_PRNG" != "" ]; then
             if [ `sed 's/^0*//g' <<< "${NAME_LAST_CONFIGURATION#*.}"` -ne `sed 's/^0*//g' <<< "${NAME_LAST_PRNG#*.}"` ]; then
                 cecho lr "\n The numbers of " emph "conf.xxxxx" " and " emph "prng.xxxxx" " are different! Check the respective folder!\n The value " emph "beta = $BETA" " will be skipped!\n"
-                PROBLEM_BETA_ARRAY+=( $BETA )
+                BHMAS_problematicBetaValues+=( $BETA )
                 continue
             fi
         fi
@@ -314,10 +314,10 @@ function ProcessBetaValuesForContinue_SLURM()
         ORIGINAL_INPUTFILE_GLOBALPATH="${INPUTFILE_GLOBALPATH}_original"
         cp $INPUTFILE_GLOBALPATH $ORIGINAL_INPUTFILE_GLOBALPATH || exit -2
         #If the option -p | --doNotMeasurePbp has not been given, check the input file and in case act accordingly
-        if [ $MEASURE_PBP = "FALSE" ]; then
-            local MEASURE_PBP_VALUE_FOR_INPUTFILE=0
-        elif [ $MEASURE_PBP = "TRUE" ]; then
-            local MEASURE_PBP_VALUE_FOR_INPUTFILE=1
+        if [ $BHMAS_measurePbp = "FALSE" ]; then
+            local BHMAS_measurePbp_VALUE_FOR_INPUTFILE=0
+        elif [ $BHMAS_measurePbp = "TRUE" ]; then
+            local BHMAS_measurePbp_VALUE_FOR_INPUTFILE=1
             #If the pbp file already exists non empty, append a line to it to be sure the prompt is at the beginning of a new line
             if [ -f ${OUTPUTFILE_GLOBALPATH}_pbp.dat ] && [ $(wc -l < ${OUTPUTFILE_GLOBALPATH}_pbp.dat) -ne 0 ]; then
                 cecho "" >> ${OUTPUTFILE_GLOBALPATH}_pbp.dat
@@ -332,10 +332,10 @@ function ProcessBetaValuesForContinue_SLURM()
                     [ $(grep -o "ferm_obs_pbp_prefix" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ]; then
                 cecho lr " The option " emph "measure_pbp" " is not present in the input file but one or more specification about how to calculate\n"\
                       " the chiral condensate are present. Suspicious situation, investigate! The value " emph "beta = $BETA" " will be skipped!\n"
-                PROBLEM_BETA_ARRAY+=( $BETA )
+                BHMAS_problematicBetaValues+=( $BETA )
                 mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue 2
             fi
-            cecho "measure_pbp=$MEASURE_PBP_VALUE_FOR_INPUTFILE\n"\
+            cecho "measure_pbp=$BHMAS_measurePbp_VALUE_FOR_INPUTFILE\n"\
                   "sourcetype=volume\n"\
                   "sourcecontent=gaussian" >> $INPUTFILE_GLOBALPATH
             if [ $BHMAS_wilson = "TRUE" ]; then
@@ -346,7 +346,7 @@ function ProcessBetaValuesForContinue_SLURM()
                       "ferm_obs_to_single_file=1\n"\
                       "ferm_obs_pbp_prefix=${BHMAS_outputFilename}" >> $INPUTFILE_GLOBALPATH
             fi
-            cecho wg " Added options " emph "measure_pbp=$MEASURE_PBP_VALUE_FOR_INPUTFILE" "\n"\
+            cecho wg " Added options " emph "measure_pbp=$BHMAS_measurePbp_VALUE_FOR_INPUTFILE" "\n"\
                   emph "               sourcetype=volume" "\n"\
                   emph "               sourcecontent=gaussian"
             if [ $BHMAS_wilson = "TRUE" ]; then
@@ -359,33 +359,33 @@ function ProcessBetaValuesForContinue_SLURM()
             fi
             cecho wg " to the " file "${INPUTFILE_GLOBALPATH#$(pwd)/}" " file."
         else
-            __static__ModifyOptionInInputFile "measure_pbp=$MEASURE_PBP_VALUE_FOR_INPUTFILE"
+            __static__ModifyOptionInInputFile "measure_pbp=$BHMAS_measurePbp_VALUE_FOR_INPUTFILE"
             [ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
-            cecho wg " Set option " emph "measure_pbp=$MEASURE_PBP_VALUE_FOR_INPUTFILE" " into the " file "${INPUTFILE_GLOBALPATH#$(pwd)/}" " file."
+            cecho wg " Set option " emph "measure_pbp=$BHMAS_measurePbp_VALUE_FOR_INPUTFILE" " into the " file "${INPUTFILE_GLOBALPATH#$(pwd)/}" " file."
         fi
 
         if [ $BHMAS_wilson = "TRUE" ]; then
             #If the option MP=() is given in the betasfile we have to do some work on the INPUTFILE to check if it was already given or not and act accordingly
-            if KeyInArray $BETA MASS_PRECONDITIONING_ARRAY; then
+            if KeyInArray $BETA BHMAS_massPreconditioningValues; then
                 case $(grep -o "use_mp" $INPUTFILE_GLOBALPATH | wc -l) in
                     0 )
                         if [ $(grep -o "solver_mp" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] || [ $(grep -o "kappa_mp" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] ||
                                [ $(grep -o "integrator2" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ] || [ $(grep -o "integrationsteps2" $INPUTFILE_GLOBALPATH | wc -l) -ne 0 ]; then
                             cecho lr " The option " emph "use_mp" " is not present in the input file but one or more specification about how to use\n"\
                                   " mass preconditioning are present. Suspicious situation, investigate! The value " emph "beta = $BETA" " will be skipped!\n"
-                            PROBLEM_BETA_ARRAY+=( $BETA )
+                            BHMAS_problematicBetaValues+=( $BETA )
                             mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
                         else
                             cecho "use_mp=1\n"\
                                   "solver_mp=cg\n"\
-                                  "kappa_mp=0.${MASS_PRECONDITIONING_ARRAY[$BETA]#*,}\n"\
+                                  "kappa_mp=0.${BHMAS_massPreconditioningValues[$BETA]#*,}\n"\
                                   "integrator2=twomn\n"\
-                                  "integrationsteps2=${MASS_PRECONDITIONING_ARRAY[$BETA]%,*}" >> $INPUTFILE_GLOBALPATH
+                                  "integrationsteps2=${BHMAS_massPreconditioningValues[$BETA]%,*}" >> $INPUTFILE_GLOBALPATH
                             cecho -wg " Added options " emph "use_mp=1" "\n"\
                                   emph "               solver_mp=cg" "\n"\
-                                  emph "               kappa_mp=0.${MASS_PRECONDITIONING_ARRAY[$BETA]#*,}" "\n"\
+                                  emph "               kappa_mp=0.${BHMAS_massPreconditioningValues[$BETA]#*,}" "\n"\
                                   emph "               integrator2=twomn" "\n"\
-                                  emph "               integrationsteps2=${MASS_PRECONDITIONING_ARRAY[$BETA]%,*}"\
+                                  emph "               integrationsteps2=${BHMAS_massPreconditioningValues[$BETA]%,*}"\
                                   " to the " file "${INPUTFILE_GLOBALPATH#$(pwd)/}" " file."
                             __static__ModifyOptionInInputFile "num_timescales=3"
                             [ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
@@ -400,22 +400,22 @@ function ProcessBetaValuesForContinue_SLURM()
                         __static__ModifyOptionInInputFile "use_mp=1"
                         [ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
                         cecho wg " Set option " emph "use_mp=1" " into the " file "${INPUTFILE_GLOBALPATH#$(pwd)/}" " file."
-                        __static__ModifyOptionInInputFile "kappa_mp=0.${MASS_PRECONDITIONING_ARRAY[$BETA]#*,}"
+                        __static__ModifyOptionInInputFile "kappa_mp=0.${BHMAS_massPreconditioningValues[$BETA]#*,}"
                         [ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
-                        cecho wg " Set option " emph "kappa_mp=0.${MASS_PRECONDITIONING_ARRAY[$BETA]#*,}" " into the " file "${INPUTFILE_GLOBALPATH#$(pwd)/}" " file."
+                        cecho wg " Set option " emph "kappa_mp=0.${BHMAS_massPreconditioningValues[$BETA]#*,}" " into the " file "${INPUTFILE_GLOBALPATH#$(pwd)/}" " file."
                         __static__ModifyOptionInInputFile "num_timescales=3"
                         [ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
                         cecho wg " Set option " emph "num_timescales=3" " into the " file "${INPUTFILE_GLOBALPATH#$(pwd)/}" " file."
-                        __static__ModifyOptionInInputFile "intsteps2=${MASS_PRECONDITIONING_ARRAY[$BETA]%,*}"
+                        __static__ModifyOptionInInputFile "intsteps2=${BHMAS_massPreconditioningValues[$BETA]%,*}"
                         [ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
-                        cecho wg " Set option " emph "intsteps2=${MASS_PRECONDITIONING_ARRAY[$BETA]%,*}" " into the " file "${INPUTFILE_GLOBALPATH#$(pwd)/}" " file."
+                        cecho wg " Set option " emph "intsteps2=${BHMAS_massPreconditioningValues[$BETA]%,*}" " into the " file "${INPUTFILE_GLOBALPATH#$(pwd)/}" " file."
                         __static__ModifyOptionInInputFile "cg_iteration_block_size=10"
                         [ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
                         cecho wg " Set option " emph "cg_iteration_block_size=10" " into the " file "${INPUTFILE_GLOBALPATH#$(pwd)/}" " file."
                         ;;
                     * )
                         cecho lr "\n String " emph "use_mp" " occurs more than once in file " file "$INPUTFILE_GLOBALPATH" "! The value " emph "beta = $BETA" " will be skipped!\n"
-                        PROBLEM_BETA_ARRAY+=( $BETA )
+                        BHMAS_problematicBetaValues+=( $BETA )
                         mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
                         ;;
                 esac
@@ -438,7 +438,7 @@ function ProcessBetaValuesForContinue_SLURM()
                         ;;
                     * )
                         cecho lr "\n String " emph "use_mp" " occurs more than once in file " file "$INPUTFILE_GLOBALPATH" "! The value " emph "beta = $BETA" " will be skipped!\n"
-                        PROBLEM_BETA_ARRAY+=( $BETA )
+                        BHMAS_problematicBetaValues+=( $BETA )
                         mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
                         ;;
                 esac
@@ -446,7 +446,7 @@ function ProcessBetaValuesForContinue_SLURM()
         fi
         #For each command line option, modify it in the inputfile.
         #
-        #If CONTINUE_NUMBER is given, set automatically the number of remaining measurements.
+        #If BHMAS_trajectoryNumberUpToWhichToContinue is given, set automatically the number of remaining measurements.
         # NOTE: If --measurements=... is (also) given, then --measurements will be used!
         #
         # ATTENTION: The ideal case is to recover the number of measurements done from the std. output of CL2QCD, and in particular
@@ -462,12 +462,12 @@ function ProcessBetaValuesForContinue_SLURM()
         # NOTE: If the configuration from which we are starting, i.e. NAME_LAST_CONFIGURATION, contains digits then it is
         #       better to deduce the number of measurements to be done from there.
         #
-        if [ $CONTINUE_NUMBER -ne 0 ]; then
+        if [ $BHMAS_trajectoryNumberUpToWhichToContinue -ne 0 ]; then
             if [ $(grep -o "[[:digit:]]\+" <<< "$NAME_LAST_CONFIGURATION" | wc -l) -ne 0 ]; then
                 local NUMBER_DONE_TRAJECTORIES=$(grep -o "[[:digit:]]\+" <<< "$NAME_LAST_CONFIGURATION" | sed 's/^0*//g')
             else
                 local STDOUTPUT_FILE=`ls -lt $BHMAS_betaPrefix$BETA | awk -v filename="$HMC_FILENAME" 'BEGIN{regexp="^"filename".[[:digit:]]+.out$"}{if($9 ~ regexp){print $9}}' | head -n1`
-                local STDOUTPUT_GLOBALPATH="$HOME_DIR_WITH_BETAFOLDERS/$BHMAS_betaPrefix$BETA/$STDOUTPUT_FILE"
+                local STDOUTPUT_GLOBALPATH="$BHMAS_submitDirWithBetaFolders/$BHMAS_betaPrefix$BETA/$STDOUTPUT_FILE"
                 if [ -f $STDOUTPUT_GLOBALPATH ] && [ $(grep "writing gaugefield at tr. [[:digit:]]\+" $STDOUTPUT_GLOBALPATH | wc -l) -ne 0 ]; then
                     local NUMBER_DONE_TRAJECTORIES=$(grep -o "writing gaugefield at tr. [[:digit:]]\+" $STDOUTPUT_GLOBALPATH | grep -o "[[:digit:]]\+" | tail -n1)
                     #If the simulation was resumed from a previous configuration, here NUMBER_DONE_TRAJECTORIES is wrong, correct it.
@@ -482,15 +482,15 @@ function ProcessBetaValuesForContinue_SLURM()
                     local NUMBER_DONE_TRAJECTORIES=0
                 fi
             fi
-            if [ $NUMBER_DONE_TRAJECTORIES -ge $CONTINUE_NUMBER ]; then
-                cecho lr " It was found that the number of done measurements is " emph "$NUMBER_DONE_TRAJECTORIES >= $CONTINUE_NUMBER = CONTINUE_NUMBER" ".\n"\
-                      "The option " emph "--continue=$CONTINUE_NUMBER" " cannot be applied. The value " emph "beta = $BETA" " will be skipped!\n"
-                PROBLEM_BETA_ARRAY+=( $BETA )
+            if [ $NUMBER_DONE_TRAJECTORIES -ge $BHMAS_trajectoryNumberUpToWhichToContinue ]; then
+                cecho lr " It was found that the number of done measurements is " emph "$NUMBER_DONE_TRAJECTORIES >= $BHMAS_trajectoryNumberUpToWhichToContinue = BHMAS_trajectoryNumberUpToWhichToContinue" ".\n"\
+                      "The option " emph "--continue=$BHMAS_trajectoryNumberUpToWhichToContinue" " cannot be applied. The value " emph "beta = $BETA" " will be skipped!\n"
+                BHMAS_problematicBetaValues+=( $BETA )
                 mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
             fi
-            __static__ModifyOptionInInputFile "measurements=$(($CONTINUE_NUMBER - $NUMBER_DONE_TRAJECTORIES))"
+            __static__ModifyOptionInInputFile "measurements=$(($BHMAS_trajectoryNumberUpToWhichToContinue - $NUMBER_DONE_TRAJECTORIES))"
             [ $? == 1 ] && mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
-            cecho wg " Set option " emph "measurements=$(($CONTINUE_NUMBER - $NUMBER_DONE_TRAJECTORIES))" " into the " file "${INPUTFILE_GLOBALPATH#$(pwd)/}" " file."
+            cecho wg " Set option " emph "measurements=$(($BHMAS_trajectoryNumberUpToWhichToContinue - $NUMBER_DONE_TRAJECTORIES))" " into the " file "${INPUTFILE_GLOBALPATH#$(pwd)/}" " file."
         fi
         #Always convert startcondition in continue
         __static__ModifyOptionInInputFile "startcondition=continue"
@@ -505,7 +505,7 @@ function ProcessBetaValuesForContinue_SLURM()
             cecho wg " Set option " emph "sourcefile=$WORK_BETADIRECTORY/${NAME_LAST_CONFIGURATION}" " into the " file "${INPUTFILE_GLOBALPATH#$(pwd)/}" " file."
         else
             cecho lr "\n String " emph "sourcefile=[[:alnum:][:punct:]]*" " occurs more than once in file " file "$INPUTFILE_GLOBALPATH" "! The value " emph "beta = $BETA" " will be skipped!\n"
-            PROBLEM_BETA_ARRAY+=( $BETA )
+            BHMAS_problematicBetaValues+=( $BETA )
             mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
         fi
         #If we have a prng_state put it in the file, otherwise set a random host seed (using shuf, see shuf --help for info)
@@ -526,7 +526,7 @@ function ProcessBetaValuesForContinue_SLURM()
                 cecho wg " Set option " emph "host_seed=$HOST_SEED" " into the " file "${INPUTFILE_GLOBALPATH#$(pwd)/}" " file."
             else
                 cecho lr "\n String " emph "host_seed=[[:digit:]]{4}" " occurs more than once in file " file "$INPUTFILE_GLOBALPATH" "! The value " emph "beta = $BETA" " will be skipped!\n"
-                PROBLEM_BETA_ARRAY+=( $BETA )
+                BHMAS_problematicBetaValues+=( $BETA )
                 mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
             fi
         else
@@ -542,15 +542,15 @@ function ProcessBetaValuesForContinue_SLURM()
                 cecho wg " Set option " emph "initial_prng_state=$WORK_BETADIRECTORY/${NAME_LAST_PRNG}" " into the " file "${INPUTFILE_GLOBALPATH#$(pwd)/}" " file."
             else
                 cecho lr "\n String " emph "initial_prng_state=[[:alnum:][:punct:]]*" " occurs more than once in file " file "$INPUTFILE_GLOBALPATH" "! The value " emph "beta = $BETA" " will be skipped!\n"
-                PROBLEM_BETA_ARRAY+=( $BETA )
+                BHMAS_problematicBetaValues+=( $BETA )
                 mv $ORIGINAL_INPUTFILE_GLOBALPATH $INPUTFILE_GLOBALPATH && continue
             fi
         fi
         #Always set the integrator steps, that could have been given or not
-        __static__ModifyOptionInInputFile "intsteps0=${INTSTEPS0_ARRAY[$BETA]}"
-        cecho wg " Set option " emph "intsteps0=${INTSTEPS0_ARRAY[$BETA]}" " into the " file "${INPUTFILE_GLOBALPATH#$(pwd)/}" " file."
-        __static__ModifyOptionInInputFile "intsteps1=${INTSTEPS1_ARRAY[$BETA]}"
-        cecho wg " Set option " emph "intsteps1=${INTSTEPS1_ARRAY[$BETA]}" " into the " file "${INPUTFILE_GLOBALPATH#$(pwd)/}" " file."
+        __static__ModifyOptionInInputFile "intsteps0=${BHMAS_scaleZeroIntegrationSteps[$BETA]}"
+        cecho wg " Set option " emph "intsteps0=${BHMAS_scaleZeroIntegrationSteps[$BETA]}" " into the " file "${INPUTFILE_GLOBALPATH#$(pwd)/}" " file."
+        __static__ModifyOptionInInputFile "intsteps1=${BHMAS_scaleOneIntegrationSteps[$BETA]}"
+        cecho wg " Set option " emph "intsteps1=${BHMAS_scaleOneIntegrationSteps[$BETA]}" " into the " file "${INPUTFILE_GLOBALPATH#$(pwd)/}" " file."
         #Modify input file according to remaining command line specified options (only -F, -f, -m)
         local COMMAND_LINE_OPTIONS_TO_BE_CONSIDERED=( "-m" "--measurements" "-f" "--confSaveFrequency" "-F" "--confSavePointFrequency" )
         local index option
@@ -566,13 +566,13 @@ function ProcessBetaValuesForContinue_SLURM()
 
         #If the script runs fine and it arrives here, it means no bash continue command was done --> we can add BETA to the jobs to be submitted
         rm $ORIGINAL_INPUTFILE_GLOBALPATH
-        LOCAL_SUBMIT_BETA_ARRAY+=( $BETA )
+        LOCAL_BHMAS_betaValuesToBeSubmitted+=( $BETA )
 
     done #loop on BETA
 
-    #Partition of the LOCAL_SUBMIT_BETA_ARRAY into group of BHMAS_GPUsPerNode and create the JobScript files inside the JOBSCRIPT_FOLDER
-    mkdir -p ${HOME_DIR_WITH_BETAFOLDERS}/$BHMAS_jobScriptFolderName || exit -2
-    __static__PackBetaValuesPerGpuAndCreateJobScriptFiles "${LOCAL_SUBMIT_BETA_ARRAY[@]}"
+    #Partition of the LOCAL_BHMAS_betaValuesToBeSubmitted into group of BHMAS_GPUsPerNode and create the JobScript files inside the JOBSCRIPT_FOLDER
+    mkdir -p ${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName || exit -2
+    __static__PackBetaValuesPerGpuAndCreateJobScriptFiles "${LOCAL_BHMAS_betaValuesToBeSubmitted[@]}"
 
     #Ask the user if he want to continue submitting job
     AskUser "Check if the continue option did its job correctly. Would you like to submit the jobs?"
@@ -587,52 +587,52 @@ function ProcessBetaValuesForContinue_SLURM()
 function ProcessBetaValuesForInversion_SLURM()
 {
 
-    local LOCAL_SUBMIT_BETA_ARRAY=()
+    local LOCAL_BHMAS_betaValuesToBeSubmitted=()
 
     for BETA in ${BETAVALUES[@]}; do
         #-------------------------------------------------------------------------#
-        local WORK_BETADIRECTORY="$WORK_DIR_WITH_BETAFOLDERS/$BHMAS_betaPrefix$BETA"
+        local WORK_BETADIRECTORY="$BHMAS_runDirWithBetaFolders/$BHMAS_betaPrefix$BETA"
         local NUMBER_OF_CONF_IN_BETADIRECTORY=$(find $WORK_BETADIRECTORY -regex "$WORK_BETADIRECTORY/conf[.][0-9]*" | wc -l)
-        local NUMBER_OF_TOTAL_CORRELATORS=$(($NUMBER_OF_CONF_IN_BETADIRECTORY * $NUMBER_SOURCES_FOR_CORRELATORS))
+        local NUMBER_OF_TOTAL_CORRELATORS=$(($NUMBER_OF_CONF_IN_BETADIRECTORY * $BHMAS_numberOfSourcesForCorrelators))
         local NUMBER_OF_EXISTING_CORRELATORS=$(find $WORK_BETADIRECTORY -regextype posix-extended -regex "$WORK_BETADIRECTORY/conf[.][0-9]*(_[0-9]+){4}_corr" | wc -l)
         local NUMBER_OF_MISSING_CORRELATORS=$(($NUMBER_OF_TOTAL_CORRELATORS - $NUMBER_OF_EXISTING_CORRELATORS))
         #-------------------------------------------------------------------------#
         ProduceSrunCommandsFileForInversionsPerBeta
-        local NUMBER_OF_INVERSION_COMMANDS=$(wc -l < $WORK_BETADIRECTORY/$SRUN_COMMANDSFILE_FOR_INVERSION)
+        local NUMBER_OF_INVERSION_COMMANDS=$(wc -l < $WORK_BETADIRECTORY/$BHMAS_inversionSrunCommandsFilename)
         if [ $NUMBER_OF_MISSING_CORRELATORS -ne $NUMBER_OF_INVERSION_COMMANDS ]; then
             cecho lr "\n File with commands for inversion expected to contain " emph "$NUMBER_OF_MISSING_CORRELATORS"\
                   " lines, but having " emph "$NUMBER_OF_INVERSION_COMMANDS" ". The value " emph "beta = $BETA" " will be skipped!\n"
-            PROBLEM_BETA_ARRAY+=( $BETA )
+            BHMAS_problematicBetaValues+=( $BETA )
             continue
         fi
-        if [ ! -s $WORK_BETADIRECTORY/$SRUN_COMMANDSFILE_FOR_INVERSION ] && [ $NUMBER_OF_MISSING_CORRELATORS -ne 0 ]; then
+        if [ ! -s $WORK_BETADIRECTORY/$BHMAS_inversionSrunCommandsFilename ] && [ $NUMBER_OF_MISSING_CORRELATORS -ne 0 ]; then
             cecho lr "\n File with commands for inversion found to be " emph "empty" ", but expected to contain "\
                   emph "$NUMBER_OF_MISSING_CORRELATORS" " lines! The value " emph "beta = $BETA" " will be skipped!\n"
-            PROBLEM_BETA_ARRAY+=( $BETA )
+            BHMAS_problematicBetaValues+=( $BETA )
             continue
         fi
         #If file seems fine put it to submit list
-        LOCAL_SUBMIT_BETA_ARRAY+=( $BETA )
+        LOCAL_BHMAS_betaValuesToBeSubmitted+=( $BETA )
     done
 
-    #Partition of the LOCAL_SUBMIT_BETA_ARRAY into group of BHMAS_GPUsPerNode and create the JobScript files inside the JOBSCRIPT_FOLDER
-    mkdir -p ${HOME_DIR_WITH_BETAFOLDERS}/$BHMAS_jobScriptFolderName || exit -2
-    __static__PackBetaValuesPerGpuAndCreateJobScriptFiles "${LOCAL_SUBMIT_BETA_ARRAY[@]}"
+    #Partition of the LOCAL_BHMAS_betaValuesToBeSubmitted into group of BHMAS_GPUsPerNode and create the JobScript files inside the JOBSCRIPT_FOLDER
+    mkdir -p ${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName || exit -2
+    __static__PackBetaValuesPerGpuAndCreateJobScriptFiles "${LOCAL_BHMAS_betaValuesToBeSubmitted[@]}"
 }
 
 #=======================================================================================================================#
 
 function SubmitJobsForValidBetaValues_SLURM()
 {
-    if [ ${#SUBMIT_BETA_ARRAY[@]} -gt "0" ]; then
+    if [ ${#BHMAS_betaValuesToBeSubmitted[@]} -gt "0" ]; then
         cecho lc "\n==================================================================================="
         cecho bb " Jobs will be submitted for the following beta values:"
-        for BETA in ${SUBMIT_BETA_ARRAY[@]}; do
+        for BETA in ${BHMAS_betaValuesToBeSubmitted[@]}; do
             cecho "  - $BETA"
         done
 
-        for BETA in ${SUBMIT_BETA_ARRAY[@]}; do
-            if [ $USE_MULTIPLE_CHAINS == "FALSE" ]; then
+        for BETA in ${BHMAS_betaValuesToBeSubmitted[@]}; do
+            if [ $BHMAS_useMultipleChains == "FALSE" ]; then
                 local PREFIX_TO_BE_GREPPED_FOR="$BHMAS_betaPrefix"
             else
                 local PREFIX_TO_BE_GREPPED_FOR="$BHMAS_seedPrefix"
@@ -648,8 +648,8 @@ function SubmitJobsForValidBetaValues_SLURM()
             fi
         done
 
-        for BETA in ${SUBMIT_BETA_ARRAY[@]}; do
-            local SUBMITTING_DIRECTORY="${HOME_DIR_WITH_BETAFOLDERS}/$BHMAS_jobScriptFolderName"
+        for BETA in ${BHMAS_betaValuesToBeSubmitted[@]}; do
+            local SUBMITTING_DIRECTORY="${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName"
             local JOBSCRIPT_NAME="$(__static__GetJobScriptName ${BETA})"
             cd $SUBMITTING_DIRECTORY
             cecho bb "\n Actual location: " dir "$(pwd)"\
@@ -692,30 +692,30 @@ function __static__PackBetaValuesPerGpuAndCreateJobScriptFiles()
         cecho ""
         local BETAS_STRING="$(__static__GetJobBetasStringUsing ${BETA_FOR_JOBSCRIPT[@]})"
         local JOBSCRIPT_NAME="$(__static__GetJobScriptName ${BETAS_STRING})"
-        local JOBSCRIPT_GLOBALPATH="${HOME_DIR_WITH_BETAFOLDERS}/$BHMAS_jobScriptFolderName/$JOBSCRIPT_NAME"
-        if [ $SUBMITONLY = "FALSE" ]; then
+        local JOBSCRIPT_GLOBALPATH="${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName/$JOBSCRIPT_NAME"
+        if [ $BHMAS_submitonlyOption = "FALSE" ]; then
             if [ -e $JOBSCRIPT_GLOBALPATH ]; then
                 mv $JOBSCRIPT_GLOBALPATH ${JOBSCRIPT_GLOBALPATH}_$(date +'%F_%H%M') || exit -2
             fi
             #Call the file to produce the jobscript file
-            if [ $INVERT_CONFIGURATIONS = "TRUE" ]; then
+            if [ $BHMAS_invertConfigurationsOption = "TRUE" ]; then
                 ProduceInverterJobscript_SLURM
             else
                 ProduceJobscript_SLURM
             fi
             if [ -e $JOBSCRIPT_GLOBALPATH ]; then
-                SUBMIT_BETA_ARRAY+=( "${BETAS_STRING}" )
+                BHMAS_betaValuesToBeSubmitted+=( "${BETAS_STRING}" )
             else
                 cecho lr "\n Jobscript " file "$JOBSCRIPT_NAME" " failed to be created! Skipping this job submission!\n"
-                PROBLEM_BETA_ARRAY+=( "${BETAS_STRING}" )
+                BHMAS_problematicBetaValues+=( "${BETAS_STRING}" )
                 continue
             fi
         else
             if [ -e $JOBSCRIPT_GLOBALPATH ]; then
-                SUBMIT_BETA_ARRAY+=( "${BETAS_STRING}" )
+                BHMAS_betaValuesToBeSubmitted+=( "${BETAS_STRING}" )
             else
                 cecho lr "\n Jobscript " file "$JOBSCRIPT_NAME" " not found! Option " emph "--submitonly" " cannot be applied! Skipping this job submission!\n"
-                PROBLEM_BETA_ARRAY+=( "${BETAS_STRING}" )
+                BHMAS_problematicBetaValues+=( "${BETAS_STRING}" )
                 continue
             fi
         fi
@@ -742,7 +742,7 @@ function __static__GetJobBetasStringUsing()
             unset 'BETAS_WITH_SEED[${BETA}]'
         fi
     done
-    if [ $USE_MULTIPLE_CHAINS == "FALSE" ]; then
+    if [ $BHMAS_useMultipleChains == "FALSE" ]; then
         BETAS_STRING_TO_BE_RETURNED="$(sed -e 's/___/_/g' -e 's/_$//' <<< "$BETAS_STRING_TO_BE_RETURNED")"
     fi
 
@@ -754,7 +754,7 @@ function __static__GetJobScriptName()
 {
     local STRING_WITH_BETAVALUES="$1"
 
-    if [ $INVERT_CONFIGURATIONS = "TRUE" ]; then
+    if [ $BHMAS_invertConfigurationsOption = "TRUE" ]; then
         printf "${BHMAS_jobScriptPrefix}_${BHMAS_parametersString}__${STRING_WITH_BETAVALUES}_INV"
     else
         if [ "$BHMAS_betaPostfix" == "_thermalizeFromConf" ]; then

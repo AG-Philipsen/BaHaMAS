@@ -56,11 +56,11 @@ function ProduceJobscript_SLURM()
 
     __static__AddToJobscriptFile "#SBATCH --ntasks=$BHMAS_GPUsPerNode" ""
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-        __static__AddToJobscriptFile "dir$INDEX=${HOME_DIR_WITH_BETAFOLDERS}/$BHMAS_betaPrefix${BETA_FOR_JOBSCRIPT[$INDEX]}"
+        __static__AddToJobscriptFile "dir$INDEX=${BHMAS_submitDirWithBetaFolders}/$BHMAS_betaPrefix${BETA_FOR_JOBSCRIPT[$INDEX]}"
     done
     __static__AddToJobscriptFile ""
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-        __static__AddToJobscriptFile "workdir$INDEX=${WORK_DIR_WITH_BETAFOLDERS}/$BHMAS_betaPrefix${BETA_FOR_JOBSCRIPT[$INDEX]}"
+        __static__AddToJobscriptFile "workdir$INDEX=${BHMAS_runDirWithBetaFolders}/$BHMAS_betaPrefix${BETA_FOR_JOBSCRIPT[$INDEX]}"
     done
     __static__AddToJobscriptFile\
         ""\
@@ -87,7 +87,7 @@ function ProduceJobscript_SLURM()
         ""\
         "# TODO: this is necessary because the log file is produced in the directoy"\
         "#       of the exec. Copying it later does not guarantee that it is still the same..."\
-        "echo \"Copy executable to beta directories in ${WORK_DIR_WITH_BETAFOLDERS}/${BHMAS_betaPrefix}x.xxxx...\""
+        "echo \"Copy executable to beta directories in ${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}x.xxxx...\""
     for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
         __static__AddToJobscriptFile "rm -f \$dir$INDEX/$HMC_FILENAME && cp -a $BHMAS_hmcGlobalPath \$dir$INDEX || exit 2"
     done
@@ -146,7 +146,7 @@ function ProduceJobscript_SLURM()
         __static__AddToJobscriptFile "# Backup files"
         for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
             __static__AddToJobscriptFile "cd \$dir$INDEX || exit 2"
-            if [ $MEASURE_PBP = "TRUE" ]; then
+            if [ $BHMAS_measurePbp = "TRUE" ]; then
                 __static__AddToJobscriptFile "cp \$workdir$INDEX/${BHMAS_outputFilename}_pbp.dat \$dir$INDEX/${BHMAS_outputFilename}_pbp.\$SLURM_JOB_ID || exit 2"
             fi
             __static__AddToJobscriptFile "cp \$workdir$INDEX/$BHMAS_outputFilename \$dir$INDEX/$BHMAS_outputFilename.\$SLURM_JOB_ID || exit 2" ""
@@ -157,7 +157,7 @@ function ProduceJobscript_SLURM()
         __static__AddToJobscriptFile "rm \$dir$INDEX/$HMC_FILENAME || exit 2"
     done
     __static__AddToJobscriptFile ""
-    if [ $THERMALIZE = "TRUE" ] || [ $CONTINUE_THERMALIZATION = "TRUE" ]; then
+    if [ $BHMAS_thermalizeOption = "TRUE" ] || [ $BHMAS_continueThermalizationOption = "TRUE" ]; then
         __static__AddToJobscriptFile "# Copy last configuration to Thermalized Configurations folder"
         if [ $BHMAS_betaPostfix == "_thermalizeFromHot" ]; then
             for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do

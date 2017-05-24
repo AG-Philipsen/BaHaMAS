@@ -8,11 +8,11 @@ function AcceptanceRateReport()
     local BETAVALUES_COPY=(${BETAVALUES[@]})
     #-----------------------------------------#
     for INDEX in "${!BETAVALUES_COPY[@]}"; do
-        local OUTPUTFILE_GLOBALPATH=$WORK_DIR_WITH_BETAFOLDERS/$BHMAS_betaPrefix${BETAVALUES_COPY[$INDEX]}/$BHMAS_outputFilename
+        local OUTPUTFILE_GLOBALPATH=$BHMAS_runDirWithBetaFolders/$BHMAS_betaPrefix${BETAVALUES_COPY[$INDEX]}/$BHMAS_outputFilename
         if [ ! -f $OUTPUTFILE_GLOBALPATH ]; then
-            cecho lr "\n File " file "$BHMAS_outputFilename" " not found in " dir "$WORK_DIR_WITH_BETAFOLDERS/$BHMAS_betaPrefix${BETAVALUES_COPY[$INDEX]}"\
+            cecho lr "\n File " file "$BHMAS_outputFilename" " not found in " dir "$BHMAS_runDirWithBetaFolders/$BHMAS_betaPrefix${BETAVALUES_COPY[$INDEX]}"\
                   " folder! The value " emph "beta = ${BETAVALUES_COPY[$INDEX]}" " will be skipped!\n"
-            PROBLEM_BETA_ARRAY+=( ${BETAVALUES_COPY[$INDEX]} )
+            BHMAS_problematicBetaValues+=( ${BETAVALUES_COPY[$INDEX]} )
             unset BETAVALUES_COPY[$INDEX] #Here BETAVALUES_COPY becomes sparse
         fi
     done
@@ -28,11 +28,11 @@ function AcceptanceRateReport()
     local POSITION_BETA_STRING_IN_DATA_ARRAY=()
     #Loop on betas and calculate acceptance concatenating data in single array
     for BETA in ${BETAVALUES_COPY[@]}; do
-        OUTPUTFILE_GLOBALPATH=$WORK_DIR_WITH_BETAFOLDERS/$BHMAS_betaPrefix$BETA/$BHMAS_outputFilename
-        NRLINES_ARRAY+=( $(awk '{if(NR%'$INTERVAL'==0){counter++;}}END{print counter}' $OUTPUTFILE_GLOBALPATH) )
+        OUTPUTFILE_GLOBALPATH=$BHMAS_runDirWithBetaFolders/$BHMAS_betaPrefix$BETA/$BHMAS_outputFilename
+        NRLINES_ARRAY+=( $(awk '{if(NR%'$BHMAS_accRateReportInterval'==0){counter++;}}END{print counter}' $OUTPUTFILE_GLOBALPATH) )
         POSITION_BETA_STRING_IN_DATA_ARRAY+=( ${#DATA_ARRAY[@]} )
         DATA_ARRAY+=( "b${BETA%_*}" )
-        DATA_ARRAY+=( $(awk '{if(NR%'$INTERVAL'==0){printf("%.2f \n", sum/'$INTERVAL*100');sum=0}}{sum+=$'$BHMAS_acceptanceColumn'}' $OUTPUTFILE_GLOBALPATH) )
+        DATA_ARRAY+=( $(awk '{if(NR%'$BHMAS_accRateReportInterval'==0){printf("%.2f \n", sum/'$BHMAS_accRateReportInterval*100');sum=0}}{sum+=$'$BHMAS_acceptanceColumn'}' $OUTPUTFILE_GLOBALPATH) )
     done
     #Find largest number of intervals to print table properly
     local LENGTH_LONGEST_COLUMN=0

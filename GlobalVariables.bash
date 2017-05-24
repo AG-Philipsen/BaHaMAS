@@ -98,77 +98,77 @@ function DeclareBaHaMASGlobalVariables()
 {
 
     #Variables about general options
-    BETASFILE='betas'
-    MEASUREMENTS=20000
-    NSAVE=100
-    NSAVEPOINT=20
+    BHMAS_betasFilename='betas'
+    BHMAS_numberOfTrajectories=20000
+    BHMAS_checkpointFrequency=100
+    BHMAS_savepointFrequency=20
     INTSTEPS0=7
     INTSTEPS1=5
     INTSTEPS2=5
     CGBS=50
-    USE_MULTIPLE_CHAINS='TRUE'
-    MEASURE_PBP='TRUE'
+    BHMAS_useMultipleChains='TRUE'
+    BHMAS_measurePbp='TRUE'
     readonly JOBS_STATUS_PREFIX='jobs_status_'
 
     #Internal BaHaMAS variables
-    readonly BaHaMAS_clusterScheduler="$(SelectClusterSchedulerName)"
-    SUBMIT_BETA_ARRAY=()
-    PROBLEM_BETA_ARRAY=()
-    declare -gA INTSTEPS0_ARRAY
-    declare -gA INTSTEPS1_ARRAY
-    declare -gA CONTINUE_RESUMETRAJ_ARRAY
-    declare -gA MASS_PRECONDITIONING_ARRAY
-    declare -gA STARTCONFIGURATION_GLOBALPATH
+    readonly BHMAS_clusterScheduler="$(SelectClusterSchedulerName)"
+    BHMAS_betaValuesToBeSubmitted=()
+    BHMAS_problematicBetaValues=()
+    declare -gA BHMAS_scaleZeroIntegrationSteps
+    declare -gA BHMAS_scaleOneIntegrationSteps
+    declare -gA BHMAS_trajectoriesToBeResumedFrom
+    declare -gA BHMAS_massPreconditioningValues
+    declare -gA BHMAS_startConfigurationGlobalPath
 
     #Mutually exclusive options variables
-    SUBMIT='FALSE'
-    SUBMITONLY='FALSE'
-    THERMALIZE='FALSE'
-    CONTINUE='FALSE'
-    CONTINUE_NUMBER=0
-    CONTINUE_THERMALIZATION='FALSE'
-    LISTSTATUS='FALSE'
-    LISTSTATUS_MEASURE_TIME='FALSE'
-    LISTSTATUS_SHOW_ONLY_QUEUED='FALSE'
-    ACCRATE_REPORT='FALSE'
-    INTERVAL=1000
-    CLEAN_OUTPUT_FILES='FALSE'
-    SECONDARY_OPTION_ALL='FALSE'
-    COMPLETE_BETAS_FILE='FALSE'
-    NUMBER_OF_CHAINS_TO_BE_IN_THE_BETAS_FILE=4
-    UNCOMMENT_BETAS='FALSE'
-    COMMENT_BETAS='FALSE'
-    UNCOMMENT_BETAS_SEED_ARRAY=()
-    UNCOMMENT_BETAS_ARRAY=()
-    INVERT_CONFIGURATIONS='FALSE'
-    readonly SRUN_COMMANDSFILE_FOR_INVERSION="srunCommandsFileForInversions"
-    readonly CORRELATOR_DIRECTION="0"
-    readonly NUMBER_SOURCES_FOR_CORRELATORS="8"
-    CALL_DATABASE='FALSE'
-    DATABASE_OPTIONS=()
+    BHMAS_submitOption='FALSE'
+    BHMAS_submitonlyOption='FALSE'
+    BHMAS_thermalizeOption='FALSE'
+    BHMAS_continueOption='FALSE'
+    BHMAS_trajectoryNumberUpToWhichToContinue=0
+    BHMAS_continueThermalizationOption='FALSE'
+    BHMAS_liststatusOption='FALSE'
+    BHMAS_liststatusMeasureTimeOption='FALSE'
+    BHMAS_liststatusShowOnlyQueuedOption='FALSE'
+    BHMAS_accRateReportOption='FALSE'
+    BHMAS_accRateReportInterval=1000
+    BHMAS_cleanOutputFilesOption='FALSE'
+    BHMAS_cleanAllOutputFiles='FALSE'
+    BHMAS_completeBetasFileOption='FALSE'
+    BHMAS_numberOfChainsToBeInTheBetasFile=4
+    BHMAS_uncommentBetasOption='FALSE'
+    BHMAS_commentBetasOption='FALSE'
+    BHMAS_betasWithSeedToBeToggled=()
+    BHMAS_betasToBeToggled=()
+    BHMAS_invertConfigurationsOption='FALSE'
+    readonly BHMAS_inversionSrunCommandsFilename="srunCommandsFileForInversions"
+    readonly BHMAS_correlatorDirection=0
+    readonly BHMAS_numberOfSourcesForCorrelators=8
+    BHMAS_databaseOption='FALSE'
+    BHMAS_optionsToBePassedToDatabase=()
 
     #Variables for output color
-    readonly DEFAULT_LISTSTATUS_COLOR="\e[0;36m"
-    readonly SUSPICIOUS_BETA_LISTSTATUS_COLOR="\e[0;33m"
-    readonly WRONG_BETA_LISTSTATUS_COLOR="\e[0;91m"
-    readonly TOO_HIGH_DELTA_S_LISTSTATUS_COLOR="\e[0;91m"
-    readonly TOO_LOW_ACCEPTANCE_LISTSTATUS_COLOR="\e[38;5;9m"
-    readonly LOW_ACCEPTANCE_LISTSTATUS_COLOR="\e[38;5;208m"
-    readonly OPTIMAL_ACCEPTANCE_LISTSTATUS_COLOR="\e[38;5;10m"
-    readonly HIGH_ACCEPTANCE_LISTSTATUS_COLOR="\e[38;5;11m"
-    readonly TOO_HIGH_ACCEPTANCE_LISTSTATUS_COLOR="\e[38;5;202m"
-    readonly RUNNING_LISTSTATUS_COLOR="\e[0;32m"
-    readonly PENDING_LISTSTATUS_COLOR="\e[0;33m"
-    readonly CLEANING_LISTSTATUS_COLOR="\e[0;31m"
-    readonly STUCK_SIMULATION_LISTSTATUS_COLOR="\e[0;91m"
-    readonly FINE_SIMULATION_LISTSTATUS_COLOR="\e[0;32m"
+    readonly BHMAS_defaultListstatusColor="\e[0;36m"
+    readonly BHMAS_suspiciousBetaListstatusColor="\e[0;33m"
+    readonly BHMAS_wrongBetaListstatusColor="\e[0;91m"
+    readonly BHMAS_tooHighDeltaSListstatusColor="\e[0;91m"
+    readonly BHMAS_tooLowAcceptanceListstatusColor="\e[38;5;9m"
+    readonly BHMAS_lowAcceptanceListstatusColor="\e[38;5;208m"
+    readonly BHMAS_optimalAcceptanceListstatusColor="\e[38;5;10m"
+    readonly BHMAS_highAcceptanceListstatusColor="\e[38;5;11m"
+    readonly BHMAS_tooHighAcceptanceListstatusColor="\e[38;5;202m"
+    readonly BHMAS_runningListstatusColor="\e[0;32m"
+    readonly BHMAS_pendingListstatusColor="\e[0;33m"
+    readonly BHMAS_toBeCleanedListstatusColor="\e[0;31m"
+    readonly BHMAS_stuckSimulationListstatusColor="\e[0;91m"
+    readonly BHMAS_fineSimulationListstatusColor="\e[0;32m"
 
     #Variables for acceptances/deltaS thresholds
-    readonly TOO_LOW_ACCEPTANCE_THRESHOLD=68
-    readonly LOW_ACCEPTANCE_THRESHOLD=70
-    readonly HIGH_ACCEPTANCE_THRESHOLD=78
-    readonly TOO_HIGH_ACCEPTANCE_THRESHOLD=90
-    readonly DELTA_S_THRESHOLD=6
+    readonly BHMAS_tooLowAcceptanceThreshold=68
+    readonly BHMAS_lowAcceptanceThreshold=70
+    readonly BHMAS_highAcceptanceThreshold=78
+    readonly BHMAS_tooHighAcceptanceThreshold=90
+    readonly BHMAS_deltaSThreshold=6
 }
 
 # The following variables cannot be declared at the
@@ -176,6 +176,6 @@ function DeclareBaHaMASGlobalVariables()
 # which needs to be extracted from the path.
 function DeclareBetaFoldersPathsAsGlobalVariables()
 {
-    readonly HOME_DIR_WITH_BETAFOLDERS="$BHMAS_submitDiskGlobalPath/$BHMAS_projectSubpath$BHMAS_parametersPath"
-    readonly WORK_DIR_WITH_BETAFOLDERS="$BHMAS_runDiskGlobalPath/$BHMAS_projectSubpath$BHMAS_parametersPath"
+    readonly BHMAS_submitDirWithBetaFolders="$BHMAS_submitDiskGlobalPath/$BHMAS_projectSubpath$BHMAS_parametersPath"
+    readonly BHMAS_runDirWithBetaFolders="$BHMAS_runDiskGlobalPath/$BHMAS_projectSubpath$BHMAS_parametersPath"
 }

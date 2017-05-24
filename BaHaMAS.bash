@@ -70,7 +70,7 @@ CheckUserDefinedVariablesAndDefineDependentAdditionalVariables
 ParseCommandLineOption "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}"
 CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase
 
-if [ $CALL_DATABASE = 'FALSE' ]; then
+if [ $BHMAS_databaseOption = 'FALSE' ]; then
     #Perform all the checks on the path, reading out parameters and testing additional paths
     CheckSingleOccurrenceInPath $(sed 's/\// /g' <<< "$BHMAS_submitDiskGlobalPath")\
                                 "${BHMAS_nflavourPrefix}${BHMAS_nflavourRegex}"\
@@ -87,32 +87,32 @@ fi
 #  Treat each mutually exclusive option separately, even if some steps are in common. This improves readability!  #
 #-----------------------------------------------------------------------------------------------------------------#
 
-if [ $CALL_DATABASE = 'TRUE' ]; then
+if [ $BHMAS_databaseOption = 'TRUE' ]; then
 
-    projectStatisticsDatabase ${DATABASE_OPTIONS[@]}
+    projectStatisticsDatabase ${BHMAS_optionsToBePassedToDatabase[@]}
 
-elif [ $SUBMITONLY = 'TRUE' ]; then
+elif [ $BHMAS_submitonlyOption = 'TRUE' ]; then
 
     ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
     ProcessBetaValuesForSubmitOnly
     SubmitJobsForValidBetaValues #TODO: Declare all possible local variable in this function as local!
 
-elif [ $SUBMIT = 'TRUE' ]; then
+elif [ $BHMAS_submitOption = 'TRUE' ]; then
 
     ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
     ProduceInputFileAndJobScriptForEachBeta
     SubmitJobsForValidBetaValues #TODO: Declare all possible local variable in this function as local!
 
-elif [ $THERMALIZE = 'TRUE' ] || [ $CONTINUE_THERMALIZATION = 'TRUE' ]; then
+elif [ $BHMAS_thermalizeOption = 'TRUE' ] || [ $BHMAS_continueThermalizationOption = 'TRUE' ]; then
 
-    if [ $USE_MULTIPLE_CHAINS = 'FALSE' ]; then
-        [ $THERMALIZE = 'TRUE' ] && cecho lr "\n Option -t | --thermalize implemented ONLY combined not with --doNotUseMultipleChains option! Aborting...\n"
-        [ $CONTINUE_THERMALIZATION = 'TRUE' ] && cecho lr "\n Option -C | --continueThermalization implemented ONLY combined not with --doNotUseMultipleChains option! Aborting...\n"
+    if [ $BHMAS_useMultipleChains = 'FALSE' ]; then
+        [ $BHMAS_thermalizeOption = 'TRUE' ] && cecho lr "\n Option -t | --thermalize implemented ONLY combined not with --doNotUseMultipleChains option! Aborting...\n"
+        [ $BHMAS_continueThermalizationOption = 'TRUE' ] && cecho lr "\n Option -C | --continueThermalization implemented ONLY combined not with --doNotUseMultipleChains option! Aborting...\n"
         exit -1
     fi
     #Here we fix the beta postfix just looking for thermalized conf from hot at the actual parameters (no matter at which beta);
     #if at least one configuration thermalized from hot is present, it means the thermalization has to be done from conf (the
-    #correct beta to be used is selected then later in the script ---> see where the array STARTCONFIGURATION_GLOBALPATH is filled
+    #correct beta to be used is selected then later in the script ---> see where the array BHMAS_startConfigurationGlobalPath is filled
     #
     # TODO: If a thermalization from hot is finished but one other crashed and one wishes to resume it, the postfix should be
     #       from Hot but it is from conf since in $BHMAS_thermConfsGlobalPath a conf from hot is found. Think about how to fix this.
@@ -121,64 +121,64 @@ elif [ $THERMALIZE = 'TRUE' ] || [ $CONTINUE_THERMALIZATION = 'TRUE' ]; then
     else
         BHMAS_betaPostfix="_thermalizeFromConf"
     fi
-    if [ $MEASURE_PBP = 'TRUE' ]; then
+    if [ $BHMAS_measurePbp = 'TRUE' ]; then
         cecho ly B "\n Measurement of PBP switched off during thermalization!"
-        MEASURE_PBP='FALSE'
+        BHMAS_measurePbp='FALSE'
     fi
 
     ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
 
-    if [ $THERMALIZE = 'TRUE' ]; then
+    if [ $BHMAS_thermalizeOption = 'TRUE' ]; then
         ProduceInputFileAndJobScriptForEachBeta
         AskUser "Check if everything is fine. Would you like to submit the jobs?"
         if UserSaidNo; then
             cecho lr "\n No job will be submitted!\n"
             exit 0
         fi
-    elif [ $CONTINUE_THERMALIZATION = 'TRUE' ]; then
+    elif [ $BHMAS_continueThermalizationOption = 'TRUE' ]; then
         ProcessBetaValuesForContinue
     fi
     SubmitJobsForValidBetaValues #TODO: Declare all possible local variable in this function as local!
 
-elif [ $CONTINUE = 'TRUE' ]; then
+elif [ $BHMAS_continueOption = 'TRUE' ]; then
 
     ReadBetaValuesFromFile  # Here we declare and fill the array BETAVALUES
     ProcessBetaValuesForContinue #TODO: Declare all possible local variable in this function as local! Use also only capital letters!
     SubmitJobsForValidBetaValues #TODO: Declare all possible local variable in this function as local!
 
-elif [ $LISTSTATUS = 'TRUE' ]; then
+elif [ $BHMAS_liststatusOption = 'TRUE' ]; then
 
     ListJobStatus
 
-elif [ $ACCRATE_REPORT = 'TRUE' ]; then
+elif [ $BHMAS_accRateReportOption = 'TRUE' ]; then
 
     ReadBetaValuesFromFile
     AcceptanceRateReport
 
-elif [ $CLEAN_OUTPUT_FILES = 'TRUE' ]; then
+elif [ $BHMAS_cleanOutputFilesOption = 'TRUE' ]; then
 
-    if [ $SECONDARY_OPTION_ALL = 'TRUE' ]; then
-        BETAVALUES=( $( ls $WORK_DIR_WITH_BETAFOLDERS | grep "^${BHMAS_betaPrefix}${BHMAS_betaRegex}" | awk '{print substr($1,2)}') )
+    if [ $BHMAS_cleanAllOutputFiles = 'TRUE' ]; then
+        BETAVALUES=( $( ls $BHMAS_runDirWithBetaFolders | grep "^${BHMAS_betaPrefix}${BHMAS_betaRegex}" | awk '{print substr($1,2)}') )
     else
         ReadBetaValuesFromFile
     fi
     CleanOutputFiles
 
-elif [ $COMPLETE_BETAS_FILE = 'TRUE' ]; then
+elif [ $BHMAS_completeBetasFileOption = 'TRUE' ]; then
 
     CompleteBetasFile
 
-elif [ $UNCOMMENT_BETAS = 'TRUE' ]; then
+elif [ $BHMAS_uncommentBetasOption = 'TRUE' ]; then
 
     UncommentEntriesInBetasFile
-    less "$BETASFILE"
+    less "$BHMAS_betasFilename"
 
-elif [ $COMMENT_BETAS = 'TRUE' ]; then
+elif [ $BHMAS_commentBetasOption = 'TRUE' ]; then
 
     CommentEntriesInBetasFile
-    less "$BETASFILE"
+    less "$BHMAS_betasFilename"
 
-elif [ $INVERT_CONFIGURATIONS = 'TRUE' ]; then
+elif [ $BHMAS_invertConfigurationsOption = 'TRUE' ]; then
 
     ReadBetaValuesFromFile
     ProcessBetaValuesForInversion
