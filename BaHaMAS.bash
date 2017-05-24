@@ -27,6 +27,8 @@ source ${BaHaMAS_repositoryTopLevelPath}/OutputFunctionality.bash               
 source ${BaHaMAS_repositoryTopLevelPath}/PathManagementFunctionality.bash          || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/FindClusterScheduler.bash                 || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/MainParser.bash        || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/ParseBetasFile.bash                       || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/FindStartingConfiguration.bash            || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/AuxiliaryFunctions.bash                   || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/AcceptanceRateReport.bash                 || exit -2
 source ${BaHaMAS_repositoryTopLevelPath}/Database/ProjectStatisticsDatabase.bash   || exit -2
