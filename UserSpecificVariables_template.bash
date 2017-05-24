@@ -5,6 +5,15 @@
 #       variables to proper values. Feel free to customize your checks, but
 #       consider that this function is called at the beginning of BaHaMAS.
 #
+# NOTE: Use the variables 'BHMAS_wilson' and 'BHMAS_staggered' to define
+#       differently the same variables in the two cases. For example:
+#
+#         if [ $BHMAS_wilson = "TRUE" ]; then
+#             ...
+#         elif [ $BHMAS_staggered = "TRUE" ]; then
+#             ...
+#         fi
+#
 # ATTENTION: Do not put slashes "/" at the end of the paths variables!!
 
 function DeclareOutputRelatedGlobalVariables()
