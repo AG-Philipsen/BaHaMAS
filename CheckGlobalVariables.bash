@@ -167,8 +167,8 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
         option="$(cecho "with the " B "--submit")"
         variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]}  ${schedulerVariables[@]}
                                        BHMAS_thermConfsGlobalPath )
-        neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]} )
-        neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]} )
+        neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]:-} )
+        neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
 
     elif [ $BHMAS_submitonlyOption = 'TRUE' ]; then
         option="$(cecho "with the " B "--submitonly")"
@@ -176,28 +176,28 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
                                        BHMAS_jobScriptPrefix
                                        BHMAS_jobScriptFolderName
                                        BHMAS_thermConfsGlobalPath )
-        neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]} )
-        neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]} )
+        neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]:-} )
+        neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
 
     elif [ $BHMAS_thermalizeOption = 'TRUE' ]; then
         option="$(cecho "with the " B "--thermalize")"
         variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
                                        BHMAS_thermConfsGlobalPath )
-        neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]} )
-        neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]} )
+        neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]:-} )
+        neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
 
     elif [ $BHMAS_continueOption = 'TRUE' ]; then
         option="$(cecho "with the " B "--continue")"
         variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]}  ${schedulerVariables[@]} )
-        neededFiles+=( ${rationalApproxFolder[@]} )
-        neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]} )
+        neededFiles+=( ${rationalApproxFolder[@]:-} )
+        neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
 
     elif [ $BHMAS_continueThermalizationOption = 'TRUE' ]; then
         option="$(cecho "with the " B "--continueThermalization")"
         variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
                                        BHMAS_thermConfsGlobalPath )
-        neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]} )
-        neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]} )
+        neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]:-} )
+        neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
 
     elif [ $BHMAS_accRateReportOption = 'TRUE' ]; then
         option="$(cecho "with the " B "--accRateReport")"
@@ -244,8 +244,8 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
         option='without any mutually exclusive'
         variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
                                        BHMAS_thermConfsGlobalPath )
-        neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]} )
-        neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]} )
+        neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]:-} )
+        neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
     fi
 
     #Check if variables are defined and not empty
