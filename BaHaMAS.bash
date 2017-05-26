@@ -69,7 +69,7 @@ fi
 CheckSystemRequirements
 CheckWilsonStaggeredVariables
 CheckUserDefinedVariablesAndDefineDependentAdditionalVariables
-ParseCommandLineOption "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}"
+[ $# -ne 0 ] && ParseCommandLineOption "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}"
 CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase
 
 if [ $BHMAS_databaseOption = 'FALSE' ]; then
