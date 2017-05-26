@@ -103,11 +103,11 @@ function MakeTestPreliminaryOperations()
             case "${1##*-}" in
                 last )
                     __static__CreateFilesInBetaFolder "conf.00800" "prng.00800"
-                    __static__AddStringToFirstLineBetasFile "resumefrom=last"
+                    __static__AddStringToFirstLineBetasFile "rlast"
                     ;;
                 resume )
                     __static__CreateFilesInBetaFolder "conf.00100" "prng.00100" "conf.00200" "prng.00200"
-                    __static__AddStringToFirstLineBetasFile "resumefrom=100"
+                    __static__AddStringToFirstLineBetasFile "r100"
                     ;;
             esac
             if [[ $1 =~ therm ]]; then

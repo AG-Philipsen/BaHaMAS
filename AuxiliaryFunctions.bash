@@ -4,6 +4,10 @@ source ${BaHaMAS_repositoryTopLevelPath}/ListJobsStatus_SLURM.bash     || exit -
 source ${BaHaMAS_repositoryTopLevelPath}/CleanOutputFiles.bash         || exit -2
 #------------------------------------------------------------------------------------#
 
+
+
+
+
 function __static__PrintOldLineToBetasFileAndShiftArrays()
 {
     if [ $BHMAS_useMultipleChains == "TRUE" ]; then
@@ -25,7 +29,7 @@ function __static__PrintNewLineToBetasFile()
 }
 
 #TODO: could one reuse some functionality of parsing of betas file here!?
-function CompleteBetasFile()
+function OLDCompleteBetasFile()
 {
     local OLD_IFS=$IFS      # save the field separator
     local IFS=$'\n'         # new field separator, the end of line

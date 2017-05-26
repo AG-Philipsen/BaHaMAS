@@ -63,11 +63,11 @@ function DeclarePathRelatedGlobalVariables()
                                                 [$BHMAS_ntimePrefix]="BHMAS_ntime"
                                                 [$BHMAS_nspacePrefix]="BHMAS_nspace" )
     #Parameters regular expressions
-    readonly BHMAS_nflavourRegex='[[:digit:]]\([.][[:digit:]]\)\?'
+    readonly BHMAS_nflavourRegex='[0-9]\([.][0-9]\)\?'
     readonly BHMAS_chempotRegex='\(0\|PiT\)'
-    readonly BHMAS_massRegex='[[:digit:]]\{4\}'
-    readonly BHMAS_ntimeRegex='[[:digit:]]\{1,2\}'
-    readonly BHMAS_nspaceRegex='[[:digit:]]\{1,2\}'
+    readonly BHMAS_massRegex='[0-9]\{4\}'
+    readonly BHMAS_ntimeRegex='[0-9]\{1,2\}'
+    readonly BHMAS_nspaceRegex='[0-9]\{1,2\}'
     declare -rga BHMAS_parameterRegexes=( [$BHMAS_nflavourPosition]=$BHMAS_nflavourRegex
                                           [$BHMAS_chempotPosition]=$BHMAS_chempotRegex
                                           [$BHMAS_massPosition]=$BHMAS_massRegex
@@ -80,10 +80,10 @@ function DeclarePathRelatedGlobalVariables()
     readonly BHMAS_betaPosition=5
     readonly BHMAS_betaPrefix='b'
     BHMAS_betaPostfix='_continueWithNewChain' #Here we set it supposing it is not a thermalization. If indeed it is, the postfix will be overwritten!
-    readonly BHMAS_betaRegex='[[:digit:]][.][[:digit:]]\{4\}'
+    readonly BHMAS_betaRegex='[0-9][.][0-9]\{4\}'
     readonly BHMAS_seedPrefix='s'
-    readonly BHMAS_seedRegex='[[:digit:]]\{4\}'
-    readonly BHMAS_betaFolderShortRegex=$BHMAS_betaRegex'_'$BHMAS_seedPrefix'[[:digit:]]\{4\}_[[:alpha:]]\+'
+    readonly BHMAS_seedRegex='[0-9]\{4\}'
+    readonly BHMAS_betaFolderShortRegex=$BHMAS_betaRegex'_'$BHMAS_seedPrefix'[0-9]\{4\}_[[:alpha:]]\+'
     readonly BHMAS_betaFolderRegex=$BHMAS_betaPrefix$BHMAS_betaFolderShortRegex
 }
 
