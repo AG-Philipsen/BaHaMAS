@@ -66,7 +66,7 @@ function FindConfigurationGlobalPathFromWhichToStartTheSimulation()
             fi
             local FOUND_CONFIGURATIONS=( $(ls $BHMAS_thermConfsGlobalPath | grep "^conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${BHMAS_betaRegex}_${BHMAS_seedPrefix}${BHMAS_seedRegex}_fromHot[[:digit:]]\+.*") )
             #Here a 0 length of FOUND_CONFIGURATIONS is not checked since we rely on the fact that if this was the case we would have $BHMAS_betaPostfix == "_thermalizeFromHot" as set in JobHandler.bash (Thermalize case)
-            declare -A FOUND_CONFIGURATIONS_WITH_BETA_AS_KEY
+            declare -A FOUND_CONFIGURATIONS_WITH_BETA_AS_KEY=()
             for CONFNAME in "${FOUND_CONFIGURATIONS[@]}"; do
                 local BETAVALUE_RECOVERED_FROM_NAME=$(awk '{split($1, res, "_fromHot"); print res[1]}' <<< "$CONFNAME" | sed 's/.*\('${BHMAS_betaRegex}'\).*/\1/')
                 FOUND_CONFIGURATIONS_WITH_BETA_AS_KEY["$BETAVALUE_RECOVERED_FROM_NAME"]=$CONFNAME

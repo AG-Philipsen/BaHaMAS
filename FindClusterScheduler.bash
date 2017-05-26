@@ -9,14 +9,13 @@
 
 function SelectClusterSchedulerName()
 {
-    declare -A schedulerMap
     local availableScheduler scheduler
     availableScheduler=()
     #Queue commands of some well known job schedulers
-    schedulerMap['LOADLEVELER']='llq'
-    schedulerMap['LSF']='bjobs'
-    schedulerMap['PBS']='qstat'
-    schedulerMap['SLURM']='squeue'
+    declare -A schedulerMap=( ['LOADLEVELER']='llq'
+                              ['LSF']='bjobs'
+                              ['PBS']='qstat'
+                              ['SLURM']='squeue' )
 
     for scheduler in "${!schedulerMap[@]}"; do
         if hash "${schedulerMap[$scheduler]}" 2>/dev/null; then

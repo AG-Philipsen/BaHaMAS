@@ -92,14 +92,14 @@ function projectStatisticsDatabase()
 
     local UPDATE_WITH_FREQUENCY="FALSE"
 
-    declare -a local NF_ARRAY
-    declare -a local MU_ARRAY
-    declare -a local MASS_ARRAY
-    declare -a local NS_ARRAY
-    declare -a local NT_ARRAY
-    declare -a local BETA_ARRAY
-    declare -a local TYPE_ARRAY
-    declare -a local STATUS_ARRAY
+    declare -a NF_ARRAY=()
+    declare -a MU_ARRAY=()
+    declare -a MASS_ARRAY=()
+    declare -a NS_ARRAY=()
+    declare -a NT_ARRAY=()
+    declare -a BETA_ARRAY=()
+    declare -a TYPE_ARRAY=()
+    declare -a STATUS_ARRAY=()
 
     local TRAJ_LOW_VALUE=""
     local TRAJ_HIGH_VALUE=""

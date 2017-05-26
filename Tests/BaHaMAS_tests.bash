@@ -43,8 +43,8 @@ testsRun=0
 testsPassed=0
 testsFailed=0
 whichFailed=()
-declare -A availableTests
-declare -a testsToBeRun #To keep tests in order and make user decide which to run
+declare -A availableTests=()
+declare -a testsToBeRun=() #To keep tests in order and make user decide which to run
 readonly testFolder="${BaHaMAS_testsFolder}/StaggeredFakeProject"
 readonly logFile="${BaHaMAS_testsFolder}/Tests.log"
 readonly testParametersString='Nf2_mui0_mass0050_nt6_ns18'

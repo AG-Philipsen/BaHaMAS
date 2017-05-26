@@ -176,7 +176,7 @@ function ProcessBetaValuesForContinue_SLURM()
     SPECIFIED_COMMAND_LINE_OPTIONS=( "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}" )
 
     #Associative array filled in the function called immediately after
-    declare -A STATUS_OF_JOBS_CONTAINING_BETA_VALUES
+    declare -A STATUS_OF_JOBS_CONTAINING_BETA_VALUES=()
     __static__GetStatusOfJobsContainingBetavalues_SLURM
 
     for BETA in ${BHMAS_betaValues[@]}; do
@@ -727,7 +727,7 @@ function __static__PackBetaValuesPerGpuAndCreateJobScriptFiles()
 function __static__GetJobBetasStringUsing()
 {
     local BETAVALUES_TO_BE_USED=( $@ )
-    declare -A BETAS_WITH_SEED
+    declare -A BETAS_WITH_SEED=()
     for INDEX in "${BETAVALUES_TO_BE_USED[@]}"; do
         BETAS_WITH_SEED[${INDEX%%_*}]="${BETAS_WITH_SEED[${INDEX%%_*}]:-}_$(awk '{split($0, res, "_"); print res[2]}' <<< "$INDEX")"
     done

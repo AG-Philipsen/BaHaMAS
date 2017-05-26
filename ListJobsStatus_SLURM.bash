@@ -320,15 +320,14 @@ function ColorClean()
 function ColorBeta()
 {
     #Columns here below ranges from 1 on, since they are used in awk
-    declare -A OBSERVABLES_COLUMNS
-    OBSERVABLES_COLUMNS["TrajectoryNr"]=1
-    OBSERVABLES_COLUMNS["Plaquette"]=2
-    OBSERVABLES_COLUMNS["PlaquetteSpatial"]=3
-    OBSERVABLES_COLUMNS["PlaquetteTemporal"]=4
-    OBSERVABLES_COLUMNS["PolyakovLoopRe"]=5
-    OBSERVABLES_COLUMNS["PolyakovLoopIm"]=6
-    OBSERVABLES_COLUMNS["PolyakovLoopSq"]=7
-    OBSERVABLES_COLUMNS["Accepted"]=11
+    declare -A OBSERVABLES_COLUMNS=( ["TrajectoryNr"]=1
+                                     ["Plaquette"]=2
+                                     ["PlaquetteSpatial"]=3
+                                     ["PlaquetteTemporal"]=4
+                                     ["PolyakovLoopRe"]=5
+                                     ["PolyakovLoopIm"]=6
+                                     ["PolyakovLoopSq"]=7
+                                     ["Accepted"]=11 )
     local AUX1=$(printf "%s," "${OBSERVABLES_COLUMNS[@]}")
     local AUX2=$(printf "%s," "${!OBSERVABLES_COLUMNS[@]}")
     if [ ! -f $OUTPUTFILE_GLOBALPATH ]; then

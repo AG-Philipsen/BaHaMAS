@@ -116,11 +116,13 @@ function DeclareBaHaMASGlobalVariables()
     BHMAS_betaValues=()
     BHMAS_betaValuesToBeSubmitted=()
     BHMAS_problematicBetaValues=()
-    declare -gA BHMAS_scaleZeroIntegrationSteps
-    declare -gA BHMAS_scaleOneIntegrationSteps
-    declare -gA BHMAS_trajectoriesToBeResumedFrom
-    declare -gA BHMAS_massPreconditioningValues
-    declare -gA BHMAS_startConfigurationGlobalPath
+    declare -gA BHMAS_scaleZeroIntegrationSteps=()
+    declare -gA BHMAS_scaleOneIntegrationSteps=()
+    declare -gA BHMAS_trajectoriesToBeResumedFrom=()
+    declare -gA BHMAS_massPreconditioningValues=()
+    declare -gA BHMAS_timesPerTrajectory=()
+    declare -gA BHMAS_goalStatistics=()
+    declare -gA BHMAS_startConfigurationGlobalPath=()
 
     #Mutually exclusive options variables
     BHMAS_submitOption='FALSE'

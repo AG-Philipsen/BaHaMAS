@@ -83,7 +83,7 @@ LOCAL_JOBS="FALSE"
 DISPLAY_STANDARD_LIST='TRUE'
 
 #Format codes for squeue command in order to get specific information
-declare -A SQUEUE_FORMAT_CODE
+declare -A SQUEUE_FORMAT_CODE=()
 SQUEUE_FORMAT_CODE["JobId"]="%i"
 SQUEUE_FORMAT_CODE["Name"]="%j"
 SQUEUE_FORMAT_CODE["JobState"]="%T"
@@ -118,7 +118,7 @@ if [ $CLUSTER_NAME = 'LOEWE' ] && [ "$SQUEUE_OUTPUT" != "" ]; then
     JOB_SUBMISSION_FOLDER=""
     JOB_SUBMISSION_TIME=""
     for ID in $(cut -d'@' -f1  <<< "$SQUEUE_OUTPUT"); do
-        declare -A EXTRACTED_JOB_INFORMATION
+        declare -A EXTRACTED_JOB_INFORMATION=()
         ExtractParametersFromJobInformation "$ID" "WorkDir" "SubmitTime"
         JOB_SUBMISSION_FOLDER="${JOB_SUBMISSION_FOLDER}|${ID}@${EXTRACTED_JOB_INFORMATION[WorkDir]}"
         JOB_SUBMISSION_TIME="${JOB_SUBMISSION_TIME}|${ID}@${EXTRACTED_JOB_INFORMATION[SubmitTime]}"
@@ -207,7 +207,7 @@ OTHER_JOBS=$(($TOTAL_JOBS-$RUNNING_JOBS-$PENDING_JOBS))
 #------------------------------------------------------------------------------------------------------------------------------------------------#
 # If node usage is required just execute this code and exit
 if [ $NODE_USAGE = "TRUE" ]; then
-    declare -A USED_NODES
+    declare -A USED_NODES=()
     #Counting
     for NODE in ${JOB_NODELIST[@]}; do
         USED_NODES[$NODE]="${USED_NODES[$NODE]}+"
@@ -235,8 +235,8 @@ fi
 #------------------------------------------------------------------------------------------------------------------------------------------------#
 # If group betas is required just execute this code and exit
 if [ $GROUP_BETAS = "TRUE" ]; then
-    declare -A JOB_PARAMETERS
-    declare -A SEEDS_STATUS
+    declare -A JOB_PARAMETERS=()
+    declare -A SEEDS_STATUS=()
     #Counting
     for INDEX in ${!JOB_NAME[@]}; do
         NAME=${JOB_NAME[$INDEX]}
