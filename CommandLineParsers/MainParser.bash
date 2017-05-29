@@ -310,7 +310,7 @@ function ParseCommandLineOption()
                     elif [[ $2 =~ ^[0-9]\.[0-9]*$ ]]; then
                         BHMAS_betasToBeToggled+=( $(awk '{printf "%1.4f", $1}' <<< "$2") )
                     else
-                        __static__PrintOptionSpecificationErrorAndExit "$1"
+                        __static__PrintOptionSpecificationErrorAndExit "${mutuallyExclusiveOptionsPassed[-1]}"
                     fi
                     shift
                 done
