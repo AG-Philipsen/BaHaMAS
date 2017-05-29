@@ -305,8 +305,8 @@ function ParseCommandLineOption()
                     BHMAS_commentBetasOption="TRUE"
                 fi
                 while [[ ! ${2:-} =~ ^(-|$) ]]; do
-                    if [[ $2 =~ ^[0-9]\.[0-9]{4}_${BHMAS_seedPrefix}[0-9]{4}_(NC|fC|fH)$ ]]; then
-                        BHMAS_betasWithSeedToBeToggled+=( $2 )
+                    if [[ $2 =~ ^[0-9]\.[0-9]{4}_${BHMAS_seedPrefix}[0-9]{4}(_(NC|fC|fH))*$ ]]; then
+                        BHMAS_betasToBeToggled+=( $2 )
                     elif [[ $2 =~ ^[0-9]\.[0-9]*$ ]]; then
                         BHMAS_betasToBeToggled+=( $(awk '{printf "%1.4f", $1}' <<< "$2") )
                     else

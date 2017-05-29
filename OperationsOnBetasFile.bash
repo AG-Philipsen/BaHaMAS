@@ -298,4 +298,34 @@ function CompleteBetasFile()
     rm "$tmpFilename" || exit -2
     unset -v 'betaOccurences'
 }
+
+#------------------------------------------------------------------------------------------------------------------------------#
+
+function __static__ToggleDesiredLines()
+{
+    local beta seed tmpArray
+    for beta in ${BHMAS_betasToBeToggled[@]+"${BHMAS_betasToBeToggled[@]}"}; do
+        tmpArray=( ${beta//_$BHMAS_seedPrefix/ } )
+        beta="${tmpArray[0]}"
+        seed="${tmpArray[1]:-}" #Possibly empty
+        #Here it is fine to assume that beta is in first position (with maybe space in front)
+        sed -i 's/^\([[:space:]]*\)'$1'\(.*'$beta'.*'$seed'.*\)$/\1'$2'\2/' $BHMAS_betasFilename #Uncomment desired lines
+    done
+}
+
+#NOTE: In the following two functions, we again reuse some functionalities implemented above
+#      and, in particular, we parse the betas file to check it. This could result in some
+#      unnecessary operations for the (un)commenting part, but it helps in making some assumptions.
+function UncommentEntriesInBetasFile()
+{
+    __static__ParseBetaFileLineByLineExtractingInformationAndOptionallyCountingGivenBetas
+    sed -i '/^[[:space:]]*#/! s/\(.*\)/#\1/' $BHMAS_betasFilename #At first comment all lines
+    __static__ToggleDesiredLines "#" ""
+}
+
+function CommentEntriesInBetasFile()
+{
+    __static__ParseBetaFileLineByLineExtractingInformationAndOptionallyCountingGivenBetas
+    sed -i "s/^\([[:space:]]*\)#\(.*\)/\1\2/" $BHMAS_betasFilename #At first uncomment all lines
+    __static__ToggleDesiredLines "" "#"
 }

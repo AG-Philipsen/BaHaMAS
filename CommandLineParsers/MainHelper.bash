@@ -89,8 +89,8 @@ function PrintMainHelper()
     __static__AddOptionToHelper -e "-U | --uncommentBetas" "This option uncomments the specified betas (all remaining entries will be commented)."\
                                 "The betas can be specified either with a seed or without. The format of the specified string"\
                                 "$(cecho "can either contain the output of the " $mutuallyExclusiveColor "--liststatus" $helperColor " option, e.g. " c "5.4380_s5491_NC" $helperColor ", or simply")"\
-                                "$(cecho "beta values like " c "5.4380" $helperColor ", or a mix of both. If pure beta values are given then all seeds")"\
-                                "of the given beta value will be uncommented."
+                                "$(cecho "beta values like " c "5.4380" $helperColor ", or a mix of both. The suffix with the type of the chain is optional.")"\
+                                "If pure beta values are given then all seeds of the given beta value will be uncommented."
     __static__AddOptionToHelper -e "-u | --commentBetas" "$(cecho "The reverse option of " $mutuallyExclusiveColor "--uncommentBetas" $helperColor ".")"
     __static__AddOptionToHelper -e "-i | --invertConfigurations" "Invert configurations and produce correlator files for betas and seed specified in the betas file."
     __static__AddOptionToHelper -e "-d | --database" "Update, display and filter database. This is a subprogram plenty of functionality."\
