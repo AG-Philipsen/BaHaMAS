@@ -124,6 +124,24 @@ function __static__CheckAndParseSingleLine()
     done
 }
 
+function __static__ParseBetaFileLineByLineExtractingInformationAndOptionallyCountingGivenBetas()
+{
+    local line
+    while read line; do
+        if [[ $line =~ ^[[:blank:]]*# ]] || [[ $line =~ ^[[:blank:]]*$ ]]; then
+            continue #Skip commented or empty lines
+        fi
+        line="${line%%#*}" #Skip in line comments
+        __static__CheckAndParseSingleLine $line
+        if declare -p betaOccurences 1>> /dev/null 2>&1; then
+            if ! KeyInArray ${BHMAS_betaValues[-1]%%_*} betaOccurences; then
+                betaOccurences[${BHMAS_betaValues[-1]%%_*}]=0
+            fi
+            (( betaOccurences[${BHMAS_betaValues[-1]%%_*}]++ )) || true   #'|| true' because of set -e option
+        fi
+    done < <(cat "$BHMAS_betasFilename")
+}
+
 function __static__CheckConsistencyInformationExtractedFromBetasFile()
 {
     #Check for missing entries which need to be there
@@ -205,20 +223,13 @@ function __static__PrintReportOnExtractedInformationFromBetasFile()
 function ParseBetasFile()
 {
     __static__CheckExistenceBetasFileAndAddEndOfLineAtTheEndIfMissing
-
-    local line
-    while read line; do
-        if [[ $line =~ ^[[:blank:]]*# ]] || [[ $line =~ ^[[:blank:]]*$ ]]; then
-            continue #Skip commented or empty lines
-        fi
-        line="${line%%#*}" #Skip in line comments
-        __static__CheckAndParseSingleLine $line
-    done < <(cat "$BHMAS_betasFilename")
-
+    __static__ParseBetaFileLineByLineExtractingInformationAndOptionallyCountingGivenBetas
     __static__CheckConsistencyInformationExtractedFromBetasFile
     __static__FillMissingTimesPerTrajectoryIfAnyIsSpecified
     __static__PrintReportOnExtractedInformationFromBetasFile
 }
+
+#------------------------------------------------------------------------------------------------------------------------------#
 
 #In the function below we complete the betas file adding new chains until the desired number
 #is reached. The adopted strategy is the following:
@@ -248,18 +259,10 @@ function CompleteBetasFile()
     fi
     __static__CheckExistenceBetasFileAndAddEndOfLineAtTheEndIfMissing
     local line tmpFilename inlineComment beta seed
-    declare -A betaOccurences betaCounter alreadyUsedSeeds
-    while read line; do
-        if [[ $line =~ ^[[:blank:]]*# ]] || [[ $line =~ ^[[:blank:]]*$ ]]; then
-            continue #Skip commented or empty lines
-        fi
-        line="${line%%#*}" #Skip in line comments
-        __static__CheckAndParseSingleLine $line
-        if ! KeyInArray ${BHMAS_betaValues[-1]%%_*} betaOccurences; then
-            betaOccurences[${BHMAS_betaValues[-1]%%_*}]=0
-        fi
-        (( betaOccurences[${BHMAS_betaValues[-1]%%_*}]++ )) || true   #'|| true' because of set -e option
-    done < <(cat "$BHMAS_betasFilename")
+    #The following array is global just to reuse code from above, unset at the end of this function
+    declare -A -g betaOccurences=() #http://lists.gnu.org/archive/html/bug-bash/2013-09/msg00025.html
+    declare -A betaCounter=() alreadyUsedSeeds=()
+    __static__ParseBetaFileLineByLineExtractingInformationAndOptionallyCountingGivenBetas
     #Now it is fine to assume that beta is in the first position of the betas file
     #and that the seed is present on each line, since the multiple chains are used
     tmpFilename="${BHMAS_betasFilename}_$(date +%H%M%S-%3N)"
@@ -292,4 +295,7 @@ function CompleteBetasFile()
             done
         fi
     done < <(cat "$tmpFilename")
+    rm "$tmpFilename" || exit -2
+    unset -v 'betaOccurences'
+}
 }
