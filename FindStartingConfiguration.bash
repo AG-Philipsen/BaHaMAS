@@ -2,69 +2,68 @@
 #   Copyright (c)  2017  Alessandro Sciarra   #
 #---------------------------------------------#
 
+function __static__PickUpStartingConfigurationAmongAvailableOnes()
+{
+    local CONFIGURATION_CHOSEN_BY_USER
+    PS3=$(cecho -d "\n" yg "Enter the number corresponding to the desired configuration: " lp)
+    select CONFIGURATION_CHOSEN_BY_USER in "${FOUND_CONFIGURATIONS[@]}"; do
+        if ! ElementInArray "$CONFIGURATION_CHOSEN_BY_USER" "${FOUND_CONFIGURATIONS[@]}"; then
+            continue
+        else
+            break
+        fi
+    done
+    cecho "" #Restore also default color
+    BHMAS_startConfigurationGlobalPath[$BETA]="$CONFIGURATION_CHOSEN_BY_USER"
+}
+
 function FindConfigurationGlobalPathFromWhichToStartTheSimulation()
 {
+    local FOUND_CONFIGURATIONS
     for BETA in "${BHMAS_betaValues[@]}"; do
-        if [ "$BHMAS_betaPostfix" == "" ]; then #Old nomenclature case: no beta postfix!
-            local FOUND_CONFIGURATIONS=( $(ls $BHMAS_thermConfsGlobalPath | grep "^conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA}.*") )
+        if [ "$BHMAS_betaPostfix" == "" ]; then #Single chain case: nomenclature with no beta postfix!
+            FOUND_CONFIGURATIONS=( $(find $BHMAS_thermConfsGlobalPath -regextype posix-extended -regex ".*/conf[.]${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA}.*") )
             if [ ${#FOUND_CONFIGURATIONS[@]} -eq 0 ]; then
                 BHMAS_startConfigurationGlobalPath[$BETA]="notFoundHenceStartFromHot"
             elif [ ${#FOUND_CONFIGURATIONS[@]} -eq 1 ]; then
-                BHMAS_startConfigurationGlobalPath[$BETA]="${BHMAS_thermConfsGlobalPath}/${FOUND_CONFIGURATIONS[0]}"
+                BHMAS_startConfigurationGlobalPath[$BETA]="${FOUND_CONFIGURATIONS[0]}"
             else
-                cecho lr "\n No valid starting configuration found for " emph "beta = ${BETA}" " in " dir "$BHMAS_thermConfsGlobalPath" "\n"\
-                      " More than 1 configuration matches " file "conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA}.*" "! Aborting...\n"
-                exit -1
+                cecho -d ly B "\n " U "WARNING" uU ":" uB " More than one valid starting configuration found for " emph "beta = ${BETA%%_*}" " in \n"\
+                      dir "          $BHMAS_thermConfsGlobalPath" ".\n          Which should be used?\n" lp
+                __static__PickUpStartingConfigurationAmongAvailableOnes
             fi
         elif [ $BHMAS_betaPostfix == "_continueWithNewChain" ]; then
-            local FOUND_CONFIGURATIONS=( $(ls $BHMAS_thermConfsGlobalPath | grep "^conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA%_*}_fromConf[[:digit:]]\+.*") )
+            FOUND_CONFIGURATIONS=( $(find $BHMAS_thermConfsGlobalPath -regextype posix-extended -regex ".*/conf[.]${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA%_*}_fromConf[0-9]+.*") )
             if [ ${#FOUND_CONFIGURATIONS[@]} -eq 0 ]; then
                 cecho -n ly B "\n " U "WARNING" uU ":" uB " No valid starting configuration found for " emph "beta = ${BETA%_*}" "\n"\
                       "          in " dir "$BHMAS_thermConfsGlobalPath" ".\n"\
                       "          Looking for configuration with not exactely the same seed,\n"\
                       "          matching " file "conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA%%_*}_${BHMAS_seedPrefix}${BHMAS_seedRegex}_fromConf[[:digit:]]\+.*"
-                FOUND_CONFIGURATIONS=( $(ls $BHMAS_thermConfsGlobalPath | grep "^conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA%%_*}_${BHMAS_seedPrefix}${BHMAS_seedRegex}_fromConf[[:digit:]]\+.*") )
+                FOUND_CONFIGURATIONS=( $(find $BHMAS_thermConfsGlobalPath -regextype posix-extended -regex ".*/conf[.]${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA%%_*}_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/}_fromConf[0-9]+.*") )
                 if [ ${#FOUND_CONFIGURATIONS[@]} -eq 0 ]; then
                     cecho lr " none found! Aborting...\n"
                     exit -1
                 elif [ ${#FOUND_CONFIGURATIONS[@]} -eq 1 ]; then
                     cecho lg " found a valid one!\n"
-                    BHMAS_startConfigurationGlobalPath[$BETA]="${BHMAS_thermConfsGlobalPath}/${FOUND_CONFIGURATIONS[0]}"
+                    BHMAS_startConfigurationGlobalPath[$BETA]="${FOUND_CONFIGURATIONS[0]}"
                 else
-                    cecho -d o " found more than one! Which should be used?\n" bb
-                    PS3=$(cecho -d "\n" yg "Enter the number corresponding to the desired configuration: " bb)
-                    select CONFIGURATION_CHOSEN_BY_USER in "${FOUND_CONFIGURATIONS[@]}"; do
-                        if ! ElementInArray "$CONFIGURATION_CHOSEN_BY_USER" "${FOUND_CONFIGURATIONS[@]}"; then
-                            continue
-                        else
-                            break
-                        fi
-                    done
-                    cecho "" #Restore also default color
-                    BHMAS_startConfigurationGlobalPath[$BETA]="${BHMAS_thermConfsGlobalPath}/$CONFIGURATION_CHOSEN_BY_USER"
+                    cecho -d o " found more than one! Which should be used?\n" lp
+                    __static__PickUpStartingConfigurationAmongAvailableOnes
                 fi
             elif [ ${#FOUND_CONFIGURATIONS[@]} -eq 1 ]; then
-                BHMAS_startConfigurationGlobalPath[$BETA]="${BHMAS_thermConfsGlobalPath}/${FOUND_CONFIGURATIONS[0]}"
+                BHMAS_startConfigurationGlobalPath[$BETA]="${FOUND_CONFIGURATIONS[0]}"
             else
-                cecho ly B "\n " U "WARNING" uU ":" uB " More than one valid starting configuration found for " emph "beta = ${BETA%%_*}" " in "\
-                      dir "$BHMAS_thermConfsGlobalPath" ".\nWhich should be used?\n" bc
-                PS3=$(cecho -d "\n" yg "Enter the number corresponding to the desired configuration: " bc)
-                select CONFIGURATION_CHOSEN_BY_USER in "${FOUND_CONFIGURATIONS[@]}"; do
-                    if ! ElementInArray "$CONFIGURATION_CHOSEN_BY_USER" "${FOUND_CONFIGURATIONS[@]}"; then
-                        continue
-                    else
-                        break
-                    fi
-                done
-                cecho "" #Restore also default color
-                BHMAS_startConfigurationGlobalPath[$BETA]="${BHMAS_thermConfsGlobalPath}/$CONFIGURATION_CHOSEN_BY_USER"
+                cecho ly B "\n " U "WARNING" uU ":" uB " More than one valid starting configuration found for " emph "beta = ${BETA%%_*}" " in \n"\
+                      dir "          $BHMAS_thermConfsGlobalPath" ".\n          Which should be used?\n" lp
+                __static__PickUpStartingConfigurationAmongAvailableOnes
             fi
         elif [ $BHMAS_betaPostfix == "_thermalizeFromConf" ]; then
-            if [ $(ls $BHMAS_thermConfsGlobalPath | grep "^conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA%_*}_fromConf[[:digit:]]\+.*" | wc -l) -ne 0 ]; then
-                cecho lr "\n It seems that there is already a thermalized configuration for " emph "beta = ${BETA%_*}" " in " dir "$BHMAS_thermConfsGlobalPath" "! Aborting...\n"
+            if [ $(find $BHMAS_thermConfsGlobalPath -regextype posix-extended -regex ".*/conf[.]${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA%_*}_fromConf[0-9]+.*" | wc -l) -ne 0 ]; then
+                cecho lr "\n It seems that there is already a thermalized configuration for " emph "beta = ${BETA%_*}" " in\n"\
+                      " " dir "$BHMAS_thermConfsGlobalPath" "! Aborting...\n"
                 exit -1
             fi
-            local FOUND_CONFIGURATIONS=( $(ls $BHMAS_thermConfsGlobalPath | grep "^conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${BHMAS_betaRegex}_${BHMAS_seedPrefix}${BHMAS_seedRegex}_fromHot[[:digit:]]\+.*") )
+            FOUND_CONFIGURATIONS=( $(find $BHMAS_thermConfsGlobalPath -regextype posix-extended -regex ".*/conf[.]${BHMAS_parametersString}_${BHMAS_betaPrefix}${BHMAS_betaRegex//\\/}_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/}_fromHot[0-9]+.*") )
             #Here a 0 length of FOUND_CONFIGURATIONS is not checked since we rely on the fact that if this was the case we would have $BHMAS_betaPostfix == "_thermalizeFromHot" as set in JobHandler.bash (Thermalize case)
             declare -A FOUND_CONFIGURATIONS_WITH_BETA_AS_KEY=()
             for CONFNAME in "${FOUND_CONFIGURATIONS[@]}"; do
@@ -76,7 +75,7 @@ function FindConfigurationGlobalPathFromWhichToStartTheSimulation()
                 cecho lr "\n Something went wrong in determinig the closest beta value to the actual one to pick up the correct thermalized from Hot configuration! Aborting...\n"
                 exit -1
             fi
-            BHMAS_startConfigurationGlobalPath[$BETA]="${BHMAS_thermConfsGlobalPath}/${FOUND_CONFIGURATIONS_WITH_BETA_AS_KEY[$CLOSEST_BETA]}"
+            BHMAS_startConfigurationGlobalPath[$BETA]="${FOUND_CONFIGURATIONS_WITH_BETA_AS_KEY[$CLOSEST_BETA]}"
         elif [ $BHMAS_betaPostfix == "_thermalizeFromHot" ]; then
             BHMAS_startConfigurationGlobalPath[$BETA]="notFoundHenceStartFromHot"
         else
