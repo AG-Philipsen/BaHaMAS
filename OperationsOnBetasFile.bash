@@ -138,9 +138,15 @@ function __static__CheckConsistencyInformationExtractedFromBetasFile()
         fi
     done
     if [ $BHMAS_useMultipleChains = 'TRUE' ]; then
-        #Check whether same seed is provided multiple times for same beta (with an associative array in awk)
-        if [ $(printf "%s\n" "${BHMAS_betaValues[@]}" | awk 'BEGIN{FS="_"}{array[$1,$2]++}END{for(ind in array){if(array[ind]>1){print -1; exit}}}') -eq -1 ]; then
-            cecho lr "\n The " B "same" uB " seed was provided multiple times for the same beta! Aborting...\n"
+        #Check whether same seed is provided multiple times for same beta
+        if [ $(printf "%s\n" "${BHMAS_betaValues[@]%_*}" | sort -n | uniq -d | wc -l) -ne 0 ]; then
+            cecho lr "\n The " B "same" uB " seed was provided multiple times for the same beta in the " file "$BHMAS_betasFilename" " file! Aborting...\n"
+            exit -1
+        fi
+    else
+        #Check whether same beta is provided multiple times
+        if [ $(printf "%s\n" "${BHMAS_betaValues[@]}" | sort -n | uniq -d | wc -l) -ne 0 ]; then
+            cecho lr "\n The " B "same" uB " beta was provided multiple times in the " file "$BHMAS_betasFilename" " file! Aborting...\n"
             exit -1
         fi
     fi
