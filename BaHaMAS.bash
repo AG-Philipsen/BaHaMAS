@@ -51,7 +51,7 @@ DeclarePathRelatedGlobalVariables
 if [ -n "${BaHaMAS_testModeOn:+x}" ] && [ ${BaHaMAS_testModeOn} = 'TRUE' ]; then
     DeclareUserDefinedGlobalVariablesForTests
 else
-    #Here be more friendly with user (no unbound errors, he could type wrong)
+    #Here be more friendly with user (no unbound errors, she/he could type wrong)
     set +u; DeclareUserDefinedGlobalVariables; set -u
 fi
 DeclareBaHaMASGlobalVariables
