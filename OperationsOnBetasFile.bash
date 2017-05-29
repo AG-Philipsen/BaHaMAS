@@ -2,6 +2,13 @@
 #   Copyright (c)  2017  Alessandro Sciarra   #
 #---------------------------------------------#
 
+#REMARK: Here the parsing of the betas file is implemented. All the prefixes
+#        are at the moment hard coded and not extracted into variables.
+#        Moreover, for the seed prefix, an hard-coded 's' is used and not
+#        the 'BHMAS_seedPrefix'. This is due to the fact that a longer value
+#        for the 'BHMAS_seedPrefix' would oblige the user to use this longer
+#        value in all her/his betas files.
+
 function __static__CheckExistenceBetasFileAndAddEndOfLineAtTheEndIfMissing()
 {
     if [ ! -e $BHMAS_betasFilename ]; then
@@ -217,12 +224,25 @@ function ParseBetasFile()
 #     the seed with the new one.
 #
 #NOTE: Parsing twice the file increase simplicity of the code and it is hardly a performance problem.
+function __static__GetNonZeroFourDigitsRandomNumberDifferentFrom()
+{
+    local fourDigitsNumber; fourDigitsNumber='0000'
+    RANDOM=$(date +%N)  #RANDOM seed from date
+    until [ $(grep -o "$fourDigitsNumber" <<< "0000 $@" | wc -l) -eq 0 ]; do
+        fourDigitsNumber=$(( (RANDOM+1000)%10000 )) # $RANDOM is in [0,32767]
+    done
+    printf "%04d" $fourDigitsNumber
+}
+
 function CompleteBetasFile()
 {
+    if [ $BHMAS_useMultipleChains = 'FALSE' ]; then
+        cecho lr "\n Option " emph "--doNotUseMultipleChains" " not compatible with " emph "--completeBetasFile" " one. Aborting...\n"
+        exit -1
+    fi
     __static__CheckExistenceBetasFileAndAddEndOfLineAtTheEndIfMissing
-
-    local line tmpFilename inlineComment beta
-    declare -A betaOccurences betaCounter
+    local line tmpFilename inlineComment beta seed
+    declare -A betaOccurences betaCounter alreadyUsedSeeds
     while read line; do
         if [[ $line =~ ^[[:blank:]]*# ]] || [[ $line =~ ^[[:blank:]]*$ ]]; then
             continue #Skip commented or empty lines
@@ -234,8 +254,8 @@ function CompleteBetasFile()
         fi
         (( betaOccurences[${BHMAS_betaValues[-1]%%_*}]++ )) || true   #'|| true' because of set -e option
     done < <(cat "$BHMAS_betasFilename")
-    PrintArray betaOccurences
     #Now it is fine to assume that beta is in the first position of the betas file
+    #and that the seed is present on each line, since the multiple chains are used
     tmpFilename="${BHMAS_betasFilename}_$(date +%H%M%S-%3N)"
     cp "$BHMAS_betasFilename" "$tmpFilename" || exit -2; rm "$BHMAS_betasFilename" || exit -2
     while read line; do
@@ -244,30 +264,26 @@ function CompleteBetasFile()
             continue #Put commented or empty lines as such into file
         fi
         beta=$(awk '{print $1}' <<< "$line")
+        seed=$(grep -o "s${BHMAS_seedRegex}" <<< "$line" | tail -n1)
         if ! KeyInArray $beta betaCounter; then
             betaCounter[$beta]=0
+            alreadyUsedSeeds[$beta]=''
         fi
         (( betaCounter[$beta]++ )) || true  #'|| true' because of set -e option
+        alreadyUsedSeeds[$beta]+="$seed "
+        cecho -d "$line" >> $BHMAS_betasFilename
         if [ ${betaCounter[$beta]} -eq ${betaOccurences[$beta]} ]; then
-            cecho o "Lines to be added here, after " emph "$line"
-
-
-
-
-
-            #TODO: add lines here and change seed!
-
-
-
-
-
-
-
-        else
-            cecho -d "$line" >> $BHMAS_betasFilename
+            while [ ${betaCounter[$beta]} -lt $BHMAS_numberOfChainsToBeInTheBetasFile ]; do
+                seed='s'$(__static__GetNonZeroFourDigitsRandomNumberDifferentFrom ${alreadyUsedSeeds[$beta]} )
+                #Replace last occurence of seed in 'line' using new one
+                #NOTE: since if user had more seeds on the same line, only the last
+                #      would be used in BaHaMAS, here we consistently behave with this
+                #      rule and we replace only the last seed given (sed is very greedy)
+                line=$(sed 's/\(.*\)'s${BHMAS_seedRegex}'/\1'$seed'/g' <<< "$line")
+                #Print new line to file
+                cecho -d "$line" >> $BHMAS_betasFilename
+                (( betaCounter[$beta]++ )) || true  #'|| true' because of set -e option
+            done
         fi
     done < <(cat "$tmpFilename")
-
-
-
 }
