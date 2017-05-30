@@ -28,9 +28,9 @@ function ProduceJobscript_SLURM()
         "#SBATCH --error=${HMC_FILENAME}.%j.err"\
         "#SBATCH --no-requeue"
 
-    [ "$BHMAS_clusterPartition"        != '' ] && __static__AddToJobscriptFile "#SBATCH --partition=$BHMAS_clusterPartition"
-    [ "$BHMAS_clusterNode"             != '' ] && __static__AddToJobscriptFile "#SBATCH --nodelist=$BHMAS_clusterNode"
-    [ "$BHMAS_clusterConstraint"       != '' ] && __static__AddToJobscriptFile "#SBATCH --constraint=$BHMAS_clusterConstraint"
+    [ "$BHMAS_clusterPartition"       != '' ] && __static__AddToJobscriptFile "#SBATCH --partition=$BHMAS_clusterPartition"
+    [ "$BHMAS_clusterNode"            != '' ] && __static__AddToJobscriptFile "#SBATCH --nodelist=$BHMAS_clusterNode"
+    [ "$BHMAS_clusterConstraint"      != '' ] && __static__AddToJobscriptFile "#SBATCH --constraint=$BHMAS_clusterConstraint"
     [ "$BHMAS_clusterGenericResource" != '' ] && __static__AddToJobscriptFile "#SBATCH --gres=$BHMAS_clusterGenericResource"
 
     #Trying to retrieve information about the list of nodes to be excluded if user gave file
