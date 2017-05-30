@@ -64,14 +64,14 @@ if ElementInArray '-h' "$@" || ElementInArray '--help' "$@"; then
 elif ElementInArray '--helpDatabase' "$@"; then
     ParseCommandLineOption '-d' '-h'
 else
-    SPECIFIED_COMMAND_LINE_OPTIONS=( "$@" )
+    BHMAS_specifiedCommandLineOptions=( "$@" )
 fi
 
 #Do some checks on system and variables, parse user option and do some more checks
 CheckSystemRequirements
 CheckWilsonStaggeredVariables
 CheckUserDefinedVariablesAndDefineDependentAdditionalVariables
-[ $# -ne 0 ] && ParseCommandLineOption "${SPECIFIED_COMMAND_LINE_OPTIONS[@]}"
+[ $# -ne 0 ] && ParseCommandLineOption "${BHMAS_specifiedCommandLineOptions[@]}"
 CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase
 
 if [ $BHMAS_databaseOption = 'FALSE' ]; then

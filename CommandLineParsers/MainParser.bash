@@ -29,7 +29,7 @@ function ParseCommandLineOption()
 
     #Reset argument function to be able to parse them as well as global given option
     set -- "${commandLineOptions[@]}"
-    SPECIFIED_COMMAND_LINE_OPTIONS=( "${commandLineOptions[@]}" )
+    BHMAS_specifiedCommandLineOptions=( "${commandLineOptions[@]}" )
 
     mutuallyExclusiveOptions=( "-s | --submit"        "-c | --continue"    "-C | --continueThermalization"
                                "-t | --thermalize"    "-l | --liststatus"  "-U | --uncommentBetas"
