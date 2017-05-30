@@ -26,8 +26,8 @@ readonly BaHaMAS_testsFolder=${BaHaMAS_repositoryTopLevelPath}/Tests
 readonly BaHaMAS_testsFolderAuxFiles=${BaHaMAS_testsFolder}/AuxiliaryFiles
 
 #Load needed files
-source ${BaHaMAS_repositoryTopLevelPath}/OutputFunctionality.bash  || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/UtilityFunctions.bash     || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/OutputFunctionality.bash  || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/UtilityFunctions.bash     || exit -2
 source ${BaHaMAS_testsFolder}/AuxiliaryFunctions.bash              || exit -2
 source ${BaHaMAS_testsFolder}/CommandLineParser.bash               || exit -2
 

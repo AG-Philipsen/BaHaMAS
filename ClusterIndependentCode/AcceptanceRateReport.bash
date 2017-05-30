@@ -1,7 +1,3 @@
-# Load auxiliary bash files that will be used.
-source ${BaHaMAS_repositoryTopLevelPath}/ListJobsStatus_SLURM.bash || exit -2
-#------------------------------------------------------------------------------------#
-
 function AcceptanceRateReport()
 {
     #-----------------------------------------#

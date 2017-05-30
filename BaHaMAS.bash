@@ -16,30 +16,32 @@
 #                                                                         #
 #-------------------------------------------------------------------------#
 
-#------------------------------------------------------------------------------------------------------#
-# Load auxiliary bash files that will be used.
-BaHaMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"
-source ${BaHaMAS_repositoryTopLevelPath}/SystemRequirements.bash                   || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/UtilityFunctions.bash                     || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/GlobalVariables.bash                      || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/CheckGlobalVariables.bash                 || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/OutputFunctionality.bash                  || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/PathManagementFunctionality.bash          || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/FindClusterScheduler.bash                 || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/MainParser.bash        || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/OperationsOnBetasFile.bash                || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/FindStartingConfiguration.bash            || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/AuxiliaryFunctions.bash                   || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/AcceptanceRateReport.bash                 || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/Database/ProjectStatisticsDatabase.bash   || exit -2
-#------------------------------------------------------------------------------------------------------#
-# User file to be sourced depending on test mode
-if [ -n "${BaHaMAS_testModeOn:+x}" ] && [ ${BaHaMAS_testModeOn} = 'TRUE' ]; then
-    source ${BaHaMAS_repositoryTopLevelPath}/Tests/SetupUserVariables.bash || exit -2
-else
-    source ${BaHaMAS_repositoryTopLevelPath}/UserSpecificVariables.bash    || exit -2
-fi
-#------------------------------------------------------------------------------------------------------#
+#----------------------------------------------------------------------------------------------------------------#
+# Load auxiliary bash files that will be used.                                                                   #
+readonly BaHaMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"     #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/SystemRequirements.bash           || exit -2     #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/FindClusterScheduler.bash         || exit -2     #
+readonly BHMAS_clusterScheduler="$(SelectClusterSchedulerName)" #It is needed to source cluster specific files!  #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/UtilityFunctions.bash             || exit -2     #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/GlobalVariables.bash              || exit -2     #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/CheckGlobalVariables.bash         || exit -2     #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/OutputFunctionality.bash          || exit -2     #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/PathManagementFunctionality.bash  || exit -2     #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/OperationsOnBetasFile.bash        || exit -2     #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/FindStartingConfiguration.bash    || exit -2     #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/AcceptanceRateReport.bash         || exit -2     #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/CleanOutputFiles.bash             || exit -2     #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/ClusterSpecificFunctionsCall.bash || exit -2     #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/ReportOnProblematicBetas.bash     || exit -2     #
+source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/MainParser.bash                       || exit -2     #
+source ${BaHaMAS_repositoryTopLevelPath}/Database/ProjectStatisticsDatabase.bash                  || exit -2     #
+# User file to be sourced depending on test mode                                                                 #
+if [ -n "${BaHaMAS_testModeOn:+x}" ] && [ ${BaHaMAS_testModeOn} = 'TRUE' ]; then                                 #
+    source ${BaHaMAS_repositoryTopLevelPath}/Tests/SetupUserVariables.bash || exit -2                            #
+else                                                                                                             #
+    source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/UserSpecificVariables.bash || exit -2        #
+fi                                                                                                               #
+#----------------------------------------------------------------------------------------------------------------#
 
 #Set stricter shell mode. This implies for the developer to be aware of what is going on,
 #but it is worth so. Good reference http://redsymbol.net/articles/unofficial-bash-strict-mode
@@ -195,8 +197,6 @@ else
     ProduceInputFileAndJobScriptForEachBeta
 
 fi
-
-
 
 #------------------------------------------------------------------------------------------------------------------------------#
 # Report on eventual problems

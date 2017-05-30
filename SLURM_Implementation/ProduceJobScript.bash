@@ -1,26 +1,26 @@
 function __static__AddToJobscriptFile()
 {
     while [ $# -ne 0 ]; do
-        printf "%s\n" "$1" >> $JOBSCRIPT_GLOBALPATH
+        printf "%s\n" "$1" >> $jobScriptGlobalPath
         shift
     done
 }
 
 function ProduceJobscript_SLURM()
 {
-    rm -f $JOBSCRIPT_GLOBALPATH || exit -2
-    touch $JOBSCRIPT_GLOBALPATH || exit -2
+    rm -f $jobScriptGlobalPath || exit -2
+    touch $jobScriptGlobalPath || exit -2
 
     #-----------------------------------------------------------------#
     # This piece of script uses the variable
-    #   local BETA_FOR_JOBSCRIPT
+    #   local betasForJobScript
     # created in the function from which it is called.
     #-----------------------------------------------------------------#
     #This jobscript is for CL2QCD only!
     __static__AddToJobscriptFile\
         "#!/bin/bash"\
         ""\
-        "#SBATCH --job-name=${JOBSCRIPT_NAME#${BHMAS_jobScriptPrefix}_*}"\
+        "#SBATCH --job-name=${jobScriptFilename#${BHMAS_jobScriptPrefix}_*}"\
         "#SBATCH --mail-type=FAIL"\
         "#SBATCH --mail-user=$BHMAS_userEmail"\
         "#SBATCH --time=$BHMAS_walltime"\
@@ -48,19 +48,19 @@ function ProduceJobscript_SLURM()
             AskUser "         Do you still want to continue with jobscript creation?"
             if UserSaidNo; then
                 cecho "\n" B lr "Exiting from job script creation process...\n"
-                rm -f $JOBSCRIPT_GLOBALPATH
+                rm -f $jobScriptGlobalPath
                 exit 0
             fi
         fi
     fi
 
     __static__AddToJobscriptFile "#SBATCH --ntasks=$BHMAS_GPUsPerNode" ""
-    for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-        __static__AddToJobscriptFile "dir$INDEX=${BHMAS_submitDirWithBetaFolders}/$BHMAS_betaPrefix${BETA_FOR_JOBSCRIPT[$INDEX]}"
+    for INDEX in "${!betasForJobScript[@]}"; do
+        __static__AddToJobscriptFile "dir$INDEX=${BHMAS_submitDirWithBetaFolders}/$BHMAS_betaPrefix${betasForJobScript[$INDEX]}"
     done
     __static__AddToJobscriptFile ""
-    for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-        __static__AddToJobscriptFile "workdir$INDEX=${BHMAS_runDirWithBetaFolders}/$BHMAS_betaPrefix${BETA_FOR_JOBSCRIPT[$INDEX]}"
+    for INDEX in "${!betasForJobScript[@]}"; do
+        __static__AddToJobscriptFile "workdir$INDEX=${BHMAS_runDirWithBetaFolders}/$BHMAS_betaPrefix${betasForJobScript[$INDEX]}"
     done
     __static__AddToJobscriptFile\
         ""\
@@ -68,7 +68,7 @@ function ProduceJobscript_SLURM()
         "errFile=$HMC_FILENAME.\$SLURM_JOB_ID.err"\
         ""\
         "# Check if directories exist"
-    for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
+    for INDEX in "${!betasForJobScript[@]}"; do
         __static__AddToJobscriptFile\
             "if [ ! -d \$dir$INDEX ]; then"\
             "  echo \"Could not find directory \\\"\$dir$INDEX\\\" for runs. Aborting...\"" \
@@ -78,23 +78,23 @@ function ProduceJobscript_SLURM()
     done
     __static__AddToJobscriptFile\
         "# Print some information"\
-        "echo \"$(printf "%s " ${BETA_FOR_JOBSCRIPT[@]})\""\
+        "echo \"$(printf "%s " ${betasForJobScript[@]})\""\
         "echo \"\""\
         "echo \"Host: \$(hostname)\""\
         "echo \"GPU:  \$GPU_DEVICE_ORDINAL\""\
         "echo \"Date and time: \$(date)\""\
-        "echo \$SLURM_JOB_NODELIST > $HMC_FILENAME.${BETAS_STRING:1}.\$SLURM_JOB_ID.nodelist"\
+        "echo \$SLURM_JOB_NODELIST > $HMC_FILENAME.${betasString:1}.\$SLURM_JOB_ID.nodelist"\
         ""\
         "# TODO: this is necessary because the log file is produced in the directoy"\
         "#       of the exec. Copying it later does not guarantee that it is still the same..."\
         "echo \"Copy executable to beta directories in ${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}x.xxxx...\""
-    for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
+    for INDEX in "${!betasForJobScript[@]}"; do
         __static__AddToJobscriptFile "rm -f \$dir$INDEX/$HMC_FILENAME && cp -a $BHMAS_hmcGlobalPath \$dir$INDEX || exit 2"
     done
     __static__AddToJobscriptFile "echo \"...done!\"" ""
     if [ "$BHMAS_submitDiskGlobalPath" != "$BHMAS_runDiskGlobalPath" ]; then
         __static__AddToJobscriptFile "#Copy inputfile from home to work directories..."
-        for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
+        for INDEX in "${!betasForJobScript[@]}"; do
             __static__AddToJobscriptFile "mkdir -p \$workdir$INDEX && cp \$dir$INDEX/$BHMAS_inputFilename \$workdir$INDEX/$BHMAS_inputFilename.\$SLURM_JOB_ID || exit 2"
         done
         __static__AddToJobscriptFile "echo \"...done!\""
@@ -110,22 +110,22 @@ function ProduceJobscript_SLURM()
         "set -o pipefail"\
         ""\
         "# Run jobs from different directories"
-    for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
+    for INDEX in "${!betasForJobScript[@]}"; do
         __static__AddToJobscriptFile\
             "mkdir -p \$workdir$INDEX || exit 2"\
             "cd \$workdir$INDEX"\
             "pwd &"\
             "if hash mbuffer 2>/dev/null; then"\
-            "    time \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$BHMAS_inputFilename --device=$INDEX --beta=${BETA_FOR_JOBSCRIPT[$INDEX]%%_*} 2> \$dir$INDEX/\$errFile | mbuffer -q -m2M > \$dir$INDEX/\$outFile &"\
+            "    time \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$BHMAS_inputFilename --device=$INDEX --beta=${betasForJobScript[$INDEX]%%_*} 2> \$dir$INDEX/\$errFile | mbuffer -q -m2M > \$dir$INDEX/\$outFile &"\
             "else"\
-            "    time srun -n 1 \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$BHMAS_inputFilename --device=$INDEX --beta=${BETA_FOR_JOBSCRIPT[$INDEX]%%_*} > \$dir$INDEX/\$outFile 2> \$dir$INDEX/\$errFile &"\
+            "    time srun -n 1 \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$BHMAS_inputFilename --device=$INDEX --beta=${betasForJobScript[$INDEX]%%_*} > \$dir$INDEX/\$outFile 2> \$dir$INDEX/\$errFile &"\
             "fi"\
             "PID_SRUN_$INDEX=\${!}"\
             ""
     done
     __static__AddToJobscriptFile "#Execute wait \$PID job after job"
-    for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
-        __static__AddToJobscriptFile "wait \$PID_SRUN_$INDEX || { printf \"\nError occurred in simulation at b${BETA_FOR_JOBSCRIPT[$INDEX]%_*}. Please check (process id \${PID_SRUN_$INDEX})...\n\" && ERROR_OCCURRED=\"TRUE\"; }"
+    for INDEX in "${!betasForJobScript[@]}"; do
+        __static__AddToJobscriptFile "wait \$PID_SRUN_$INDEX || { printf \"\nError occurred in simulation at b${betasForJobScript[$INDEX]%_*}. Please check (process id \${PID_SRUN_$INDEX})...\n\" && ERROR_OCCURRED=\"TRUE\"; }"
     done
     __static__AddToJobscriptFile\
         ""\
@@ -144,7 +144,7 @@ function ProduceJobscript_SLURM()
         "" ""
     if [ "$BHMAS_submitDiskGlobalPath" != "$BHMAS_runDiskGlobalPath" ]; then
         __static__AddToJobscriptFile "# Backup files"
-        for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
+        for INDEX in "${!betasForJobScript[@]}"; do
             __static__AddToJobscriptFile "cd \$dir$INDEX || exit 2"
             if [ $BHMAS_measurePbp = "TRUE" ]; then
                 __static__AddToJobscriptFile "cp \$workdir$INDEX/${BHMAS_outputFilename}_pbp.dat \$dir$INDEX/${BHMAS_outputFilename}_pbp.\$SLURM_JOB_ID || exit 2"
@@ -153,25 +153,25 @@ function ProduceJobscript_SLURM()
         done
     fi
     __static__AddToJobscriptFile "# Remove executable"
-    for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
+    for INDEX in "${!betasForJobScript[@]}"; do
         __static__AddToJobscriptFile "rm \$dir$INDEX/$HMC_FILENAME || exit 2"
     done
     __static__AddToJobscriptFile ""
     if [ $BHMAS_thermalizeOption = "TRUE" ] || [ $BHMAS_continueThermalizationOption = "TRUE" ]; then
         __static__AddToJobscriptFile "# Copy last configuration to Thermalized Configurations folder"
         if [ $BHMAS_betaPostfix == "_thermalizeFromHot" ]; then
-            for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
+            for INDEX in "${!betasForJobScript[@]}"; do
                 __static__AddToJobscriptFile\
                     "NUMBER_LAST_CONFIGURATION_IN_FOLDER=\$(ls \$workdir$INDEX | grep 'conf.[0-9]\+' | grep -o '[0-9]\+' | sort -V | tail -n1)" \
-                    "cp \$workdir$INDEX/conf.\${NUMBER_LAST_CONFIGURATION_IN_FOLDER} ${BHMAS_thermConfsGlobalPath}/conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA_FOR_JOBSCRIPT[$INDEX]%_*}_fromHot\$(sed 's/^0*//' <<< \"\$NUMBER_LAST_CONFIGURATION_IN_FOLDER\") || exit 2"
+                    "cp \$workdir$INDEX/conf.\${NUMBER_LAST_CONFIGURATION_IN_FOLDER} ${BHMAS_thermConfsGlobalPath}/conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${betasForJobScript[$INDEX]%_*}_fromHot\$(sed 's/^0*//' <<< \"\$NUMBER_LAST_CONFIGURATION_IN_FOLDER\") || exit 2"
             done
         elif [ $BHMAS_betaPostfix == "_thermalizeFromConf" ]; then
-            for INDEX in "${!BETA_FOR_JOBSCRIPT[@]}"; do
+            for INDEX in "${!betasForJobScript[@]}"; do
                 __static__AddToJobscriptFile "NUMBER_LAST_CONFIGURATION_IN_FOLDER=\$(ls \$workdir$INDEX | grep 'conf.[0-9]\+' | grep -o '[0-9]\+' | sort -V | tail -n1)"
                 #TODO: For the moment we assume 1000 tr. are done from hot. Better to avoid it
                 __static__AddToJobscriptFile\
                     "TRAJECTORIES_DONE_FROM_CONF=\$(( \$(sed 's/^0*//' <<< \"\$NUMBER_LAST_CONFIGURATION_IN_FOLDER\") - 1000 ))"\
-                    "cp \$workdir$INDEX/conf.\${NUMBER_LAST_CONFIGURATION_IN_FOLDER} ${BHMAS_thermConfsGlobalPath}/conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA_FOR_JOBSCRIPT[$INDEX]%_*}_fromConf\${TRAJECTORIES_DONE_FROM_CONF} || exit 2"
+                    "cp \$workdir$INDEX/conf.\${NUMBER_LAST_CONFIGURATION_IN_FOLDER} ${BHMAS_thermConfsGlobalPath}/conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${betasForJobScript[$INDEX]%_*}_fromConf\${TRAJECTORIES_DONE_FROM_CONF} || exit 2"
             done
         fi
     fi

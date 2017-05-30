@@ -1,4 +1,8 @@
-function ProduceSrunCommandsFileForInversionsPerBeta()
+#---------------------------------------------#
+#   Copyright (c)  2017  Alessandro Sciarra   #
+#---------------------------------------------#
+
+function __static__ProduceSrunCommandsFileForInversionsPerBeta()
 {
 
     if [ "$BHMAS_chempot" != '0' ]; then
@@ -72,4 +76,39 @@ function ProduceSrunCommandsFileForInversionsPerBeta()
             }
         }' > $WORK_BETADIRECTORY/$BHMAS_inversionSrunCommandsFilename
 
+}
+
+function ProcessBetaValuesForInversion_SLURM()
+{
+    local LOCAL_BHMAS_betaValuesToBeSubmitted=()
+
+    for BETA in ${BHMAS_betaValues[@]}; do
+        #-------------------------------------------------------------------------#
+        local WORK_BETADIRECTORY="$BHMAS_runDirWithBetaFolders/$BHMAS_betaPrefix$BETA"
+        local NUMBER_OF_CONF_IN_BETADIRECTORY=$(find $WORK_BETADIRECTORY -regex "$WORK_BETADIRECTORY/conf[.][0-9]*" | wc -l)
+        local NUMBER_OF_TOTAL_CORRELATORS=$(($NUMBER_OF_CONF_IN_BETADIRECTORY * $BHMAS_numberOfSourcesForCorrelators))
+        local NUMBER_OF_EXISTING_CORRELATORS=$(find $WORK_BETADIRECTORY -regextype posix-extended -regex "$WORK_BETADIRECTORY/conf[.][0-9]*(_[0-9]+){4}_corr" | wc -l)
+        local NUMBER_OF_MISSING_CORRELATORS=$(($NUMBER_OF_TOTAL_CORRELATORS - $NUMBER_OF_EXISTING_CORRELATORS))
+        #-------------------------------------------------------------------------#
+        __static__ProduceSrunCommandsFileForInversionsPerBeta
+        local NUMBER_OF_INVERSION_COMMANDS=$(wc -l < $WORK_BETADIRECTORY/$BHMAS_inversionSrunCommandsFilename)
+        if [ $NUMBER_OF_MISSING_CORRELATORS -ne $NUMBER_OF_INVERSION_COMMANDS ]; then
+            cecho lr "\n File with commands for inversion expected to contain " emph "$NUMBER_OF_MISSING_CORRELATORS"\
+                  " lines, but having " emph "$NUMBER_OF_INVERSION_COMMANDS" ". The value " emph "beta = $BETA" " will be skipped!\n"
+            BHMAS_problematicBetaValues+=( $BETA )
+            continue
+        fi
+        if [ ! -s $WORK_BETADIRECTORY/$BHMAS_inversionSrunCommandsFilename ] && [ $NUMBER_OF_MISSING_CORRELATORS -ne 0 ]; then
+            cecho lr "\n File with commands for inversion found to be " emph "empty" ", but expected to contain "\
+                  emph "$NUMBER_OF_MISSING_CORRELATORS" " lines! The value " emph "beta = $BETA" " will be skipped!\n"
+            BHMAS_problematicBetaValues+=( $BETA )
+            continue
+        fi
+        #If file seems fine put it to submit list
+        LOCAL_BHMAS_betaValuesToBeSubmitted+=( $BETA )
+    done
+
+    #Partition of the LOCAL_BHMAS_betaValuesToBeSubmitted into group of BHMAS_GPUsPerNode and create the JobScript files inside the JOBSCRIPT_FOLDER
+    mkdir -p ${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName || exit -2
+    PackBetaValuesPerGpuAndCreateJobScriptFiles "${LOCAL_BHMAS_betaValuesToBeSubmitted[@]}"
 }

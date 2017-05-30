@@ -2,7 +2,9 @@ function __static__CheckFileForSuspiciousTrajectory()
 {
     local FILE_GLOBALPATH="$1"
     #Check whether there is any trajectory repeated but with different observables
-    # TODO: Adjust the following line for JUQUEEN where there is the time in the output file!
+    # TODO: Adjust the following line for codes where there is the time in the output file,
+    #       or in general where there are entries in a line that repeating the same
+    #       trajectory could change!
     local SUSPICIOUS_TRAJECTORY=$(awk '{val=$1; $1=""; array[val]++; if(array[val]>1 && $0 != lineRest[val]){print val; exit}; lineRest[val]=$0}' $FILE_GLOBALPATH)
     if [ "$SUSPICIOUS_TRAJECTORY" != "" ]; then
         cecho o "        Found different lines for same trajectory number! First occurence at trajectory " emph "$SUSPICIOUS_TRAJECTORY"\

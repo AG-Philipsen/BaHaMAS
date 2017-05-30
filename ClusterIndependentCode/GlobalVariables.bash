@@ -96,7 +96,6 @@ function DeclarePathRelatedGlobalVariables()
 
 function DeclareBaHaMASGlobalVariables()
 {
-
     #Variables about general options
     BHMAS_betasFilename='betas'
     BHMAS_numberOfTrajectories=20000
@@ -111,8 +110,6 @@ function DeclareBaHaMASGlobalVariables()
     readonly JOBS_STATUS_PREFIX='jobs_status_'
 
     #Internal BaHaMAS variables
-    readonly BHMAS_clusterScheduler="$(SelectClusterSchedulerName)"
-
     BHMAS_betaValues=()
     BHMAS_betaValuesToBeSubmitted=()
     BHMAS_problematicBetaValues=()

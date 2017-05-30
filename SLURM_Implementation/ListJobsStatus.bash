@@ -1,7 +1,3 @@
-# Load auxiliary bash files that will be used.
-source ${BaHaMAS_repositoryTopLevelPath}/UtilityFunctions.bash || exit -2
-#------------------------------------------------------------------------------------#
-
 function __static__ExtractBetasFromJOBNAME()
 {
     #Here it is supposed that the name of the job is ${BHMAS_parametersString}_(...)
@@ -335,7 +331,7 @@ function ColorBeta()
         return
     fi
 
-    awk -v obsColumns="${AUX1%?}" -v obsNames="${AUX2%?}" -f ${BaHaMAS_repositoryTopLevelPath}/CheckCorrectnessCl2qcdOutputFile.awk $OUTPUTFILE_GLOBALPATH
+    awk -v obsColumns="${AUX1%?}" -v obsNames="${AUX2%?}" -f ${BaHaMAS_repositoryTopLevelPath}/SLURM_Implementation/CheckCorrectnessCl2qcdOutputFile.awk $OUTPUTFILE_GLOBALPATH
     local ERROR_CODE=$?
 
     if [ $ERROR_CODE -eq 0 ]; then
