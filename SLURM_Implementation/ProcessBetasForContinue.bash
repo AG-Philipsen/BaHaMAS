@@ -127,8 +127,8 @@ function __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAnd
                 return 1
             fi
         fi
-        cecho o B U "ATTENTION" uU ":" bc uB " The simulation for " emph "beta = ${betaValue%_*}"\
-              " will be resumed from trajectory " emph "${BHMAS_trajectoriesToBeResumedFrom[$betaValue]}" "."
+        cecho lm B U "ATTENTION" uU ":" uB " The simulation for " B emph "beta = ${betaValue%_*}"\
+              uB " will be resumed from trajectory " B emph "${BHMAS_trajectoriesToBeResumedFrom[$betaValue]}" uB "."
         # TODO: Previously here was put an AskUser directive to prevent to mess up the folder moving files in Trash in case the user
         #       forgot some resumefrom label in betas file. It is however annoying when the user really wants to resume many simulations.
         #       Implement mechanism to undo file move/modification maybe trapping CTRL-C or acting in case of UserSaidNo at the end of this
