@@ -37,41 +37,39 @@ function PrintMainHelper()
     helperColor='g'; normalColor='m'; mutuallyExclusiveColor='b'
     cecho -d $helperColor
     cecho -d " Call " B "BaHaMAS" uB " with the following optional arguments:" "\n"
-    __static__AddOptionToHelper "-h | --help"                      ""
-    __static__AddOptionToHelper "--jobscript_prefix"               "default value = $(__static__PrintDefault ${BHMAS_jobScriptPrefix:-})"
-    __static__AddOptionToHelper "--chempot_prefix"                 "default value = $(__static__PrintDefault ${BHMAS_chempotPrefix:-})"
-    __static__AddOptionToHelper "--mass_prefix"                    "default value = $(__static__PrintDefault ${BHMAS_massPrefix:-})"
-    __static__AddOptionToHelper "--ntime_prefix"                   "default value = $(__static__PrintDefault ${BHMAS_ntimePrefix:-})"
-    __static__AddOptionToHelper "--nspace_prefix"                  "default value = $(__static__PrintDefault ${BHMAS_nspacePrefix:-})"
-    __static__AddOptionToHelper "--beta_prefix"                    "default value = $(__static__PrintDefault ${BHMAS_betaPrefix:-})"
-    __static__AddOptionToHelper "--betasfile"                      "default value = $(__static__PrintDefault ${BHMAS_betasFilename:-})"
-    __static__AddOptionToHelper "-m | --measurements"              "default value = $(__static__PrintDefault ${BHMAS_numberOfTrajectories:-})"
-    __static__AddOptionToHelper "-f | --confSaveFrequency"         "default value = $(__static__PrintDefault ${BHMAS_checkpointFrequency:-})"
-    __static__AddOptionToHelper "-F | --confSavePointFrequency"    "default value = $(__static__PrintDefault ${BHMAS_savepointFrequency:-})"
-    __static__AddOptionToHelper "--intsteps0"                      "default value = $(__static__PrintDefault ${INTSTEPS0:-})"
-    __static__AddOptionToHelper "--intsteps1"                      "default value = $(__static__PrintDefault ${INTSTEPS1:-})"
-    __static__AddOptionToHelper "--cgbs"                           "default value = $(__static__PrintDefault ${CGBS:-}) (cg_iteration_block_size)"
-    __static__AddOptionToHelper "--doNotUseMultipleChains"         "multiple chain usage and nomenclature are disabled"\
+    __static__AddOptionToHelper "-h | --help"                   ""
+    __static__AddOptionToHelper "--jobscript_prefix"            "default value = $(__static__PrintDefault ${BHMAS_jobScriptPrefix:-})"
+    __static__AddOptionToHelper "--chempot_prefix"              "default value = $(__static__PrintDefault ${BHMAS_chempotPrefix:-})"
+    __static__AddOptionToHelper "--mass_prefix"                 "default value = $(__static__PrintDefault ${BHMAS_massPrefix:-})"
+    __static__AddOptionToHelper "--ntime_prefix"                "default value = $(__static__PrintDefault ${BHMAS_ntimePrefix:-})"
+    __static__AddOptionToHelper "--nspace_prefix"               "default value = $(__static__PrintDefault ${BHMAS_nspacePrefix:-})"
+    __static__AddOptionToHelper "--beta_prefix"                 "default value = $(__static__PrintDefault ${BHMAS_betaPrefix:-})"
+    __static__AddOptionToHelper "--betasfile"                   "default value = $(__static__PrintDefault ${BHMAS_betasFilename:-})"
+    __static__AddOptionToHelper "-m | --measurements"           "default value = $(__static__PrintDefault ${BHMAS_numberOfTrajectories:-})"
+    __static__AddOptionToHelper "-f | --confSaveFrequency"      "default value = $(__static__PrintDefault ${BHMAS_checkpointFrequency:-})"
+    __static__AddOptionToHelper "-F | --confSavePointFrequency" "default value = $(__static__PrintDefault ${BHMAS_savepointFrequency:-})"
+    __static__AddOptionToHelper "--intsteps0"                   "default value = $(__static__PrintDefault ${INTSTEPS0:-})"
+    __static__AddOptionToHelper "--intsteps1"                   "default value = $(__static__PrintDefault ${INTSTEPS1:-})"
+    __static__AddOptionToHelper "--cgbs"                        "default value = $(__static__PrintDefault ${CGBS:-}) (cg_iteration_block_size)"
+    __static__AddOptionToHelper "--doNotUseMultipleChains"      "multiple chain usage and nomenclature are disabled"\
                                 "(in the betas file the seed column is NOT present)"
-    __static__AddOptionToHelper "-p | --doNotMeasurePbp"     "the chiral condensate measurement is switched off"
-    __static__AddOptionToHelper "-w | --walltime"            "default value = $(__static__PrintDefault ${BHMAS_walltime:-}) [days-hours:min:sec]"
-    __static__AddOptionToHelper "--partition"                "default value = $(__static__PrintDefault ${BHMAS_clusterPartition:-})"
-    __static__AddOptionToHelper "--constraint"               "default value = $(__static__PrintDefault ${BHMAS_clusterConstraint:-})"
-    __static__AddOptionToHelper "--node"                     "default value = $(__static__PrintDefault ${BHMAS_clusterNode:-})"
+    __static__AddOptionToHelper "-p | --doNotMeasurePbp"        "the chiral condensate measurement is switched off"
+    __static__AddOptionToHelper "-w | --walltime"               "default value = $(__static__PrintDefault ${BHMAS_walltime:-}) [days-hours:min:sec]"
+    __static__AddOptionToHelper "--partition"                   "default value = $(__static__PrintDefault ${BHMAS_clusterPartition:-})"
+    __static__AddOptionToHelper "--constraint"                  "default value = $(__static__PrintDefault ${BHMAS_clusterConstraint:-})"
+    __static__AddOptionToHelper "--node"                        "default value = $(__static__PrintDefault ${BHMAS_clusterNode:-})"
     cecho ""
-    __static__AddOptionToHelper -e "-s | --submit"                "jobs will be submitted"
-    __static__AddOptionToHelper -e "--submitonly"                 "jobs will be submitted (no files are created)"
-    __static__AddOptionToHelper -e "-t | --thermalize"            "The thermalization is done."
-    __static__AddOptionToHelper -e "-c     | --continue"          "Unfinished jobs will be continued doing the nr. of measurements specified in the input"
-    __static__AddOptionToHelper -e "-c[=#] | --continue[=#]"      "file. If a number is specified, jobs will be continued up to the specified number."\
-                                "$(cecho "To resume a simulation from a given trajectory, add " bc "resumefrom=[number]" $helperColor " in")"\
-                                "$(cecho "the betasfile. Use " bc "resumefrom=last" $helperColor " in the betasfile to resume a simulation")"\
-                                "$(cecho "from the last saved " p "conf.[[:digit:]]+" $helperColor " file.")"
-    __static__AddOptionToHelper -e "-C     | --continueThermalization"      "Unfinished thermalizations will be continued doing the nr. of measurements specified in the"
-    __static__AddOptionToHelper -e "-C[=#] | --continueThermalization[=#]"  "input file. If a number is specified, thermalizations will be continued up to the specified"\
-                                "$(cecho "number. To resume a thermalization from a given trajectory, add " bc "resumefrom=[number]" $helperColor " in")"\
-                                "$(cecho "the betasfile. Use " bc "resumefrom=last" $helperColor " in the betasfile to resume a thermalization")"\
-                                "$(cecho "from the last saved " p "conf.[[:digit:]]+" $helperColor " file.")"
+    __static__AddOptionToHelper -e "-s | --submit"             "jobs will be submitted"
+    __static__AddOptionToHelper -e "--submitonly"              "jobs will be submitted (no files are created)"
+    __static__AddOptionToHelper -e "-t | --thermalize"         "The thermalization is done."
+    __static__AddOptionToHelper -e "-c[=#] | --continue[=#]"   "Unfinished jobs will be continued doing the nr. of measurements specified in the input"\
+                                "file. If a number is specified, jobs will be continued up to the specified number."\
+                                "$(cecho "To resume a simulation from a given trajectory, add " bc "r[number]" $helperColor " in the betasfile.")"\
+                                "$(cecho "Use " bc "rlast" $helperColor " in the betasfile to resume a simulation from the last saved " p "conf.[0-9]+" $helperColor " file.")"
+    __static__AddOptionToHelper -e "-C[=#] | --continueThermalization[=#]"  "Unfinished thermalizations will be continued doing the nr. of measurements specified in the"\
+                                "input file. If a number is specified, thermalizations will be continued up to the specified"\
+                                "$(cecho "number. To resume a thermalization from a given trajectory, add " bc "r[number]" $helperColor " in the betasfile.")"\
+                                "$(cecho "Use " bc "rlast" $helperColor " in the betasfile to resume a thermalization from the last saved " p "conf.[0-9]+" $helperColor " file.")"
     __static__AddOptionToHelper -e "-l | --liststatus" "A report of the local simulation status for all beta will be displayed"\
                                 "$(cecho  B "Secondary options" uB ": " $mutuallyExclusiveColor "--measureTime" $helperColor " to get information about the trajectory time")"\
                                 "$(cecho "                   " $mutuallyExclusiveColor "--showOnlyQueued" $helperColor " not to show status about not queued jobs")"
