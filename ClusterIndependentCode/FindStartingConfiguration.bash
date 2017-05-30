@@ -38,7 +38,7 @@ function FindConfigurationGlobalPathFromWhichToStartTheSimulation()
                 cecho -n ly B "\n " U "WARNING" uU ":" uB " No valid starting configuration found for " emph "beta = ${BETA%_*}" "\n"\
                       "          in " dir "$BHMAS_thermConfsGlobalPath" ".\n"\
                       "          Looking for configuration with not exactely the same seed,\n"\
-                      "          matching " file "conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA%%_*}_${BHMAS_seedPrefix}${BHMAS_seedRegex}_fromConf[[:digit:]]\+.*"
+                      "          matching " file "conf[.]${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA%%_*}_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/}_fromConf[0-9]+.*"
                 FOUND_CONFIGURATIONS=( $(find $BHMAS_thermConfsGlobalPath -regextype posix-extended -regex ".*/conf[.]${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA%%_*}_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/}_fromConf[0-9]+.*") )
                 if [ ${#FOUND_CONFIGURATIONS[@]} -eq 0 ]; then
                     cecho lr " none found! Aborting...\n"
