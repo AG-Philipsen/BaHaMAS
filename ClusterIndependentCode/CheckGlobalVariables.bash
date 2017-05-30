@@ -282,10 +282,10 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
     if [ ${#neededFolders[@]} -ne 0 ] || [ ${#neededFiles[@]} -ne 0 ]; then
         cecho "\n " lo "To run " B "BaHaMAS" uB " $option "\
               lo "option, the following specified " lb B "folder(s)" uB lo " or " wg "file(s)" lo " must " B "exist" uB ":\n"
-        for variable in "${neededFolders[@]}"; do
+        for variable in ${neededFolders[@]+"${neededFolders[@]}"}; do
             cecho lb "   " B "$variable"
         done
-        for variable in "${neededFiles[@]}"; do
+        for variable in ${neededFiles[@]+"${neededFiles[@]}"}; do
             cecho wg "   $variable"
         done
         cecho lr "\n Please check the path variables in the " B "BaHaMAS" uB " setup and run the program again.\n"
