@@ -169,10 +169,10 @@ function __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAnd
         [ -f $runBetaDirectory/prng.save_backup ] && mv $runBetaDirectory/prng.save_backup $trashFolderName
         #Move the output file to Trash, and duplicate it parsing it in awk deleting all the trajectories after the resume from one, included (if found)
         mv $outputFileGlobalPath $trashFolderName || exit -2
-        if awk -v tr="${BHMAS_trajectoriesToBeResumedFrom[$betaValue]}"\
-               'BEGIN{found=1} $1<tr{print $0} $1==(tr-1){found=0} END{exit found}'\
-               ${trashFolderName}/$(basename $outputFileGlobalPath) > $outputFileGlobalPath; then
-            cecho lr "\n Measurement for trajectory " emph "$(( BHMAS_trajectoriesToBeResumedFrom[$betaValue] - 1 ))" " not found in outputfile"\
+        if ! awk -v tr="${BHMAS_trajectoriesToBeResumedFrom[$betaValue]}"\
+             'BEGIN{found=1} $1<tr{print $0} $1==(tr-1){found=0} END{exit found}'\
+             ${trashFolderName}/$(basename $outputFileGlobalPath) > $outputFileGlobalPath; then
+            cecho lr "\n Measurement for trajectory " emph "$(( BHMAS_trajectoriesToBeResumedFrom[$betaValue] - 1 ))" " not found in outputfile "\
                   emph "$outputFileGlobalPath" "\n The value " emph "beta = $betaValue" " will be skipped!"
             mv $trashFolderName/* $runBetaDirectory || exit -2
             rmdir $trashFolderName || exit -2
