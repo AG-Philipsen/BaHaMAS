@@ -157,9 +157,9 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
                                BHMAS_approxMDFilename
                                BHMAS_approxMetropolisFilename )
         rationalApproxFolder+=( "$BHMAS_rationalApproxGlobalPath" )
-        rationalApproxFiles+=( "${BHMAS_rationalApproxGlobalPath}/$BHMAS_approxHeatbathFilename"
-                               "${BHMAS_rationalApproxGlobalPath}/$BHMAS_approxMDFilename"
-                               "${BHMAS_rationalApproxGlobalPath}/$BHMAS_approxMetropolisFilename" )
+        rationalApproxFiles+=( "${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}*$BHMAS_approxHeatbathFilename"
+                               "${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}*$BHMAS_approxMDFilename"
+                               "${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}*$BHMAS_approxMetropolisFilename" )
     fi
 
     #Check variables depending on BaHaMAS invocation

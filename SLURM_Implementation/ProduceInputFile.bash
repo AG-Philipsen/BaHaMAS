@@ -21,9 +21,9 @@ function ProduceInputFile_SLURM()
         if [ $BHMAS_useRationalApproxFiles = "TRUE" ]; then
             __static__AddToInputFile \
                 "read_rational_approximations_from_file=1"\
-                "approx_heatbath_file=${BHMAS_rationalApproxGlobalPath}/Nf${BHMAS_nflavour}_${BHMAS_approxHeatbathFilename}"\
-                "approx_md_file=${BHMAS_rationalApproxGlobalPath}/Nf${BHMAS_nflavour}_${BHMAS_approxMDFilename}"\
-                "approx_metropolis_file=${BHMAS_rationalApproxGlobalPath}/Nf${BHMAS_nflavour}_${BHMAS_approxMetropolisFilename}"
+                "approx_heatbath_file=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_${BHMAS_approxHeatbathFilename}"\
+                "approx_md_file=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_${BHMAS_approxMDFilename}"\
+                "approx_metropolis_file=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_${BHMAS_approxMetropolisFilename}"
         else
             __static__AddToInputFile "read_rational_approximations_from_file=0"
         fi
