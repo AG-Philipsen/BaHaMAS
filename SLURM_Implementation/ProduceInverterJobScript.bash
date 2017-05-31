@@ -6,7 +6,7 @@ function __static__AddToInverterJobscriptFile()
     done
 }
 
-function ProduceInverterJobscript_SLURM()
+function ProduceInverterJobscript_CL2QCD()
 {
     rm -f $jobScriptGlobalPath || exit -2
     touch $jobScriptGlobalPath || exit -2

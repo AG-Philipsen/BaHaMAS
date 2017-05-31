@@ -44,13 +44,13 @@ function __static__GetJobBetasStringUsing()
     printf "${betasStringToBeReturned:2}" #I cut here the two initial underscores
 }
 
-function PackBetaValuesPerGpuAndCreateJobScriptFiles()
+function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
 {
     local betaValuesToBeSplit betasForJobScript betasString jobScriptFilename jobScriptGlobalPath
     betaValuesToBeSplit=( $@ )
     cecho lc "\n================================================================================="
     cecho bb "  The following beta values have been grouped (together with the seed if used):"
-    while [[ "${!betaValuesToBeSplit[@]}" != "" ]]; do # ${!array[@]} gives the list of the valid indices in the array
+    while [[ "${!betaValuesToBeSplit[@]}" != "" ]]; do
         betasForJobScript=(${betaValuesToBeSplit[@]:0:$BHMAS_GPUsPerNode})
         betaValuesToBeSplit=(${betaValuesToBeSplit[@]:$BHMAS_GPUsPerNode})
         cecho -n "   ->"
@@ -67,9 +67,9 @@ function PackBetaValuesPerGpuAndCreateJobScriptFiles()
             fi
             #Call the file to produce the jobscript file
             if [ $BHMAS_invertConfigurationsOption = "TRUE" ]; then
-                ProduceInverterJobscript_SLURM
+                ProduceInverterJobscript_CL2QCD
             else
-                ProduceJobscript_SLURM
+                ProduceJobscript_CL2QCD
             fi
             if [ -e $jobScriptGlobalPath ]; then
                 BHMAS_betaValuesToBeSubmitted+=( "${betasString}" )

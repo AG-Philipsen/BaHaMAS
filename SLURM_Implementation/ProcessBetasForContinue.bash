@@ -507,7 +507,7 @@ function ProcessBetaValuesForContinue_SLURM()
     done
     #Partition of the betaValuesToBeSubmitted into group of BHMAS_GPUsPerNode and create the JobScript files inside the JOBSCRIPT_FOLDER
     mkdir -p ${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName || exit -2
-    PackBetaValuesPerGpuAndCreateJobScriptFiles "${betaValuesToBeSubmitted[@]}"
+    PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles "${betaValuesToBeSubmitted[@]}"
     #Ask the user if he want to continue submitting job
     AskUser "Check if the continue option did its job correctly. Would you like to submit the jobs?"
     if UserSaidNo; then

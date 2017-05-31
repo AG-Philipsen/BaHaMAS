@@ -6,7 +6,7 @@ function __static__AddToJobscriptFile()
     done
 }
 
-function ProduceJobscript_SLURM()
+function ProduceJobscript_CL2QCD()
 {
     rm -f $jobScriptGlobalPath || exit -2
     touch $jobScriptGlobalPath || exit -2

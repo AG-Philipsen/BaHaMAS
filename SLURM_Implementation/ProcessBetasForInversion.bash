@@ -110,5 +110,5 @@ function ProcessBetaValuesForInversion_SLURM()
 
     #Partition of the LOCAL_BHMAS_betaValuesToBeSubmitted into group of BHMAS_GPUsPerNode and create the JobScript files inside the JOBSCRIPT_FOLDER
     mkdir -p ${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName || exit -2
-    PackBetaValuesPerGpuAndCreateJobScriptFiles "${LOCAL_BHMAS_betaValuesToBeSubmitted[@]}"
+    PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles "${LOCAL_BHMAS_betaValuesToBeSubmitted[@]}"
 }
