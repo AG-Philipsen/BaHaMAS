@@ -69,7 +69,7 @@ function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
             if [ $BHMAS_invertConfigurationsOption = "TRUE" ]; then
                 ProduceInverterJobscript_CL2QCD
             else
-                ProduceJobscript_CL2QCD
+                ProduceJobscript_CL2QCD "$jobScriptGlobalPath" "$jobScriptFilename" "${betasForJobScript[@]}"
             fi
             if [ -e $jobScriptGlobalPath ]; then
                 BHMAS_betaValuesToBeSubmitted+=( "${betasString}" )
