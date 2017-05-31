@@ -52,6 +52,48 @@ function SecondsToTimeStringWithDays()
     printf "%d-%02d:%02d:%02d" "${days}" "${hours}" "${minutes}" "${seconds}"
 }
 
+function GetLargestWalltimeBetweenTwo()
+{
+    [[ ! $1 =~ ^([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]] && return 1
+    [[ ! $2 =~ ^([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]] && return 1
+    local first second
+    first="$1"; second="$2"
+    [[ ! $first =~ ^[0-9]+- ]] && first="0-$first"
+    [[ ! $second =~ ^[0-9]+- ]] && second="0-$second"
+    if [ ${first%%-*} -gt ${second%%-*} ]; then
+        printf "$1"; return 0
+    elif [ ${first%%-*} -lt ${second%%-*} ]; then
+        printf "$2"; return 0
+    else
+        first=${first##*-}; second=${second##*-}
+        if [ $(cut -d':' -f1 <<< "$first") -gt $(cut -d':' -f1 <<< "$second") ]; then
+            printf "$1"; return 0
+        elif [ $(cut -d':' -f1 <<< "$first") -lt $(cut -d':' -f1 <<< "$second") ]; then
+            printf "$2"; return 0
+        else
+            if [ $(cut -d':' -f2 <<< "$first") -gt $(cut -d':' -f2 <<< "$second") ]; then
+                printf "$1"; return 0
+            elif [ $(cut -d':' -f2 <<< "$first") -lt $(cut -d':' -f2 <<< "$second") ]; then
+                printf "$2"; return 0
+            else
+                if [ $(cut -d':' -f3 <<< "$first") -gt $(cut -d':' -f3 <<< "$second") ]; then
+                    printf "$1"; return 0
+                else
+                    printf "$2"; return 0
+                fi
+            fi
+        fi
+    fi
+}
+
+function GetSmallestWalltimeBetweenTwo()
+{
+    local largest; largest=$(GetLargestWalltimeBetweenTwo "$1" "$2")
+    [ "$largest" = '' ] && return 1
+    [ "$1" = "$largest" ] && printf "$2" || printf "$1"
+    return 0
+}
+
 function MinimumOfArray()
 {
     local MIN=$1; shift
@@ -83,7 +125,7 @@ function KeyOfMinimumOfArray()
 function MaximumOfArray()
 {
     local MAX=$1; shift
-    while [ "$1" != "" ]; do
+    while [ $# -gt 0 ]; do
         if [ $(awk '{print ($1>$2)}' <<< "$1 $MAX") -eq 1 ]; then
             MAX=$1
         fi
