@@ -2,7 +2,7 @@
 #   Copyright (c)  2017  Alessandro Sciarra   #
 #---------------------------------------------#
 
-function GetJobScriptName()
+function GetJobScriptFilename()
 {
     local stringWithBetaValues; stringWithBetaValues="$1"
 
@@ -59,7 +59,7 @@ function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
         done
         cecho ""
         betasString="$(__static__GetJobBetasStringUsing ${betasForJobScript[@]})"
-        jobScriptFilename="$(GetJobScriptName ${betasString})"
+        jobScriptFilename="$(GetJobScriptFilename ${betasString})"
         jobScriptGlobalPath="${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName/$jobScriptFilename"
         if [ $BHMAS_submitonlyOption = "FALSE" ]; then
             if [ -e $jobScriptGlobalPath ]; then

@@ -5,20 +5,19 @@
 function SubmitJobsForValidBetaValues_SLURM()
 {
     if [ ${#BHMAS_betaValuesToBeSubmitted[@]} -gt 0 ]; then
+        local betaString stringToBeGreppedFor submittingDirectory jobScriptFilename
         cecho lc "\n==================================================================================="
         cecho bb " Jobs will be submitted for the following beta values:"
-        for BETA in ${BHMAS_betaValuesToBeSubmitted[@]}; do
-            cecho "  - $BETA"
+        for betaString in ${BHMAS_betaValuesToBeSubmitted[@]}; do
+            cecho "  - $betaString"
         done
-
-        for BETA in ${BHMAS_betaValuesToBeSubmitted[@]}; do
+        for betaString in ${BHMAS_betaValuesToBeSubmitted[@]}; do
             if [ $BHMAS_useMultipleChains == "FALSE" ]; then
-                local PREFIX_TO_BE_GREPPED_FOR="$BHMAS_betaPrefix"
+                stringToBeGreppedFor="${BHMAS_betaPrefix}${BHMAS_betaRegex}"
             else
-                local PREFIX_TO_BE_GREPPED_FOR="$BHMAS_seedPrefix"
+                stringToBeGreppedFor="${BHMAS_seedPrefix}${BHMAS_seedRegex}"
             fi
-            local TEMP_ARRAY=( $(sed 's/_/ /g' <<< "$BETA") )
-            if [ $(grep -o "${PREFIX_TO_BE_GREPPED_FOR}\([[:digit:]][.]\)\?[[:alnum:]]\{4\}" <<< "$BETA" | wc -l) -ne $BHMAS_GPUsPerNode ]; then
+            if [ $(grep -o "${stringToBeGreppedFor}" <<< "$betaString" | wc -l) -ne $BHMAS_GPUsPerNode ]; then
                 cecho -n ly B "\n " U "WARNING" uU ":" uB " At least one job is being submitted with less than " emph "$BHMAS_GPUsPerNode" " runs inside."
                 AskUser "         Would you like to submit in any case?"
                 if UserSaidNo; then
@@ -27,14 +26,13 @@ function SubmitJobsForValidBetaValues_SLURM()
                 fi
             fi
         done
-
-        for BETA in ${BHMAS_betaValuesToBeSubmitted[@]}; do
-            local SUBMITTING_DIRECTORY="${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName"
-            local JOBSCRIPT_NAME="$(GetJobScriptName ${BETA})"
-            cd $SUBMITTING_DIRECTORY
+        for betaString in ${BHMAS_betaValuesToBeSubmitted[@]}; do
+            submittingDirectory="${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName"
+            jobScriptFilename="$(GetJobScriptFilename ${betaString})"
+            cd $submittingDirectory
             cecho bb "\n Actual location: " dir "$(pwd)"\
-                  B "\n      Submitting: " uB emph "sbatch $JOBSCRIPT_NAME"
-            sbatch $JOBSCRIPT_NAME
+                  B "\n      Submitting: " uB emph "sbatch $jobScriptFilename"
+            sbatch $jobScriptFilename
         done
         cecho lc "\n==================================================================================="
     else
