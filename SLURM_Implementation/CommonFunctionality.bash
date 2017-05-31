@@ -44,9 +44,42 @@ function __static__GetJobBetasStringUsing()
     printf "${betasStringToBeReturned:2}" #I cut here the two initial underscores
 }
 
+function __static__ExtractNumberOfTrajectoriesToBeDoneFromFile()
+{
+    local filename numberOfTrajectories
+    filename="$1"
+    numberOfTrajectories=$(sed -n 's/^.*hmcsteps=\([0-9]\+\)/\1/p' "$filename")
+    if [ "$numberOfTrajectories" = '' ]; then
+        cecho "\n Number of trajectories to be done not present in input file " file "$filename" "! Aborting...\n"
+        exit -1
+    else
+        printf "$numberOfTrajectories"
+    fi
+}
+
+function __static__CalculateWalltimeExtractingNumberOfTrajectoriesPerBetaAndUsingTimesPerTrajectoryIfGiven()
+{
+    local betaValues beta inputFileGlobalPath walltimesInSeconds finalWalltime
+    betaValues=( "$@" ); walltimesInSeconds=()
+    declare -A trajectoriesToBeDone=()
+    if [ "$BHMAS_walltime" != '' ]; then
+        finalWalltime="$BHMAS_walltime"
+    elif [ ${#BHMAS_timesPerTrajectory[@]} -eq 0 ]; then
+        finalWalltime="$BHMAS_walltime" #Fine to assume it is not empty, checked already in parsing betas file
+    else
+        for beta in "${betaValues[@]}"; do
+            inputFileGlobalPath="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${beta}/${BHMAS_inputFilename}"
+            trajectoriesToBeDone["$beta"]=$(__static__ExtractNumberOfTrajectoriesToBeDoneFromFile "$inputFileGlobalPath")
+            walltimesInSeconds+=( $(awk '{print $1*$2}' <<< "${trajectoriesToBeDone[$beta]} ${BHMAS_timesPerTrajectory[$beta]}") )
+        done
+        finalWalltime="$(SecondsToTimeStringWithDays $(MaximumOfArray ${walltimesInSeconds[@]}) )"
+    fi
+    GetSmallestWalltimeBetweenTwo "$finalWalltime" "$BHMAS_maximumWalltime"
+}
+
 function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
 {
-    local betaValuesToBeSplit betasForJobScript betasString jobScriptFilename jobScriptGlobalPath
+    local betaValuesToBeSplit betasForJobScript betasString jobScriptFilename jobScriptGlobalPath walltime
     betaValuesToBeSplit=( $@ )
     cecho lc "\n================================================================================="
     cecho bb "  The following beta values have been grouped (together with the seed if used):"
@@ -61,6 +94,7 @@ function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
         betasString="$(__static__GetJobBetasStringUsing ${betasForJobScript[@]})"
         jobScriptFilename="$(GetJobScriptFilename ${betasString})"
         jobScriptGlobalPath="${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName/$jobScriptFilename"
+        walltime="$(__static__CalculateWalltimeExtractingNumberOfTrajectoriesPerBetaAndUsingTimesPerTrajectoryIfGiven "${betasForJobScript[@]}")"
         if [ $BHMAS_submitonlyOption = "FALSE" ]; then
             if [ -e $jobScriptGlobalPath ]; then
                 mv $jobScriptGlobalPath ${jobScriptGlobalPath}_$(date +'%F_%H%M') || exit -2
@@ -69,7 +103,7 @@ function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
             if [ $BHMAS_invertConfigurationsOption = "TRUE" ]; then
                 ProduceInverterJobscript_CL2QCD
             else
-                ProduceJobscript_CL2QCD "$jobScriptGlobalPath" "$jobScriptFilename" "${betasForJobScript[@]}"
+                ProduceJobscript_CL2QCD "$jobScriptGlobalPath" "$jobScriptFilename" "$walltime" "${betasForJobScript[@]}"
             fi
             if [ -e $jobScriptGlobalPath ]; then
                 BHMAS_betaValuesToBeSubmitted+=( "${betasString}" )

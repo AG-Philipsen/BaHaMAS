@@ -8,8 +8,8 @@ function __static__AddToJobscriptFile()
 
 function ProduceJobscript_CL2QCD()
 {
-    local jobScriptGlobalPath jobScriptFilename betaValues index excludeString
-    jobScriptGlobalPath="$1"; jobScriptFilename="$2"; shift 2
+    local jobScriptGlobalPath jobScriptFilename walltime betaValues index excludeString
+    jobScriptGlobalPath="$1"; jobScriptFilename="$2"; walltime="$3"; shift 3
     betaValues=( "$@" )
 
     rm -f $jobScriptGlobalPath || exit -2
@@ -27,7 +27,7 @@ function ProduceJobscript_CL2QCD()
         "#SBATCH --job-name=${jobScriptFilename#${BHMAS_jobScriptPrefix}_*}"\
         "#SBATCH --mail-type=FAIL"\
         "#SBATCH --mail-user=$BHMAS_userEmail"\
-        "#SBATCH --time=$BHMAS_walltime"\
+        "#SBATCH --time=$walltime"\
         "#SBATCH --output=${BHMAS_hmcFilename}.%j.out"\
         "#SBATCH --error=${BHMAS_hmcFilename}.%j.err"\
         "#SBATCH --no-requeue"
