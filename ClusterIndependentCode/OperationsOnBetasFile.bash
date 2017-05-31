@@ -27,7 +27,7 @@ function __static__CheckFormatBetasFileEntry()
     integrationStepsRegex='[0-9]\+\(-[0-9]\+\)*'
     massPreconditioningRegex='[0-9]\+,[0-9]\+'
     resumeRegex='\([0-9]\+\|last\)'
-    statisticsRegex='[0-9]\+'
+    statisticsRegex='[1-9][0-9]*'
     timesRegex='[0-9]\+\([.][0-9]*\)\?'
     case "$1" in
         integrationSteps )
@@ -53,6 +53,10 @@ function __static__CheckFormatBetasFileEntry()
         trajectoryTime )
             if [[ ! $2 =~ ^${timesRegex//\\/}$ ]]; then
                 cecho lr "\n Trajectory time entry " emph "$2" " in " file "$BHMAS_betasFilename" " file does not match expected format! Aborting...\n"
+                exit -1
+            fi
+            if [[ ! $2 =~ [1-9]+ ]]; then
+                cecho lr "\n Trajectory time equal to " emph "$2" " in " file "$BHMAS_betasFilename" " file is not allowed! Aborting...\n"
                 exit -1
             fi ;;
         * )
