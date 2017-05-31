@@ -101,10 +101,7 @@ function DeclareBaHaMASGlobalVariables()
     BHMAS_numberOfTrajectories=20000
     BHMAS_checkpointFrequency=100
     BHMAS_savepointFrequency=20
-    INTSTEPS0=7
-    INTSTEPS1=5
-    INTSTEPS2=5
-    CGBS=50
+    BHMAS_inverterBlockSize=50
     BHMAS_useMultipleChains='TRUE'
     BHMAS_measurePbp='TRUE'
     readonly JOBS_STATUS_PREFIX='jobs_status_'

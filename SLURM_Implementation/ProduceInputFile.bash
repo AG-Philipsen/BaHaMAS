@@ -82,12 +82,12 @@ function ProduceInputFile_SLURM()
                 "integrationsteps2=${BHMAS_massPreconditioningValues[${BETAVALUES_COPY[$INDEX]}]%,*}"
         else
             __static__AddToInputFile \
-                "cg_iteration_block_size=$CGBS"\
+                "cg_iteration_block_size=$BHMAS_inverterBlockSize"\
                 "num_timescales=2"
         fi
     elif [ $BHMAS_staggered = "TRUE" ]; then
         __static__AddToInputFile \
-            "cg_iteration_block_size=$CGBS"\
+            "cg_iteration_block_size=$BHMAS_inverterBlockSize"\
             "num_timescales=2"
     fi
     __static__AddToInputFile \

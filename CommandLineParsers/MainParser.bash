@@ -136,27 +136,11 @@ function ParseCommandLineOption()
                 fi
                 shift 2 ;;
 
-            --intsteps0 )
-                if [[ ! ${2:-} =~ ^[0-9]+$ ]]; then
-                    __static__PrintOptionSpecificationErrorAndExit "$1"
-                else
-                    INTSTEPS0=$2
-                fi
-                shift 2 ;;
-
-            --intsteps1 )
-                if [[ ! ${2:-} =~ ^[0-9]+$ ]]; then
-                    __static__PrintOptionSpecificationErrorAndExit "$1"
-                else
-                    INTSTEPS1=$2
-                fi
-                shift 2 ;;
-
             --cgbs )
                 if [[ ! ${2:-} =~ ^[0-9]+$ ]]; then
                     __static__PrintOptionSpecificationErrorAndExit "$1"
                 else
-                    CGBS=$2
+                    BHMAS_inverterBlockSize=$2
                 fi
                 shift 2 ;;
 
