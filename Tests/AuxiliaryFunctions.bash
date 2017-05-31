@@ -74,10 +74,13 @@ function MakeTestPreliminaryOperations()
     cp "${BaHaMAS_testsFolderAuxFiles}/fakeBetas" "${testFolder}${testParametersPath}/betas"
 
     case "$1" in
-        default | submit )
+        default | submit | submit-goal )
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateThermalizedConfigurationFolder
             __static__CreateThermalizedConfiguration "fromConf4000"
+            if [[ $1 =~ goal ]]; then
+                __static__AddStringToFirstLineBetasFile "g15000"
+            fi
             ;;
         submitonly )
             __static__CreateRationalApproxFolderWithFiles
