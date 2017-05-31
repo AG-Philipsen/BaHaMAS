@@ -33,7 +33,7 @@ function ProduceInputFileAndJobScriptForEachBeta_SLURM()
         else
             temporaryNumberOfTrajectories=$BHMAS_numberOfTrajectories
         fi
-        ProduceInputFile_CL2QCD "${beta}" "${submitBetaDirectory}/$BHMAS_inputFilename" $temporaryNumberOfTrajectories
+        ProduceInputFile_CL2QCD "${beta}" "${submitBetaDirectory}/${BHMAS_inputFilename}" $temporaryNumberOfTrajectories
     done
     mkdir -p ${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName || exit -2
     PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles "${betaValuesCopy[@]}"
