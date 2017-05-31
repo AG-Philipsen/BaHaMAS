@@ -65,14 +65,14 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
     done
 
     #Check variables values (those not checked have no requirement at this point)
-    if [ "$BHMAS_coloredOutput" != 'TRUE' ] && [ "$BHMAS_coloredOutput" != 'FALSE' ]; then
+    if [ "${BHMAS_coloredOutput:-}" != 'TRUE' ] && [ "${BHMAS_coloredOutput:-}" != 'FALSE' ]; then
         #Since in the following we use cecho which rely on the variable "BHMAS_coloredOutput",
         #if this was wrongly set, let us set it to 'FALSE' but still report on it
         BHMAS_coloredOutput='FALSE'
         cecho lr "\n " B "BHMAS_coloredOutput" uB " variable must be set either to " ly "TRUE" lr " or to " ly "FALSE"
         mustReturn='FALSE'
     fi
-    if [ "$BHMAS_useRationalApproxFiles" != 'TRUE' ] && [ "$BHMAS_useRationalApproxFiles" != 'FALSE' ]; then
+    if [ "${BHMAS_useRationalApproxFiles:-}" != 'TRUE' ] && [ "${BHMAS_useRationalApproxFiles:-}" != 'FALSE' ]; then
         cecho lr "\n " B "BHMAS_useRationalApproxFiles" uB " variable must be set either to " ly "TRUE" lr " or to " ly "FALSE"
         mustReturn='FALSE'
     fi
@@ -81,10 +81,11 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
         mustReturn='FALSE'
     fi
     if [ "$BHMAS_GPUsPerNode" != '' ] && [[ ! $BHMAS_GPUsPerNode =~ ^[1-9]+$ ]]; then
+    if [ "${BHMAS_GPUsPerNode:-}" != '' ] && [[ ! $BHMAS_GPUsPerNode =~ ^[1-9]+$ ]]; then
         cecho lr "\n " B "BHMAS_GPUsPerNode" uB " variable format invalid. It has to be a " ly "positive integer" lr " number."
         mustReturn='FALSE'
     fi
-    if [ "$BHMAS_acceptanceColumn" != '' ] && [[ ! $BHMAS_acceptanceColumn =~ ^[1-9]+$ ]]; then
+    if [ "${BHMAS_acceptanceColumn:-}" != '' ] && [[ ! $BHMAS_acceptanceColumn =~ ^[1-9]+$ ]]; then
         cecho lr "\n " B "BHMAS_acceptanceColumn" uB " variable format invalid. It has to be a " ly "positive integer" lr " number."
         mustReturn='FALSE'
     fi
@@ -114,10 +115,10 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
 
 
     #Define dependent additional variables
-    if [ "$BHMAS_hmcGlobalPath" != '' ]; then
+    if [ "${BHMAS_hmcGlobalPath:-}" != '' ]; then
         readonly BHMAS_hmcFilename="${BHMAS_hmcGlobalPath##*/}"
     fi
-    if [ "$BHMAS_inverterGlobalPath" != '' ]; then
+    if [ "${BHMAS_inverterGlobalPath:-}" != '' ]; then
         readonly BHMAS_inverterFilename="${BHMAS_inverterGlobalPath##*/}"
     fi
 
