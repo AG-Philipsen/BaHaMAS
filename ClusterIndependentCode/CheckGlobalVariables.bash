@@ -172,6 +172,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
                                        BHMAS_thermConfsGlobalPath )
         neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]:-} )
         neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
+        readonly BHMAS_walltimeIsNeeded='TRUE'
 
     elif [ $BHMAS_submitonlyOption = 'TRUE' ]; then
         option="$(cecho "with the " B "--submitonly")"
@@ -188,12 +189,14 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
                                        BHMAS_thermConfsGlobalPath )
         neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]:-} )
         neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
+        readonly BHMAS_walltimeIsNeeded='TRUE'
 
     elif [ $BHMAS_continueOption = 'TRUE' ]; then
         option="$(cecho "with the " B "--continue")"
-        variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]}  ${schedulerVariables[@]} )
+        variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]} )
         neededFiles+=( ${rationalApproxFolder[@]:-} )
         neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
+        readonly BHMAS_walltimeIsNeeded='TRUE'
 
     elif [ $BHMAS_continueThermalizationOption = 'TRUE' ]; then
         option="$(cecho "with the " B "--continueThermalization")"
@@ -201,6 +204,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
                                        BHMAS_thermConfsGlobalPath )
         neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]:-} )
         neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
+        readonly BHMAS_walltimeIsNeeded='TRUE'
 
     elif [ $BHMAS_accRateReportOption = 'TRUE' ]; then
         option="$(cecho "with the " B "--accRateReport")"
@@ -249,7 +253,11 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
                                        BHMAS_thermConfsGlobalPath )
         neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]:-} )
         neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
+        readonly BHMAS_walltimeIsNeeded='TRUE'
     fi
+
+    #If BHMAS_walltimeIsNeeded not declared, put it false
+    [ "${BHMAS_walltimeIsNeeded:-}" = '' ] && readonly BHMAS_walltimeIsNeeded='FALSE'
 
     #Check if variables are defined and not empty
     for index in "${!variablesThatMustBeNotEmpty[@]}"; do

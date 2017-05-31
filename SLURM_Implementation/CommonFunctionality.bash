@@ -94,11 +94,11 @@ function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
         betasString="$(__static__GetJobBetasStringUsing ${betasForJobScript[@]})"
         jobScriptFilename="$(GetJobScriptFilename ${betasString})"
         jobScriptGlobalPath="${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName/$jobScriptFilename"
-        walltime="$(__static__CalculateWalltimeExtractingNumberOfTrajectoriesPerBetaAndUsingTimesPerTrajectoryIfGiven "${betasForJobScript[@]}")"
         if [ $BHMAS_submitonlyOption = "FALSE" ]; then
             if [ -e $jobScriptGlobalPath ]; then
                 mv $jobScriptGlobalPath ${jobScriptGlobalPath}_$(date +'%F_%H%M') || exit -2
             fi
+            walltime="$(__static__CalculateWalltimeExtractingNumberOfTrajectoriesPerBetaAndUsingTimesPerTrajectoryIfGiven "${betasForJobScript[@]}")"
             #Call the file to produce the jobscript file
             if [ $BHMAS_invertConfigurationsOption = "TRUE" ]; then
                 ProduceInverterJobscript_CL2QCD

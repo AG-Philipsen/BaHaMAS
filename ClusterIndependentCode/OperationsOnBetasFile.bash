@@ -177,12 +177,12 @@ function __static__CheckConsistencyInformationExtractedFromBetasFile()
 function __static__FillMissingTimesPerTrajectoryIfAnyIsSpecified()
 {
     if [ ${#BHMAS_timesPerTrajectory[@]} -eq 0 ]; then
-        if [ "$BHMAS_walltime" != '' ]; then
-            return
-        else
+        if [ $BHMAS_walltimeIsNeeded = 'TRUE' ] && [ "$BHMAS_walltime" = '' ]; then
             cecho lr "\n The " emph "--walltime" " option was not given and "\
                   emph "no time" " was provided in the " file "$BHMAS_betasFilename" " file! Aborting...\n"
             exit -1
+        else
+            return 0
         fi
     fi
     #If an entry in the BHMAS_timesPerTrajectory is missing, put in the time referring to the closest beta

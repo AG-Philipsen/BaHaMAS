@@ -38,5 +38,6 @@ function DeclareUserDefinedGlobalVariablesForTests()
     BHMAS_clusterNode=""
     BHMAS_clusterConstraint=""
     BHMAS_clusterGenericResource=""
+    BHMAS_maximumWalltime="1-00:00:00"
 
 }
