@@ -25,7 +25,7 @@ function __static__CreateParametersFolders()
 function __static__CreateRationalApproxFolderWithFiles()
 {
     mkdir -p "${testFolder}/Rational_Approximations"
-    cp "${BaHaMAS_testsFolderAuxFiles}/fakeApprox" "${testFolder}/Rational_Approximations"
+    cp "${BaHaMAS_testsFolderAuxFiles}/fakeApprox" "${testFolder}/Rational_Approximations/NfX_fakeApprox"
 }
 function __static__CreateBetaFolder()
 {
@@ -109,6 +109,9 @@ function MakeTestPreliminaryOperations()
                     __static__CreateFilesInBetaFolder "conf.00100" "prng.00100" "conf.00200" "prng.00200"
                     __static__AddStringToFirstLineBetasFile "r100"
                     ;;
+                goal )
+                    __static__AddStringToFirstLineBetasFile "g15000"
+                    ;;
             esac
             if [[ $1 =~ therm ]]; then
                 __static__CreateThermalizedConfigurationFolder
@@ -173,7 +176,7 @@ function RunBaHaMASInTestMode()
     printf "\n===============================\n" >> $logFile
     printf " $(date)\n" >> $logFile
     printf "===============================\n" >> $logFile
-    printf "Running:\n    ${BaHaMAS_command} $@\n\n" >> $logFile
+    printf "Running test \"$testName\":\n    ${BaHaMAS_command} $@\n\n" >> $logFile
     # NOTE: Here we run BaHaMAS in subshell to exclude any potential variables conflict.
     #       Moreover we activate the test mode defining a variable before running it and
     #       we inhibit some commands in order to avoid job summission. Observe also that
