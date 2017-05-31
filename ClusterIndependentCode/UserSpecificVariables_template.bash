@@ -44,6 +44,7 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_databaseGlobalPath=""
     readonly BHMAS_inverterGlobalPath=""
     readonly BHMAS_thermConfsGlobalPath=""
+    readonly BHMAS_maximumWalltime=""
 
     #Possible default value for options which then may not be given via command line
     BHMAS_walltime=""
@@ -77,6 +78,7 @@ function DeclareUserDefinedGlobalVariables()
 #     BHMAS_thermConfsGlobalPath       -->  global path to the folder containing the thermalized configurations
 #     BHMAS_databaseGlobalPath         -->  directory where the the simulation status files are stored (it MUST be a GLOBALPATH)
 #     BHMAS_databaseFilename           -->  name of the file containing the database
+#     BHMAS_maximumWalltime            -->  maximum walltime accepted by the scheduler in the format 'days-hours:min:sec'
 #     BHMAS_walltime                   -->  jobs walltime in the format 'days-hours:min:sec'
 #     BHMAS_clusterPartition           -->  name of the partition of the cluster that has to be used
 #     BHMAS_clusterNode                -->  list of nodes that have to be used

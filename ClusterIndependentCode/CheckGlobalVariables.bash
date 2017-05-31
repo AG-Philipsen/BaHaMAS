@@ -33,7 +33,8 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
                                   BHMAS_clusterNode
                                   BHMAS_clusterConstraint
                                   BHMAS_clusterGenericResource
-                                  BHMAS_walltime )
+                                  BHMAS_walltime
+                                  BHMAS_maximumWalltime )
     variablesThatIfNotEmptyMustNotEndWithSlash=(BHMAS_submitDiskGlobalPath
                                                 BHMAS_runDiskGlobalPath
                                                 BHMAS_projectSubpath
@@ -76,11 +77,12 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
         cecho lr "\n " B "BHMAS_useRationalApproxFiles" uB " variable must be set either to " ly "TRUE" lr " or to " ly "FALSE"
         mustReturn='FALSE'
     fi
-    if [ "$BHMAS_walltime" != '' ] && [[ ! $BHMAS_walltime =~ ^([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]]; then
-        cecho lr "\n " B "BHMAS_walltime" uB " variable format invalid. Correct format: " ly "days-hours:min:sec" lr " or " ly "hours:min:sec"
-        mustReturn='FALSE'
-    fi
-    if [ "$BHMAS_GPUsPerNode" != '' ] && [[ ! $BHMAS_GPUsPerNode =~ ^[1-9]+$ ]]; then
+    for variable in BHMAS_walltime BHMAS_maximumWalltime; do
+        if [ "${!variable:-}" != '' ] && [[ ! ${!variable} =~ ^([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]]; then
+            cecho lr "\n " B "$variable" uB " variable format invalid. Correct format: " ly "days-hours:min:sec" lr " or " ly "hours:min:sec"
+            mustReturn='FALSE'
+        fi
+    done
     if [ "${BHMAS_GPUsPerNode:-}" != '' ] && [[ ! $BHMAS_GPUsPerNode =~ ^[1-9]+$ ]]; then
         cecho lr "\n " B "BHMAS_GPUsPerNode" uB " variable format invalid. It has to be a " ly "positive integer" lr " number."
         mustReturn='FALSE'
@@ -141,7 +143,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
           neededFolders neededFiles rationalApproxFolder rationalApproxFiles
     mustReturn='TRUE'
     jobsNeededVariables=(BHMAS_inputFilename  BHMAS_outputFilename  BHMAS_hmcGlobalPath  BHMAS_jobScriptPrefix  BHMAS_jobScriptFolderName)
-    schedulerVariables=(BHMAS_GPUsPerNode  BHMAS_walltime  BHMAS_userEmail)
+    schedulerVariables=(BHMAS_GPUsPerNode  BHMAS_maximumWalltime  BHMAS_userEmail) #BHMAS_walltime can be empty here, we check later if user gave time in betas file!
     variablesThatMustBeNotEmpty=(BHMAS_submitDiskGlobalPath  BHMAS_runDiskGlobalPath  BHMAS_projectSubpath)
     neededFolders=( "$BHMAS_submitDiskGlobalPath" "${BHMAS_submitDiskGlobalPath}/$BHMAS_projectSubpath" )
     if [ "$BHMAS_submitDiskGlobalPath" != "$BHMAS_runDiskGlobalPath" ]; then
