@@ -505,14 +505,15 @@ function ProcessBetaValuesForContinue_SLURM()
         rm $originalInputFileGlobalPath
         betaValuesToBeSubmitted+=( $betaValue )
     done
-    #Partition of the betaValuesToBeSubmitted into group of BHMAS_GPUsPerNode and create the JobScript files inside the JOBSCRIPT_FOLDER
-    mkdir -p ${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName || exit -2
-    PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles "${betaValuesToBeSubmitted[@]}"
-    #Ask the user if he want to continue submitting job
-    AskUser "Check if the continue option did its job correctly. Would you like to submit the jobs?"
-    if UserSaidNo; then
-        cecho lr B "\n No jobs will be submitted.\n"
-        exit 0;
+    if [ ${#betaValuesToBeSubmitted[@]} -ne 0 ]; then
+       mkdir -p ${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName || exit -2
+       PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles "${betaValuesToBeSubmitted[@]}"
+       #Ask the user if he want to continue submitting job
+       AskUser "Check if the continue option did its job correctly. Would you like to submit the jobs?"
+       if UserSaidNo; then
+           cecho lr B "\n No jobs will be submitted.\n"
+           exit 0;
+       fi
     fi
     unset -v 'statusOfJobsContainingGivenBeta'
 }

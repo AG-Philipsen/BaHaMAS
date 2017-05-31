@@ -4,7 +4,7 @@
 
 function SubmitJobsForValidBetaValues_SLURM()
 {
-    if [ ${#BHMAS_betaValuesToBeSubmitted[@]} -gt "0" ]; then
+    if [ ${#BHMAS_betaValuesToBeSubmitted[@]} -gt 0 ]; then
         cecho lc "\n==================================================================================="
         cecho bb " Jobs will be submitted for the following beta values:"
         for BETA in ${BHMAS_betaValuesToBeSubmitted[@]}; do

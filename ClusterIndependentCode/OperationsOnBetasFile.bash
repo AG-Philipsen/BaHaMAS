@@ -309,7 +309,7 @@ function __static__ToggleDesiredLines()
         beta="${tmpArray[0]}"
         seed="${tmpArray[1]:-}" #Possibly empty
         #Here it is fine to assume that beta is in first position (with maybe space in front)
-        sed -i 's/^\([[:space:]]*\)'$1'\(.*'$beta'.*'$seed'.*\)$/\1'$2'\2/' $BHMAS_betasFilename #Uncomment desired lines
+        sed -i 's/^\([[:space:]]*\)'$1'\(.*'$beta'.*'$seed'.*\)$/\1'$2'\2/' $BHMAS_betasFilename
     done
 }
 

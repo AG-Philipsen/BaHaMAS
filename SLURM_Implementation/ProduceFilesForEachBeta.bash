@@ -25,7 +25,7 @@ function ProduceInputFileAndJobScriptForEachBeta_SLURM()
     for beta in "${betaValuesCopy[@]}"; do
         submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${beta}"
         cecho -n b " Creating directory " dir "$submitBetaDirectory" "..."
-        mkdir $submitBetaDirectory || exit -2
+        mkdir -p $submitBetaDirectory || exit -2
         cecho lg " done!"
         cecho lc "   Configuration used: " file "${BHMAS_startConfigurationGlobalPath[$beta]}"
         if KeyInArray "$beta" BHMAS_goalStatistics; then
