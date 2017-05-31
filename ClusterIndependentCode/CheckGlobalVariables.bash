@@ -115,10 +115,10 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
 
     #Define dependent additional variables
     if [ "$BHMAS_hmcGlobalPath" != '' ]; then
-        HMC_FILENAME="${BHMAS_hmcGlobalPath##*/}"
+        readonly BHMAS_hmcFilename="${BHMAS_hmcGlobalPath##*/}"
     fi
     if [ "$BHMAS_inverterGlobalPath" != '' ]; then
-        INVERTER_FILENAME="${BHMAS_inverterGlobalPath##*/}"
+        readonly BHMAS_inverterFilename="${BHMAS_inverterGlobalPath##*/}"
     fi
 
     #Decide whether to return or to exit
@@ -132,7 +132,7 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
 
 
 # Make logical checks on variables that must be necessarily set only in some cases and therefore not always used
-# EXAMPLE: If user wants only to produce confs, INVERTER_FILENAME can be unset
+# EXAMPLE: If user wants only to produce confs, BHMAS_inverterFilename can be unset
 # Checks also existence directories/files depending on what BaHaMAS should do
 function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
 {

@@ -24,8 +24,8 @@ function ProduceJobscript_CL2QCD()
         "#SBATCH --mail-type=FAIL"\
         "#SBATCH --mail-user=$BHMAS_userEmail"\
         "#SBATCH --time=$BHMAS_walltime"\
-        "#SBATCH --output=${HMC_FILENAME}.%j.out"\
-        "#SBATCH --error=${HMC_FILENAME}.%j.err"\
+        "#SBATCH --output=${BHMAS_hmcFilename}.%j.out"\
+        "#SBATCH --error=${BHMAS_hmcFilename}.%j.err"\
         "#SBATCH --no-requeue"
 
     [ "$BHMAS_clusterPartition"       != '' ] && __static__AddToJobscriptFile "#SBATCH --partition=$BHMAS_clusterPartition"
@@ -64,8 +64,8 @@ function ProduceJobscript_CL2QCD()
     done
     __static__AddToJobscriptFile\
         ""\
-        "outFile=$HMC_FILENAME.\$SLURM_JOB_ID.out"\
-        "errFile=$HMC_FILENAME.\$SLURM_JOB_ID.err"\
+        "outFile=$BHMAS_hmcFilename.\$SLURM_JOB_ID.out"\
+        "errFile=$BHMAS_hmcFilename.\$SLURM_JOB_ID.err"\
         ""\
         "# Check if directories exist"
     for INDEX in "${!betasForJobScript[@]}"; do
@@ -83,13 +83,13 @@ function ProduceJobscript_CL2QCD()
         "echo \"Host: \$(hostname)\""\
         "echo \"GPU:  \$GPU_DEVICE_ORDINAL\""\
         "echo \"Date and time: \$(date)\""\
-        "echo \$SLURM_JOB_NODELIST > $HMC_FILENAME.${betasString:1}.\$SLURM_JOB_ID.nodelist"\
+        "echo \$SLURM_JOB_NODELIST > $BHMAS_hmcFilename.${betasString:1}.\$SLURM_JOB_ID.nodelist"\
         ""\
         "# TODO: this is necessary because the log file is produced in the directoy"\
         "#       of the exec. Copying it later does not guarantee that it is still the same..."\
         "echo \"Copy executable to beta directories in ${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}x.xxxx...\""
     for INDEX in "${!betasForJobScript[@]}"; do
-        __static__AddToJobscriptFile "rm -f \$dir$INDEX/$HMC_FILENAME && cp -a $BHMAS_hmcGlobalPath \$dir$INDEX || exit 2"
+        __static__AddToJobscriptFile "rm -f \$dir$INDEX/$BHMAS_hmcFilename && cp -a $BHMAS_hmcGlobalPath \$dir$INDEX || exit 2"
     done
     __static__AddToJobscriptFile "echo \"...done!\"" ""
     if [ "$BHMAS_submitDiskGlobalPath" != "$BHMAS_runDiskGlobalPath" ]; then
@@ -116,9 +116,9 @@ function ProduceJobscript_CL2QCD()
             "cd \$workdir$INDEX"\
             "pwd &"\
             "if hash mbuffer 2>/dev/null; then"\
-            "    time \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$BHMAS_inputFilename --device=$INDEX --beta=${betasForJobScript[$INDEX]%%_*} 2> \$dir$INDEX/\$errFile | mbuffer -q -m2M > \$dir$INDEX/\$outFile &"\
+            "    time \$dir$INDEX/$BHMAS_hmcFilename --input-file=\$dir$INDEX/$BHMAS_inputFilename --device=$INDEX --beta=${betasForJobScript[$INDEX]%%_*} 2> \$dir$INDEX/\$errFile | mbuffer -q -m2M > \$dir$INDEX/\$outFile &"\
             "else"\
-            "    time srun -n 1 \$dir$INDEX/$HMC_FILENAME --input-file=\$dir$INDEX/$BHMAS_inputFilename --device=$INDEX --beta=${betasForJobScript[$INDEX]%%_*} > \$dir$INDEX/\$outFile 2> \$dir$INDEX/\$errFile &"\
+            "    time srun -n 1 \$dir$INDEX/$BHMAS_hmcFilename --input-file=\$dir$INDEX/$BHMAS_inputFilename --device=$INDEX --beta=${betasForJobScript[$INDEX]%%_*} > \$dir$INDEX/\$outFile 2> \$dir$INDEX/\$errFile &"\
             "fi"\
             "PID_SRUN_$INDEX=\${!}"\
             ""
@@ -154,7 +154,7 @@ function ProduceJobscript_CL2QCD()
     fi
     __static__AddToJobscriptFile "# Remove executable"
     for INDEX in "${!betasForJobScript[@]}"; do
-        __static__AddToJobscriptFile "rm \$dir$INDEX/$HMC_FILENAME || exit 2"
+        __static__AddToJobscriptFile "rm \$dir$INDEX/$BHMAS_hmcFilename || exit 2"
     done
     __static__AddToJobscriptFile ""
     if [ $BHMAS_thermalizeOption = "TRUE" ] || [ $BHMAS_continueThermalizationOption = "TRUE" ]; then

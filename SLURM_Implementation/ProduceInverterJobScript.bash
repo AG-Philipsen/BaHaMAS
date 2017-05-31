@@ -24,8 +24,8 @@ function ProduceInverterJobscript_CL2QCD()
         "#SBATCH --mail-type=FAIL"\
         "#SBATCH --mail-user=$BHMAS_userEmail"\
         "#SBATCH --time=$BHMAS_walltime"\
-        "#SBATCH --output=${INVERTER_FILENAME}.%j.out"\
-        "#SBATCH --error=${INVERTER_FILENAME}.%j.err"\
+        "#SBATCH --output=${BHMAS_inverterFilename}.%j.out"\
+        "#SBATCH --error=${BHMAS_inverterFilename}.%j.err"\
         "#SBATCH --no-requeue"
 
     [ "$BHMAS_clusterPartition"        != '' ] && __static__AddToJobscriptFile "#SBATCH --partition=$BHMAS_clusterPartition"
@@ -64,8 +64,8 @@ function ProduceInverterJobscript_CL2QCD()
     done
     __static__AddToInverterJobscriptFile\
         ""\
-        "outFile=$INVERTER_FILENAME.\$SLURM_JOB_ID.out"\
-        "errFile=$INVERTER_FILENAME.\$SLURM_JOB_ID.err"\
+        "outFile=$BHMAS_inverterFilename.\$SLURM_JOB_ID.out"\
+        "errFile=$BHMAS_inverterFilename.\$SLURM_JOB_ID.err"\
         ""\
         "# Check if directories exist"
     for INDEX in "${!betasForJobScript[@]}"; do
@@ -83,13 +83,13 @@ function ProduceInverterJobscript_CL2QCD()
         "echo \"Host: \$(hostname)\""\
         "echo \"GPU:  \$GPU_DEVICE_ORDINAL\""\
         "echo \"Date and time: \$(date)\""\
-        "echo \$SLURM_JOB_NODELIST > $INVERTER_FILENAME.${betasString:1}.\$SLURM_JOB_ID.nodelist"\
+        "echo \$SLURM_JOB_NODELIST > $BHMAS_inverterFilename.${betasString:1}.\$SLURM_JOB_ID.nodelist"\
         ""\
         "# TODO: this is necessary because the log file is produced in the directoy"\
         "#       of the exec. Copying it later does not guarantee that it is still the same..."\
         "echo \"Copy executable to beta directories in ${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}x.xxxx...\""
     for INDEX in "${!betasForJobScript[@]}"; do
-        __static__AddToInverterJobscriptFile "rm -f \$dir$INDEX/$INVERTER_FILENAME && cp -a $BHMAS_inverterGlobalPath \$dir$INDEX || exit 2"
+        __static__AddToInverterJobscriptFile "rm -f \$dir$INDEX/$BHMAS_inverterFilename && cp -a $BHMAS_inverterGlobalPath \$dir$INDEX || exit 2"
     done
     __static__AddToInverterJobscriptFile\
         "echo \"...done!\""\
@@ -124,9 +124,9 @@ function ProduceInverterJobscript_CL2QCD()
             "for line in \$(cat \$workdir$INDEX/$BHMAS_inversionSrunCommandsFilename); do"\
             "    IFS=\$OLD_IFS #Restore here old IFS to give separated options (and not only one)to CL2QCD!"\
             "    if hash mbuffer 2>/dev/null; then"\
-            "        time \$dir$INDEX/$INVERTER_FILENAME \$line --device=$INDEX 2>> \$dir$INDEX/\$errFile | mbuffer -q -m2M >> \$dir$INDEX/\$outFile"\
+            "        time \$dir$INDEX/$BHMAS_inverterFilename \$line --device=$INDEX 2>> \$dir$INDEX/\$errFile | mbuffer -q -m2M >> \$dir$INDEX/\$outFile"\
             "    else"\
-            "        time srun -n 1 \$dir$INDEX/$INVERTER_FILENAME \$line --device=$INDEX 2>> \$dir$INDEX/\$errFile >> \$dir$INDEX/\$outFile"\
+            "        time srun -n 1 \$dir$INDEX/$BHMAS_inverterFilename \$line --device=$INDEX 2>> \$dir$INDEX/\$errFile >> \$dir$INDEX/\$outFile"\
             "    fi"\
             "    if [ \$? -ne 0 ]; then"\
             "        printf \"\nError occurred in simulation at b${betasForJobScript[$INDEX]%_*}.\n\""\
@@ -154,7 +154,7 @@ function ProduceInverterJobscript_CL2QCD()
         "" ""\
         "# Remove executable"
     for INDEX in "${!betasForJobScript[@]}"; do
-        __static__AddToInverterJobscriptFile "rm \$dir$INDEX/$INVERTER_FILENAME || exit 2"
+        __static__AddToInverterJobscriptFile "rm \$dir$INDEX/$BHMAS_inverterFilename || exit 2"
     done
     __static__AddToInverterJobscriptFile ""
 

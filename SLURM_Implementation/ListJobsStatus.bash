@@ -121,7 +121,7 @@ function ListJobStatus_SLURM()
         #----Constructing WORK_BETADIRECTORY, HOME_BETADIRECTORY, JOBSCRIPT_NAME, JOBSCRIPT_GLOBALPATH and INPUTFILE_GLOBALPATH---#
         local OUTPUTFILE_GLOBALPATH="$BHMAS_runDiskGlobalPath/$BHMAS_projectSubpath$LOCAL_PARAMETERS_PATH/$BHMAS_betaPrefix$BETA/$BHMAS_outputFilename"
         local INPUTFILE_GLOBALPATH="$BHMAS_submitDiskGlobalPath/$BHMAS_projectSubpath$LOCAL_PARAMETERS_PATH/$BHMAS_betaPrefix$BETA/$BHMAS_inputFilename"
-        local STDOUTPUT_FILE=`ls -t1 $BHMAS_betaPrefix$BETA 2>/dev/null | awk -v filename="$HMC_FILENAME" 'BEGIN{regexp="^"filename".[[:digit:]]+.out$"}{if($1 ~ regexp){print $1}}' | head -n1`
+        local STDOUTPUT_FILE=`ls -t1 $BHMAS_betaPrefix$BETA 2>/dev/null | awk -v filename="$BHMAS_hmcFilename" 'BEGIN{regexp="^"filename".[[:digit:]]+.out$"}{if($1 ~ regexp){print $1}}' | head -n1`
         local STDOUTPUT_GLOBALPATH="$BHMAS_submitDiskGlobalPath/$BHMAS_projectSubpath$LOCAL_PARAMETERS_PATH/$BHMAS_betaPrefix$BETA/$STDOUTPUT_FILE"
         #-------------------------------------------------------------------------------------------------------------------------#
         if [ $BHMAS_liststatusMeasureTimeOption = "TRUE" ]; then
