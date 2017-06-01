@@ -108,6 +108,7 @@ function DeclareBaHaMASGlobalVariables()
 
     #Internal BaHaMAS variables
     BHMAS_betaValues=()
+    BHMAS_betaValuesToBeSubmitted=()
     BHMAS_problematicBetaValues=()
     declare -gA BHMAS_scaleZeroIntegrationSteps=()
     declare -gA BHMAS_scaleOneIntegrationSteps=()

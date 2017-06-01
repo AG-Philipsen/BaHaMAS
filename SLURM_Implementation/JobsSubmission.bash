@@ -36,6 +36,6 @@ function SubmitJobsForValidBetaValues_SLURM()
         done
         cecho lc "\n==================================================================================="
     else
-        cecho lr B " No jobs will be submitted."
+        cecho lr B "\n No jobs will be submitted.\n"
     fi
 }
