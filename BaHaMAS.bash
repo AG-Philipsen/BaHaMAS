@@ -63,6 +63,9 @@ if ElementInArray '-h' "$@" || ElementInArray '--help' "$@"; then
     ParseCommandLineOption '--help'
 elif ElementInArray '--helpDatabase' "$@"; then
     ParseCommandLineOption '-d' '-h'
+elif ElementInArray '-j' "$@" || ElementInArray '--jobstatus' "$@"; then
+    ParseCommandLineOption "$@"       #TODO: Temporal workaround, this should be below,
+    ListJobsStatus; cecho ''; exit 0  #      but we wish it to work from anywhere!
 else
     BHMAS_specifiedCommandLineOptions=( "$@" )
 fi
@@ -151,9 +154,9 @@ elif [ $BHMAS_continueOption = 'TRUE' ]; then
     ProcessBetaValuesForContinue
     SubmitJobsForValidBetaValues
 
-elif [ $BHMAS_jobstatusOption = 'TRUE' ]; then
-
-    ListJobsStatus
+#elif [ $BHMAS_jobstatusOption = 'TRUE' ]; then
+#
+#    ListJobsStatus
 
 elif [ $BHMAS_liststatusOption = 'TRUE' ]; then
 
