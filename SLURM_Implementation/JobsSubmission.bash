@@ -34,7 +34,7 @@ function SubmitJobsForValidBetaValues_SLURM()
                   B "\n      Submitting: " uB emph "sbatch $jobScriptFilename"
             sbatch $jobScriptFilename
         done
-        cecho lc "\n==================================================================================="
+        cecho lc "==================================================================================="
     else
         cecho lr B "\n No jobs will be submitted.\n"
     fi
