@@ -59,7 +59,7 @@ function __static__ExtractMetaInformationFromJOBNAME()
         METAINFORMATION_ARRAY+=( $(sed 's/ //g' <<< "${JOB_PARAMETERS_STRING} | $(sed 's/ /_/g' <<< "${JOBNAME_BETAS[@]}") | postfix=${JOBNAME_POSTFIX} | ${JOB_STATUS}") )
     done && unset -v 'VALUE'
 
-    printf "%s " "${METAINFORMATION_ARRAY[@]}"
+    printf "%s " "${METAINFORMATION_ARRAY[@]:-}"
 }
 
 function ListSimulationsStatus_SLURM()
@@ -106,7 +106,7 @@ function ListSimulationsStatus_SLURM()
 
         local POSTFIX_FROM_FOLDER=$(grep -o "[[:alpha:]]\+\$" <<< "${BETA##*_}")
 
-        local STATUS=( $(sed 's/ /\n/g' <<< "${JOB_METAINFORMATION_ARRAY[@]}" | grep "${LOCAL_PARAMETERS_STRING}" | grep "${BHMAS_betaPrefix}${BETA%_*}" | grep "postfix=${POSTFIX_FROM_FOLDER}|" | cut -d'|' -f4) )
+        local STATUS=( $(sed 's/ /\n/g' <<< "${JOB_METAINFORMATION_ARRAY[@]:-}" | grep "${LOCAL_PARAMETERS_STRING}" | grep "${BHMAS_betaPrefix}${BETA%_*}" | grep "postfix=${POSTFIX_FROM_FOLDER}|" | cut -d'|' -f4) )
 
         if [ ${#STATUS[@]} -eq 0 ]; then
             [ $BHMAS_liststatusShowOnlyQueuedOption = "TRUE" ] && continue
