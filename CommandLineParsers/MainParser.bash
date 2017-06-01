@@ -32,7 +32,7 @@ function ParseCommandLineOption()
     BHMAS_specifiedCommandLineOptions=( "${commandLineOptions[@]}" )
 
     mutuallyExclusiveOptions=( "-s | --submit"        "-c | --continue"    "-C | --continueThermalization"
-                               "-t | --thermalize"    "-l | --liststatus"  "-U | --uncommentBetas"
+                               "-t | --thermalize"    "-j | --jobstatus"   "-l | --liststatus"  "-U | --uncommentBetas"
                                "-u | --commentBetas"  "-d | --database"    "-i | --invertConfigurations"
                                "--submitonly"  "--accRateReport"  "--cleanOutputFiles"  "--completeBetasFile")
     mutuallyExclusiveOptionsPassed=()
@@ -219,7 +219,38 @@ function ParseCommandLineOption()
                 fi
                 shift ;;
 
-            -l | --liststatus )
+            -j | --jobstatus )
+                mutuallyExclusiveOptionsPassed+=( $1 )
+                BHMAS_jobstatusOption="TRUE"
+                shift;;
+
+            -u | --user )
+                if [ $BHMAS_jobstatusOption = "FALSE" ]; then
+                    __static__PrintSecondaryOptionSpecificationErrorAndExit "-j | --jobstatus" "$1"
+                else
+                    BHMAS_jobstatusUser="$2"
+                    shift
+                fi
+                shift ;;
+
+            --local )
+                if [ $BHMAS_jobstatusOption = "FALSE" ]; then
+                    __static__PrintSecondaryOptionSpecificationErrorAndExit "-j | --jobstatus" "$1"
+                else
+                    BHMAS_jobstatusLocal='TRUE'
+                fi
+                shift ;;
+
+            -l )
+                if [ $BHMAS_jobstatusOption = 'TRUE' ]; then
+                    BHMAS_jobstatusLocal='TRUE'
+                else
+                    mutuallyExclusiveOptionsPassed+=( $1 )
+                    BHMAS_liststatusOption="TRUE"
+                fi
+                shift;;
+
+            --liststatus )
                 mutuallyExclusiveOptionsPassed+=( $1 )
                 BHMAS_liststatusOption="TRUE"
                 shift;;
@@ -258,11 +289,13 @@ function ParseCommandLineOption()
                 BHMAS_cleanOutputFilesOption="TRUE"
                 shift ;;
 
-            --all )
-                if [ $BHMAS_cleanOutputFilesOption = "FALSE" ]; then
+            -a | --all )
+                if [ $BHMAS_cleanOutputFilesOption = "FALSE" ] && [ $BHMAS_jobstatusOption = "FALSE" ]; then
                     __static__PrintSecondaryOptionSpecificationErrorAndExit "--cleanOutputFiles" "$1"
-                else
+                elif [ $BHMAS_cleanOutputFilesOption = "TRUE" ]; then
                     BHMAS_cleanAllOutputFiles="TRUE"
+                elif [ $BHMAS_jobstatusOption = "TRUE" ]; then
+                    BHMAS_jobstatusAll='TRUE'
                 fi
                 shift ;;
 

@@ -124,6 +124,10 @@ function DeclareBaHaMASGlobalVariables()
     BHMAS_continueOption='FALSE'
     BHMAS_trajectoryNumberUpToWhichToContinue=0
     BHMAS_continueThermalizationOption='FALSE'
+    BHMAS_jobstatusOption='FALSE'
+    BHMAS_jobstatusUser="$(whoami)"
+    BHMAS_jobstatusAll='FALSE'
+    BHMAS_jobstatusLocal='FALSE'
     BHMAS_liststatusOption='FALSE'
     BHMAS_liststatusMeasureTimeOption='FALSE'
     BHMAS_liststatusShowOnlyQueuedOption='FALSE'

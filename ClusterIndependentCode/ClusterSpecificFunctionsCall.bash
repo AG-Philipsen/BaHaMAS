@@ -13,6 +13,7 @@ source ${BaHaMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementatio
 source ${BaHaMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/ProcessBetasForContinue.bash    2>/dev/null  #
 source ${BaHaMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/ProcessBetasForInversion.bash   2>/dev/null  #
 source ${BaHaMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/JobsSubmission.bash             2>/dev/null  #
+source ${BaHaMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/JobsStatus.bash                 2>/dev/null  #
 source ${BaHaMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/SimulationsStatus.bash          2>/dev/null  #
 #------------------------------------------------------------------------------------------------------------------------------#
 
@@ -59,6 +60,11 @@ function SubmitJobsForValidBetaValues()
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_$BHMAS_clusterScheduler
 }
 
+
+function ListJobsStatus()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_$BHMAS_clusterScheduler
+}
 
 function ListSimulationsStatus()
 {

@@ -68,8 +68,12 @@ function PrintMainHelper()
                                 "input file. If a number is specified, thermalizations will be continued up to the specified"\
                                 "$(cecho "number. To resume a thermalization from a given trajectory, add " bc "r[number]" $helperColor " in the betasfile.")"\
                                 "$(cecho "Use " bc "rlast" $helperColor " in the betasfile to resume a thermalization from the last saved " p "conf.[0-9]+" $helperColor " file.")"
+    __static__AddOptionToHelper -e "-j | --jobstatus" "An overview on the queued jobs will be given"\
+                                "$(cecho B "Secondary options" uB ": " $mutuallyExclusiveColor "-u | --user" $helperColor " to get information about a different user")"\
+                                "$(cecho "                   " $mutuallyExclusiveColor "-a | --all" $helperColor " to display all queued jobs on the given partition, if specified")"\
+                                "$(cecho "                   " $mutuallyExclusiveColor "-l | --local" $helperColor " to display jobs submitted from the present directory")"
     __static__AddOptionToHelper -e "-l | --liststatus" "A report of the local simulation status for all beta will be displayed"\
-                                "$(cecho  B "Secondary options" uB ": " $mutuallyExclusiveColor "--measureTime" $helperColor " to get information about the trajectory time")"\
+                                "$(cecho B "Secondary options" uB ": " $mutuallyExclusiveColor "--measureTime" $helperColor " to get information about the trajectory time")"\
                                 "$(cecho "                   " $mutuallyExclusiveColor "--showOnlyQueued" $helperColor " not to show status about not queued jobs")"
     __static__AddOptionToHelper -e "--accRateReport[=number]" "The acceptance rates will be computed on the output files of the given beta every "\
                                 "1000 trajectories and summarized in a table. If a number is specified, this is used"\
@@ -77,7 +81,7 @@ function PrintMainHelper()
     __static__AddOptionToHelper -e "--cleanOutputFiles" "The output files referred to the betas contained in the betas file are cleaned"\
                                 "(repeated lines are eliminated). For safety reason, a backup of the output file is done"\
                                 "(it is left in the output file folder with the name outputfilename_date)."\
-                                "$(cecho "Secondary options: " $mutuallyExclusiveColor "--all" $helperColor " to clean output files for all betas in present folder")"
+                                "$(cecho B "Secondary options" uB ": " $mutuallyExclusiveColor "-a | --all" $helperColor " to clean output files for all betas in present folder")"
     __static__AddOptionToHelper -e "--completeBetasFile[=number]" "The beta file is completed adding for each beta new chains in order to have as many"\
                                 "chain as specified. If no number is specified, 4 is used. This option, if"\
                                 "$(cecho $mutuallyExclusiveColor "--doNotUseMultipleChains" $helperColor " has not been given, uses the seed in the second field to")"\

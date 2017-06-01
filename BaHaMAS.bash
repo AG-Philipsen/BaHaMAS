@@ -151,6 +151,10 @@ elif [ $BHMAS_continueOption = 'TRUE' ]; then
     ProcessBetaValuesForContinue
     SubmitJobsForValidBetaValues
 
+elif [ $BHMAS_jobstatusOption = 'TRUE' ]; then
+
+    ListJobsStatus
+
 elif [ $BHMAS_liststatusOption = 'TRUE' ]; then
 
     ListSimulationsStatus
