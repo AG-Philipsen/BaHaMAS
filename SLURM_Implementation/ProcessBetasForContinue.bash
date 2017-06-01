@@ -455,8 +455,8 @@ function __static__HandleIntegrationStepsInInputFile()
     local optionsToBeAddedOrModified
     #Always set the integrator steps, that could have changed or not
     optionsToBeAddedOrModified=("intsteps0=${BHMAS_scaleZeroIntegrationSteps[$betaValue]}" "intsteps1=${BHMAS_scaleOneIntegrationSteps[$betaValue]}")
-    __static__ModifyOptionsInInputFile $optionsToBeAddedOrModified || { __static__RestoreOriginalInputFile && return 1; }
-    __static__PrintModifiedOptionsToStandardOutput $optionsToBeAddedOrModified
+    __static__ModifyOptionsInInputFile ${optionsToBeAddedOrModified[@]} || { __static__RestoreOriginalInputFile && return 1; }
+    __static__PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
 }
 
 function __static__HandleFurtherOptionsInInputFile()
