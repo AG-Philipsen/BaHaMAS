@@ -206,6 +206,12 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
         neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
         readonly BHMAS_walltimeIsNeeded='TRUE'
 
+    elif [ $BHMAS_liststatusOption = 'TRUE' ]; then
+        option="$(cecho "with the " B "--liststatus")"
+        variablesThatMustBeNotEmpty+=( BHMAS_inputFilename
+                                       BHMAS_outputFilename
+                                       BHMAS_acceptanceColumn )
+
     elif [ $BHMAS_accRateReportOption = 'TRUE' ]; then
         option="$(cecho "with the " B "--accRateReport")"
         variablesThatMustBeNotEmpty+=( BHMAS_acceptanceColumn  BHMAS_outputFilename )
@@ -230,12 +236,6 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
                                        BHMAS_inverterGlobalPath
                                        ${schedulerVariables[@]} )
         neededFiles+=( "$BHMAS_inverterGlobalPath" )
-
-    elif [ $BHMAS_liststatusOption = 'TRUE' ]; then
-        option="$(cecho "with the " B "--liststatus")"
-        variablesThatMustBeNotEmpty+=( BHMAS_inputFilename
-                                       BHMAS_outputFilename
-                                       BHMAS_acceptanceColumn )
 
     elif [ $BHMAS_databaseOption = 'TRUE' ]; then
         option="$(cecho "with the " B "--dataBase")"

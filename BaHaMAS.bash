@@ -153,7 +153,7 @@ elif [ $BHMAS_continueOption = 'TRUE' ]; then
 
 elif [ $BHMAS_liststatusOption = 'TRUE' ]; then
 
-    ListJobStatus
+    ListSimulationsStatus
 
 elif [ $BHMAS_accRateReportOption = 'TRUE' ]; then
 

@@ -416,7 +416,7 @@ function projectStatisticsDatabase()
 
                 PARAMETER_DIRECTORY_STRUCTURE=${line##*$BHMAS_projectSubpath}
 
-                ListJobStatus_SLURM $PARAMETER_DIRECTORY_STRUCTURE | \
+                ListSimulationsStatus_SLURM $PARAMETER_DIRECTORY_STRUCTURE | \
                     sed -r 's/[^(\x1b)]\[|\]|\(|\)|%//g' | \
                     sed -r 's/(\x1B\[[0-9]{1,2};[0-9]{0,2};[0-9]{0,3}m)(.)/\1 \2/g' | \
                     sed -r 's/(.)(\x1B\[.{1,2};.{1,2}m)/\1 \2/g' | \

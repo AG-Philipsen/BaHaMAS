@@ -62,7 +62,7 @@ function __static__ExtractMetaInformationFromJOBNAME()
     printf "%s " "${METAINFORMATION_ARRAY[@]}"
 }
 
-function ListJobStatus_SLURM()
+function ListSimulationsStatus_SLURM()
 {
 
     # This function can be called by the JobHandler either in the BHMAS_liststatusOption setup or in the DATABASE setup.
@@ -80,7 +80,7 @@ function ListJobStatus_SLURM()
         local LOCAL_PARAMETERS_STRING=${LOCAL_PARAMETERS_PATH//\//_}
         LOCAL_PARAMETERS_STRING=${LOCAL_PARAMETERS_STRING:1}
     else
-        cecho "\e[31m Wrong invocation of ListJobStatus_SLURM: Invalid number of arguments. Please investigate...exiting."
+        cecho "\e[31m Wrong invocation of ListSimulationsStatus_SLURM: Invalid number of arguments. Please investigate...exiting."
         return
     fi
 
