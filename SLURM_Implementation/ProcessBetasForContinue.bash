@@ -22,23 +22,6 @@ function __static__GetStatusOfJobsContainingBetavalues()
     return 0
 }
 
-function __static__CheckWhetherSimulationForGivenBetaIsAlreadyEnqueued()
-{
-    local jobStatus; jobStatus="${statusOfJobsContainingGivenBeta[$betaValue]}"
-    if [ "$jobStatus" = "" ]; then
-        return 0
-    else
-        if [ $(grep -c "\(RUNNING\|PENDING\)" <<< "$jobStatus") -gt 0 ]; then
-            cecho lr  " The simulation seems to be already running with " emph "job-id $(cut -d'@' -f1 <<< "$jobStatus")" " and it cannot be continued!\n"\
-                  " The value " emph "beta = $betaValue" " will be skipped!"
-            BHMAS_problematicBetaValues+=( $betaValue )
-            return 1
-        else
-            return 0
-        fi
-    fi
-}
-
 function __static__CheckWhetherAnyRequiredFileOrFolderIsMissing()
 {
     if [ ! -d $runBetaDirectory ]; then
@@ -55,6 +38,23 @@ function __static__CheckWhetherAnyRequiredFileOrFolderIsMissing()
         return 1
     fi
     return 0
+}
+
+function __static__CheckWhetherSimulationForGivenBetaIsAlreadyEnqueued()
+{
+    local jobStatus; jobStatus="${statusOfJobsContainingGivenBeta[$betaValue]}"
+    if [ "$jobStatus" = "" ]; then
+        return 0
+    else
+        if [ $(grep -c "\(RUNNING\|PENDING\)" <<< "$jobStatus") -gt 0 ]; then
+            cecho lr  " The simulation seems to be already running with " emph "job-id $(cut -d'@' -f1 <<< "$jobStatus")" " and it cannot be continued!\n"\
+                  " The value " emph "beta = $betaValue" " will be skipped!"
+            BHMAS_problematicBetaValues+=( $betaValue )
+            return 1
+        else
+            return 0
+        fi
+    fi
 }
 
 function __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAndOutputFileIfNeeded()
@@ -144,8 +144,8 @@ function __static__CheckWhetherFoundCheckpointIsGoodToContinue()
         BHMAS_problematicBetaValues+=( $betaValue )
         return 1
     fi
-    if [ "$nameOfLastPRNG" == "" ]; then
-        cecho ly B "\n " U "WARNING" uU ":" uB " No prng state found in " dir "$runBetaDirectory" ", using a random host_seed...\n"
+    if [ "$nameOfLastPRNG" = "" ]; then
+        cecho " " ly B U "WARNING" uU ":" uB " No valid PRNG file for configuration " file "${BHMAS_betaPrefix}${betaValue}/$nameOfLastConfiguration" " was found! Using a random seed."
     fi
     #Check that, in case the continue is done from a "numeric" configuration, the number of conf and prng is the same
     if [[ "$nameOfLastConfiguration" =~ [.][0-9]+$ ]] && [[ "$nameOfLastPRNG" =~ [.][0-9]+$ ]]; then
@@ -191,13 +191,13 @@ function __static__FindAndReplaceSingleOccurenceInFile()
         cecho lr "\n Error occurred in " emph "$FUNCNAME" ": file " file "$filename" " has not been found! Aborting...\n"
         exit -1
     elif [ $(grep -c "$stringToBeFound" $filename) -eq 0 ]; then
-        cecho lr "\n The string " emph "$stringToBeFound" " has " emph "not been found" " in file\n "\
-              file "$filename" "! The value " emph "beta = $betaValue" " will be skipped!"
+        cecho lr "\n The string " emph "$stringToBeFound" " has " emph "not been found" " in file "\
+              file "${filename##$BHMAS_runDirWithBetaFolders/}" "! The value " emph "beta = $betaValue" " will be skipped!"
         BHMAS_problematicBetaValues+=( $betaValue )
         return 1
     elif [ $(grep -c "$stringToBeFound" $filename) -gt 1 ]; then
-        cecho lr "\n The string " emph "$stringToBeFound" " occurs " emph "more than once" " in file\n "\
-              file "$filename" "! The value " emph "beta = $betaValue" " will be skipped!"
+        cecho lr "\n The string " emph "$stringToBeFound" " occurs " emph "more than once" " in file "\
+              file "${filename##$BHMAS_runDirWithBetaFolders/}" "! The value " emph "beta = $betaValue" " will be skipped!"
         BHMAS_problematicBetaValues+=( $betaValue )
         return 1
     fi
@@ -259,6 +259,84 @@ function __static__PrintAddedOptionsToStandardOutput()
 function __static__PrintModifiedOptionsToStandardOutput()
 {
     __static__PrintAboutOptionsToStandardOutput "Set" "$@"
+}
+
+function __static__FindAndSetNumberOfTrajectoriesAlreadyProduced()
+{
+    # Strategy to recover the number of done measurement:
+    #   1) if nameOfLastConfiguration contains the number of the conf, use it. Otherwise,
+    #   2) try to extract from within the configuration file (specific CL2QCD). Otherwise,
+    #   3) if the output file exists, use it. Otherwise,
+    #   4) print an error and skip beta.
+    numberOfTrajectoriesAlreadyProduced="$(sed -n 's/^[^1-9]*\([0-9]\+\)[^0-9]*$/\1/p' <<< "$nameOfLastConfiguration")" #extract number without leading zeros (only if exactly one number is in conf name)
+    if [ "$numberOfTrajectoriesAlreadyProduced" = '' ]; then
+        numberOfTrajectoriesAlreadyProduced="$(sed -n "s/^trajectory nr = \([1-9][0-9]*\)$/\1/p" ${runBetaDirectory}/${nameOfLastConfiguration} || true)"
+    fi
+    if [ "$numberOfTrajectoriesAlreadyProduced" = '' ]; then
+        if [ -f $outputFileGlobalPath ]; then
+            numberOfTrajectoriesAlreadyProduced=$(awk 'END{print $1 + 1}' $outputFileGlobalPath) #The +1 is here necessary because the first tr. is supposed to be the number 0.
+        fi
+    fi
+    if [ "$numberOfTrajectoriesAlreadyProduced" = '' ]; then
+        cecho lr "It was not possible to deduce the number of already produced trajectories! The value " emph "beta = $betaValue" " will be skipped!"
+        BHMAS_problematicBetaValues+=( $betaValue )
+        return 1
+    else
+        return 0
+    fi
+}
+
+function __static__IsSimulationFinished()
+{
+    local startingStatistics goalStatistics
+    startingStatistics=$1; goalStatistics=$2
+    if [ $startingStatistics -gt $goalStatistics ]; then
+        cecho lr " It was found that the number of done measurements is " emph "$startingStatistics > $goalStatistics = goal trajectory" "."
+        if [ $BHMAS_trajectoryNumberUpToWhichToContinue -ne 0 ]; then
+            cecho lr " The option " emph "--continue=$BHMAS_trajectoryNumberUpToWhichToContinue" " cannot be applied. The value " emph "beta = $betaValue" " will be skipped!"
+        else
+            cecho lr " The option " emph "--continue" " cannot be applied. The value " emph "beta = $betaValue" " will be skipped!"
+        fi
+        BHMAS_problematicBetaValues+=( $betaValue )
+        return 1
+    elif [ $startingStatistics -eq $goalStatistics ]; then
+        if KeyInArray $betaValue BHMAS_trajectoriesToBeResumedFrom; then
+            #If we resume from and simulation is finished, delete from std output the 'ATTENTION' line
+            cecho -d -n "\e[1A\e[K"
+        fi
+        cecho lg " The simulation for " lo "beta = $betaValue" lg " seems to be finished, it will not be continued!"
+        return 1
+    fi
+    return 0
+}
+
+function __static__HandleMeasurementsInInputFile()
+{
+    # There are differente possibilities to set the number of measurements in the input file
+    # and we have to decide a list of priorities:
+    #   1) if the '--measurements' option is given, then it will be used. Otherwise,
+    #   2) if the '--continue=[number]' option is given, then it will be used. Otherwise,
+    #   3) if the 'g[number]' field is present in the betas file, then it will be used. Otherwise,
+    #   4) the measurement option in the input file is not modified!
+    #
+    #
+    local optionsToBeAddedOrModified numberOfTrajectoriesAlreadyProduced
+    if ElementInArray '-m' "${BHMAS_specifiedCommandLineOptions[@]}" || ElementInArray '--measurements' "${BHMAS_specifiedCommandLineOptions[@]}"; then
+        optionsToBeAddedOrModified="measurements=$BHMAS_numberOfTrajectories"
+    elif [ $BHMAS_trajectoryNumberUpToWhichToContinue -ne 0 ]; then
+        __static__FindAndSetNumberOfTrajectoriesAlreadyProduced || { __static__RestoreOriginalInputFile && return 1; }
+        __static__IsSimulationFinished $numberOfTrajectoriesAlreadyProduced $BHMAS_trajectoryNumberUpToWhichToContinue || { __static__RestoreOriginalInputFile && return 1; }
+        optionsToBeAddedOrModified="measurements=$(( BHMAS_trajectoryNumberUpToWhichToContinue - numberOfTrajectoriesAlreadyProduced ))"
+    elif KeyInArray $betaValue BHMAS_goalStatistics; then
+        __static__FindAndSetNumberOfTrajectoriesAlreadyProduced || { __static__RestoreOriginalInputFile && return 1; }
+        __static__IsSimulationFinished $numberOfTrajectoriesAlreadyProduced ${BHMAS_goalStatistics[$betaValue]} || { __static__RestoreOriginalInputFile && return 1; }
+        optionsToBeAddedOrModified="measurements=$(( BHMAS_goalStatistics[$betaValue] - numberOfTrajectoriesAlreadyProduced ))"
+    else
+        return 0
+    fi
+    __static__ModifyOptionsInInputFile $optionsToBeAddedOrModified || { __static__RestoreOriginalInputFile && return 1; }
+    __static__PrintModifiedOptionsToStandardOutput $optionsToBeAddedOrModified
+    return 0
 }
 
 function __static__HandlePbpInInputFile()
@@ -342,62 +420,6 @@ function __static__HandleMassPreconditioningInInputFile()
     return 0
 }
 
-function __static__FindAndSetNumberOfTrajectoriesAlreadyProduced()
-{
-    # Strategy to recover the number of done measurement:
-    #   1) if nameOfLastConfiguration contains the number of the conf, use it. Otherwise,
-    #   2) try to extract from within the configuration file (specific CL2QCD). Otherwise,
-    #   3) if the output file exists, use it. Otherwise,
-    #   4) print an error and skip beta.
-    numberOfTrajectoriesAlreadyProduced="$(sed -n 's/^[^1-9]*\([0-9]\+\)[^0-9]*$/\1/p' <<< "$nameOfLastConfiguration")" #extract number without leading zeros (only if exactly one number is in conf name)
-    if [ "$numberOfTrajectoriesAlreadyProduced" = '' ]; then
-        numberOfTrajectoriesAlreadyProduced="$(sed -n "s/^trajectory nr = \([1-9][0-9]*\)$/\1/p" ${runBetaDirectory}/${nameOfLastConfiguration} || true)"
-    fi
-    if [ "$numberOfTrajectoriesAlreadyProduced" = '' ]; then
-        if [ -f $outputFileGlobalPath ]; then
-            numberOfTrajectoriesAlreadyProduced=$(awk 'END{print $1 + 1}' $outputFileGlobalPath) #The +1 is here necessary because the first tr. is supposed to be the number 0.
-        fi
-    fi
-    if [ "$numberOfTrajectoriesAlreadyProduced" = '' ]; then
-        cecho lr "It was not possible to deduce the number of already produced trajectories! The value " emph "beta = $betaValue" " will be skipped!"
-        return 1
-    else
-        return 0
-    fi
-}
-
-function __static__HandleMeasurementsInInputFile()
-{
-    # There are differente possibilities to set the number of measurements in the input file
-    # and we have to decide a list of priorities:
-    #   1) if the '--measurements' option is given, then it will be used. Otherwise,
-    #   2) if the '--continue=[number]' option is given, then it will be used. Otherwise,
-    #   3) if the 'g[number]' field is present in the betas file, then it will be used. Otherwise,
-    #   4) the measurement option in the input file is not modified!
-    #
-    #
-    local optionsToBeAddedOrModified numberOfTrajectoriesAlreadyProduced
-    if ElementInArray '-m' "${BHMAS_specifiedCommandLineOptions[@]}" || ElementInArray '--measurements' "${BHMAS_specifiedCommandLineOptions[@]}"; then
-        optionsToBeAddedOrModified="measurements=$BHMAS_numberOfTrajectories"
-    elif [ $BHMAS_trajectoryNumberUpToWhichToContinue -ne 0 ]; then
-        __static__FindAndSetNumberOfTrajectoriesAlreadyProduced || { __static__RestoreOriginalInputFile && return 1; }
-        if [ $numberOfTrajectoriesAlreadyProduced -ge $BHMAS_trajectoryNumberUpToWhichToContinue ]; then
-            cecho lr " It was found that the number of done measurements is " emph "$numberOfTrajectoriesAlreadyProduced >= $BHMAS_trajectoryNumberUpToWhichToContinue = trajectory number up to which to continue" ".\n"\
-                  "The option " emph "--continue=$BHMAS_trajectoryNumberUpToWhichToContinue" " cannot be applied. The value " emph "beta = $betaValue" " will be skipped!"
-            __static__RestoreOriginalInputFile && return 1
-        fi
-        optionsToBeAddedOrModified="measurements=$(( BHMAS_trajectoryNumberUpToWhichToContinue - numberOfTrajectoriesAlreadyProduced ))"
-    elif KeyInArray $betaValue BHMAS_goalStatistics; then
-        __static__FindAndSetNumberOfTrajectoriesAlreadyProduced || { __static__RestoreOriginalInputFile && return 1; }
-        optionsToBeAddedOrModified="measurements=$(( BHMAS_goalStatistics[$betaValue] - numberOfTrajectoriesAlreadyProduced ))"
-    else
-        return 0
-    fi
-    __static__ModifyOptionsInInputFile $optionsToBeAddedOrModified || { __static__RestoreOriginalInputFile && return 1; }
-    __static__PrintModifiedOptionsToStandardOutput $optionsToBeAddedOrModified
-    return 0
-}
-
 function __static__HandleStartConditionInInputFile()
 {
     #Always convert startcondition in continue (and do not notify user, it is understood)
@@ -426,7 +448,7 @@ function __static__HandlePRNGStateInInputFile()
     if [ "$nameOfLastPRNG" == "" ]; then
         #Delete eventual line from input file with initial_prng_state (here we must use a random seed)
         sed -i '/initial_prng_state/d' $inputFileGlobalPath
-        optionsToBeAddedOrModified="host_seed=$(( (RANDOM+1000)%10000 ))"
+        optionsToBeAddedOrModified="host_seed=$(printf "%04d" $(( (RANDOM+1000)%10000 )) )"
         if [ $(grep -c "host_seed=[0-9]\{4\}" $inputFileGlobalPath) -eq 0 ]; then
             __static__AddOptionsToInputFile $optionsToBeAddedOrModified
             __static__PrintAddedOptionsToStandardOutput $optionsToBeAddedOrModified
@@ -492,10 +514,11 @@ function ProcessBetaValuesForContinue_SLURM()
         __static__CheckWhetherAnyRequiredFileOrFolderIsMissing                                     || continue
         __static__CheckWhetherSimulationForGivenBetaIsAlreadyEnqueued                              || continue
         __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAndOutputFileIfNeeded  || continue
+        __static__CheckWhetherFoundCheckpointIsGoodToContinue                                      || continue
         __static__MakeTemporaryCopyOfOriginalInputFile
+        __static__HandleMeasurementsInInputFile         || continue
         __static__HandlePbpInInputFile                  || continue
         __static__HandleMassPreconditioningInInputFile  || continue
-        __static__HandleMeasurementsInInputFile         || continue
         __static__HandleStartConditionInInputFile       || continue
         __static__HandleStartConfigurationInInputFile   || continue
         __static__HandlePRNGStateInInputFile            || continue
