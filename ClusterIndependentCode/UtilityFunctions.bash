@@ -97,7 +97,7 @@ function GetSmallestWalltimeBetweenTwo()
 function MinimumOfArray()
 {
     local MIN=$1; shift
-    while [ "$1" != "" ]; do
+    while [ $# -gt 0 ]; do
         if [ $(awk '{print ($1<$2)}' <<< "$1 $MIN") -eq 1 ]; then
             MIN=$1
         fi
@@ -111,7 +111,7 @@ function KeyOfMinimumOfArray()
     local COUNTER=0
     local KEY_AT_MIN=0
     local MIN=$1; shift
-    while [ "$1" != "" ]; do
+    while [ $# -ne 0 ]; do
         (( COUNTER++ ))
         if [ $(awk '{print ($1<$2)}' <<< "$1 $MIN") -eq 1 ]; then
             MIN=$1
@@ -139,7 +139,7 @@ function KeyOfMaximumOfArray()
     local COUNTER=0
     local KEY_AT_MAX=0
     local MAX=$1; shift
-    while [ "$1" != "" ]; do
+    while [ $# -gt 0 ]; do
         (( COUNTER++ ))
         if [ $(awk '{print ($1>$2)}' <<< "$1 $MAX") -eq 1 ]; then
             MAX=$1
@@ -166,7 +166,7 @@ function FindPositionOfFirstMinimumOfArray()
 function LengthOfLongestEntryInArray()
 {
     local LENGTH_MAX=${#1}; shift
-    while [ "$1" != "" ]; do
+    while [ $# -gt 0 ]; do
         if [ ${#1} -gt $LENGTH_MAX ]; then
             LENGTH_MAX=${#1}
         fi
