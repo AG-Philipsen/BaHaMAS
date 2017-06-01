@@ -63,7 +63,7 @@ function __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAnd
     if KeyInArray $betaValue BHMAS_trajectoriesToBeResumedFrom; then
         #If the user wishes to resume from the last avialable trajectory, then find here which number is "last"
         if [ ${BHMAS_trajectoriesToBeResumedFrom[$betaValue]} = "last" ]; then
-            BHMAS_trajectoriesToBeResumedFrom[$betaValue]=$(find $runBetaDirectory -regextype posix-extended -regex ".*/conf[.][0-9]+$" -type f -exec basename {} ';' | sed 's/^conf[.]0*//' | sort -n | tail -n1)
+            BHMAS_trajectoriesToBeResumedFrom[$betaValue]=$(ls -1 $runBetaDirectory | sed -n "s/^conf[.]0*\([1-9][0-9]*\)$/\1/p" | sort -n | tail -n1)
             if [[ ! ${BHMAS_trajectoriesToBeResumedFrom[$betaValue]} =~ ^[0-9]+$ ]]; then
                 cecho lr "\n Unable to find " emph "last configuration" " to resume from!\n The value " emph "beta = $betaValue" " will be skipped!"
                 BHMAS_problematicBetaValues+=( $betaValue )
@@ -98,7 +98,7 @@ function __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAnd
         local trashFolderName filename numberFromFile
         trashFolderName="$runBetaDirectory/Trash_$(date +'%F_%H%M%S')"
         mkdir $trashFolderName || exit 2
-        for filename in $(find $runBetaDirectory -regextype posix-extended -regex ".*/(conf|prng)[.][0-9]+$" -type f); do
+        for filename in $(ls -1 $runBetaDirectory | sed -n "/^\(conf|prng\)[.][0-9]\+$/p"); do
             #Move to trash only 'conf.xxxxx' or 'prng.xxxxx' files with xxxxx larger than the resume from trajectory
             numberFromFile=$(sed 's/^0*//' <<< "${filename##*.}")
             if [ $numberFromFile -gt ${BHMAS_trajectoriesToBeResumedFrom[$betaValue]} ]; then
@@ -130,8 +130,8 @@ function __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAnd
             nameOfLastPRNG=""
         fi
     else
-        nameOfLastConfiguration=$(find $runBetaDirectory -regextype posix-extended -regex ".*/conf[.][0-9]+$" -type f -exec basename {} ';' | sort -V | tail -n1)
-        nameOfLastPRNG=$(find $runBetaDirectory -regextype posix-extended -regex ".*/prng[.][0-9]+$" -type f -exec basename {} ';' | sort -V | tail -n1)
+        nameOfLastConfiguration=$(ls -1 $runBetaDirectory | sed -n "/^conf[.][0-9]\+$/p" | sort -V | tail -n1)
+        nameOfLastPRNG=$(ls -1 $runBetaDirectory | sed -n "/^prng[.][0-9]\+$/p" | sort -V | tail -n1)
     fi
     return 0
 }
