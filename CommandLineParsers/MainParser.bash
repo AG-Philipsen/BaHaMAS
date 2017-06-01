@@ -224,7 +224,7 @@ function ParseCommandLineOption()
                 BHMAS_jobstatusOption="TRUE"
                 shift;;
 
-            -u | --user )
+            --user )
                 if [ $BHMAS_jobstatusOption = "FALSE" ]; then
                     __static__PrintSecondaryOptionSpecificationErrorAndExit "-j | --jobstatus" "$1"
                 else
@@ -313,24 +313,29 @@ function ParseCommandLineOption()
                 shift ;;
 
             -U | --uncommentBetas | -u | --commentBetas )
-                mutuallyExclusiveOptionsPassed+=( $1 )
-                if [ $1 = '-U' ] || [ $1 = '--uncommentBetas' ]; then
-                    BHMAS_commentBetasOption="FALSE"
-                    BHMAS_uncommentBetasOption="TRUE"
-                elif [ $1 = '-u' ] || [ $1 = '--commentBetas' ]; then
-                    BHMAS_uncommentBetasOption="FALSE"
-                    BHMAS_commentBetasOption="TRUE"
-                fi
-                while [[ ! ${2:-} =~ ^(-|$) ]]; do
-                    if [[ $2 =~ ^[0-9]\.[0-9]{4}_${BHMAS_seedPrefix}[0-9]{4}(_(NC|fC|fH))*$ ]]; then
-                        BHMAS_betasToBeToggled+=( $2 )
-                    elif [[ $2 =~ ^[0-9]\.[0-9]*$ ]]; then
-                        BHMAS_betasToBeToggled+=( $(awk '{printf "%1.4f", $1}' <<< "$2") )
-                    else
-                        __static__PrintOptionSpecificationErrorAndExit "${mutuallyExclusiveOptionsPassed[-1]}"
-                    fi
+                if [ $BHMAS_jobstatusOption = "TRUE" ] && [ $1 = '-u' ]; then
+                    BHMAS_jobstatusUser="$2"
                     shift
-                done
+                else
+                    mutuallyExclusiveOptionsPassed+=( $1 )
+                    if [ $1 = '-U' ] || [ $1 = '--uncommentBetas' ]; then
+                        BHMAS_commentBetasOption="FALSE"
+                        BHMAS_uncommentBetasOption="TRUE"
+                    elif [ $1 = '-u' ] || [ $1 = '--commentBetas' ]; then
+                        BHMAS_uncommentBetasOption="FALSE"
+                        BHMAS_commentBetasOption="TRUE"
+                    fi
+                    while [[ ! ${2:-} =~ ^(-|$) ]]; do
+                        if [[ $2 =~ ^[0-9]\.[0-9]{4}_${BHMAS_seedPrefix}[0-9]{4}(_(NC|fC|fH))*$ ]]; then
+                            BHMAS_betasToBeToggled+=( $2 )
+                        elif [[ $2 =~ ^[0-9]\.[0-9]*$ ]]; then
+                            BHMAS_betasToBeToggled+=( $(awk '{printf "%1.4f", $1}' <<< "$2") )
+                        else
+                            __static__PrintOptionSpecificationErrorAndExit "${mutuallyExclusiveOptionsPassed[-1]}"
+                        fi
+                        shift
+                    done
+                fi
                 shift ;;
 
             -i | --invertConfigurations)
