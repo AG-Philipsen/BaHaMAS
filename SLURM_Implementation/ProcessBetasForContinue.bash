@@ -351,7 +351,7 @@ function __static__FindAndSetNumberOfTrajectoriesAlreadyProduced()
     #   4) print an error and skip beta.
     numberOfTrajectoriesAlreadyProduced="$(sed -n 's/^[^1-9]*\([0-9]\+\)[^0-9]*$/\1/p' <<< "$nameOfLastConfiguration")" #extract number without leading zeros (only if exactly one number is in conf name)
     if [ "$numberOfTrajectoriesAlreadyProduced" = '' ]; then
-        numberOfTrajectoriesAlreadyProduced="$(grep -a "^trajectory nr = [1-9][0-9]*$" ${runBetaDirectory}/${nameOfLastConfiguration} || true)"
+        numberOfTrajectoriesAlreadyProduced="$(sed -n "s/^trajectory nr = \([1-9][0-9]*\)$/\1/p" ${runBetaDirectory}/${nameOfLastConfiguration} || true)"
     fi
     if [ "$numberOfTrajectoriesAlreadyProduced" = '' ]; then
         if [ -f $outputFileGlobalPath ]; then
