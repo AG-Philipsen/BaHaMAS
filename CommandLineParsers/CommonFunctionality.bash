@@ -48,3 +48,76 @@ function SplitCombinedShortOptionsInSingleOptions()
     done
     printf "%s\n" "${newOptions[@]}"
 }
+
+function __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray()
+{
+    declare -A mapOptions=(['-a']='--all'
+                           ['-c']='--continue'
+                           ['-C']='--continueThermalization'
+                           ['-d']='--database'
+                           ['-f']='--confSaveFrequency'
+                           ['-F']='--confSavePointFrequency'
+                           ['-i']='--invertConfigurations'
+                           ['-j']='--jobstatus'
+                           ['-m']='--measurements'
+                           ['-p']='--doNotMeasurePbp'
+                           ['-s']='--submit'
+                           ['-t']='--thermalize'
+                           ['-U']='--uncommentBetas'
+                           ['-w']='--walltime' )
+    local option databaseOption
+    databaseOption='FALSE'
+    for option in "${commandLineOptions[@]}"; do
+        #Replace short options if they are NOT for dabase!
+        if [ $databaseOption = 'FALSE' ]; then
+           KeyInArray $option mapOptions && option=${mapOptions[$option]}
+           #More logic for repeated short options with different long one
+           if [ $option = '-l' ]; then
+               if ElementInArray '--jobstatus' "${arrayNameWhereToStoreTheProcessedOptions[@]}"; then
+                   option='--local'
+               else
+                   option='--liststatus'
+               fi
+           elif [ $option = '-u' ]; then
+               if ElementInArray '--jobstatus' "${arrayNameWhereToStoreTheProcessedOptions[@]}"; then
+                   option='--user'
+               else
+                   option='--commentBetas'
+               fi
+           elif [ $option = '-h' ]; then
+               option='--help'
+           fi
+        else
+           if [ $option = '-h' ]; then
+               option='--helpDatabase'
+           fi
+        fi
+        arrayNameWhereToStoreTheProcessedOptions[${#arrayNameWhereToStoreTheProcessedOptions[@]}]="$option"
+        if ElementInArray '--database' "${arrayNameWhereToStoreTheProcessedOptions[@]}"; then
+            databaseOption='TRUE'
+        fi
+    done
+}
+
+function PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem()
+{
+    local arrayNameWhereToStoreTheProcessedOptions commandLineOptions option
+    declare -ga $1=\(\)
+    declare -n arrayNameWhereToStoreTheProcessedOptions=$1; shift #Reference to variable
+    #The following two lines are not combined to respect potential spaces in options
+    readarray -t commandLineOptions <<< "$(PrepareGivenOptionToBeProcessed "$@")"
+    readarray -t commandLineOptions <<< "$(SplitCombinedShortOptionsInSingleOptions "${commandLineOptions[@]}")"
+    __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray
+}
+
+
+function PrintHelperAndExitIfUserAskedForIt()
+{
+    if ElementInArray '--help' "$@"; then
+        PrintMainHelper; exit 0
+    elif ElementInArray '--helpDatabase' "$@"; then
+        PrintDatabaseHelper; exit 0
+    else
+        return 0
+    fi
+}

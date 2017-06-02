@@ -39,10 +39,6 @@ function ParseDatabaseCommandLineOption()
     #Here it is fine to assume that option names and values are separated by spaces
     while [ $# -gt 0 ]; do
         case $1 in
-            -h | --help )
-                PrintDatabaseHelper
-                exit 0
-                shift ;;
 
             -c | --columns)
                 DISPLAY="TRUE"

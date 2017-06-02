@@ -8,8 +8,6 @@
 #*Everytime the database is updated, actually create a new file with the date and time in the name? This way it possible to track how the statistics
 # grow over longer periods.
 
-source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/DatabaseParser.bash || exit -2
-
 function join()
 {
     local IFS="$1"; shift

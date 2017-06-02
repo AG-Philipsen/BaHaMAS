@@ -33,7 +33,9 @@ source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/AcceptanceRateRe
 source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/CleanOutputFiles.bash             || exit -2     #
 source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/ClusterSpecificFunctionsCall.bash || exit -2     #
 source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/ReportOnProblematicBetas.bash     || exit -2     #
+source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/CommonFunctionality.bash              || exit -2     #
 source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/MainParser.bash                       || exit -2     #
+source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/DatabaseParser.bash                   || exit -2     #
 source ${BaHaMAS_repositoryTopLevelPath}/Database/ProjectStatisticsDatabase.bash                  || exit -2     #
 # User file to be sourced depending on test mode                                                                 #
 if [ -n "${BaHaMAS_testModeOn:+x}" ] && [ ${BaHaMAS_testModeOn} = 'TRUE' ]; then                                 #
@@ -58,26 +60,22 @@ else
 fi
 DeclareBaHaMASGlobalVariables
 
-#If the help is asked, it doesn't matter which other options are given to the script
-if ElementInArray '-h' "$@" || ElementInArray '--help' "$@"; then
-    ParseCommandLineOption '--help'
-elif ElementInArray '--helpDatabase' "$@"; then
-    ParseCommandLineOption '-d' '-h'
-elif ElementInArray '-j' "$@" || ElementInArray '--jobstatus' "$@"; then
-    ParseCommandLineOption "$@"       #TODO: Temporal workaround, this should be below,
-    ListJobsStatus; cecho ''; exit 0  #      but we wish it to work from anywhere!
-else
-    BHMAS_specifiedCommandLineOptions=( "$@" )
+PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem BHMAS_specifiedCommandLineOptions "$@"
+PrintHelperAndExitIfUserAskedForIt "${BHMAS_specifiedCommandLineOptions[@]}"
+
+#Do some checks on system and variables, parse user option and do some more check
+if ! ElementInArray '--jobstatus' "${BHMAS_specifiedCommandLineOptions[@]}"; then
+    CheckSystemRequirements
+    CheckWilsonStaggeredVariables
+    CheckUserDefinedVariablesAndDefineDependentAdditionalVariables
+fi
+PrintArray BHMAS_specifiedCommandLineOptions
+[ $# -ne 0 ] && ParseCommandLineOption "${BHMAS_specifiedCommandLineOptions[@]}"
+if ! ElementInArray '--jobstatus' "${BHMAS_specifiedCommandLineOptions[@]}"; then
+    CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase
 fi
 
-#Do some checks on system and variables, parse user option and do some more checks
-CheckSystemRequirements
-CheckWilsonStaggeredVariables
-CheckUserDefinedVariablesAndDefineDependentAdditionalVariables
-[ $# -ne 0 ] && ParseCommandLineOption "${BHMAS_specifiedCommandLineOptions[@]}"
-CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase
-
-if [ $BHMAS_databaseOption = 'FALSE' ]; then
+if [ $BHMAS_databaseOption = 'FALSE' ] && [ $BHMAS_jobstatusOption = 'FALSE' ]; then
     #Perform all the checks on the path, reading out parameters and testing additional paths
     CheckSingleOccurrenceInPath $(sed 's/\// /g' <<< "$BHMAS_submitDiskGlobalPath")\
                                 "${BHMAS_nflavourPrefix}${BHMAS_nflavourRegex}"\
@@ -154,9 +152,9 @@ elif [ $BHMAS_continueOption = 'TRUE' ]; then
     ProcessBetaValuesForContinue
     SubmitJobsForValidBetaValues
 
-#elif [ $BHMAS_jobstatusOption = 'TRUE' ]; then
-#
-#    ListJobsStatus
+elif [ $BHMAS_jobstatusOption = 'TRUE' ]; then
+
+    ListJobsStatus
 
 elif [ $BHMAS_liststatusOption = 'TRUE' ]; then
 
