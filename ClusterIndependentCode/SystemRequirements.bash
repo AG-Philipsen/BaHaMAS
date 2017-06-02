@@ -34,7 +34,7 @@ function __static__CheckAboutProgram()
     __static__CheckAvailabilityOfProgram $program
     case $program in
         bash )
-            requiredVersion='4.2.53'
+            requiredVersion='4.3.30'
             foundVersion="$(sed 's/ /./g' <<< "${BASH_VERSINFO[@]:0:3}")"
             ;;
         awk )
