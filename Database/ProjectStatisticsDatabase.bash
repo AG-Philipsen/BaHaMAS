@@ -461,8 +461,11 @@ function projectStatisticsDatabase()
 
     if [ $REPORT = "TRUE" ]; then
 
-        cecho lm "\t\t\t  " U "AUTOMATIC REPORT FROM DATABASE (status on "\
+        cecho lm "\n\t\t\t  " U "AUTOMATIC REPORT FROM DATABASE (status on "\
               B "$(date -r $PROJECT_DATABASE_FILE "$(cecho -n -d '+%%d.%%m.%%Y' uB ' at ' B '%%H:%%M')")" uB ")\n"
+
+        local exitCodeAwk
+        exitCodeAwk=0
 
         awk --posix -v betaColorColumn="$((${COLUMNS[betaC]} -1 ))" \
             -v trajNoColorColumn="$((${COLUMNS[trajNoC]} -1 ))" \
@@ -563,9 +566,9 @@ printf string[9] , green                                     , bold, simFine
 printf string[10], (filesToBeCleaned>0 ? lightOrange : green), bold, filesToBeCleaned
 
 if(criticalSituation ==1){exit 1}else{exit 0}
-        }' $PROJECT_DATABASE_FILE
+        }' $PROJECT_DATABASE_FILE || exitCodeAwk=1
 
-        if [ $? -ne 0 ]; then
+        if [ $exitCodeAwk -ne 0 ]; then
             cecho -d -n lr "\n\t\t\t"
         else
             cecho -d -n wg "\n\t\t\t"
@@ -596,7 +599,7 @@ if(criticalSituation ==1){exit 1}else{exit 0}
                                              "Running simulations"
                                              "Pending simulations" )
 
-        cecho yg "Which simulations would you like to show?\n" p
+        cecho -d yg "Which simulations would you like to show?\n" p
         PS3=$(cecho yg '\nEnter the number corresponding to the desired set: ' p)
         select SIMULATION in "${POSSIBLE_SIMULATIONS_TO_SHOW[@]}"; do
             if ! ElementInArray "$SIMULATION" "${POSSIBLE_SIMULATIONS_TO_SHOW[@]}"; then
@@ -678,10 +681,10 @@ if(criticalSituation ==1){exit 1}else{exit 0}
 
         if [ $(wc -l < $BHMAS_databaseGlobalPath/$TEMPORARY_DATABASE_FILE) -eq 0 ]; then
             cecho o emph "  $SIMULATION" " not found in database (last update ended on "\
-                  B "$(date -r $PROJECT_DATABASE_FILE $(cecho -n -d '+%%d.%%m.%%Y' uB ' at ' B '%H:%M'))" uB ").\n"
+                  B "$(date -r $PROJECT_DATABASE_FILE "$(cecho -n -d '+%%d.%%m.%%Y' uB ' at ' B '%%H:%%M')")" uB ").\n"
         else
             __static__DisplayDatabaseFile <(sort $BHMAS_databaseGlobalPath/$TEMPORARY_DATABASE_FILE | uniq)
-            cecho "\n Last update ended on " B "$(date -r $PROJECT_DATABASE_FILE $(cecho -n -d '+%%d.%%m.%%Y' uB ' at ' B '%H:%M'))"\
+            cecho "\n Last update ended on " B "$(date -r $PROJECT_DATABASE_FILE "$(cecho -n -d '+%%d.%%m.%%Y' uB ' at ' B '%%H:%%M')")"\
                   uB o "  --->  " file "$PROJECT_DATABASE_FILE" "\n"
         fi
 
@@ -716,7 +719,7 @@ function __static__DisplayDatabaseFile()
     #STRIPPING OF THE LAST | SYMBOL FROM THE STRING
     NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL="${NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL%|}"
     NAME_OF_COLUMN_NR_OF_COLUMN_STRING="${NAME_OF_COLUMN_NR_OF_COLUMN_STRING%|}"
-    NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING="${NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING%|})"
+    NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING="${NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING%|}"
     NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING="${NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING%|}"
     NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING="${NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING%|}"
 

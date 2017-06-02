@@ -13,7 +13,9 @@ function __static__CheckMutuallyExclusiveOptions()
     else
         reportShow='FALSE'
     fi
-    if [ $(grep -o 'TRUE' <<< "$DISPLAY $UPDATE $reportShow" | wc -l) -gt 1 ]; then
+    if [ $(grep -o 'TRUE' <<< "$DISPLAY $UPDATE $reportShow" | wc -l) -eq 0 ]; then
+        DISPLAY='TRUE'
+    elif [ $(grep -o 'TRUE' <<< "$DISPLAY $UPDATE $reportShow" | wc -l) -gt 1 ]; then
         cecho lr "\n Options for " emph "UPDATE" ", " emph "DISPLAY/FILTERING" " and " emph "REPORT" " scenarios cannot be mixed!\n"
         exit -1
     fi
@@ -35,7 +37,6 @@ function ParseDatabaseCommandLineOption()
         ReadParametersFromPathAndSetRelatedVariables $(pwd)
         set -- ${newOptions[@]:-} "--mu" "$BHMAS_chempot" "--$MASS_PARAMETER" "$BHMAS_mass" "--nt" "$BHMAS_ntime" "--ns" "$BHMAS_nspace"
     fi
-
     #Here it is fine to assume that option names and values are separated by spaces
     while [ $# -gt 0 ]; do
         case $1 in

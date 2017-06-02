@@ -73,13 +73,13 @@ function __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray()
            KeyInArray $option mapOptions && option=${mapOptions[$option]}
            #More logic for repeated short options with different long one
            if [ $option = '-l' ]; then
-               if ElementInArray '--jobstatus' "${arrayNameWhereToStoreTheProcessedOptions[@]}"; then
+               if ElementInArray '--jobstatus' "${arrayNameWhereToStoreTheProcessedOptions[@]:-}"; then
                    option='--local'
                else
                    option='--liststatus'
                fi
            elif [ $option = '-u' ]; then
-               if ElementInArray '--jobstatus' "${arrayNameWhereToStoreTheProcessedOptions[@]}"; then
+               if ElementInArray '--jobstatus' "${arrayNameWhereToStoreTheProcessedOptions[@]:-}"; then
                    option='--user'
                else
                    option='--commentBetas'

@@ -101,7 +101,7 @@ fi
 
 if [ $BHMAS_databaseOption = 'TRUE' ]; then
 
-    projectStatisticsDatabase ${BHMAS_optionsToBePassedToDatabase[@]}
+    projectStatisticsDatabase ${BHMAS_optionsToBePassedToDatabase[@]+"${BHMAS_optionsToBePassedToDatabase[@]}"}
 
 elif [ $BHMAS_submitonlyOption = 'TRUE' ]; then
 
