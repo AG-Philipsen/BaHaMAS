@@ -599,8 +599,8 @@ if(criticalSituation ==1){exit 1}else{exit 0}
                                              "Running simulations"
                                              "Pending simulations" )
 
-        cecho -d yg "Which simulations would you like to show?\n" p
-        PS3=$(cecho yg '\nEnter the number corresponding to the desired set: ' p)
+        cecho -d yg "Which simulations would you like to show?\n" lp
+        PS3=$(cecho -d yg '\nEnter the number corresponding to the desired set: ' lp)
         select SIMULATION in "${POSSIBLE_SIMULATIONS_TO_SHOW[@]}"; do
             if ! ElementInArray "$SIMULATION" "${POSSIBLE_SIMULATIONS_TO_SHOW[@]}"; then
                 continue
