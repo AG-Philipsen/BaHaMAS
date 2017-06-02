@@ -27,7 +27,9 @@ function __static__AddOptionToDatabaseHelper()
 
 function PrintDatabaseHelper()
 {
-    local sectionColor groupExclusiveColor
+    local sectionColor groupExclusiveColor defaultMassParameter
+    defaultMassParameter='\e[91m${massPrefix}\e[0m'
+    [ "${MASS_PARAMETER:-}" = '' ] && MASS_PARAMETER="$defaultMassParameter"
     declare -A groupColors=( ['DISPLAY']='p' ['UPDATE']='pk' ['REPORT']='lc' ['GENERAL']='o' )
     sectionColor='g'
     __static__AddSectionLine "Displaying options"
@@ -35,14 +37,14 @@ function PrintDatabaseHelper()
     __static__AddOptionToDatabaseHelper "-c | --columns" "Specify the columns to be displayed."\
                                         "$(cecho $groupExclusiveColor "Possible columns are: " emph "mu" ", " emph "$MASS_PARAMETER" ", " emph "nt" ", " emph "ns" ", " emph "beta_chain_type" ", ")"\
                                         "$(cecho $groupExclusiveColor "                      " emph "trajNo" ", " emph "acc" ", " emph "accLast1k" ", " emph "status" ", " emph "lastTraj" ".")"\
-                                        "$(cecho "Example:  " lp "-c $MASS_PARAMETER nt ns beta_chain_type trajNo")"\
+                                        "$(cecho "Example:  " lp "-c $MASS_PARAMETER" lp " nt ns beta_chain_type trajNo")"\
                                         "If no columns are specified, all of the above columns will be printed by default."
     __static__AddOptionToDatabaseHelper "--color" "Specifiy this option for displaying coloured output.(NOT YET IMPLEMENTED)"
     __static__AddOptionToDatabaseHelper "--sum" "Summing up the trajectory numbers of each parameter set."
     sectionColor='wg'
     __static__AddSectionLine "Filtering"
     __static__AddOptionToDatabaseHelper "--mu" "Specify filtering values for mu."
-    __static__AddOptionToDatabaseHelper "--$MASS_PARAMETER" "Specify filtering values for $MASS_PARAMETER."
+    __static__AddOptionToDatabaseHelper "--$MASS_PARAMETER" "Specify filtering values for $MASS_PARAMETER$(cecho -n -d $groupExclusiveColor)."
     __static__AddOptionToDatabaseHelper "--nt"   "Specify filtering values for nt."
     __static__AddOptionToDatabaseHelper "--ns"   "Specify filtering values for ns."
     __static__AddOptionToDatabaseHelper "--beta" "Specify filtering values for beta."
@@ -86,8 +88,8 @@ function PrintDatabaseHelper()
                                         "file, use this option to specify a file to display and filter."\
                                         ""
     __static__AddOptionToDatabaseHelper "-l | --local" "To use this option, the script should be called from a position such that"\
-                                        "mu, $MASS_PARAMETER, nt and ns can be extracted from the path. This option will add to"\
-                                        "$(cecho "the given ones the " ${groupColors['DISPLAY']} "--mu --$MASS_PARAMETER --nt --ns" $groupExclusiveColor " options with the values extracted")"\
+                                        "mu, $MASS_PARAMETER$(cecho -n -d $groupExclusiveColor), nt and ns can be extracted from the path. This option will add to"\
+                                        "$(cecho "the given ones the " ${groupColors['DISPLAY']} "--mu --$MASS_PARAMETER" ${groupColors['DISPLAY']} " --nt --ns" $groupExclusiveColor " options with the values extracted")"\
                                         "from the path. At the moment it is not compatible with any of such options."
     sectionColor='g'
     __static__AddSectionLine "Report from database"
@@ -102,4 +104,10 @@ function PrintDatabaseHelper()
     cecho ly "  " B U\
           "NOTE" uU ":" uB " Please, remember that the " ${groupColors['DISPLAY']} "display" ly ", " ${groupColors['UPDATE']} "update" ly " and " ${groupColors['REPORT']} "report" ly " options are not compatible!"
     cecho ''
+    if [ $MASS_PARAMETER = "$defaultMassParameter" ]; then
+        cecho lr "  " B U\
+              "ATTENTION" uU ":" uB lc " Note that " lr "$MASS_PARAMETER" lc " refers to the mass prefix that will be used in simulations (e.g. " ly "mass" lc " or " ly "k" lc ")."
+        cecho ''
+    fi
+
 }
