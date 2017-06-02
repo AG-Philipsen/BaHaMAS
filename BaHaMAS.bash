@@ -52,11 +52,12 @@ else
     fi
 fi
 
+#----------------------------------------------------------------------------------------------------------------#
 #Set stricter shell mode. This implies for the developer to be aware of what is going on,
 #but it is worth so. Good reference http://redsymbol.net/articles/unofficial-bash-strict-mode
 set -euo pipefail
+#----------------------------------------------------------------------------------------------------------------#
 
-#Declare all variables (color user decisions for output needed from very beginning)
 DeclareOutputRelatedGlobalVariables
 DeclarePathRelatedGlobalVariables
 if [ -n "${BaHaMAS_testModeOn:+x}" ] && [ ${BaHaMAS_testModeOn} = 'TRUE' ]; then
@@ -70,20 +71,19 @@ DeclareBaHaMASGlobalVariables
 PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem BHMAS_specifiedCommandLineOptions "$@"
 PrintHelperAndExitIfUserAskedForIt "${BHMAS_specifiedCommandLineOptions[@]}"
 
-#Do some checks on system and variables, parse user option and do some more check
 if ! ElementInArray '--jobstatus' "${BHMAS_specifiedCommandLineOptions[@]}"; then
     CheckSystemRequirements
     CheckWilsonStaggeredVariables
     CheckUserDefinedVariablesAndDefineDependentAdditionalVariables
 fi
-PrintArray BHMAS_specifiedCommandLineOptions
+
 [ $# -ne 0 ] && ParseCommandLineOption "${BHMAS_specifiedCommandLineOptions[@]}"
+
 if ! ElementInArray '--jobstatus' "${BHMAS_specifiedCommandLineOptions[@]}"; then
     CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase
 fi
 
 if [ $BHMAS_databaseOption = 'FALSE' ] && [ $BHMAS_jobstatusOption = 'FALSE' ]; then
-    #Perform all the checks on the path, reading out parameters and testing additional paths
     CheckSingleOccurrenceInPath $(sed 's/\// /g' <<< "$BHMAS_submitDiskGlobalPath")\
                                 "${BHMAS_nflavourPrefix}${BHMAS_nflavourRegex}"\
                                 "${BHMAS_chempotPrefix}${BHMAS_chempotRegex}"\
@@ -120,9 +120,11 @@ elif [ $BHMAS_submitOption = 'TRUE' ]; then
 elif [ $BHMAS_thermalizeOption = 'TRUE' ] || [ $BHMAS_continueThermalizationOption = 'TRUE' ]; then
 
     if [ $BHMAS_useMultipleChains = 'FALSE' ]; then
-        [ $BHMAS_thermalizeOption = 'TRUE' ] && cecho lr "\n Option -t | --thermalize implemented ONLY combined not with --doNotUseMultipleChains option! Aborting...\n"
-        [ $BHMAS_continueThermalizationOption = 'TRUE' ] && cecho lr "\n Option -C | --continueThermalization implemented ONLY combined not with --doNotUseMultipleChains option! Aborting...\n"
+        if [ $BHMAS_thermalizeOption = 'TRUE' ] || [ $BHMAS_continueThermalizationOption = 'TRUE' ]; then
+            cecho lr "\n Options " emph "--thermalize" " and " emph "--continueThermalization" " implemented ONLY"\
+                  " not combined not with " emph "--doNotUseMultipleChains" " option! Aborting...\n"
         exit -1
+        fi
     fi
     #Here we fix the beta postfix just looking for thermalized conf from hot at the actual parameters (no matter at which beta);
     #if at least one configuration thermalized from hot is present, it means the thermalization has to be done from conf (the
