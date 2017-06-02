@@ -37,13 +37,20 @@ source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/CommonFunctionality.
 source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/MainParser.bash                       || exit -2     #
 source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/DatabaseParser.bash                   || exit -2     #
 source ${BaHaMAS_repositoryTopLevelPath}/Database/ProjectStatisticsDatabase.bash                  || exit -2     #
-# User file to be sourced depending on test mode                                                                 #
-if [ -n "${BaHaMAS_testModeOn:+x}" ] && [ ${BaHaMAS_testModeOn} = 'TRUE' ]; then                                 #
-    source ${BaHaMAS_repositoryTopLevelPath}/Tests/SetupUserVariables.bash || exit -2                            #
-else                                                                                                             #
-    source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/UserSpecificVariables.bash || exit -2        #
-fi                                                                                                               #
 #----------------------------------------------------------------------------------------------------------------#
+
+# User file to be sourced depending on test mode
+if [ -n "${BaHaMAS_testModeOn:+x}" ] && [ ${BaHaMAS_testModeOn} = 'TRUE' ]; then
+    source ${BaHaMAS_repositoryTopLevelPath}/Tests/SetupUserVariables.bash || exit -2
+else
+    fileToBeSourced="${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/UserSpecificVariables.bash"
+    if [ ! -f "$fileToBeSourced" ]; then
+        printf "\n \e[91mNo user variable file found, please provide one following the documentation. Aborting...\n\n\e[0m"
+        exit -1
+    else
+        source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/UserSpecificVariables.bash || exit -2
+    fi
+fi
 
 #Set stricter shell mode. This implies for the developer to be aware of what is going on,
 #but it is worth so. Good reference http://redsymbol.net/articles/unofficial-bash-strict-mode
