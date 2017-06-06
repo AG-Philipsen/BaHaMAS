@@ -17,8 +17,15 @@
 #-------------------------------------------------------------------------#
 
 #----------------------------------------------------------------------------------------------------------------#
+#Set stricter shell mode. This implies for the developer to be aware of what is going on,
+#but it is worth so. Good reference http://redsymbol.net/articles/unofficial-bash-strict-mode
+set -euo pipefail
+#----------------------------------------------------------------------------------------------------------------#
+
+#----------------------------------------------------------------------------------------------------------------#
 # Load auxiliary bash files that will be used.                                                                   #
 readonly BaHaMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"     #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/Setup.bash                        || exit -2     #
 source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/SystemRequirements.bash           || exit -2     #
 source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/FindClusterScheduler.bash         || exit -2     #
 readonly BHMAS_clusterScheduler="$(SelectClusterSchedulerName)" #It is needed to source cluster specific files!  #
@@ -44,19 +51,19 @@ if [ -n "${BaHaMAS_testModeOn:+x}" ] && [ ${BaHaMAS_testModeOn} = 'TRUE' ]; then
     source ${BaHaMAS_repositoryTopLevelPath}/Tests/SetupUserVariables.bash || exit -2
 else
     fileToBeSourced="${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/UserSpecificVariables.bash"
-    if [ ! -f "$fileToBeSourced" ]; then
-        printf "\n \e[91mNo user variable file found, please provide one following the documentation. Aborting...\n\n\e[0m"
-        exit -1
+    if ElementInArray '--setup' "$@"; then
+        MakeInteractiveSetupAndCreateUserDefinedVariablesFile "$fileToBeSourced"
+        exit 0
     else
-        source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/UserSpecificVariables.bash || exit -2
+        if [ ! -f "$fileToBeSourced" ]; then
+            printf "\n \e[91mBaHaMAS has not been configured, yet! Please, run BaHaMAS with the \e[93m--setup\e[91m option to configure it! Aborting...\n\n\e[0m"
+            exit -1
+        else
+            source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/UserSpecificVariables.bash || exit -2
+        fi
     fi
 fi
 
-#----------------------------------------------------------------------------------------------------------------#
-#Set stricter shell mode. This implies for the developer to be aware of what is going on,
-#but it is worth so. Good reference http://redsymbol.net/articles/unofficial-bash-strict-mode
-set -euo pipefail
-#----------------------------------------------------------------------------------------------------------------#
 
 DeclareOutputRelatedGlobalVariables
 DeclarePathRelatedGlobalVariables

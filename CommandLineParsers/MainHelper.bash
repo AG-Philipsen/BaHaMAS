@@ -31,12 +31,32 @@ function __static__PrintDefault()
     fi
 }
 
+function __static__PrintHelperHeader()
+{
+    cecho lc '\n'\
+          ' #-------------------------------------------------------------------------#\n'\
+          ' #         ____              __  __            __  ___   ___     _____     #\n'\
+          ' #        / __ )   ____ _   / / / /  ____ _   /  |/  /  /   |   / ___/     #\n'\
+          ' #       / __  |  / __ `/  / /_/ /  / __ `/  / /|_/ /  / /| |   \__ \      #\n'\
+          ' #      / /_/ /  / /_/ /  / __  /  / /_/ /  / /  / /  / ___ |  ___/ /      #\n'\
+          ' #     /_____/   \__,_/  /_/ /_/   \__,_/  /_/  /_/  /_/  |_| /____/       #\n'\
+          ' #                                                                         #\n'\
+          ' #-------------------------------------------------------------------------#\n'\
+          '\n'\
+          '     Run BaHaMAS with the ' emph '--setup' ' option to configure the program.\n'\
+          '     You will be asked to fill out a form through a self-explainatory,\n'\
+          '     rudimental, but functional GUI. The ' emph '--setup' ' option can also be\n'\
+          '     used to update and/or complete previous configurations.'\
+          '\n'
+}
+
 function PrintMainHelper()
 {
     local helperColor normalColor mutuallyExclusiveColor
     helperColor='g'; normalColor='m'; mutuallyExclusiveColor='b'
+    __static__PrintHelperHeader
     cecho -d $helperColor
-    cecho -d " Call " B "BaHaMAS" uB " with the following optional arguments:" "\n"
+    cecho -d "  Call " B "BaHaMAS" uB " with the following optional arguments:" "\n"
     __static__AddOptionToHelper "-h | --help"                   ""
     __static__AddOptionToHelper "--jobscript_prefix"            "default value = $(__static__PrintDefault ${BHMAS_jobScriptPrefix:-})"
     __static__AddOptionToHelper "--chempot_prefix"              "default value = $(__static__PrintDefault ${BHMAS_chempotPrefix:-})"
