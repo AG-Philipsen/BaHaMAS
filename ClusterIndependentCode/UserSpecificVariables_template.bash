@@ -52,7 +52,6 @@ function DeclareUserDefinedGlobalVariables()
     BHMAS_clusterNode=""
     BHMAS_clusterConstraint=""
     BHMAS_clusterGenericResource=""
-
 }
 
 # Documentation:

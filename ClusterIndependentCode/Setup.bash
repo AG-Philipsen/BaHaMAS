@@ -51,7 +51,34 @@ function __static__FireUpTheDialogBoxStoringResultAndActingAccordingly()
 
 function __static__ParseSetupResultAndFillInUserVariablesArray()
 {
-    echo "$resultOfDialogBox"
+    local oldIFS entry index
+    #echo "$resultOfDialogBox"
+    oldIFS=$IFS; IFS="|"; index=0
+    for entry in $resultOfDialogBox; do
+        userVariables[${variableNames[$index]}]="$entry"
+        (( index++ )) || true
+    done; IFS=$oldIFS
+}
+
+function __static__ProduceUserVariableFile()
+{
+    local backupFile variable
+    backupFile="${filenameUserSetup}_$(date +%H%M%S)"
+    if [ -f $filenameUserSetup ]; then
+        mv $filenameUserSetup $backupFile || exit -2
+    fi
+    cp $filenameTemplate $filenameUserSetup || exit -2
+    #Delete commented lines from user file
+    sed -i '/^[[:space:]]*[#]/d' $filenameUserSetup
+    #Set variables
+    for variable in ${!userVariables[@]}; do
+        if [ $(grep -o '\$' <<< "${userVariables[$variable]}" | wc -l) -eq 0 ]; then
+            sed -i "s#\(^.*${variable}=\).*#\1'${userVariables[$variable]}'#g" $filenameUserSetup
+        else
+            sed -i "s#\(^.*${variable}=\).*#\1\"${userVariables[$variable]}\"#g" $filenameUserSetup
+        fi
+    done
+    rm -f $backupFile
 }
 
 function MakeInteractiveSetupAndCreateUserDefinedVariablesFile()
@@ -132,6 +159,7 @@ function MakeInteractiveSetupAndCreateUserDefinedVariablesFile()
     __static__FireUpTheDialogBoxStoringResultAndActingAccordingly\
         __static__ParseSetupResultAndFillInUserVariablesArray\
         __static__AbortSetupProcess
-
+    #Produce final setup file
+    __static__ProduceUserVariableFile
 
 }
