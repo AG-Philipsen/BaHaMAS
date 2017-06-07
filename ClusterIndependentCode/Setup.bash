@@ -81,7 +81,7 @@ function MakeInteractiveSetupAndCreateUserDefinedVariablesFile()
     if hash dialog 2>/dev/null; then
         MakeInteractiveSetupUsingDialog
     else
-        cecho lr "Program " ly $1 lr " was not found, but it is required to run " B "BaHaMAS setup" uB ". Aborting...\n"; exit -1
+        cecho lr "\n Program " emph "dialog" " was not found, but it is required to run " B "BaHaMAS setup" uB ". Aborting...\n"; exit -1
     fi
 
     #Produce final setup file
