@@ -1,0 +1,50 @@
+#---------------------------------------------#
+#   Copyright (c)  2017  Alessandro Sciarra   #
+#---------------------------------------------#
+
+function AbortSetupProcess()
+{
+    cecho lr '\n BaHaMAS setup has been aborted! Consider to rerun it, if needed.\n'
+    exit -1
+}
+
+function SetColoredOutput()
+{
+    BHMAS_coloredOutput="$1"
+    userVariables['BHMAS_coloredOutput']="$BHMAS_coloredOutput"
+}
+
+function FireUpTheDialogBoxStoringResultAndActingAccordingly()
+{
+    local functionToBeCalledOnSuccess functionToBeCalledOnCancel\
+          dialogOk dialogCancel dialogHelp dialogExtra\
+          dialogItemHelp dialogEsc returnValue
+    functionToBeCalledOnSuccess="$1"
+    functionToBeCalledOnCancel="$2"
+    dialogOk=0; dialogCancel=1; dialogEsc=255
+    dialogHelp=2; dialogExtra=3; dialogItemHelp=4 #These only in dialog not in whiptail
+    #Use new file descriptor to get dialog output
+    exec 3>&1
+    set +e
+    resultOfBox=$(eval $commandToBeExecuted 2>&1 1>&3)
+    returnValue=$?
+    set -e
+    exec 3>&-
+    case $returnValue in
+        $dialogOk)
+            $functionToBeCalledOnSuccess ;;
+        $dialogCancel)
+            $functionToBeCalledOnCancel ;;
+        $dialogHelp)
+            cecho o "\n INTERNAL: Help button pressed, but unexpected! Aborting...\n"
+            exit -1 ;;
+        $dialogExtra)
+            cecho o "\n INTERNAL: Extra button pressed, but unexpected! Aborting...\n"
+            exit -1 ;;
+        $dialogItemHelp)
+            cecho o "\n INTERNAL: Item-help button pressed, but unexpected! Aborting...\n"
+            exit -1 ;;
+        $dialogEsc)
+            AbortSetupProcess ;;
+    esac
+}

@@ -25,7 +25,7 @@ set -euo pipefail
 #----------------------------------------------------------------------------------------------------------------#
 # Load auxiliary bash files that will be used.                                                                   #
 readonly BaHaMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"     #
-source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/Setup.bash                        || exit -2     #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/Setup/Setup.bash                  || exit -2     #
 source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/SystemRequirements.bash           || exit -2     #
 source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/FindClusterScheduler.bash         || exit -2     #
 readonly BHMAS_clusterScheduler="$(SelectClusterSchedulerName)" #It is needed to source cluster specific files!  #

@@ -2,8 +2,9 @@
 #   Copyright (c)  2017  Alessandro Sciarra   #
 #---------------------------------------------#
 
-source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/SetupDialog.bash   || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/SetupWhiptail.bash || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/Setup/CommonFunctionality.bash   || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/Setup/SetupDialog.bash           || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/Setup/SetupWhiptail.bash         || exit -2
 
 function __static__ReadVariablesFromTemplateFile()
 {
@@ -80,8 +81,11 @@ function MakeInteractiveSetupAndCreateUserDefinedVariablesFile()
 
     if hash dialog 2>/dev/null; then
         MakeInteractiveSetupUsingDialog
+    elif hash whiptail 2>/dev/null; then
+        MakeInteractiveSetupUsingWhiptail
     else
-        cecho lr "\n Program " emph "dialog" " was not found, but it is required to run " B "BaHaMAS setup" uB ". Aborting...\n"; exit -1
+        cecho lr "\n Programs " emph "dialog" " and " emph "whitptail" " were not found, but they are required to run the " B "BaHaMAS setup" uB ".\n"\
+              " Consider to install any of them or read in the documentation how to make the BaHaMAS setup manually! Aborting...\n"; exit -1
     fi
 
     #Produce final setup file
