@@ -1,3 +1,8 @@
+#-------------------------------------------------------------------------------#
+#   This file is part of BaHaMAS and it is subject to the terms and conditions  #
+#   defined in the LICENCE.md file, which is distributed within the software.   #
+#-------------------------------------------------------------------------------#
+
 #TODO:
 #*If a filtering option is specified wrongly, should the program exit or not? If not, should the error message rather be printed in the end?
 #*Is it necessary to implement the functionality where the script uses find the update the database?

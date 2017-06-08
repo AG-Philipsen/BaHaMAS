@@ -1,6 +1,7 @@
-#---------------------------------------------#
-#   Copyright (c)  2017  Alessandro Sciarra   #
-#---------------------------------------------#
+#-------------------------------------------------------------------------------#
+#   This file is part of BaHaMAS and it is subject to the terms and conditions  #
+#   defined in the LICENCE.md file, which is distributed within the software.   #
+#-------------------------------------------------------------------------------#
 
 # NOTE: At the moment I do not have a smarter idea about
 #       how to understand which scheduler is installed

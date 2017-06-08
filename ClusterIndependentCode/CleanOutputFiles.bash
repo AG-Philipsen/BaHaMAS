@@ -1,3 +1,8 @@
+#-------------------------------------------------------------------------------#
+#   This file is part of BaHaMAS and it is subject to the terms and conditions  #
+#   defined in the LICENCE.md file, which is distributed within the software.   #
+#-------------------------------------------------------------------------------#
+
 function __static__CheckFileForSuspiciousTrajectory()
 {
     local FILE_GLOBALPATH="$1"
