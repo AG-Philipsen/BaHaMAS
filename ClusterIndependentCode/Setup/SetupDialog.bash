@@ -15,7 +15,7 @@ function __static__ParseSetupResultAndFillInUserVariablesArray()
 
 function MakeInteractiveSetupUsingDialog()
 {
-    local commandToBeExecuted resultOfBox dialogDimensions\
+    local commandToBeExecuted resultOfBox lines columns\
           dialogHeight dialogWidth formHeight variableNameFieldLength\
           variableValueFieldLength formHeader index
     #Start setting up colored output
@@ -27,13 +27,17 @@ function MakeInteractiveSetupUsingDialog()
         "SetColoredOutput TRUE"\
         "SetColoredOutput FALSE"
     #Continue with BaHaMAS user variables
-    exec 3>&1; dialogDimensions=$(dialog --print-maxsize 2>&1 1>&3); exec 3>&-
-    dialogHeight=$(grep -o "[0-9]\+" <<< "$dialogDimensions" | head -n1 | awk '{print int(0.6*$1)}')
-    dialogWidth=$(grep  -o "[0-9]\+" <<< "$dialogDimensions" | tail -n1 | awk '{print int(0.7*$1)}')
-    formHeight=30 #Hard-coded since it seems there is an implicit maximum depending on the dialogHeight
+    lines=$(tput lines)
+    columns=$(tput cols)
+    dialogHeight=$((lines-16))
+    dialogWidth=$((columns-10))
+    formHeight=$((dialogHeight-23))
     variableNameFieldLength=$(( $(LengthOfLongestEntryInArray ${variableNames[@]}) +8 ))
-    variableValueFieldLength=200 #It should be enough
-    formHeader='\n\ZbPlease, provide the following information (the content of a previous filled out variable can be accessed with the \Z5${nameOfTheVariable}\Z0 syntax):\Zn'
+    variableValueFieldLength=180 #It should be enough
+    formHeader='\n
+    \ZbPlease, provide the following information (the content of a previous filled out variable can be accessed with the \Z5${nameOfTheVariable}\Z0 syntax).\Zn\n\n
+    Consider that \Z4NOT\Z0 all values of the variables must be provided and, in general, only some of them are needed to run BaHaMAS with a particular option.\n
+    If a needed variable is left unset, you will be notified when you run BaHaMAS and you can rerun the setup to give the missing values.\n\n'
     commandToBeExecuted="dialog --keep-tite --colors --ok-label 'Configure BaHaMAS'
                                 --cancel-label 'Abort setup'
                                 --backtitle 'BaHaMAS setup'
