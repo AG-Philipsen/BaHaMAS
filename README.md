@@ -1,7 +1,7 @@
 BaHaMAS
 -------
 
-`BaHaMAS` stands for *__Ba__sh __Ha__ndler to __M__onitor and __A__dministrate __S__imulations* and it is a tool to efficiently run LQCD simulations on supercomputers. During years, it has grown and improved, so that it is by now plenty of functionality to submit, monitor, continue and resume jobs.
+`BaHaMAS` stands for ***Ba**sh **Ha**ndler to **M**onitor and **A**dministrate **S**imulations* and it is a tool to efficiently run LQCD simulations on supercomputers. During years, it has grown and improved, so that it is by now plenty of functionality to submit, monitor, continue and resume jobs.
 
 #### Origin of the code as disclaimer
 
@@ -12,17 +12,17 @@ However, reading the documentation, it should be clear that the structure of the
 
 ## Main Features
 
- - Thermalise configurations for a given set of parameters
- - Submit jobs for configurations production (with one or several replica)
- - Continue a simulation from the last checkpoint
- - Resume a simulation from a previous checkpoint
- - Get an overview of the queued jobs
- - Get a report on the status of the simulations for a given set of parameters
- - Use the database for complete control on your project
- - Keep easily under control the acceptance rate of each run
- - Clean the output files for a successive analysis
- - Calculate correlators on produced configurations
- - ...and many others!
+ - **Thermalise** configurations for a given set of parameters
+ - **Submit** jobs for configurations production (with one or several replica)
+ - **Continue** a simulation from the last checkpoint
+ - **Resume** a simulation from a previous checkpoint
+ - Get an **overview** of the queued jobs
+ - Get a **report** on the status of the simulations for a given set of parameters
+ - Use the **database** for complete control on your project
+ - Keep easily under control the **acceptance rate** of each run
+ - **Clean** the output files for a successive analysis
+ - Calculate **correlators** on produced configurations
+ - *...and many others!*
 
 ## Quick Start
 
@@ -37,7 +37,7 @@ Being written in bash, `BaHaMAS` does not need to be compiled or installed. Once
 
 ### Authors
 
-`BaHaMAS` was born in 2014 and it has been developed in a very small team. Use [git] functionalities like `git shortlog -sne` if you are interested in getting an overview of contributions by different authors. Feel free to contact us if you have suggestions, feedbacks, bug reports or anything else about the software.
+`BaHaMAS` was born in 2014 and it has been developed in a very small team. Use [git] functionalities like, for example, `git shortlog -sne` if you are interested in getting an overview of contributions by different authors. Feel free to contact us if you have suggestions, feedbacks, bug reports or anything else about the software.
 
 
 License
