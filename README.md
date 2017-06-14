@@ -2,12 +2,12 @@
 
 `BaHaMAS` stands for ***Ba**sh **Ha**ndler to **M**onitor and **A**dministrate **S**imulations* and it is a tool to efficiently run LQCD simulations on supercomputers. During years, it has grown and improved, so that it is by now plenty of functionality to submit, monitor, continue and resume jobs.
 
-#### Origin of the code as disclaimer
+### Origin of the code as disclaimer
 
 `BaHaMAS` has been developed to run LQCD simulations with the [CL<sup>2</sup>QCD] software on clusters provided with the [slurm] job scheduler. Therefore, if you are using a different scheduler or a different software, the implementation of some functionality could be potentially missing.
 However, reading the documentation, it should be clear that the structure of the code allows for easy generalisations<sup>1</sup> and it should not be difficult to provide an implementation for a different job scheduler and/or for a different software.
 
-<sup>1</sup> <sub>_This statement could be at the moment not true. `BaHaMAS` is in an intense development phase and a lot of work is done to provide a more solid structure, which will allow easier extensions in future. For example, some features are [CL<sup>2</sup>QCD] specific and they are still hard coded._</sub>
+<sup>1</sup> <sub>_This statement could be at the moment not true. `BaHaMAS` is in an intense development phase and a lot of work is being done to provide a more solid structure, which will allow easier extensions in future. For example, some features are [CL<sup>2</sup>QCD] specific and they are still hard coded._</sub>
 
 ## Main Features
 
