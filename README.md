@@ -34,7 +34,7 @@ Being written in bash, `BaHaMAS` does not need to be compiled or installed. Once
   - [ ] Progress percentage and remaining time per simulation in `--liststatus` option
 
 
-### Authors
+## Authors
 
 `BaHaMAS` was born in 2014 and it has been developed in a very small team. Use [git] functionalities like, for example, `git shortlog -sne` if you are interested in getting an overview of contributions by different authors. Feel free to contact us if you have suggestions, feedbacks, bug reports or anything else about the software.
 
