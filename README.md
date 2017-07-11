@@ -1,3 +1,5 @@
+<img src="Logo.png" align="right" width="30%" height="30%"/>
+
 # BaHaMAS
 
 `BaHaMAS` stands for ***Ba**sh **Ha**ndler to **M**onitor and **A**dministrate **S**imulations* and it is a tool to efficiently run LQCD simulations on supercomputers. During years, it has grown and improved, so that it has by now plenty of functionality to submit, monitor, continue and resume jobs.
