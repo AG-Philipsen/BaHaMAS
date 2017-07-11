@@ -1,8 +1,8 @@
-### MIT License 
+### MIT License
 
     Copyright (c)  2014  Alessandro Sciarra, Christopher Czaban
                    2015  Alessandro Sciarra, Christopher Czaban
-                   2016  Alessandro Sciarra, Christopher Czaban 
+                   2016  Alessandro Sciarra, Christopher Czaban
                    2017  Alessandro Sciarra
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,3 +22,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+### Logo
+
+    Copyright (c)  2017  Aurora Somaglia
+
+All rights on the BaHaMAS logo are reserved. Feel free to contact us if you need
+to make any use of it.
