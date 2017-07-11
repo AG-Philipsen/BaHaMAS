@@ -25,7 +25,7 @@ SOFTWARE.
 
 ### Logo
 
-    Copyright (c)  2017  Aurora Somaglia
+    Copyright (c)  2017  Aurora Somaglia, Alessandro Sciarra
 
 All rights on the BaHaMAS logo are reserved. Feel free to contact us if you need
 to make any use of it.
