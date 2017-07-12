@@ -27,5 +27,9 @@ SOFTWARE.
 
     Copyright (c)  2017  Aurora Somaglia, Alessandro Sciarra
 
-All rights on the BaHaMAS logo are reserved. Feel free to contact us if you need
+All rights on the BaHaMAS [logo] are reserved. Feel free to contact us if you need
 to make any use of it.
+
+[//]: #
+
+   [logo]: <https://github.com/AG-Philipsen/BaHaMAS/blob/images/Logo.png?raw=true> 
