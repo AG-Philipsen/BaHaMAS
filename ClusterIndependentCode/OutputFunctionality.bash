@@ -136,6 +136,8 @@ function cecho()
     printf "$outputString"
 }
 
+#-------------------------------------------------------------------------------#
+
 function AskUser()
 {
     cecho -n "\n" lc " $1" "  [Y/N]  "
@@ -164,6 +166,55 @@ function UserSaidNo()
     fi
 }
 
+#-------------------------------------------------------------------------------#
+
+function __static__PrintMessageToScreen()
+{
+    local typeOfMessage messageColor fullMessage finalString
+    typeOfMessage="$1"; exitCode="$2"; shift 2
+    case "$typeOfMessage" in
+        WARNING )
+            messageColor='ly'
+            finalString='';;
+        ERROR | FATAL )
+            messageColor='lr'
+            finalString='Aborting...' ;;
+        * )
+            messageColor='lo'
+            finalString='Please contact the developers!' ;;
+    esac
+    fullMessage="$(cecho $messageColor "${@//\n/\n ${typeOfMessage//?/ }  }")"
+    cecho "\n " $messageColor B U "${typeOfMessage}" uU ": " uB "${fullMessage}"
+    if [ "$finalString" != '' ]; then
+        cecho lr "\n ${typeOfMessage//?/ }  $finalString\n"
+    else
+        cecho ''
+    fi
+    if [ $exitCode -ne 0 ]; then
+        exit $exitCode
+    fi
+}
+
+function Warning()
+{
+    __static__PrintMessageToScreen 'WARNING' 0 "$@" 
+}
+
+function Error()
+{
+    __static__PrintMessageToScreen 'ERROR' 0 "$@" 
+}
+
+function Fatal()
+{
+    __static__PrintMessageToScreen 'FATAL' "$1" "${@:2}" 
+}
+
+function Internal()
+{
+    __static__PrintMessageToScreen 'INTERNAL' "$1" "${@:2}"
+}
+#-------------------------------------------------------------------------------#
 
 #format="${escape}38;5;9m  " ;;    lr
 #format="${escape}38;5;10m " ;;    lg
