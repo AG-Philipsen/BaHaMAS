@@ -23,7 +23,7 @@
 #-----------------------------------------------------------------------------#
 
 repositoryTopLevelPath="$(git rev-parse --show-toplevel)"
-source $repositoryTopLevelPath/Hooks/AuxiliaryFunctions.bash || exit -2
+source $repositoryTopLevelPath/Hooks/AuxiliaryFunctions.bash || exit 64
 
 #-----------------------------------------------------------------------------
 #Check for committer identity.

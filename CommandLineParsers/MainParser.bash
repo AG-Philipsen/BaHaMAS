@@ -3,7 +3,7 @@
 #   defined in the LICENCE.md file, which is distributed within the software.   #
 #-------------------------------------------------------------------------------#
 
-source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/MainHelper.bash          || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/MainHelper.bash          || exit $BHMAS_fatalBuiltin
 
 function __static__PrintInvalidOptionErrorAndExit()
 {

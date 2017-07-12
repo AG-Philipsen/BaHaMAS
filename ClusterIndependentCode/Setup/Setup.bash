@@ -3,9 +3,9 @@
 #   defined in the LICENCE.md file, which is distributed within the software.   #
 #-------------------------------------------------------------------------------#
 
-source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/Setup/CommonFunctionality.bash   || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/Setup/SetupDialog.bash           || exit -2
-source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/Setup/SetupWhiptail.bash         || exit -2
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/Setup/CommonFunctionality.bash   || exit $BHMAS_fatalBuiltin
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/Setup/SetupDialog.bash           || exit $BHMAS_fatalBuiltin
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/Setup/SetupWhiptail.bash         || exit $BHMAS_fatalBuiltin
 
 function __static__ReadVariablesFromTemplateFile()
 {
@@ -53,9 +53,9 @@ function __static__ProduceUserVariableFile()
     local backupFile variable
     backupFile="${filenameUserSetup}_$(date +%H%M%S)"
     if [ -f $filenameUserSetup ]; then
-        mv $filenameUserSetup $backupFile || exit -2
+        mv $filenameUserSetup $backupFile || exit $BHMAS_fatalBuiltin
     fi
-    cp $filenameTemplate $filenameUserSetup || exit -2
+    cp $filenameTemplate $filenameUserSetup || exit $BHMAS_fatalBuiltin
     #Delete commented lines from user file
     sed -i '/^[[:space:]]*[#]/d' $filenameUserSetup
     #Set variables

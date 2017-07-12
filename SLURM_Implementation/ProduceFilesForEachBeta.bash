@@ -26,7 +26,7 @@ function ProduceInputFileAndJobScriptForEachBeta_SLURM()
     for beta in "${betaValuesCopy[@]}"; do
         submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${beta}"
         cecho -n b " Creating directory " dir "$submitBetaDirectory" "..."
-        mkdir -p $submitBetaDirectory || exit -2
+        mkdir -p $submitBetaDirectory || exit $BHMAS_fatalBuiltin
         cecho lg " done!"
         cecho lc "   Configuration used: " file "${BHMAS_startConfigurationGlobalPath[$beta]}"
         if KeyInArray "$beta" BHMAS_goalStatistics; then
@@ -36,6 +36,6 @@ function ProduceInputFileAndJobScriptForEachBeta_SLURM()
         fi
         ProduceInputFile_CL2QCD "${beta}" "${submitBetaDirectory}/${BHMAS_inputFilename}" $temporaryNumberOfTrajectories
     done
-    mkdir -p ${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName || exit -2
+    mkdir -p ${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName || exit $BHMAS_fatalBuiltin
     PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles "${betaValuesCopy[@]}"
 }

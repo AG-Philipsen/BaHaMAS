@@ -21,7 +21,7 @@ function CheckTestEnvironment()
 
 function __static__CreateParametersFolders()
 {
-    mkdir -p "${testFolder}${testParametersPath}" || exit -2
+    mkdir -p "${testFolder}${testParametersPath}" || exit $BHMAS_fatalBuiltin
 }
 function __static__CreateRationalApproxFolderWithFiles()
 {
@@ -30,39 +30,39 @@ function __static__CreateRationalApproxFolderWithFiles()
 }
 function __static__CreateBetaFolder()
 {
-    mkdir "${testFolder}${testParametersPath}/${betaFolder}" || exit -2
+    mkdir "${testFolder}${testParametersPath}/${betaFolder}" || exit $BHMAS_fatalBuiltin
 }
 function __static__CreateFilesInBetaFolder()
 {
     local file
     for file in "$@"; do
-        touch "${testFolder}${testParametersPath}/${betaFolder}/${file}" || exit -2
+        touch "${testFolder}${testParametersPath}/${betaFolder}/${file}" || exit $BHMAS_fatalBuiltin
     done
 }
 function __static__AddStringToFirstLineBetasFile()
 {
     local line
     line="$(head -n 1 "${testFolder}${testParametersPath}/betas")"
-    cecho -n -d "$line   $1" > "${testFolder}${testParametersPath}/betas" || exit -2
+    cecho -n -d "$line   $1" > "${testFolder}${testParametersPath}/betas" || exit $BHMAS_fatalBuiltin
 }
 function __static__CopyAuxiliaryFileAtBetaFolderLevel()
 {
-    cp "${BaHaMAS_testsFolderAuxFiles}/$1" "${testFolder}${testParametersPath}/$2" || exit -2
+    cp "${BaHaMAS_testsFolderAuxFiles}/$1" "${testFolder}${testParametersPath}/$2" || exit $BHMAS_fatalBuiltin
 }
 function __static__CopyAuxiliaryFilesToBetaFolder()
 {
     local file
     for file in "$@"; do
-        cp "${BaHaMAS_testsFolderAuxFiles}/${file}" "${testFolder}${testParametersPath}/${betaFolder}" || exit -2
+        cp "${BaHaMAS_testsFolderAuxFiles}/${file}" "${testFolder}${testParametersPath}/${betaFolder}" || exit $BHMAS_fatalBuiltin
     done
 }
 function __static__CreateThermalizedConfigurationFolder()
 {
-    mkdir "${testFolder}/Thermalized_Configurations" || exit -2
+    mkdir "${testFolder}/Thermalized_Configurations" || exit $BHMAS_fatalBuiltin
 }
 function __static__CreateThermalizedConfiguration()
 {
-    touch "${testFolder}/Thermalized_Configurations/conf.${testParametersString}_${betaFolder%_*}_$1" || exit -2
+    touch "${testFolder}/Thermalized_Configurations/conf.${testParametersString}_${betaFolder%_*}_$1" || exit $BHMAS_fatalBuiltin
 }
 
 function MakeTestPreliminaryOperations()
@@ -70,7 +70,7 @@ function MakeTestPreliminaryOperations()
     local trashFolderName file folder
     #Always create params folders and go at betafolder level
     __static__CreateParametersFolders
-    cd "${testFolder}${testParametersPath}" || exit -2
+    cd "${testFolder}${testParametersPath}" || exit $BHMAS_fatalBuiltin
     #Always use completed file and then in case overwrite
     cp "${BaHaMAS_testsFolderAuxFiles}/fakeBetas" "${testFolder}${testParametersPath}/betas"
 
@@ -89,7 +89,7 @@ function MakeTestPreliminaryOperations()
             __static__CreateThermalizedConfiguration "fromConf4000"
             __static__CreateBetaFolder
             __static__CopyAuxiliaryFilesToBetaFolder "fakeInput"
-            mkdir "Jobscripts_TEST" || exit -2
+            mkdir "Jobscripts_TEST" || exit $BHMAS_fatalBuiltin
             printf "NOT EMPTY\n" > "${testFolder}${testParametersPath}/Jobscripts_TEST/fakePrefix_${testParametersString}__${betaFolder%_*}"
             ;;
         thermalize* )
@@ -231,12 +231,12 @@ function CleanTestsEnvironmentForFollowingTest()
     bigTrash="Trash"
     #Always go to simulation path level and move everything inside a Trash folder
     #which contains in the name also the test name (easy debug in case of failure)
-    cd "$testFolder" || exit -2
-    mkdir -p "$bigTrash" || exit -2
+    cd "$testFolder" || exit $BHMAS_fatalBuiltin
+    mkdir -p "$bigTrash" || exit $BHMAS_fatalBuiltin
     if [ "$(ls -A)" ]; then
         trashFolderName="Trash_$(date +%H%M%S-%3N)_$1"
-        mkdir "${bigTrash}/${trashFolderName}" || exit -2
-        mv !("$bigTrash") "${bigTrash}/${trashFolderName}/." || exit -2
+        mkdir "${bigTrash}/${trashFolderName}" || exit $BHMAS_fatalBuiltin
+        mv !("$bigTrash") "${bigTrash}/${trashFolderName}/." || exit $BHMAS_fatalBuiltin
     else
         cecho lr "Folder " dir "$(pwd)" " empty but it should not be the case! Aborting...\n"
         exit -1
@@ -277,7 +277,7 @@ function PrintTestsReport()
 function DeleteAuxiliaryFilesAndFolders()
 {
     local name
-    cd "$BaHaMAS_testsFolder" || exit -2
+    cd "$BaHaMAS_testsFolder" || exit $BHMAS_fatalBuiltin
     [ $reportLevel -eq 3 ] && cecho bb " In $(pwd):"
     for name in "${listOfAuxiliaryFilesAndFolders[@]}"; do
         if [ -d "$name" ]; then

@@ -112,14 +112,14 @@ function __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAnd
         [ -f $runBetaDirectory/conf.save_backup ] && mv $runBetaDirectory/conf.save_backup $trashFolderName
         [ -f $runBetaDirectory/prng.save_backup ] && mv $runBetaDirectory/prng.save_backup $trashFolderName
         #Move the output file to Trash, and duplicate it parsing it in awk deleting all the trajectories after the resume from one, included (if found)
-        mv $outputFileGlobalPath $trashFolderName || exit -2
+        mv $outputFileGlobalPath $trashFolderName || exit $BHMAS_fatalBuiltin
         if ! awk -v tr="${BHMAS_trajectoriesToBeResumedFrom[$betaValue]}"\
              'BEGIN{found=1} $1<tr{print $0} $1==(tr-1){found=0} END{exit found}'\
              ${trashFolderName}/$(basename $outputFileGlobalPath) > $outputFileGlobalPath; then
             cecho lr "\n Measurement for trajectory " emph "$(( BHMAS_trajectoriesToBeResumedFrom[$betaValue] - 1 ))" " not found in outputfile "\
                   emph "$outputFileGlobalPath" "\n The value " emph "beta = $betaValue" " will be skipped!"
-            mv $trashFolderName/* $runBetaDirectory || exit -2
-            rmdir $trashFolderName || exit -2
+            mv $trashFolderName/* $runBetaDirectory || exit $BHMAS_fatalBuiltin
+            rmdir $trashFolderName || exit $BHMAS_fatalBuiltin
             BHMAS_problematicBetaValues+=( $betaValue )
             return 1
         fi
@@ -166,7 +166,7 @@ function __static__MakeTemporaryCopyOfOriginalInputFile()
     #This is to avoid to modify some parameters and then skip beta because of some error leaving the input file modified!
     #If the beta is skipped this temporary file is used to restore the original input file, otherwise it is deleted.
     originalInputFileGlobalPath="${inputFileGlobalPath}_original"
-    cp $inputFileGlobalPath $originalInputFileGlobalPath || exit -2
+    cp $inputFileGlobalPath $originalInputFileGlobalPath || exit $BHMAS_fatalBuiltin
     return 0
 }
 
@@ -530,7 +530,7 @@ function ProcessBetaValuesForContinue_SLURM()
         betaValuesToBeSubmitted+=( $betaValue )
     done
     if [ ${#betaValuesToBeSubmitted[@]} -ne 0 ]; then
-       mkdir -p ${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName || exit -2
+       mkdir -p ${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName || exit $BHMAS_fatalBuiltin
        PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles "${betaValuesToBeSubmitted[@]}"
        #Ask the user if he want to continue submitting job
        AskUser "Check if the continue option did its job correctly. Would you like to submit the jobs?"

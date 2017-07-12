@@ -10,7 +10,7 @@
 readonly repositoryTopLevelPath="$(git rev-parse --show-toplevel)"
 readonly hookGitFolder=$repositoryTopLevelPath/.git/hooks
 readonly hookDistributedFolder=$repositoryTopLevelPath/Hooks
-source $hookDistributedFolder/AuxiliaryFunctions.bash || exit -2
+source $hookDistributedFolder/AuxiliaryFunctions.bash || exit 64
 
 cd $hookGitFolder
 

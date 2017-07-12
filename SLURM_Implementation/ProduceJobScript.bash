@@ -17,8 +17,8 @@ function ProduceJobscript_CL2QCD()
     jobScriptGlobalPath="$1"; jobScriptFilename="$2"; walltime="$3"; shift 3
     betaValues=( "$@" )
 
-    rm -f $jobScriptGlobalPath || exit -2
-    touch $jobScriptGlobalPath || exit -2
+    rm -f $jobScriptGlobalPath || exit $BHMAS_fatalBuiltin
+    touch $jobScriptGlobalPath || exit $BHMAS_fatalBuiltin
 
     #-----------------------------------------------------------------#
     # This piece of script uses the variable

@@ -172,6 +172,13 @@ function DeclareBaHaMASGlobalVariables()
     readonly BHMAS_highAcceptanceThreshold=78
     readonly BHMAS_tooHighAcceptanceThreshold=90
     readonly BHMAS_deltaSThreshold=6
+
+    #Variables for exit codes (between 64 and 113 http://tldp.org/LDP/abs/html/exitcodes.html)
+    readonly BHMAS_fatalBuiltin=64
+    readonly BHMAS_fatalNoFile=65
+    readonly BHMAS_fatalGeneric=112
+    readonly BHMAS_internal=113
+    
 }
 
 # The following variables cannot be declared at the

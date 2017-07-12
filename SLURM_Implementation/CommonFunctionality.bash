@@ -97,7 +97,7 @@ function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
         jobScriptGlobalPath="${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName/$jobScriptFilename"
         if [ $BHMAS_submitonlyOption = "FALSE" ]; then
             if [ -e $jobScriptGlobalPath ]; then
-                mv $jobScriptGlobalPath ${jobScriptGlobalPath}_$(date +'%F_%H%M') || exit -2
+                mv $jobScriptGlobalPath ${jobScriptGlobalPath}_$(date +'%F_%H%M') || exit $BHMAS_fatalBuiltin
             fi
             walltime="$(__static__CalculateWalltimeExtractingNumberOfTrajectoriesPerBetaAndUsingTimesPerTrajectoryIfGiven "${betasForJobScript[@]}")"
             #Call the file to produce the jobscript file

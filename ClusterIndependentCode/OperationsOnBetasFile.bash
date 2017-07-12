@@ -277,7 +277,7 @@ function CompleteBetasFile()
     #Now it is fine to assume that beta is in the first position of the betas file
     #and that the seed is present on each line, since the multiple chains are used
     tmpFilename="${BHMAS_betasFilename}_$(date +%H%M%S-%3N)"
-    cp "$BHMAS_betasFilename" "$tmpFilename" || exit -2; rm "$BHMAS_betasFilename" || exit -2
+    cp "$BHMAS_betasFilename" "$tmpFilename" || exit $BHMAS_fatalBuiltin; rm "$BHMAS_betasFilename" || exit $BHMAS_fatalBuiltin
     while read line; do
         if [[ $line =~ ^[[:blank:]]*# ]] || [[ $line =~ ^[[:blank:]]*$ ]]; then
             cecho -d "$line" >> $BHMAS_betasFilename
@@ -306,7 +306,7 @@ function CompleteBetasFile()
             done
         fi
     done < <(cat "$tmpFilename")
-    rm "$tmpFilename" || exit -2
+    rm "$tmpFilename" || exit $BHMAS_fatalBuiltin
     unset -v 'betaOccurences'
 }
 

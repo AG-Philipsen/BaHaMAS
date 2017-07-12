@@ -24,7 +24,7 @@ function __static__CleanFile()
     local CHECK_FOR_SUSPICIOUS_TR="$2"
     #Do a backup of the file
     local FILE_GLOBALPATH_BACKUP="${FILE_GLOBALPATH}_$(date +'%F_%H%M')"
-    cp $FILE_GLOBALPATH $FILE_GLOBALPATH_BACKUP || exit -2
+    cp $FILE_GLOBALPATH $FILE_GLOBALPATH_BACKUP || exit $BHMAS_fatalBuiltin
 
     if [ "$CHECK_FOR_SUSPICIOUS_TR" = "TRUE" ]; then
         __static__CheckFileForSuspiciousTrajectory $FILE_GLOBALPATH
@@ -33,7 +33,7 @@ function __static__CleanFile()
     sort --numeric-sort --unique --key 1,1 --output=${FILE_GLOBALPATH} ${FILE_GLOBALPATH}
     if [ $? -ne 0 ]; then
         cecho lr "      Problem occurred cleaning file " file "$FILE_GLOBALPATH" "! The value " emph "beta = ${BETA%_*}" " will be skipped!\n"
-        mv $FILE_GLOBALPATH_BACKUP $FILE_GLOBALPATH || exit -2
+        mv $FILE_GLOBALPATH_BACKUP $FILE_GLOBALPATH || exit $BHMAS_fatalBuiltin
         BHMAS_problematicBetaValues+=( $BETA )
         continue
     fi

@@ -109,7 +109,7 @@ function ProcessBetaValuesForInversion_SLURM()
         betaValuesToBeSubmitted+=( $beta )
     done
     if [ ${#betaValuesToBeSubmitted[@]} -ne 0 ]; then
-        mkdir -p ${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName || exit -2
+        mkdir -p ${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName || exit $BHMAS_fatalBuiltin
         PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles "${betaValuesToBeSubmitted[@]}"
     fi
 }

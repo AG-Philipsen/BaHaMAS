@@ -25,33 +25,33 @@
 set -euo pipefail
 #----------------------------------------------------------------------------------------------------------------#
 
-#----------------------------------------------------------------------------------------------------------------#
-# Load auxiliary bash files that will be used.                                                                   #
-readonly BaHaMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"     #
-source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/Setup/Setup.bash                  || exit -2     #
-source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/SystemRequirements.bash           || exit -2     #
-source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/FindClusterScheduler.bash         || exit -2     #
-readonly BHMAS_clusterScheduler="$(SelectClusterSchedulerName)" #It is needed to source cluster specific files!  #
-source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/UtilityFunctions.bash             || exit -2     #
-source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/GlobalVariables.bash              || exit -2     #
-source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/CheckGlobalVariables.bash         || exit -2     #
-source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/OutputFunctionality.bash          || exit -2     #
-source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/PathManagementFunctionality.bash  || exit -2     #
-source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/OperationsOnBetasFile.bash        || exit -2     #
-source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/FindStartingConfiguration.bash    || exit -2     #
-source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/AcceptanceRateReport.bash         || exit -2     #
-source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/CleanOutputFiles.bash             || exit -2     #
-source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/ClusterSpecificFunctionsCall.bash || exit -2     #
-source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/ReportOnProblematicBetas.bash     || exit -2     #
-source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/CommonFunctionality.bash              || exit -2     #
-source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/MainParser.bash                       || exit -2     #
-source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/DatabaseParser.bash                   || exit -2     #
-source ${BaHaMAS_repositoryTopLevelPath}/Database/ProjectStatisticsDatabase.bash                  || exit -2     #
-#----------------------------------------------------------------------------------------------------------------#
+#---------------------------------------------------------------------------------------------------------------------------------#
+# Load auxiliary bash files that will be used.                                                                                    #
+readonly BaHaMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"                      #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/Setup/Setup.bash                  || exit $BHMAS_fatalBuiltin     #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/SystemRequirements.bash           || exit $BHMAS_fatalBuiltin     #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/FindClusterScheduler.bash         || exit $BHMAS_fatalBuiltin     #
+readonly BHMAS_clusterScheduler="$(SelectClusterSchedulerName)" #It is needed to source cluster specific files!                   #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/UtilityFunctions.bash             || exit $BHMAS_fatalBuiltin     #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/GlobalVariables.bash              || exit $BHMAS_fatalBuiltin     #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/CheckGlobalVariables.bash         || exit $BHMAS_fatalBuiltin     #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/OutputFunctionality.bash          || exit $BHMAS_fatalBuiltin     #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/PathManagementFunctionality.bash  || exit $BHMAS_fatalBuiltin     #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/OperationsOnBetasFile.bash        || exit $BHMAS_fatalBuiltin     #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/FindStartingConfiguration.bash    || exit $BHMAS_fatalBuiltin     #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/AcceptanceRateReport.bash         || exit $BHMAS_fatalBuiltin     #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/CleanOutputFiles.bash             || exit $BHMAS_fatalBuiltin     #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/ClusterSpecificFunctionsCall.bash || exit $BHMAS_fatalBuiltin     #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/ReportOnProblematicBetas.bash     || exit $BHMAS_fatalBuiltin     #
+source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/CommonFunctionality.bash              || exit $BHMAS_fatalBuiltin     #
+source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/MainParser.bash                       || exit $BHMAS_fatalBuiltin     #
+source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/DatabaseParser.bash                   || exit $BHMAS_fatalBuiltin     #
+source ${BaHaMAS_repositoryTopLevelPath}/Database/ProjectStatisticsDatabase.bash                  || exit $BHMAS_fatalBuiltin     #
+#---------------------------------------------------------------------------------------------------------------------------------#
 
 # User file to be sourced depending on test mode
 if [ -n "${BaHaMAS_testModeOn:+x}" ] && [ ${BaHaMAS_testModeOn} = 'TRUE' ]; then
-    source ${BaHaMAS_repositoryTopLevelPath}/Tests/SetupUserVariables.bash || exit -2
+    source ${BaHaMAS_repositoryTopLevelPath}/Tests/SetupUserVariables.bash || exit $BHMAS_fatalBuiltin
 else
     fileToBeSourced="${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/UserSpecificVariables.bash"
     if ElementInArray '--setup' "$@"; then
@@ -62,7 +62,7 @@ else
             printf "\n \e[91mBaHaMAS has not been configured, yet! Please, run BaHaMAS with the \e[93m--setup\e[91m option to configure it! Aborting...\n\n\e[0m"
             exit -1
         else
-            source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/UserSpecificVariables.bash || exit -2
+            source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/UserSpecificVariables.bash || exit $BHMAS_fatalBuiltin
         fi
     fi
 fi

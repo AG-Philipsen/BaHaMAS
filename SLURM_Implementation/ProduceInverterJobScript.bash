@@ -13,8 +13,8 @@ function __static__AddToInverterJobscriptFile()
 
 function ProduceInverterJobscript_CL2QCD()
 {
-    rm -f $jobScriptGlobalPath || exit -2
-    touch $jobScriptGlobalPath || exit -2
+    rm -f $jobScriptGlobalPath || exit $BHMAS_fatalBuiltin
+    touch $jobScriptGlobalPath || exit $BHMAS_fatalBuiltin
 
     #-----------------------------------------------------------------#
     # This piece of script uses the variable

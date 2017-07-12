@@ -17,8 +17,8 @@ function ProduceInputFile_CL2QCD()
     betaValue="$1"
     inputFileGlobalPath="$2"
     numberOfTrajectoriesToBeDone=$3
-    rm -f $inputFileGlobalPath || exit -2
-    touch $inputFileGlobalPath || exit -2
+    rm -f $inputFileGlobalPath || exit $BHMAS_fatalBuiltin
+    touch $inputFileGlobalPath || exit $BHMAS_fatalBuiltin
 
     #This input file is for CL2QCD only!
     if [ $BHMAS_wilson = "TRUE" ]; then
