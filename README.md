@@ -43,7 +43,9 @@ Being written in bash, `BaHaMAS` does not need to be compiled or installed. Once
 
 License
 ----
-[MIT](https://github.com/AxelKrypton/BaHaMAS/blob/master/LICENSE.md)
+| Code | Logo |
+| :--: | :--: |
+|[MIT](https://github.com/AxelKrypton/BaHaMAS/blob/master/LICENSE.md)| All rights are reserved|
 
 [//]: # (These are reference links used in the body of this note and get stripped out when the markdown processor does its job. There is no need to format nicely because it shouldn't be seen. Thanks SO - http://stackoverflow.com/questions/4823468/store-comments-in-markdown-syntax)
 
@@ -51,3 +53,4 @@ License
    [slurm]: <https://slurm.schedmd.com/>
    [CL<sup>2</sup>QCD]: <https://github.com/AG-Philipsen/cl2qcd>
    [git]: <https://git-scm.com>
+   [logo]: <https://github.com/AG-Philipsen/BaHaMAS/blob/master/Logo.png>
