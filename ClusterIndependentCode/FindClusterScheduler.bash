@@ -25,10 +25,9 @@ function SelectClusterSchedulerName()
     done
 
     if [ ${#availableScheduler[@]} -eq 0 ]; then
-        cecho lr "\n No known scheduler was found! Aborting...\n" >&2
-        exit -1
+        Fatal $BHMAS_fatalMissingFeature "No known scheduler was found!"
     elif [ ${#availableScheduler[@]} -gt 1 ]; then
-        cecho "\n" ly B " WARNING:" uB " More than one scheduler was found! Using " o B "${availableScheduler[0]}" uB ly "\n" >&2
+        Warning "More than one scheduler was found! Using " o B "${availableScheduler[0]}" uB ly "."
     fi
 
     printf "${availableScheduler[0]}"

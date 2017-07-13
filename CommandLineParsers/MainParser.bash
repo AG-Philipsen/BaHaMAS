@@ -3,25 +3,17 @@
 #   defined in the LICENCE.md file, which is distributed within the software.   #
 #-------------------------------------------------------------------------------#
 
-source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/MainHelper.bash          || exit $BHMAS_fatalBuiltin
+source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/MainHelper.bash || exit $BHMAS_fatalBuiltin
 
-function __static__PrintInvalidOptionErrorAndExit()
-{
-    cecho lr "\n Invalid option " emph "$1" " specified! Run " B "BaHaMAS" uB " with " emph "--help" " to get further information. Aborting...\n"; exit -1
-}
-function __static__PrintOptionSpecificationErrorAndExit()
-{
-    cecho lr "\n The value of the option " emph "$1" " was not correctly specified! Aborting...\n"; exit -1
-}
 function __static__PrintSecondaryOptionSpecificationErrorAndExit()
 {
-    cecho lr "\n The option " emph "$2" " is a secondary option of " emph "$1" " and it has to be given after it! Aborting...\n"; exit -1
+    Fatal $BHMAS_fatalCommandLine "The option " emph "$2" " is a secondary option of " emph "$1" " and it has to be given after it!"
 }
 
 function ParseCommandLineOption()
 {
 
-    local mutuallyExclusiveOptions mutuallyExclusiveOptionsPassed option
+    local mutuallyExclusiveOptions mutuallyExclusiveOptionsPassed option listOfOptionsAsString
 
     mutuallyExclusiveOptions=( "-s | --submit"        "-c | --continue"    "-C | --continueThermalization"
                                "-t | --thermalize"    "-j | --jobstatus"   "-l | --liststatus"  "-U | --uncommentBetas"
@@ -35,7 +27,7 @@ function ParseCommandLineOption()
 
             --jobscript_prefix )
                 if [[ ${2:-} =~ ^(-|$) ]]; then
-                    __static__PrintOptionSpecificationErrorAndExit "$1"
+                    PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_jobScriptPrefix="$2"
                 fi
@@ -43,7 +35,7 @@ function ParseCommandLineOption()
 
             --chempot_prefix )
                 if [[ ${2:-} =~ ^(-|$) ]]; then
-                    __static__PrintOptionSpecificationErrorAndExit "$1"
+                    PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_chempotPrefix="$2"
                 fi
@@ -51,7 +43,7 @@ function ParseCommandLineOption()
 
             --mass_prefix )
                 if [[ ${2:-} =~ ^(-|$) ]]; then
-                    __static__PrintOptionSpecificationErrorAndExit "$1"
+                    PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_massPrefix="$2"
                 fi
@@ -59,7 +51,7 @@ function ParseCommandLineOption()
 
             --ntime_prefix )
                 if [[ ${2:-} =~ ^(-|$) ]]; then
-                    __static__PrintOptionSpecificationErrorAndExit "$1"
+                    PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_ntimePrefix="$2"
                 fi
@@ -67,7 +59,7 @@ function ParseCommandLineOption()
 
             --nspace_prefix )
                 if [[ ${2:-} =~ ^(-|$) ]]; then
-                    __static__PrintOptionSpecificationErrorAndExit "$1"
+                    PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_nspacePrefix="$2"
                 fi
@@ -75,7 +67,7 @@ function ParseCommandLineOption()
 
             --beta_prefix )
                 if [[ ${2:-} =~ ^(-|$) ]]; then
-                    __static__PrintOptionSpecificationErrorAndExit "$1"
+                    PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_betaPrefix="$2"
                 fi
@@ -83,7 +75,7 @@ function ParseCommandLineOption()
 
             --betasfile )
                 if [[ ${2:-} =~ ^(-|$) ]]; then
-                    __static__PrintOptionSpecificationErrorAndExit "$1"
+                    PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_betasFilename="$2"
                 fi
@@ -96,13 +88,13 @@ function ParseCommandLineOption()
                     BHMAS_walltime="${2:-}"
                 fi
                 if [[ ! $BHMAS_walltime =~ ^([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]]; then
-                    __static__PrintOptionSpecificationErrorAndExit "$1"
+                    PrintOptionSpecificationErrorAndExit "$1"
                 fi
                 shift 2 ;;
 
             --measurements )
                 if [[ ! ${2:-} =~ ^[0-9]+$ ]]; then
-                    __static__PrintOptionSpecificationErrorAndExit "$1"
+                    PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_numberOfTrajectories=$2
                 fi
@@ -110,7 +102,7 @@ function ParseCommandLineOption()
 
             --confSaveFrequency )
                 if [[ ! ${2:-} =~ ^[0-9]+$ ]]; then
-                    __static__PrintOptionSpecificationErrorAndExit "$1"
+                    PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_checkpointFrequency=$2
                 fi
@@ -118,7 +110,7 @@ function ParseCommandLineOption()
 
             --confSavePointFrequency )
                 if [[ ! ${2:-} =~ ^[0-9]+$ ]]; then
-                    __static__PrintOptionSpecificationErrorAndExit "$1"
+                    PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_savepointFrequency=$2
                 fi
@@ -126,7 +118,7 @@ function ParseCommandLineOption()
 
             --cgbs )
                 if [[ ! ${2:-} =~ ^[0-9]+$ ]]; then
-                    __static__PrintOptionSpecificationErrorAndExit "$1"
+                    PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_inverterBlockSize=$2
                 fi
@@ -144,7 +136,7 @@ function ParseCommandLineOption()
 
             --partition )
                 if [[ ${2:-} =~ ^(-|$) ]]; then
-                    __static__PrintOptionSpecificationErrorAndExit "$1"
+                    PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_clusterPartition="$2"
                 fi
@@ -152,7 +144,7 @@ function ParseCommandLineOption()
 
             --constraint )
                 if [[ ${2:-} =~ ^(-|$) ]]; then
-                    __static__PrintOptionSpecificationErrorAndExit "$1"
+                    PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_clusterConstraint="$2"
                 fi
@@ -160,7 +152,7 @@ function ParseCommandLineOption()
 
             --node )
                 if [[ ${2:-} =~ ^(-|$) ]]; then
-                    __static__PrintOptionSpecificationErrorAndExit "$1"
+                    PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_clusterNode="$2"
                 fi
@@ -186,7 +178,7 @@ function ParseCommandLineOption()
                 BHMAS_continueOption="TRUE"
                 if [[ ! ${2:-} =~ ^(-|$) ]]; then
                     if [[ ! $2 =~ ^[0-9]+$ ]];then
-                        __static__PrintOptionSpecificationErrorAndExit "$1"
+                        PrintOptionSpecificationErrorAndExit "$1"
                     else
                         BHMAS_trajectoryNumberUpToWhichToContinue=$2
                         shift
@@ -199,7 +191,7 @@ function ParseCommandLineOption()
                 BHMAS_continueThermalizationOption="TRUE"
                 if [[ ! ${2:-} =~ ^(-|$) ]]; then
                     if [[ ! $2 =~ ^[0-9]+$ ]];then
-                        __static__PrintOptionSpecificationErrorAndExit "$1"
+                        PrintOptionSpecificationErrorAndExit "$1"
                     else
                         BHMAS_trajectoryNumberUpToWhichToContinue=$2
                         shift
@@ -255,7 +247,7 @@ function ParseCommandLineOption()
                 BHMAS_accRateReportOption="TRUE"
                 if [[ ! ${2:-} =~ ^(-|$) ]]; then
                     if [[ ! $2 =~ ^[0-9]+$ ]];then
-                        __static__PrintOptionSpecificationErrorAndExit "$1"
+                        PrintOptionSpecificationErrorAndExit "$1"
                     else
                         BHMAS_accRateReportInterval=$2
                         shift
@@ -283,7 +275,7 @@ function ParseCommandLineOption()
                 BHMAS_completeBetasFileOption="TRUE"
                 if [[ ! ${2:-} =~ ^(-|$) ]]; then
                     if [[ ! $2 =~ ^[0-9]+$ ]];then
-                        __static__PrintOptionSpecificationErrorAndExit "$1"
+                        PrintOptionSpecificationErrorAndExit "$1"
                     else
                         BHMAS_numberOfChainsToBeInTheBetasFile=$2
                         shift
@@ -304,7 +296,7 @@ function ParseCommandLineOption()
                     elif [[ $2 =~ ^[0-9]\.[0-9]*$ ]]; then
                         BHMAS_betasToBeToggled+=( $(awk '{printf "%1.4f", $1}' <<< "$2") )
                     else
-                        __static__PrintOptionSpecificationErrorAndExit "${mutuallyExclusiveOptionsPassed[-1]}"
+                        PrintOptionSpecificationErrorAndExit "${mutuallyExclusiveOptionsPassed[-1]}"
                     fi
                     shift
                 done
@@ -323,16 +315,15 @@ function ParseCommandLineOption()
                 shift $# ;;
 
             * )
-                __static__PrintInvalidOptionErrorAndExit "$1" ;;
+                PrintInvalidOptionErrorAndExit "$1" ;;
         esac
     done
 
     if [ ${#mutuallyExclusiveOptionsPassed[@]} -gt 1 ]; then
-        cecho lr "\n The options"
+        listOfOptionsAsString=''
         for option in "${mutuallyExclusiveOptions[@]}"; do
-            cecho ly "   $option"
+            listOfOptionsAsString+="\n$(cecho -d lo "  ") $option"
         done
-        cecho lr " are mutually exclusive and cannot be combined! Aborting...\n"
-        exit -1
+        Fatal $BHMAS_fatalCommandLine "The following options are mutually exclusive and cannot be combined: $listOfOptionsAsString"
     fi
 }

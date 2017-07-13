@@ -5,14 +5,6 @@
 
 source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/CommonFunctionality.bash || exit $BHMAS_fatalBuiltin
 
-function __static__PrintInvalidOptionErrorAndExit()
-{
-    cecho lr "\n Invalid option " emph "$1" " specified! Run " B "BaHaMAS tests" uB " with " emph "--help" " to get further information. Aborting...\n"; exit -1
-}
-function __static__PrintOptionSpecificationErrorAndExit()
-{
-    cecho lr "\n The value of the option " emph "$1" " was not correctly specified! Aborting...\n"; exit -1
-}
 function __static__AddOptionToHelper()
 {
     local name description color lengthOption indentation
@@ -80,7 +72,7 @@ function ParseCommandLineOption()
                 if [[ $2 =~ ^[0-3]$ ]]; then
                     reportLevel=$2
                 else
-                    __static__PrintOptionSpecificationErrorAndExit $1
+                    PrintOptionSpecificationErrorAndExit $1
                 fi
                 shift 2 ;;
             -t | --runTests )
@@ -97,7 +89,7 @@ function ParseCommandLineOption()
                         done
                         testsToBeRun=( "${testsNameList[@]}" )
                     else
-                        __static__PrintOptionSpecificationErrorAndExit $2
+                        PrintOptionSpecificationErrorAndExit $2
                     fi
                 else
                     __static__PrintListOfTests
@@ -108,7 +100,7 @@ function ParseCommandLineOption()
                 cleanTestFolder='FALSE'
                 shift ;;
             * )
-                __static__PrintInvalidOptionErrorAndExit $1 ;;
+                PrintInvalidOptionErrorAndExit $1 ;;
         esac
     done
 }

@@ -115,10 +115,20 @@ function PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem()
 function PrintHelperAndExitIfUserAskedForIt()
 {
     if ElementInArray '--help' "$@"; then
-        PrintMainHelper; exit 0
+        PrintMainHelper; exit $BHMAS_successExitCode
     elif ElementInArray '--helpDatabase' "$@"; then
-        PrintDatabaseHelper; exit 0
+        PrintDatabaseHelper; exit $BHMAS_successExitCode
     else
         return 0
     fi
+}
+
+function PrintInvalidOptionErrorAndExit()
+{
+    Fatal $BHMAS_fatalCommandLine "Invalid option " emph "$1" " specified! Use the " emph "--help" " option to get further information."
+}
+
+function PrintOptionSpecificationErrorAndExit()
+{
+    Fatal $BHMAS_fatalCommandLine "The value of the option " emph "$1" " was not correctly specified (either " emph "forgotten" " or " emph " invalid" ")!"
 }

@@ -13,8 +13,7 @@
 function __static__CheckExistenceBetasFileAndAddEndOfLineAtTheEndIfMissing()
 {
     if [ ! -e $BHMAS_betasFilename ]; then
-        cecho lr "\n  File " emph "$BHMAS_betasFilename" " not found in $(pwd). Aborting...\n"
-        exit -1
+        Fatal $BHMAS_fatalFileNotFound "File " emph "$BHMAS_betasFilename" " not found in " emph "$(pwd)" "."
     else
         #Add a end of line at end of file if missing
         sed -i '$a\' "$BHMAS_betasFilename"
@@ -33,35 +32,29 @@ function __static__CheckFormatBetasFileEntry()
     case "$1" in
         integrationSteps )
             if [[ ! $2 =~ ^${integrationStepsRegex//\\/}$ ]]; then
-                cecho lr "\n Integration steps entry " emph "$2" " in " file "$BHMAS_betasFilename" " file does not match expected format! Aborting...\n"
-                exit -1
+                Fatal $BHMAS_fatalWrongBetasFile "Integration steps entry " emph "$2" " in " file "$BHMAS_betasFilename" " file does not match expected format!"
             fi ;;
         massPreconditioning )
             if [[ ! $2 =~ ^${massPreconditioningRegex//\\/}$ ]]; then
-                cecho lr "\n Mass preconditioning entry " emph "$2" " in " file "$BHMAS_betasFilename" " file does not match expected format! Aborting...\n"
-                exit -1
+                Fatal $BHMAS_fatalWrongBetasFile "Mass preconditioning entry " emph "$2" " in " file "$BHMAS_betasFilename" " file does not match expected format!"
             fi ;;
         resumeFrom )
             if [[ ! $2 =~ ^${resumeRegex//\\/}$ ]]; then
-                cecho lr "\n Resume from trajectory entry " emph "$2" " in " file "$BHMAS_betasFilename" " file does not match expected format! Aborting...\n"
-                exit -1
+                Fatal $BHMAS_fatalWrongBetasFile "Resume from trajectory entry " emph "$2" " in " file "$BHMAS_betasFilename" " file does not match expected format!"
             fi ;;
         statistics )
             if [[ ! $2 =~ ^${statisticsRegex//\\/}$ ]]; then
-                cecho lr "\n Goal statistics entry " emph "$2" " in " file "$BHMAS_betasFilename" " file does not match expected format! Aborting...\n"
-                exit -1
+                Fatal $BHMAS_fatalWrongBetasFile "Goal statistics entry " emph "$2" " in " file "$BHMAS_betasFilename" " file does not match expected format!"
             fi ;;
         trajectoryTime )
             if [[ ! $2 =~ ^${timesRegex//\\/}$ ]]; then
-                cecho lr "\n Trajectory time entry " emph "$2" " in " file "$BHMAS_betasFilename" " file does not match expected format! Aborting...\n"
-                exit -1
+                Fatal $BHMAS_fatalWrongBetasFile "Trajectory time entry " emph "$2" " in " file "$BHMAS_betasFilename" " file does not match expected format!"
             fi
             if [[ ! $2 =~ [1-9]+ ]]; then
-                cecho lr "\n Trajectory time equal to " emph "$2" " in " file "$BHMAS_betasFilename" " file is not allowed! Aborting...\n"
-                exit -1
+                Fatal $BHMAS_fatalWrongBetasFile "Trajectory time equal to " emph "$2" " in " file "$BHMAS_betasFilename" " file is not allowed!"
             fi ;;
         * )
-            cecho lr "\n Function " emph "$FUNCNAME" " wrongly called! Aborting...\n"; exit -1 ;;
+            Internal "Function " emph "$FUNCNAME" " wrongly called!" ;;
     esac
 }
 
@@ -69,8 +62,7 @@ function __static__CheckAndParseSingleLine()
 {
     local entry beta tmpSeed entriesToBeParsed
     if [[ ! $1 =~ ^${BHMAS_betaRegex//\\/}$ ]]; then
-        cecho lr "\n No " emph "beta value" " found at beginning of line in " file "$BHMAS_betasFilename" " file! Aborting...\n"
-        exit -1
+        Fatal $BHMAS_fatalWrongBetasFile "No " emph "beta value" " found at beginning of line in " file "$BHMAS_betasFilename" " file!"
     else
         beta="$1"
     fi
@@ -84,8 +76,7 @@ function __static__CheckAndParseSingleLine()
     done
     if [ $BHMAS_useMultipleChains == "TRUE" ]; then
         if [ "$tmpSeed" = '' ]; then
-            cecho lr "\n Seed missing in " file "$BHMAS_betasFilename" " file for " emph "beta = $beta" " Aborting...\n"
-            exit -1
+            Fatal $BHMAS_fatalWrongBetasFile "Seed missing in " file "$BHMAS_betasFilename" " file for " emph "beta = $beta" "."
         fi
         beta+="_${BHMAS_seedPrefix}${tmpSeed}${BHMAS_betaPostfix}"
     fi
@@ -98,12 +89,11 @@ function __static__CheckAndParseSingleLine()
                 entry=${1:1}
                 __static__CheckFormatBetasFileEntry integrationSteps "$entry"
                 if [ $(grep -o "-" <<< "$entry" | wc -l) -ne 1 ]; then
-                    cecho lr "\n Unable to use a different number of integration steps different than " emph "2" " for " emph "beta = ${beta%_*}" "! Aborting...\n"
-                    exit -1
+                    Fatal $BHMAS_fatalMissingFeature "Unable to use a different number of integration steps different than " emph "2" " for " emph "beta = ${beta%_*}" "!"
                 fi
                 BHMAS_scaleZeroIntegrationSteps["$beta"]=${entry%%-*}
                 BHMAS_scaleOneIntegrationSteps["$beta"]=${entry##*-}
-                #If generalized in future, something like  BHMAS_integrationSteps["$beta"]=${entry//-/}
+                #If generalized in future, something like  BHMAS_integrationSteps["$beta"]=( ${entry//-/} )
                 ;;
             mp* )
                 entry=${1:2}
@@ -122,8 +112,7 @@ function __static__CheckAndParseSingleLine()
                 __static__CheckFormatBetasFileEntry trajectoryTime "$entry"
                 BHMAS_timesPerTrajectory["$beta"]=$entry ;;
             * )
-                cecho lr "\n Invalid prefix found in " file "$BHMAS_betasFilename" " file for entry " emph "$1" "! Aborting...\n"
-                exit -1 ;;
+                Fatal $BHMAS_fatalWrongBetasFile "Invalid prefix found in " file "$BHMAS_betasFilename" " file for entry " emph "$1" "!" ;;
         esac
         shift
     done
@@ -151,26 +140,22 @@ function __static__CheckConsistencyInformationExtractedFromBetasFile()
 {
     #Check for missing entries which need to be there
     if [ ${#BHMAS_betaValues[@]} -eq 0 ]; then
-        cecho lr "\n  No beta values in betas file. Aborting...\n"
-        exit -1
+        Fatal $BHMAS_fatalWrongBetasFile "No beta values in betas file."
     fi
     for beta in "${BHMAS_betaValues[@]}"; do
         if ! KeyInArray "$beta" BHMAS_scaleZeroIntegrationSteps || ! KeyInArray "$beta" BHMAS_scaleOneIntegrationSteps; then
-            cecho lr "\n Integration steps information missing in " file "$BHMAS_betasFilename" " file for " emph "beta = ${beta%_*}" "! Aborting...\n"
-            exit -1
+            Fatal $BHMAS_fatalWrongBetasFile "Integration steps information missing in " file "$BHMAS_betasFilename" " file for " emph "beta = ${beta%_*}" "!"
         fi
     done
     if [ $BHMAS_useMultipleChains = 'TRUE' ]; then
         #Check whether same seed is provided multiple times for same beta
         if [ $(printf "%s\n" "${BHMAS_betaValues[@]%_*}" | sort -n | uniq -d | wc -l) -ne 0 ]; then
-            cecho lr "\n The " B "same" uB " seed was provided multiple times for the same beta in the " file "$BHMAS_betasFilename" " file! Aborting...\n"
-            exit -1
+            Fatal $BHMAS_fatalWrongBetasFile "The " emph "same seed" " was provided multiple times for the same beta in the " file "$BHMAS_betasFilename" " file!"
         fi
     else
         #Check whether same beta is provided multiple times
         if [ $(printf "%s\n" "${BHMAS_betaValues[@]}" | sort -n | uniq -d | wc -l) -ne 0 ]; then
-            cecho lr "\n The " B "same" uB " beta was provided multiple times in the " file "$BHMAS_betasFilename" " file! Aborting...\n"
-            exit -1
+            Fatal $BHMAS_fatalWrongBetasFile "The " emph "same beta" " was provided multiple times in the " file "$BHMAS_betasFilename" " file!"
         fi
     fi
 }
@@ -179,9 +164,8 @@ function __static__FillMissingTimesPerTrajectoryIfAnyIsSpecified()
 {
     if [ ${#BHMAS_timesPerTrajectory[@]} -eq 0 ]; then
         if [ $BHMAS_walltimeIsNeeded = 'TRUE' ] && [ "$BHMAS_walltime" = '' ]; then
-            cecho lr "\n The " emph "--walltime" " option was not given and "\
-                  emph "no time" " was provided in the " file "$BHMAS_betasFilename" " file! Aborting...\n"
-            exit -1
+            Fatal $BHMAS_fatalWrongBetasFile "The " emph "--walltime" " option was not given and "\
+                  emph "no time" " was provided in the " file "$BHMAS_betasFilename" " file!"
         else
             return 0
         fi
@@ -265,8 +249,7 @@ function __static__GetNonZeroFourDigitsRandomNumberDifferentFrom()
 function CompleteBetasFile()
 {
     if [ $BHMAS_useMultipleChains = 'FALSE' ]; then
-        cecho lr "\n Option " emph "--doNotUseMultipleChains" " not compatible with " emph "--completeBetasFile" " one. Aborting...\n"
-        exit -1
+        Fatal $BHMAS_fatalLogicError "Option " emph "--doNotUseMultipleChains" " not compatible with " emph "--completeBetasFile" " one."
     fi
     __static__CheckExistenceBetasFileAndAddEndOfLineAtTheEndIfMissing
     local line tmpFilename inlineComment beta seed

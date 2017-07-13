@@ -8,7 +8,7 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
     local variablesThatMustBeNotEmpty\
           variablesThatMustBeDeclared\
           variablesThatIfNotEmptyMustNotEndWithSlash\
-          index variable mustReturn
+          index variable mustReturn listOfVariablesAsString
     mustReturn='TRUE'
     variablesThatMustBeNotEmpty=( BHMAS_userEmail
                                   BHMAS_submitDiskGlobalPath
@@ -66,53 +66,58 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
         fi
     done
 
+    #Leave an empty line that I remove later if no error occurred (just to have better output
+    cecho ''
+    
     #Check variables values (those not checked have no requirement at this point)
     if [ "${BHMAS_coloredOutput:-}" != 'TRUE' ] && [ "${BHMAS_coloredOutput:-}" != 'FALSE' ]; then
         #Since in the following we use cecho which rely on the variable "BHMAS_coloredOutput",
         #if this was wrongly set, let us set it to 'FALSE' but still report on it
         BHMAS_coloredOutput='FALSE'
-        cecho lr "\n " B "BHMAS_coloredOutput" uB " variable must be set either to " ly "TRUE" lr " or to " ly "FALSE"
+        Error -n B emph "BHMAS_coloredOutput" uB " variable must be set either to " emph "TRUE" " or to " emph "FALSE"
         mustReturn='FALSE'
     fi
     if [ "${BHMAS_useRationalApproxFiles:-}" != 'TRUE' ] && [ "${BHMAS_useRationalApproxFiles:-}" != 'FALSE' ]; then
-        cecho lr "\n " B "BHMAS_useRationalApproxFiles" uB " variable must be set either to " ly "TRUE" lr " or to " ly "FALSE"
+        Error -n B emph "BHMAS_useRationalApproxFiles" uB " variable must be set either to " emph "TRUE" " or to " emph "FALSE"
         mustReturn='FALSE'
     fi
     for variable in BHMAS_walltime BHMAS_maximumWalltime; do
         if [ "${!variable:-}" != '' ] && [[ ! ${!variable} =~ ^([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]]; then
-            cecho lr "\n " B "$variable" uB " variable format invalid. Correct format: " ly "days-hours:min:sec" lr " or " ly "hours:min:sec"
+            Error -n B emph "$variable" uB " variable format invalid. Correct format: " emph "days-hours:min:sec" " or " emph "hours:min:sec"
             mustReturn='FALSE'
         fi
     done
     if [ "${BHMAS_GPUsPerNode:-}" != '' ] && [[ ! $BHMAS_GPUsPerNode =~ ^[1-9]+$ ]]; then
-        cecho lr "\n " B "BHMAS_GPUsPerNode" uB " variable format invalid. It has to be a " ly "positive integer" lr " number."
+        Error -n B emph "BHMAS_GPUsPerNode" uB " variable format invalid. It has to be a " emph "positive integer" " number."
         mustReturn='FALSE'
     fi
     if [ "${BHMAS_acceptanceColumn:-}" != '' ] && [[ ! $BHMAS_acceptanceColumn =~ ^[1-9]+$ ]]; then
-        cecho lr "\n " B "BHMAS_acceptanceColumn" uB " variable format invalid. It has to be a " ly "positive integer" lr " number."
+        Error -n B emph "BHMAS_acceptanceColumn" uB " variable format invalid. It has to be a " emph "positive integer" " number."
         mustReturn='FALSE'
     fi
 
     #If variables remained in arrays, print error
     if [ ${#variablesThatMustBeNotEmpty[@]} -ne 0 ]; then
-        cecho "\n " ly "The following variable(s) must be " B "set" uB " and " B "not empty" uB ":\n"
+        listOfVariablesAsString=''
         for variable in "${variablesThatMustBeNotEmpty[@]}"; do
-            cecho lo "   " B "$variable"
+            listOfVariablesAsString+="\n$(cecho -d lo " " B) $variable"
         done
+        Error -n "The following variable(s) must be " emph "set" " and " emph "not empty" ": $listOfVariablesAsString"
         mustReturn='FALSE'
     fi
     if [ ${#variablesThatMustBeDeclared[@]} -ne 0 ]; then
-        cecho "\n " ly "The following variable(s) must be " B "declared" uB ":\n"
+        listOfVariablesAsString=''
         for variable in "${variablesThatMustBeDeclared[@]}"; do
-            cecho lo "   " B "$variable"
+            listOfVariablesAsString+="\n$(cecho -d lo " " B) $variable"
         done
+        Error -n "The following variable(s) must be " emph "declared" ": $listOfVariablesAsString"
         mustReturn='FALSE'
     fi
     if [ ${#variablesThatIfNotEmptyMustNotEndWithSlash[@]} -ne 0 ]; then
-        cecho "\n " ly "The following variable(s) must " B "not end with '/'" uB ":\n"
         for variable in "${variablesThatIfNotEmptyMustNotEndWithSlash[@]}"; do
-            cecho lo "   " B "$variable"
+            listOfVariablesAsString+="\n$(cecho -d lo " " B) $variable"
         done
+        Error -n "The following variable(s) must " emph "not end with '/'" ": $listOfVariablesAsString"
         mustReturn='FALSE'
     fi
 
@@ -127,10 +132,9 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
 
     #Decide whether to return or to exit
     if [ $mustReturn = 'TRUE' ]; then
-        return
+        cecho -n '\e[1A'; return
     else
-        cecho lr "\n Please set the above variables properly and run " B "BaHaMAS" uB " again.\n"
-        exit -1
+        Fatal $BHMAS_fatalVariableUnset "Please set the above variables properly using the " emph "--setup" " option and run " B "BaHaMAS" uB " again."
     fi
 }
 
@@ -141,7 +145,7 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
 function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
 {
     local index variable option variablesThatMustBeNotEmpty jobsNeededVariables schedulerVariables\
-          neededFolders neededFiles rationalApproxFolder rationalApproxFiles
+          neededFolders neededFiles rationalApproxFolder rationalApproxFiles listOfVariablesAsString
     mustReturn='TRUE'
     jobsNeededVariables=(BHMAS_inputFilename  BHMAS_outputFilename  BHMAS_hmcGlobalPath  BHMAS_jobScriptPrefix  BHMAS_jobScriptFolderName)
     schedulerVariables=(BHMAS_GPUsPerNode  BHMAS_maximumWalltime  BHMAS_userEmail) #BHMAS_walltime can be empty here, we check later if user gave time in betas file!
@@ -168,7 +172,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
 
     #Check variables depending on BaHaMAS invocation
     if [ $BHMAS_submitOption = 'TRUE' ]; then
-        option="$(cecho "with the " B "--submit")"
+        option="$(cecho -d "with the " B "--submit" uB)"
         variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]}  ${schedulerVariables[@]}
                                        BHMAS_thermConfsGlobalPath )
         neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]:-} )
@@ -176,7 +180,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
         readonly BHMAS_walltimeIsNeeded='TRUE'
 
     elif [ $BHMAS_submitonlyOption = 'TRUE' ]; then
-        option="$(cecho "with the " B "--submitonly")"
+        option="$(cecho -d "with the " B "--submitonly" uB)"
         variablesThatMustBeNotEmpty+=( BHMAS_inputFilename
                                        BHMAS_jobScriptPrefix
                                        BHMAS_jobScriptFolderName
@@ -185,7 +189,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
         neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
 
     elif [ $BHMAS_thermalizeOption = 'TRUE' ]; then
-        option="$(cecho "with the " B "--thermalize")"
+        option="$(cecho -d "with the " B "--thermalize" uB)"
         variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
                                        BHMAS_thermConfsGlobalPath )
         neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]:-} )
@@ -193,14 +197,14 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
         readonly BHMAS_walltimeIsNeeded='TRUE'
 
     elif [ $BHMAS_continueOption = 'TRUE' ]; then
-        option="$(cecho "with the " B "--continue")"
+        option="$(cecho -d "with the " B "--continue" uB)"
         variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]} )
         neededFiles+=( ${rationalApproxFolder[@]:-} )
         neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
         readonly BHMAS_walltimeIsNeeded='TRUE'
 
     elif [ $BHMAS_continueThermalizationOption = 'TRUE' ]; then
-        option="$(cecho "with the " B "--continueThermalization")"
+        option="$(cecho -d "with the " B "--continueThermalization" uB)"
         variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
                                        BHMAS_thermConfsGlobalPath )
         neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]:-} )
@@ -208,30 +212,30 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
         readonly BHMAS_walltimeIsNeeded='TRUE'
 
     elif [ $BHMAS_liststatusOption = 'TRUE' ]; then
-        option="$(cecho "with the " B "--liststatus")"
+        option="$(cecho -d "with the " B "--liststatus" uB)"
         variablesThatMustBeNotEmpty+=( BHMAS_inputFilename
                                        BHMAS_outputFilename
                                        BHMAS_acceptanceColumn )
 
     elif [ $BHMAS_accRateReportOption = 'TRUE' ]; then
-        option="$(cecho "with the " B "--accRateReport")"
+        option="$(cecho -d "with the " B "--accRateReport" uB)"
         variablesThatMustBeNotEmpty+=( BHMAS_acceptanceColumn  BHMAS_outputFilename )
 
     elif [ $BHMAS_cleanOutputFilesOption = 'TRUE' ]; then
-        option="$(cecho "with the " B "--cleanOutputFiles")"
+        option="$(cecho -d "with the " B "--cleanOutputFiles" uB)"
         variablesThatMustBeNotEmpty+=( BHMAS_outputFilename )
 
     elif [ $BHMAS_completeBetasFileOption = 'TRUE' ]; then
-        option="$(cecho "with the " B "--completeBetasFile")"
+        option="$(cecho -d "with the " B "--completeBetasFile" uB)"
 
     elif [ $BHMAS_uncommentBetasOption = 'TRUE' ]; then
-        option="$(cecho "with the " B "--uncommentBetas")"
+        option="$(cecho -d "with the " B "--uncommentBetas" uB)"
 
     elif [ $BHMAS_commentBetasOption = 'TRUE' ]; then
-        option="$(cecho "with the " B "--commentBetas")"
+        option="$(cecho -d "with the " B "--commentBetas" uB)"
 
     elif [ $BHMAS_invertConfigurationsOption = 'TRUE' ]; then
-        option="$(cecho "with the " B "--invertConfigurations")"
+        option="$(cecho -d "with the " B "--invertConfigurations" uB)"
         variablesThatMustBeNotEmpty+=( BHMAS_jobScriptPrefix
                                        BHMAS_jobScriptFolderName
                                        BHMAS_inverterGlobalPath
@@ -239,14 +243,13 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
         neededFiles+=( "$BHMAS_inverterGlobalPath" )
 
     elif [ $BHMAS_databaseOption = 'TRUE' ]; then
-        option="$(cecho "with the " B "--dataBase")"
+        option="$(cecho -d "with the " B "--dataBase" uB)"
         variablesThatMustBeNotEmpty+=( BHMAS_inputFilename
                                        BHMAS_outputFilename
                                        BHMAS_acceptanceColumn
                                        BHMAS_databaseGlobalPath
                                        BHMAS_databaseFilename )
         neededFolders+=( "$BHMAS_databaseGlobalPath" )
-        neededFiles+=( "${BHMAS_databaseGlobalPath}/*$BHMAS_databaseFilename" )
 
     else
         option='without any mutually exclusive'
@@ -269,13 +272,12 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
 
     #If variables remained, print error otherwise check needed files/folders
     if [ ${#variablesThatMustBeNotEmpty[@]} -ne 0 ]; then
-        cecho "\n " lo "To run " B "BaHaMAS" uB " $option "\
-              lo "option, the following " ly "variable(s)" lo " must be " B "set" uB " and " B "not empty" uB ":\n"
+        listOfVariablesAsString=''
         for variable in "${variablesThatMustBeNotEmpty[@]}"; do
-            cecho ly "   " B "$variable"
+            listOfVariablesAsString+="\n$(cecho -d ly " " B) $variable"            
         done
-        cecho lr "\n Please set the above variables properly and run " B "BaHaMAS" uB " again.\n"
-        exit -1
+        Error "To run " B "BaHaMAS" uB " $option " "option, the following " emph "variable(s)" " must be " emph "set" " and " emph "not empty" ": $listOfVariablesAsString"
+        Fatal -n $BHMAS_fatalVariableUnset "Please set the above variables properly using the " emph "--setup" " option and run " B "BaHaMAS" uB " again."
     else
         for index in "${!neededFolders[@]}"; do
             if [ -d "${neededFolders[$index]}" ]; then
@@ -292,16 +294,15 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
 
     #If required files/folders were not found, print error and exit
     if [ ${#neededFolders[@]} -ne 0 ] || [ ${#neededFiles[@]} -ne 0 ]; then
-        cecho "\n " lo "To run " B "BaHaMAS" uB " $option "\
-              lo "option, the following specified " lb B "folder(s)" uB lo " or " wg "file(s)" lo " must " B "exist" uB ":\n"
+        listOfVariablesAsString=''
         for variable in ${neededFolders[@]+"${neededFolders[@]}"}; do
-            cecho lb "   " B "$variable"
+            listOfVariablesAsString+="\n$(cecho -d dir " " B) $variable"
         done
         for variable in ${neededFiles[@]+"${neededFiles[@]}"}; do
-            cecho wg "   $variable"
+            listOfVariablesAsString+="\n$(cecho -d file " ") $variable"
         done
-        cecho lr "\n Please check the path variables in the " B "BaHaMAS" uB " setup and run the program again.\n"
-        exit -1
+        Error "To run " B "BaHaMAS" uB " $option " "option, the following specified " B dir "folder(s)" uB " or " file "file(s)" " must " emph "exist" ": $listOfVariablesAsString"
+        Fatal $BHMAS_fatalFileNotFound -n "Please check the path variables in the " B "BaHaMAS" uB " setup and run the program again."
     fi
 }
 
@@ -310,19 +311,12 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
 function CheckBetaFoldersPathsVariables()
 {
     if [ $BHMAS_submitDirWithBetaFolders != "$(pwd)" ]; then
-        cecho "\n"\
-              lr " Constructed path to directory containing beta folders\n"\
-              ly "   $BHMAS_submitDirWithBetaFolders"\
-              lr " does not match the actual position"\
-              ly "   $(pwd)"\
-              lr " Aborting...\n"
-        exit -1
+        Fatal $BHMAS_fatalPathError "Constructed path to directory containing beta folders\n"\
+              dir "   $BHMAS_submitDirWithBetaFolders" "\ndoes not match the actual position\n"\
+              dir "   $(pwd)"
     fi
     if [ ! -d $BHMAS_runDirWithBetaFolders ]; then
-        cecho "\n"\
-              lr " Constructed path to directory containing beta folders on scratch\n"\
-              ly "   $BHMAS_runDirWithBetaFolders"\
-              lr " seems not to exist! Aborting...\n"
-        exit -1
+        Fatal $BHMAS_fatalPathError "Constructed path to directory containing beta folders on scratch\n"\
+              dir "   $BHMAS_runDirWithBetaFolders" "\nseems not to be a valid path!"
     fi
 }

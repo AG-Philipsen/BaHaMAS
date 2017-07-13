@@ -85,8 +85,8 @@ function MakeInteractiveSetupAndCreateUserDefinedVariablesFile()
     elif hash whiptail 2>/dev/null; then
         MakeInteractiveSetupUsingWhiptail
     else
-        cecho lr "\n Programs " emph "dialog" " and " emph "whitptail" " were not found, but they are required to run the " B "BaHaMAS setup" uB ".\n"\
-              " Consider to install any of them or read in the documentation how to make the BaHaMAS setup manually! Aborting...\n"; exit -1
+        Fatal $BHMAS_fatalRequirement "Programs " emph "dialog" " and " emph "whitptail" " were not found, but they are required to run the " emph "BaHaMAS setup" ".\n"\
+              "Consider to install any of them or read in the documentation how to make the BaHaMAS setup manually!"
     fi
 
     #Produce final setup file

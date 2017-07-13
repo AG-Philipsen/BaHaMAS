@@ -8,7 +8,7 @@ function __static__CheckAvailabilityOfProgram()
     if hash $1 2>/dev/null; then
         return 0
     else
-        cecho lr "Program " ly $1 lr " was not found, but it is required to run " B "BaHaMAS" uB ". Aborting...\n"; exit -1
+        Fatal $BHMAS_fatalRequirement "Program " emph "$1" " was not found, but it is required to run " B "BaHaMAS" uB "."
     fi
 }
 
@@ -51,13 +51,13 @@ function __static__CheckAboutProgram()
             fi
             ;;
         *)
-            cecho lr "Function " B "$FUNCNAME" uB " called with unexpected program! Aborting...\n"; exit -1 ;;
+            Internal "Function " B "$FUNCNAME" uB " called with unexpected program!" ;;
     esac
     if [[ ! $foundVersion =~ ^[0-9]([.0-9])* ]]; then
-        cecho ly B "\n WARNING" uB ": Unable to recover " lo "$program" ly " version, skipping check on minimum requirement!"
+        Warning "Unable to recover " emph "$program" " version, skipping check on minimum requirement!"
     else
         if __static__IsFoundVersionOlderThanRequired $requiredVersion $foundVersion; then
-            cecho lr "\n Version " ly "$foundVersion" lr " of " ly "$program" lr " was found but version " lg "$requiredVersion" lr " is required!"
+            Error "Version " emph "$foundVersion" " of " emph "$program" " was found but version " emph "$requiredVersion" " is required!"
             return 1
         fi
     fi
@@ -75,7 +75,7 @@ function CheckSystemRequirements()
         (( returnValue+=$? )) || true #'|| true' because of set -e option
     done
     if [ $returnValue -gt 0 ]; then
-        cecho lr "\n Please (maybe locally) install the required versions of the above programs and run " B "BaHaMAS" uB " again.\n"
-        exit -1
+        cecho -n "\e[1A"
+        Fatal $BHMAS_fatalRequirement "Please (maybe locally) install the required versions of the above programs and run " B "BaHaMAS" uB " again."
     fi
 }

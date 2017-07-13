@@ -25,9 +25,8 @@ function __static__CheckExistenceOfFunctionAndCallIt()
     if [ "$(type -t $nameOfTheFunction)" = 'function' ]; then
         $nameOfTheFunction
     else
-        cecho "\n " lr "Function " emph "$nameOfTheFunction" " for " emph "$BHMAS_clusterScheduler" " scheduler not found!"
-        cecho "\n " lr "Please provide an implementation following the " B "BaHaMAS" uB " documentation and source the file. Aborting...\n"
-        exit -1
+        Fatal $BHMAS_fatalMissingFeature "Function " emph "$nameOfTheFunction" " for " emph "$BHMAS_clusterScheduler" " scheduler not found!\n"\
+              "Please provide an implementation following the " B "BaHaMAS" uB " documentation and source the file."
     fi
 }
 

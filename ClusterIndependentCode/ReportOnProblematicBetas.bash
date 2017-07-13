@@ -13,6 +13,6 @@ function PrintReportForProblematicBeta()
             cecho lr "  - " B "$BETA"
         done
         cecho lr "===================================================================================\n"
-        exit -1
+        exit $BHMAS_fatalGeneric
     fi
 }

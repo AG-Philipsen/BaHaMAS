@@ -6,17 +6,15 @@
 function CheckWilsonStaggeredVariables()
 {
     if [ "$BHMAS_wilson" == "$BHMAS_staggered" ]; then
-        cecho lr "\n The variables " emph "BHMAS_wilson" " and " emph "BHMAS_staggered"\
-              " are both set to the same value (please check the position from where the script was run)! Aborting...\n"
-        exit -1
+        Fatal $BHMAS_fatalPathError "The variables " emph "BHMAS_wilson" " and " emph "BHMAS_staggered"\
+              " are both set to the same value (please check the position from where the script was run)!"
     fi
 }
 
 function __static__CheckPrefixExistence()
 {
     if [[ -z "${BHMAS_parameterVariableNames[$1]:+x}" ]]; then
-        cecho lr "\n Accessing " emph "BHMAS_parameterVariableNames" " array with not existing prefix " emph "$1" "! Aborting...\n"
-        exit -1
+        Internal "Accessing " emph "BHMAS_parameterVariableNames" " array with not existing prefix " emph "$1" "!"
     fi
 }
 
@@ -36,8 +34,7 @@ function __static__IsAnyParameterUnsetAmong()
 function __static__CheckNoArguments()
 {
     if [ $2 -eq 0 ]; then
-        cecho lr "\n Function " emph "$1" " called without needed arguments! Aborting...\n"
-        exit -1
+        Internal "Function " emph "$1" " called without needed arguments!"
     fi
 }
 
@@ -45,8 +42,7 @@ function __static__CheckUnsetParameters()
 {
     local functionName; functionName="$1"; shift
     if __static__IsAnyParameterUnsetAmong "$@"; then
-        cecho lr "\n Function " emph "$functionName" " called before extracting parameters! Aborting...\n"
-        exit -1
+        Internal "Function " emph "$functionName" " called before extracting parameters!"
     fi
 }
 
@@ -86,8 +82,7 @@ function __static__SetParametersPathAndString()
 function __static__ReadSingleParameterFromPath()
 {
     if [ $# -ne 2 ]; then
-        cecho lr "\n Function " emph "$FUNCNAME" " called with wrong number of parameters! Aborting...\n"
-        exit -1
+        Internal "Function " emph "$FUNCNAME" " called with wrong number of parameters!"
     fi
     local pathToBeSearchedIn prefixToBeUsed pieceOfPathWithParameter
     pathToBeSearchedIn="/$1/" #Add in front and back a "/" just to be general in the search
@@ -95,15 +90,13 @@ function __static__ReadSingleParameterFromPath()
     __static__CheckPrefixExistence "$prefixToBeUsed"
     case $(grep -o "/$prefixToBeUsed" <<< "$pathToBeSearchedIn" | wc -l) in
         0)
-            cecho lr "\n Unable to recover " emph "$prefixToBeUsed" " from the path " dir "$1" ". Aborting...\n"
-            exit -1 ;;
+            Fatal $BHMAS_fatalPathError "Unable to recover " emph "$prefixToBeUsed" " from the path " dir "$1" "." ;;
         1)
             pieceOfPathWithParameter="$(grep -o "/${prefixToBeUsed}[^/]*" <<< "$pathToBeSearchedIn")"
             declare -gr ${BHMAS_parameterVariableNames["$prefixToBeUsed"]}="${pieceOfPathWithParameter##*$prefixToBeUsed}"
             ;;
         *)
-            cecho lr "\n Prefix " emph "$prefixToBeUsed" " found several times in path " dir "$1" ". Aborting...\n"
-            exit -1 ;;
+            Fatal $BHMAS_fatalPathError "Prefix " emph "$prefixToBeUsed" " found several times in path " dir "$1" "." ;;
     esac
 }
 
@@ -121,8 +114,8 @@ function __static__CheckParametersExtractedFromPath()
         variableName+="[@]" #See NOTE above
         for value in ${!variableName}; do
             if [[ ! $value =~ ^${!variableRegex//\\/}$ ]]; then
-                cecho lr "\n Parameter " emph "$prefix" " extracted from the path not matching "\
-                      emph "${!variableRegex//\\/}" "! Aborting...\n"; exit -1
+                Fatal $BHMAS_fatalPathError "Parameter " emph "$prefix" " extracted from the path not matching "\
+                      emph "${!variableRegex//\\/}" "!"
             fi
         done
     done
@@ -137,8 +130,7 @@ function ReadParametersFromPathAndSetRelatedVariables()
     __static__CheckParametersExtractedFromPath "${BHMAS_parameterPrefixes[@]}"
     __static__SetParametersPathAndString
     if [ -z "${BHMAS_parametersString:+x}" ] || [ -z "${BHMAS_parametersPath:+x}" ]; then
-        cecho lr "\n Either " emph "BHMAS_parametersString" " or " emph "BHMAS_parametersPath" " unset or empty! Aborting...\n"
-        exit -1
+        Internal "Either " emph "BHMAS_parametersString" " or " emph "BHMAS_parametersPath" " unset or empty!"
     fi
 }
 
@@ -147,8 +139,7 @@ function CheckSingleOccurrenceInPath()
     local variable
     for variable in $@; do
         if [ $(grep -o "$variable" <<< "$(pwd)" | wc -l) -ne 1 ] ; then
-            cecho lr "\n The string " emph "$variable" " must occur " B "once and only once" uB " in the path! Aborting...\n"
-            exit 1
+            Fatal $BHMAS_fatalPathError "The string " emph "$variable" " must occur " B "once and only once" uB " in the path!"
         fi
     done
 }

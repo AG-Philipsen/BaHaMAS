@@ -49,6 +49,8 @@ source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/DatabaseParser.bash 
 source ${BaHaMAS_repositoryTopLevelPath}/Database/ProjectStatisticsDatabase.bash                  || exit $BHMAS_fatalBuiltin     #
 #---------------------------------------------------------------------------------------------------------------------------------#
 
+DeclareBaHaMASErrorCodes
+
 # User file to be sourced depending on test mode
 if [ -n "${BaHaMAS_testModeOn:+x}" ] && [ ${BaHaMAS_testModeOn} = 'TRUE' ]; then
     source ${BaHaMAS_repositoryTopLevelPath}/Tests/SetupUserVariables.bash || exit $BHMAS_fatalBuiltin
@@ -56,17 +58,16 @@ else
     fileToBeSourced="${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/UserSpecificVariables.bash"
     if ElementInArray '--setup' "$@"; then
         MakeInteractiveSetupAndCreateUserDefinedVariablesFile "$fileToBeSourced"
-        exit 0
+        exit $BHMAS_successExitCode
     else
         if [ ! -f "$fileToBeSourced" ]; then
-            printf "\n \e[91mBaHaMAS has not been configured, yet! Please, run BaHaMAS with the \e[93m--setup\e[91m option to configure it! Aborting...\n\n\e[0m"
-            exit -1
+            BHMAS_coloredOutput='FALSE' #This is needed in cecho but is a user variable! Declare it here manually
+            Fatal $BHMAS_fatalFileNotFound "BaHaMAS has not been configured, yet! Please, run BaHaMAS with the --setup option to configure it!"
         else
             source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/UserSpecificVariables.bash || exit $BHMAS_fatalBuiltin
         fi
     fi
 fi
-
 
 DeclareOutputRelatedGlobalVariables
 DeclarePathRelatedGlobalVariables
@@ -78,18 +79,22 @@ else
 fi
 DeclareBaHaMASGlobalVariables
 
-PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem BHMAS_specifiedCommandLineOptions "$@"
-PrintHelperAndExitIfUserAskedForIt "${BHMAS_specifiedCommandLineOptions[@]}"
-
-if ! ElementInArray '--jobstatus' "${BHMAS_specifiedCommandLineOptions[@]}"; then
+if [ $# -ne 0 ]; then
+    PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem BHMAS_specifiedCommandLineOptions "$@"
+    PrintHelperAndExitIfUserAskedForIt "${BHMAS_specifiedCommandLineOptions[@]}"
+fi
+    
+if ! ElementInArray '--jobstatus' ${BHMAS_specifiedCommandLineOptions[@]+"${BHMAS_specifiedCommandLineOptions[@]}"}; then
     CheckSystemRequirements
     CheckWilsonStaggeredVariables
     CheckUserDefinedVariablesAndDefineDependentAdditionalVariables
 fi
 
-[ $# -ne 0 ] && ParseCommandLineOption "${BHMAS_specifiedCommandLineOptions[@]}"
+if [ $# -ne 0 ]; then
+    ParseCommandLineOption "${BHMAS_specifiedCommandLineOptions[@]}"
+fi
 
-if ! ElementInArray '--jobstatus' "${BHMAS_specifiedCommandLineOptions[@]}"; then
+if ! ElementInArray '--jobstatus' ${BHMAS_specifiedCommandLineOptions[@]+"${BHMAS_specifiedCommandLineOptions[@]}"}; then
     CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase
 fi
 
@@ -131,9 +136,8 @@ elif [ $BHMAS_thermalizeOption = 'TRUE' ] || [ $BHMAS_continueThermalizationOpti
 
     if [ $BHMAS_useMultipleChains = 'FALSE' ]; then
         if [ $BHMAS_thermalizeOption = 'TRUE' ] || [ $BHMAS_continueThermalizationOption = 'TRUE' ]; then
-            cecho lr "\n Options " emph "--thermalize" " and " emph "--continueThermalization" " implemented ONLY"\
-                  " not combined not with " emph "--doNotUseMultipleChains" " option! Aborting...\n"
-        exit -1
+            Fatal $BHMAS_fatalCommandLine "Options " emph "--thermalize" " and " emph "--continueThermalization"\
+                  " implemented " emph "only not" " combined not with " emph "--doNotUseMultipleChains" " option!"
         fi
     fi
     #Here we fix the beta postfix just looking for thermalized conf from hot at the actual parameters (no matter at which beta);
@@ -158,7 +162,7 @@ elif [ $BHMAS_thermalizeOption = 'TRUE' ] || [ $BHMAS_continueThermalizationOpti
         AskUser "Check if everything is fine. Would you like to submit the jobs?"
         if UserSaidNo; then
             cecho lr "\n No job will be submitted!\n"
-            exit 0
+            exit $BHMAS_successExitCode
         fi
     elif [ $BHMAS_continueThermalizationOption = 'TRUE' ]; then
         ProcessBetaValuesForContinue
@@ -229,4 +233,4 @@ PrintReportForProblematicBeta
 
 cecho ''
 
-exit 0
+exit $BHMAS_successExitCode

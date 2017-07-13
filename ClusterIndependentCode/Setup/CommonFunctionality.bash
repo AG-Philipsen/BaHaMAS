@@ -5,8 +5,7 @@
 
 function AbortSetupProcess()
 {
-    cecho lr '\n BaHaMAS setup has been aborted! Consider to rerun it, if needed.\n'
-    exit -1
+    Fatal $BHMAS_fatalGeneric 'BaHaMAS setup has been aborted! Consider to rerun it, if needed.'
 }
 
 function SetColoredOutput()
@@ -37,14 +36,11 @@ function FireUpTheDialogBoxStoringResultAndActingAccordingly()
         $dialogCancel)
             $functionToBeCalledOnCancel ;;
         $dialogHelp)
-            cecho o "\n INTERNAL: Help button pressed, but unexpected! Aborting...\n"
-            exit -1 ;;
+            Internal "Help button pressed, but unexpected!" ;;
         $dialogExtra)
-            cecho o "\n INTERNAL: Extra button pressed, but unexpected! Aborting...\n"
-            exit -1 ;;
+            Internal "Extra button pressed, but unexpected!" ;;
         $dialogItemHelp)
-            cecho o "\n INTERNAL: Item-help button pressed, but unexpected! Aborting...\n"
-            exit -1 ;;
+            Internal "Item-help button pressed, but unexpected!" ;;
         $dialogEsc)
             AbortSetupProcess ;;
     esac

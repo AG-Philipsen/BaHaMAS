@@ -36,33 +36,31 @@ function FindConfigurationGlobalPathFromWhichToStartTheSimulation()
         elif [ $BHMAS_betaPostfix == "_continueWithNewChain" ]; then
             FOUND_CONFIGURATIONS=( $(find $BHMAS_thermConfsGlobalPath -regextype posix-extended -regex ".*/conf[.]${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA%_*}_fromConf[0-9]+.*") )
             if [ ${#FOUND_CONFIGURATIONS[@]} -eq 0 ]; then
-                cecho -n ly B "\n " U "WARNING" uU ":" uB " No valid starting configuration found for " emph "beta = ${BETA%_*}" "\n"\
-                      "          in " dir "$BHMAS_thermConfsGlobalPath" ".\n"\
-                      "          Looking for configuration with not exactely the same seed,\n"\
-                      "          matching " file "conf[.]${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA%%_*}_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/}_fromConf[0-9]+.*"
+                Warning "No valid starting configuration found for " emph "beta = ${BETA%_*}" "\n"\
+                        "in " dir "$BHMAS_thermConfsGlobalPath" ".\n"\
+                        "Looking for configuration with not exactely the same seed,\n"\
+                        "matching " file "conf[.]${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA%%_*}_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/}_fromConf[0-9]+.*" "...\e[s"
                 FOUND_CONFIGURATIONS=( $(find $BHMAS_thermConfsGlobalPath -regextype posix-extended -regex ".*/conf[.]${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA%%_*}_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/}_fromConf[0-9]+.*") )
                 if [ ${#FOUND_CONFIGURATIONS[@]} -eq 0 ]; then
-                    cecho lr " none found! Aborting...\n"
-                    exit -1
+                    cecho -n "\e[1A"; Fatal $BHMAS_fatalFileNotFound " none found!"
                 elif [ ${#FOUND_CONFIGURATIONS[@]} -eq 1 ]; then
-                    cecho lg " found a valid one!\n"
+                    cecho "\e[u\e[2A" lg " found a valid one!\n"
                     BHMAS_startConfigurationGlobalPath[$BETA]="${FOUND_CONFIGURATIONS[0]}"
                 else
-                    cecho -d o " found more than one! Which should be used?\n" lp
+                    cecho -d "\e[u\e[2A" o " found more than one! Which should be used?\n" lp
                     __static__PickUpStartingConfigurationAmongAvailableOnes
                 fi
             elif [ ${#FOUND_CONFIGURATIONS[@]} -eq 1 ]; then
                 BHMAS_startConfigurationGlobalPath[$BETA]="${FOUND_CONFIGURATIONS[0]}"
             else
-                cecho ly B "\n " U "WARNING" uU ":" uB " More than one valid starting configuration found for " emph "beta = ${BETA%%_*}" " in \n"\
-                      dir "          $BHMAS_thermConfsGlobalPath" ".\n          Which should be used?\n" lp
-                __static__PickUpStartingConfigurationAmongAvailableOnes
+                Warning "More than one valid starting configuration found for " emph "beta = ${BETA%%_*}" " in \n"\
+                        dir "$BHMAS_thermConfsGlobalPath" ".\nWhich should be used?"
+                cecho -d -n lp; __static__PickUpStartingConfigurationAmongAvailableOnes
             fi
         elif [ $BHMAS_betaPostfix == "_thermalizeFromConf" ]; then
             if [ $(find $BHMAS_thermConfsGlobalPath -regextype posix-extended -regex ".*/conf[.]${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA%_*}_fromConf[0-9]+.*" | wc -l) -ne 0 ]; then
-                cecho lr "\n It seems that there is already a thermalized configuration for " emph "beta = ${BETA%_*}" " in\n"\
-                      " " dir "$BHMAS_thermConfsGlobalPath" "! Aborting...\n"
-                exit -1
+                Fatal $BHMAS_fatalFileExists "It seems that there is already a thermalized configuration for " emph "beta = ${BETA%_*}" " in\n"\
+                      dir "$BHMAS_thermConfsGlobalPath" "!"
             fi
             FOUND_CONFIGURATIONS=( $(find $BHMAS_thermConfsGlobalPath -regextype posix-extended -regex ".*/conf[.]${BHMAS_parametersString}_${BHMAS_betaPrefix}${BHMAS_betaRegex//\\/}_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/}_fromHot[0-9]+.*") )
             #Here a 0 length of FOUND_CONFIGURATIONS is not checked since we rely on the fact that if this was the case we would have $BHMAS_betaPostfix == "_thermalizeFromHot" as set in JobHandler.bash (Thermalize case)
@@ -73,15 +71,13 @@ function FindConfigurationGlobalPathFromWhichToStartTheSimulation()
             done
             local CLOSEST_BETA=$(FindValueOfClosestElementInArrayToGivenValue ${BETA%%_*} "${!FOUND_CONFIGURATIONS_WITH_BETA_AS_KEY[@]}")
             if [ "$CLOSEST_BETA" = "" ]; then
-                cecho lr "\n Something went wrong in determinig the closest beta value to the actual one to pick up the correct thermalized from Hot configuration! Aborting...\n"
-                exit -1
+                Internal "Something went wrong determinig the closest beta value to the actual one to pick up the correct thermalized from Hot configuration!"
             fi
             BHMAS_startConfigurationGlobalPath[$BETA]="${FOUND_CONFIGURATIONS_WITH_BETA_AS_KEY[$CLOSEST_BETA]}"
         elif [ $BHMAS_betaPostfix == "_thermalizeFromHot" ]; then
             BHMAS_startConfigurationGlobalPath[$BETA]="notFoundHenceStartFromHot"
         else
-            cecho lr "\n Something really strange happened! BHMAS_betaPostfix set to unknown value " emph "BHMAS_betaPostfix = $BHMAS_betaPostfix" "! Aborting...\n"
-            exit -1
+            Internal "Something really strange happened! BHMAS_betaPostfix set to unknown value " emph "BHMAS_betaPostfix = $BHMAS_betaPostfix" "!"
         fi
     done
 }

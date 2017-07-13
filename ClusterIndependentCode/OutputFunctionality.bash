@@ -170,21 +170,21 @@ function UserSaidNo()
 
 function __static__PrintMessageToScreen()
 {
-    local typeOfMessage messageColor fullMessage finalString
-    typeOfMessage="$1"; exitCode="$2"; shift 2
+    local initialEndline typeOfMessage messageColor fullMessage finalString
+    typeOfMessage="$1"; exitCode="$2"; shift 2; finalString=''
+    initialEndline="\n"
+    [ "$1" = '-n' ] && initialEndline='' && shift
     case "$typeOfMessage" in
         WARNING )
-            messageColor='ly'
-            finalString='';;
+            messageColor='ly' ;;
         ERROR | FATAL )
-            messageColor='lr'
-            finalString='Aborting...' ;;
+            messageColor='lr' ;;
         * )
             messageColor='lo'
             finalString='Please contact the developers!' ;;
     esac
-    fullMessage="$(cecho $messageColor "${@//\n/\n ${typeOfMessage//?/ }  }")"
-    cecho "\n " $messageColor B U "${typeOfMessage}" uU ": " uB "${fullMessage}"
+    fullMessage="$(cecho $messageColor "${@//\\n/$'\n' ${typeOfMessage//?/ }  }")"
+    cecho "$initialEndline " $messageColor B U "${typeOfMessage}" uU ": " uB "${fullMessage}"
     if [ "$finalString" != '' ]; then
         cecho lr "\n ${typeOfMessage//?/ }  $finalString\n"
     else
@@ -212,7 +212,7 @@ function Fatal()
 
 function Internal()
 {
-    __static__PrintMessageToScreen 'INTERNAL' "$1" "${@:2}"
+    __static__PrintMessageToScreen 'INTERNAL' "$BHMAS_internal" "$@"
 }
 #-------------------------------------------------------------------------------#
 
