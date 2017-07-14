@@ -51,8 +51,7 @@ function __static__ExtractNumberOfTrajectoriesToBeDoneFromFile()
     filename="$1"
     numberOfTrajectories=$(sed -n 's/^.*hmcsteps=\([0-9]\+\)/\1/p' "$filename")
     if [ "$numberOfTrajectories" = '' ]; then
-        cecho "\n Number of trajectories to be done not present in input file " file "$filename" "! Aborting...\n"
-        exit -1
+        Fatal $BHMAS_fatalLogicError "Number of trajectories to be done not present in input file " file "$filename" "!"
     else
         printf "$numberOfTrajectories"
     fi

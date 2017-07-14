@@ -50,8 +50,7 @@ function ProduceInputFile_CL2QCD()
         if [ $BHMAS_chempot = "PiT" ]; then
             __static__AddToInputFile "chem_pot_im=0.523598775598299"
         else
-            cecho "\n" r " Unknown value of imaginary chemical potential for input file! Aborting...\n"
-            exit -1
+            Fatal $BHMAS_fatalValueError "Unknown value " emph "$BHMAS_chempot" " of imaginary chemical potential for input file!"
         fi
     fi
     #Information about solver and measurements
@@ -129,8 +128,7 @@ function ProduceInputFile_CL2QCD()
     if [ $BHMAS_useMultipleChains == "TRUE" ]; then
         local SEED_EXTRACTED_FROM_BETA="$(awk '{split($1, result, "_"); print substr(result[2],2)}' <<< "$betaValue")"
         if [[ ! $SEED_EXTRACTED_FROM_BETA =~ ^[[:digit:]]{4}$ ]] || [[ $SEED_EXTRACTED_FROM_BETA == "0000" ]]; then
-            cecho "\n" r " Seed not allowed to be put in inputfile for CL2QCD! Aborting...\n"
-            exit -1
+            Fatal $BHMAS_fatalValueError "Seed " emph "$SEED_EXTRACTED_FROM_BETA" " not allowed to be put in inputfile for CL2QCD!"
         else
             __static__AddToInputFile "host_seed=$SEED_EXTRACTED_FROM_BETA"
         fi

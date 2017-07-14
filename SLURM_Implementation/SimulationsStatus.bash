@@ -85,8 +85,7 @@ function ListSimulationsStatus_SLURM()
         local LOCAL_PARAMETERS_STRING=${LOCAL_PARAMETERS_PATH//\//_}
         LOCAL_PARAMETERS_STRING=${LOCAL_PARAMETERS_STRING:1}
     else
-        cecho "\e[31m Wrong invocation of ListSimulationsStatus_SLURM: Invalid number of arguments. Please investigate...exiting."
-        return
+        Internal "Wrong invocation of " emph "$FUNCNAME" ", invalid number of arguments!"
     fi
 
 
@@ -119,8 +118,7 @@ function ListSimulationsStatus_SLURM()
         elif [ ${#STATUS[@]} -eq 1 ]; then
             STATUS=${STATUS[0]}
         else
-            cecho lr B "\n " U "WARNING" uU ":" uB " There are more than one job with " emph "${LOCAL_PARAMETERS_STRING}" " and " emph "BETA=$BETA" " as parameters! This should not happen! Aborting...\n"
-            exit -1
+            Fatal $BHMAS_fatalLogicError "There are more than one job with " emph "${LOCAL_PARAMETERS_STRING}" " and " emph "beta = $BETA" " as parameters! This should not happen!"
         fi
 
         #----Constructing WORK_BETADIRECTORY, HOME_BETADIRECTORY, JOBSCRIPT_NAME, JOBSCRIPT_GLOBALPATH and INPUTFILE_GLOBALPATH---#

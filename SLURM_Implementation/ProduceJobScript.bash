@@ -58,7 +58,7 @@ function ProduceJobscript_CL2QCD()
             if UserSaidNo; then
                 cecho "\n" B lr "Exiting from job script creation process...\n"
                 rm -f $jobScriptGlobalPath
-                exit 0
+                exit $BHMAS_successExitCode
             fi
         fi
     fi
@@ -81,7 +81,7 @@ function ProduceJobscript_CL2QCD()
         __static__AddToJobscriptFile\
             "if [ ! -d \$dir${index} ]; then"\
             "  echo \"Could not find directory \\\"\$dir${index}\\\" for runs. Aborting...\"" \
-            "  exit 2" \
+            "  exit $BHMAS_fatalFileNotFound" \
             "fi" \
             ""
     done
@@ -98,13 +98,13 @@ function ProduceJobscript_CL2QCD()
         "#       of the exec. Copying it later does not guarantee that it is still the same..."\
         "echo \"Copy executable to beta directories in ${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}x.xxxx...\""
     for index in "${!betaValues[@]}"; do
-        __static__AddToJobscriptFile "rm -f \$dir${index}/$BHMAS_hmcFilename && cp -a $BHMAS_hmcGlobalPath \$dir${index} || exit 2"
+        __static__AddToJobscriptFile "rm -f \$dir${index}/$BHMAS_hmcFilename && cp -a $BHMAS_hmcGlobalPath \$dir${index} || exit $BHMAS_fatalBuiltin"
     done
     __static__AddToJobscriptFile "echo \"...done!\"" ""
     if [ "$BHMAS_submitDiskGlobalPath" != "$BHMAS_runDiskGlobalPath" ]; then
         __static__AddToJobscriptFile "#Copy inputfile from home to work directories..."
         for index in "${!betaValues[@]}"; do
-            __static__AddToJobscriptFile "mkdir -p \$workdir${index} && cp \$dir${index}/$BHMAS_inputFilename \$workdir${index}/$BHMAS_inputFilename.\$SLURM_JOB_ID || exit 2"
+            __static__AddToJobscriptFile "mkdir -p \$workdir${index} && cp \$dir${index}/$BHMAS_inputFilename \$workdir${index}/$BHMAS_inputFilename.\$SLURM_JOB_ID || exit $BHMAS_fatalBuiltin"
         done
         __static__AddToJobscriptFile "echo \"...done!\""
     fi
@@ -121,7 +121,7 @@ function ProduceJobscript_CL2QCD()
         "# Run jobs from different directories"
     for index in "${!betaValues[@]}"; do
         __static__AddToJobscriptFile\
-            "mkdir -p \$workdir${index} || exit 2"\
+            "mkdir -p \$workdir${index} || exit $BHMAS_fatalBuiltin"\
             "cd \$workdir${index}"\
             "pwd &"\
             "if hash mbuffer 2>/dev/null; then"\
@@ -141,7 +141,7 @@ function ProduceJobscript_CL2QCD()
         "# Terminating job manually to get an email in case of failure of any run"\
         "if [ \"\$ERROR_OCCURRED\" = \"TRUE\" ]; then"\
         "   printf \"\nTerminating job with non zero exit code... (\$(date))\n\""\
-        "   exit 255"\
+        "   exit $BHMAS_fatalGeneric"\
         "fi"\
         ""\
         "# Unset pipefail since not needed anymore"\
@@ -154,16 +154,16 @@ function ProduceJobscript_CL2QCD()
     if [ "$BHMAS_submitDiskGlobalPath" != "$BHMAS_runDiskGlobalPath" ]; then
         __static__AddToJobscriptFile "# Backup files"
         for index in "${!betaValues[@]}"; do
-            __static__AddToJobscriptFile "cd \$dir${index} || exit 2"
+            __static__AddToJobscriptFile "cd \$dir${index} || exit $BHMAS_fatalBuiltin"
             if [ $BHMAS_measurePbp = "TRUE" ]; then
-                __static__AddToJobscriptFile "cp \$workdir${index}/${BHMAS_outputFilename}_pbp.dat \$dir${index}/${BHMAS_outputFilename}_pbp.\$SLURM_JOB_ID || exit 2"
+                __static__AddToJobscriptFile "cp \$workdir${index}/${BHMAS_outputFilename}_pbp.dat \$dir${index}/${BHMAS_outputFilename}_pbp.\$SLURM_JOB_ID || exit $BHMAS_fatalBuiltin"
             fi
-            __static__AddToJobscriptFile "cp \$workdir${index}/$BHMAS_outputFilename \$dir${index}/$BHMAS_outputFilename.\$SLURM_JOB_ID || exit 2" ""
+            __static__AddToJobscriptFile "cp \$workdir${index}/$BHMAS_outputFilename \$dir${index}/$BHMAS_outputFilename.\$SLURM_JOB_ID || exit $BHMAS_fatalBuiltin" ""
         done
     fi
     __static__AddToJobscriptFile "# Remove executable"
     for index in "${!betaValues[@]}"; do
-        __static__AddToJobscriptFile "rm \$dir${index}/$BHMAS_hmcFilename || exit 2"
+        __static__AddToJobscriptFile "rm \$dir${index}/$BHMAS_hmcFilename || exit $BHMAS_fatalBuiltin"
     done
     __static__AddToJobscriptFile ""
     if [ $BHMAS_thermalizeOption = "TRUE" ] || [ $BHMAS_continueThermalizationOption = "TRUE" ]; then
@@ -172,7 +172,7 @@ function ProduceJobscript_CL2QCD()
             for index in "${!betaValues[@]}"; do
                 __static__AddToJobscriptFile\
                     "NUMBER_LAST_CONFIGURATION_IN_FOLDER=\$(ls \$workdir${index} | grep 'conf.[0-9]\+' | grep -o '[0-9]\+' | sort -V | tail -n1)" \
-                    "cp \$workdir${index}/conf.\${NUMBER_LAST_CONFIGURATION_IN_FOLDER} ${BHMAS_thermConfsGlobalPath}/conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${betaValues[${index}]%_*}_fromHot\$(sed 's/^0*//' <<< \"\$NUMBER_LAST_CONFIGURATION_IN_FOLDER\") || exit 2"
+                    "cp \$workdir${index}/conf.\${NUMBER_LAST_CONFIGURATION_IN_FOLDER} ${BHMAS_thermConfsGlobalPath}/conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${betaValues[${index}]%_*}_fromHot\$(sed 's/^0*//' <<< \"\$NUMBER_LAST_CONFIGURATION_IN_FOLDER\") || exit $BHMAS_fatalBuiltin"
             done
         elif [ $BHMAS_betaPostfix == "_thermalizeFromConf" ]; then
             for index in "${!betaValues[@]}"; do
@@ -180,7 +180,7 @@ function ProduceJobscript_CL2QCD()
                 #TODO: For the moment we assume 1000 tr. are done from hot. Better to avoid it
                 __static__AddToJobscriptFile\
                     "TRAJECTORIES_DONE_FROM_CONF=\$(( \$(sed 's/^0*//' <<< \"\$NUMBER_LAST_CONFIGURATION_IN_FOLDER\") - 1000 ))"\
-                    "cp \$workdir${index}/conf.\${NUMBER_LAST_CONFIGURATION_IN_FOLDER} ${BHMAS_thermConfsGlobalPath}/conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${betaValues[${index}]%_*}_fromConf\${TRAJECTORIES_DONE_FROM_CONF} || exit 2"
+                    "cp \$workdir${index}/conf.\${NUMBER_LAST_CONFIGURATION_IN_FOLDER} ${BHMAS_thermConfsGlobalPath}/conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${betaValues[${index}]%_*}_fromConf\${TRAJECTORIES_DONE_FROM_CONF} || exit $BHMAS_fatalBuiltin"
             done
         fi
     fi

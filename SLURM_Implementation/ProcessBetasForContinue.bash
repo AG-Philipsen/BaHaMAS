@@ -98,7 +98,7 @@ function __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAnd
         #Create in runBetaDirectory a folder named Trash_$(date) where to mv all the file produced after the traj. ${BHMAS_trajectoriesToBeResumedFrom[$betaValue]}
         local trashFolderName filename numberFromFile
         trashFolderName="$runBetaDirectory/Trash_$(date +'%F_%H%M%S')"
-        mkdir $trashFolderName || exit 2
+        mkdir $trashFolderName || exit $BHMAS_fatalBuiltin
         for filename in $(ls -1 $runBetaDirectory | sed -n "/^\(conf|prng\)[.][0-9]\+$/p"); do
             #Move to trash only 'conf.xxxxx' or 'prng.xxxxx' files with xxxxx larger than the resume from trajectory
             numberFromFile=$(sed 's/^0*//' <<< "${filename##*.}")
@@ -183,14 +183,12 @@ function __static__AddOptionsToInputFile()
 function __static__FindAndReplaceSingleOccurenceInFile()
 {
     if [ $# -ne 3 ]; then
-        cecho lr "\n The function " emph "$FUNCNAME" " has been wrongly called (" emph "3 arguments needed" ")! Aborting...\n"
-        exit -1
+        Internal "The function " emph "$FUNCNAME" " has been wrongly called (" emph "3 arguments needed" ")!"
     fi
     local filename stringToBeFound replaceString
     filename="$1"; stringToBeFound="$2"; replaceString="$3"
     if [ ! -f "$filename" ]; then
-        cecho lr "\n Error occurred in " emph "$FUNCNAME" ": file " file "$filename" " has not been found! Aborting...\n"
-        exit -1
+        Fatal $BHMAS_fatalFileNotFound "File " file "$filename" " has not been found!"
     elif [ $(grep -c "$stringToBeFound" $filename) -eq 0 ]; then
         cecho lr "\n The string " emph "$stringToBeFound" " has " emph "not been found" " in file "\
               file "${filename##$BHMAS_runDirWithBetaFolders/}" "! The value " emph "beta = $betaValue" " will be skipped!"
@@ -536,7 +534,7 @@ function ProcessBetaValuesForContinue_SLURM()
        AskUser "Check if the continue option did its job correctly. Would you like to submit the jobs?"
        if UserSaidNo; then
            cecho lr B "\n No jobs will be submitted.\n"
-           exit 0;
+           exit $BHMAS_successExitCode
        fi
     fi
     unset -v 'statusOfJobsContainingGivenBeta'

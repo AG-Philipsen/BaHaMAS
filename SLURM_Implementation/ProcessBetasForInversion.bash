@@ -8,14 +8,12 @@ function __static__ProduceSrunCommandsFileForInversionsPerBeta()
     local betaDirectory betaValue filename
     betaDirectory="$1"; betaValue="$2"; filename="$3"
     if [ "$BHMAS_chempot" != '0' ]; then
-        cecho lr "\n Inversion of configuration with nonzero chemical potential not allowed!\n"
-        exit -1
+        Fatal $BHMAS_fatalValueError "Inversion of configuration with nonzero chemical potential not allowed!"
     fi
 
     if [ $(($BHMAS_nspace*$BHMAS_nspace*$BHMAS_nspace*$BHMAS_ntime)) -lt $BHMAS_numberOfSourcesForCorrelators ]; then
-        cecho lr "\n Number of required sources bigger than available positions ("\
-              emph "$(($BHMAS_nspace*$BHMAS_nspace*$BHMAS_nspace*$BHMAS_ntime)) <= $BHMAS_numberOfSourcesForCorrelators" ")! Not allowed...\n"
-        exit -1
+        Fatal $BHMAS_fatalValueError "Number of required sources bigger than available positions ("\
+              emph "$(($BHMAS_nspace*$BHMAS_nspace*$BHMAS_nspace*$BHMAS_ntime)) <= $BHMAS_numberOfSourcesForCorrelators" ")!"
     fi
 
     ls $betaDirectory | grep "^conf\.[[:digit:]]\{5\}" | awk -v ns="$BHMAS_nspace" \

@@ -46,15 +46,18 @@ NR>1{
     }
 }
 END{
+    wrongVariable
+    success
+    failure
     if(skipEnd==1){
         if(printReport==1){printf "\n\033[38;5;9mCheck variables given to awk script, \"Accepted\" and/or \"TrajectoryNr\" label(s) not found in obsNames!!\033[0m\n\n"}
-        exit 2
+        exit wrongVariable
     }
     if(wrongLines==0){
         if(printReport==1){printf "\033[38;5;10m No wrong lines have been detected! The file seems to be correct!\033[0m\n\n"}
-        exit 0
+        exit success
     }else{
         if(printReport==1){printf "\n\033[38;5;9m In total \033[38;5;11m%d\033[38;5;9m wrong lines!\033[0m\n\n", wrongLines}
-        exit 1
+        exit failure
     }
 }

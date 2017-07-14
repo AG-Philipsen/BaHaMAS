@@ -16,10 +16,9 @@ readonly BHMAS_fatalFileNotFound=67
 readonly BHMAS_fatalFileExists=68
 readonly BHMAS_fatalWrongBetasFile=69
 readonly BHMAS_fatalCommandLine=70
+readonly BHMAS_fatalValueError=71
 readonly BHMAS_fatalVariableUnset=109
 readonly BHMAS_fatalRequirement=110
 readonly BHMAS_fatalLogicError=111
 readonly BHMAS_fatalGeneric=112
 readonly BHMAS_internal=113
-
-

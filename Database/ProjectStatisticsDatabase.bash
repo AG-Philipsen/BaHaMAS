@@ -128,22 +128,19 @@ function projectStatisticsDatabase()
         if [ "$FILENAME_GIVEN_AS_INPUT" = "" ]; then
             LATEST_DATABASE_FILE=$(ls $BHMAS_databaseGlobalPath | grep -E [0-9]{2}_[0-9]{2}_[0-9]{2}_$BHMAS_databaseFilename | sort -t "_" -k 1,1 -k 2,2 -k 3,3 | tail -n1)
             if [ "$LATEST_DATABASE_FILE" = "" ]; then
-                cecho lr "\n No older database versions found! Aborting...\n"
-                exit -1
+                Fatal $BHMAS_fatalFileNotFound "No older database versions found!"
             fi
             local PROJECT_DATABASE_FILE=$BHMAS_databaseGlobalPath/$LATEST_DATABASE_FILE
         else
             if [ ! f $FILENAME_GIVEN_AS_INPUT ]; then
-                cecho lr "\n File " file "$FILENAME_GIVEN_AS_INPUT" " does not exist! Aborting...\n"
-                exit -1
+                Fatal $BHMAS_fatalFileNotFound "File " file "$FILENAME_GIVEN_AS_INPUT" " does not exist!"
             fi
             local PROJECT_DATABASE_FILE=$FILENAME_GIVEN_AS_INPUT
         fi
     else
         if [ "$FILENAME_GIVEN_AS_INPUT" != "" ] ; then
             if [ ! -f $FILENAME_GIVEN_AS_INPUT ]; then
-                cecho lr "\n File " emph "$FILENAME_GIVEN_AS_INPUT" " does not exist! Aborting...\n"
-                exit -1
+                Fatal $BHMAS_fatalFileNotFound "File " emph "$FILENAME_GIVEN_AS_INPUT" " does not exist!"
             fi
             local FILE_WITH_DIRECTORIES=$FILENAME_GIVEN_AS_INPUT
         else
@@ -368,8 +365,7 @@ function projectStatisticsDatabase()
     if [ $UPDATE = "TRUE" ]; then
 
         if [ "$SLEEP_TIME" != "" ] && [ "$UPDATE_TIME" != "" ]; then
-            cecho lr "\n Values for both sleep time and update time are specified but are mutually exclusive. Please investigate! Aborting...\n"
-            exit -1
+            Internal "Values for both " emph "SLEEP_TIME" " and " emph "UPDATE_TIME" " are specified but it should not be the case!"
         fi
 
         local TEMPORARY_FILE_WITH_DIRECTORIES="${BHMAS_databaseGlobalPath}/temporaryFileWithDirectoriesForDatabaseUpdate.dat"
@@ -400,6 +396,10 @@ function projectStatisticsDatabase()
 
             [ "$FILE_WITH_DIRECTORIES" = "" ] && find $BHMAS_submitDiskGlobalPath/$BHMAS_projectSubpath -regextype grep -regex "$REGEX_STRING" -type d > $TEMPORARY_FILE_WITH_DIRECTORIES
             [ "$FILE_WITH_DIRECTORIES" != "" ] && cat $FILE_WITH_DIRECTORIES > $TEMPORARY_FILE_WITH_DIRECTORIES
+
+            if [ ! -s "$TEMPORARY_FILE_WITH_DIRECTORIES" ]; then
+                Fatal $BHMAS_fatalLogicError -n emph "No directory" " for the database update! Please check the given file or the folder structure!"
+            fi
 
             while read line
             do
@@ -435,11 +435,10 @@ function projectStatisticsDatabase()
             done < <(cat $TEMPORARY_FILE_WITH_DIRECTORIES)
 
             if [ ! -f $TEMPORARY_DATABASE_FILE ] || [ "$(wc -l < $TEMPORARY_DATABASE_FILE)" -eq 0 ]; then
-                cecho lr "\n After the database procedure, the database seems to be empty! Temporary files\n"\
-                      file "   $TEMPORARY_DATABASE_FILE" "\n"\
-                      file "   $TEMPORARY_FILE_WITH_DIRECTORIES\n"\
-                      " have been left for further investigation! Aborting...\n"
-                exit -1
+                Internal "After the database procedure, the database seems to be " emph "empty" "! Temporary files\n"\
+                         file "   $TEMPORARY_DATABASE_FILE" "\n"\
+                         file "   $TEMPORARY_FILE_WITH_DIRECTORIES\n"\
+                         "have been left for further investigation!"
             fi
 
             #Updating the content of PROJECT_DATABASE_FILE
@@ -545,6 +544,8 @@ green="\033[32m"
 blue="\033[38;5;45m"
 pink="\033[38;5;171m"
 bold="\033[1m"
+success=0
+failure=1
 
 string[0]= "\t\t" pink "                     Simulations on " bold " broken GPU"def pink": %s%s%4d " def "\n"
 string[1]= "\t\t" blue "  Simulations with" bold " too low acceptance" def blue " - " bold "last 1k" def blue ": %s%s%4d" def blue "  - %s%s%4d" def blue "  [  0%%,  %2d%% )  " def "\n"
@@ -570,7 +571,7 @@ printf string[8] , (simStuck>0     ? red : green)            , bold, simStuck
 printf string[9] , green                                     , bold, simFine
 printf string[10], (filesToBeCleaned>0 ? lightOrange : green), bold, filesToBeCleaned
 
-if(criticalSituation ==1){exit 1}else{exit 0}
+if (criticalSituation == 1) {exit failure} else {exit success}
         }' $PROJECT_DATABASE_FILE || exitCodeAwk=1
 
         if [ $exitCodeAwk -ne 0 ]; then
