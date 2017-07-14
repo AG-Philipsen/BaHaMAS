@@ -22,8 +22,9 @@
 # it wants to stop the commit.
 #-----------------------------------------------------------------------------#
 
-repositoryTopLevelPath="$(git rev-parse --show-toplevel)"
-source $repositoryTopLevelPath/Hooks/AuxiliaryFunctions.bash || exit 64
+BHMAS_repositoryTopLevelPath="$(git rev-parse --show-toplevel)"
+source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/ErrorCodes.bash || exit 64
+source ${BHMAS_repositoryTopLevelPath}/Hooks/AuxiliaryFunctions.bash || exit $BHMAS_fatalBuiltin
 
 #-----------------------------------------------------------------------------
 #Check for committer identity.

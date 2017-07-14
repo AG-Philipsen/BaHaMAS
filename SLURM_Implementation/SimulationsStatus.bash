@@ -334,7 +334,7 @@ function ColorBeta()
         return
     fi
 
-    awk -v obsColumns="${AUX1%?}" -v obsNames="${AUX2%?}" -f ${BaHaMAS_repositoryTopLevelPath}/SLURM_Implementation/CheckCorrectnessCl2qcdOutputFile.awk $OUTPUTFILE_GLOBALPATH
+    awk -v obsColumns="${AUX1%?}" -v obsNames="${AUX2%?}" -f ${BHMAS_repositoryTopLevelPath}/SLURM_Implementation/CheckCorrectnessCl2qcdOutputFile.awk $OUTPUTFILE_GLOBALPATH
     local ERROR_CODE=$?
 
     if [ $ERROR_CODE -eq 0 ]; then

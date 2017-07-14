@@ -7,10 +7,12 @@
 
 # Script to automatically set up symlinks for existing hooks.
 
-readonly repositoryTopLevelPath="$(git rev-parse --show-toplevel)"
-readonly hookGitFolder=$repositoryTopLevelPath/.git/hooks
-readonly hookDistributedFolder=$repositoryTopLevelPath/Hooks
-source $hookDistributedFolder/AuxiliaryFunctions.bash || exit 64
+readonly BHMAS_repositoryTopLevelPath="$(git rev-parse --show-toplevel)"
+readonly hookGitFolder=${repositoryTopLevelPath}/.git/hooks
+readonly hookDistributedFolder=${repositoryTopLevelPath}/Hooks
+
+source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/ErrorCodes.bash || exit 64
+source ${hookDistributedFolder}/AuxiliaryFunctions.bash || exit $BHMAS_fatalBuiltin
 
 cd $hookGitFolder
 

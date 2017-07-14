@@ -28,7 +28,7 @@ function PrintHookFailure() {
 function AbortCommit() {
     PrintHookFailure "$1"
     [ $# -gt 1 ] && $2
-    exit 1
+    exit $BHMAS_failureExitCode
 }
 
 #------------------------------------#

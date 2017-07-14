@@ -26,7 +26,7 @@ function __static__CreateParametersFolders()
 function __static__CreateRationalApproxFolderWithFiles()
 {
     mkdir -p "${testFolder}/Rational_Approximations"
-    cp "${BaHaMAS_testsFolderAuxFiles}/fakeApprox" "${testFolder}/Rational_Approximations/NfX_fakeApprox"
+    cp "${BHMAS_testsFolderAuxFiles}/fakeApprox" "${testFolder}/Rational_Approximations/NfX_fakeApprox"
 }
 function __static__CreateBetaFolder()
 {
@@ -47,13 +47,13 @@ function __static__AddStringToFirstLineBetasFile()
 }
 function __static__CopyAuxiliaryFileAtBetaFolderLevel()
 {
-    cp "${BaHaMAS_testsFolderAuxFiles}/$1" "${testFolder}${testParametersPath}/$2" || exit $BHMAS_fatalBuiltin
+    cp "${BHMAS_testsFolderAuxFiles}/$1" "${testFolder}${testParametersPath}/$2" || exit $BHMAS_fatalBuiltin
 }
 function __static__CopyAuxiliaryFilesToBetaFolder()
 {
     local file
     for file in "$@"; do
-        cp "${BaHaMAS_testsFolderAuxFiles}/${file}" "${testFolder}${testParametersPath}/${betaFolder}" || exit $BHMAS_fatalBuiltin
+        cp "${BHMAS_testsFolderAuxFiles}/${file}" "${testFolder}${testParametersPath}/${betaFolder}" || exit $BHMAS_fatalBuiltin
     done
 }
 function __static__CreateThermalizedConfigurationFolder()
@@ -72,7 +72,7 @@ function MakeTestPreliminaryOperations()
     __static__CreateParametersFolders
     cd "${testFolder}${testParametersPath}" || exit $BHMAS_fatalBuiltin
     #Always use completed file and then in case overwrite
-    cp "${BaHaMAS_testsFolderAuxFiles}/fakeBetas" "${testFolder}${testParametersPath}/betas"
+    cp "${BHMAS_testsFolderAuxFiles}/fakeBetas" "${testFolder}${testParametersPath}/betas"
 
     case "$1" in
         default | submit | submit-goal )
@@ -149,7 +149,7 @@ function MakeTestPreliminaryOperations()
             ;;
         database* )
             mkdir -p "${testFolder}/SimulationsOverview"
-            cp "${BaHaMAS_testsFolderAuxFiles}/fakeOverviewDatabase" "${testFolder}/SimulationsOverview/2222_01_01_OverviewDatabase"
+            cp "${BHMAS_testsFolderAuxFiles}/fakeOverviewDatabase" "${testFolder}/SimulationsOverview/2222_01_01_OverviewDatabase"
             if [[ $1 =~ update ]]; then
                 __static__CreateBetaFolder
                 __static__CopyAuxiliaryFilesToBetaFolder "fakeExecutable.123456.out" "fakeInput" "fakeOutput"
@@ -180,7 +180,7 @@ function RunBaHaMASInTestMode()
     printf "\n===============================\n" >> $logFile
     printf " $(date)\n" >> $logFile
     printf "===============================\n" >> $logFile
-    printf "Running test \"$testName\":\n    ${BaHaMAS_command} $@\n\n" >> $logFile
+    printf "Running test \"$testName\":\n    ${BHMAS_command} $@\n\n" >> $logFile
     # NOTE: Here we run BaHaMAS in subshell to exclude any potential variables conflict.
     #       Moreover we activate the test mode defining a variable before running it and
     #       we inhibit some commands in order to avoid job summission. Observe also that
@@ -191,7 +191,7 @@ function RunBaHaMASInTestMode()
     #       any interactve Y/N question of BaHaMAS and we do it answering always Y.
     (
         InhibitBaHaMASCommands "$testName"
-        BaHaMAS_testModeOn='TRUE' ${BaHaMAS_command} $@ < <(yes 'Y') >> $logFile 2>&1
+        BHMAS_testModeOn='TRUE' ${BHMAS_command} $@ < <(yes 'Y') >> $logFile 2>&1
     )
     if [ $? -eq 0 ]; then
         return 0
@@ -276,7 +276,7 @@ function PrintTestsReport()
 function DeleteAuxiliaryFilesAndFolders()
 {
     local name
-    cd "$BaHaMAS_testsFolder" || exit $BHMAS_fatalBuiltin
+    cd "$BHMAS_testsFolder" || exit $BHMAS_fatalBuiltin
     [ $reportLevel -eq 3 ] && cecho bb " In $(pwd):"
     for name in "${listOfAuxiliaryFilesAndFolders[@]}"; do
         if [ -d "$name" ]; then
@@ -286,7 +286,7 @@ function DeleteAuxiliaryFilesAndFolders()
         elif ls "$name" 1>/dev/null 2>&1; then
             cecho lr "   Error in $FUNCNAME: " emph "$name" " neither file or directory, leaving it!"; continue
         fi
-        [ $(pwd) = "$BaHaMAS_testsFolder" ] && rm -rf "$name"
+        [ $(pwd) = "$BHMAS_testsFolder" ] && rm -rf "$name"
     done
     cecho ''
 }

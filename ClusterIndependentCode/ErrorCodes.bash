@@ -7,8 +7,11 @@
 #      as everywhere else. So we can use them just sourcing the file also in
 #      the tests. It is fine because they are all just constants.
 
-#Variables for exit codes (between 64 and 113 http://tldp.org/LDP/abs/html/exitcodes.html)
+#Standard bash exit codes
 readonly BHMAS_successExitCode=0
+readonly BHMAS_failureExitCode=1
+
+#Variables for exit codes (between 64 and 113 http://tldp.org/LDP/abs/html/exitcodes.html)
 readonly BHMAS_fatalBuiltin=64
 readonly BHMAS_fatalPathError=65
 readonly BHMAS_fatalMissingFeature=66

@@ -26,16 +26,17 @@
 # commit.  The hook is allowed to edit the commit message file.
 #-----------------------------------------------------------------------------#
 
-repositoryTopLevelPath="$(git rev-parse --show-toplevel)"
-source $repositoryTopLevelPath/Hooks/AuxiliaryFunctions.bash || exit 64
+BHMAS_repositoryTopLevelPath="$(git rev-parse --show-toplevel)"
+source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/ErrorCodes.bash || exit 64
+source ${BHMAS_repositoryTopLevelPath}/Hooks/AuxiliaryFunctions.bash || exit $BHMAS_fatalBuiltin
 
 #Abort immediately on empty commit
 if IsCommitMessageEmpty "$1"; then
     AbortCommit "Committed aborted due to empty message!"
 fi
 #Store commit message in a file to allow user to resume and edit commit
-dotGitFolderPath="$repositoryTopLevelPath/.git"
-commitMessageFile="$dotGitFolderPath/COMMIT_MSG"
+dotGitFolderPath="${BHMAS_repositoryTopLevelPath}/.git"
+commitMessageFile="${dotGitFolderPath}/COMMIT_MSG"
 RemoveTrailingSpacesAtBeginOfFirstThreeLines "$1"
 RemoveTrailingSpacesAtEndOfEachLine "$1"
 AddEndOfLineAtEndOfFileIfMissing "$1"
@@ -74,4 +75,4 @@ if ! IsCommitMessageAMerge "$commitMessageFile" && ! IsCommitMessageARevert "$co
 fi
 
 #Remove commit file if not needed
-rm -f "$commitMessageFile" || exit 1
+rm -f "$commitMessageFile" || exit $BHMAS_failureExitCode

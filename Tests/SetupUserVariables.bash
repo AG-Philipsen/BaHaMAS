@@ -11,8 +11,8 @@ function DeclareOutputRelatedGlobalVariables()
 function DeclareUserDefinedGlobalVariablesForTests()
 {
     readonly BHMAS_userEmail="user@test.com"
-    readonly BHMAS_submitDiskGlobalPath="${BaHaMAS_repositoryTopLevelPath}/Tests"
-    readonly BHMAS_runDiskGlobalPath="${BaHaMAS_repositoryTopLevelPath}/Tests"
+    readonly BHMAS_submitDiskGlobalPath="${BHMAS_repositoryTopLevelPath}/Tests"
+    readonly BHMAS_runDiskGlobalPath="${BHMAS_repositoryTopLevelPath}/Tests"
     readonly BHMAS_GPUsPerNode=999
     readonly BHMAS_jobScriptFolderName="Jobscripts_TEST"
     readonly BHMAS_excludeNodesGlobalPath="${BHMAS_submitDiskGlobalPath}/ExcludeNodes_TEST"

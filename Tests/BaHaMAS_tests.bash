@@ -21,17 +21,17 @@ shopt -s extglob
 readonly BHMAS_coloredOutput='TRUE'
 
 #Retrieve information from git
-readonly BaHaMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"
-readonly BaHaMAS_command=${BaHaMAS_repositoryTopLevelPath}/BaHaMAS.bash
-readonly BaHaMAS_testsFolder=${BaHaMAS_repositoryTopLevelPath}/Tests
-readonly BaHaMAS_testsFolderAuxFiles=${BaHaMAS_testsFolder}/AuxiliaryFiles
+readonly BHMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"
+readonly BHMAS_command=${BHMAS_repositoryTopLevelPath}/BaHaMAS.bash
+readonly BHMAS_testsFolder=${BHMAS_repositoryTopLevelPath}/Tests
+readonly BHMAS_testsFolderAuxFiles=${BHMAS_testsFolder}/AuxiliaryFiles
 
 #Load needed files
-source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/ErrorCodes.bash           || exit $BHMAS_fatalBuiltin
-source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/OutputFunctionality.bash  || exit $BHMAS_fatalBuiltin
-source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/UtilityFunctions.bash     || exit $BHMAS_fatalBuiltin
-source ${BaHaMAS_testsFolder}/AuxiliaryFunctions.bash              || exit $BHMAS_fatalBuiltin
-source ${BaHaMAS_testsFolder}/CommandLineParser.bash               || exit $BHMAS_fatalBuiltin
+source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/ErrorCodes.bash           || exit $BHMAS_fatalBuiltin
+source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/OutputFunctionality.bash  || exit $BHMAS_fatalBuiltin
+source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/UtilityFunctions.bash     || exit $BHMAS_fatalBuiltin
+source ${BHMAS_testsFolder}/AuxiliaryFunctions.bash              || exit $BHMAS_fatalBuiltin
+source ${BHMAS_testsFolder}/CommandLineParser.bash               || exit $BHMAS_fatalBuiltin
 
 #Helper has priority
 if ElementInArray '-h' "$@" || ElementInArray '--help' "$@"; then
@@ -47,8 +47,8 @@ testsFailed=0
 whichFailed=()
 declare -A availableTests=()
 declare -a testsToBeRun=() #To keep tests in order and make user decide which to run
-readonly testFolder="${BaHaMAS_testsFolder}/StaggeredFakeProject"
-readonly logFile="${BaHaMAS_testsFolder}/Tests.log"
+readonly testFolder="${BHMAS_testsFolder}/StaggeredFakeProject"
+readonly logFile="${BHMAS_testsFolder}/Tests.log"
 readonly testParametersString='Nf2_mui0_mass0050_nt6_ns18'
 readonly testParametersPath="/${testParametersString//_/\/}"
 readonly betaFolder='b5.1111_s3333_continueWithNewChain'

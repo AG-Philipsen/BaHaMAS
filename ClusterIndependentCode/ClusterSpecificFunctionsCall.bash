@@ -5,17 +5,17 @@
 
 #------------------------------------------------------------------------------------------------------------------------------#
 # The following source commands could fail since the file for the cluster scheduler could not be there, then suppress errors   #
-source ${BaHaMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/ProduceJobScript.bash           2>/dev/null  #
-source ${BaHaMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/ProduceInverterJobScript.bash   2>/dev/null  #
-source ${BaHaMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/CommonFunctionality.bash        2>/dev/null  #
-source ${BaHaMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/ProduceInputFile.bash           2>/dev/null  #
-source ${BaHaMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/ProduceFilesForEachBeta.bash    2>/dev/null  #
-source ${BaHaMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/ProcessBetasForSubmitOnly.bash  2>/dev/null  #
-source ${BaHaMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/ProcessBetasForContinue.bash    2>/dev/null  #
-source ${BaHaMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/ProcessBetasForInversion.bash   2>/dev/null  #
-source ${BaHaMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/JobsSubmission.bash             2>/dev/null  #
-source ${BaHaMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/JobsStatus.bash                 2>/dev/null  #
-source ${BaHaMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/SimulationsStatus.bash          2>/dev/null  #
+source ${BHMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/ProduceJobScript.bash           2>/dev/null  #
+source ${BHMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/ProduceInverterJobScript.bash   2>/dev/null  #
+source ${BHMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/CommonFunctionality.bash        2>/dev/null  #
+source ${BHMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/ProduceInputFile.bash           2>/dev/null  #
+source ${BHMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/ProduceFilesForEachBeta.bash    2>/dev/null  #
+source ${BHMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/ProcessBetasForSubmitOnly.bash  2>/dev/null  #
+source ${BHMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/ProcessBetasForContinue.bash    2>/dev/null  #
+source ${BHMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/ProcessBetasForInversion.bash   2>/dev/null  #
+source ${BHMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/JobsSubmission.bash             2>/dev/null  #
+source ${BHMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/JobsStatus.bash                 2>/dev/null  #
+source ${BHMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/SimulationsStatus.bash          2>/dev/null  #
 #------------------------------------------------------------------------------------------------------------------------------#
 
 function __static__CheckExistenceOfFunctionAndCallIt()
