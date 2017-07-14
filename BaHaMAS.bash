@@ -28,6 +28,7 @@ set -euo pipefail
 #---------------------------------------------------------------------------------------------------------------------------------#
 # Load auxiliary bash files that will be used.                                                                                    #
 readonly BaHaMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"                      #
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/ErrorCodes.bash                   || exit $BHMAS_fatalBuiltin     #
 source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/Setup/Setup.bash                  || exit $BHMAS_fatalBuiltin     #
 source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/SystemRequirements.bash           || exit $BHMAS_fatalBuiltin     #
 source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/FindClusterScheduler.bash         || exit $BHMAS_fatalBuiltin     #
@@ -48,8 +49,6 @@ source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/MainParser.bash     
 source ${BaHaMAS_repositoryTopLevelPath}/CommandLineParsers/DatabaseParser.bash                   || exit $BHMAS_fatalBuiltin     #
 source ${BaHaMAS_repositoryTopLevelPath}/Database/ProjectStatisticsDatabase.bash                  || exit $BHMAS_fatalBuiltin     #
 #---------------------------------------------------------------------------------------------------------------------------------#
-
-DeclareBaHaMASErrorCodes
 
 # User file to be sourced depending on test mode
 if [ -n "${BaHaMAS_testModeOn:+x}" ] && [ ${BaHaMAS_testModeOn} = 'TRUE' ]; then

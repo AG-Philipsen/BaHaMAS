@@ -27,6 +27,7 @@ readonly BaHaMAS_testsFolder=${BaHaMAS_repositoryTopLevelPath}/Tests
 readonly BaHaMAS_testsFolderAuxFiles=${BaHaMAS_testsFolder}/AuxiliaryFiles
 
 #Load needed files
+source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/ErrorCodes.bash           || exit $BHMAS_fatalBuiltin
 source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/OutputFunctionality.bash  || exit $BHMAS_fatalBuiltin
 source ${BaHaMAS_repositoryTopLevelPath}/ClusterIndependentCode/UtilityFunctions.bash     || exit $BHMAS_fatalBuiltin
 source ${BaHaMAS_testsFolder}/AuxiliaryFunctions.bash              || exit $BHMAS_fatalBuiltin
@@ -131,8 +132,7 @@ for testName in "${testsToBeRun[@]}"; do
         MakeTestPreliminaryOperations "$testName"
         RunTest "$testName" "${availableTests[$testName]}"
     else
-        cecho lr "\n Test " emph "$testName" " not found among availableTests! Aborting...\n"
-        exit -1
+        Fatal $BHMAS_fatalLogicError "Test " emph "$testName" " not found among availableTests!"
     fi
     CleanTestsEnvironmentForFollowingTest "$testName"
 done && unset -v 'testName'

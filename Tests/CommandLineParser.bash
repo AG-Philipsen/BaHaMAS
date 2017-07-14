@@ -65,7 +65,7 @@ function ParseCommandLineOption()
         case $1 in
             -h | --help )
                 __static__PrintHelper
-                exit 0
+                exit $BHMAS_successExitCode
                 shift ;;
 
             -r | --reportLevel )
@@ -83,7 +83,7 @@ function ParseCommandLineOption()
                         for number in "${testsNumericList[@]}"; do
                             (( number-- ))
                             if [ $number -ge ${#testsToBeRun[@]} ]; then
-                                cecho lr "\n Specified tests numbers " emph "$2" " not available! Aborting...\n"; exit -1
+                                Fatal $BHMAS_fatalCommandLine "Specified tests numbers " emph "$2" " not available!"
                             fi
                             testsNameList+=( "${testsToBeRun[$number]}" )
                         done
@@ -93,7 +93,7 @@ function ParseCommandLineOption()
                     fi
                 else
                     __static__PrintListOfTests
-                    exit 0
+                    exit $BHMAS_successExitCode
                 fi
                 shift 2 ;;
             -l | --doNotCleanTestFolder )

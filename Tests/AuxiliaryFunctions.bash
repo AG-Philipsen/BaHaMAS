@@ -238,8 +238,7 @@ function CleanTestsEnvironmentForFollowingTest()
         mkdir "${bigTrash}/${trashFolderName}" || exit $BHMAS_fatalBuiltin
         mv !("$bigTrash") "${bigTrash}/${trashFolderName}/." || exit $BHMAS_fatalBuiltin
     else
-        cecho lr "Folder " dir "$(pwd)" " empty but it should not be the case! Aborting...\n"
-        exit -1
+        Internal "Folder " dir "$(pwd)" " empty but it should not be the case!"
     fi
 }
 
