@@ -23,13 +23,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-### Logo
+### Logo and Images
 
     Copyright (c)  2017  Aurora Somaglia, Alessandro Sciarra
 
-All rights on the BaHaMAS [logo] are reserved. Feel free to contact us if you need
-to make any use of it.
+All rights on the BaHaMAS [logo] and on the other images are reserved.
+Feel free to contact us if you need to make any use of them.
 
 [//]: #
 
-   [logo]: <https://github.com/AG-Philipsen/BaHaMAS/blob/images/Logo.png?raw=true> 
+   [logo]: <https://github.com/AG-Philipsen/BaHaMAS/blob/images/Logo.png?raw=true>

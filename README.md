@@ -43,7 +43,7 @@ Being written in bash, `BaHaMAS` does not need to be compiled or installed. Once
 
 License
 ----
-| Code | Logo |
+| Code | Logo and Images |
 | :--: | :--: |
 |[MIT](https://github.com/AxelKrypton/BaHaMAS/blob/master/LICENSE.md)| All rights are reserved|
 
