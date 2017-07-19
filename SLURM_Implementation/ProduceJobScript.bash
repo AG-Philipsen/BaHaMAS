@@ -171,16 +171,16 @@ function ProduceJobscript_CL2QCD()
         if [ $BHMAS_betaPostfix == "_thermalizeFromHot" ]; then
             for index in "${!betaValues[@]}"; do
                 __static__AddToJobscriptFile\
-                    "NUMBER_LAST_CONFIGURATION_IN_FOLDER=\$(ls \$workdir${index} | grep 'conf.[0-9]\+' | grep -o '[0-9]\+' | sort -V | tail -n1)" \
-                    "cp \$workdir${index}/conf.\${NUMBER_LAST_CONFIGURATION_IN_FOLDER} ${BHMAS_thermConfsGlobalPath}/conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${betaValues[${index}]%_*}_fromHot\$(sed 's/^0*//' <<< \"\$NUMBER_LAST_CONFIGURATION_IN_FOLDER\") || exit $BHMAS_fatalBuiltin"
+                    "NUMBER_LAST_CONFIGURATION_IN_FOLDER=\$(ls \$workdir${index} | grep '${BHMAS_configurationPrefix}[0-9]\+' | grep -o '[0-9]\+' | sort -V | tail -n1)" \
+                    "cp \$workdir${index}/${BHMAS_configurationPrefix//\\/}\${NUMBER_LAST_CONFIGURATION_IN_FOLDER} ${BHMAS_thermConfsGlobalPath}/${BHMAS_configurationPrefix//\\/}${BHMAS_parametersString}_${BHMAS_betaPrefix}${betaValues[${index}]%_*}_fromHot\$(sed 's/^0*//' <<< \"\$NUMBER_LAST_CONFIGURATION_IN_FOLDER\") || exit $BHMAS_fatalBuiltin"
             done
         elif [ $BHMAS_betaPostfix == "_thermalizeFromConf" ]; then
             for index in "${!betaValues[@]}"; do
-                __static__AddToJobscriptFile "NUMBER_LAST_CONFIGURATION_IN_FOLDER=\$(ls \$workdir${index} | grep 'conf.[0-9]\+' | grep -o '[0-9]\+' | sort -V | tail -n1)"
+                __static__AddToJobscriptFile "NUMBER_LAST_CONFIGURATION_IN_FOLDER=\$(ls \$workdir${index} | grep '${BHMAS_configurationPrefix}[0-9]\+' | grep -o '[0-9]\+' | sort -V | tail -n1)"
                 #TODO: For the moment we assume 1000 tr. are done from hot. Better to avoid it
                 __static__AddToJobscriptFile\
                     "TRAJECTORIES_DONE_FROM_CONF=\$(( \$(sed 's/^0*//' <<< \"\$NUMBER_LAST_CONFIGURATION_IN_FOLDER\") - 1000 ))"\
-                    "cp \$workdir${index}/conf.\${NUMBER_LAST_CONFIGURATION_IN_FOLDER} ${BHMAS_thermConfsGlobalPath}/conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${betaValues[${index}]%_*}_fromConf\${TRAJECTORIES_DONE_FROM_CONF} || exit $BHMAS_fatalBuiltin"
+                    "cp \$workdir${index}/${BHMAS_configurationPrefix//\\/}\${NUMBER_LAST_CONFIGURATION_IN_FOLDER} ${BHMAS_thermConfsGlobalPath}/${BHMAS_configurationPrefix//\\/}${BHMAS_parametersString}_${BHMAS_betaPrefix}${betaValues[${index}]%_*}_fromConf\${TRAJECTORIES_DONE_FROM_CONF} || exit $BHMAS_fatalBuiltin"
             done
         fi
     fi

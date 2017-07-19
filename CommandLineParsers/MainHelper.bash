@@ -84,11 +84,11 @@ function PrintMainHelper()
     __static__AddOptionToHelper -e "-c[=#] | --continue[=#]"   "Unfinished jobs will be continued doing the nr. of measurements specified in the input"\
                                 "file. If a number is specified, jobs will be continued up to the specified number."\
                                 "$(cecho "To resume a simulation from a given trajectory, add " bc "r[number]" $helperColor " in the betasfile.")"\
-                                "$(cecho "Use " bc "rlast" $helperColor " in the betasfile to resume a simulation from the last saved " p "conf.[0-9]+" $helperColor " file.")"
+                                "$(cecho "Use " bc "rlast" $helperColor " in the betasfile to resume a simulation from the last saved " p "${BHMAS_configurationPrefix//\\/}[0-9]+" $helperColor " file.")"
     __static__AddOptionToHelper -e "-C[=#] | --continueThermalization[=#]"  "Unfinished thermalizations will be continued doing the nr. of measurements specified in the"\
                                 "input file. If a number is specified, thermalizations will be continued up to the specified"\
                                 "$(cecho "number. To resume a thermalization from a given trajectory, add " bc "r[number]" $helperColor " in the betasfile.")"\
-                                "$(cecho "Use " bc "rlast" $helperColor " in the betasfile to resume a thermalization from the last saved " p "conf.[0-9]+" $helperColor " file.")"
+                                "$(cecho "Use " bc "rlast" $helperColor " in the betasfile to resume a thermalization from the last saved " p "${BHMAS_configurationPrefix//\\/}[0-9]+" $helperColor " file.")"
     __static__AddOptionToHelper -e "-j | --jobstatus" "An overview on the queued jobs will be given"\
                                 "$(cecho B "Secondary options" uB ": " $mutuallyExclusiveColor "-u | --user" $helperColor " to get information about a different user")"\
                                 "$(cecho "                   " $mutuallyExclusiveColor "-a | --all" $helperColor " to display all queued jobs on the given partition, if specified")"\

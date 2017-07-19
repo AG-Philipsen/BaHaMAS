@@ -134,7 +134,7 @@ function ProduceInverterJobscript_CL2QCD()
             "    fi"\
             "    if [ \$? -ne 0 ]; then"\
             "        printf \"\nError occurred in simulation at b${betasForJobScript[$INDEX]%_*}.\n\""\
-            "        CONFIGURATION_$INDEX=\$(grep -o \"conf.[[:digit:]]\{5\}\" <<< \"\$line\")"\
+            "        CONFIGURATION_$INDEX=\$(grep -o \"${BHMAS_configurationPrefix}[[:digit:]]\{5\}\" <<< \"\$line\")"\
             "        CORRELATOR_POSTFIX_$INDEX=\$(grep -o \"_[[:digit:]]\+_[[:digit:]]\+_[[:digit:]]\+_[[:digit:]]\+_corr\"  <<< \"\$line\")"\
             "        echo \$CONFIGURATION_$INDEX\$CORRELATOR_POSTFIX_$INDEX >> \$dir$INDEX/failed_inversions_tmp_file"\
             "    fi"\

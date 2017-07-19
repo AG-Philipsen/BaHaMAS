@@ -64,7 +64,7 @@ function __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAnd
     if KeyInArray $betaValue BHMAS_trajectoriesToBeResumedFrom; then
         #If the user wishes to resume from the last avialable trajectory, then find here which number is "last"
         if [ ${BHMAS_trajectoriesToBeResumedFrom[$betaValue]} = "last" ]; then
-            BHMAS_trajectoriesToBeResumedFrom[$betaValue]=$(ls -1 $runBetaDirectory | sed -n "s/^conf[.]0*\([1-9][0-9]*\)$/\1/p" | sort -n | tail -n1)
+            BHMAS_trajectoriesToBeResumedFrom[$betaValue]=$(ls -1 $runBetaDirectory | sed -n 's/^'${BHMAS_configurationPrefix}'0*\([1-9][0-9]*\)$/\1/p' | sort -n | tail -n1)
             if [[ ! ${BHMAS_trajectoriesToBeResumedFrom[$betaValue]} =~ ^[0-9]+$ ]]; then
                 cecho lr "\n Unable to find " emph "last configuration" " to resume from!\n The value " emph "beta = $betaValue" " will be skipped!"
                 BHMAS_problematicBetaValues+=( $betaValue )
@@ -77,7 +77,7 @@ function __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAnd
         #       forgot some resumefrom label in betas file. It is however annoying when the user really wants to resume many simulations.
         #       Implement mechanism to undo file move/modification maybe trapping CTRL-C or acting in case of UserSaidNo at the end of this
         #       function (ideally asking the user again if he wants to restore everything as it was).
-        nameOfLastConfiguration=$(printf "conf.%05d" "${BHMAS_trajectoriesToBeResumedFrom[$betaValue]}")
+        nameOfLastConfiguration=$(printf "${BHMAS_configurationPrefix//\\/}%05d" "${BHMAS_trajectoriesToBeResumedFrom[$betaValue]}")
         if [ ! -f "${runBetaDirectory}/${nameOfLastConfiguration}" ];then
             cecho lr " Configuration " emph "$nameOfLastConfiguration" " not found in "\
                   dir "$runBetaDirectory" " folder.\n The value " emph "beta = $betaValue" " will be skipped!"
@@ -96,21 +96,22 @@ function __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAnd
         fi
         #Now it should be feasable to resume simulation ---> clean runBetaDirectory
         #Create in runBetaDirectory a folder named Trash_$(date) where to mv all the file produced after the traj. ${BHMAS_trajectoriesToBeResumedFrom[$betaValue]}
-        local trashFolderName filename numberFromFile
+        local trashFolderName filename numberFromFile prefix
         trashFolderName="$runBetaDirectory/Trash_$(date +'%F_%H%M%S')"
         mkdir $trashFolderName || exit $BHMAS_fatalBuiltin
-        for filename in $(ls -1 $runBetaDirectory | sed -n "/^\(conf|prng\)[.][0-9]\+$/p"); do
-            #Move to trash only 'conf.xxxxx' or 'prng.xxxxx' files with xxxxx larger than the resume from trajectory
-            numberFromFile=$(sed 's/^0*//' <<< "${filename##*.}")
+        for filename in $(ls -1 $runBetaDirectory | sed -n -e '/^'${BHMAS_configurationRegex}'.*$/p' -e '/^'${BHMAS_prngRegex}'.*$/p'); do
+            #Move to trash only 'conf.xxxxx(whatever)' or 'prng.xxxxx(whatever)' files with xxxxx larger than the resume from trajectory
+            numberFromFile=$(sed -n 's/^\('${BHMAS_configurationPrefix}'\|'${BHMAS_prngPrefix}'\)0*\([1-9][0-9]*\).*$/\2/p' <<< "${filename}")
             if [ $numberFromFile -gt ${BHMAS_trajectoriesToBeResumedFrom[$betaValue]} ]; then
-                mv $filename $trashFolderName
+                mv $runBetaDirectory/$filename $trashFolderName
             fi
         done
-        #Move to trash conf.save(_backup) and prng.save(_backup) files if existing
-        [ -f $runBetaDirectory/conf.save ]        && mv $runBetaDirectory/conf.save        $trashFolderName
-        [ -f $runBetaDirectory/prng.save ]        && mv $runBetaDirectory/prng.save        $trashFolderName
-        [ -f $runBetaDirectory/conf.save_backup ] && mv $runBetaDirectory/conf.save_backup $trashFolderName
-        [ -f $runBetaDirectory/prng.save_backup ] && mv $runBetaDirectory/prng.save_backup $trashFolderName
+        #Move to trash conf.save(whatever) and prng.save(whatever) files if existing
+        for prefix in ${BHMAS_configurationPrefix} ${BHMAS_prngPrefix}; do
+            for filename in $(compgen -G "$runBetaDirectory/${prefix}${BHMAS_standardCheckpointPostfix}*"); do
+                mv $filename $trashFolderName
+            done
+        done
         #Move the output file to Trash, and duplicate it parsing it in awk deleting all the trajectories after the resume from one, included (if found)
         mv $outputFileGlobalPath $trashFolderName || exit $BHMAS_fatalBuiltin
         if ! awk -v tr="${BHMAS_trajectoriesToBeResumedFrom[$betaValue]}"\
@@ -123,16 +124,16 @@ function __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAnd
             BHMAS_problematicBetaValues+=( $betaValue )
             return 1
         fi
-    elif [ -f "$runBetaDirectory/conf.save" ]; then #If resumefrom has not been given use conf.save if present, otherwise use the last checkpoint
-        nameOfLastConfiguration="conf.save"
-        if [ -f $runBetaDirectory/prng.save ]; then
-            nameOfLastPRNG="prng.save"
+    elif [ -f "$runBetaDirectory/${BHMAS_configurationPrefix//\\/}${BHMAS_standardCheckpointPostfix}" ]; then #If resumefrom has not been given use conf.save if present, otherwise use the last checkpoint
+        nameOfLastConfiguration="${BHMAS_configurationPrefix//\\/}${BHMAS_standardCheckpointPostfix}"
+        if [ -f "$runBetaDirectory/${BHMAS_prngPrefix//\\/}${BHMAS_standardCheckpointPostfix}" ]; then
+            nameOfLastPRNG="${BHMAS_prngPrefix//\\/}${BHMAS_standardCheckpointPostfix}"
         else
             nameOfLastPRNG=""
         fi
     else
-        nameOfLastConfiguration=$(ls -1 $runBetaDirectory | sed -n "/^conf[.][0-9]\+$/p" | sort -V | tail -n1)
-        nameOfLastPRNG=$(ls -1 $runBetaDirectory | sed -n "/^prng[.][0-9]\+$/p" | sort -V | tail -n1)
+        nameOfLastConfiguration=$(ls -1 $runBetaDirectory | sed -n '/^'${BHMAS_configurationRegex}'$/p' | sort -V | tail -n1)
+        nameOfLastPRNG=$(ls -1 $runBetaDirectory | sed -n '/^'${BHMAS_prngRegex}'$/p' | sort -V | tail -n1)
     fi
     return 0
 }
@@ -141,7 +142,7 @@ function __static__CheckWhetherFoundCheckpointIsGoodToContinue()
 {
     #The variable nameOfLastConfiguration should be set here, if not it means no conf was available!
     if [ "$nameOfLastConfiguration" == "" ]; then
-        cecho lr "\n No configuration found in " dir "$runBetaDirectory.\n The value " emph "beta = $betaValue" " will be skipped!"
+        cecho lr "\n No configuration found in " dir "$runBetaDirectory" ".\n The value " emph "beta = $betaValue" " will be skipped!"
         BHMAS_problematicBetaValues+=( $betaValue )
         return 1
     fi
@@ -151,7 +152,8 @@ function __static__CheckWhetherFoundCheckpointIsGoodToContinue()
     #Check that, in case the continue is done from a "numeric" configuration, the number of conf and prng is the same
     if [[ "$nameOfLastConfiguration" =~ [.][0-9]+$ ]] && [[ "$nameOfLastPRNG" =~ [.][0-9]+$ ]]; then
         if [ $(sed 's/^0*//g' <<< "${nameOfLastConfiguration#*.}") -ne $(sed 's/^0*//g' <<< "${nameOfLastPRNG#*.}") ]; then
-            cecho lr "\n The numbers of " emph "conf.xxxxx" " and " emph "prng.xxxxx" " are different! Check the respective folder!\n"\
+            cecho lr "\n The numbers of " emph "${BHMAS_configurationPrefix//\\/}xxxxx" " and "\
+                  emph "${BHMAS_prngPrefix//\\/}xxxxx" " are different! Check the respective folder!\n"\
                   " The value " emph "beta = $betaValue" " will be skipped!"
             BHMAS_problematicBetaValues+=( $betaValue )
             return 1

@@ -147,7 +147,7 @@ elif [ $BHMAS_thermalizeOption = 'TRUE' ] || [ $BHMAS_continueThermalizationOpti
     #
     # TODO: If a thermalization from hot is finished but one other crashed and one wishes to resume it, the postfix should be
     #       from Hot but it is from conf since in $BHMAS_thermConfsGlobalPath a conf from hot is found. Think about how to fix this.
-    if [ $(ls $BHMAS_thermConfsGlobalPath | grep "conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${BHMAS_betaRegex}_${BHMAS_seedPrefix}${BHMAS_seedRegex}_fromHot[[:digit:]]\+.*" | wc -l) -eq 0 ]; then
+    if [ $(ls $BHMAS_thermConfsGlobalPath | grep "${BHMAS_configurationPrefix}${BHMAS_parametersString}_${BHMAS_betaPrefix}${BHMAS_betaRegex}_${BHMAS_seedPrefix}${BHMAS_seedRegex}_fromHot[[:digit:]]\+.*" | wc -l) -eq 0 ]; then
         BHMAS_betaPostfix="_thermalizeFromHot"
     else
         BHMAS_betaPostfix="_thermalizeFromConf"

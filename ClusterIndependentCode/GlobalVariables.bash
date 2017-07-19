@@ -172,6 +172,13 @@ function DeclareBaHaMASGlobalVariables()
     readonly BHMAS_highAcceptanceThreshold=78
     readonly BHMAS_tooHighAcceptanceThreshold=90
     readonly BHMAS_deltaSThreshold=6
+
+    #Variables to make first step towards independence from software (NO SPACES in them assumed!)
+    readonly BHMAS_configurationPrefix='conf\.'
+    readonly BHMAS_prngPrefix='prng\.' #tell user about BRE http://en.wikipedia.org/wiki/Regular_expression#POSIX_basic_and_extended
+    readonly BHMAS_standardCheckpointPostfix='save'
+    readonly BHMAS_configurationRegex="${BHMAS_configurationPrefix}[0-9]\+"
+    readonly BHMAS_prngRegex="${BHMAS_prngPrefix}[0-9]\+"
 }
 
 # The following variables cannot be declared at the

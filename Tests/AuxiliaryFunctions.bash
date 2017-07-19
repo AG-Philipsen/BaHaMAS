@@ -110,7 +110,7 @@ function MakeTestPreliminaryOperations()
                     __static__AddStringToFirstLineBetasFile "rlast"
                     ;;
                 resume )
-                    __static__CreateFilesInBetaFolder "conf.00100" "prng.00100" "conf.00200" "prng.00200"
+                    __static__CreateFilesInBetaFolder "conf.00100" "prng.00100" "conf.00200" "prng.00200" "conf.00200_backup" "conf.save_backup" "prng.save_backup"
                     __static__AddStringToFirstLineBetasFile "r100"
                     ;;
                 goal )
