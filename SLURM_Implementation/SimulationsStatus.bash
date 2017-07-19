@@ -234,18 +234,18 @@ function ListSimulationsStatus_SLURM()
         fi
 
         printf \
-            "$(ColorBeta)%-15s\t  \
-$(ColorClean $TO_BE_CLEANED)%8s${BHMAS_defaultListstatusColor} \
+            "$(__static__ColorBeta)%-15s\t  \
+$(__static__ColorClean $TO_BE_CLEANED)%8s${BHMAS_defaultListstatusColor} \
 ($(GoodAcc $ACCEPTANCE)%s %%${BHMAS_defaultListstatusColor}) \
 [$(GoodAcc $ACCEPTANCE_LAST)%s %%${BHMAS_defaultListstatusColor}] \
 %s-%s%s%s\t\
-$(ColorStatus $STATUS)%9s${BHMAS_defaultListstatusColor}\t\
-$(ColorDeltaS $MAX_DELTAS)%9s${BHMAS_defaultListstatusColor}\t   \
-$(ColorTime $TIME_FROM_LAST_MODIFICATION)%s${BHMAS_defaultListstatusColor}      \
+$(__static__ColorStatus $STATUS)%9s${BHMAS_defaultListstatusColor}\t\
+$(__static__ColorDeltaS $MAX_DELTAS)%9s${BHMAS_defaultListstatusColor}\t   \
+$(__static__ColorTime $TIME_FROM_LAST_MODIFICATION)%s${BHMAS_defaultListstatusColor}      \
 %6s \
 ( %s ) \
 \n\e[0m" \
-            "$(GetShortenedBetaString)" \
+            "$(__static__GetShortenedBetaString)" \
             "$TRAJECTORIES_DONE" \
             "$ACCEPTANCE" \
             "$ACCEPTANCE_LAST" \
@@ -256,16 +256,16 @@ $(ColorTime $TIME_FROM_LAST_MODIFICATION)%s${BHMAS_defaultListstatusColor}      
             "$(awk '{if($1 ~ /^[[:digit:]]+$/ && $2 ~ /^[[:digit:]]+$/){printf "%3ds | %3ds", $1, $2}else if($1 == "ERR" || $2 == "ERR"){print "_errorMeas_"}else{print "notMeasured"}}' <<< "$TIME_LAST_TRAJECTORY $AVERAGE_TIME_PER_TRAJECTORY")"
 
         if [ $TO_BE_CLEANED -eq 0 ]; then
-            printf "%s\t\t%8s (%s %%) [%s %%]  %s-%s%s%s\t%9s\t%s\n"   "$(GetShortenedBetaString)"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$ACCEPTANCE_LAST"   "$INT0" "$INT1" "$INT2" "$K_MP"   "$STATUS"   "$MAX_DELTAS" >> $JOBS_STATUS_FILE
+            printf "%s\t\t%8s (%s %%) [%s %%]  %s-%s%s%s\t%9s\t%s\n"   "$(__static__GetShortenedBetaString)"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$ACCEPTANCE_LAST"   "$INT0" "$INT1" "$INT2" "$K_MP"   "$STATUS"   "$MAX_DELTAS" >> $JOBS_STATUS_FILE
         else
-            printf "%s\t\t%8s (%s %%) [%s %%]  %s-%s%s%s\t%9s\t%s\t ---> File to be cleaned!\n"   "$(GetShortenedBetaString)"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$ACCEPTANCE_LAST"   "$INT0" "$INT1" "$INT2" "$K_MP"   "$STATUS"   "$MAX_DELTAS" >> $JOBS_STATUS_FILE
+            printf "%s\t\t%8s (%s %%) [%s %%]  %s-%s%s%s\t%9s\t%s\t ---> File to be cleaned!\n"   "$(__static__GetShortenedBetaString)"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$ACCEPTANCE_LAST"   "$INT0" "$INT1" "$INT2" "$K_MP"   "$STATUS"   "$MAX_DELTAS" >> $JOBS_STATUS_FILE
         fi
 
     done #Loop on BETA
     cecho -d "${BHMAS_defaultListstatusColor}==============================================================================================================================================="
 }
 
-function GetShortenedBetaString()
+function __static__GetShortenedBetaString()
 {
     if [ "$POSTFIX_FROM_FOLDER" == "continueWithNewChain" ]; then
         printf "${BETA%_*}_NC"
@@ -291,7 +291,7 @@ function GoodAcc()
         -v tht="$BHMAS_tooHighAcceptanceThreshold" '{if($1<tlt){print tl}else if($1<lt){print l}else if($1>tht){print th}else if($1>ht){print h}else{print op}}' <<< "$1"
 }
 
-function ColorStatus()
+function __static__ColorStatus()
 {
     if [[ $1 == "RUNNING" ]]; then
         printf $BHMAS_runningListstatusColor
@@ -302,7 +302,7 @@ function ColorStatus()
     fi
 }
 
-function ColorTime()
+function __static__ColorTime()
 {
     if [[ ! $1 =~ ^[[:digit:]]+$ ]]; then
         printf $BHMAS_defaultListstatusColor
@@ -311,12 +311,12 @@ function ColorTime()
     fi
 }
 
-function ColorClean()
+function __static__ColorClean()
 {
     [ $1 -eq 0 ] && printf $BHMAS_defaultListstatusColor || printf $BHMAS_toBeCleanedListstatusColor
 }
 
-function ColorBeta()
+function __static__ColorBeta()
 {
     #Columns here below ranges from 1 on, since they are used in awk
     declare -A OBSERVABLES_COLUMNS=( ["TrajectoryNr"]=1
@@ -348,7 +348,7 @@ function ColorBeta()
 }
 
 
-function ColorDeltaS()
+function __static__ColorDeltaS()
 {
     if [[ ! $1 =~ [+-]?[[:digit:]]+[.]?[[:digit:]]* ]]; then
         printf $BHMAS_defaultListstatusColor
@@ -360,3 +360,19 @@ function ColorDeltaS()
         fi
     fi
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         __static__ExtractBetasFromJOBNAME\
+         __static__ExtractPostfixFromJOBNAME\
+         __static__ExtractMetaInformationFromJOBNAME\
+         ListSimulationsStatus_SLURM\
+         __static__GetShortenedBetaString\
+         GoodAcc\
+         __static__ColorStatus\
+         __static__ColorTime\
+         __static__ColorClean\
+         __static__ColorBeta\
+         __static__ColorDeltaS

@@ -798,3 +798,11 @@ function __static__DisplayDatabaseFile()
                     }'     $1
 
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         join\
+         projectStatisticsDatabase\
+         __static__DisplayDatabaseFile

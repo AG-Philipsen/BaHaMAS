@@ -79,3 +79,12 @@ function CheckSystemRequirements()
         Fatal $BHMAS_fatalRequirement "Please (maybe locally) install the required versions of the above programs and run " B "BaHaMAS" uB " again."
     fi
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         __static__CheckAvailabilityOfProgram\
+         __static__IsFoundVersionOlderThanRequired\
+         __static__CheckAboutProgram\
+         CheckSystemRequirements

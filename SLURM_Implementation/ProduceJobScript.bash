@@ -185,3 +185,10 @@ function ProduceJobscript_CL2QCD()
         fi
     fi
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         __static__AddToJobscriptFile\
+         ProduceJobscript_CL2QCD

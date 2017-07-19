@@ -111,3 +111,10 @@ function ProcessBetaValuesForInversion_SLURM()
         PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles "${betaValuesToBeSubmitted[@]}"
     fi
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         __static__ProduceSrunCommandsFileForInversionsPerBeta\
+         ProcessBetaValuesForInversion_SLURM

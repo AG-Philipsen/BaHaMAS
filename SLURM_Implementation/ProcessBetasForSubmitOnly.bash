@@ -38,3 +38,9 @@ function ProcessBetaValuesForSubmitOnly_SLURM()
         PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles "${betaValuesCopy[@]}"
     fi
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         ProcessBetaValuesForSubmitOnly_SLURM

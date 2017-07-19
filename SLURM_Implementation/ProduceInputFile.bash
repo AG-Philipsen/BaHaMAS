@@ -134,3 +134,10 @@ function ProduceInputFile_CL2QCD()
         fi
     fi
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         __static__AddToInputFile\
+         ProduceInputFile_CL2QCD

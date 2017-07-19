@@ -58,3 +58,10 @@ function MakeInteractiveSetupUsingDialog()
         __static__ParseSetupResultAndFillInUserVariablesArray\
         AbortSetupProcess
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         __static__ParseSetupResultAndFillInUserVariablesArray\
+         MakeInteractiveSetupUsingDialog

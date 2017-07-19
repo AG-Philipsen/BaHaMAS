@@ -35,7 +35,8 @@ function __static__PrintHelper()
                                 "files in the BaHaMAS test folder."
     cecho ''
 }
-function __static__PrintListOfTests(){
+function __static__PrintListOfTests()
+{
     local index list termCols longestString colsWidth maxNumCols formatString
     cecho B lm "\n " U "List of available tests" uU ":\n"
     list=( "${testsToBeRun[@]}" )
@@ -104,3 +105,12 @@ function ParseCommandLineOption()
         esac
     done
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         __static__AddOptionToHelper\
+         __static__PrintHelper\
+         __static__PrintListOfTests\
+         ParseCommandLineOption

@@ -197,36 +197,36 @@ function __static__PrintMessageToScreen()
 
 function Warning()
 {
-    __static__PrintMessageToScreen 'WARNING' 0 "$@" 
+    __static__PrintMessageToScreen 'WARNING' 0 "$@"
 }
 
 function Error()
 {
-    __static__PrintMessageToScreen 'ERROR' 0 "$@" 
+    __static__PrintMessageToScreen 'ERROR' 0 "$@"
 }
 
 function Fatal()
 {
-    __static__PrintMessageToScreen 'FATAL' "$1" "${@:2}" 
+    __static__PrintMessageToScreen 'FATAL' "$1" "${@:2}"
 }
 
 function Internal()
 {
     __static__PrintMessageToScreen 'INTERNAL' "$BHMAS_internal" "$@"
 }
-#-------------------------------------------------------------------------------#
 
-#format="${escape}38;5;9m  " ;;    lr
-#format="${escape}38;5;10m " ;;    lg
-#format="${escape}38;5;11m " ;;    ly
-#format="${escape}38;5;13m " ;;    lm
-#format="${escape}38;5;27m " ;;    bb
-#format="${escape}38;5;34m " ;;     g
-#format="${escape}38;5;39m " ;;     b
-#format="${escape}38;5;49m " ;;    wg
-#format="${escape}38;5;69m " ;;     b
-#format="${escape}38;5;83m " ;;    wg
-#format="${escape}38;5;86m " ;;    lc
-#format="${escape}38;5;123m" ;;    lc
-#format="${escape}38;5;171m" ;;     p
-#format="${escape}38;5;207m" ;;    lm
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         __static__SetColorCodes\
+         __static__SetEmphasizeCodes\
+         cecho\
+         AskUser\
+         UserSaidYes\
+         UserSaidNo\
+         __static__PrintMessageToScreen\
+         Warning\
+         Error\
+         Fatal\
+         Internal

@@ -59,6 +59,13 @@ function DeclareUserDefinedGlobalVariables()
     BHMAS_clusterGenericResource=""
 }
 
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         DeclareOutputRelatedGlobalVariables\
+         DeclareUserDefinedGlobalVariables
+
 # Documentation:
 #
 #     BHMAS_coloredOutput              -->  it can be 'TRUE' or 'FALSE' and can be used to disable coloured output

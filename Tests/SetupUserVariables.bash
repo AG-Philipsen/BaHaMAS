@@ -42,3 +42,10 @@ function DeclareUserDefinedGlobalVariablesForTests()
     BHMAS_maximumWalltime="1-00:00:00"
 
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         DeclareOutputRelatedGlobalVariables\
+         DeclareUserDefinedGlobalVariablesForTests

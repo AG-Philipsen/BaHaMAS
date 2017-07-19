@@ -251,3 +251,26 @@ function ConvertFromBytesToHumanReadable()
         }
         {print human($1)}' <<< "$BYTES"
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         TimeToSeconds\
+         SecondsToTime\
+         SecondsToTimeString\
+         TimeStringToSecond\
+         SecondsToTimeStringWithDays\
+         GetLargestWalltimeBetweenTwo\
+         GetSmallestWalltimeBetweenTwo\
+         MinimumOfArray\
+         KeyOfMinimumOfArray\
+         MaximumOfArray\
+         KeyOfMaximumOfArray\
+         FindPositionOfFirstMinimumOfArray\
+         LengthOfLongestEntryInArray\
+         ElementInArray\
+         KeyInArray\
+         FindValueOfClosestElementInArrayToGivenValue\
+         PrintArray\
+         ConvertFromBytesToHumanReadable

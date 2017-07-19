@@ -182,3 +182,11 @@ function DeclareBetaFoldersPathsAsGlobalVariables()
     readonly BHMAS_submitDirWithBetaFolders="$BHMAS_submitDiskGlobalPath/$BHMAS_projectSubpath$BHMAS_parametersPath"
     readonly BHMAS_runDirWithBetaFolders="$BHMAS_runDiskGlobalPath/$BHMAS_projectSubpath$BHMAS_parametersPath"
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         DeclarePathRelatedGlobalVariables\
+         DeclareBaHaMASGlobalVariables\
+         DeclareBetaFoldersPathsAsGlobalVariables

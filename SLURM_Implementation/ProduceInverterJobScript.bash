@@ -178,3 +178,10 @@ function ProduceInverterJobscript_CL2QCD()
         "  exit $BHMAS_fatalGeneric"\
         "fi"
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         __static__AddToInverterJobscriptFile\
+         ProduceInverterJobscript_CL2QCD

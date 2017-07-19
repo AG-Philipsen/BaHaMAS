@@ -539,3 +539,33 @@ function ProcessBetaValuesForContinue_SLURM()
     fi
     unset -v 'statusOfJobsContainingGivenBeta'
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         __static__SetBetaRelatedPathVariables\
+         __static__GetStatusOfJobsContainingBetavalues\
+         __static__CheckWhetherAnyRequiredFileOrFolderIsMissing\
+         __static__CheckWhetherSimulationForGivenBetaIsAlreadyEnqueued\
+         __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAndOutputFileIfNeeded\
+         __static__CheckWhetherFoundCheckpointIsGoodToContinue\
+         __static__MakeTemporaryCopyOfOriginalInputFile\
+         __static__RestoreOriginalInputFile\
+         __static__AddOptionsToInputFile\
+         __static__FindAndReplaceSingleOccurenceInFile\
+         __static__ModifyOptionsInInputFile\
+         __static__PrintAboutOptionsToStandardOutput\
+         __static__PrintAddedOptionsToStandardOutput\
+         __static__PrintModifiedOptionsToStandardOutput\
+         __static__FindAndSetNumberOfTrajectoriesAlreadyProduced\
+         __static__IsSimulationFinished\
+         __static__HandleMeasurementsInInputFile\
+         __static__HandlePbpInInputFile\
+         __static__HandleMassPreconditioningInInputFile\
+         __static__HandleStartConditionInInputFile\
+         __static__HandleStartConfigurationInInputFile\
+         __static__HandlePRNGStateInInputFile\
+         __static__HandleIntegrationStepsInInputFile\
+         __static__HandleFurtherOptionsInInputFile\
+         ProcessBetaValuesForContinue_SLURM

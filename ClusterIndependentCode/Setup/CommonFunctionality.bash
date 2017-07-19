@@ -45,3 +45,11 @@ function FireUpTheDialogBoxStoringResultAndActingAccordingly()
             AbortSetupProcess ;;
     esac
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         AbortSetupProcess\
+         SetColoredOutput\
+         FireUpTheDialogBoxStoringResultAndActingAccordingly

@@ -327,3 +327,10 @@ function ParseCommandLineOption()
         Fatal $BHMAS_fatalCommandLine "The following options are mutually exclusive and cannot be combined: $listOfOptionsAsString"
     fi
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         __static__PrintSecondaryOptionSpecificationErrorAndExit\
+         ParseCommandLineOption

@@ -16,3 +16,9 @@ function PrintReportForProblematicBeta()
         exit $BHMAS_fatalGeneric
     fi
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         PrintReportForProblematicBeta

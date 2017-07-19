@@ -92,3 +92,12 @@ function MakeInteractiveSetupAndCreateUserDefinedVariablesFile()
     #Produce final setup file
     __static__ProduceUserVariableFile
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         __static__ReadVariablesFromTemplateFile\
+         __static__FillInVariablesFromMaybeExistentUserSetup\
+         __static__ProduceUserVariableFile\
+         MakeInteractiveSetupAndCreateUserDefinedVariablesFile

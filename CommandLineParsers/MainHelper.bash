@@ -129,3 +129,12 @@ function PrintMainHelper()
           '      For example ' lc '-dl' lo ' is equivalent to ' lc '-d -l' lo ' and ' lc '-pcm=10000' lo ' is equivalent to ' lc '-p -c -m=10000' lo '.'
     cecho ''
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         __static__AddOptionToHelper\
+         __static__PrintDefault\
+         __static__PrintHelperHeader\
+         PrintMainHelper

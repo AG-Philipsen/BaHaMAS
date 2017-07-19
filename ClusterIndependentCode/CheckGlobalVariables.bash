@@ -68,7 +68,7 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
 
     #Leave an empty line that I remove later if no error occurred (just to have better output
     cecho ''
-    
+
     #Check variables values (those not checked have no requirement at this point)
     if [ "${BHMAS_coloredOutput:-}" != 'TRUE' ] && [ "${BHMAS_coloredOutput:-}" != 'FALSE' ]; then
         #Since in the following we use cecho which rely on the variable "BHMAS_coloredOutput",
@@ -274,7 +274,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
     if [ ${#variablesThatMustBeNotEmpty[@]} -ne 0 ]; then
         listOfVariablesAsString=''
         for variable in "${variablesThatMustBeNotEmpty[@]}"; do
-            listOfVariablesAsString+="\n$(cecho -d ly " " B) $variable"            
+            listOfVariablesAsString+="\n$(cecho -d ly " " B) $variable"
         done
         Error "To run " B "BaHaMAS" uB " $option " "option, the following " emph "variable(s)" " must be " emph "set" " and " emph "not empty" ": $listOfVariablesAsString"
         Fatal -n $BHMAS_fatalVariableUnset "Please set the above variables properly using the " emph "--setup" " option and run " B "BaHaMAS" uB " again."
@@ -320,3 +320,11 @@ function CheckBetaFoldersPathsVariables()
               dir "   $BHMAS_runDirWithBetaFolders" "\nseems not to be a valid path!"
     fi
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         CheckUserDefinedVariablesAndDefineDependentAdditionalVariables\
+         CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase\
+         CheckBetaFoldersPathsVariables

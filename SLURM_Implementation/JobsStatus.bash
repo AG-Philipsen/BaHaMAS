@@ -160,3 +160,10 @@ function ListJobsStatus_SLURM()
     cecho o "\n  Total number of submitted jobs: " B "$numberOfJobs" uB " (" B lg "Running: $numberOfRunningJobs" ly "     Pending: $numberOfPendingJobs" lm "     Others: $numberOfOtherJobs" uB o ")"
     cecho lc B "$lineOfEquals\n"
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         __static__ExtractParametersFromJobInformation\
+         ListJobsStatus_SLURM

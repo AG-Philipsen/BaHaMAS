@@ -82,3 +82,12 @@ function MakeInteractiveSetupUsingWhiptail()
     #Continue with BaHaMAS user variables
     __static__DisplayMenuBoxWithPresentVariablesAndActOnInput
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         __static__DisplayMenuBoxWithPresentVariablesAndActOnInput\
+         __static__SetValueOfVariableObtainedFromUser\
+         __static__DisplayFreeInputBoxAndSetGivenInputValue\
+         MakeInteractiveSetupUsingWhiptail

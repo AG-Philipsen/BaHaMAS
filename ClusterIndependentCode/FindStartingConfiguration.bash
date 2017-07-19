@@ -81,3 +81,10 @@ function FindConfigurationGlobalPathFromWhichToStartTheSimulation()
         fi
     done
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         __static__PickUpStartingConfigurationAmongAvailableOnes\
+         FindConfigurationGlobalPathFromWhichToStartTheSimulation

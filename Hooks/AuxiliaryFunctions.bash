@@ -72,7 +72,7 @@ function IsCommitMessageARevert() {
     [ $(cat "$1" | head -1 | grep -c "^Revert ") -gt 0 ] && return 0 || return 1
 }
 
-function IsFirstLineNotStartingWithLetter(){ #Assume no trailing spaces, since removed
+function IsFirstLineNotStartingWithLetter() { #Assume no trailing spaces, since removed
     [ $(cat "$1" | head -1 | grep -c '^[[:alpha:]]') -gt 0 ] && return 1 || return 0
 }
 
@@ -136,3 +136,31 @@ function GiveAdviceAboutWhitespaceError() {
     errecho "   git diff-index --check --cached $againstSHAToCompareWidth\n" 11
     errecho 'to have a look to the whitespace violation on staged files.\n\n' 202
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         errecho\
+         PrintHookFailure\
+         AbortCommit\
+         GiveAdviceToResumeCommit\
+         IsCommitMessageEmpty\
+         RemoveTrailingSpacesAtBeginOfFirstThreeLines\
+         RemoveTrailingSpacesAtEndOfEachLine\
+         AddEndOfLineAtEndOfFileIfMissing\
+         CapitalizeFirstLetterFirstLine\
+         RemovePointAtTheEndFirstLine\
+         IsCommitMessageAMerge\
+         IsCommitMessageARevert\
+         IsFirstLineNotStartingWithLetter\
+         IsFirstLineTooShort\
+         IsFirstLineTooLong\
+         IsSecondLineNotEmpty\
+         IsAnyOfTheLinesAfterTheSecondTooLong\
+         GiveAdviceAboutUserNameAndEmail\
+         GiveAdviceAboutUserNameFormat\
+         GiveAdviceAboutUserEmailFormat\
+         GiveAdviceAboutNonASCIICharacters\
+         GiveAdviceAboutBranch\
+         GiveAdviceAboutWhitespaceError

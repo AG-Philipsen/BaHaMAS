@@ -132,3 +132,15 @@ function PrintOptionSpecificationErrorAndExit()
 {
     Fatal $BHMAS_fatalCommandLine "The value of the option " emph "$1" " was not correctly specified (either " emph "forgotten" " or " emph " invalid" ")!"
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         PrepareGivenOptionToBeProcessed\
+         SplitCombinedShortOptionsInSingleOptions\
+         __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray\
+         PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem\
+         PrintHelperAndExitIfUserAskedForIt\
+         PrintInvalidOptionErrorAndExit\
+         PrintOptionSpecificationErrorAndExit

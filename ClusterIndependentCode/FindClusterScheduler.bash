@@ -32,3 +32,9 @@ function SelectClusterSchedulerName()
 
     printf "${availableScheduler[0]}"
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         SelectClusterSchedulerName

@@ -124,3 +124,13 @@ function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
     done
     cecho lc "================================================================================="
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         GetJobScriptFilename\
+         __static__GetJobBetasStringUsing\
+         __static__ExtractNumberOfTrajectoriesToBeDoneFromFile\
+         __static__CalculateWalltimeExtractingNumberOfTrajectoriesPerBetaAndUsingTimesPerTrajectoryIfGiven\
+         PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles

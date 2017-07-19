@@ -323,3 +323,21 @@ function CommentEntriesInBetasFile()
     sed -i "s/^\([[:space:]]*\)#\(.*\)/\1\2/" $BHMAS_betasFilename #At first uncomment all lines
     __static__ToggleDesiredLines "" "#"
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         __static__CheckExistenceBetasFileAndAddEndOfLineAtTheEndIfMissing\
+         __static__CheckFormatBetasFileEntry\
+         __static__CheckAndParseSingleLine\
+         __static__ParseBetaFileLineByLineExtractingInformationAndOptionallyCountingGivenBetas\
+         __static__CheckConsistencyInformationExtractedFromBetasFile\
+         __static__FillMissingTimesPerTrajectoryIfAnyIsSpecified\
+         __static__PrintReportOnExtractedInformationFromBetasFile\
+         ParseBetasFile\
+         __static__GetNonZeroFourDigitsRandomNumberDifferentFrom\
+         CompleteBetasFile\
+         __static__ToggleDesiredLines\
+         UncommentEntriesInBetasFile\
+         CommentEntriesInBetasFile

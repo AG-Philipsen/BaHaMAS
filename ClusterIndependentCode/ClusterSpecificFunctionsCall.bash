@@ -70,3 +70,16 @@ function ListSimulationsStatus()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_$BHMAS_clusterScheduler
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         __static__CheckExistenceOfFunctionAndCallIt\
+         ProduceInputFileAndJobScriptForEachBeta\
+         ProcessBetaValuesForSubmitOnly\
+         ProcessBetaValuesForContinue\
+         ProcessBetaValuesForInversion\
+         SubmitJobsForValidBetaValues\
+         ListJobsStatus\
+         ListSimulationsStatus

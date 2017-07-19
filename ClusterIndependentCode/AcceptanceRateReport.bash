@@ -92,3 +92,9 @@ function AcceptanceRateReport()
     cecho lc "${SPACE_AT_THE_BEGINNING_OF_EACH_LINE}${LINE_OF_EQUAL// /=}"
 
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         AcceptanceRateReport

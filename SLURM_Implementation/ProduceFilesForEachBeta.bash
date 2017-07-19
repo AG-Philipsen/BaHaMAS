@@ -39,3 +39,9 @@ function ProduceInputFileAndJobScriptForEachBeta_SLURM()
     mkdir -p ${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName || exit $BHMAS_fatalBuiltin
     PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles "${betaValuesCopy[@]}"
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         ProduceInputFileAndJobScriptForEachBeta_SLURM

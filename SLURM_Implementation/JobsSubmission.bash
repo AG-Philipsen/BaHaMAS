@@ -40,3 +40,9 @@ function SubmitJobsForValidBetaValues_SLURM()
         cecho lr B "\n No jobs will be submitted.\n"
     fi
 }
+
+
+#----------------------------------------------------------------#
+#Set functions readonly
+readonly -f\
+         SubmitJobsForValidBetaValues_SLURM
