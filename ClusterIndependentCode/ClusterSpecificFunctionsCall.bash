@@ -19,9 +19,10 @@ function SourceClusterSpecificCode()
                              'JobsStatus.bash'
                              'SimulationsStatus.bash' )
 
-    #The following source commands could fail since the file for the cluster scheduler could not be there, then suppress errors
+    #The following source commands could fail since the file for the cluster scheduler could not be there,
+    #then suppress the error and continue to avoid that the script exits due to 'set -e'
     for fileToBeSourced in "${listOfFilesToBeSourced[@]}"; do
-        source "${BHMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/${fileToBeSourced}" 2>/dev/null
+        source "${BHMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/${fileToBeSourced}" 2>/dev/null || continue
     done
 }
 
