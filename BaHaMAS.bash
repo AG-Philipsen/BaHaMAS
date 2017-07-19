@@ -155,8 +155,8 @@ elif [ $BHMAS_thermalizeOption = 'TRUE' ] || [ $BHMAS_continueThermalizationOpti
         BHMAS_measurePbp='FALSE'
     fi
     ParseBetasFile
-    FindConfigurationGlobalPathFromWhichToStartTheSimulation
     if [ $BHMAS_thermalizeOption = 'TRUE' ]; then
+        FindConfigurationGlobalPathFromWhichToStartTheSimulation
         ProduceInputFileAndJobScriptForEachBeta
         AskUser "Check if everything is fine. Would you like to submit the jobs?"
         if UserSaidNo; then
