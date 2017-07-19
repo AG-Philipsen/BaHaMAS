@@ -27,11 +27,15 @@ readonly BHMAS_testsFolder=${BHMAS_repositoryTopLevelPath}/Tests
 readonly BHMAS_testsFolderAuxFiles=${BHMAS_testsFolder}/AuxiliaryFiles
 
 #Load needed files
-source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/ErrorCodes.bash           || exit $BHMAS_fatalBuiltin
-source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/OutputFunctionality.bash  || exit $BHMAS_fatalBuiltin
-source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/UtilityFunctions.bash     || exit $BHMAS_fatalBuiltin
-source ${BHMAS_testsFolder}/AuxiliaryFunctions.bash              || exit $BHMAS_fatalBuiltin
-source ${BHMAS_testsFolder}/CommandLineParser.bash               || exit $BHMAS_fatalBuiltin
+readonly BHMAS_filesToBeSourced=( "${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/OutputFunctionality.bash"
+                                  "${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/UtilityFunctions.bash"
+                                  "${BHMAS_testsFolder}/AuxiliaryFunctions.bash"
+                                  "${BHMAS_testsFolder}/CommandLineParser.bash" )
+#Source error codes and fail with error hard coded since variable defined in file which is sourced!
+source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/ErrorCodes.bash || exit 64
+for fileToBeSourced in "${BHMAS_filesToBeSourced[@]}"; do
+    source "${fileToBeSourced}" || exit $BHMAS_fatalBuiltin
+done
 
 #Helper has priority
 if ElementInArray '-h' "$@" || ElementInArray '--help' "$@"; then

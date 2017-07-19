@@ -19,38 +19,40 @@
 #   defined in the LICENCE.md file, which is distributed within the software.   #
 #-------------------------------------------------------------------------------#
 
-#----------------------------------------------------------------------------------------------------------------#
-#Set stricter shell mode. This implies for the developer to be aware of what is going on,
-#but it is worth so. Good reference http://redsymbol.net/articles/unofficial-bash-strict-mode
-set -euo pipefail
-#----------------------------------------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------------------#
+# Set stricter shell mode. This implies for the developer to be aware of what is going on,      #
+# but it is worth so. Good reference http://redsymbol.net/articles/unofficial-bash-strict-mode  #
+set -euo pipefail                                                                               #
+#-----------------------------------------------------------------------------------------------#
 
-#---------------------------------------------------------------------------------------------------------------------------------#
-# Load auxiliary bash files that will be used.                                                                                    #
-readonly BHMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"                      #
-source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/ErrorCodes.bash                   || exit 64                      #
-source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/Setup/Setup.bash                  || exit $BHMAS_fatalBuiltin     #
-source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/SystemRequirements.bash           || exit $BHMAS_fatalBuiltin     #
-source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/FindClusterScheduler.bash         || exit $BHMAS_fatalBuiltin     #
-readonly BHMAS_clusterScheduler="$(SelectClusterSchedulerName)" #It is needed to source cluster specific files!                   #
-source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/UtilityFunctions.bash             || exit $BHMAS_fatalBuiltin     #
-source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/GlobalVariables.bash              || exit $BHMAS_fatalBuiltin     #
-source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/CheckGlobalVariables.bash         || exit $BHMAS_fatalBuiltin     #
-source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/OutputFunctionality.bash          || exit $BHMAS_fatalBuiltin     #
-source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/PathManagementFunctionality.bash  || exit $BHMAS_fatalBuiltin     #
-source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/OperationsOnBetasFile.bash        || exit $BHMAS_fatalBuiltin     #
-source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/FindStartingConfiguration.bash    || exit $BHMAS_fatalBuiltin     #
-source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/AcceptanceRateReport.bash         || exit $BHMAS_fatalBuiltin     #
-source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/CleanOutputFiles.bash             || exit $BHMAS_fatalBuiltin     #
-source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/ClusterSpecificFunctionsCall.bash || exit $BHMAS_fatalBuiltin     #
-source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/ReportOnProblematicBetas.bash     || exit $BHMAS_fatalBuiltin     #
-source ${BHMAS_repositoryTopLevelPath}/CommandLineParsers/CommonFunctionality.bash              || exit $BHMAS_fatalBuiltin     #
-source ${BHMAS_repositoryTopLevelPath}/CommandLineParsers/MainParser.bash                       || exit $BHMAS_fatalBuiltin     #
-source ${BHMAS_repositoryTopLevelPath}/CommandLineParsers/DatabaseParser.bash                   || exit $BHMAS_fatalBuiltin     #
-source ${BHMAS_repositoryTopLevelPath}/Database/ProjectStatisticsDatabase.bash                  || exit $BHMAS_fatalBuiltin     #
-#---------------------------------------------------------------------------------------------------------------------------------#
+#Load auxiliary bash files that will be used
+readonly BHMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"
+readonly BHMAS_filesToBeSourced=( 'ClusterIndependentCode/Setup/Setup.bash'
+                                  'ClusterIndependentCode/SystemRequirements.bash'
+                                  'ClusterIndependentCode/FindClusterScheduler.bash'
+                                  'ClusterIndependentCode/UtilityFunctions.bash'
+                                  'ClusterIndependentCode/GlobalVariables.bash'
+                                  'ClusterIndependentCode/CheckGlobalVariables.bash'
+                                  'ClusterIndependentCode/OutputFunctionality.bash'
+                                  'ClusterIndependentCode/PathManagementFunctionality.bash'
+                                  'ClusterIndependentCode/OperationsOnBetasFile.bash'
+                                  'ClusterIndependentCode/FindStartingConfiguration.bash'
+                                  'ClusterIndependentCode/AcceptanceRateReport.bash'
+                                  'ClusterIndependentCode/CleanOutputFiles.bash'
+                                  'ClusterIndependentCode/ClusterSpecificFunctionsCall.bash'
+                                  'ClusterIndependentCode/ReportOnProblematicBetas.bash'
+                                  'CommandLineParsers/CommonFunctionality.bash'
+                                  'CommandLineParsers/MainParser.bash'
+                                  'CommandLineParsers/DatabaseParser.bash'
+                                  'Database/ProjectStatisticsDatabase.bash' )
+#Source error codes and fail with error hard coded since variable defined in file which is sourced!
+source "${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/ErrorCodes.bash" || exit 64
+for fileToBeSourced in "${BHMAS_filesToBeSourced[@]}"; do
+    source "${BHMAS_repositoryTopLevelPath}/${fileToBeSourced}" || exit $BHMAS_fatalBuiltin
+done
+SourceClusterSpecificCode
 
-# User file to be sourced depending on test mode
+#User file to be sourced depending on test mode
 if [ -n "${BHMAS_testModeOn:+x}" ] && [ ${BHMAS_testModeOn} = 'TRUE' ]; then
     source ${BHMAS_repositoryTopLevelPath}/Tests/SetupUserVariables.bash || exit $BHMAS_fatalBuiltin
 else

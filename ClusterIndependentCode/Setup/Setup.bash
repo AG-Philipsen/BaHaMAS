@@ -3,9 +3,11 @@
 #   defined in the LICENCE.md file, which is distributed within the software.   #
 #-------------------------------------------------------------------------------#
 
-source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/Setup/CommonFunctionality.bash   || exit $BHMAS_fatalBuiltin
-source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/Setup/SetupDialog.bash           || exit $BHMAS_fatalBuiltin
-source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/Setup/SetupWhiptail.bash         || exit $BHMAS_fatalBuiltin
+#Load needed files
+for fileToBeSourced in "CommonFunctionality" "SetupDialog" "SetupWhiptail"; do
+    source "${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/Setup/${fileToBeSourced}.bash" || exit $BHMAS_fatalBuiltin
+done && unset -v 'fileToBeSourced'
+
 
 function __static__ReadVariablesFromTemplateFile()
 {

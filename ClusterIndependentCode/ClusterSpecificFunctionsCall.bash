@@ -3,20 +3,27 @@
 #   defined in the LICENCE.md file, which is distributed within the software.   #
 #-------------------------------------------------------------------------------#
 
-#------------------------------------------------------------------------------------------------------------------------------#
-# The following source commands could fail since the file for the cluster scheduler could not be there, then suppress errors   #
-source ${BHMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/ProduceJobScript.bash           2>/dev/null  #
-source ${BHMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/ProduceInverterJobScript.bash   2>/dev/null  #
-source ${BHMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/CommonFunctionality.bash        2>/dev/null  #
-source ${BHMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/ProduceInputFile.bash           2>/dev/null  #
-source ${BHMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/ProduceFilesForEachBeta.bash    2>/dev/null  #
-source ${BHMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/ProcessBetasForSubmitOnly.bash  2>/dev/null  #
-source ${BHMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/ProcessBetasForContinue.bash    2>/dev/null  #
-source ${BHMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/ProcessBetasForInversion.bash   2>/dev/null  #
-source ${BHMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/JobsSubmission.bash             2>/dev/null  #
-source ${BHMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/JobsStatus.bash                 2>/dev/null  #
-source ${BHMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/SimulationsStatus.bash          2>/dev/null  #
-#------------------------------------------------------------------------------------------------------------------------------#
+function SourceClusterSpecificCode()
+{
+    readonly BHMAS_clusterScheduler="$(SelectClusterSchedulerName)"
+    local listOfFilesToBeSourced
+    listOfFilesToBeSourced=( 'ProduceJobScript.bash'
+                             'ProduceInverterJobScript.bash'
+                             'CommonFunctionality.bash'
+                             'ProduceInputFile.bash'
+                             'ProduceFilesForEachBeta.bash'
+                             'ProcessBetasForSubmitOnly.bash'
+                             'ProcessBetasForContinue.bash'
+                             'ProcessBetasForInversion.bash'
+                             'JobsSubmission.bash'
+                             'JobsStatus.bash'
+                             'SimulationsStatus.bash' )
+
+    #The following source commands could fail since the file for the cluster scheduler could not be there, then suppress errors
+    for fileToBeSourced in "${listOfFilesToBeSourced[@]}"; do
+        source "${BHMAS_repositoryTopLevelPath}/${BHMAS_clusterScheduler}_Implementation/${fileToBeSourced}" 2>/dev/null
+    done
+}
 
 function __static__CheckExistenceOfFunctionAndCallIt()
 {
