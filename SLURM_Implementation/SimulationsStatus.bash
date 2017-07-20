@@ -122,12 +122,14 @@ function ListSimulationsStatus_SLURM()
         fi
 
         #----Constructing WORK_BETADIRECTORY, HOME_BETADIRECTORY, JOBSCRIPT_NAME, JOBSCRIPT_GLOBALPATH and INPUTFILE_GLOBALPATH---#
-        local OUTPUTFILE_GLOBALPATH="$BHMAS_runDiskGlobalPath/$BHMAS_projectSubpath$LOCAL_PARAMETERS_PATH/$BHMAS_betaPrefix$BETA/$BHMAS_outputFilename"
-        local INPUTFILE_GLOBALPATH="$BHMAS_submitDiskGlobalPath/$BHMAS_projectSubpath$LOCAL_PARAMETERS_PATH/$BHMAS_betaPrefix$BETA/$BHMAS_inputFilename"
-        local STDOUTPUT_FILE=`ls -t1 $BHMAS_betaPrefix$BETA 2>/dev/null | awk -v filename="$BHMAS_hmcFilename" 'BEGIN{regexp="^"filename".[[:digit:]]+.out$"}{if($1 ~ regexp){print $1}}' | head -n1`
-        local STDOUTPUT_GLOBALPATH="$BHMAS_submitDiskGlobalPath/$BHMAS_projectSubpath$LOCAL_PARAMETERS_PATH/$BHMAS_betaPrefix$BETA/$STDOUTPUT_FILE"
+        local OUTPUTFILE_GLOBALPATH INPUTFILE_GLOBALPATH
+        OUTPUTFILE_GLOBALPATH="$BHMAS_runDiskGlobalPath/$BHMAS_projectSubpath$LOCAL_PARAMETERS_PATH/$BHMAS_betaPrefix$BETA/$BHMAS_outputFilename"
+        INPUTFILE_GLOBALPATH="$BHMAS_submitDiskGlobalPath/$BHMAS_projectSubpath$LOCAL_PARAMETERS_PATH/$BHMAS_betaPrefix$BETA/$BHMAS_inputFilename"
         #-------------------------------------------------------------------------------------------------------------------------#
         if [ $BHMAS_liststatusMeasureTimeOption = "TRUE" ]; then
+            local STDOUTPUT_FILE STDOUTPUT_GLOBALPATH
+            STDOUTPUT_FILE=`ls -t1 $BHMAS_betaPrefix$BETA 2>/dev/null | awk -v filename="$BHMAS_hmcFilename" 'BEGIN{regexp="^"filename".[[:digit:]]+.out$"}{if($1 ~ regexp){print $1}}' | head -n1`
+            STDOUTPUT_GLOBALPATH="$BHMAS_submitDiskGlobalPath/$BHMAS_projectSubpath$LOCAL_PARAMETERS_PATH/$BHMAS_betaPrefix$BETA/$STDOUTPUT_FILE"
             if [ -f $STDOUTPUT_GLOBALPATH ] && [[ $STATUS == "RUNNING" ]]; then
                 #Since in CL2QCD std. output there is only the time of saving and not the day, I have to go through the std. output and count the
                 #number of days (done looking at the hours). One could sum up all the tr. times but it is not really efficient!

@@ -213,7 +213,8 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
 
     elif [ $BHMAS_liststatusOption = 'TRUE' ]; then
         option="$(cecho -d "with the " B "--liststatus" uB)"
-        variablesThatMustBeNotEmpty+=( BHMAS_inputFilename
+        variablesThatMustBeNotEmpty+=( BHMAS_hmcGlobalPath #TODO: Remove, now it's only for --measureTime
+                                       BHMAS_inputFilename
                                        BHMAS_outputFilename
                                        BHMAS_acceptanceColumn )
 
