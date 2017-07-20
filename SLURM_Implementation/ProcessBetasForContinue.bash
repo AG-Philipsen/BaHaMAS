@@ -62,11 +62,14 @@ function __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAnd
 {
     #If the option resumefrom is given in the betasfile we have to clean the $runBetaDirectory, otherwise just set the name of conf and prng
     if KeyInArray $betaValue BHMAS_trajectoriesToBeResumedFrom; then
-        #If the user wishes to resume from the last avialable trajectory, then find here which number is "last"
+        #NOTE: If the user wishes to resume from the last avialable checkpoint, then we have to find here which is
+        #      the "last" valid one. Valid means that both the conf and the prng file are present with the same number
         if [ ${BHMAS_trajectoriesToBeResumedFrom[$betaValue]} = "last" ]; then
-            BHMAS_trajectoriesToBeResumedFrom[$betaValue]=$(ls -1 $runBetaDirectory | sed -n 's/^'${BHMAS_configurationPrefix}'0*\([1-9][0-9]*\)$/\1/p' | sort -n | tail -n1)
+            #comm expects alphabetically sorted input, then we sort numerically the output and we take the last number
+            BHMAS_trajectoriesToBeResumedFrom[$betaValue]=$(comm -12  <(ls -1 $runBetaDirectory | sed -n 's/^'${BHMAS_configurationPrefix}'0*\([1-9][0-9]*\)$/\1/p' | sort)\
+                                                                 <(ls -1 $runBetaDirectory | sed -n 's/^'${BHMAS_prngPrefix}'0*\([1-9][0-9]*\)$/\1/p' | sort) | sort -n | tail -n1)
             if [[ ! ${BHMAS_trajectoriesToBeResumedFrom[$betaValue]} =~ ^[0-9]+$ ]]; then
-                cecho lr "\n Unable to find " emph "last configuration" " to resume from!\n The value " emph "beta = $betaValue" " will be skipped!"
+                Error "Unable to find " emph "last valid checkpoint" " to resume from!\n" "The value " emph "beta = $betaValue" " will be skipped!"
                 BHMAS_problematicBetaValues+=( $betaValue )
                 return 1
             fi
