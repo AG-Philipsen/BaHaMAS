@@ -26,15 +26,15 @@ function __static__GetStatusOfJobsContainingBetavalues()
 function __static__CheckWhetherAnyRequiredFileOrFolderIsMissing()
 {
     if [ ! -d $runBetaDirectory ]; then
-        cecho lr "\n The directory " dir "$runBetaDirectory" " does not exist! \n The value " emph "beta = $betaValue" " will be skipped!"
+        Error "The directory " dir "$runBetaDirectory" " does not exist!\n" "The value " emph "beta = $betaValue" " will be skipped!"
         BHMAS_problematicBetaValues+=( $betaValue )
         return 1
     elif [ ! -d $submitBetaDirectory ]; then
-        cecho lr "\n The directory " dir "$submitBetaDirectory" " does not exist! \n The value " emph "beta = $betaValue" " will be skipped!"
+        Error "The directory " dir "$submitBetaDirectory" " does not exist!\n" "The value " emph "beta = $betaValue" " will be skipped!"
         BHMAS_problematicBetaValues+=( $betaValue )
         return 1
     elif [ ! -f $inputFileGlobalPath ]; then
-        cecho lr "\n The file " file "$inputFileGlobalPath" " does not exist!\n The value " emph "beta = $betaValue" " will be skipped!"
+        Error "The file " file "$inputFileGlobalPath" " does not exist!\n" "The value " emph "beta = $betaValue" " will be skipped!"
         BHMAS_problematicBetaValues+=( $betaValue )
         return 1
     fi
@@ -48,8 +48,8 @@ function __static__CheckWhetherSimulationForGivenBetaIsAlreadyEnqueued()
         return 0
     else
         if [ $(grep -c "\(RUNNING\|PENDING\)" <<< "$jobStatus") -gt 0 ]; then
-            cecho lr  " The simulation seems to be already running with " emph "job-id $(cut -d'@' -f1 <<< "$jobStatus")" " and it cannot be continued!\n"\
-                  " The value " emph "beta = $betaValue" " will be skipped!"
+            Error "The simulation seems to be already running with " emph "job-id $(cut -d'@' -f1 <<< "$jobStatus")" " and it cannot be continued!\n"\
+                  "The value " emph "beta = $betaValue" " will be skipped!"
             BHMAS_problematicBetaValues+=( $betaValue )
             return 1
         else
@@ -80,10 +80,11 @@ function __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAnd
         #       forgot some resumefrom label in betas file. It is however annoying when the user really wants to resume many simulations.
         #       Implement mechanism to undo file move/modification maybe trapping CTRL-C or acting in case of UserSaidNo at the end of this
         #       function (ideally asking the user again if he wants to restore everything as it was).
+
         nameOfLastConfiguration=$(printf "${BHMAS_configurationPrefix//\\/}%05d" "${BHMAS_trajectoriesToBeResumedFrom[$betaValue]}")
         if [ ! -f "${runBetaDirectory}/${nameOfLastConfiguration}" ];then
-            cecho lr " Configuration " emph "$nameOfLastConfiguration" " not found in "\
-                  dir "$runBetaDirectory" " folder.\n The value " emph "beta = $betaValue" " will be skipped!"
+            Error "Configuration " emph "$nameOfLastConfiguration" " not found in "\
+                  dir "$runBetaDirectory" " folder.\n" "The value " emph "beta = $betaValue" " will be skipped!"
             BHMAS_problematicBetaValues+=( $betaValue )
             return 1
         fi
@@ -93,7 +94,7 @@ function __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAnd
         fi
         #If the BHMAS_outputFilename is not in the runBetaDirectory stop and not do anything else for this betaValue
         if [ ! -f $outputFileGlobalPath ]; then
-            cecho lr " File " file "$BHMAS_outputFilename" " not found in " dir "$runBetaDirectory" " folder.\n The value " emph "beta = $betaValue" " will be skipped!"
+            Error "File " file "$BHMAS_outputFilename" " not found in " dir "$runBetaDirectory" " folder.\n" "The value " emph "beta = $betaValue" " will be skipped!"
             BHMAS_problematicBetaValues+=( $betaValue )
             return 1
         fi
@@ -120,8 +121,8 @@ function __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAnd
         if ! awk -v tr="${BHMAS_trajectoriesToBeResumedFrom[$betaValue]}"\
              'BEGIN{found=1} $1<tr{print $0} $1==(tr-1){found=0} END{exit found}'\
              ${trashFolderName}/$(basename $outputFileGlobalPath) > $outputFileGlobalPath; then
-            cecho lr "\n Measurement for trajectory " emph "$(( BHMAS_trajectoriesToBeResumedFrom[$betaValue] - 1 ))" " not found in outputfile "\
-                  emph "$outputFileGlobalPath" "\n The value " emph "beta = $betaValue" " will be skipped!"
+            Error "Measurement for trajectory " emph "$(( BHMAS_trajectoriesToBeResumedFrom[$betaValue] - 1 ))" " not found in outputfile "\
+                  emph "$outputFileGlobalPath\n" "The value " emph "beta = $betaValue" " will be skipped!"
             mv $trashFolderName/* $runBetaDirectory || exit $BHMAS_fatalBuiltin
             rmdir $trashFolderName || exit $BHMAS_fatalBuiltin
             BHMAS_problematicBetaValues+=( $betaValue )
@@ -145,19 +146,19 @@ function __static__CheckWhetherFoundCheckpointIsGoodToContinue()
 {
     #The variable nameOfLastConfiguration should be set here, if not it means no conf was available!
     if [ "$nameOfLastConfiguration" == "" ]; then
-        cecho lr "\n No configuration found in " dir "$runBetaDirectory" ".\n The value " emph "beta = $betaValue" " will be skipped!"
+        Error "No configuration found in " dir "$runBetaDirectory" ".\n" "The value " emph "beta = $betaValue" " will be skipped!"
         BHMAS_problematicBetaValues+=( $betaValue )
         return 1
     fi
     if [ "$nameOfLastPRNG" = "" ]; then
-        cecho " " ly B U "WARNING" uU ":" uB " No valid PRNG file for configuration " file "${BHMAS_betaPrefix}${betaValue}/$nameOfLastConfiguration" " was found! Using a random seed."
+        Warning "No valid PRNG file for configuration " file "${BHMAS_betaPrefix}${betaValue}/$nameOfLastConfiguration" " was found! Using a random seed."
     fi
     #Check that, in case the continue is done from a "numeric" configuration, the number of conf and prng is the same
     if [[ "$nameOfLastConfiguration" =~ [.][0-9]+$ ]] && [[ "$nameOfLastPRNG" =~ [.][0-9]+$ ]]; then
         if [ $(sed 's/^0*//g' <<< "${nameOfLastConfiguration#*.}") -ne $(sed 's/^0*//g' <<< "${nameOfLastPRNG#*.}") ]; then
-            cecho lr "\n The numbers of " emph "${BHMAS_configurationPrefix//\\/}xxxxx" " and "\
+            Error "The numbers of " emph "${BHMAS_configurationPrefix//\\/}xxxxx" " and "\
                   emph "${BHMAS_prngPrefix//\\/}xxxxx" " are different! Check the respective folder!\n"\
-                  " The value " emph "beta = $betaValue" " will be skipped!"
+                  "The value " emph "beta = $betaValue" " will be skipped!"
             BHMAS_problematicBetaValues+=( $betaValue )
             return 1
         fi
@@ -195,13 +196,13 @@ function __static__FindAndReplaceSingleOccurenceInFile()
     if [ ! -f "$filename" ]; then
         Fatal $BHMAS_fatalFileNotFound "File " file "$filename" " has not been found!"
     elif [ $(grep -c "$stringToBeFound" $filename) -eq 0 ]; then
-        cecho lr "\n The string " emph "$stringToBeFound" " has " emph "not been found" " in file "\
-              file "${filename##$BHMAS_runDirWithBetaFolders/}" "! The value " emph "beta = $betaValue" " will be skipped!"
+        Error "The string " emph "$stringToBeFound" " has " emph "not been found" " in file "\
+              file "${filename##$BHMAS_runDirWithBetaFolders/}" "!\n" "The value " emph "beta = $betaValue" " will be skipped!"
         BHMAS_problematicBetaValues+=( $betaValue )
         return 1
     elif [ $(grep -c "$stringToBeFound" $filename) -gt 1 ]; then
-        cecho lr "\n The string " emph "$stringToBeFound" " occurs " emph "more than once" " in file "\
-              file "${filename##$BHMAS_runDirWithBetaFolders/}" "! The value " emph "beta = $betaValue" " will be skipped!"
+        Error "The string " emph "$stringToBeFound" " occurs " emph "more than once" " in file "\
+              file "${filename##$BHMAS_runDirWithBetaFolders/}" "!\n" "The value " emph "beta = $betaValue" " will be skipped!"
         BHMAS_problematicBetaValues+=( $betaValue )
         return 1
     fi
@@ -229,7 +230,7 @@ function __static__ModifyOptionsInInputFile()
             cg_iteration_block_size=* )         oldString="cg_iteration_block_size=[0-9]\+";           newString="cg_iteration_block_size=${1#*=}" ;;
             num_timescales=* )                  oldString="num_timescales=[0-9]\+";                    newString="num_timescales=${1#*=}" ;;
             * )
-                cecho lr "\n The option " emph "$1" " cannot be handled in the continue scenario.\n Simulation cannot be continued. The value " emph "beta = $betaValue" " will be skipped!"
+                Error "The option " emph "$1" " cannot be handled in the continue scenario.\n" "Simulation cannot be continued. The value " emph "beta = $betaValue" " will be skipped!"
                 BHMAS_problematicBetaValues+=( $betaValue )
                 return 1 ;;
         esac
@@ -282,7 +283,7 @@ function __static__FindAndSetNumberOfTrajectoriesAlreadyProduced()
         fi
     fi
     if [ "$numberOfTrajectoriesAlreadyProduced" = '' ]; then
-        cecho lr "It was not possible to deduce the number of already produced trajectories! The value " emph "beta = $betaValue" " will be skipped!"
+        Error "It was not possible to deduce the number of already produced trajectories!\n" "The value " emph "beta = $betaValue" " will be skipped!"
         BHMAS_problematicBetaValues+=( $betaValue )
         return 1
     else
@@ -292,15 +293,14 @@ function __static__FindAndSetNumberOfTrajectoriesAlreadyProduced()
 
 function __static__IsSimulationFinished()
 {
-    local startingStatistics goalStatistics
-    startingStatistics=$1; goalStatistics=$2
+    local startingStatistics goalStatistics continueOptionString
+    startingStatistics=$1; goalStatistics=$2; continueOptionString="--continue"
     if [ $startingStatistics -gt $goalStatistics ]; then
-        cecho lr " It was found that the number of done measurements is " emph "$startingStatistics > $goalStatistics = goal trajectory" "."
         if [ $BHMAS_trajectoryNumberUpToWhichToContinue -ne 0 ]; then
-            cecho lr " The option " emph "--continue=$BHMAS_trajectoryNumberUpToWhichToContinue" " cannot be applied. The value " emph "beta = $betaValue" " will be skipped!"
-        else
-            cecho lr " The option " emph "--continue" " cannot be applied. The value " emph "beta = $betaValue" " will be skipped!"
+            continueOptionString+="=$BHMAS_trajectoryNumberUpToWhichToContinue"
         fi
+        Error "It was found that the number of done measurements is " emph "$startingStatistics > $goalStatistics = goal trajectory" ".\n"\
+              "The option " emph "--continue" " cannot be applied. The value " emph "beta = $betaValue" " will be skipped!"
         BHMAS_problematicBetaValues+=( $betaValue )
         return 1
     elif [ $startingStatistics -eq $goalStatistics ]; then
@@ -360,8 +360,8 @@ function __static__HandlePbpInInputFile()
         pbpStrings=(sourcetype sourcecontent num_sources pbp_measurements ferm_obs_to_single_file ferm_obs_pbp_prefix)
         for string in "${pbpStrings[@]}"; do
             if [ $(grep -c "$string" $inputFileGlobalPath) -ne 0 ]; then
-                cecho lr " The option " emph "measure_pbp" " is not present in the input file but one or more specification about how to calculate\n"\
-                      " the chiral condensate are present. Suspicious situation, investigate! The value " emph "beta = $betaValue" " will be skipped!"
+                Error "The option " emph "measure_pbp" " is not present in the input file but one or more specification about how to calculate\n"\
+                      "the chiral condensate are present. Suspicious situation, investigate! The value " emph "beta = $betaValue" " will be skipped!"
                 BHMAS_problematicBetaValues+=( $betaValue )
                 __static__RestoreOriginalInputFile && return 1
             fi
@@ -391,8 +391,8 @@ function __static__HandleMassPreconditioningInInputFile()
                 massPreconditioningStrings=(solver_mp kappa_mp integrator2 integrationsteps2)
                 for string in "${massPreconditioningStrings[@]}"; do
                     if [ $(grep -c "$string" $inputFileGlobalPath) -ne 0 ]; then
-                        cecho lr " The option " emph "use_mp" " is not present in the input file but one or more specification about how to use\n"\
-                              " mass preconditioning are present. Suspicious situation, investigate! The value " emph "beta = $betaValue" " will be skipped!"
+                        Error "The option " emph "use_mp" " is not present in the input file but one or more specification about how to use\n"\
+                              "mass preconditioning are present. Suspicious situation, investigate! The value " emph "beta = $betaValue" " will be skipped!"
                         BHMAS_problematicBetaValues+=( $betaValue )
                         __static__RestoreOriginalInputFile && return 1
                     fi
