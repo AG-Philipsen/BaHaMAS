@@ -277,7 +277,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
             listOfVariablesAsString+="\n$(cecho -d ly " " B) $variable"
         done
         Error "To run " B "BaHaMAS" uB " $option " "option, the following " emph "variable(s)" " must be " emph "set" " and " emph "not empty" ": $listOfVariablesAsString"
-        Fatal -n $BHMAS_fatalVariableUnset "Please set the above variables properly using the " emph "--setup" " option and run " B "BaHaMAS" uB " again."
+        Fatal $BHMAS_fatalVariableUnset -n "Please set the above variables properly using the " emph "--setup" " option and run " B "BaHaMAS" uB " again."
     else
         for index in "${!neededFolders[@]}"; do
             if [ -d "${neededFolders[$index]}" ]; then
