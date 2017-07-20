@@ -81,14 +81,14 @@ function __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAnd
         #       Implement mechanism to undo file move/modification maybe trapping CTRL-C or acting in case of UserSaidNo at the end of this
         #       function (ideally asking the user again if he wants to restore everything as it was).
 
-        nameOfLastConfiguration=$(printf "${BHMAS_configurationPrefix//\\/}%05d" "${BHMAS_trajectoriesToBeResumedFrom[$betaValue]}")
+        nameOfLastConfiguration=$(printf "${BHMAS_configurationPrefix//\\/}%0${BHMAS_checkpointMinimumNumberOfDigits}d" "${BHMAS_trajectoriesToBeResumedFrom[$betaValue]}")
         if [ ! -f "${runBetaDirectory}/${nameOfLastConfiguration}" ];then
             Error "Configuration " emph "$nameOfLastConfiguration" " not found in "\
                   dir "$runBetaDirectory" " folder.\n" "The value " emph "beta = $betaValue" " will be skipped!"
             BHMAS_problematicBetaValues+=( $betaValue )
             return 1
         fi
-        nameOfLastPRNG=$(printf "prng.%05d" "${BHMAS_trajectoriesToBeResumedFrom[$betaValue]}")
+        nameOfLastPRNG=$(printf "${BHMAS_prngPrefix//\\/}%0${BHMAS_checkpointMinimumNumberOfDigits}d" "${BHMAS_trajectoriesToBeResumedFrom[$betaValue]}")
         if [ ! -f "${runBetaDirectory}/${nameOfLastPRNG}" ]; then
             nameOfLastPRNG="" #If the prng.xxxxx is not found, use random seed
         fi

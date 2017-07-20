@@ -177,6 +177,7 @@ function DeclareBaHaMASGlobalVariables()
     readonly BHMAS_configurationPrefix='conf\.'
     readonly BHMAS_prngPrefix='prng\.' #tell user about BRE http://en.wikipedia.org/wiki/Regular_expression#POSIX_basic_and_extended
     readonly BHMAS_standardCheckpointPostfix='save'
+    readonly BHMAS_checkpointMinimumNumberOfDigits=5
     readonly BHMAS_configurationRegex="${BHMAS_configurationPrefix}[0-9]\+"
     readonly BHMAS_prngRegex="${BHMAS_prngPrefix}[0-9]\+"
 }
