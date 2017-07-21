@@ -9,6 +9,7 @@ function __static__SetBetaRelatedPathVariables()
     submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${betaValue}"
     inputFileGlobalPath="${submitBetaDirectory}/${BHMAS_inputFilename}"
     outputFileGlobalPath="${runBetaDirectory}/${BHMAS_outputFilename}"
+    outputPbpFileGlobalPath="${outputFileGlobalPath}_pbp.dat"
     return 0
 }
 
@@ -127,6 +128,20 @@ function __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAnd
             rmdir $trashFolderName || exit $BHMAS_fatalBuiltin
             BHMAS_problematicBetaValues+=( $betaValue )
             return 1
+        fi
+        #Make same operations on pbp file, if existing
+        if [ -f $outputPbpFileGlobalPath ]; then
+            mv $outputPbpFileGlobalPath $trashFolderName || exit $BHMAS_fatalBuiltin
+            if ! awk -v tr="${BHMAS_trajectoriesToBeResumedFrom[$betaValue]}"\
+                 'BEGIN{found=1} $1<tr{print $0} $1==(tr-1){found=0} END{exit found}'\
+                 ${trashFolderName}/$(basename $outputPbpFileGlobalPath) > $outputPbpFileGlobalPath; then
+                Error "Measurement for trajectory " emph "$(( BHMAS_trajectoriesToBeResumedFrom[$betaValue] - 1 ))" " not found in pbp outputfile "\
+                      emph "$outputPbpFileGlobalPath\n" "The value " emph "beta = $betaValue" " will be skipped!"
+                mv $trashFolderName/* $runBetaDirectory || exit $BHMAS_fatalBuiltin
+                rmdir $trashFolderName || exit $BHMAS_fatalBuiltin
+                BHMAS_problematicBetaValues+=( $betaValue )
+                return 1
+            fi
         fi
     elif [ -f "$runBetaDirectory/${BHMAS_configurationPrefix//\\/}${BHMAS_standardCheckpointPostfix}" ]; then #If resumefrom has not been given use conf.save if present, otherwise use the last checkpoint
         nameOfLastConfiguration="${BHMAS_configurationPrefix//\\/}${BHMAS_standardCheckpointPostfix}"
@@ -350,9 +365,9 @@ function __static__HandlePbpInInputFile()
         measurePbpValueForInputFile=0
     elif [ $BHMAS_measurePbp = "TRUE" ]; then
         measurePbpValueForInputFile=1
-        #If the pbp file already exists non empty, append a line to it to be sure the prompt is at the beginning of a new line
-        if [ -f ${outputFileGlobalPath}_pbp.dat ] && [ $(wc -l < ${outputFileGlobalPath}_pbp.dat) -ne 0 ]; then
-            printf "" >> ${outputFileGlobalPath}_pbp.dat
+        #If the pbp file already exists non empty, add end of line to it to be sure the prompt is at the beginning of a new line
+        if [ -f $outputPbpFileGlobalPath ] && [ $(wc -l < $outputPbpFileGlobalPath) -ne 0 ]; then
+            sed -i '$a\' $outputPbpFileGlobalPath
         fi
     fi
     optionsToBeAddedOrModified=("measure_pbp=$measurePbpValueForInputFile")
@@ -507,7 +522,8 @@ function __static__HandleFurtherOptionsInInputFile()
 
 function ProcessBetaValuesForContinue_SLURM()
 {
-    local index betaValue betaValuesToBeSubmitted nameOfLastConfiguration nameOfLastPRNG originalInputFileGlobalPath
+    local betaValue runBetaDirectory submitBetaDirectory inputFileGlobalPath outputFileGlobalPath outputPbpFileGlobalPath\
+          betaValuesToBeSubmitted nameOfLastConfiguration nameOfLastPRNG originalInputFileGlobalPath
     betaValuesToBeSubmitted=()
     #Associative array filled in the function called immediately after (global because of bug, see link here below)
     declare -A -g statusOfJobsContainingGivenBeta=() #http://lists.gnu.org/archive/html/bug-bash/2013-09/msg00025.html

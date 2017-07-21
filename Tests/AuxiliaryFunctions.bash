@@ -102,7 +102,7 @@ function MakeTestPreliminaryOperations()
         continue-* )
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateBetaFolder
-            __static__CopyAuxiliaryFilesToBetaFolder "fakeInput" "fakeOutput"
+            __static__CopyAuxiliaryFilesToBetaFolder "fakeInput" "fakeOutput" "fakeOutput_pbp.dat"
             __static__CreateFilesInBetaFolder "conf.save" "prng.save"
             case "${1##*-}" in
                 last )
