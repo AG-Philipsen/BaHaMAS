@@ -65,7 +65,8 @@ function __static__CalculateWalltimeExtractingNumberOfTrajectoriesPerBetaAndUsin
     if [ "$BHMAS_walltime" != '' ]; then
         finalWalltime="$BHMAS_walltime"
     elif [ ${#BHMAS_timesPerTrajectory[@]} -eq 0 ]; then
-        finalWalltime="$BHMAS_walltime" #Fine to assume it is not empty, checked already in parsing betas file
+        Internal "Variable " emph "BHMAS_walltime" " empty and no time per trajectory from betas file!"\
+                 "\nThis should have been avoided before in betas file parser!"
     else
         for beta in "${betaValues[@]}"; do
             inputFileGlobalPath="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${beta}/${BHMAS_inputFilename}"
