@@ -104,9 +104,7 @@ function PrintMainHelper()
                                 "(it is left in the output file folder with the name outputfilename_date)."\
                                 "$(cecho B "Secondary options" uB ": " $mutuallyExclusiveColor "-a | --all" $helperColor " to clean output files for all betas in present folder")"
     __static__AddOptionToHelper -e "--completeBetasFile[=number]" "The beta file is completed adding for each beta new chains in order to have as many"\
-                                "chain as specified. If no number is specified, 4 is used. This option, if"\
-                                "$(cecho $mutuallyExclusiveColor "--doNotUseMultipleChains" $helperColor " has not been given, uses the seed in the second field to")"\
-                                "generate new chains (or one new field containing the seed is inserted)."
+                                "chains as specified. If no number is specified, 4 is used. New seeds are randomly drawn."
     __static__AddOptionToHelper -e "-U | --uncommentBetas" "This option uncomments the specified betas (all remaining entries will be commented)."\
                                 "The betas can be specified either with a seed or without. The format of the specified string"\
                                 "$(cecho "can either contain the output of the " $mutuallyExclusiveColor "--liststatus" $helperColor " option, e.g. " c "5.4380_s5491_NC" $helperColor ", or simply")"\
