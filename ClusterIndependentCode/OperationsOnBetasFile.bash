@@ -301,9 +301,9 @@ function __static__ToggleDesiredLines()
     for beta in ${BHMAS_betasToBeToggled[@]+"${BHMAS_betasToBeToggled[@]}"}; do
         tmpArray=( ${beta//_$BHMAS_seedPrefix/ } )
         beta="${tmpArray[0]}"
-        seed="${tmpArray[1]:-}" #Possibly empty
+        seed="${tmpArray[1]:-}" #Possibly empty, if not it has _fH or _fC or _NC which are removed below
         #Here it is fine to assume that beta is in first position (with maybe space in front)
-        sed -i 's/^\([[:space:]]*\)'$1'\(.*'$beta'.*'$seed'.*\)$/\1'$2'\2/' $BHMAS_betasFilename
+        sed -i 's/^\([[:space:]]*\)'$1'\(.*'$beta'.*'${seed%%_*}'.*\)$/\1'$2'\2/' $BHMAS_betasFilename
     done
 }
 
