@@ -244,6 +244,7 @@ function __static__ModifyOptionsInInputFile()
             intsteps2=* )                       oldString="integrationsteps2=[0-9]\+";                 newString="integrationsteps2=${1#*=}" ;;
             cg_iteration_block_size=* )         oldString="cg_iteration_block_size=[0-9]\+";           newString="cg_iteration_block_size=${1#*=}" ;;
             num_timescales=* )                  oldString="num_timescales=[0-9]\+";                    newString="num_timescales=${1#*=}" ;;
+            num_pseudofermions=* )              oldString="num_pseudofermions=[0-9]\+";                newString="num_pseudofermions=${1#*=}" ;;
             * )
                 Error "The option " emph "$1" " cannot be handled in the continue scenario.\n" "Simulation cannot be continued. The value " emph "beta = $betaValue" " will be skipped!"
                 BHMAS_problematicBetaValues+=( $betaValue )
@@ -390,9 +391,37 @@ function __static__HandlePbpInInputFile()
         __static__AddOptionsToInputFile ${optionsToBeAddedOrModified[@]}
         __static__PrintAddedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
     else
+        #If measure_pbp is in input file we assume that relative options are there and fine
         __static__ModifyOptionsInInputFile ${optionsToBeAddedOrModified[@]} || { __static__RestoreOriginalInputFile && return 1; }
         __static__PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
     fi
+    return 0
+}
+
+function __static__HandleMultiplePseudofermionsInInputFile()
+{
+    local oldOption newOption optionsToBeAddedOrModified
+    optionsToBeAddedOrModified=("num_pseudofermions=${BHMAS_numberOfPseudofermions}")
+    if [ $(grep -c "num_pseudofermions" $inputFileGlobalPath) -eq 0 ]; then
+        __static__AddOptionsToInputFile ${optionsToBeAddedOrModified[@]}
+        __static__PrintAddedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
+    else
+        __static__ModifyOptionsInInputFile ${optionsToBeAddedOrModified[@]} || { __static__RestoreOriginalInputFile && return 1; }
+        __static__PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
+    fi
+    #Always replace approx files with correct ones (maybe unnecessary, but easy to be done always)
+    oldOption="approx_heatbath_file=.*/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_\(pf[1-9]\+_\)?Approx_Heatbath"
+    newOption="${oldOption%%/*}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Heatbath"
+    [ $BHMAS_numberOfPseudofermions -gt 1 ] && newOption="${newOption/Approx_Heatbath/pf${BHMAS_numberOfPseudofermions}_Approx_Heatbath}"
+    __static__FindAndReplaceSingleOccurenceInFile $inputFileGlobalPath "$oldString" "$newString" || { __static__RestoreOriginalInputFile && return 1; }
+    oldOption="approx_md_file=.*/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_\(pf[1-9]\+_\)?Approx_MD"
+    newOption="${oldOption%%/*}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_MD"
+    [ $BHMAS_numberOfPseudofermions -gt 1 ] && newOption="${newOption/Approx_MD/pf${BHMAS_numberOfPseudofermions}_Approx_MD}"
+    __static__FindAndReplaceSingleOccurenceInFile $inputFileGlobalPath "$oldString" "$newString" || { __static__RestoreOriginalInputFile && return 1; }
+    oldOption="approx_metropolis_file=.*/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_\(pf[1-9]\+_\)?Approx_Metropolis"
+    newOption="${oldOption%%/*}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Metropolis"
+    [ $BHMAS_numberOfPseudofermions -gt 1 ] && newOption="${newOption/Approx_Metropolis/pf${BHMAS_numberOfPseudofermions}_Approx_Metropolis}"
+    __static__FindAndReplaceSingleOccurenceInFile $inputFileGlobalPath "$oldString" "$newString" || { __static__RestoreOriginalInputFile && return 1; }
     return 0
 }
 
@@ -536,14 +565,15 @@ function ProcessBetaValuesForContinue_SLURM()
         __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAndOutputFileIfNeeded  || continue
         __static__CheckWhetherFoundCheckpointIsGoodToContinue                                      || continue
         __static__MakeTemporaryCopyOfOriginalInputFile
-        __static__HandleMeasurementsInInputFile         || continue
-        __static__HandlePbpInInputFile                  || continue
-        __static__HandleMassPreconditioningInInputFile  || continue
-        __static__HandleStartConditionInInputFile       || continue
-        __static__HandleStartConfigurationInInputFile   || continue
-        __static__HandlePRNGStateInInputFile            || continue
-        __static__HandleIntegrationStepsInInputFile     || continue
-        __static__HandleFurtherOptionsInInputFile       || continue
+        __static__HandleMeasurementsInInputFile            || continue
+        __static__HandlePbpInInputFile                     || continue
+        __static__HandleMultiplePseudofermionsInInputFile  || continue
+        __static__HandleMassPreconditioningInInputFile     || continue
+        __static__HandleStartConditionInInputFile          || continue
+        __static__HandleStartConfigurationInInputFile      || continue
+        __static__HandlePRNGStateInInputFile               || continue
+        __static__HandleIntegrationStepsInInputFile        || continue
+        __static__HandleFurtherOptionsInInputFile          || continue
         #If the script runs fine and it arrives here, it means no 'continue' was done
         rm $originalInputFileGlobalPath
         betaValuesToBeSubmitted+=( $betaValue )
