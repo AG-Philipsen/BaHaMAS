@@ -413,15 +413,15 @@ function __static__HandleMultiplePseudofermionsInInputFile()
     oldOption="approx_heatbath_file=.*/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_\(pf[1-9]\+_\)?Approx_Heatbath"
     newOption="${oldOption%%/*}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Heatbath"
     [ $BHMAS_numberOfPseudofermions -gt 1 ] && newOption="${newOption/Approx_Heatbath/pf${BHMAS_numberOfPseudofermions}_Approx_Heatbath}"
-    __static__FindAndReplaceSingleOccurenceInFile $inputFileGlobalPath "$oldString" "$newString" || { __static__RestoreOriginalInputFile && return 1; }
+    __static__FindAndReplaceSingleOccurenceInFile $inputFileGlobalPath "$oldOption" "$newOption" || { __static__RestoreOriginalInputFile && return 1; }
     oldOption="approx_md_file=.*/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_\(pf[1-9]\+_\)?Approx_MD"
     newOption="${oldOption%%/*}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_MD"
     [ $BHMAS_numberOfPseudofermions -gt 1 ] && newOption="${newOption/Approx_MD/pf${BHMAS_numberOfPseudofermions}_Approx_MD}"
-    __static__FindAndReplaceSingleOccurenceInFile $inputFileGlobalPath "$oldString" "$newString" || { __static__RestoreOriginalInputFile && return 1; }
+    __static__FindAndReplaceSingleOccurenceInFile $inputFileGlobalPath "$oldOption" "$newOption" || { __static__RestoreOriginalInputFile && return 1; }
     oldOption="approx_metropolis_file=.*/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_\(pf[1-9]\+_\)?Approx_Metropolis"
     newOption="${oldOption%%/*}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Metropolis"
     [ $BHMAS_numberOfPseudofermions -gt 1 ] && newOption="${newOption/Approx_Metropolis/pf${BHMAS_numberOfPseudofermions}_Approx_Metropolis}"
-    __static__FindAndReplaceSingleOccurenceInFile $inputFileGlobalPath "$oldString" "$newString" || { __static__RestoreOriginalInputFile && return 1; }
+    __static__FindAndReplaceSingleOccurenceInFile $inputFileGlobalPath "$oldOption" "$newOption" || { __static__RestoreOriginalInputFile && return 1; }
     return 0
 }
 
