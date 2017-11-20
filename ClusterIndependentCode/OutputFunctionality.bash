@@ -152,7 +152,7 @@ function UserSaidYes()
         elif [ "$userAnswer" = "N" ]; then
             return 1
         else
-            cecho ly "\n Please enter " B "Y" uB " (yes) or " B "N" uB " (no): "
+            cecho -n ly "\n Please enter " B "Y" uB " (yes) or " B "N" uB " (no): "
         fi
     done
 }
