@@ -124,6 +124,14 @@ function ParseCommandLineOption()
                 fi
                 shift 2 ;;
 
+            --pf )
+                if [[ ! ${2:-} =~ ^[1-9][0-9]*$ ]]; then
+                    PrintOptionSpecificationErrorAndExit "$1"
+                else
+                    BHMAS_numberOfPseudofermions=$2
+                fi
+                shift 2 ;;
+
             --doNotMeasurePbp )
                 BHMAS_measurePbp="FALSE"; shift ;;
 

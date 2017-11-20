@@ -28,15 +28,24 @@ function ProduceInputFile_CL2QCD()
             "fermact=rooted_stagg"\
             "num_tastes=$BHMAS_nflavour"
         if [ $BHMAS_useRationalApproxFiles = "TRUE" ]; then
-            __static__AddToInputFile \
-                "read_rational_approximations_from_file=1"\
-                "approx_heatbath_file=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_${BHMAS_approxHeatbathFilename}"\
-                "approx_md_file=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_${BHMAS_approxMDFilename}"\
-                "approx_metropolis_file=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_${BHMAS_approxMetropolisFilename}"
+            __static__AddToInputFile "read_rational_approximations_from_file=1"
+            if [ $BHMAS_numberOfPseudofermions -eq 1 ]; then
+                __static__AddToInputFile\
+                    "approx_heatbath_file=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_${BHMAS_approxHeatbathFilename}"\
+                    "approx_md_file=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_${BHMAS_approxMDFilename}"\
+                    "approx_metropolis_file=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_${BHMAS_approxMetropolisFilename}"
+            else
+                __static__AddToInputFile\
+                    "approx_heatbath_file=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${BHMAS_numberOfPseudofermions}_${BHMAS_approxHeatbathFilename}"\
+                    "approx_md_file=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${BHMAS_numberOfPseudofermions}_${BHMAS_approxMDFilename}"\
+                    "approx_metropolis_file=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${BHMAS_numberOfPseudofermions}_${BHMAS_approxMetropolisFilename}"
+            fi
         else
             __static__AddToInputFile "read_rational_approximations_from_file=0"
         fi
-        __static__AddToInputFile "findminmax_max=10000"
+        __static__AddToInputFile "num_pseudofermions=${BHMAS_numberOfPseudofermions}"\
+                                 "findminmax_max=10000"
+
     fi
     __static__AddToInputFile \
         "use_cpu=false"\
