@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------#
 #   This file is part of BaHaMAS and it is subject to the terms and conditions  #
-#   defined in the LICENCE.md file, which is distributed within the software.   #
+#   defined in the LICENSE.md file, which is distributed within the software.   #
 #-------------------------------------------------------------------------------#
 
 #NOTE: We want to discard a potential equal sign between option name
