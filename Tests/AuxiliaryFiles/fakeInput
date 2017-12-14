@@ -1,9 +1,9 @@
 fermact=rooted_stagg
 num_tastes=2
 read_rational_approximations_from_file=1
-approx_heatbath_file=/lustre/nyx/lcsc/asciarra/StaggeredProject/Rational_Approximations/Nf2_Approx_Heatbath
-approx_md_file=/lustre/nyx/lcsc/asciarra/StaggeredProject/Rational_Approximations/Nf2_Approx_MD
-approx_metropolis_file=/lustre/nyx/lcsc/asciarra/StaggeredProject/Rational_Approximations/Nf2_Approx_Metropolis
+approx_heatbath_file=/home/sciarra/BaHaMAS/Tests/StaggeredFakeProject/Rational_Approximations/Nf2_Approx_Heatbath
+approx_md_file=/home/sciarra/BaHaMAS/Tests/StaggeredFakeProject/Rational_Approximations/Nf2_Approx_MD
+approx_metropolis_file=/home/sciarra/BaHaMAS/Tests/StaggeredFakeProject/Rational_Approximations/Nf2_Approx_Metropolis
 findminmax_max=10000
 use_cpu=false
 theta_fermion_spatial=0
