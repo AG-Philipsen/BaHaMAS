@@ -191,7 +191,14 @@ function ListSimulationsStatus_SLURM()
             else
                 local ACCEPTANCE_LAST=" --- "
             fi
-            local MAX_DELTAS=$(awk 'BEGIN {max=0} {if(sqrt($8^2)>max){max=sqrt($8^2)}} END {printf "%6g", max}' $OUTPUTFILE_GLOBALPATH)
+            #local maxSpikeToMeanAsNSigma=$(awk 'BEGIN {max=0} {if(sqrt($8^2)>max){max=sqrt($8^2)}} END {printf "%6g", max}' $OUTPUTFILE_GLOBALPATH)
+            local maxSpikeToMeanAsNSigma
+            maxSpikeToMeanAsNSigma=$(
+                awk 'BEGIN{mean=0; sigma=0; maxSpike=0; firstFile=1}
+                     NR==FNR{mean+=$8; next}
+                     firstFile==1{nDat=NR-1; mean/=nDat; firstFile=0}
+                     {delta=($8-mean); sigma+=delta^2; if(delta<0 && sqrt(delta^2)>maxSpike){maxSpike=sqrt(delta^2)}}
+                     END{sigma=sqrt(sigma/nDat); printf "%6g", maxSpike/sigma}' $OUTPUTFILE_GLOBALPATH $OUTPUTFILE_GLOBALPATH)
             if [[ $STATUS == "RUNNING" ]]; then
                 local TIME_FROM_LAST_MODIFICATION=`expr $(date +%s) - $(stat -c %Y $OUTPUTFILE_GLOBALPATH)`
             else
@@ -205,7 +212,7 @@ function ListSimulationsStatus_SLURM()
             local NUMBER_LAST_TRAJECTORY="----"
             local ACCEPTANCE=" ----"
             local ACCEPTANCE_LAST=" ----"
-            local MAX_DELTAS=" ----"
+            local maxSpikeToMeanAsNSigma=" ----"
             local TIME_FROM_LAST_MODIFICATION="------"
 
         fi
@@ -242,7 +249,7 @@ $(__static__ColorClean $TO_BE_CLEANED)%8s${BHMAS_defaultListstatusColor} \
 [$(GoodAcc $ACCEPTANCE_LAST)%s %%${BHMAS_defaultListstatusColor}] \
 %s-%s%s%s\t\
 $(__static__ColorStatus $STATUS)%9s${BHMAS_defaultListstatusColor}\t\
-$(__static__ColorDeltaS $MAX_DELTAS)%9s${BHMAS_defaultListstatusColor}\t   \
+$(__static__ColorDeltaS $maxSpikeToMeanAsNSigma)%9s${BHMAS_defaultListstatusColor}\t   \
 $(__static__ColorTime $TIME_FROM_LAST_MODIFICATION)%s${BHMAS_defaultListstatusColor}      \
 %6s \
 ( %s ) \
@@ -252,15 +259,15 @@ $(__static__ColorTime $TIME_FROM_LAST_MODIFICATION)%s${BHMAS_defaultListstatusCo
             "$ACCEPTANCE" \
             "$ACCEPTANCE_LAST" \
             "$INT0" "$INT1" "$INT2" "$K_MP" \
-            "$STATUS"   "$MAX_DELTAS" \
+            "$STATUS"   "$maxSpikeToMeanAsNSigma" \
             "$(awk '{if($1 ~ /^[[:digit:]]+$/){printf "%6d", $1}else{print $1}}' <<< "$TIME_FROM_LAST_MODIFICATION") sec. ago" \
             "$NUMBER_LAST_TRAJECTORY" \
             "$(awk '{if($1 ~ /^[[:digit:]]+$/ && $2 ~ /^[[:digit:]]+$/){printf "%3ds | %3ds", $1, $2}else if($1 == "ERR" || $2 == "ERR"){print "_errorMeas_"}else{print "notMeasured"}}' <<< "$TIME_LAST_TRAJECTORY $AVERAGE_TIME_PER_TRAJECTORY")"
 
         if [ $TO_BE_CLEANED -eq 0 ]; then
-            printf "%s\t\t%8s (%s %%) [%s %%]  %s-%s%s%s\t%9s\t%s\n"   "$(__static__GetShortenedBetaString)"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$ACCEPTANCE_LAST"   "$INT0" "$INT1" "$INT2" "$K_MP"   "$STATUS"   "$MAX_DELTAS" >> $JOBS_STATUS_FILE
+            printf "%s\t\t%8s (%s %%) [%s %%]  %s-%s%s%s\t%9s\t%s\n"   "$(__static__GetShortenedBetaString)"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$ACCEPTANCE_LAST"   "$INT0" "$INT1" "$INT2" "$K_MP"   "$STATUS"   "$maxSpikeToMeanAsNSigma" >> $JOBS_STATUS_FILE
         else
-            printf "%s\t\t%8s (%s %%) [%s %%]  %s-%s%s%s\t%9s\t%s\t ---> File to be cleaned!\n"   "$(__static__GetShortenedBetaString)"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$ACCEPTANCE_LAST"   "$INT0" "$INT1" "$INT2" "$K_MP"   "$STATUS"   "$MAX_DELTAS" >> $JOBS_STATUS_FILE
+            printf "%s\t\t%8s (%s %%) [%s %%]  %s-%s%s%s\t%9s\t%s\t ---> File to be cleaned!\n"   "$(__static__GetShortenedBetaString)"   "$TRAJECTORIES_DONE"   "$ACCEPTANCE"   "$ACCEPTANCE_LAST"   "$INT0" "$INT1" "$INT2" "$K_MP"   "$STATUS"   "$maxSpikeToMeanAsNSigma" >> $JOBS_STATUS_FILE
         fi
 
     done #Loop on BETA
