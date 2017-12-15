@@ -101,7 +101,7 @@ function ListSimulationsStatus_SLURM()
     rm -f $jobsStatusFile
 
     cecho -d "\n${BHMAS_defaultListstatusColor}==============================================================================================================================================="
-    cecho -n -d lm "$(printf "%s\t\t  %s\t  %s\t   %s\t  %s\t%s\n\e[0m"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "MinDS/sigma [>4s #|th.] [>5s #|th.]" "Last tr. finished" " Tr: # (time last|av.)")"
+    cecho -n -d lm "$(printf "%s\t\t  %s\t  %s\t   %s\t  %s\t%s\n\e[0m"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "MaxSpikeDS/sigma [>4s #|th.] [>5s #|th.]" "Last tr. finished" " Tr: # (time last|av.)")"
     printf "%s\t\t\t  %s\t  %s\t%s\t  %s\t%s\n"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" >> $jobsStatusFile
 
     jobsMetainformationArray=( $(__static__ExtractMetaInformationFromQueuedJobs) )
