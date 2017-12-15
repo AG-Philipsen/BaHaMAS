@@ -262,7 +262,7 @@ $(__static__ColorClean $toBeCleaned)%8s${BHMAS_defaultListstatusColor} \
 [$(GoodAcc $acceptanceLastBunchOfTrajectories)%s %%${BHMAS_defaultListstatusColor}] \
 %s-%s%s%s\t\
 $(__static__ColorStatus $jobStatus)%9s${BHMAS_defaultListstatusColor}\t\
-$(__static__ColorDeltaS $maxSpikeToMeanAsNSigma)%7s${BHMAS_defaultListstatusColor}    %5s %5s\t      \
+$(__static__ColorDeltaS $maxSpikeToMeanAsNSigma)%7s${BHMAS_defaultListstatusColor}    %8s %-8s  \
 $(__static__ColorTime $timeFromLastTrajectory)%s${BHMAS_defaultListstatusColor}   \
 %7s \
 ( %s ) \
