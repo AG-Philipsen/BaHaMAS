@@ -3,13 +3,14 @@
 #   defined in the LICENSE.md file, which is distributed within the software.   #
 #-------------------------------------------------------------------------------#
 
-function __static__ExtractBetasFromJOBNAME()
+function __static__ExtractBetasFrom()
 {
-    local betasString temporalArray betaValuesArray element betaValue seedsArray seed
+    local jobName betasString temporalArray betaValuesArray element betaValue seedsArray seed
+    jobName="$1"
     #Here it is supposed that the name of the job is ${BHMAS_parametersString}_(...)
     #The goal of this function is to get an array whose elements are bx.xxxx_syyyy and since we use involved bash lines it is better to say that:
-    #  1) from JOBNAME we take everything after the BHMAS_betaPrefix
-    betasString=$(awk -v pref="$BHMAS_betaPrefix" '{print substr($0, index($0, pref))}' <<< "$JOBNAME")
+    #  1) from jobName we take everything after the BHMAS_betaPrefix
+    betasString=$(awk -v pref="$BHMAS_betaPrefix" '{print substr($0, index($0, pref))}' <<< "$jobName")
     #  2) we split on the BHMAS_betaPrefix in order to get all the seeds referred to the same beta
     temporalArray=( $(awk -v pref="$BHMAS_betaPrefix" '{split($1, res, pref); for (i in res) print res[i]}' <<< "$betasString") )
     #  3) we take the value of the beta and of the seeds building up the final array
@@ -28,9 +29,11 @@ function __static__ExtractBetasFromJOBNAME()
     printf "%s " "${betaValuesArray[@]}"
 }
 
-function __static__ExtractPostfixFromJOBNAME()
+function __static__ExtractPostfixFrom()
 {
-    local postfix; postfix=${JOBNAME##*_}
+    local jobName postfix
+    jobName="$1"
+    postfix=${jobName##*_}
     if [ "$postfix" == "TC" ]; then
         printf "thermalizeFromConf"
     elif [ "$postfix" == "TH" ]; then
@@ -40,26 +43,26 @@ function __static__ExtractPostfixFromJOBNAME()
     elif [ "$postfix" == "Tuning" ]; then
         printf "tuning"
         #Also in the "TC" and "TH" cases we have seeds in the name, but such a cases are exluded from the elif
-    elif [ $(grep -o "_${BHMAS_seedPrefix}[[:alnum:]]\{4\}" <<< "$JOBNAME" | wc -l) -ne 0 ]; then
+    elif [ $(grep -o "_${BHMAS_seedPrefix}[[:alnum:]]\{4\}" <<< "$jobName" | wc -l) -ne 0 ]; then
         printf "continueWithNewChain"
     else
         printf ""
     fi
 }
 
-function __static__ExtractMetaInformationFromJOBNAME()
+function __static__ExtractMetaInformationFromQueuedJobs()
 {
-    local metaInformationArray jobInfoString value jobStatus jobNameBetas jobNamePostfix jobParametersString
+    local jobName metaInformationArray jobInfoString value jobStatus jobNameBetas jobNamePostfix jobParametersString
     metaInformationArray=()
     jobInfoString="$(squeue --noheader -u $(whoami) -o "%j@%T")" #here jobInfoString contains spaces at the end of the line
     for value in $jobInfoString; do #here I use the fact that jobInfoString has spaces to split it (IMPORTANT missing quotes)
-        JOBNAME=${value%@*}
+        jobName=${value%@*}
         jobStatus=${value#*@}
-        jobNameBetas=( $(__static__ExtractBetasFromJOBNAME) )
-        jobNamePostfix=$(__static__ExtractPostfixFromJOBNAME)
-        jobParametersString="${JOBNAME%%__*}"
+        jobNameBetas=( $(__static__ExtractBetasFrom $jobName) )
+        jobNamePostfix=$(__static__ExtractPostfixFrom $jobName)
+        jobParametersString="${jobName%%__*}"
         #If jobParametersString is not at the beginning of the jobname, skip job
-        [ $(grep "^${jobParametersString}" <<< "$JOBNAME" | wc -l) -eq 0 ] && continue
+        [ $(grep "^${jobParametersString}" <<< "$jobName" | wc -l) -eq 0 ] && continue
         #If the status is COMPLETING, skip job
         [ $jobStatus == "COMPLETING" ] && continue
         metaInformationArray+=( $(sed 's/ //g' <<< "${jobParametersString} | $(sed 's/ /_/g' <<< "${jobNameBetas[@]}") | postfix=${jobNamePostfix} | ${jobStatus}") )
@@ -101,7 +104,7 @@ function ListSimulationsStatus_SLURM()
     cecho -n -d lm "$(printf "%s\t\t  %s\t  %s\t   %s\t  %s\t%s\n\e[0m"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" "Last tr. finished" " Tr: # (time last|av.)")"
     printf "%s\t\t\t  %s\t  %s\t%s\t  %s\t%s\n"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" >> $jobsStatusFile
 
-    jobsMetainformationArray=( $(__static__ExtractMetaInformationFromJOBNAME) )
+    jobsMetainformationArray=( $(__static__ExtractMetaInformationFromQueuedJobs) )
 
     for beta in ${BHMAS_betaPrefix}[[:digit:]]*; do
         #Select only folders with old or new names
@@ -376,9 +379,9 @@ function __static__ColorDeltaS()
 #----------------------------------------------------------------#
 #Set functions readonly
 readonly -f\
-         __static__ExtractBetasFromJOBNAME\
-         __static__ExtractPostfixFromJOBNAME\
-         __static__ExtractMetaInformationFromJOBNAME\
+         __static__ExtractBetasFrom\
+         __static__ExtractPostfixFrom\
+         __static__ExtractMetaInformationFromQueuedJobs\
          ListSimulationsStatus_SLURM\
          __static__GetShortenedBetaString\
          GoodAcc\
