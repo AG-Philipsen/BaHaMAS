@@ -100,8 +100,8 @@ function ListSimulationsStatus_SLURM()
     jobsStatusFile="jobs_status_$localParametersString.txt"
     rm -f $jobsStatusFile
 
-    cecho -d "\n${BHMAS_defaultListstatusColor}==============================================================================================================================================="
-    cecho -n -d lm "$(printf "%s\t\t  %s\t  %s\t   %s\t  %s\t%s\n\e[0m"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "MaxSpikeDS/sigma [>4s #|th.] [>5s #|th.]" "Last tr. finished" " Tr: # (time last|av.)")"
+    cecho -d "\n${BHMAS_defaultListstatusColor}========================================================================================================================================================="
+    cecho -n -d lm "$(printf "%s\t\t  %s\t   %s     %s  %s\t  %s\n\e[0m"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "MaxSpikeDS/s [>4s,>5s #|th.]" "Last tr. finished" "Tr: # (time last|av.)")"
     printf "%s\t\t\t  %s\t  %s\t%s\t  %s\t%s\n"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" >> $jobsStatusFile
 
     jobsMetainformationArray=( $(__static__ExtractMetaInformationFromQueuedJobs) )
@@ -207,7 +207,7 @@ function ListSimulationsStatus_SLURM()
                      secondFile==1 {sigma=sqrt(sigma/nDat); secondFile=0}
                      FILENAME==ARGV[3] {if($8<mean-4*sigma){beyondIVsigma+=1}; if($8<mean-5*sigma){beyondVsigma+=1}}
                      END{expectedBeyondIVsigma=3.16712e-5*nDat; expectedBeyondVsigma=2.86652e-7*nDat;
-                         printf "%6g %d %d %d %d", maxSpike/sigma, beyondIVsigma, expectedBeyondIVsigma, beyondVsigma, expectedBeyondVsigma}' $outputFileGlobalPath $outputFileGlobalPath $outputFileGlobalPath ) )
+                         printf "%.3f %d %d %d %d", maxSpike/sigma, beyondIVsigma, expectedBeyondIVsigma, beyondVsigma, expectedBeyondVsigma}' $outputFileGlobalPath $outputFileGlobalPath $outputFileGlobalPath ) )
             maxSpikeToMeanAsNSigma=${temporaryArray[0]}
             spikesBeyondFourSigma="${temporaryArray[1]}|${temporaryArray[2]}" # In awk we rounded the expected values with %d, not with %.0f since this
             spikesBeyondFiveSigma="${temporaryArray[3]}|${temporaryArray[4]}" # could be a not so smart idea -> https://www.gnu.org/software/gawk/manual/html_node/Round-Function.html
@@ -262,10 +262,9 @@ $(__static__ColorClean $toBeCleaned)%8s${BHMAS_defaultListstatusColor} \
 [$(GoodAcc $acceptanceLastBunchOfTrajectories)%s %%${BHMAS_defaultListstatusColor}] \
 %s-%s%s%s\t\
 $(__static__ColorStatus $jobStatus)%9s${BHMAS_defaultListstatusColor}\t\
-$(__static__ColorDeltaS $maxSpikeToMeanAsNSigma)%9s${BHMAS_defaultListstatusColor}  \
-%5s %5s\t  \
-$(__static__ColorTime $timeFromLastTrajectory)%s${BHMAS_defaultListstatusColor}      \
-%6s \
+$(__static__ColorDeltaS $maxSpikeToMeanAsNSigma)%7s${BHMAS_defaultListstatusColor}    %5s %5s\t      \
+$(__static__ColorTime $timeFromLastTrajectory)%s${BHMAS_defaultListstatusColor}   \
+%7s \
 ( %s ) \
 \n\e[0m" \
             "$(__static__GetShortenedBetaString)" \
@@ -286,7 +285,7 @@ $(__static__ColorTime $timeFromLastTrajectory)%s${BHMAS_defaultListstatusColor} 
 
     done #Loop on BETA
 
-    cecho -d "${BHMAS_defaultListstatusColor}==============================================================================================================================================="
+    cecho -d "${BHMAS_defaultListstatusColor}========================================================================================================================================================="
 }
 
 function __static__GetShortenedBetaString()
