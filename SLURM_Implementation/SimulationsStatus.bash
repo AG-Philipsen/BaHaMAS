@@ -5,17 +5,17 @@
 
 function __static__ExtractBetasFrom()
 {
-    local jobName betasString temporalArray betaValuesArray element betaValue seedsArray seed
+    local jobName betasString temporaryArray betaValuesArray element betaValue seedsArray seed
     jobName="$1"
     #Here it is supposed that the name of the job is ${BHMAS_parametersString}_(...)
     #The goal of this function is to get an array whose elements are bx.xxxx_syyyy and since we use involved bash lines it is better to say that:
     #  1) from jobName we take everything after the BHMAS_betaPrefix
     betasString=$(awk -v pref="$BHMAS_betaPrefix" '{print substr($0, index($0, pref))}' <<< "$jobName")
     #  2) we split on the BHMAS_betaPrefix in order to get all the seeds referred to the same beta
-    temporalArray=( $(awk -v pref="$BHMAS_betaPrefix" '{split($1, res, pref); for (i in res) print res[i]}' <<< "$betasString") )
+    temporaryArray=( $(awk -v pref="$BHMAS_betaPrefix" '{split($1, res, pref); for (i in res) print res[i]}' <<< "$betasString") )
     #  3) we take the value of the beta and of the seeds building up the final array
     betaValuesArray=()
-    for element in "${temporalArray[@]}"; do
+    for element in "${temporaryArray[@]}"; do
         betaValue=${element%%_*}
         seedsArray=( $(grep -o "${BHMAS_seedPrefix}[[:alnum:]]\{4\}" <<< "${element#*_}") )
         if [ ${#seedsArray[@]} -gt 0 ]; then
@@ -76,8 +76,8 @@ function ListSimulationsStatus_SLURM()
           postfixFromFolder jobStatus outputFileGlobalPath inputFileGlobalPath\
           averageTimePerTrajectory timeLastTrajectory toBeCleaned trajectoriesDone\
           numberLastTrajectory acceptanceAllRun acceptanceLastBunchOfTrajectories\
-          maxSpikeToMeanAsNSigma timeFromLastTrajectory integrationSteps0 integrationSteps1\
-          integrationSteps2 kappaMassPreconditioning
+          maxSpikeToMeanAsNSigma spikesBeyondFourSigma spikesBeyondFiveSigma timeFromLastTrajectory \
+          integrationSteps0 integrationSteps1 integrationSteps2 kappaMassPreconditioning
     # This function can be called by the JobHandler either in the BHMAS_liststatusOption setup or in the DATABASE setup.
     # The crucial difference is that in the first case the BHMAS_parametersString and BHMAS_parametersPath variable
     # must be the global ones, otherwise they have to be built on the basis of some given information.
@@ -101,7 +101,7 @@ function ListSimulationsStatus_SLURM()
     rm -f $jobsStatusFile
 
     cecho -d "\n${BHMAS_defaultListstatusColor}==============================================================================================================================================="
-    cecho -n -d lm "$(printf "%s\t\t  %s\t  %s\t   %s\t  %s\t%s\n\e[0m"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" "Last tr. finished" " Tr: # (time last|av.)")"
+    cecho -n -d lm "$(printf "%s\t\t  %s\t  %s\t   %s\t  %s\t%s\n\e[0m"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "MinDS/sigma [>4s #|th.] [>5s #|th.]" "Last tr. finished" " Tr: # (time last|av.)")"
     printf "%s\t\t\t  %s\t  %s\t%s\t  %s\t%s\n"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" >> $jobsStatusFile
 
     jobsMetainformationArray=( $(__static__ExtractMetaInformationFromQueuedJobs) )
@@ -197,12 +197,20 @@ function ListSimulationsStatus_SLURM()
             else
                 acceptanceLastBunchOfTrajectories=" --- "
             fi
-            maxSpikeToMeanAsNSigma=$(
-                awk 'BEGIN{mean=0; sigma=0; maxSpike=0; firstFile=1}
-                     NR==FNR{mean+=$8; next}
-                     firstFile==1{nDat=NR-1; mean/=nDat; firstFile=0}
-                     {delta=($8-mean); sigma+=delta^2; if(delta<0 && sqrt(delta^2)>maxSpike){maxSpike=sqrt(delta^2)}}
-                     END{sigma=sqrt(sigma/nDat); printf "%6g", maxSpike/sigma}' $outputFileGlobalPath $outputFileGlobalPath)
+
+            local temporaryArray
+            temporaryArray=( $(
+                awk 'BEGIN{mean=0; sigma=0; maxSpike=0; firstFile=1; secondFile=1; beyondIVsigma=0; beyondVsigma=0}
+                     NR==FNR {mean+=$8; next}
+                     firstFile==1 {nDat=NR-1; mean/=nDat; firstFile=0}
+                     NR-nDat==FNR {delta=($8-mean); sigma+=delta^2; if(delta<0 && sqrt(delta^2)>maxSpike){maxSpike=sqrt(delta^2)}; next}
+                     secondFile==1 {sigma=sqrt(sigma/nDat); secondFile=0}
+                     FILENAME==ARGV[3] {if($8<mean-4*sigma){beyondIVsigma+=1}; if($8<mean-5*sigma){beyondVsigma+=1}}
+                     END{expectedBeyondIVsigma=3.16712e-5*nDat; expectedBeyondVsigma=2.86652e-7*nDat;
+                         printf "%6g %d %d %d %d", maxSpike/sigma, beyondIVsigma, expectedBeyondIVsigma, beyondVsigma, expectedBeyondVsigma}' $outputFileGlobalPath $outputFileGlobalPath $outputFileGlobalPath ) )
+            maxSpikeToMeanAsNSigma=${temporaryArray[0]}
+            spikesBeyondFourSigma="${temporaryArray[1]}|${temporaryArray[2]}" # In awk we rounded the expected values with %d, not with %.0f since this
+            spikesBeyondFiveSigma="${temporaryArray[3]}|${temporaryArray[4]}" # could be a not so smart idea -> https://www.gnu.org/software/gawk/manual/html_node/Round-Function.html
 
             if [[ $jobStatus == "RUNNING" ]]; then
                 timeFromLastTrajectory=$(( $(date +%s) - $(stat -c %Y $outputFileGlobalPath) ))
@@ -217,6 +225,8 @@ function ListSimulationsStatus_SLURM()
             acceptanceAllRun=" ----"
             acceptanceLastBunchOfTrajectories=" ----"
             maxSpikeToMeanAsNSigma=" ----"
+            spikesBeyondFourSigma="---"
+            spikesBeyondFiveSigma="---"
             timeFromLastTrajectory="------"
         fi
 
@@ -252,7 +262,8 @@ $(__static__ColorClean $toBeCleaned)%8s${BHMAS_defaultListstatusColor} \
 [$(GoodAcc $acceptanceLastBunchOfTrajectories)%s %%${BHMAS_defaultListstatusColor}] \
 %s-%s%s%s\t\
 $(__static__ColorStatus $jobStatus)%9s${BHMAS_defaultListstatusColor}\t\
-$(__static__ColorDeltaS $maxSpikeToMeanAsNSigma)%9s${BHMAS_defaultListstatusColor}\t   \
+$(__static__ColorDeltaS $maxSpikeToMeanAsNSigma)%9s${BHMAS_defaultListstatusColor}  \
+%5s %5s\t  \
 $(__static__ColorTime $timeFromLastTrajectory)%s${BHMAS_defaultListstatusColor}      \
 %6s \
 ( %s ) \
@@ -262,7 +273,7 @@ $(__static__ColorTime $timeFromLastTrajectory)%s${BHMAS_defaultListstatusColor} 
             "$acceptanceAllRun" \
             "$acceptanceLastBunchOfTrajectories" \
             "$integrationSteps0" "$integrationSteps1" "$integrationSteps2" "$kappaMassPreconditioning" \
-            "$jobStatus"   "$maxSpikeToMeanAsNSigma" \
+            "$jobStatus"   "$maxSpikeToMeanAsNSigma"   "[${spikesBeyondFourSigma}]"   "[${spikesBeyondFiveSigma}]"\
             "$(awk '{if($1 ~ /^[[:digit:]]+$/){printf "%6d", $1}else{print $1}}' <<< "$timeFromLastTrajectory") sec. ago" \
             "$numberLastTrajectory" \
             "$(awk '{if($1 ~ /^[[:digit:]]+$/ && $2 ~ /^[[:digit:]]+$/){printf "%3ds | %3ds", $1, $2}else if($1 == "ERR" || $2 == "ERR"){print "_errorMeas_"}else{print "notMeasured"}}' <<< "$timeLastTrajectory $averageTimePerTrajectory")"

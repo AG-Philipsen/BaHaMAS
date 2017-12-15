@@ -426,7 +426,7 @@ function projectStatisticsDatabase()
                     sed -r 's/(\x1B\[.{1,2};.{1,2}m)(.)/\1 \2/g' |
                     awk --posix -v nf=${PARAMS[0]#$BHMAS_nflavourPrefix*} -v mu=${PARAMS[1]#$BHMAS_chempotPrefix*} -v k=${PARAMS[2]#$BHMAS_massPrefix*} -v nt=${PARAMS[3]#$BHMAS_ntimePrefix*} -v ns=${PARAMS[4]#*$BHMAS_nspacePrefix} '
                             $3 ~ /^[0-9]\.[0-9]{4}/{
-                            print "\033[36m " nf " \033[36m " mu " \033[36m " k " \033[36m " nt " \033[36m " ns " " $(3-1) " " $3 " " $(5-1) " " $5 " " $(8-1) " " $8 " " $(11-1) " " $(11) " " $(18-1) " " $(18) " " $(15-1) " " $15 " " $(21-1) " " $21 " " "\033[0m"
+                            print "\033[36m " nf " \033[36m " mu " \033[36m " k " \033[36m " nt " \033[36m " ns " " $(3-1) " " $3 " " $(5-1) " " $5 " " $(8-1) " " $8 " " $(11-1) " " $(11) " " $(18-1) " " $(18) " " $(15-1) " " $15 " " $(23-1) " " $23 " " "\033[0m"
                             }
                         ' >> $TEMPORARY_DATABASE_FILE
 
