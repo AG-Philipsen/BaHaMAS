@@ -37,7 +37,6 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_projectSubpath=""
     readonly BHMAS_hmcGlobalPath=""
     readonly BHMAS_inputFilename=""
-    readonly BHMAS_jobScriptPrefix=""
     readonly BHMAS_outputFilename=""
     readonly BHMAS_acceptanceColumn=
     readonly BHMAS_useRationalApproxFiles='FALSE'
@@ -52,6 +51,7 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_maximumWalltime=""
 
     #Possible default value for options which then may not be given via command line
+    BHMAS_jobScriptPrefix=""
     BHMAS_walltime=""
     BHMAS_clusterPartition=""
     BHMAS_clusterNode=""
