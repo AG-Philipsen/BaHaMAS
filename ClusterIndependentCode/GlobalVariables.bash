@@ -46,18 +46,18 @@ function DeclarePathRelatedGlobalVariables()
     readonly BHMAS_massPosition=2
     readonly BHMAS_ntimePosition=3
     readonly BHMAS_nspacePosition=4
-    #Parameters prefixes
-    readonly BHMAS_nflavourPrefix="Nf"
-    readonly BHMAS_chempotPrefix="mui"
-    [ $BHMAS_wilson = "TRUE" ] && readonly BHMAS_massPrefix="k" || readonly BHMAS_massPrefix="mass"
-    readonly BHMAS_ntimePrefix="nt"
-    readonly BHMAS_nspacePrefix="ns"
-    declare -rga BHMAS_parameterPrefixes=( [$BHMAS_nflavourPosition]=$BHMAS_nflavourPrefix
+    #Parameters prefixes (here not readonly since they can be changed by user -> set as readonly in command line parser!)
+    BHMAS_nflavourPrefix="Nf"
+    BHMAS_chempotPrefix="mui"
+    [ $BHMAS_wilson = "TRUE" ] && BHMAS_massPrefix="k" || BHMAS_massPrefix="mass"
+    BHMAS_ntimePrefix="nt"
+    BHMAS_nspacePrefix="ns"
+    declare -ga BHMAS_parameterPrefixes=( [$BHMAS_nflavourPosition]=$BHMAS_nflavourPrefix
                                            [$BHMAS_chempotPosition]=$BHMAS_chempotPrefix
                                            [$BHMAS_massPosition]=$BHMAS_massPrefix
                                            [$BHMAS_ntimePosition]=$BHMAS_ntimePrefix
                                            [$BHMAS_nspacePosition]=$BHMAS_nspacePrefix )
-    #Parameters variable names (declred as readonly when reading from path)
+    #Parameters variable names (the parameters variables are declared as readonly when reading from path)
     declare -rgA BHMAS_parameterVariableNames=( [$BHMAS_nflavourPrefix]="BHMAS_nflavour"
                                                 [$BHMAS_chempotPrefix]="BHMAS_chempot"
                                                 [$BHMAS_massPrefix]="BHMAS_mass"
@@ -78,14 +78,15 @@ function DeclarePathRelatedGlobalVariables()
     BHMAS_parametersPath=''     # --> e.g. /Nf2/muiPiT/k1550/nt6/ns12    or   /Nf2/mui0/mass0250/nt4/ns8
     BHMAS_parametersString=''   # --> e.g.  Nf2_muiPiT_k1550_nt6_ns12    or    Nf2_mui0_mass0250_nt4_ns8
     #Beta and seed information (intentionally not in arrays of prefixes, regexes, etc.)
+    #(here not readonly since they can be changed by user -> set as readonly in command line parser!)
     readonly BHMAS_betaPosition=5
-    readonly BHMAS_betaPrefix='b'
+    BHMAS_betaPrefix='b'
     BHMAS_betaPostfix='_continueWithNewChain' #Here we set it supposing it is not a thermalization. If indeed it is, the postfix will be overwritten!
     readonly BHMAS_betaRegex='[0-9][.][0-9]\{4\}'
-    readonly BHMAS_seedPrefix='s'
+    BHMAS_seedPrefix='s'
     readonly BHMAS_seedRegex='[0-9]\{4\}'
-    readonly BHMAS_betaFolderShortRegex=$BHMAS_betaRegex'_'$BHMAS_seedPrefix'[0-9]\{4\}_[[:alpha:]]\+'
-    readonly BHMAS_betaFolderRegex=$BHMAS_betaPrefix$BHMAS_betaFolderShortRegex
+    BHMAS_betaFolderShortRegex=$BHMAS_betaRegex'_'$BHMAS_seedPrefix'[0-9]\{4\}_[[:alpha:]]\+'
+    BHMAS_betaFolderRegex=$BHMAS_betaPrefix$BHMAS_betaFolderShortRegex
 }
 
 #----------------------------------------------------------------------------------#

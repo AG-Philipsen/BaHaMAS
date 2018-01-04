@@ -29,7 +29,16 @@ function ParseCommandLineOption()
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
-                    BHMAS_jobScriptPrefix="$2"
+                    readonly BHMAS_jobScriptPrefix="$2"
+                fi
+                shift 2 ;;
+
+            --nflavor_prefix )
+                if [[ ${2:-} =~ ^(-|$) ]]; then
+                    PrintOptionSpecificationErrorAndExit "$1"
+                else
+                    readonly BHMAS_nflavourPrefix="$2"
+                    BHMAS_parameterPrefixes[$BHMAS_nflavourPosition]=$BHMAS_nflavourPrefix
                 fi
                 shift 2 ;;
 
@@ -37,7 +46,8 @@ function ParseCommandLineOption()
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
-                    BHMAS_chempotPrefix="$2"
+                    readonly BHMAS_chempotPrefix="$2"
+                    BHMAS_parameterPrefixes[$BHMAS_chempotPosition]=$BHMAS_chempotPrefix
                 fi
                 shift 2 ;;
 
@@ -45,7 +55,8 @@ function ParseCommandLineOption()
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
-                    BHMAS_massPrefix="$2"
+                    readonly BHMAS_massPrefix="$2"
+                    BHMAS_parameterPrefixes[$BHMAS_massPosition]=$BHMAS_massPrefix
                 fi
                 shift 2 ;;
 
@@ -53,7 +64,8 @@ function ParseCommandLineOption()
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
-                    BHMAS_ntimePrefix="$2"
+                    readonly BHMAS_ntimePrefix="$2"
+                    BHMAS_parameterPrefixes[$BHMAS_ntimePosition]=$BHMAS_ntimePrefix
                 fi
                 shift 2 ;;
 
@@ -61,7 +73,8 @@ function ParseCommandLineOption()
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
-                    BHMAS_nspacePrefix="$2"
+                    readonly BHMAS_nspacePrefix="$2"
+                    BHMAS_parameterPrefixes[$BHMAS_nspacePosition]=$BHMAS_nspacePrefix
                 fi
                 shift 2 ;;
 
@@ -69,7 +82,17 @@ function ParseCommandLineOption()
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
-                    BHMAS_betaPrefix="$2"
+                    readonly BHMAS_betaPrefix="$2"
+                fi
+                shift 2 ;;
+
+            --seed_prefix )
+                if [[ ${2:-} =~ ^(-|$) ]]; then
+                    PrintOptionSpecificationErrorAndExit "$1"
+                else
+                    readonly BHMAS_seedPrefix="$2"
+                    readonly BHMAS_betaFolderShortRegex=$BHMAS_betaRegex'_'$BHMAS_seedPrefix'[0-9]\{4\}_[[:alpha:]]\+'
+                    readonly BHMAS_betaFolderRegex=$BHMAS_betaPrefix$BHMAS_betaFolderShortRegex
                 fi
                 shift 2 ;;
 
@@ -334,6 +357,9 @@ function ParseCommandLineOption()
         done
         Fatal $BHMAS_fatalCommandLine "The following options are mutually exclusive and cannot be combined: $listOfOptionsAsString"
     fi
+
+    #Mark as readonly the BHMAS_parameterPrefixes array, since from now on prefixes cannot change any more!
+    declare -rga BHMAS_parameterPrefixes
 }
 
 

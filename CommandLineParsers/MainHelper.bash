@@ -58,13 +58,14 @@ function PrintMainHelper()
     __static__PrintHelperHeader
     cecho -d $helperColor
     cecho -d "  Call " B "BaHaMAS" uB " with the following optional arguments:" "\n"
-    __static__AddOptionToHelper "-h | --help"                   ""
     __static__AddOptionToHelper "--jobscript_prefix"            "default value = $(__static__PrintDefault ${BHMAS_jobScriptPrefix:-})"
+    __static__AddOptionToHelper "--nflavor_prefix"              "default value = $(__static__PrintDefault ${BHMAS_nflavourPrefix:-})"
     __static__AddOptionToHelper "--chempot_prefix"              "default value = $(__static__PrintDefault ${BHMAS_chempotPrefix:-})"
     __static__AddOptionToHelper "--mass_prefix"                 "default value = $(__static__PrintDefault ${BHMAS_massPrefix:-})"
     __static__AddOptionToHelper "--ntime_prefix"                "default value = $(__static__PrintDefault ${BHMAS_ntimePrefix:-})"
     __static__AddOptionToHelper "--nspace_prefix"               "default value = $(__static__PrintDefault ${BHMAS_nspacePrefix:-})"
     __static__AddOptionToHelper "--beta_prefix"                 "default value = $(__static__PrintDefault ${BHMAS_betaPrefix:-})"
+    __static__AddOptionToHelper "--seed_prefix"                 "default value = $(__static__PrintDefault ${BHMAS_seedPrefix:-})"
     __static__AddOptionToHelper "--betasfile"                   "default value = $(__static__PrintDefault ${BHMAS_betasFilename:-})"
     __static__AddOptionToHelper "-m | --measurements"           "default value = $(__static__PrintDefault ${BHMAS_numberOfTrajectories:-})"
     __static__AddOptionToHelper "-f | --confSaveFrequency"      "default value = $(__static__PrintDefault ${BHMAS_checkpointFrequency:-})"
