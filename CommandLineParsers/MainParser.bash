@@ -173,6 +173,14 @@ function ParseCommandLineOption()
                 fi
                 shift 2 ;;
 
+            --node )
+                if [[ ${2:-} =~ ^(-|$) ]]; then
+                    PrintOptionSpecificationErrorAndExit "$1"
+                else
+                    BHMAS_clusterNode="$2"
+                fi
+                shift 2 ;;
+
             --constraint )
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
@@ -181,11 +189,11 @@ function ParseCommandLineOption()
                 fi
                 shift 2 ;;
 
-            --node )
+            --resource )
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
-                    BHMAS_clusterNode="$2"
+                    BHMAS_clusterGenericResource="$2"
                 fi
                 shift 2 ;;
 
