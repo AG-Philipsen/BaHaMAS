@@ -419,14 +419,20 @@ function projectStatisticsDatabase()
 
                 PARAMETER_DIRECTORY_STRUCTURE=${line##*$BHMAS_projectSubpath}
 
+                #Explaination of the below sed commands:
+                # 1) Remove %[(]) symbols but not the [ of a color code.
+                #    Print the matched symbol before %[(]), which could be an important space (column divisor for awk)
+                # 2) Introduce a space after each color code with 3 format specifiers
+                # 3) Introduce a space before each color code with 2 format specifiers
+                # 4) Introduce a space after each color code with 2 format specifiers
                 ListSimulationsStatus_SLURM $PARAMETER_DIRECTORY_STRUCTURE | \
-                    sed -r 's/[^(\x1b)]\[|\]|\(|\)|%//g' | \
+                    sed -r 's/([^(\x1b)])\[|\]|\(|\)|%/\1/g' | \
                     sed -r 's/(\x1B\[[0-9]{1,2};[0-9]{0,2};[0-9]{0,3}m)(.)/\1 \2/g' | \
                     sed -r 's/(.)(\x1B\[.{1,2};.{1,2}m)/\1 \2/g' | \
                     sed -r 's/(\x1B\[.{1,2};.{1,2}m)(.)/\1 \2/g' |
                     awk --posix -v nf=${PARAMS[0]#$BHMAS_nflavourPrefix*} -v mu=${PARAMS[1]#$BHMAS_chempotPrefix*} -v k=${PARAMS[2]#$BHMAS_massPrefix*} -v nt=${PARAMS[3]#$BHMAS_ntimePrefix*} -v ns=${PARAMS[4]#*$BHMAS_nspacePrefix} '
                             $3 ~ /^[0-9]\.[0-9]{4}/{
-                            print "\033[36m " nf " \033[36m " mu " \033[36m " k " \033[36m " nt " \033[36m " ns " " $(3-1) " " $3 " " $(5-1) " " $5 " " $(8-1) " " $8 " " $(11-1) " " $(11) " " $(18-1) " " $(18) " " $(15-1) " " $15 " " $(23-1) " " $23 " " "\033[0m"
+                            print "\033[36m " nf " \033[36m " mu " \033[36m " k " \033[36m " nt " \033[36m " ns " " $(3-1) " " $3 " " $(5-1) " " $5 " " $(8-1) " " $8 " " $(11-1) " " $(11) " " $(18-1) " " $(18) " " $(15-1) " " $(15) " " $(23-1) " " $(23) " " "\033[0m"
                             }
                         ' >> $TEMPORARY_DATABASE_FILE
 
