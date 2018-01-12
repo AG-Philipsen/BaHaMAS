@@ -57,7 +57,7 @@ function ProduceInputFile_CL2QCD()
     else
         __static__AddToInputFile "use_chem_pot_im=1"
         if [ $BHMAS_chempot = "PiT" ]; then
-            __static__AddToInputFile "chem_pot_im=0.523598775598299"
+            __static__AddToInputFile "chem_pot_im=$(awk -v ntime="${BHMAS_ntime}" 'BEGIN{printf "%.15f\n", atan2(0, -1)/ntime}')"
         else
             Fatal $BHMAS_fatalValueError "Unknown value " emph "$BHMAS_chempot" " of imaginary chemical potential for input file!"
         fi
