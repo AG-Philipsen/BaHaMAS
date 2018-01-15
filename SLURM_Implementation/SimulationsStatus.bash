@@ -203,10 +203,10 @@ function ListSimulationsStatus_SLURM()
                 temporaryArray=( $(awk 'BEGIN{mean=0; sigma=0; maxSpike=0; firstFile=1; secondFile=1; beyondIVsigma=0; beyondVsigma=0}
                                         NR==FNR {mean+=$8; next}
                                         firstFile==1 {nDat=NR-1; mean/=nDat; firstFile=0}
-                                        NR-nDat==FNR {delta=($8-mean); sigma+=delta^2; if(delta<0 && sqrt(delta^2)>maxSpike){maxSpike=sqrt(delta^2)}; next}
+                                        NR-nDat==FNR {delta=($8-mean); sigma+=delta^2; if(sqrt(delta^2)>maxSpike){maxSpike=sqrt(delta^2)}; next}
                                         secondFile==1 {sigma=sqrt(sigma/nDat); secondFile=0}
-                                        FILENAME==ARGV[3] {if($8<mean-4*sigma){beyondIVsigma+=1}; if($8<mean-5*sigma){beyondVsigma+=1}}
-                                        END{expectedBeyondIVsigma=3.16712e-5*nDat; expectedBeyondVsigma=2.86652e-7*nDat;
+                                        FILENAME==ARGV[3] {if(sqrt($8^2)>mean+4*sigma){beyondIVsigma+=1}; if(sqrt($8^2)>mean+5*sigma){beyondVsigma+=1}}
+                                        END{expectedBeyondIVsigma=2*3.16712e-5*nDat; expectedBeyondVsigma=2*2.86652e-7*nDat;
                                             printf "%.3f %d %d %d %d", maxSpike/sigma, beyondIVsigma, expectedBeyondIVsigma, beyondVsigma, expectedBeyondVsigma}' $outputFileGlobalPath $outputFileGlobalPath $outputFileGlobalPath ) )
                 maxSpikeToMeanAsNSigma=${temporaryArray[0]}
                 spikesBeyondFourSigma="${temporaryArray[1]}|${temporaryArray[2]}" # In awk we rounded the expected values with %d, not with %.0f since this
