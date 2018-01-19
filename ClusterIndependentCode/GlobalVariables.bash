@@ -133,7 +133,7 @@ function DeclareBaHaMASGlobalVariables()
     BHMAS_jobstatusAll='FALSE'
     BHMAS_jobstatusLocal='FALSE'
     BHMAS_liststatusOption='FALSE'
-    BHMAS_liststatusMeasureTimeOption='FALSE'
+    BHMAS_liststatusMeasureTimeOption='TRUE'
     BHMAS_liststatusShowOnlyQueuedOption='FALSE'
     BHMAS_accRateReportOption='FALSE'
     BHMAS_accRateReportInterval=1000

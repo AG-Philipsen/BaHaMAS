@@ -97,7 +97,7 @@ function PrintMainHelper()
                                 "$(cecho "                   " $mutuallyExclusiveColor "-a | --all" $helperColor " to display all queued jobs on the given partition, if specified")"\
                                 "$(cecho "                   " $mutuallyExclusiveColor "-l | --local" $helperColor " to display jobs submitted from the present directory")"
     __static__AddOptionToHelper -e "-l | --liststatus" "A report of the local simulation status for all beta will be displayed"\
-                                "$(cecho B "Secondary options" uB ": " $mutuallyExclusiveColor "--measureTime" $helperColor " to get information about the trajectory time")"\
+                                "$(cecho B "Secondary options" uB ": " $mutuallyExclusiveColor "--doNotMeasureTime" $helperColor " to omit information about the trajectory time")"\
                                 "$(cecho "                   " $mutuallyExclusiveColor "--showOnlyQueued" $helperColor " not to show status about not queued jobs")"
     __static__AddOptionToHelper -e "--accRateReport[=number]" "The acceptance rates will be computed on the output files of the given beta every "\
                                 "1000 trajectories and summarized in a table. If a number is specified, this is used"\

@@ -265,11 +265,11 @@ function ParseCommandLineOption()
                 BHMAS_liststatusOption="TRUE"
                 shift;;
 
-            --measureTime )
+            --doNotMeasureTime )
                 if [ $BHMAS_liststatusOption = "FALSE" ]; then
                     __static__PrintSecondaryOptionSpecificationErrorAndExit "-l | --liststatus" "$1"
                 else
-                    BHMAS_liststatusMeasureTimeOption="TRUE"
+                    BHMAS_liststatusMeasureTimeOption="FALSE"
                 fi
                 shift ;;
 

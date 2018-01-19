@@ -134,54 +134,6 @@ function ListSimulationsStatus_SLURM()
         outputFileGlobalPath="$BHMAS_runDiskGlobalPath/$BHMAS_projectSubpath$localParametersPath/$BHMAS_betaPrefix$beta/$BHMAS_outputFilename"
         inputFileGlobalPath="$BHMAS_submitDiskGlobalPath/$BHMAS_projectSubpath$localParametersPath/$BHMAS_betaPrefix$beta/$BHMAS_inputFilename"
         #---------------------------------------------------------------------------------------------------------------------------------------#
-        if [ $BHMAS_liststatusMeasureTimeOption = "TRUE" ]; then
-            local standardOutputFilename standardOutputFileGlobalPath timesArray uniqueHoursArray numberOfDays totalTimeOfSimulation
-            standardOutputFilename=`ls -t1 $BHMAS_betaPrefix$beta 2>/dev/null | awk -v filename="$BHMAS_hmcFilename" 'BEGIN{regexp="^"filename".[[:digit:]]+.out$"}{if($1 ~ regexp){print $1}}' | head -n1`
-            standardOutputFileGlobalPath="$BHMAS_submitDiskGlobalPath/$BHMAS_projectSubpath$localParametersPath/$BHMAS_betaPrefix$beta/$standardOutputFilename"
-            if [ -f $standardOutputFileGlobalPath ] && [[ $jobStatus == "RUNNING" ]]; then
-                #Since in CL2QCD std. output there is only the time of saving and not the day, I have to go through the std. output and count the
-                #number of days (done looking at the hours). One could sum up all the tr. times but it is not really efficient!
-                timesArray=( $(grep "finished trajectory" $standardOutputFileGlobalPath | awk '{print substr($1,2,8)}') )
-                uniqueHoursArray=( $(grep "finished trajectory" $standardOutputFileGlobalPath | awk '{print substr($1,2,2)}' | uniq -d) )
-                #I use the number of occurences of the second hours in order to get the almost correct number of days,
-                #then I correct in the case the last hour is equal to the first.
-                if [ ${#uniqueHoursArray[@]} -lt 2 ]; then
-                    numberOfDays=0
-                else
-                    numberOfDays=$(awk 'BEGIN{RS=" "}NR==2{secondHour=$1}{hours[$1]++}END{print hours[secondHour]-1}' <<< "${uniqueHoursArray[@]}")
-                    if [ ${uniqueHoursArray[0]} -eq ${uniqueHoursArray[@]:(-1)} ]; then
-                        [ $(TimeToSeconds ${timesArray[0]}) -le $(TimeToSeconds ${timesArray[@]:(-1)}) ] && numberOfDays=$(($numberOfDays + 1))
-                    fi
-                fi
-                #Now we can calculate the total time and then the average time if we have done more than one trajectory!
-                if [ ${#timesArray[@]} -gt 1 ]; then
-                    totalTimeOfSimulation=$(( $(date -d "${timesArray[@]:(-1)}" +%s) - $(date -d "${timesArray[0]}" +%s) ))
-                    [ $totalTimeOfSimulation -lt 0 ] && totalTimeOfSimulation=$(( $totalTimeOfSimulation + 86400 ))
-                    totalTimeOfSimulation=$(( $totalTimeOfSimulation + $numberOfDays*86400 ))
-                    averageTimePerTrajectory=$(( $totalTimeOfSimulation / (${#timesArray[@]}-1) +1)) #The +1 is to round to the following integer
-                    #Calculate also last trajectory time
-                    timeLastTrajectory=$(( $(date -d "${timesArray[@]:(-1)}" +%s) - $(date -d "${timesArray[$((${#timesArray[@]}-2))]}" +%s) ))
-                    [ $timeLastTrajectory -lt 0 ] && timeLastTrajectory=$(( $timeLastTrajectory + 86400 ))
-                    #The following line is to avoid that the time is 0s because the last two lines found in the file are for the saving to prng.save and prng.xxxx
-                    [ $timeLastTrajectory -lt 1 ] && timeLastTrajectory=$(( $(date -d "${timesArray[@]:(-1)}" +%s) - $(date -d "${timesArray[$((${#timesArray[@]}-3))]}" +%s) ))
-                else
-                    averageTimePerTrajectory="ERR"
-                    timeLastTrajectory="ERR"
-                fi
-            else
-                if [ ! -f $standardOutputFileGlobalPath ]; then
-                    averageTimePerTrajectory="ERR"
-                    timeLastTrajectory="ERR"
-                else
-                    averageTimePerTrajectory="----"
-                    timeLastTrajectory="----"
-                fi
-            fi
-        else
-            averageTimePerTrajectory="OFF"
-            timeLastTrajectory="OFF"
-        fi
-
         if [ -f $outputFileGlobalPath ] && [ $(wc -l < $outputFileGlobalPath) -gt 0 ]; then
             toBeCleaned=$(awk 'BEGIN{traj_num = -1; file_to_be_cleaned=0}{if($1>traj_num){traj_num = $1} else {file_to_be_cleaned=1; exit;}}END{print file_to_be_cleaned}' $outputFileGlobalPath)
             if [ $toBeCleaned -eq 0 ]; then
@@ -223,6 +175,10 @@ function ListSimulationsStatus_SLURM()
                 timeFromLastTrajectory="------"
             fi
 
+            if [ $BHMAS_liststatusMeasureTimeOption = "TRUE" ]; then
+                averageTimePerTrajectory=$(awk '{ time=$'$BHMAS_trajectoryTimeColumn'; if(time!=0){sum+=time; counter+=1}} END {if(counter!=0){printf "%d", sum/counter}else{printf "%d", 0}}' $outputFileGlobalPath)
+                timeLastTrajectory=$(awk 'END{printf "%d", $'$BHMAS_trajectoryTimeColumn'}' $outputFileGlobalPath)
+            fi
         else
             toBeCleaned=0
             trajectoriesDone="-----"
@@ -233,6 +189,8 @@ function ListSimulationsStatus_SLURM()
             spikesBeyondFourSigma="---"
             spikesBeyondFiveSigma="---"
             timeFromLastTrajectory="------"
+            averageTimePerTrajectory="----"
+            timeLastTrajectory="----"
         fi
 
         if [ -f $inputFileGlobalPath ]; then
@@ -280,7 +238,7 @@ $(__static__ColorTime $timeFromLastTrajectory)%s${BHMAS_defaultListstatusColor} 
             "$jobStatus"   "$maxSpikeToMeanAsNSigma"   "[${spikesBeyondFourSigma}]"   "[${spikesBeyondFiveSigma}]"\
             "$(awk '{if($1 ~ /^[[:digit:]]+$/){printf "%6d", $1}else{print $1}}' <<< "$timeFromLastTrajectory") sec. ago" \
             "$numberLastTrajectory" \
-            "$(awk '{if($1 ~ /^[[:digit:]]+$/ && $2 ~ /^[[:digit:]]+$/){printf "%3ds | %3ds", $1, $2}else if($1 == "ERR" || $2 == "ERR"){print "_errorMeas_"}else{print "notMeasured"}}' <<< "$timeLastTrajectory $averageTimePerTrajectory")"
+            "$(awk '{if($1 ~ /^[[:digit:]]+$/ && $2 ~ /^[[:digit:]]+$/){printf "%3ds | %3ds", $1, $2}else{print "notMeasured"}}' <<< "$timeLastTrajectory $averageTimePerTrajectory")"
 
         if [ $toBeCleaned -eq 0 ]; then
             printf "%s\t\t%8s (%s %%) [%s %%]  %s-%s%s%s\t%9s\t%s\n"   "$(__static__GetShortenedBetaString)"   "$trajectoriesDone"   "$acceptanceAllRun"   "$acceptanceLastBunchOfTrajectories"   "$integrationSteps0" "$integrationSteps1" "$integrationSteps2" "$kappaMassPreconditioning"   "$jobStatus"   "$maxSpikeToMeanAsNSigma" >> $jobsStatusFile

@@ -20,6 +20,7 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
                                   BHMAS_jobScriptPrefix
                                   BHMAS_outputFilename
                                   BHMAS_acceptanceColumn
+                                  BHMAS_trajectoryTimeColumn
                                   BHMAS_databaseFilename
                                   BHMAS_databaseGlobalPath
                                   BHMAS_thermConfsGlobalPath
@@ -87,12 +88,16 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
             mustReturn='FALSE'
         fi
     done
-    if [ "${BHMAS_GPUsPerNode:-}" != '' ] && [[ ! $BHMAS_GPUsPerNode =~ ^[1-9]+$ ]]; then
+    if [ "${BHMAS_GPUsPerNode:-}" != '' ] && [[ ! $BHMAS_GPUsPerNode =~ ^[1-9][0-9]*$ ]]; then
         Error -n B emph "BHMAS_GPUsPerNode" uB " variable format invalid. It has to be a " emph "positive integer" " number."
         mustReturn='FALSE'
     fi
-    if [ "${BHMAS_acceptanceColumn:-}" != '' ] && [[ ! $BHMAS_acceptanceColumn =~ ^[1-9]+$ ]]; then
+    if [ "${BHMAS_acceptanceColumn:-}" != '' ] && [[ ! $BHMAS_acceptanceColumn =~ ^[1-9][0-9]*$ ]]; then
         Error -n B emph "BHMAS_acceptanceColumn" uB " variable format invalid. It has to be a " emph "positive integer" " number."
+        mustReturn='FALSE'
+    fi
+    if [ "${BHMAS_trajectoryTimeColumn:-}" != '' ] && [[ ! $BHMAS_trajectoryTimeColumn =~ ^[1-9][0-9]*$ ]]; then
+        Error -n B emph "BHMAS_trajectoryTimeColumn" uB " variable format invalid. It has to be a " emph "positive integer" " number."
         mustReturn='FALSE'
     fi
 

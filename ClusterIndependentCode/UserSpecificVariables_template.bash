@@ -39,6 +39,7 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_inputFilename=""
     readonly BHMAS_outputFilename=""
     readonly BHMAS_acceptanceColumn=
+    readonly BHMAS_trajectoryTimeColumn=
     readonly BHMAS_useRationalApproxFiles='FALSE'
     readonly BHMAS_rationalApproxGlobalPath=""
     readonly BHMAS_approxHeatbathFilename=""
