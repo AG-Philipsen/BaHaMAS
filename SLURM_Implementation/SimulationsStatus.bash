@@ -306,13 +306,13 @@ function __static__ColorBeta()
 {
     #Columns here below ranges from 1 on, since they are used in awk
     declare -A observablesColumns=( ["TrajectoryNr"]=1
-                                     ["Plaquette"]=2
-                                     ["PlaquetteSpatial"]=3
-                                     ["PlaquetteTemporal"]=4
-                                     ["PolyakovLoopRe"]=5
-                                     ["PolyakovLoopIm"]=6
-                                     ["PolyakovLoopSq"]=7
-                                     ["Accepted"]=11 )
+                                    ["Plaquette"]=2
+                                    ["PlaquetteSpatial"]=3
+                                    ["PlaquetteTemporal"]=4
+                                    ["PolyakovLoopRe"]=5
+                                    ["PolyakovLoopIm"]=6
+                                    ["PolyakovLoopSq"]=7
+                                    ["Accepted"]=${BHMAS_acceptanceColumn} )
     local auxiliaryVariable1 auxiliaryVariable2 errorCode
     auxiliaryVariable1=$(printf "%s," "${observablesColumns[@]}")
     auxiliaryVariable2=$(printf "%s," "${!observablesColumns[@]}")
@@ -321,12 +321,17 @@ function __static__ColorBeta()
         return
     fi
 
-    awk -v obsColumns="${auxiliaryVariable1%?}" -v obsNames="${auxiliaryVariable2%?}" -f ${BHMAS_repositoryTopLevelPath}/SLURM_Implementation/CheckCorrectnessCl2qcdOutputFile.awk $outputFileGlobalPath
+    awk -v obsColumns="${auxiliaryVariable1%?}" \
+        -v obsNames="${auxiliaryVariable2%?}" \
+        -v wrongVariable="${BHMAS_fatalVariableUnset}" \
+        -v success="${BHMAS_successExitCode}" \
+        -v failure="${BHMAS_fatalLogicError}" \
+        -f ${BHMAS_repositoryTopLevelPath}/SLURM_Implementation/CheckCorrectnessCl2qcdOutputFile.awk $outputFileGlobalPath
     errorCode=$?
 
-    if [ $errorCode -eq 0 ]; then
+    if [ $errorCode -eq ${BHMAS_successExitCode} ]; then
         printf $BHMAS_defaultListstatusColor
-    elif [ $errorCode -eq 1 ]; then
+    elif [ $errorCode -eq ${BHMAS_fatalLogicError} ]; then
         printf $BHMAS_wrongBetaListstatusColor
     else
         printf $BHMAS_suspiciousBetaListstatusColor

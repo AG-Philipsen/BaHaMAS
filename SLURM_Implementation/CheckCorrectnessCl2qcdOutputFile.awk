@@ -5,11 +5,13 @@
 #   defined in the LICENSE.md file, which is distributed within the software.   #
 #-------------------------------------------------------------------------------#
 
-# This awk script needs two input variables, namely the
-# observable columns (from 1 on) in a variable named "obsColumns" and
-# the observables names in a variable named "obsNames".
-# These variablse must be two strings with elements separated
-# by commas (,) and without any space inside.
+# This awk script needs 5 input variables:
+#  - the observable columns (from 1 on) in a variable named "obsColumns"
+#  - the observables names in a variable named "obsNames"
+#     [These variablse must be two strings with elements separated
+#      by commas (,) and without any space inside.]
+#  - three variables named "wrongVariable", "success", "failure" which
+#    are the error codes to be returned.
 #
 # Pass another variable named "printReport" set to 1 if you want
 # to get a report.
@@ -46,9 +48,6 @@ NR>1{
     }
 }
 END{
-    wrongVariable
-    success
-    failure
     if(skipEnd==1){
         if(printReport==1){printf "\n\033[38;5;9mCheck variables given to awk script, \"Accepted\" and/or \"TrajectoryNr\" label(s) not found in obsNames!!\033[0m\n\n"}
         exit wrongVariable
