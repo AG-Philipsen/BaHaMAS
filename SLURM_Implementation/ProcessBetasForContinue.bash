@@ -400,31 +400,33 @@ function __static__HandlePbpInInputFile()
 
 function __static__HandleMultiplePseudofermionsInInputFile()
 {
-    local oldOption newOption optionsToBeAddedOrModified
-    optionsToBeAddedOrModified=("num_pseudofermions=${BHMAS_numberOfPseudofermions}")
-    if [ $(grep -c "num_pseudofermions" $inputFileGlobalPath) -eq 0 ]; then
-        __static__AddOptionsToInputFile ${optionsToBeAddedOrModified[@]}
-        __static__PrintAddedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
-    else
-        __static__ModifyOptionsInInputFile ${optionsToBeAddedOrModified[@]} || { __static__RestoreOriginalInputFile && return 1; }
-        __static__PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
+    if [ $BHMAS_staggered = "TRUE" ]; then #Multiple pseudofermions simply ignored if not staggered
+        local oldOption newOption optionsToBeAddedOrModified
+        optionsToBeAddedOrModified=("num_pseudofermions=${BHMAS_numberOfPseudofermions}")
+        if [ $(grep -c "num_pseudofermions" $inputFileGlobalPath) -eq 0 ]; then
+            __static__AddOptionsToInputFile ${optionsToBeAddedOrModified[@]}
+            __static__PrintAddedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
+        else
+            __static__ModifyOptionsInInputFile ${optionsToBeAddedOrModified[@]} || { __static__RestoreOriginalInputFile && return 1; }
+            __static__PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
+        fi
+        #Always replace approx files with correct ones (maybe unnecessary, but easy to be done always)
+        oldOption="approx_heatbath_file=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_\(pf[1-9]\+_\)\?Approx_Heatbath"
+        newOption="${oldOption%/*}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Heatbath"
+        [ $BHMAS_numberOfPseudofermions -gt 1 ] && newOption="${newOption/Approx_Heatbath/pf${BHMAS_numberOfPseudofermions}_Approx_Heatbath}"
+        __static__FindAndReplaceSingleOccurenceInFile $inputFileGlobalPath "$oldOption" "$newOption" || { __static__RestoreOriginalInputFile && return 1; }
+        __static__PrintModifiedOptionsToStandardOutput ${newOption}
+        oldOption="approx_md_file=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_\(pf[1-9]\+_\)\?Approx_MD"
+        newOption="${oldOption%/*}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_MD"
+        [ $BHMAS_numberOfPseudofermions -gt 1 ] && newOption="${newOption/Approx_MD/pf${BHMAS_numberOfPseudofermions}_Approx_MD}"
+        __static__FindAndReplaceSingleOccurenceInFile $inputFileGlobalPath "$oldOption" "$newOption" || { __static__RestoreOriginalInputFile && return 1; }
+        __static__PrintModifiedOptionsToStandardOutput ${newOption}
+        oldOption="approx_metropolis_file=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_\(pf[1-9]\+_\)\?Approx_Metropolis"
+        newOption="${oldOption%/*}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Metropolis"
+        [ $BHMAS_numberOfPseudofermions -gt 1 ] && newOption="${newOption/Approx_Metropolis/pf${BHMAS_numberOfPseudofermions}_Approx_Metropolis}"
+        __static__FindAndReplaceSingleOccurenceInFile $inputFileGlobalPath "$oldOption" "$newOption" || { __static__RestoreOriginalInputFile && return 1; }
+        __static__PrintModifiedOptionsToStandardOutput ${newOption}
     fi
-    #Always replace approx files with correct ones (maybe unnecessary, but easy to be done always)
-    oldOption="approx_heatbath_file=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_\(pf[1-9]\+_\)\?Approx_Heatbath"
-    newOption="${oldOption%/*}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Heatbath"
-    [ $BHMAS_numberOfPseudofermions -gt 1 ] && newOption="${newOption/Approx_Heatbath/pf${BHMAS_numberOfPseudofermions}_Approx_Heatbath}"
-    __static__FindAndReplaceSingleOccurenceInFile $inputFileGlobalPath "$oldOption" "$newOption" || { __static__RestoreOriginalInputFile && return 1; }
-    __static__PrintModifiedOptionsToStandardOutput ${newOption}
-    oldOption="approx_md_file=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_\(pf[1-9]\+_\)\?Approx_MD"
-    newOption="${oldOption%/*}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_MD"
-    [ $BHMAS_numberOfPseudofermions -gt 1 ] && newOption="${newOption/Approx_MD/pf${BHMAS_numberOfPseudofermions}_Approx_MD}"
-    __static__FindAndReplaceSingleOccurenceInFile $inputFileGlobalPath "$oldOption" "$newOption" || { __static__RestoreOriginalInputFile && return 1; }
-    __static__PrintModifiedOptionsToStandardOutput ${newOption}
-    oldOption="approx_metropolis_file=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_\(pf[1-9]\+_\)\?Approx_Metropolis"
-    newOption="${oldOption%/*}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Metropolis"
-    [ $BHMAS_numberOfPseudofermions -gt 1 ] && newOption="${newOption/Approx_Metropolis/pf${BHMAS_numberOfPseudofermions}_Approx_Metropolis}"
-    __static__FindAndReplaceSingleOccurenceInFile $inputFileGlobalPath "$oldOption" "$newOption" || { __static__RestoreOriginalInputFile && return 1; }
-    __static__PrintModifiedOptionsToStandardOutput ${newOption}
     return 0
 }
 
