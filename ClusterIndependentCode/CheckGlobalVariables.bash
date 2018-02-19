@@ -204,7 +204,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
     elif [ $BHMAS_continueOption = 'TRUE' ]; then
         option="$(cecho -d "with the " B "--continue" uB)"
         variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]} )
-        neededFiles+=( ${rationalApproxFolder[@]:-} )
+        neededFolders+=( ${rationalApproxFolder[@]:-} )
         neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
         readonly BHMAS_walltimeIsNeeded='TRUE'
 

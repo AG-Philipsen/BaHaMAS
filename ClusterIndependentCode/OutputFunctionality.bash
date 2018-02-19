@@ -170,7 +170,7 @@ function UserSaidNo()
 
 function __static__PrintMessageToScreen()
 {
-    local initialEndline typeOfMessage messageColor fullMessage finalString
+    local initialEndline typeOfMessage exitCode messageColor fullMessage finalString
     typeOfMessage="$1"; exitCode="$2"; shift 2; finalString=''
     initialEndline="\n"
     [ "$1" = '-n' ] && initialEndline='' && shift
