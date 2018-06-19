@@ -82,7 +82,7 @@ function ParseDatabaseCommandLineOption()
             --nf)
                 DISPLAY="TRUE"
                 FILTER_NF="TRUE"
-                while [[ ${2:-} =~ ^[0-9](\.[0-9]+)?$ ]]; do
+                while [[ ${2:-} =~ ^${BHMAS_nflavourRegex//\\/}$ ]]; do
                     NF_ARRAY+=( $2 )
                     shift
                 done
@@ -113,7 +113,7 @@ function ParseDatabaseCommandLineOption()
             --$MASS_PARAMETER)
                 DISPLAY="TRUE"
                 FILTER_MASS="TRUE"
-                while [[ ${2:-} =~ ^[0-9]{4}$ ]]; do
+                while [[ ${2:-} =~ ^${BHMAS_massRegex//\\/}$ ]]; do
                     MASS_ARRAY+=( $2 )
                     shift
                 done
@@ -123,7 +123,7 @@ function ParseDatabaseCommandLineOption()
             --nt)
                 DISPLAY="TRUE"
                 FILTER_NT="TRUE"
-                while [[ ${2:-} =~ ^[0-9]{1,2}$ ]]; do
+                while [[ ${2:-} =~ ^${BHMAS_ntimeRegex//\\/}$ ]]; do
                     NT_ARRAY+=( $2 )
                     shift
                 done
@@ -133,7 +133,7 @@ function ParseDatabaseCommandLineOption()
             --ns)
                 DISPLAY="TRUE"
                 FILTER_NS="TRUE"
-                while [[ ${2:-} =~ ^[0-9]{1,2}$ ]]; do
+                while [[ ${2:-} =~ ^${BHMAS_nspaceRegex//\\/}$ ]]; do
                     NS_ARRAY+=( $2 )
                     shift
                 done
@@ -143,7 +143,7 @@ function ParseDatabaseCommandLineOption()
             --beta)
                 DISPLAY="TRUE"
                 FILTER_BETA="TRUE"
-                while [[ ${2:-} =~ ^[0-9]\.[0-9]{4}$ ]]; do
+                while [[ ${2:-} =~ ^${BHMAS_betaRegex//\\/}$ ]]; do
                     BETA_ARRAY+=( $2 )
                     shift
                 done
