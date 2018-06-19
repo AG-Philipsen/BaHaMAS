@@ -64,6 +64,8 @@ function ParseDatabaseCommandLineOption()
                             NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER+=( accRateLast1KC ); shift ;;
                         maxDS)
                             NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER+=( maxDsC ); shift ;;
+                        maxDP)
+                            NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER+=( maxPlaqC ); shift ;;
                         status)
                             NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER+=( statusC ); shift ;;
                         lastTraj)

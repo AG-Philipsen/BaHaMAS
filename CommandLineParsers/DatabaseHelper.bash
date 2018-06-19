@@ -35,8 +35,8 @@ function PrintDatabaseHelper()
     __static__AddSectionLine "Displaying options"
     groupExclusiveColor=${groupColors['DISPLAY']}
     __static__AddOptionToDatabaseHelper "-c | --columns" "Specify the columns to be displayed."\
-                                        "$(cecho $groupExclusiveColor "Possible columns are: " emph "mu" ", " emph "$MASS_PARAMETER" ", " emph "nt" ", " emph "ns" ", " emph "beta_chain_type" ", ")"\
-                                        "$(cecho $groupExclusiveColor "                      " emph "trajNo" ", " emph "acc" ", " emph "accLast1k" ", " emph "status" ", " emph "lastTraj" ".")"\
+                                        "$(cecho $groupExclusiveColor "Possible columns are: " emph "nf" ", " emph "mu" ", " emph "$MASS_PARAMETER" ", " emph "nt" ", " emph "ns" ", " emph "beta_chain_type" ", " emph "maxDS" ", ")"\
+                                        "$(cecho $groupExclusiveColor "                      " emph "maxDP" ", " emph "trajNo" ", " emph "acc" ", " emph "accLast1k" ", " emph "status" ", " emph "lastTraj" ".")"\
                                         "$(cecho "Example:  " lp "-c $MASS_PARAMETER" lp " nt ns beta_chain_type trajNo")"\
                                         "If no columns are specified, all of the above columns will be printed by default."
     __static__AddOptionToDatabaseHelper "--sum" "Summing up the trajectory numbers of each parameter set."

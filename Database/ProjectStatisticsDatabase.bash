@@ -24,6 +24,7 @@ function projectStatisticsDatabase()
     local FILENAME_GIVEN_AS_INPUT=""
     local CURRENT_DIRECTORY=$(pwd)
 
+    #Here the _C stands for _column
     local NF_C=$((2*1))
     local MU_C=$((2*2))
     local K_C=$((2*3))
@@ -34,27 +35,30 @@ function projectStatisticsDatabase()
     local ACCRATE_C=$((2*8))
     local ACCRATE_LAST1K_C=$((2*9))
     local MAX_ACTION_C=$((2*10))
-    local STATUS_C=$((2*11))
-    local LASTTRAJ_C=$((2*12))
+    local MAX_PLAQ_C=$((2*11))
+    local STATUS_C=$((2*12))
+    local LASTTRAJ_C=$((2*13))
 
-    declare -A COLUMNS=( [nfC]=$NF_C [muC]=$MU_C [kC]=$K_C [ntC]=$NT_C [nsC]=$NS_C [betaC]=$BETA_C [trajNoC]=$TRAJNO_C [accRateC]=$ACCRATE_C [accRateLast1KC]=$ACCRATE_LAST1K_C \
-                              [maxDsC]=$MAX_ACTION_C [statusC]=$STATUS_C [lastTrajC]=$LASTTRAJ_C )
+    declare -A COLUMNS=( [nfC]=$NF_C [muC]=$MU_C [kC]=$K_C [ntC]=$NT_C [nsC]=$NS_C [betaC]=$BETA_C [trajNoC]=$TRAJNO_C [accRateC]=$ACCRATE_C [accRateLast1KC]=$ACCRATE_LAST1K_C
+                         [maxDsC]=$MAX_ACTION_C [maxPlaqC]=$MAX_PLAQ_C [statusC]=$STATUS_C [lastTrajC]=$LASTTRAJ_C )
 
     #FSNA = FORMAT_SPECIFIER_NUMBER_ARRAY
-    declare -A FSNA=( [nfC]="6" [muC]="7" [kC]="8" [ntC]="6" [nsC]="6" [betaC]="19" [trajNoC]="11" [accRateC]="8" [accRateLast1KC]="12" [maxDsC]="12" [statusC]="13" [lastTrajC]="11" )
+    declare -A FSNA=( [nfC]="6" [muC]="7" [kC]="8" [ntC]="6" [nsC]="6" [betaC]="19" [trajNoC]="11" [accRateC]="8" [accRateLast1KC]="12" [maxDsC]="16" [maxPlaqC]="16" [statusC]="13" [lastTrajC]="11" )
 
-    declare -A PRINTF_FORMAT_SPECIFIER_ARRAY=( [nfC]="%+${FSNA[nfC]}s" [muC]="%+${FSNA[muC]}s" [kC]="%+${FSNA[kC]}s" [ntC]="%${FSNA[ntC]}d" [nsC]="%${FSNA[nsC]}d" [betaC]="%+${FSNA[betaC]}s" \
-                                                    [trajNoC]="%${FSNA[trajNoC]}d" [accRateC]="%+${FSNA[accRateC]}s" [accRateLast1KC]="%+${FSNA[accRateLast1KC]}s" [maxDsC]="%+${FSNA[maxDsC]}s" \
-                                                    [statusC]="%+${FSNA[statusC]}s" [lastTrajC]="%+${FSNA[lastTrajC]}s" )
+    declare -A PRINTF_FORMAT_SPECIFIER_ARRAY=( [nfC]="%+${FSNA[nfC]}s" [muC]="%+${FSNA[muC]}s" [kC]="%+${FSNA[kC]}s" [ntC]="%${FSNA[ntC]}d" [nsC]="%${FSNA[nsC]}d" [betaC]="%+${FSNA[betaC]}s"
+                                               [trajNoC]="%${FSNA[trajNoC]}d" [accRateC]="%+${FSNA[accRateC]}s" [accRateLast1KC]="%+${FSNA[accRateLast1KC]}s" [maxDsC]="%+${FSNA[maxDsC]}s"
+                                               [maxPlaqC]="%+${FSNA[maxPlaqC]}s" [statusC]="%+${FSNA[statusC]}s" [lastTrajC]="%+${FSNA[lastTrajC]}s" )
 
-    declare -A HEADER_PRINTF_FORMAT_SPECIFIER_ARRAY=( [nfC]="%+$((${FSNA[nfC]}+1))s" [muC]="%+$((${FSNA[muC]}+1))s" [kC]="%+$((${FSNA[kC]}+1))s" [ntC]="%+$((${FSNA[ntC]}+1))s" [nsC]="%+$((${FSNA[nsC]}+1))s" [betaC]="%+$((${FSNA[betaC]}+1))s" \
-                                                           [trajNoC]="%+$((${FSNA[trajNoC]}+1))s" [accRateC]="%+$((${FSNA[accRateC]}+1))s" [accRateLast1KC]="%+$((${FSNA[accRateLast1KC]}+1))s" [maxDsC]="%+$((${FSNA[maxDsC]}+1))s" [statusC]="%+$((${FSNA[statusC]}+1))s" [lastTrajC]="%+$((${FSNA[lastTrajC]}+1))s" )
+    declare -A HEADER_PRINTF_FORMAT_SPECIFIER_ARRAY=( [nfC]="%+$((${FSNA[nfC]}+1))s" [muC]="%+$((${FSNA[muC]}+1))s" [kC]="%+$((${FSNA[kC]}+1))s" [ntC]="%+$((${FSNA[ntC]}+1))s" [nsC]="%+$((${FSNA[nsC]}+1))s"
+                                                      [betaC]="%+$((${FSNA[betaC]}+1))s" [trajNoC]="%+$((${FSNA[trajNoC]}+1))s" [accRateC]="%+$((${FSNA[accRateC]}+1))s"
+                                                      [accRateLast1KC]="%+$((${FSNA[accRateLast1KC]}+1))s" [maxDsC]="%+$((${FSNA[maxDsC]}+1))s" [maxPlaqC]="%+$((${FSNA[maxPlaqC]}+1))s"
+                                                      [statusC]="%+$((${FSNA[statusC]}+1))s" [lastTrajC]="%+$((${FSNA[lastTrajC]}+1))s" )
 
     [ $BHMAS_wilson = "TRUE" ] && MASS_PARAMETER="kappa"
     [ $BHMAS_staggered = "TRUE" ] && MASS_PARAMETER="mass"
 
-    declare -A HEADER_PRINTF_PARAMETER_ARRAY=( [nfC]="nf" [muC]=$BHMAS_chempotPrefix [kC]=$MASS_PARAMETER [ntC]=$BHMAS_ntimePrefix [nsC]=$BHMAS_nspacePrefix [betaC]="beta_chain_type" [trajNoC]="trajNo" \
-                                                    [accRateC]="acc" [accRateLast1KC]="accLast1K" [maxDsC]="maxDS" [statusC]="status" [lastTrajC]="l.T.[s]" )
+    declare -A HEADER_PRINTF_PARAMETER_ARRAY=( [nfC]="nf" [muC]=$BHMAS_chempotPrefix [kC]=$MASS_PARAMETER [ntC]=$BHMAS_ntimePrefix [nsC]=$BHMAS_nspacePrefix [betaC]="beta_chain_type" [trajNoC]="trajNo"
+                                               [accRateC]="acc" [accRateLast1KC]="accLast1K" [maxDsC]="maxSpikeDS/s" [maxPlaqC]="maxSpikeDP/s" [statusC]="status" [lastTrajC]="l.T.[s]" )
 
     declare -a NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=()
 
@@ -88,8 +92,7 @@ function projectStatisticsDatabase()
     local FILTER_TYPE="FALSE"
     local FILTER_TRAJNO="FALSE"
     local FILTER_ACCRATE="FALSE"
-    local FILTER_ACCRATE_LAST1K="FALSE"
-    local FILTER_MAX_ACTION="FALSE"
+    local FILTER_ACCRATE_LAST1K="FALSE" #Not in helper so far!
     local FILTER_STATUS="FALSE"
     local FILTER_LASTTRAJ="FALSE"
 
@@ -169,11 +172,11 @@ function projectStatisticsDatabase()
         [ "$FILTER_ACCRATE" = "TRUE" ] && [ "$ACCRATE_HIGH_VALUE" = "" ]  && ACCRATE_HIGH_VALUE=100.00
 
         [ "$FILTER_ACCRATE_LAST1K" = "TRUE" ] && [ "$ACCRATE_LAST1K_LOW_VALUE" = "" ]  && ACCRATE_LAST1K_LOW_VALUE=0.0
-        [ "$FILTER_ACCRATE_LAST1K" = "TRUE" ] && [ "$ACCRATE__LAST1KHIGH_VALUE" = "" ]  && ACCRATE_LAST1K_HIGH_VALUE=100.00
+        [ "$FILTER_ACCRATE_LAST1K" = "TRUE" ] && [ "$ACCRATE_LAST1K_HIGH_VALUE" = "" ]  && ACCRATE_LAST1K_HIGH_VALUE=100.00
 
 
         if [ "$CUSTOMIZE_COLUMNS" = "FALSE" ]; then
-            NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=( nfC muC kC ntC nsC betaC trajNoC accRateC accRateLast1KC maxDsC statusC lastTrajC )
+            NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=( nfC muC kC ntC nsC betaC trajNoC accRateC accRateLast1KC maxDsC maxPlaqC statusC lastTrajC )
         fi
 
         for NAME_OF_COLUMN in ${!COLUMNS[@]}; do
@@ -204,7 +207,7 @@ function projectStatisticsDatabase()
 
         awk --posix -v filterNf=$FILTER_NF -v filterMu=$FILTER_MU -v filterKappa=$FILTER_MASS -v filterNt=$FILTER_NT -v filterNs=$FILTER_NS \
             -v filterBeta=$FILTER_BETA -v filterType=$FILTER_TYPE \
-            -v filterTrajNo=$FILTER_TRAJNO -v filterAccRate=$FILTER_ACCRATE -v filterAccRateLast1K=$FILTER_ACCRATE_LAST1K -v filterMaxDs=$FILTER_MAX_ACTION \
+            -v filterTrajNo=$FILTER_TRAJNO -v filterAccRate=$FILTER_ACCRATE -v filterAccRateLast1K=$FILTER_ACCRATE_LAST1K \
             -v filterStatus=$FILTER_STATUS -v filterLastTrajTime=$FILTER_LASTTRAJ -v statisticsSummary=$STATISTICS_SUMMARY \
             -v nfString="$NF_STRING" -v muString="$MU_STRING" -v kappaString="$MASS_STRING" -v nsString="$NS_STRING" -v ntString="$NT_STRING" -v betaString="$BETA_STRING" \
             -v typeString=$TYPE_STRING -v statusString="$STATUS_STRING" \
@@ -425,6 +428,10 @@ function projectStatisticsDatabase()
                 # 2) Introduce a space after each color code with 3 format specifiers
                 # 3) Introduce a space before each color code with 2 format specifiers
                 # 4) Introduce a space after each color code with 2 format specifiers
+                # 5) Fields in the print command inside awk should be:
+                #      nf mu k nt ns    colorBeta beta                colorTrDone trDone              colorAcceptance acceptance
+                #                       colorAccLast1K accLast1K      colorMaxDSspike makDSspike      colorMaxPlaqSpike maxPlaqSpike
+                #                       colorStatus status            colorLastTrAgo lastTrAgo
                 ListSimulationsStatus_SLURM $PARAMETER_DIRECTORY_STRUCTURE | \
                     sed -r 's/([^(\x1b)])\[|\]|\(|\)|%/\1/g' | \
                     sed -r 's/(\x1B\[[0-9]{1,2};[0-9]{0,2};[0-9]{0,3}m)(.)/\1 \2/g' | \
@@ -432,7 +439,7 @@ function projectStatisticsDatabase()
                     sed -r 's/(\x1B\[.{1,2};.{1,2}m)(.)/\1 \2/g' |
                     awk --posix -v nf=${PARAMS[0]#$BHMAS_nflavourPrefix*} -v mu=${PARAMS[1]#$BHMAS_chempotPrefix*} -v k=${PARAMS[2]#$BHMAS_massPrefix*} -v nt=${PARAMS[3]#$BHMAS_ntimePrefix*} -v ns=${PARAMS[4]#*$BHMAS_nspacePrefix} '
                             $3 ~ /^[0-9]\.[0-9]{4}/{
-                            print "\033[36m " nf " \033[36m " mu " \033[36m " k " \033[36m " nt " \033[36m " ns " " $(3-1) " " $3 " " $(5-1) " " $5 " " $(8-1) " " $8 " " $(11-1) " " $(11) " " $(18-1) " " $(18) " " $(15-1) " " $(15) " " $(23-1) " " $(23) " " "\033[0m"
+                            print "\033[36m " nf " \033[36m " mu " \033[36m " k " \033[36m " nt " \033[36m " ns " " $(3-1) " " $3 " " $(5-1) " " $5 " " $(8-1) " " $8 " " $(11-1) " " $(11) " " $(18-1) " " $(18) " " $(23-1) " " $(23) " " $(15-1) " " $(15) " " $(26-1) " " $(26) " " "\033[0m"
                             }
                         ' >> $TEMPORARY_DATABASE_FILE
 
@@ -482,6 +489,7 @@ function projectStatisticsDatabase()
             -v accRateColorColumn="$((${COLUMNS[accRateC]} -1 ))" \
             -v accRateLast1KColorColumn="$((${COLUMNS[accRateLast1KC]} -1 ))" \
             -v maxDsColorColumn="$((${COLUMNS[maxDsC]} -1 ))" \
+            -v maxDPColorColumn="$((${COLUMNS[maxPlaqC]} -1 ))" \
             -v statusColorColumn="$((${COLUMNS[statusC]} -1 ))" \
             -v lastTrajColorColumn="$((${COLUMNS[lastTrajC]} -1 ))" \
             -v defaultColor="${BHMAS_defaultListstatusColor/e/033}" \
@@ -493,6 +501,7 @@ function projectStatisticsDatabase()
             -v highAccColor="${BHMAS_highAcceptanceListstatusColor/e/033}" \
             -v tooHighAccColor="${BHMAS_tooHighAcceptanceListstatusColor/e/033}" \
             -v tooHighMaxDsColor="${BHMAS_tooHighDeltaSListstatusColor/e/033}" \
+            -v tooHighMaxDPColor="${BHMAS_tooHighDeltaPListstatusColor/e/033}" \
             -v runningColor="${BHMAS_runningListstatusColor/e/033}" \
             -v pendingColor="${BHMAS_pendingListstatusColor/e/033}" \
             -v toBeCleanedColor="${BHMAS_toBeCleanedListstatusColor/e/033}" \
@@ -523,7 +532,7 @@ simOnBrokenGPU = 0
 criticalSituation = 0
 }
 {
-if($betaColorColumn == wrongBetaColor || $maxDsColorColumn == tooHighMaxDsColor){simOnBrokenGPU+=1; criticalSituation=1}
+if($betaColorColumn == wrongBetaColor || $maxDsColorColumn == tooHighMaxDsColor || $maxDPColorColumn == tooHighMaxDPColor){simOnBrokenGPU+=1; criticalSituation=1}
 if($trajNoColorColumn == toBeCleanedColor){filesToBeCleaned+=1}
 if($accRateColorColumn == tooLowAccColor){simTooLowAcc+=1; criticalSituation=1}
 if($accRateColorColumn == lowAccColor){simLowAcc+=1}
@@ -621,8 +630,10 @@ if (criticalSituation == 1) {exit failure} else {exit success}
                     "Simulations on broken GPU")
                         local COLUMNS_TO_FILTER=( "$((${COLUMNS[betaC]} -1 ))" )
                         COLUMNS_TO_FILTER+=( "$((${COLUMNS[maxDsC]} -1 ))" )
+                        COLUMNS_TO_FILTER+=( "$((${COLUMNS[maxPlaqC]} -1 ))" )
                         local VALUES_TO_MATCH=( "${BHMAS_wrongBetaListstatusColor/e/033}" )
                         VALUES_TO_MATCH+=( "${BHMAS_tooHighDeltaSListstatusColor/e/033}" )
+                        VALUES_TO_MATCH+=( "${BHMAS_tooHighDeltaPListstatusColor/e/033}" )
                         ;;
                     "Simulations stuck (or finished)")
                         local COLUMNS_TO_FILTER=( "$((${COLUMNS[lastTrajC]} -1 ))" )
@@ -712,7 +723,7 @@ function __static__DisplayDatabaseFile()
 {
 
     if [ "$CUSTOMIZE_COLUMNS" = "FALSE" ]; then
-        NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=( nfC muC kC ntC nsC betaC trajNoC accRateC accRateLast1KC maxDsC statusC lastTrajC )
+        NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=( nfC muC kC ntC nsC betaC trajNoC accRateC accRateLast1KC maxDsC maxPlaqC statusC lastTrajC )
     fi
 
     for NAME_OF_COLUMN in ${!COLUMNS[@]}; do
