@@ -140,7 +140,10 @@ function cecho()
 
 function AskUser()
 {
-    cecho -n "\n" lc " $1" "  [Y/N]  "
+    local initialEndline
+    initialEndline="\n"
+    [ "$1" = '-n' ] && initialEndline='' && shift
+    cecho -n "${initialEndline}" lc " $1" "  [Y/N]  "
 }
 
 function UserSaidYes()
