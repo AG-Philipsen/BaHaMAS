@@ -157,6 +157,7 @@ function DeclareBaHaMASGlobalVariables()
     readonly BHMAS_suspiciousBetaListstatusColor="\e[0;33m"
     readonly BHMAS_wrongBetaListstatusColor="\e[0;91m"
     readonly BHMAS_tooHighDeltaSListstatusColor="\e[0;91m"
+    readonly BHMAS_tooHighDeltaPListstatusColor="\e[0;91m"
     readonly BHMAS_tooLowAcceptanceListstatusColor="\e[38;5;9m"
     readonly BHMAS_lowAcceptanceListstatusColor="\e[38;5;208m"
     readonly BHMAS_optimalAcceptanceListstatusColor="\e[38;5;10m"
@@ -174,6 +175,7 @@ function DeclareBaHaMASGlobalVariables()
     readonly BHMAS_highAcceptanceThreshold=78
     readonly BHMAS_tooHighAcceptanceThreshold=90
     readonly BHMAS_deltaSThreshold=6
+    readonly BHMAS_deltaPThreshold=6
 
     #Variables to make first step towards independence from software (NO SPACES in them assumed!)
     readonly BHMAS_configurationPrefix='conf\.'

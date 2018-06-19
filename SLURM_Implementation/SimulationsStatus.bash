@@ -76,8 +76,8 @@ function ListSimulationsStatus_SLURM()
           postfixFromFolder jobStatus outputFileGlobalPath inputFileGlobalPath\
           averageTimePerTrajectory timeLastTrajectory toBeCleaned trajectoriesDone\
           numberLastTrajectory acceptanceAllRun acceptanceLastBunchOfTrajectories\
-          maxSpikeToMeanAsNSigma spikesBeyondFourSigma spikesBeyondFiveSigma timeFromLastTrajectory \
-          integrationSteps0 integrationSteps1 integrationSteps2 kappaMassPreconditioning
+          maxSpikeToMeanAsNSigma maxSpikePlaquetteAsNSigma meanPlaquetteLastBunchOfTrajectories deltaMaxPlaquette\
+          timeFromLastTrajectory integrationSteps0 integrationSteps1 integrationSteps2 kappaMassPreconditioning
     # This function can be called by the JobHandler either in the BHMAS_liststatusOption setup or in the DATABASE setup.
     # The crucial difference is that in the first case the BHMAS_parametersString and BHMAS_parametersPath variable
     # must be the global ones, otherwise they have to be built on the basis of some given information.
@@ -100,8 +100,8 @@ function ListSimulationsStatus_SLURM()
     jobsStatusFile="jobs_status_$localParametersString.txt"
     rm -f $jobsStatusFile
 
-    cecho -d "\n${BHMAS_defaultListstatusColor}========================================================================================================================================================="
-    cecho -n -d lm "$(printf "%s\t\t  %s\t   %s     %s  %s\t  %s\n\e[0m"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "MaxSpikeDS/s [>4s,>5s #|th.]" "Last tr. finished" "Tr: # (time last|av.)")"
+    cecho -d "\n${BHMAS_defaultListstatusColor}=============================================================================================================================================================================================="
+    cecho -n -d lm "$(printf "%s\t\t  %s\t   %s    %s    %s\t  %s\t     %s\n\e[0m"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "MaxSpikeDS/s"   "Plaq: <Last1000>  Pmax-Pmin  MaxSpikeDP/s"   "Last tr. finished" "Tr: # (time last|av.)")"
     printf "%s\t\t\t  %s\t  %s\t%s\t  %s\t%s\n"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "Max DS" >> $jobsStatusFile
 
     jobsMetainformationArray=( $(__static__ExtractMetaInformationFromQueuedJobs) )
@@ -146,29 +146,28 @@ function ListSimulationsStatus_SLURM()
 
             if [ $trajectoriesDone -ge 1000 ]; then
                 acceptanceLastBunchOfTrajectories=$(tail -n1000 $outputFileGlobalPath | awk '{ sum+=$'$BHMAS_acceptanceColumn'} END {printf "%5.2f", 100*sum/(NR)}')
+                meanPlaquetteLastBunchOfTrajectories=$(tail -n1000 $outputFileGlobalPath | awk '{ sum+=$'$BHMAS_plaquetteColumn'} END {printf "% .6f", sum/(NR)}')
             else
                 acceptanceLastBunchOfTrajectories=" --- "
+                meanPlaquetteLastBunchOfTrajectories=" ----- "
             fi
 
-            if [ $(wc -l < $outputFileGlobalPath) -gt 0 ]; then
-                local temporaryArray
-                temporaryArray=( $(awk 'BEGIN{mean=0; sigma=0; maxSpike=0; firstFile=1; secondFile=1; beyondIVsigma=0; beyondVsigma=0}
-                                        NR==FNR {mean+=$8; next}
-                                        firstFile==1 {nDat=NR-1; mean/=nDat; firstFile=0}
-                                        NR-nDat==FNR {delta=($8-mean); sigma+=delta^2; if(sqrt(delta^2)>maxSpike){maxSpike=sqrt(delta^2)}; next}
-                                        secondFile==1 {sigma=sqrt(sigma/nDat); secondFile=0}
-                                        FILENAME==ARGV[3] {if(sqrt($8^2)>mean+4*sigma){beyondIVsigma+=1}; if(sqrt($8^2)>mean+5*sigma){beyondVsigma+=1}}
-                                        END{expectedBeyondIVsigma=2*3.16712e-5*nDat; expectedBeyondVsigma=2*2.86652e-7*nDat;
-                                            printf "%.3f %d %d %d %d", maxSpike/sigma, beyondIVsigma, expectedBeyondIVsigma, beyondVsigma, expectedBeyondVsigma}' $outputFileGlobalPath $outputFileGlobalPath $outputFileGlobalPath ) )
-                maxSpikeToMeanAsNSigma=${temporaryArray[0]}
-                spikesBeyondFourSigma="${temporaryArray[1]}|${temporaryArray[2]}" # In awk we rounded the expected values with %d, not with %.0f since this
-                spikesBeyondFiveSigma="${temporaryArray[3]}|${temporaryArray[4]}" # could be a not so smart idea -> https://www.gnu.org/software/gawk/manual/html_node/Round-Function.html
-            else
-                maxSpikeToMeanAsNSigma=" ----"
-                spikesBeyondFourSigma="---"
-                spikesBeyondFiveSigma="---"
-            fi
-
+            local temporaryArray
+            temporaryArray=( $(awk 'BEGIN{meanS=0; sigmaS=0; maxSpikeS=0; meanP=0; sigmaP=0; maxSpikeP=0; firstFile=1; secondFile=1}
+                                    NR==1 {plaqMin=$'${BHMAS_plaquetteColumn}'; plaqMax=$'${BHMAS_plaquetteColumn}'}
+                                    NR==FNR {meanS+=$'${BHMAS_deltaHColumn}'; meanP+=$'${BHMAS_plaquetteColumn}'; plaqValue=$'${BHMAS_plaquetteColumn}';
+                                             if(plaqValue<plaqMin){plaqMin=plaqValue}; if(plaqValue>plaqMax){plaqMax=plaqValue}; next}
+                                    firstFile==1 {nDat=NR-1; meanS/=nDat; meanP/=nDat; firstFile=0}
+                                    NR-nDat==FNR {deltaS=($'${BHMAS_deltaHColumn}'-meanS); sigmaS+=deltaS^2; if(sqrt(deltaS^2)>maxSpikeS){maxSpikeS=sqrt(deltaS^2)};
+                                                  deltaP=($'${BHMAS_plaquetteColumn}'-meanP); sigmaP+=deltaP^2; if(sqrt(deltaP^2)>maxSpikeP){maxSpikeP=sqrt(deltaP^2)}; next}
+                                    END{sigmaS=sqrt(sigmaS/nDat); sigmaP=sqrt(sigmaP/nDat); secondFile=0;
+                                        if(sigmaS!=0) {printf "%.3f ", maxSpikeS/sigmaS} else {print "---- "};
+                                        if(sigmaP!=0) {printf "%.3f",  maxSpikeP/sigmaP} else {print "---- "};
+                                        printf "% .6f", plaqMax-plaqMin;
+                                       }' $outputFileGlobalPath $outputFileGlobalPath ) )
+            maxSpikeToMeanAsNSigma=${temporaryArray[0]}
+            maxSpikePlaquetteAsNSigma=${temporaryArray[1]}
+            deltaMaxPlaquette=${temporaryArray[2]}
             if [[ $jobStatus == "RUNNING" ]]; then
                 timeFromLastTrajectory=$(( $(date +%s) - $(stat -c %Y $outputFileGlobalPath) ))
             else
@@ -178,6 +177,9 @@ function ListSimulationsStatus_SLURM()
             if [ $BHMAS_liststatusMeasureTimeOption = "TRUE" ]; then
                 averageTimePerTrajectory=$(awk '{ time=$'$BHMAS_trajectoryTimeColumn'; if(time!=0){sum+=time; counter+=1}} END {if(counter!=0){printf "%d", sum/counter}else{printf "%d", 0}}' $outputFileGlobalPath)
                 timeLastTrajectory=$(awk 'END{printf "%d", $'$BHMAS_trajectoryTimeColumn'}' $outputFileGlobalPath)
+            else
+                averageTimePerTrajectory="----"
+                timeLastTrajectory="----"
             fi
         else
             toBeCleaned=0
@@ -185,9 +187,10 @@ function ListSimulationsStatus_SLURM()
             numberLastTrajectory="----"
             acceptanceAllRun=" ----"
             acceptanceLastBunchOfTrajectories=" ----"
+            meanPlaquetteLastBunchOfTrajectories="---"
             maxSpikeToMeanAsNSigma=" ----"
-            spikesBeyondFourSigma="---"
-            spikesBeyondFiveSigma="---"
+            maxSpikePlaquetteAsNSigma="----"
+            deltaMaxPlaquette="---"
             timeFromLastTrajectory="------"
             averageTimePerTrajectory="----"
             timeLastTrajectory="----"
@@ -225,9 +228,10 @@ $(__static__ColorClean $toBeCleaned)%8s${BHMAS_defaultListstatusColor} \
 [$(GoodAcc $acceptanceLastBunchOfTrajectories)%s %%${BHMAS_defaultListstatusColor}] \
 %s-%s%s%s\t\
 $(__static__ColorStatus $jobStatus)%9s${BHMAS_defaultListstatusColor}\t\
-$(__static__ColorDeltaS $maxSpikeToMeanAsNSigma)%7s${BHMAS_defaultListstatusColor}    %8s %-8s  \
-$(__static__ColorTime $timeFromLastTrajectory)%s${BHMAS_defaultListstatusColor}   \
-%7s \
+$(__static__ColorDelta S $maxSpikeToMeanAsNSigma)%7s${BHMAS_defaultListstatusColor}\t\
+%20s  %10s  $(__static__ColorDelta P $maxSpikePlaquetteAsNSigma)%9s${BHMAS_defaultListstatusColor}\t  \
+$(__static__ColorTime $timeFromLastTrajectory)%s${BHMAS_defaultListstatusColor}\t\
+%10s \
 ( %s ) \
 \n\e[0m" \
             "$(__static__GetShortenedBetaString)" \
@@ -235,7 +239,7 @@ $(__static__ColorTime $timeFromLastTrajectory)%s${BHMAS_defaultListstatusColor} 
             "$acceptanceAllRun" \
             "$acceptanceLastBunchOfTrajectories" \
             "$integrationSteps0" "$integrationSteps1" "$integrationSteps2" "$kappaMassPreconditioning" \
-            "$jobStatus"   "$maxSpikeToMeanAsNSigma"   "[${spikesBeyondFourSigma}]"   "[${spikesBeyondFiveSigma}]"\
+            "$jobStatus"   "$maxSpikeToMeanAsNSigma"   "${meanPlaquetteLastBunchOfTrajectories}"   "${deltaMaxPlaquette}"   "${maxSpikePlaquetteAsNSigma}"\
             "$(awk '{if($1 ~ /^[[:digit:]]+$/){printf "%6d", $1}else{print $1}}' <<< "$timeFromLastTrajectory") sec. ago" \
             "$numberLastTrajectory" \
             "$(awk '{if($1 ~ /^[[:digit:]]+$/ && $2 ~ /^[[:digit:]]+$/){printf "%3ds | %3ds", $1, $2}else{print "notMeasured"}}' <<< "$timeLastTrajectory $averageTimePerTrajectory")"
@@ -248,7 +252,7 @@ $(__static__ColorTime $timeFromLastTrajectory)%s${BHMAS_defaultListstatusColor} 
 
     done #Loop on BETA
 
-    cecho -d "${BHMAS_defaultListstatusColor}========================================================================================================================================================="
+    cecho -d "${BHMAS_defaultListstatusColor}================================================================================================================================================================================================="
 }
 
 function __static__GetShortenedBetaString()
@@ -306,7 +310,7 @@ function __static__ColorBeta()
 {
     #Columns here below ranges from 1 on, since they are used in awk
     declare -A observablesColumns=( ["TrajectoryNr"]=1
-                                    ["Plaquette"]=2
+                                    ["Plaquette"]=${BHMAS_plaquetteColumn}
                                     ["PlaquetteSpatial"]=3
                                     ["PlaquetteTemporal"]=4
                                     ["PolyakovLoopRe"]=5
@@ -340,13 +344,16 @@ function __static__ColorBeta()
 }
 
 
-function __static__ColorDeltaS()
+function __static__ColorDelta()
 {
-    if [[ ! $1 =~ [+-]?[[:digit:]]+[.]?[[:digit:]]* ]]; then
+    if [[ ! $1 =~ ^[PS]$ ]] || [[ ! $2 =~ [+-]?[[:digit:]]+[.]?[[:digit:]]* ]]; then
         printf $BHMAS_defaultListstatusColor
     else
-        if [ "$postfixFromFolder" == "continueWithNewChain" ] && [ $(awk -v threshold=$BHMAS_deltaSThreshold -v value=$1 'BEGIN{if(value >= threshold)print 1; else print 0;}') -eq 1 ]; then
-            printf $BHMAS_tooHighDeltaSListstatusColor
+        local thresholdVariableName tooHighColorVariableName
+        thresholdVariableName="BHMAS_delta${1}Threshold"
+        tooHighColorVariableName="BHMAS_tooHighDelta${1}ListstatusColor"
+        if [ "$postfixFromFolder" == "continueWithNewChain" ] && [ $(awk -v threshold=${!thresholdVariableName} -v value=$2 'BEGIN{if(value >= threshold)print 1; else print 0;}') -eq 1 ]; then
+            printf ${!tooHighColorVariableName}
         else
             printf $BHMAS_defaultListstatusColor
         fi
@@ -367,4 +374,4 @@ readonly -f\
          __static__ColorTime\
          __static__ColorClean\
          __static__ColorBeta\
-         __static__ColorDeltaS
+         __static__ColorDelta
