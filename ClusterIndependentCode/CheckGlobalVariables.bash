@@ -19,6 +19,8 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
                                   BHMAS_inputFilename
                                   BHMAS_jobScriptPrefix
                                   BHMAS_outputFilename
+                                  BHMAS_plaquetteColumn
+                                  BHMAS_deltaHColumn
                                   BHMAS_acceptanceColumn
                                   BHMAS_trajectoryTimeColumn
                                   BHMAS_databaseFilename
@@ -90,6 +92,14 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
     done
     if [ "${BHMAS_GPUsPerNode:-}" != '' ] && [[ ! $BHMAS_GPUsPerNode =~ ^[1-9][0-9]*$ ]]; then
         Error -n B emph "BHMAS_GPUsPerNode" uB " variable format invalid. It has to be a " emph "positive integer" " number."
+        mustReturn='FALSE'
+    fi
+    if [ "${BHMAS_plaquetteColumn:-}" != '' ] && [[ ! $BHMAS_plaquetteColumn =~ ^[1-9][0-9]*$ ]]; then
+        Error -n B emph "BHMAS_plaquetteColumn" uB " variable format invalid. It has to be a " emph "positive integer" " number."
+        mustReturn='FALSE'
+    fi
+    if [ "${BHMAS_deltaHColumn:-}" != '' ] && [[ ! $BHMAS_deltaHColumn =~ ^[1-9][0-9]*$ ]]; then
+        Error -n B emph "BHMAS_deltaHColumn" uB " variable format invalid. It has to be a " emph "positive integer" " number."
         mustReturn='FALSE'
     fi
     if [ "${BHMAS_acceptanceColumn:-}" != '' ] && [[ ! $BHMAS_acceptanceColumn =~ ^[1-9][0-9]*$ ]]; then
@@ -221,7 +231,10 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
         variablesThatMustBeNotEmpty+=( BHMAS_hmcGlobalPath #TODO: Remove, now it's only for --measureTime
                                        BHMAS_inputFilename
                                        BHMAS_outputFilename
-                                       BHMAS_acceptanceColumn )
+                                       BHMAS_plaquetteColumn
+                                       BHMAS_deltaHColumn
+                                       BHMAS_acceptanceColumn
+                                       BHMAS_trajectoryTimeColumn )
 
     elif [ $BHMAS_accRateReportOption = 'TRUE' ]; then
         option="$(cecho -d "with the " B "--accRateReport" uB)"
@@ -252,7 +265,10 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
         option="$(cecho -d "with the " B "--dataBase" uB)"
         variablesThatMustBeNotEmpty+=( BHMAS_inputFilename
                                        BHMAS_outputFilename
+                                       BHMAS_plaquetteColumn
+                                       BHMAS_deltaHColumn
                                        BHMAS_acceptanceColumn
+                                       BHMAS_trajectoryTimeColumn
                                        BHMAS_databaseGlobalPath
                                        BHMAS_databaseFilename )
         neededFolders+=( "$BHMAS_databaseGlobalPath" )

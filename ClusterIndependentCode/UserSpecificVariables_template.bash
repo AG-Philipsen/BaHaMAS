@@ -38,6 +38,8 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_hmcGlobalPath=""
     readonly BHMAS_inputFilename=""
     readonly BHMAS_outputFilename=""
+    readonly BHMAS_plaquetteColumn=
+    readonly BHMAS_deltaHColumn=
     readonly BHMAS_acceptanceColumn=
     readonly BHMAS_trajectoryTimeColumn=
     readonly BHMAS_useRationalApproxFiles='FALSE'
@@ -81,7 +83,10 @@ readonly -f\
 #     BHMAS_inputFilename              -->  name of the inputfile
 #     BHMAS_jobScriptPrefix            -->  prefix of the jobscript name
 #     BHMAS_outputFilename             -->  name of the outputfile
+#     BHMAS_plaquetteColumn            -->  number of column containing the plaquette value [first column is column number 1].
+#     BHMAS_deltaHColumn               -->  number of column containing the dH value [first column is column number 1].
 #     BHMAS_acceptanceColumn           -->  number of column containing outcomes (zeros or ones) of Metropolis test [first column is column number 1].
+#     BHMAS_trajectoryTimeColumn       -->  number of column containing the trajectory time in seconds [first column is column number 1].
 #     BHMAS_rationalApproxGlobalPath   -->  global path to the folder containing the rational approximations
 #     BHMAS_approxHeatbathFilename     -->  rational approximation used for the pseudofermion fields
 #     BHMAS_approxMDFilename           -->  rational approximation used for the molecular dynamis
