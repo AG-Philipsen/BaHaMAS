@@ -44,17 +44,25 @@ function ProduceJobscript_CL2QCD()
 
     #Trying to retrieve information about the list of nodes to be excluded if user gave file
     if [ "$BHMAS_excludeNodesGlobalPath" != '' ]; then
+        set +e #Here we want to "allow" grep or ssh to fail, since there could e.g. be connection problems. Afterwards we check excludeString.
         if [ -f "$BHMAS_excludeNodesGlobalPath" ]; then
             excludeString=$(grep -oE '\-\-exclude=.*\[.*\]' $BHMAS_excludeNodesGlobalPath 2>/dev/null)
+            if [ $? -eq 2 ]; then
+                Error "It was not possible to recover the exclude nodes string from " file "${BHMAS_excludeNodesGlobalPath}" " file!"
+            fi
         elif [[ $BHMAS_excludeNodesGlobalPath =~ : ]]; then
             excludeString=$(ssh ${BHMAS_excludeNodesGlobalPath%%:*} "grep -oE '\-\-exclude=.*\[.*\]' ${BHMAS_excludeNodesGlobalPath#*:} 2>/dev/null")
+            if [ $? -eq 2 ]; then
+                Error "It was not possible to recover the exclude nodes string over ssh connection!"
+            fi
         fi
+        set -e
         if [ "${excludeString:-}" != "" ]; then
             __static__AddToJobscriptFile "#SBATCH $excludeString"
             cecho "\e[1A\e[80C\t$excludeString"
         else
-            cecho -n "\n " ly B U "WARNING" uU ":" uB " No exclude string to exclude nodes in jobscript found!"
-            AskUser "         Do you still want to continue with jobscript creation?"
+            Warning -n "No string to exclude nodes in jobscript is available!"
+            AskUser -n "         Do you still want to continue the jobscript creation?"
             if UserSaidNo; then
                 cecho "\n" B lr "Exiting from job script creation process...\n"
                 rm -f $jobScriptGlobalPath
