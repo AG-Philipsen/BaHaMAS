@@ -66,7 +66,7 @@ function DeclarePathRelatedGlobalVariables()
     #Parameters regular expressions
     readonly BHMAS_nflavourRegex='[0-9]\([.][0-9]\)\?'
     readonly BHMAS_chempotRegex='\(0\|PiT\)'
-    readonly BHMAS_massRegex='[0-9]\{4\}'
+    readonly BHMAS_massRegex='\([0-9][.]\)\?[0-9]\{4\}'
     readonly BHMAS_ntimeRegex='[0-9]\{1,2\}'
     readonly BHMAS_nspaceRegex='[0-9]\{1,2\}'
     declare -rga BHMAS_parameterRegexes=( [$BHMAS_nflavourPosition]=$BHMAS_nflavourRegex

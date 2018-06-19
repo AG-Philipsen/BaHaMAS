@@ -13,12 +13,17 @@ function __static__AddToInputFile()
 
 function ProduceInputFile_CL2QCD()
 {
-    local betaValue inputFileGlobalPath numberOfTrajectoriesToBeDone
+    local betaValue inputFileGlobalPath numberOfTrajectoriesToBeDone massAsNumber
     betaValue="$1"
     inputFileGlobalPath="$2"
     numberOfTrajectoriesToBeDone=$3
     rm -f $inputFileGlobalPath || exit $BHMAS_fatalBuiltin
     touch $inputFileGlobalPath || exit $BHMAS_fatalBuiltin
+    if [ $(grep -c "[.]" <<< "${BHMAS_mass}") -eq 0 ]; then
+        massAsNumber="0.${BHMAS_mass}"
+    else
+        massAsNumber="${BHMAS_mass}"
+    fi
 
     #This input file is for CL2QCD only!
     if [ $BHMAS_wilson = "TRUE" ]; then
@@ -117,11 +122,11 @@ function ProduceInputFile_CL2QCD()
         "ntime=$BHMAS_ntime"
     if [ $BHMAS_wilson = "TRUE" ]; then
         __static__AddToInputFile \
-            "kappa=0.$BHMAS_mass"\
+            "kappa=${massAsNumber}"\
             "hmcsteps=$numberOfTrajectoriesToBeDone"
     elif [ $BHMAS_staggered = "TRUE" ]; then
         __static__AddToInputFile \
-            "mass=0.$BHMAS_mass"\
+            "mass=${massAsNumber}"\
             "rhmcsteps=$numberOfTrajectoriesToBeDone"
     fi
     __static__AddToInputFile \
