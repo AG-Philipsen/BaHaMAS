@@ -35,17 +35,20 @@ function __static__FillInVariablesFromMaybeExistentUserSetup()
         for variable in ${!userVariables[@]}; do
             #TODO: What about several formulations?!
             occurences=( $(sed -n "s/^[^#].*\(${variable}=.*\)/\1/p" $filenameUserSetup | sed "s/['\"]//g") )
-            if [ ${#occurences[@]} -le 1 ]; then
+            if [ ${#occurences[@]} -eq 1 ]; then
                 userVariables[$variable]=${occurences[0]##*=}
             else
                 unableToRecover+=( $variable )
             fi
         done
         if [ ${#unableToRecover[@]} -ne 0 ]; then
-            cecho B ly "\n " U "WARNING" uU ":" uB " Unable to recover the previously set value for the following variable(s):"
+            local warningString;
+            Warning -N "Unable to recover the previously set value for the following variable(s):"
             for variable in ${unableToRecover[@]}; do
-                cecho ly "           - " lo "$variable"
+                Warning -n -e -N " - " lo "$variable"
             done
+            Warning -n -e -N "Maybe they were missing just because recently introduced in BaHaMAS."
+            Warning -n -e -N "Press enter to continue (and to let the setup add them)."; read
         fi
     fi
 }
