@@ -173,10 +173,21 @@ function UserSaidNo()
 
 function __static__PrintMessageToScreen()
 {
-    local initialEndline typeOfMessage exitCode messageColor fullMessage finalString
+    local initialEndline finalEndline typeOfMessage exitCode printMessageLabel messageColor fullMessage finalString
     typeOfMessage="$1"; exitCode="$2"; shift 2; finalString=''
-    initialEndline="\n"
-    [ "$1" = '-n' ] && initialEndline='' && shift
+    initialEndline="\n"; finalEndline="\n"; printMessageLabel='TRUE';
+    while [[ $1 =~ ^-[nNe]$ ]]; do
+        case "$1" in
+            -n )
+                initialEndline='' ;;
+            -N )
+                finalEndline='' ;;
+            -e )
+                printMessageLabel='FALSE' ;;
+        esac
+        shift
+    done
+    #[ "$1" = '-n' ] && initialEndline='' && shift
     case "$typeOfMessage" in
         WARNING )
             messageColor='ly' ;;
@@ -186,12 +197,17 @@ function __static__PrintMessageToScreen()
             messageColor='lo'
             finalString='Please contact the developers!' ;;
     esac
+    [ "$1" = '-e' ] && typeOfMessage="${typeOfMessage//?/ }" && shift
     fullMessage="$(cecho $messageColor "${@//\\n/$'\n' ${typeOfMessage//?/ }  }")"
-    cecho "$initialEndline " $messageColor B U "${typeOfMessage}" uU ": " uB "${fullMessage}"
-    if [ "$finalString" != '' ]; then
-        cecho lr "\n ${typeOfMessage//?/ }  $finalString\n"
+    if [ $printMessageLabel = 'TRUE' ]; then
+        cecho "$initialEndline " $messageColor B U "${typeOfMessage}" uU ": " uB "${fullMessage}"
     else
-        cecho ''
+        cecho "$initialEndline " $messageColor "${typeOfMessage//?/ }  ${fullMessage}"
+    fi
+    if [ "$finalString" != '' ]; then
+        cecho lr "\n ${typeOfMessage//?/ }  $finalString${finalEndline}"
+    else
+        cecho -n "${finalEndline}"
     fi
     if [ $exitCode -ne 0 ]; then
         exit $exitCode
