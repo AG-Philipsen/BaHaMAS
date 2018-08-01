@@ -25,8 +25,8 @@ function __static__ProduceSrunCommandsFileForInversionsPerBeta()
                                                              -v mass="0.$BHMAS_mass" \
                                                              -v corrDir="$BHMAS_correlatorDirection" \
                                                              -v solver="cg" \
-                                                             -v cgmax="30000" \
-                                                             -v cgIterationBlockSize="50" \
+                                                             -v solverMaxIterations="30000" \
+                                                             -v solverResidCheckEvery="50" \
                                                              -v thetaFermionTemporal="1" \
                                                              -v maxNrCorrs="$BHMAS_numberOfSourcesForCorrelators" \
                                                              -v chemPot="$BHMAS_chempot" \
@@ -35,14 +35,14 @@ function __static__ProduceSrunCommandsFileForInversionsPerBeta()
         BEGIN{
             srand();
             if(chemPot == 0){
-                chemPotString="--use_chem_pot_im=0";
+                chemPotString="--useChemicalPotentialIm=0";
             }else{
                 exit
             }
             if(wilson == "TRUE"){
-                options_discretization = "--kappa=" mass " --fermact=wilson --num_sources=12"
+                options_discretization = "--kappa=" mass " --fermionAction=wilson --nSources=12"
             }else if (staggered == "TRUE"){
-                options_discretization = "--mass=" mass " --fermact=rooted_stagg --num_sources=3"
+                options_discretization = "--mass=" mass " --fermionAction=rooted_stagg --nSources=3"
             }
         }
         {
@@ -72,7 +72,7 @@ function __static__ProduceSrunCommandsFileForInversionsPerBeta()
             for(i = 1; i <= n; ++i)
             {
                 split(list_of_correlators_to_calculate[i], parts_of_correlator_name, "_");
-                print "--sourcefile=" parts_of_correlator_name[1] " --use_cpu=" useCpu " --startcondition=" startcondition " --log-level=" logLevel " --ns=" ns " --nt=" nt " --source_x=" parts_of_correlator_name[2] " --source_y=" parts_of_correlator_name[3] " --source_z=" parts_of_correlator_name[4] " --source_t=" parts_of_correlator_name[5] " --beta=" beta " --corr_dir=" corrDir " --solver=" solver " --cgmax=" cgmax " --cg_iteration_block_size=" cgIterationBlockSize " --theta_fermion_temporal=" thetaFermionTemporal " --ferm_obs_corr_postfix=" "_" parts_of_correlator_name[2] "_" parts_of_correlator_name[3] "_" parts_of_correlator_name[4] "_" parts_of_correlator_name[5] "_corr" " " chemPotString " " options_discretization;
+                print "--initialConf=" parts_of_correlator_name[1] " --useCPU=" useCpu " --startCondition=" startcondition " --logLevel=" logLevel " --nSpace=" ns " --nTime=" nt " --sourceX=" parts_of_correlator_name[2] " --sourceY=" parts_of_correlator_name[3] " --sourceZ=" parts_of_correlator_name[4] " --sourceT=" parts_of_correlator_name[5] " --beta=" beta " --correlatorDirection=" corrDir " --solver=" solver " --solverMaxIterations=" solverMaxIterations " --solverResiduumCheckEvery=" solverResidCheckEvery " --thetaFermionTemporal=" thetaFermionTemporal " --fermObsCorrelatorsPostfix=" "_" parts_of_correlator_name[2] "_" parts_of_correlator_name[3] "_" parts_of_correlator_name[4] "_" parts_of_correlator_name[5] "_corr" " " chemPotString " " options_discretization;
             }
         }' > "$filename"
 

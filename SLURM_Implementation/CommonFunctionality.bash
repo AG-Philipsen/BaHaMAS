@@ -49,7 +49,7 @@ function __static__ExtractNumberOfTrajectoriesToBeDoneFromFile()
 {
     local filename numberOfTrajectories
     filename="$1"
-    numberOfTrajectories=$(sed -n 's/^.*hmcsteps=\([0-9]\+\)/\1/p' "$filename")
+    numberOfTrajectories=$(sed -n 's/^n\(H\|Rh\)mcsteps=\([0-9]\+\)/\2/p' "$filename") #Option is either nHmcSteps or nRhmcSteps
     if [ "$numberOfTrajectories" = '' ]; then
         Fatal $BHMAS_fatalLogicError "Number of trajectories to be done not present in input file " file "$filename" "!"
     else

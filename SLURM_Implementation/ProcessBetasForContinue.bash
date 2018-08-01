@@ -229,22 +229,22 @@ function __static__ModifyOptionsInInputFile()
     local oldString newString
     while [ $# -gt 0 ]; do
         case $1 in
-            startcondition=* )                  oldString="startcondition=[[:alpha:]]\+";              newString="startcondition=${1#*=}" ;;
-            sourcefile=* )                      oldString="sourcefile=[[:alnum:][:punct:]]*";          newString="sourcefile=${1#*=}" ;;
-            initial_prng_state=* )              oldString="initial_prng_state=[[:alnum:][:punct:]]*";  newString="initial_prng_state=${1#*=}" ;;
-            host_seed=* )                       oldString="host_seed=[0-9]\+";                         newString="host_seed=${1#*=}" ;;
-            intsteps0=* )                       oldString="integrationsteps0=[0-9]\+";                 newString="integrationsteps0=${1#*=}" ;;
-            intsteps1=* )                       oldString="integrationsteps1=[0-9]\+";                 newString="integrationsteps1=${1#*=}" ;;
-            f=* | confSaveFrequency=* )         oldString="savefrequency=[0-9]\+";                     newString="savefrequency=${1#*=}" ;;
-            F=* | confSavePointFrequency=* )    oldString="savepointfrequency=[0-9]\+";                newString="savepointfrequency=${1#*=}" ;;
-            m=* | measurements=* )              oldString="hmcsteps=[0-9]\+";                          newString="hmcsteps=${1#*=}" ;;
-            measure_pbp=* )                     oldString="measure_pbp=[0-9]\+";                       newString="measure_pbp=${1#*=}" ;;
-            use_mp=* )                          oldString="use_mp=[0-9]\+";                            newString="use_mp=${1#*=}" ;;
-            kappa_mp=* )                        oldString="kappa_mp=[0-9]\+[.][0-9]\+";                newString="kappa_mp=${1#*=}" ;;
-            intsteps2=* )                       oldString="integrationsteps2=[0-9]\+";                 newString="integrationsteps2=${1#*=}" ;;
-            cg_iteration_block_size=* )         oldString="cg_iteration_block_size=[0-9]\+";           newString="cg_iteration_block_size=${1#*=}" ;;
-            num_timescales=* )                  oldString="num_timescales=[0-9]\+";                    newString="num_timescales=${1#*=}" ;;
-            num_pseudofermions=* )              oldString="num_pseudofermions=[0-9]\+";                newString="num_pseudofermions=${1#*=}" ;;
+            startCondition=* )                  oldString="startCondition=[[:alpha:]]\+";                newString="startCondition=${1#*=}" ;;
+            initialConf=* )                     oldString="initialConf=[[:alnum:][:punct:]]*";           newString="initialConf=${1#*=}" ;;
+            initialPRNG=* )                     oldString="initialPRNG=[[:alnum:][:punct:]]*";           newString="initialPRNG=${1#*=}" ;;
+            hostSeed=* )                        oldString="hostSeed=[0-9]\+";                            newString="hostSeed=${1#*=}" ;;
+            intsteps0=* )                       oldString="integrationSteps0=[0-9]\+";                   newString="integrationSteps0=${1#*=}" ;;
+            intsteps1=* )                       oldString="integrationSteps1=[0-9]\+";                   newString="integrationSteps1=${1#*=}" ;;
+            f=* | confSaveFrequency=* )         oldString="createCheckpointEvery=[0-9]\+";               newString="createCheckpointEvery=${1#*=}" ;;
+            F=* | confSavePointFrequency=* )    oldString="overwriteTemporaryCheckpointEvery=[0-9]\+";   newString="overwriteTemporaryCheckpointEvery=${1#*=}" ;;
+            m=* | measurements=* )              oldString="mcSteps=[0-9]\+";                             newString="mcSteps=${1#*=}" ;;  # This replacement works both with nHmcSteps and nRhmcSteps
+            measurePbp=* )                      oldString="measurePbp=[0-9]\+";                          newString="measurePbp=${1#*=}" ;;
+            useMP=* )                           oldString="useMP=[0-9]\+";                               newString="useMP=${1#*=}" ;;
+            kappaMP=* )                         oldString="kappaMP=[0-9]\+[.][0-9]\+";                   newString="kappaMP=${1#*=}" ;;
+            intsteps2=* )                       oldString="integrationSteps2=[0-9]\+";                   newString="integrationSteps2=${1#*=}" ;;
+            solverResiduumCheckEvery=* )        oldString="solverResiduumCheckEvery=[0-9]\+";            newString="solverResiduumCheckEvery=${1#*=}" ;;
+            nTimeScales=* )                     oldString="nTimeScales=[0-9]\+";                         newString="nTimeScales=${1#*=}" ;;
+            nPseudoFermions=* )                 oldString="nPseudoFermions=[0-9]\+";                     newString="nPseudoFermions=${1#*=}" ;;
             * )
                 Error "The option " emph "$1" " cannot be handled in the continue scenario.\n" "Simulation cannot be continued. The value " emph "beta = $betaValue" " will be skipped!"
                 BHMAS_problematicBetaValues+=( $betaValue )
@@ -371,27 +371,27 @@ function __static__HandlePbpInInputFile()
             sed -i '$a\' $outputPbpFileGlobalPath
         fi
     fi
-    optionsToBeAddedOrModified=("measure_pbp=$measurePbpValueForInputFile")
-    if [ $(grep -c "measure_pbp" $inputFileGlobalPath) -eq 0 ]; then
-        pbpStrings=(sourcetype sourcecontent num_sources pbp_measurements ferm_obs_to_single_file ferm_obs_pbp_prefix)
+    optionsToBeAddedOrModified=("measurePbp=$measurePbpValueForInputFile")
+    if [ $(grep -c "measurePbp" $inputFileGlobalPath) -eq 0 ]; then
+        pbpStrings=(sourceType sourceContent nSources pbpMeasurements fermObsInSingleFile fermObsPbpPrefix)
         for string in "${pbpStrings[@]}"; do
             if [ $(grep -c "$string" $inputFileGlobalPath) -ne 0 ]; then
-                Error "The option " emph "measure_pbp" " is not present in the input file but one or more specification about how to calculate\n"\
+                Error "The option " emph "measurePbp" " is not present in the input file but one or more specification about how to calculate\n"\
                       "the chiral condensate are present. Suspicious situation, investigate! The value " emph "beta = $betaValue" " will be skipped!"
                 BHMAS_problematicBetaValues+=( $betaValue )
                 __static__RestoreOriginalInputFile && return 1
             fi
         done
-        optionsToBeAddedOrModified+=("sourcetype=volume" "sourcecontent=gaussian")
+        optionsToBeAddedOrModified+=("sourceType=volume" "sourceContent=gaussian")
         if [ $BHMAS_wilson = "TRUE" ]; then
-            optionsToBeAddedOrModified+=("num_sources=16")
+            optionsToBeAddedOrModified+=("nSources=16")
         elif [ $BHMAS_staggered = "TRUE" ]; then
-            optionsToBeAddedOrModified+=("num_sources=1" "pbp_measurements=8" "ferm_obs_to_single_file=1" "ferm_obs_pbp_prefix=${BHMAS_outputFilename}")
+            optionsToBeAddedOrModified+=("nSources=1" "pbpMeasurements=8" "fermObsInSingleFile=1" "fermObsPbpPrefix=${BHMAS_outputFilename}")
         fi
         __static__AddOptionsToInputFile ${optionsToBeAddedOrModified[@]}
         __static__PrintAddedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
     else
-        #If measure_pbp is in input file we assume that relative options are there and fine
+        #If measurePbp is in input file we assume that relative options are there and fine
         __static__ModifyOptionsInInputFile ${optionsToBeAddedOrModified[@]} || { __static__RestoreOriginalInputFile && return 1; }
         __static__PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
     fi
@@ -402,8 +402,8 @@ function __static__HandleMultiplePseudofermionsInInputFile()
 {
     if [ $BHMAS_staggered = "TRUE" ]; then #Multiple pseudofermions simply ignored if not staggered
         local oldOption newOption optionsToBeAddedOrModified
-        optionsToBeAddedOrModified=("num_pseudofermions=${BHMAS_numberOfPseudofermions}")
-        if [ $(grep -c "num_pseudofermions" $inputFileGlobalPath) -eq 0 ]; then
+        optionsToBeAddedOrModified=("nPseudoFermions=${BHMAS_numberOfPseudofermions}")
+        if [ $(grep -c "nPseudoFermions" $inputFileGlobalPath) -eq 0 ]; then
             __static__AddOptionsToInputFile ${optionsToBeAddedOrModified[@]}
             __static__PrintAddedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
         else
@@ -411,17 +411,17 @@ function __static__HandleMultiplePseudofermionsInInputFile()
             __static__PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
         fi
         #Always replace approx files with correct ones (maybe unnecessary, but easy to be done always)
-        oldOption="approx_heatbath_file=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_\(pf[1-9]\+_\)\?Approx_Heatbath"
+        oldOption="rationalApproxFileHB=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_\(pf[1-9]\+_\)\?Approx_Heatbath"
         newOption="${oldOption%/*}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Heatbath"
         [ $BHMAS_numberOfPseudofermions -gt 1 ] && newOption="${newOption/Approx_Heatbath/pf${BHMAS_numberOfPseudofermions}_Approx_Heatbath}"
         __static__FindAndReplaceSingleOccurenceInFile $inputFileGlobalPath "$oldOption" "$newOption" || { __static__RestoreOriginalInputFile && return 1; }
         __static__PrintModifiedOptionsToStandardOutput ${newOption}
-        oldOption="approx_md_file=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_\(pf[1-9]\+_\)\?Approx_MD"
+        oldOption="rationalApproxFileMD=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_\(pf[1-9]\+_\)\?Approx_MD"
         newOption="${oldOption%/*}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_MD"
         [ $BHMAS_numberOfPseudofermions -gt 1 ] && newOption="${newOption/Approx_MD/pf${BHMAS_numberOfPseudofermions}_Approx_MD}"
         __static__FindAndReplaceSingleOccurenceInFile $inputFileGlobalPath "$oldOption" "$newOption" || { __static__RestoreOriginalInputFile && return 1; }
         __static__PrintModifiedOptionsToStandardOutput ${newOption}
-        oldOption="approx_metropolis_file=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_\(pf[1-9]\+_\)\?Approx_Metropolis"
+        oldOption="rationalApproxFileMetropolis=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_\(pf[1-9]\+_\)\?Approx_Metropolis"
         newOption="${oldOption%/*}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Metropolis"
         [ $BHMAS_numberOfPseudofermions -gt 1 ] && newOption="${newOption/Approx_Metropolis/pf${BHMAS_numberOfPseudofermions}_Approx_Metropolis}"
         __static__FindAndReplaceSingleOccurenceInFile $inputFileGlobalPath "$oldOption" "$newOption" || { __static__RestoreOriginalInputFile && return 1; }
@@ -435,36 +435,36 @@ function __static__HandleMassPreconditioningInInputFile()
     if [ $BHMAS_wilson = "TRUE" ]; then #Mass preconditioning simply ignored if not Wilson
         local string massPreconditioningStrings optionsToBeAddedOrModified
         if KeyInArray $betaValue BHMAS_massPreconditioningValues; then
-            optionsToBeAddedOrModified=("use_mp=1")
-            if [ $(grep -c "use_mp" $inputFileGlobalPath) -eq 0 ]; then
-                massPreconditioningStrings=(solver_mp kappa_mp integrator2 integrationsteps2)
+            optionsToBeAddedOrModified=("useMP=1")
+            if [ $(grep -c "useMP" $inputFileGlobalPath) -eq 0 ]; then
+                massPreconditioningStrings=(solverMP kappaMP integrator2 integrationSteps2)
                 for string in "${massPreconditioningStrings[@]}"; do
                     if [ $(grep -c "$string" $inputFileGlobalPath) -ne 0 ]; then
-                        Error "The option " emph "use_mp" " is not present in the input file but one or more specification about how to use\n"\
+                        Error "The option " emph "useMP" " is not present in the input file but one or more specification about how to use\n"\
                               "mass preconditioning are present. Suspicious situation, investigate! The value " emph "beta = $betaValue" " will be skipped!"
                         BHMAS_problematicBetaValues+=( $betaValue )
                         __static__RestoreOriginalInputFile && return 1
                     fi
                 done
-                optionsToBeAddedOrModified+=("solver_mp=cg" "kappa_mp=0.${BHMAS_massPreconditioningValues[$betaValue]#*,}"
-                                             "integrator2=twomn" "integrationsteps2=${BHMAS_massPreconditioningValues[$betaValue]%,*}")
+                optionsToBeAddedOrModified+=("solverMP=cg" "kappaMP=0.${BHMAS_massPreconditioningValues[$betaValue]#*,}"
+                                             "integrator2=twomn" "integrationSteps2=${BHMAS_massPreconditioningValues[$betaValue]%,*}")
                 __static__AddOptionsToInputFile ${optionsToBeAddedOrModified[@]}
                 __static__PrintAddedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
-                optionsToBeAddedOrModified=("num_timescales=3" "cg_iteration_block_size=10")
+                optionsToBeAddedOrModified=("nTimeScales=3" "solverResiduumCheckEvery=10")
                 __static__ModifyOptionsInInputFile ${optionsToBeAddedOrModified[@]} || { __static__RestoreOriginalInputFile && return 1; }
                 __static__PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
             else
                 #Here I assume that the specifications for mass preconditioning are already in the input file and I just modify them!
                 #In any case, the function '__static__ModifyOptionsInInputFile' will catch any missing option and the beta will be skipped
-                optionsToBeAddedOrModified+=("kappa_mp=0.${BHMAS_massPreconditioningValues[$betaValue]#*,}" "num_timescales=3"
-                                             "intsteps2=${BHMAS_massPreconditioningValues[$betaValue]%,*}" "cg_iteration_block_size=10")
+                optionsToBeAddedOrModified+=("kappaMP=0.${BHMAS_massPreconditioningValues[$betaValue]#*,}" "nTimeScales=3"
+                                             "intsteps2=${BHMAS_massPreconditioningValues[$betaValue]%,*}" "solverResiduumCheckEvery=10")
                 __static__ModifyOptionsInInputFile ${optionsToBeAddedOrModified[@]} || { __static__RestoreOriginalInputFile && return 1; }
                 __static__PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
             fi
         else
             #Here check if mass preconditioning is in the input file and if so switch it off
-            if [ $(grep -c "use_mp" $inputFileGlobalPath) -gt 0 ]; then #Use '-gt 0' instead of '-eq 1' so that we also check multiple occurences
-                optionsToBeAddedOrModified=("use_mp=0" "cg_iteration_block_size=50" "num_timescales=2")
+            if [ $(grep -c "useMP" $inputFileGlobalPath) -gt 0 ]; then #Use '-gt 0' instead of '-eq 1' so that we also check multiple occurences
+                optionsToBeAddedOrModified=("useMP=0" "solverResiduumCheckEvery=50" "nTimeScales=2")
                 __static__ModifyOptionsInInputFile ${optionsToBeAddedOrModified[@]} || { __static__RestoreOriginalInputFile && return 1; }
                 __static__PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
             fi
@@ -476,15 +476,15 @@ function __static__HandleMassPreconditioningInInputFile()
 function __static__HandleStartConditionInInputFile()
 {
     #Always convert startcondition in continue (and do not notify user, it is understood)
-    __static__ModifyOptionsInInputFile "startcondition=continue" || { __static__RestoreOriginalInputFile && return 1; }
+    __static__ModifyOptionsInInputFile "startCondition=continue" || { __static__RestoreOriginalInputFile && return 1; }
     return 0
 }
 
 function __static__HandleStartConfigurationInInputFile()
 {
     local optionsToBeAddedOrModified
-    optionsToBeAddedOrModified="sourcefile=$runBetaDirectory/${nameOfLastConfiguration}"
-    if [ $(grep -c "sourcefile=[[:alnum:][:punct:]]*" $inputFileGlobalPath) -eq 0 ]; then
+    optionsToBeAddedOrModified="initialConf=$runBetaDirectory/${nameOfLastConfiguration}"
+    if [ $(grep -c "initialConf=[[:alnum:][:punct:]]*" $inputFileGlobalPath) -eq 0 ]; then
         __static__AddOptionsToInputFile $optionsToBeAddedOrModified
         __static__PrintAddedOptionsToStandardOutput $optionsToBeAddedOrModified
     else
@@ -499,10 +499,10 @@ function __static__HandlePRNGStateInInputFile()
 {
     local optionsToBeAddedOrModified
     if [ "$nameOfLastPRNG" == "" ]; then
-        #Delete eventual line from input file with initial_prng_state (here we must use a random seed)
-        sed -i '/initial_prng_state/d' $inputFileGlobalPath
-        optionsToBeAddedOrModified="host_seed=$(printf "%04d" $(( (RANDOM+1000)%10000 )) )"
-        if [ $(grep -c "host_seed=[0-9]\{4\}" $inputFileGlobalPath) -eq 0 ]; then
+        #Delete eventual line from input file with initialPRNG (here we must use a random seed)
+        sed -i '/initialPRNG/d' $inputFileGlobalPath
+        optionsToBeAddedOrModified="hostSeed=$(printf "%04d" $(( (RANDOM+1000)%10000 )) )"
+        if [ $(grep -c "hostSeed=[0-9]\{4\}" $inputFileGlobalPath) -eq 0 ]; then
             __static__AddOptionsToInputFile $optionsToBeAddedOrModified
             __static__PrintAddedOptionsToStandardOutput $optionsToBeAddedOrModified
         else
@@ -510,10 +510,10 @@ function __static__HandlePRNGStateInInputFile()
             __static__PrintModifiedOptionsToStandardOutput $optionsToBeAddedOrModified
         fi
     else
-        #Delete eventual line from input file with host_seed (here we use an initial_prng_state)
-        sed -i '/host_seed/d' $inputFileGlobalPath
-        optionsToBeAddedOrModified="initial_prng_state=$runBetaDirectory/${nameOfLastPRNG}"
-        if [ $(grep -c "initial_prng_state=[[:alnum:][:punct:]]*" $inputFileGlobalPath) -eq 0 ]; then
+        #Delete eventual line from input file with hostSeed (here we use an initialPRNG)
+        sed -i '/hostSeed/d' $inputFileGlobalPath
+        optionsToBeAddedOrModified="initialPRNG=$runBetaDirectory/${nameOfLastPRNG}"
+        if [ $(grep -c "initialPRNG=[[:alnum:][:punct:]]*" $inputFileGlobalPath) -eq 0 ]; then
             __static__AddOptionsToInputFile $optionsToBeAddedOrModified
             __static__PrintAddedOptionsToStandardOutput $optionsToBeAddedOrModified
         else

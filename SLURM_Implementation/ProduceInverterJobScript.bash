@@ -128,9 +128,9 @@ function ProduceInverterJobscript_CL2QCD()
             "for line in \$(cat \$workdir$INDEX/$BHMAS_inversionSrunCommandsFilename); do"\
             "    IFS=\$OLD_IFS #Restore here old IFS to give separated options (and not only one)to CL2QCD!"\
             "    if hash mbuffer 2>/dev/null; then"\
-            "        time \$dir$INDEX/$BHMAS_inverterFilename \$line --device=$INDEX 2>> \$dir$INDEX/\$errFile | mbuffer -q -m2M >> \$dir$INDEX/\$outFile"\
+            "        time \$dir$INDEX/$BHMAS_inverterFilename \$line --deviceId=$INDEX 2>> \$dir$INDEX/\$errFile | mbuffer -q -m2M >> \$dir$INDEX/\$outFile"\
             "    else"\
-            "        time srun -n 1 \$dir$INDEX/$BHMAS_inverterFilename \$line --device=$INDEX 2>> \$dir$INDEX/\$errFile >> \$dir$INDEX/\$outFile"\
+            "        time srun -n 1 \$dir$INDEX/$BHMAS_inverterFilename \$line --deviceId=$INDEX 2>> \$dir$INDEX/\$errFile >> \$dir$INDEX/\$outFile"\
             "    fi"\
             "    if [ \$? -ne 0 ]; then"\
             "        printf \"\nError occurred in simulation at b${betasForJobScript[$INDEX]%_*}.\n\""\

@@ -22,6 +22,8 @@ function DeclareUserDefinedGlobalVariablesForTests()
     readonly BHMAS_inputFilename="fakeInput"
     readonly BHMAS_jobScriptPrefix="fakePrefix"
     readonly BHMAS_outputFilename="fakeOutput"
+    readonly BHMAS_plaquetteColumn=2
+    readonly BHMAS_deltaHColumn=8
     readonly BHMAS_acceptanceColumn=9
     readonly BHMAS_trajectoryTimeColumn=10
     readonly BHMAS_useRationalApproxFiles='TRUE'

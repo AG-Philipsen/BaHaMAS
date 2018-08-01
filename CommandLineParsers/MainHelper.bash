@@ -70,7 +70,7 @@ function PrintMainHelper()
     __static__AddOptionToHelper "-m | --measurements"           "default value = $(__static__PrintDefault ${BHMAS_numberOfTrajectories:-})"
     __static__AddOptionToHelper "-f | --confSaveFrequency"      "default value = $(__static__PrintDefault ${BHMAS_checkpointFrequency:-})"
     __static__AddOptionToHelper "-F | --confSavePointFrequency" "default value = $(__static__PrintDefault ${BHMAS_savepointFrequency:-})"
-    __static__AddOptionToHelper "--cgbs"                        "default value = $(__static__PrintDefault ${BHMAS_inverterBlockSize:-}) (cg_iteration_block_size)"
+    __static__AddOptionToHelper "--cgbs"                        "default value = $(__static__PrintDefault ${BHMAS_inverterBlockSize:-}) (check residuum in solver every bunch of iterations)"
     __static__AddOptionToHelper "--pf"                          "default value = $(__static__PrintDefault ${BHMAS_numberOfPseudofermions:-}) (number of pseudofermions)"
     __static__AddOptionToHelper "--doNotUseMultipleChains"      "multiple chain usage and nomenclature are disabled"\
                                 "(in the betas file the seed column is NOT present)"
