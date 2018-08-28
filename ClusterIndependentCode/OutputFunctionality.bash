@@ -216,22 +216,22 @@ function __static__PrintMessageToScreen()
 
 function Warning()
 {
-    __static__PrintMessageToScreen 'WARNING' 0 "$@"
+    __static__PrintMessageToScreen 'WARNING' 0 "$@" 1>&2
 }
 
 function Error()
 {
-    __static__PrintMessageToScreen 'ERROR' 0 "$@"
+    __static__PrintMessageToScreen 'ERROR' 0 "$@" 1>&2
 }
 
 function Fatal()
 {
-    __static__PrintMessageToScreen 'FATAL' "$1" "${@:2}"
+    __static__PrintMessageToScreen 'FATAL' "$1" "${@:2}" 1>&2
 }
 
 function Internal()
 {
-    __static__PrintMessageToScreen 'INTERNAL' "$BHMAS_internal" "$@"
+    __static__PrintMessageToScreen 'INTERNAL' "$BHMAS_internal" "$@" 1>&2
 }
 
 
