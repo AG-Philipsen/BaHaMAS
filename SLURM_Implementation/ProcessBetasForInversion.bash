@@ -15,8 +15,8 @@ function __static__ProduceSrunCommandsFileForInversionsPerBeta()
         Fatal $BHMAS_fatalValueError "Number of required sources bigger than available positions ("\
               emph "$(($BHMAS_nspace*$BHMAS_nspace*$BHMAS_nspace*$BHMAS_ntime)) <= $BHMAS_numberOfSourcesForCorrelators" ")!"
     fi
-
-    ls $betaDirectory | grep "^conf\.[[:digit:]]\{5\}" | awk -v ns="$BHMAS_nspace" \
+    ls $betaDirectory | grep "^conf\.[[:digit:]]\{5\}" | awk -v randomSeed="$RANDOM" \
+                                                             -v ns="$BHMAS_nspace" \
                                                              -v nt="$BHMAS_ntime" \
                                                              -v useCpu="false"   \
                                                              -v startcondition="continue" \
@@ -33,7 +33,7 @@ function __static__ProduceSrunCommandsFileForInversionsPerBeta()
                                                              -v wilson="$BHMAS_wilson" \
                                                              -v staggered="$BHMAS_staggered" '
         BEGIN{
-            srand();
+            srand(randomSeed);
             if(chemPot == 0){
                 chemPotString="--useChemicalPotentialIm=0";
             }else{
@@ -60,19 +60,22 @@ function __static__ProduceSrunCommandsFileForInversionsPerBeta()
                 {
                     coordinates = int(rand()*ns) "_" int(rand()*ns) "_" int(rand()*ns) "_" int(rand()*nt) "_" "corr";
                     new_corr_name = conf_nr "_" coordinates;
-                    if(new_corr_name in conf_x_y_z_t_corr_key == 0)
+                    if(new_corr_name in conf_x_y_z_t_corr_key || new_corr_name in conf_x_y_z_t_corr_key_new)
+                    {
+                         continue;
+                    }
+                    else
                     {
                         conf_x_y_z_t_corr_key_new[new_corr_name];
                         conf_count[conf_nr]++;
                     }
                 }
             }
-
             n = asorti(conf_x_y_z_t_corr_key_new, list_of_correlators_to_calculate);
             for(i = 1; i <= n; ++i)
             {
                 split(list_of_correlators_to_calculate[i], parts_of_correlator_name, "_");
-                print "--initialConf=" parts_of_correlator_name[1] " --useCPU=" useCpu " --startCondition=" startcondition " --logLevel=" logLevel " --nSpace=" ns " --nTime=" nt " --sourceX=" parts_of_correlator_name[2] " --sourceY=" parts_of_correlator_name[3] " --sourceZ=" parts_of_correlator_name[4] " --sourceT=" parts_of_correlator_name[5] " --beta=" beta " --correlatorDirection=" corrDir " --solver=" solver " --solverMaxIterations=" solverMaxIterations " --solverResiduumCheckEvery=" solverResidCheckEvery " --thetaFermionTemporal=" thetaFermionTemporal " --fermObsCorrelatorsPostfix=" "_" parts_of_correlator_name[2] "_" parts_of_correlator_name[3] "_" parts_of_correlator_name[4] "_" parts_of_correlator_name[5] "_corr" " " chemPotString " " options_discretization;
+                print "--initialConf=" parts_of_correlator_name[1] " --useCPU=" useCpu " --startCondition=" startcondition " --logLevel=" logLevel " --nSpace=" ns " --nTime=" nt " --sourceX=" parts_of_correlator_name[2] " --sourceY=" parts_of_correlator_name[3] " --sourceZ=" parts_of_correlator_name[4] " --sourceT=" parts_of_correlator_name[5] " --beta=" beta " --measureCorrelators=1 --correlatorDirection=" corrDir " --solver=" solver " --solverMaxIterations=" solverMaxIterations " --solverResiduumCheckEvery=" solverResidCheckEvery " --thetaFermionTemporal=" thetaFermionTemporal " --fermObsCorrelatorsPostfix=" "_" parts_of_correlator_name[2] "_" parts_of_correlator_name[3] "_" parts_of_correlator_name[4] "_" parts_of_correlator_name[5] "_corr" " " chemPotString " " options_discretization;
             }
         }' > "$filename"
 
