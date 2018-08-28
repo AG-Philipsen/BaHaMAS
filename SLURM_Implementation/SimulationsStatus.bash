@@ -197,15 +197,15 @@ function ListSimulationsStatus_SLURM()
         fi
 
         if [ -f $inputFileGlobalPath ]; then
-            integrationSteps0=$( grep -o "integrationSteps0=[[:digit:]]\+"  $inputFileGlobalPath | sed 's/integrationSteps0=\([[:digit:]]\+\)/\1/' )
-            integrationSteps1=$( grep -o "integrationSteps1=[[:digit:]]\+"  $inputFileGlobalPath | sed 's/integrationSteps1=\([[:digit:]]\+\)/\1/' )
+            integrationSteps0=$( sed -n '/integrationSteps0=[[:digit:]]\+/p'  $inputFileGlobalPath | sed 's/integrationSteps0=\([[:digit:]]\+\)/\1/' )
+            integrationSteps1=$( sed -n '/integrationSteps1=[[:digit:]]\+/p'  $inputFileGlobalPath | sed 's/integrationSteps1=\([[:digit:]]\+\)/\1/' )
             if [[ ! $integrationSteps0 =~ ^[[:digit:]]+$ ]] || [[ ! $integrationSteps1 =~ ^[[:digit:]]+$ ]]; then
                 integrationSteps0="--"
                 integrationSteps1="--"
             fi
             if [ $(grep -o "useMP=1" $inputFileGlobalPath | wc -l) -eq 1 ]; then
-                integrationSteps2="-$( grep -o "integrationSteps2=[[:digit:]]\+"  $inputFileGlobalPath | sed 's/integrationSteps2=\([[:digit:]]\+\)/\1/' )"
-                kappaMassPreconditioning="-$( grep -o "kappaMP=[[:digit:]]\+[.][[:digit:]]\+"  $inputFileGlobalPath | sed 's/kappaMP=\(.*\)/\1/' )"
+                integrationSteps2="-$( sed -n '/integrationSteps2=[[:digit:]]\+/p'  $inputFileGlobalPath | sed 's/integrationSteps2=\([[:digit:]]\+\)/\1/' )"
+                kappaMassPreconditioning="-$( sed -n '/kappaMP=[[:digit:]]\+[.][[:digit:]]\+/p'  $inputFileGlobalPath | sed 's/kappaMP=\(.*\)/\1/' )"
                 if [[ ! $integrationSteps2 =~ ^-[[:digit:]]+$ ]] || [[ ! $kappaMassPreconditioning =~ ^-[[:digit:]]+[.][[:digit:]]+$ ]]; then
                     integrationSteps2="--"
                     kappaMassPreconditioning="--"
