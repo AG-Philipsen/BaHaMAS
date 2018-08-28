@@ -13,18 +13,13 @@ function __static__AddToJobscriptFile()
 
 function ProduceJobscript_CL2QCD()
 {
-    local jobScriptGlobalPath jobScriptFilename walltime betaValues index excludeString
+    local jobScriptGlobalPath jobScriptFilename walltime betaValues betaValue index excludeString
     jobScriptGlobalPath="$1"; jobScriptFilename="$2"; walltime="$3"; shift 3
     betaValues=( "$@" )
 
     rm -f $jobScriptGlobalPath || exit $BHMAS_fatalBuiltin
     touch $jobScriptGlobalPath || exit $BHMAS_fatalBuiltin
 
-    #-----------------------------------------------------------------#
-    # This piece of script uses the variable
-    #   local betaValues
-    # created in the function from which it is called.
-    #-----------------------------------------------------------------#
     #This jobscript is for CL2QCD only!
     __static__AddToJobscriptFile\
         "#!/bin/bash"\
@@ -32,7 +27,7 @@ function ProduceJobscript_CL2QCD()
         "#SBATCH --job-name=${jobScriptFilename#${BHMAS_jobScriptPrefix}_*}"\
         "#SBATCH --mail-type=FAIL"\
         "#SBATCH --mail-user=$BHMAS_userEmail"\
-        "#SBATCH --time=$walltime"\
+        "#SBATCH --time=${walltime}"\
         "#SBATCH --output=${BHMAS_hmcFilename}.%j.out"\
         "#SBATCH --error=${BHMAS_hmcFilename}.%j.err"\
         "#SBATCH --no-requeue"
@@ -59,7 +54,6 @@ function ProduceJobscript_CL2QCD()
         set -e
         if [ "${excludeString:-}" != "" ]; then
             __static__AddToJobscriptFile "#SBATCH $excludeString"
-            cecho "\e[1A\e[80C\t$excludeString"
         else
             Warning -n "No string to exclude nodes in jobscript is available!"
             AskUser -n "         Do you still want to continue the jobscript creation?"
@@ -70,6 +64,13 @@ function ProduceJobscript_CL2QCD()
             fi
         fi
     fi
+
+    #Print to the screen the set of betas together with the excluded nodes if available
+    cecho -n "   ->"
+    for betaValue in "${betaValues[@]}"; do
+        cecho -n "    ${BHMAS_betaPrefix}${betaValue%_*}"
+    done
+    cecho "     ${excludeString:-}"
 
     __static__AddToJobscriptFile "#SBATCH --ntasks=$BHMAS_GPUsPerNode" ""
     for index in "${!betaValues[@]}"; do

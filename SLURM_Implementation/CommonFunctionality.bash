@@ -49,7 +49,7 @@ function __static__ExtractNumberOfTrajectoriesToBeDoneFromFile()
 {
     local filename numberOfTrajectories
     filename="$1"
-    numberOfTrajectories=$(sed -n 's/^n\(H\|Rh\)mcsteps=\([0-9]\+\)/\2/p' "$filename") #Option is either nHmcSteps or nRhmcSteps
+    numberOfTrajectories=$(sed -n 's/^n\(H\|Rh\)mcSteps=\([0-9]\+\)/\2/p' "$filename") #Option is either nHmcSteps or nRhmcSteps
     if [ "$numberOfTrajectories" = '' ]; then
         Fatal $BHMAS_fatalLogicError "Number of trajectories to be done not present in input file " file "$filename" "!"
     else
@@ -59,6 +59,9 @@ function __static__ExtractNumberOfTrajectoriesToBeDoneFromFile()
 
 function __static__CalculateWalltimeExtractingNumberOfTrajectoriesPerBetaAndUsingTimesPerTrajectoryIfGiven()
 {
+    #This function is called in a subshell and we want to be sure that exit on failure is valid also for one level further down
+    set -euo pipefail
+
     local betaValues beta inputFileGlobalPath walltimesInSeconds finalWalltime
     betaValues=( "$@" ); walltimesInSeconds=()
     declare -A trajectoriesToBeDone=()
@@ -78,6 +81,16 @@ function __static__CalculateWalltimeExtractingNumberOfTrajectoriesPerBetaAndUsin
     GetSmallestWalltimeBetweenTwo "$finalWalltime" "$BHMAS_maximumWalltime"
 }
 
+function __static__CalculateWalltimeForInverter()
+{
+    if [ "${BHMAS_walltime}" = '' ]; then
+        Warning "No walltime was specified for the inverter executable, using maximum walltime: " emph "${BHMAS_maximumWalltime}"
+        printf "${BHMAS_maximumWalltime}"
+    else
+        printf "${BHMAS_walltime}"
+    fi
+}
+
 function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
 {
     local betaValuesToBeSplit betasForJobScript betasString jobScriptFilename jobScriptGlobalPath walltime
@@ -87,11 +100,6 @@ function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
     while [[ "${!betaValuesToBeSplit[@]}" != "" ]]; do
         betasForJobScript=(${betaValuesToBeSplit[@]:0:$BHMAS_GPUsPerNode})
         betaValuesToBeSplit=(${betaValuesToBeSplit[@]:$BHMAS_GPUsPerNode})
-        cecho -n "   ->"
-        for BETA in "${betasForJobScript[@]}"; do
-            cecho -n "    ${BHMAS_betaPrefix}${BETA%_*}"
-        done
-        cecho ""
         betasString="$(__static__GetJobBetasStringUsing ${betasForJobScript[@]})"
         jobScriptFilename="$(GetJobScriptFilename ${betasString})"
         jobScriptGlobalPath="${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName/$jobScriptFilename"
@@ -99,11 +107,12 @@ function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
             if [ -e $jobScriptGlobalPath ]; then
                 mv $jobScriptGlobalPath ${jobScriptGlobalPath}_$(date +'%F_%H%M') || exit $BHMAS_fatalBuiltin
             fi
-            walltime="$(__static__CalculateWalltimeExtractingNumberOfTrajectoriesPerBetaAndUsingTimesPerTrajectoryIfGiven "${betasForJobScript[@]}")"
             #Call the file to produce the jobscript file
             if [ $BHMAS_invertConfigurationsOption = "TRUE" ]; then
-                ProduceInverterJobscript_CL2QCD
+                walltime="$(__static__CalculateWalltimeForInverter)"
+                ProduceInverterJobscript_CL2QCD "$jobScriptGlobalPath" "$jobScriptFilename" "$walltime" "${betasForJobScript[@]}"
             else
+                walltime="$(__static__CalculateWalltimeExtractingNumberOfTrajectoriesPerBetaAndUsingTimesPerTrajectoryIfGiven "${betasForJobScript[@]}")"
                 ProduceJobscript_CL2QCD "$jobScriptGlobalPath" "$jobScriptFilename" "$walltime" "${betasForJobScript[@]}"
             fi
             if [ -e $jobScriptGlobalPath ]; then
@@ -134,4 +143,5 @@ readonly -f\
          __static__GetJobBetasStringUsing\
          __static__ExtractNumberOfTrajectoriesToBeDoneFromFile\
          __static__CalculateWalltimeExtractingNumberOfTrajectoriesPerBetaAndUsingTimesPerTrajectoryIfGiven\
+         __static__CalculateWalltimeForInverter\
          PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles
