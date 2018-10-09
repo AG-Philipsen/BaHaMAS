@@ -38,27 +38,28 @@ function projectStatisticsDatabase()
     local MAX_PLAQ_C=$((2*11))
     local STATUS_C=$((2*12))
     local LASTTRAJ_C=$((2*13))
+    local TIME_TRAJ_C=$((2*14))
 
     declare -A COLUMNS=( [nfC]=$NF_C [muC]=$MU_C [kC]=$K_C [ntC]=$NT_C [nsC]=$NS_C [betaC]=$BETA_C [trajNoC]=$TRAJNO_C [accRateC]=$ACCRATE_C [accRateLast1KC]=$ACCRATE_LAST1K_C
-                         [maxDsC]=$MAX_ACTION_C [maxPlaqC]=$MAX_PLAQ_C [statusC]=$STATUS_C [lastTrajC]=$LASTTRAJ_C )
+                         [maxDsC]=$MAX_ACTION_C [maxPlaqC]=$MAX_PLAQ_C [statusC]=$STATUS_C [lastTrajC]=$LASTTRAJ_C [timeTrajC]=$TIME_TRAJ_C )
 
     #FSNA = FORMAT_SPECIFIER_NUMBER_ARRAY
-    declare -A FSNA=( [nfC]="6" [muC]="7" [kC]="8" [ntC]="6" [nsC]="6" [betaC]="19" [trajNoC]="11" [accRateC]="8" [accRateLast1KC]="12" [maxDsC]="16" [maxPlaqC]="16" [statusC]="13" [lastTrajC]="11" )
+    declare -A FSNA=( [nfC]="6" [muC]="7" [kC]="8" [ntC]="6" [nsC]="6" [betaC]="19" [trajNoC]="11" [accRateC]="8" [accRateLast1KC]="12" [maxDsC]="16" [maxPlaqC]="16" [statusC]="13" [lastTrajC]="11" [timeTrajC]="10" )
 
     declare -A PRINTF_FORMAT_SPECIFIER_ARRAY=( [nfC]="%+${FSNA[nfC]}s" [muC]="%+${FSNA[muC]}s" [kC]="%+${FSNA[kC]}s" [ntC]="%${FSNA[ntC]}d" [nsC]="%${FSNA[nsC]}d" [betaC]="%+${FSNA[betaC]}s"
                                                [trajNoC]="%${FSNA[trajNoC]}d" [accRateC]="%+${FSNA[accRateC]}s" [accRateLast1KC]="%+${FSNA[accRateLast1KC]}s" [maxDsC]="%+${FSNA[maxDsC]}s"
-                                               [maxPlaqC]="%+${FSNA[maxPlaqC]}s" [statusC]="%+${FSNA[statusC]}s" [lastTrajC]="%+${FSNA[lastTrajC]}s" )
+                                               [maxPlaqC]="%+${FSNA[maxPlaqC]}s" [statusC]="%+${FSNA[statusC]}s" [lastTrajC]="%+${FSNA[lastTrajC]}s" [timeTrajC]="%+${FSNA[timeTrajC]}s" )
 
     declare -A HEADER_PRINTF_FORMAT_SPECIFIER_ARRAY=( [nfC]="%+$((${FSNA[nfC]}+1))s" [muC]="%+$((${FSNA[muC]}+1))s" [kC]="%+$((${FSNA[kC]}+1))s" [ntC]="%+$((${FSNA[ntC]}+1))s" [nsC]="%+$((${FSNA[nsC]}+1))s"
                                                       [betaC]="%+$((${FSNA[betaC]}+1))s" [trajNoC]="%+$((${FSNA[trajNoC]}+1))s" [accRateC]="%+$((${FSNA[accRateC]}+1))s"
                                                       [accRateLast1KC]="%+$((${FSNA[accRateLast1KC]}+1))s" [maxDsC]="%+$((${FSNA[maxDsC]}+1))s" [maxPlaqC]="%+$((${FSNA[maxPlaqC]}+1))s"
-                                                      [statusC]="%+$((${FSNA[statusC]}+1))s" [lastTrajC]="%+$((${FSNA[lastTrajC]}+1))s" )
+                                                      [statusC]="%+$((${FSNA[statusC]}+1))s" [lastTrajC]="%+$((${FSNA[lastTrajC]}+1))s" [timeTrajC]="%+$((${FSNA[timeTrajC]}+1))s" )
 
     [ $BHMAS_wilson = "TRUE" ] && MASS_PARAMETER="kappa"
     [ $BHMAS_staggered = "TRUE" ] && MASS_PARAMETER="mass"
 
     declare -A HEADER_PRINTF_PARAMETER_ARRAY=( [nfC]="nf" [muC]=$BHMAS_chempotPrefix [kC]=$MASS_PARAMETER [ntC]=$BHMAS_ntimePrefix [nsC]=$BHMAS_nspacePrefix [betaC]="beta_chain_type" [trajNoC]="trajNo"
-                                               [accRateC]="acc" [accRateLast1KC]="accLast1K" [maxDsC]="maxSpikeDS/s" [maxPlaqC]="maxSpikeDP/s" [statusC]="status" [lastTrajC]="l.T.[s]" )
+                                               [accRateC]="acc" [accRateLast1KC]="accLast1K" [maxDsC]="maxSpikeDS/s" [maxPlaqC]="maxSpikeDP/s" [statusC]="status" [lastTrajC]="l.Tr[s]" [timeTrajC]="Time/Tr" )
 
     declare -a NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=()
 
@@ -117,6 +118,7 @@ function projectStatisticsDatabase()
     local ACCRATE_LAST1K_HIGH_VALUE=""
 
     local LAST_TRAJ_TIME=""
+    local TIME_TRAJ_TIME=""
 
     local SLEEP_TIME=""
     local UPDATE_TIME=""
@@ -176,7 +178,7 @@ function projectStatisticsDatabase()
 
 
         if [ "$CUSTOMIZE_COLUMNS" = "FALSE" ]; then
-            NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=( nfC muC kC ntC nsC betaC trajNoC accRateC accRateLast1KC maxDsC maxPlaqC statusC lastTrajC )
+            NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=( nfC muC kC ntC nsC betaC trajNoC accRateC accRateLast1KC maxDsC maxPlaqC statusC lastTrajC timeTrajC )
         fi
 
         for NAME_OF_COLUMN in ${!COLUMNS[@]}; do
@@ -423,23 +425,25 @@ function projectStatisticsDatabase()
                 PARAMETER_DIRECTORY_STRUCTURE=${line##*$BHMAS_projectSubpath}
 
                 #Explaination of the below sed commands:
-                # 1) Remove %[(]) symbols but not the [ of a color code.
-                #    Print the matched symbol before %[(]), which could be an important space (column divisor for awk)
+                # 1) Remove %[(])| symbols but not the [ of a color code.
+                #    Print the matched symbol before %[(])|, which could be an important space (column divisor for awk)
                 # 2) Introduce a space after each color code with 3 format specifiers
                 # 3) Introduce a space before each color code with 2 format specifiers
                 # 4) Introduce a space after each color code with 2 format specifiers
                 # 5) Fields in the print command inside awk should be:
                 #      nf mu k nt ns    colorBeta beta                colorTrDone trDone              colorAcceptance acceptance
                 #                       colorAccLast1K accLast1K      colorMaxDSspike makDSspike      colorMaxPlaqSpike maxPlaqSpike
-                #                       colorStatus status            colorLastTrAgo lastTrAgo
+                #                       colorStatus status            colorLastTrAgo lastTrAgo        averageTimePerTrajectory
+                #
+                # NOTE: Each numeric field in the awk command has a color in front, either from the simulation status or put here by hand
                 ListSimulationsStatus_SLURM $PARAMETER_DIRECTORY_STRUCTURE | \
-                    sed -r 's/([^(\x1b)])\[|\]|\(|\)|%/\1/g' | \
+                    sed -r 's/([^(\x1b)])\[|\]|\(|\)|%|\|/\1/g' | \
                     sed -r 's/(\x1B\[[0-9]{1,2};[0-9]{0,2};[0-9]{0,3}m)(.)/\1 \2/g' | \
                     sed -r 's/(.)(\x1B\[.{1,2};.{1,2}m)/\1 \2/g' | \
                     sed -r 's/(\x1B\[.{1,2};.{1,2}m)(.)/\1 \2/g' |
                     awk --posix -v nf=${PARAMS[0]#$BHMAS_nflavourPrefix*} -v mu=${PARAMS[1]#$BHMAS_chempotPrefix*} -v k=${PARAMS[2]#$BHMAS_massPrefix*} -v nt=${PARAMS[3]#$BHMAS_ntimePrefix*} -v ns=${PARAMS[4]#*$BHMAS_nspacePrefix} '
                             $3 ~ /^[0-9]\.[0-9]{4}/{
-                            print "\033[36m " nf " \033[36m " mu " \033[36m " k " \033[36m " nt " \033[36m " ns " " $(3-1) " " $3 " " $(5-1) " " $5 " " $(8-1) " " $8 " " $(11-1) " " $(11) " " $(18-1) " " $(18) " " $(23-1) " " $(23) " " $(15-1) " " $(15) " " $(26-1) " " $(26) " " "\033[0m"
+                            print "\033[36m " nf " \033[36m " mu " \033[36m " k " \033[36m " nt " \033[36m " ns " " $(3-1) " " $3 " " $(5-1) " " $5 " " $(8-1) " " $8 " " $(11-1) " " $(11) " " $(18-1) " " $(18) " " $(23-1) " " $(23) " " $(15-1) " " $(15) " " $(26-1) " " $(26) " \033[36m " $(32) " \033[0m"
                             }
                         ' >> $TEMPORARY_DATABASE_FILE
 
@@ -723,7 +727,7 @@ function __static__DisplayDatabaseFile()
 {
 
     if [ "$CUSTOMIZE_COLUMNS" = "FALSE" ]; then
-        NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=( nfC muC kC ntC nsC betaC trajNoC accRateC accRateLast1KC maxDsC maxPlaqC statusC lastTrajC )
+        NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=( nfC muC kC ntC nsC betaC trajNoC accRateC accRateLast1KC maxDsC maxPlaqC statusC lastTrajC timeTrajC )
     fi
 
     for NAME_OF_COLUMN in ${!COLUMNS[@]}; do

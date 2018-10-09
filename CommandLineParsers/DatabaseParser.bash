@@ -42,7 +42,7 @@ function ParseDatabaseCommandLineOption()
             -c | --columns)
                 DISPLAY="TRUE"
                 CUSTOMIZE_COLUMNS="TRUE"
-                while [[ ! ${2:-} =~ ^- ]]; do
+                while [[ ! ${2:-} =~ ^(-|$) ]]; do
                     case $2 in
                         nf)
                             NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER+=( nfC ); shift ;;
@@ -70,6 +70,8 @@ function ParseDatabaseCommandLineOption()
                             NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER+=( statusC ); shift ;;
                         lastTraj)
                             NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER+=( lastTrajC ); shift ;;
+                        timeTraj)
+                            NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER+=( timeTrajC ); shift ;;
                         *)
                             PrintInvalidOptionErrorAndExit "$1"
                     esac
