@@ -22,7 +22,7 @@ function __static__SetFormatCodes()
 {
     formatCodes[B]="${escape}1m"   # bold
     formatCodes[U]="${escape}4m"   # underlined
-    formatCodes[uB]="${escape}21m" # u-bold
+    formatCodes[uB]="${escape}22m" # u-bold
     formatCodes[uU]="${escape}24m" # u-underlined
 }
 
