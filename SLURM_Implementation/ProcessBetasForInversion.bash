@@ -5,7 +5,7 @@
 
 function __static__ProduceSrunCommandsFileForInversionsPerBeta()
 {
-    local betaDirectory betaValue filename
+    local betaDirectory betaValue filename massAsNumber
     betaDirectory="$1"; betaValue="$2"; filename="$3"
     if [ "$BHMAS_chempot" != '0' ]; then
         Fatal $BHMAS_fatalValueError "Inversion of configuration with nonzero chemical potential not allowed!"
@@ -15,23 +15,28 @@ function __static__ProduceSrunCommandsFileForInversionsPerBeta()
         Fatal $BHMAS_fatalValueError "Number of required sources bigger than available positions ("\
               emph "$(($BHMAS_nspace*$BHMAS_nspace*$BHMAS_nspace*$BHMAS_ntime)) <= $BHMAS_numberOfSourcesForCorrelators" ")!"
     fi
-    ls $betaDirectory | grep "^conf\.[[:digit:]]\{5\}" | awk -v randomSeed="$RANDOM" \
-                                                             -v ns="$BHMAS_nspace" \
-                                                             -v nt="$BHMAS_ntime" \
-                                                             -v useCpu="false"   \
-                                                             -v startcondition="continue" \
-                                                             -v logLevel="info" \
-                                                             -v beta="${betaValue%%_*}" \
-                                                             -v mass="0.$BHMAS_mass" \
-                                                             -v corrDir="$BHMAS_correlatorDirection" \
-                                                             -v solver="cg" \
-                                                             -v solverMaxIterations="30000" \
-                                                             -v solverResidCheckEvery="50" \
-                                                             -v thetaFermionTemporal="1" \
-                                                             -v maxNrCorrs="$BHMAS_numberOfSourcesForCorrelators" \
-                                                             -v chemPot="$BHMAS_chempot" \
-                                                             -v wilson="$BHMAS_wilson" \
-                                                             -v staggered="$BHMAS_staggered" '
+    if [ $(grep -c "[.]" <<< "${BHMAS_mass}") -eq 0 ]; then
+        massAsNumber="0.${BHMAS_mass}"
+    else
+        massAsNumber="${BHMAS_mass}"
+    fi
+    ls $betaDirectory | grep "^conf\.[[:digit:]]\{5\}\($\|.*corr\)" | awk -v randomSeed="$RANDOM" \
+                                                                          -v ns="$BHMAS_nspace" \
+                                                                          -v nt="$BHMAS_ntime" \
+                                                                          -v useCpu="false"   \
+                                                                          -v startcondition="continue" \
+                                                                          -v logLevel="info" \
+                                                                          -v beta="${betaValue%%_*}" \
+                                                                          -v mass="$massAsNumber" \
+                                                                          -v corrDir="$BHMAS_correlatorDirection" \
+                                                                          -v solver="cg" \
+                                                                          -v solverMaxIterations="30000" \
+                                                                          -v solverResidCheckEvery="50" \
+                                                                          -v thetaFermionTemporal="1" \
+                                                                          -v maxNrCorrs="$BHMAS_numberOfSourcesForCorrelators" \
+                                                                          -v chemPot="$BHMAS_chempot" \
+                                                                          -v wilson="$BHMAS_wilson" \
+                                                                          -v staggered="$BHMAS_staggered" '
         BEGIN{
             srand(randomSeed);
             if(chemPot == 0){
