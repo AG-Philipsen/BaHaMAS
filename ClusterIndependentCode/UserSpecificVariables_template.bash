@@ -1,7 +1,3 @@
-#-------------------------------------------------------------------------------#
-#   This file is part of BaHaMAS and it is subject to the terms and conditions  #
-#   defined in the LICENSE.md file, which is distributed within the software.   #
-#-------------------------------------------------------------------------------#
 
 # User provided variables necessary in order to use BaHaMAS
 #

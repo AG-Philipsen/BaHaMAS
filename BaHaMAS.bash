@@ -15,9 +15,6 @@
 #                        2017  Alessandro Sciarra                               #
 #                                                                               #
 #-------------------------------------------------------------------------------#
-#   This file is part of BaHaMAS and it is subject to the terms and conditions  #
-#   defined in the LICENSE.md file, which is distributed within the software.   #
-#-------------------------------------------------------------------------------#
 
 #-----------------------------------------------------------------------------------------------#
 # Set stricter shell mode. This implies for the developer to be aware of what is going on,      #

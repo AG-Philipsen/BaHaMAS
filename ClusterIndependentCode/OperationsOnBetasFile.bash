@@ -1,7 +1,3 @@
-#-------------------------------------------------------------------------------#
-#   This file is part of BaHaMAS and it is subject to the terms and conditions  #
-#   defined in the LICENSE.md file, which is distributed within the software.   #
-#-------------------------------------------------------------------------------#
 
 #REMARK: Here the parsing of the betas file is implemented. All the prefixes
 #        are at the moment hard coded and not extracted into variables.

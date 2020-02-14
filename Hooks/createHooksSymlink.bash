@@ -1,9 +1,5 @@
 #!/bin/bash
 
-#-------------------------------------------------------------------------------#
-#   This file is part of BaHaMAS and it is subject to the terms and conditions  #
-#   defined in the LICENSE.md file, which is distributed within the software.   #
-#-------------------------------------------------------------------------------#
 
 # Script to automatically set up symlinks for existing hooks.
 

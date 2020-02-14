@@ -1,9 +1,5 @@
 #!/bin/awk -f
 
-#-------------------------------------------------------------------------------#
-#   This file is part of BaHaMAS and it is subject to the terms and conditions  #
-#   defined in the LICENSE.md file, which is distributed within the software.   #
-#-------------------------------------------------------------------------------#
 
 # This awk script needs 5 input variables:
 #  - the observable columns (from 1 on) in a variable named "obsColumns"
