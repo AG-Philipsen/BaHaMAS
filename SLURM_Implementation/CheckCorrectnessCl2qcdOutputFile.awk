@@ -1,6 +1,6 @@
 #!/bin/awk -f
 #
-#  Copyright (c)
+#  Copyright (c) 2016-2018,2020 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #

@@ -1,6 +1,7 @@
 #!/bin/bash
 #
-#  Copyright (c)
+#  Copyright (c) 2014-2016 Christopher Czaban
+#  Copyright (c) 2014-2017,2020 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #

@@ -1,5 +1,6 @@
 #
-#  Copyright (c)
+#  Copyright (c) 2015-2016 Christopher Czaban
+#  Copyright (c) 2015-2018,2020 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
