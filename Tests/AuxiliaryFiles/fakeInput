@@ -1,9 +1,6 @@
 fermionAction=rooted_stagg
 nTastes=2
 readRationalApproxFromFile=1
-rationalApproxFileHB=/home/sciarra/BaHaMAS/Tests/StaggeredFakeProject/Rational_Approximations/Nf2_Approx_Heatbath
-rationalApproxFileMD=/home/sciarra/BaHaMAS/Tests/StaggeredFakeProject/Rational_Approximations/Nf2_Approx_MD
-rationalApproxFileMetropolis=/home/sciarra/BaHaMAS/Tests/StaggeredFakeProject/Rational_Approximations/Nf2_Approx_Metropolis
 findminmaxMaxIterations=10000
 useCPU=false
 thetaFermionSpatial=0

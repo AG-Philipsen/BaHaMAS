@@ -39,8 +39,11 @@ function __static__CreateParametersFolders()
 }
 function __static__CreateRationalApproxFolderWithFiles()
 {
+    local filename
     mkdir -p "${testFolder}/Rational_Approximations"
-    cp "${BHMAS_testsFolderAuxFiles}/fakeApprox" "${testFolder}/Rational_Approximations/NfX_fakeApprox"
+    for filename in 'Approx_Heatbath' 'Approx_MD' 'Approx_Metropolis'; do
+        cp "${BHMAS_testsFolderAuxFiles}/fakeApprox" "${testFolder}/Rational_Approximations/Nf2_${filename}"
+    done
 }
 function __static__CreateBetaFolder()
 {
@@ -69,6 +72,14 @@ function __static__CopyAuxiliaryFilesToBetaFolder()
     for file in "$@"; do
         cp "${BHMAS_testsFolderAuxFiles}/${file}" "${testFolder}${testParametersPath}/${betaFolder}" || exit $BHMAS_fatalBuiltin
     done
+}
+function __static__CompleteInputFileWithCorrectPaths()
+{
+    local filename
+    printf '%s\n'\
+           "rationalApproxFileHB=${testFolder}/Rational_Approximations/Nf2_Approx_Heatbath"\
+           "rationalApproxFileMD=${testFolder}/Rational_Approximations/Nf2_Approx_MD"\
+           "rationalApproxFileMetropolis=${testFolder}/Rational_Approximations/Nf2_Approx_Metropolis"  >> "${testFolder}${testParametersPath}/${betaFolder}/fakeInput" || exit $BHMAS_fatalBuiltin
 }
 function __static__CreateThermalizedConfigurationFolder()
 {
@@ -117,6 +128,7 @@ function MakeTestPreliminaryOperations()
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateBetaFolder
             __static__CopyAuxiliaryFilesToBetaFolder "fakeInput" "fakeOutput" "fakeOutput_pbp.dat"
+            __static__CompleteInputFileWithCorrectPaths
             __static__CreateFilesInBetaFolder "conf.save" "prng.save"
             case "${1##*-}" in
                 last )

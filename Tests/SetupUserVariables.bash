@@ -42,9 +42,9 @@ function DeclareUserDefinedGlobalVariablesForTests()
     readonly BHMAS_trajectoryTimeColumn=10
     readonly BHMAS_useRationalApproxFiles='TRUE'
     readonly BHMAS_rationalApproxGlobalPath="${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath}/Rational_Approximations"
-    readonly BHMAS_approxHeatbathFilename="fakeApprox"
-    readonly BHMAS_approxMDFilename="fakeApprox"
-    readonly BHMAS_approxMetropolisFilename="fakeApprox"
+    readonly BHMAS_approxHeatbathFilename="Approx_Heatbath"
+    readonly BHMAS_approxMDFilename="Approx_MD"
+    readonly BHMAS_approxMetropolisFilename="Approx_Metropolis"
     readonly BHMAS_databaseFilename="OverviewDatabase"
     readonly BHMAS_databaseGlobalPath="${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath}/SimulationsOverview"
     readonly BHMAS_inverterGlobalPath="${BHMAS_submitDiskGlobalPath}/AuxiliaryFiles/fakeExecutable"
