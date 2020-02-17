@@ -1,4 +1,4 @@
-<img src="https://github.com/AG-Philipsen/BaHaMAS/blob/images/Logo.png?raw=true" align="right" width="30%" height="30%"/>
+<img src="https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/raw/images/Logo.png" align="right" width="30%" height="30%"/>
 
 # BaHaMAS
 
@@ -43,9 +43,12 @@ Being written in bash, `BaHaMAS` does not need to be compiled or installed. Once
 
 License
 ----
-| Code | Logo and Images |
-| :--: | :--: |
-|[MIT](https://github.com/AxelKrypton/BaHaMAS/blob/master/LICENSE.md)| All rights are reserved|
+
+The logo of `BaHaMAS` as well as the Wiki cover picture have been drawn by Aurora Somaglia, while the other pictures in the Wiki have been realized by Alessandro Sciarra.
+
+|     **Code**      |   **Logo and Images**   |
+|     :------:      |   :-----------------:   |
+| [GPLv3](/LICENSE) | All rights are reserved |
 
 [//]: # (These are reference links used in the body of this note and get stripped out when the markdown processor does its job. There is no need to format nicely because it shouldn't be seen. Thanks SO - http://stackoverflow.com/questions/4823468/store-comments-in-markdown-syntax)
 
