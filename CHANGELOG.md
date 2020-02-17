@@ -32,7 +32,9 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 ## Unreleased
 
+* :sos: BaHaMAS requested the setup to be done before the help could be displayed. This condition was relaxed.
 * :x: The **Hooks** folder has been removed from the repository since the [GitHooks](https://github.com/AxelKrypton/GitHooks) shall be used.
 * :new: Add **CONTRIBUTING.md** and **CHANGELOG.md** files to repository.
+* :sos: Fix tests failures due to hard-coded path in tests setup.
 
 <!-- ## Version 0.1.0 &ensp;<sub><sup>XX month YYYY</sup></sub> -->

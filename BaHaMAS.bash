@@ -72,6 +72,8 @@ SourceClusterSpecificCode
 #User file to be sourced depending on test mode
 if [ -n "${BHMAS_testModeOn:+x}" ] && [ ${BHMAS_testModeOn} = 'TRUE' ]; then
     source ${BHMAS_repositoryTopLevelPath}/Tests/SetupUserVariables.bash || exit $BHMAS_fatalBuiltin
+    DeclareUserDefinedGlobalVariablesForTests
+    DeclareOutputRelatedGlobalVariables
 else
     fileToBeSourced="${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/UserSpecificVariables.bash"
     if ElementInArray '--setup' "$@"; then
@@ -80,21 +82,21 @@ else
     else
         if [ ! -f "$fileToBeSourced" ]; then
             BHMAS_coloredOutput='FALSE' #This is needed in cecho but is a user variable! Declare it here manually
-            Fatal $BHMAS_fatalFileNotFound "BaHaMAS has not been configured, yet! Please, run BaHaMAS with the --setup option to configure it!"
+            if [ $# -ne 0 ] && { ElementInArray '--help' "$@" || ElementInArray '-h' "$@"; }; then
+                Warning -N "BaHaMAS was not set up yet, but help was asked, some default values might not be displayed."
+            else
+                Fatal $BHMAS_fatalFileNotFound "BaHaMAS has not been configured, yet! Please, run BaHaMAS with the --setup option to configure it!"
+            fi
         else
             source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/UserSpecificVariables.bash || exit $BHMAS_fatalBuiltin
+            #Here be more friendly with user (no unbound errors, she/he could type wrong)
+            set +u; DeclareUserDefinedGlobalVariables; set -u
+            DeclareOutputRelatedGlobalVariables
         fi
     fi
 fi
 
-DeclareOutputRelatedGlobalVariables
 DeclarePathRelatedGlobalVariables
-if [ -n "${BHMAS_testModeOn:+x}" ] && [ ${BHMAS_testModeOn} = 'TRUE' ]; then
-    DeclareUserDefinedGlobalVariablesForTests
-else
-    #Here be more friendly with user (no unbound errors, she/he could type wrong)
-    set +u; DeclareUserDefinedGlobalVariables; set -u
-fi
 DeclareBaHaMASGlobalVariables
 
 if [ $# -ne 0 ]; then
