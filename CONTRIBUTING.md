@@ -86,29 +86,23 @@ To know which policy is then enforced, refer to the **GitHooks** [README](https:
 
 Most of the editors have the possibility to help you in typing a commit message.
 
-#### `vim`
+* `vim` does it in a natural way and even with default configuration provides a nice syntax highlighting for commit messages.
+  Using colours, it notifies you if your commit summary is too long or if you are typing something on the second line that should be empty.
+  To automatically wrap the commit description at 72 characters, you could add `set textwidth=72` to your `.vimrc` file in your home directory.
+  To make git use `vim` as editor for all your repositories, use something like `git config --global core.editor vim`.
 
-`vim` does it in a natural way and even with default configuration provides a nice syntax highlighting for commit messages.
-Using colours, it notifies you if your commit summary is too long or if you are typing something on the second line that should be empty.
-To automatically wrap the commit description at 72 characters, you could add `set textwidth=72` to your `.vimrc` file in your home directory.
-To make git use `vim` as editor for all your repositories, use something like `git config --global core.editor vim`.
-
-#### `emacs`
-
-If your favourite editor is `emacs`, the way is not so down-hill.
-But it is not so tough neither.
-From MELPA you can download the git-commit package, which will provide you with useful functionality.
-Then you can add few lines to your `~/.emacs`, which could look like below.
-
-```emacs-lisp
-;; Git specific operation to simplify environment when committing
-(setq column-number-mode t)              ; show column number in the mode line
-(global-git-commit-mode)                 ; activate git-commit mode
-(setq git-commit-summary-max-length 49)  ;  - changing style in first line after the 50th char
-(setq git-commit-fill-column 71 )        ;  - activate auto-fill-mode on space and return
-(aset auto-fill-chars ?. t)              ;    after the 72th char. It can be useful to have
-(aset auto-fill-chars ?? t)              ;    line folded also on any of the punctuation like
-(aset auto-fill-chars ?! t)              ;    .?! which could be inserted beyond char 72.
-```
-
-If your `~/.emacs` file takes some time to be loaded and you would like to quickly fire up `emacs` to make a commit, then you could put the code above in some lighter standalone file - e.g. `${HOME}/.emacs_for_git` - and then tell git how to invoke properly the editor, e.g. via `git config --global core.editor "emacs -nw -Q -l ${HOME}/.emacs_for_git"`.
+* If your favourite editor is `emacs`, the way is not so down-hill.
+  But it is not so tough neither.
+  From MELPA you can download the git-commit package, which will provide you with useful functionality.
+  Then you can add few lines to your `~/.emacs`, which could look like below.
+  ```emacs-lisp
+  ;; Git specific operation to simplify environment when committing
+  (setq column-number-mode t)              ; show column number in the mode line
+  (global-git-commit-mode)                 ; activate git-commit mode
+  (setq git-commit-summary-max-length 49)  ;  - changing style in first line after the 50th char
+  (setq git-commit-fill-column 71 )        ;  - activate auto-fill-mode on space and return
+  (aset auto-fill-chars ?. t)              ;    after the 72th char. It can be useful to have
+  (aset auto-fill-chars ?? t)              ;    line folded also on any of the punctuation like
+  (aset auto-fill-chars ?! t)              ;    .?! which could be inserted beyond char 72.
+  ```
+  If your `~/.emacs` file takes some time to be loaded and you would like to quickly fire up `emacs` to make a commit, then you could put the code above in some lighter standalone file - e.g. `~/.emacs_for_git` - and then tell git how to invoke properly the editor, e.g. via `git config --global core.editor "emacs -nw -Q -l ${HOME}/.emacs_for_git"`.
