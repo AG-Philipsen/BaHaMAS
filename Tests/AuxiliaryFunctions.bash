@@ -1,3 +1,21 @@
+#
+#  Copyright (c) 2017,2020 Alessandro Sciarra
+#
+#  This file is part of BaHaMAS.
+#
+#  BaHaMAS is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  BaHaMAS is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with BaHaMAS. If not, see <http://www.gnu.org/licenses/>.
+#
 
 function CheckTestEnvironment()
 {
@@ -21,8 +39,11 @@ function __static__CreateParametersFolders()
 }
 function __static__CreateRationalApproxFolderWithFiles()
 {
+    local filename
     mkdir -p "${testFolder}/Rational_Approximations"
-    cp "${BHMAS_testsFolderAuxFiles}/fakeApprox" "${testFolder}/Rational_Approximations/NfX_fakeApprox"
+    for filename in 'Approx_Heatbath' 'Approx_MD' 'Approx_Metropolis'; do
+        cp "${BHMAS_testsFolderAuxFiles}/fakeApprox" "${testFolder}/Rational_Approximations/Nf2_${filename}"
+    done
 }
 function __static__CreateBetaFolder()
 {
@@ -51,6 +72,14 @@ function __static__CopyAuxiliaryFilesToBetaFolder()
     for file in "$@"; do
         cp "${BHMAS_testsFolderAuxFiles}/${file}" "${testFolder}${testParametersPath}/${betaFolder}" || exit $BHMAS_fatalBuiltin
     done
+}
+function __static__CompleteInputFileWithCorrectPaths()
+{
+    local filename
+    printf '%s\n'\
+           "rationalApproxFileHB=${testFolder}/Rational_Approximations/Nf2_Approx_Heatbath"\
+           "rationalApproxFileMD=${testFolder}/Rational_Approximations/Nf2_Approx_MD"\
+           "rationalApproxFileMetropolis=${testFolder}/Rational_Approximations/Nf2_Approx_Metropolis"  >> "${testFolder}${testParametersPath}/${betaFolder}/fakeInput" || exit $BHMAS_fatalBuiltin
 }
 function __static__CreateThermalizedConfigurationFolder()
 {
@@ -99,6 +128,7 @@ function MakeTestPreliminaryOperations()
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateBetaFolder
             __static__CopyAuxiliaryFilesToBetaFolder "fakeInput" "fakeOutput" "fakeOutput_pbp.dat"
+            __static__CompleteInputFileWithCorrectPaths
             __static__CreateFilesInBetaFolder "conf.save" "prng.save"
             case "${1##*-}" in
                 last )

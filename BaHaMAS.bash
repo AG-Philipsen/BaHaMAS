@@ -1,4 +1,24 @@
 #!/bin/bash
+#
+#  Copyright (c) 2014-2016 Christopher Czaban
+#  Copyright (c) 2014-2017,2020 Alessandro Sciarra
+#
+#  This file is part of BaHaMAS.
+#
+#  BaHaMAS is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  BaHaMAS is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with BaHaMAS. If not, see <http://www.gnu.org/licenses/>.
+#
+
 
 #-------------------------------------------------------------------------------#
 #            ____              __  __            __  ___   ___     _____        #
@@ -52,6 +72,8 @@ SourceClusterSpecificCode
 #User file to be sourced depending on test mode
 if [ -n "${BHMAS_testModeOn:+x}" ] && [ ${BHMAS_testModeOn} = 'TRUE' ]; then
     source ${BHMAS_repositoryTopLevelPath}/Tests/SetupUserVariables.bash || exit $BHMAS_fatalBuiltin
+    DeclareUserDefinedGlobalVariablesForTests
+    DeclareOutputRelatedGlobalVariables
 else
     fileToBeSourced="${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/UserSpecificVariables.bash"
     if ElementInArray '--setup' "$@"; then
@@ -60,21 +82,21 @@ else
     else
         if [ ! -f "$fileToBeSourced" ]; then
             BHMAS_coloredOutput='FALSE' #This is needed in cecho but is a user variable! Declare it here manually
-            Fatal $BHMAS_fatalFileNotFound "BaHaMAS has not been configured, yet! Please, run BaHaMAS with the --setup option to configure it!"
+            if [ $# -ne 0 ] && { ElementInArray '--help' "$@" || ElementInArray '-h' "$@"; }; then
+                Warning -N "BaHaMAS was not set up yet, but help was asked, some default values might not be displayed."
+            else
+                Fatal $BHMAS_fatalFileNotFound "BaHaMAS has not been configured, yet! Please, run BaHaMAS with the --setup option to configure it!"
+            fi
         else
             source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/UserSpecificVariables.bash || exit $BHMAS_fatalBuiltin
+            #Here be more friendly with user (no unbound errors, she/he could type wrong)
+            set +u; DeclareUserDefinedGlobalVariables; set -u
+            DeclareOutputRelatedGlobalVariables
         fi
     fi
 fi
 
-DeclareOutputRelatedGlobalVariables
 DeclarePathRelatedGlobalVariables
-if [ -n "${BHMAS_testModeOn:+x}" ] && [ ${BHMAS_testModeOn} = 'TRUE' ]; then
-    DeclareUserDefinedGlobalVariablesForTests
-else
-    #Here be more friendly with user (no unbound errors, she/he could type wrong)
-    set +u; DeclareUserDefinedGlobalVariables; set -u
-fi
 DeclareBaHaMASGlobalVariables
 
 if [ $# -ne 0 ]; then
