@@ -10,7 +10,7 @@ Generally, given a version number **X.Y.Z**,
 * **Y** is incremented for substantial refactoring and/or the introduction of minor new functionality and
 * **X** for the introduction of substantial new features.
 
-The prefix of each tag will be **bahamas-** and, although most of the time it will be the case, it is not automatic that a Release (in the GitLab sense) will be created for each repository tag.
+The prefix of each tag will be `BaHaMAS-` and, although most of the time it will be the case, it is not automatic that a Release (in the GitLab sense) will be created for each repository tag.
 This is however always true for major releases (i.e. when **X** is increased).
 
 ## Meaning of the symbols in this file
@@ -30,11 +30,13 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 ---
 
-## Unreleased
+## [Unreleased](https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/compare/BaHaMAS-0.1.0...develop)
+
+
+
+## Version 0.1.0 &ensp;<sub><sup>17 February 2020</sup></sub>
 
 * :sos: BaHaMAS requested the setup to be done before the help could be displayed. This condition was relaxed.
 * :x: The **Hooks** folder has been removed from the repository since the [GitHooks](https://github.com/AxelKrypton/GitHooks) shall be used.
 * :new: Add **CONTRIBUTING.md** and **CHANGELOG.md** files to repository.
 * :sos: Fix tests failures due to hard-coded path in tests setup.
-
-<!-- ## Version 0.1.0 &ensp;<sub><sup>XX month YYYY</sup></sub> -->
