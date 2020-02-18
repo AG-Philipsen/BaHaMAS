@@ -17,7 +17,7 @@
 #  along with BaHaMAS. If not, see <http://www.gnu.org/licenses/>.
 #
 
-source ${BHMAS_repositoryTopLevelPath}/CommandLineParsers/CommonFunctionality.bash || exit $BHMAS_fatalBuiltin
+source ${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/CommandLineParsers/CommonFunctionality.bash || exit $BHMAS_fatalBuiltin
 
 function __static__AddOptionToHelper()
 {

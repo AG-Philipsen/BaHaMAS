@@ -44,26 +44,26 @@ set -euo pipefail                                                               
 
 #Load auxiliary bash files that will be used
 readonly BHMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"
-readonly BHMAS_filesToBeSourced=( 'ClusterIndependentCode/Setup/Setup.bash'
-                                  'ClusterIndependentCode/SystemRequirements.bash'
-                                  'ClusterIndependentCode/FindClusterScheduler.bash'
-                                  'ClusterIndependentCode/UtilityFunctions.bash'
-                                  'ClusterIndependentCode/GlobalVariables.bash'
-                                  'ClusterIndependentCode/CheckGlobalVariables.bash'
-                                  'ClusterIndependentCode/OutputFunctionality.bash'
-                                  'ClusterIndependentCode/PathManagementFunctionality.bash'
-                                  'ClusterIndependentCode/OperationsOnBetasFile.bash'
-                                  'ClusterIndependentCode/FindStartingConfiguration.bash'
-                                  'ClusterIndependentCode/AcceptanceRateReport.bash'
-                                  'ClusterIndependentCode/CleanOutputFiles.bash'
-                                  'ClusterIndependentCode/ClusterSpecificFunctionsCall.bash'
-                                  'ClusterIndependentCode/ReportOnProblematicBetas.bash'
-                                  'CommandLineParsers/CommonFunctionality.bash'
-                                  'CommandLineParsers/MainParser.bash'
-                                  'CommandLineParsers/DatabaseParser.bash'
-                                  'Database/ProjectStatisticsDatabase.bash' )
+readonly BHMAS_filesToBeSourced=( 'SchedulerIndependentCode/AcceptanceRateReport.bash'
+                                  'SchedulerIndependentCode/CheckGlobalVariables.bash'
+                                  'SchedulerIndependentCode/CleanOutputFiles.bash'
+                                  'SchedulerIndependentCode/ClusterSpecificFunctionsCall.bash'
+                                  'SchedulerIndependentCode/CommandLineParsers/CommonFunctionality.bash'
+                                  'SchedulerIndependentCode/CommandLineParsers/MainParser.bash'
+                                  'SchedulerIndependentCode/CommandLineParsers/DatabaseParser.bash'
+                                  'SchedulerIndependentCode/Database/ProjectStatisticsDatabase.bash'
+                                  'SchedulerIndependentCode/FindClusterScheduler.bash'
+                                  'SchedulerIndependentCode/FindStartingConfiguration.bash'
+                                  'SchedulerIndependentCode/GlobalVariables.bash'
+                                  'SchedulerIndependentCode/OperationsOnBetasFile.bash'
+                                  'SchedulerIndependentCode/OutputFunctionality.bash'
+                                  'SchedulerIndependentCode/PathManagementFunctionality.bash'
+                                  'SchedulerIndependentCode/ReportOnProblematicBetas.bash'
+                                  'SchedulerIndependentCode/Setup/Setup.bash'
+                                  'SchedulerIndependentCode/SystemRequirements.bash'
+                                  'SchedulerIndependentCode/UtilityFunctions.bash' )
 #Source error codes and fail with error hard coded since variable defined in file which is sourced!
-source "${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/ErrorCodes.bash" || exit 64
+source "${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/ErrorCodes.bash" || exit 64
 for fileToBeSourced in "${BHMAS_filesToBeSourced[@]}"; do
     source "${BHMAS_repositoryTopLevelPath}/${fileToBeSourced}" || exit $BHMAS_fatalBuiltin
 done
@@ -75,7 +75,7 @@ if [ -n "${BHMAS_testModeOn:+x}" ] && [ ${BHMAS_testModeOn} = 'TRUE' ]; then
     DeclareUserDefinedGlobalVariablesForTests
     DeclareOutputRelatedGlobalVariables
 else
-    fileToBeSourced="${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/UserSpecificVariables.bash"
+    fileToBeSourced="${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/UserSpecificVariables.bash"
     if ElementInArray '--setup' "$@"; then
         MakeInteractiveSetupAndCreateUserDefinedVariablesFile "$fileToBeSourced"
         exit $BHMAS_successExitCode
@@ -88,7 +88,7 @@ else
                 Fatal $BHMAS_fatalFileNotFound "BaHaMAS has not been configured, yet! Please, run BaHaMAS with the --setup option to configure it!"
             fi
         else
-            source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/UserSpecificVariables.bash || exit $BHMAS_fatalBuiltin
+            source ${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/UserSpecificVariables.bash || exit $BHMAS_fatalBuiltin
             #Here be more friendly with user (no unbound errors, she/he could type wrong)
             set +u; DeclareUserDefinedGlobalVariables; set -u
             DeclareOutputRelatedGlobalVariables
