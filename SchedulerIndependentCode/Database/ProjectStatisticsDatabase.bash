@@ -23,9 +23,6 @@
 #*Coloured output?
 #*Other options?
 #*User specific variables?
-#*Putting the command line parser into another file in order to remove the cluttering - right now the parser makes up ~50% of the script.
-#*Everytime the database is updated, actually create a new file with the date and time in the name? This way it possible to track how the statistics
-# grow over longer periods.
 
 function join()
 {
@@ -450,7 +447,7 @@ function projectStatisticsDatabase()
                 #                       colorStatus status            colorLastTrAgo lastTrAgo        averageTimePerTrajectory
                 #
                 # NOTE: Each numeric field in the awk command has a color in front, either from the simulation status or put here by hand
-                ListSimulationsStatus_SLURM $PARAMETER_DIRECTORY_STRUCTURE | \
+                ListSimulationsStatus_${BHMAS_clusterScheduler} $PARAMETER_DIRECTORY_STRUCTURE | \
                     sed -r 's/([^(\x1b)])\[|\]|\(|\)|%|\|/\1/g' | \
                     sed -r 's/(\x1B\[[0-9]{1,2};[0-9]{0,2};[0-9]{0,3}m)(.)/\1 \2/g' | \
                     sed -r 's/(.)(\x1B\[.{1,2};.{1,2}m)/\1 \2/g' | \
