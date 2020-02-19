@@ -44,30 +44,7 @@ set -euo pipefail                                                               
 
 #Load auxiliary bash files that will be used
 readonly BHMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"
-readonly BHMAS_filesToBeSourced=( 'SchedulerIndependentCode/AcceptanceRateReport.bash'
-                                  'SchedulerIndependentCode/CheckGlobalVariables.bash'
-                                  'SchedulerIndependentCode/CleanOutputFiles.bash'
-                                  'SchedulerIndependentCode/CommandLineParsers/CommonFunctionality.bash'
-                                  'SchedulerIndependentCode/CommandLineParsers/MainParser.bash'
-                                  'SchedulerIndependentCode/CommandLineParsers/DatabaseParser.bash'
-                                  'SchedulerIndependentCode/Database/ProjectStatisticsDatabase.bash'
-                                  'SchedulerIndependentCode/FindSchedulerInUse.bash'
-                                  'SchedulerIndependentCode/FindStartingConfiguration.bash'
-                                  'SchedulerIndependentCode/GlobalVariables.bash'
-                                  'SchedulerIndependentCode/OperationsOnBetasFile.bash'
-                                  'SchedulerIndependentCode/OutputFunctionality.bash'
-                                  'SchedulerIndependentCode/PathManagementFunctionality.bash'
-                                  'SchedulerIndependentCode/ReportOnProblematicBetas.bash'
-                                  'SchedulerIndependentCode/SchedulerSpecificFunctionsCall.bash'
-                                  'SchedulerIndependentCode/Setup/Setup.bash'
-                                  'SchedulerIndependentCode/SystemRequirements.bash'
-                                  'SchedulerIndependentCode/UtilityFunctions.bash' )
-#Source error codes and fail with error hard coded since variable defined in file which is sourced!
-source "${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/ErrorCodes.bash" || exit 64
-for fileToBeSourced in "${BHMAS_filesToBeSourced[@]}"; do
-    source "${BHMAS_repositoryTopLevelPath}/${fileToBeSourced}" || exit $BHMAS_fatalBuiltin
-done
-SourceClusterSpecificCode
+source "${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/SourceCodebaseFiles.bash"
 
 #User file to be sourced depending on test mode
 if [ -n "${BHMAS_testModeOn:+x}" ] && [ ${BHMAS_testModeOn} = 'TRUE' ]; then
