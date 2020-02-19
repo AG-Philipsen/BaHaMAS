@@ -61,9 +61,4 @@ function FireUpTheDialogBoxStoringResultAndActingAccordingly()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         AbortSetupProcess\
-         SetColoredOutput\
-         FireUpTheDialogBoxStoringResultAndActingAccordingly
+MakeFunctionsDefinedInThisFileReadonly

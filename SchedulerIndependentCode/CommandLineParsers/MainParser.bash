@@ -385,8 +385,4 @@ function ParseCommandLineOption()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         __static__PrintSecondaryOptionSpecificationErrorAndExit\
-         ParseCommandLineOption
+MakeFunctionsDefinedInThisFileReadonly

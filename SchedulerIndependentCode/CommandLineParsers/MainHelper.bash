@@ -146,10 +146,4 @@ function PrintMainHelper()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         __static__AddOptionToHelper\
-         __static__PrintDefault\
-         __static__PrintHelperHeader\
-         PrintMainHelper
+MakeFunctionsDefinedInThisFileReadonly

@@ -148,13 +148,4 @@ function PrintOptionSpecificationErrorAndExit()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         PrepareGivenOptionToBeProcessed\
-         SplitCombinedShortOptionsInSingleOptions\
-         __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray\
-         PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem\
-         PrintHelperAndExitIfUserAskedForIt\
-         PrintInvalidOptionErrorAndExit\
-         PrintOptionSpecificationErrorAndExit
+MakeFunctionsDefinedInThisFileReadonly

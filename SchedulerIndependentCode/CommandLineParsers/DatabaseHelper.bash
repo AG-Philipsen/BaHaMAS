@@ -126,10 +126,4 @@ function PrintDatabaseHelper()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         __static__GetSectionLine\
-         __static__AddSectionLine\
-         __static__AddOptionToDatabaseHelper\
-         PrintDatabaseHelper
+MakeFunctionsDefinedInThisFileReadonly

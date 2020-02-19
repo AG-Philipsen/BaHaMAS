@@ -176,8 +176,4 @@ function ListJobsStatus_SLURM()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         __static__ExtractParametersFromJobInformation\
-         ListJobsStatus_SLURM
+MakeFunctionsDefinedInThisFileReadonly

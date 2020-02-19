@@ -375,17 +375,4 @@ function __static__ColorDelta()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         __static__ExtractBetasFrom\
-         __static__ExtractPostfixFrom\
-         __static__ExtractMetaInformationFromQueuedJobs\
-         ListSimulationsStatus_SLURM\
-         __static__GetShortenedBetaString\
-         GoodAcc\
-         __static__ColorStatus\
-         __static__ColorTime\
-         __static__ColorClean\
-         __static__ColorBeta\
-         __static__ColorDelta
+MakeFunctionsDefinedInThisFileReadonly

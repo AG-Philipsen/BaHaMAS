@@ -358,9 +358,4 @@ function CheckBetaFoldersPathsVariables()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         CheckUserDefinedVariablesAndDefineDependentAdditionalVariables\
-         CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase\
-         CheckBetaFoldersPathsVariables
+MakeFunctionsDefinedInThisFileReadonly

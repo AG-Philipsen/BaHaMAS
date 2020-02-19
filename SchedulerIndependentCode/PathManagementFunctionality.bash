@@ -159,18 +159,4 @@ function CheckSingleOccurrenceInPath()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         CheckWilsonStaggeredVariables\
-         __static__CheckPrefixExistence\
-         __static__IsAnyParameterUnsetAmong\
-         __static__CheckNoArguments\
-         __static__CheckUnsetParameters\
-         __static__GetParametersString\
-         __static__GetParametersPath\
-         __static__SetParametersPathAndString\
-         __static__ReadSingleParameterFromPath\
-         __static__CheckParametersExtractedFromPath\
-         ReadParametersFromPathAndSetRelatedVariables\
-         CheckSingleOccurrenceInPath
+MakeFunctionsDefinedInThisFileReadonly

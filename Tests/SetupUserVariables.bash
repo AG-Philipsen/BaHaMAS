@@ -61,8 +61,4 @@ function DeclareUserDefinedGlobalVariablesForTests()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         DeclareOutputRelatedGlobalVariables\
-         DeclareUserDefinedGlobalVariablesForTests
+MakeFunctionsDefinedInThisFileReadonly

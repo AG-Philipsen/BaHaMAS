@@ -318,23 +318,4 @@ function DeleteAuxiliaryFilesAndFolders()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         CheckTestEnvironment\
-         __static__CreateParametersFolders\
-         __static__CreateRationalApproxFolderWithFiles\
-         __static__CreateBetaFolder\
-         __static__CreateFilesInBetaFolder\
-         __static__AddStringToFirstLineBetasFile\
-         __static__CopyAuxiliaryFileAtBetaFolderLevel\
-         __static__CopyAuxiliaryFilesToBetaFolder\
-         __static__CreateThermalizedConfigurationFolder\
-         __static__CreateThermalizedConfiguration\
-         MakeTestPreliminaryOperations\
-         InhibitBaHaMASCommands\
-         RunBaHaMASInTestMode\
-         RunTest\
-         CleanTestsEnvironmentForFollowingTest\
-         PrintTestsReport\
-         DeleteAuxiliaryFilesAndFolders
+MakeFunctionsDefinedInThisFileReadonly

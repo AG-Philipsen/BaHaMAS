@@ -210,9 +210,4 @@ function DeclareBetaFoldersPathsAsGlobalVariables()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         DeclarePathRelatedGlobalVariables\
-         DeclareBaHaMASGlobalVariables\
-         DeclareBetaFoldersPathsAsGlobalVariables
+MakeFunctionsDefinedInThisFileReadonly

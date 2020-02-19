@@ -74,8 +74,4 @@ function MakeInteractiveSetupUsingDialog()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         __static__ParseSetupResultAndFillInUserVariablesArray\
-         MakeInteractiveSetupUsingDialog
+MakeFunctionsDefinedInThisFileReadonly

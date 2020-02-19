@@ -56,7 +56,4 @@ function SubmitJobsForValidBetaValues_SLURM()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         SubmitJobsForValidBetaValues_SLURM
+MakeFunctionsDefinedInThisFileReadonly

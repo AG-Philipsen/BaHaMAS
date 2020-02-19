@@ -53,6 +53,4 @@ if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
     SourceCodebaseGeneralFiles
 fi
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f SourceCodebaseGeneralFiles
+MakeFunctionsDefinedInThisFileReadonly

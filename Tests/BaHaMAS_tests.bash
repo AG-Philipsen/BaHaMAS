@@ -42,8 +42,8 @@ readonly BHMAS_testsFolder=${BHMAS_repositoryTopLevelPath}/Tests
 readonly BHMAS_testsFolderAuxFiles=${BHMAS_testsFolder}/AuxiliaryFiles
 
 #Load needed files
-readonly BHMAS_filesToBeSourced=( "${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/OutputFunctionality.bash"
-                                  "${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/UtilityFunctions.bash"
+readonly BHMAS_filesToBeSourced=( "${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/UtilityFunctions.bash"
+                                  "${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/OutputFunctionality.bash"
                                   "${BHMAS_testsFolder}/AuxiliaryFunctions.bash"
                                   "${BHMAS_testsFolder}/CommandLineParser.bash" )
 #Source error codes and fail with error hard coded since variable defined in file which is sourced!

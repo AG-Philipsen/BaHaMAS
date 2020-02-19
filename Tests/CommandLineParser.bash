@@ -121,10 +121,4 @@ function ParseCommandLineOption()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         __static__AddOptionToHelper\
-         __static__PrintHelper\
-         __static__PrintListOfTests\
-         ParseCommandLineOption
+MakeFunctionsDefinedInThisFileReadonly

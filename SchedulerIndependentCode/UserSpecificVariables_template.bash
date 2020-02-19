@@ -77,11 +77,7 @@ function DeclareUserDefinedGlobalVariables()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         DeclareOutputRelatedGlobalVariables\
-         DeclareUserDefinedGlobalVariables
+MakeFunctionsDefinedInThisFileReadonly
 
 # Documentation:
 #

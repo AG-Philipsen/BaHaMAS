@@ -166,8 +166,4 @@ function ProduceInputFile_CL2QCD()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         __static__AddToInputFile\
-         ProduceInputFile_CL2QCD
+MakeFunctionsDefinedInThisFileReadonly

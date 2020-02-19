@@ -94,14 +94,4 @@ function ListSimulationsStatus()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         __static__CheckExistenceOfFunctionAndCallIt\
-         ProduceInputFileAndJobScriptForEachBeta\
-         ProcessBetaValuesForSubmitOnly\
-         ProcessBetaValuesForContinue\
-         ProcessBetaValuesForInversion\
-         SubmitJobsForValidBetaValues\
-         ListJobsStatus\
-         ListSimulationsStatus
+MakeFunctionsDefinedInThisFileReadonly

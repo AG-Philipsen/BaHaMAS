@@ -55,7 +55,4 @@ function ProduceInputFileAndJobScriptForEachBeta_SLURM()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         ProduceInputFileAndJobScriptForEachBeta_SLURM
+MakeFunctionsDefinedInThisFileReadonly

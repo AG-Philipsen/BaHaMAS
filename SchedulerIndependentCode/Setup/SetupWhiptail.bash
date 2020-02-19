@@ -98,10 +98,5 @@ function MakeInteractiveSetupUsingWhiptail()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         __static__DisplayMenuBoxWithPresentVariablesAndActOnInput\
-         __static__SetValueOfVariableObtainedFromUser\
-         __static__DisplayFreeInputBoxAndSetGivenInputValue\
-         MakeInteractiveSetupUsingWhiptail
+
+MakeFunctionsDefinedInThisFileReadonly
