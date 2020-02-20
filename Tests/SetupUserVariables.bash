@@ -22,7 +22,7 @@ function DeclareOutputRelatedGlobalVariables()
     readonly BHMAS_coloredOutput='TRUE'
 }
 
-function DeclareUserDefinedGlobalVariablesForTests()
+function DeclareUserDefinedGlobalVariables()
 {
     readonly BHMAS_userEmail="user@test.com"
     readonly BHMAS_submitDiskGlobalPath="${BHMAS_repositoryTopLevelPath}/Tests"

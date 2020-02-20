@@ -116,7 +116,7 @@ function __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray()
 
 function PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem()
 {
-    local arrayNameWhereToStoreTheProcessedOptions commandLineOptions option
+    local arrayNameWhereToStoreTheProcessedOptions commandLineOptions
     declare -ga $1=\(\)
     declare -n arrayNameWhereToStoreTheProcessedOptions=$1; shift #Reference to variable
     #The following two lines are not combined to respect potential spaces in options

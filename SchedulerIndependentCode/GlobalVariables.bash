@@ -209,5 +209,27 @@ function DeclareBetaFoldersPathsAsGlobalVariables()
     readonly BHMAS_runDirWithBetaFolders="$BHMAS_runDiskGlobalPath/$BHMAS_projectSubpath$BHMAS_parametersPath"
 }
 
+function DeclareAllGlobalVariables()
+{
+    if IsBaHaMASRunInSetupMode; then
+        return 0
+    else
+        if ! IsTestModeOn && [[ ! -f "${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/UserSpecificVariables.bash" ]]; then
+            if WasAnyOfTheseOptionsGivenToBaHaMAS '-h' '--help'; then
+                #Make a fake BaHaMAS setup here to treat this corner case
+                function DeclareOutputRelatedGlobalVariables() { BHMAS_coloredOutput='FALSE'; }
+                function DeclareUserDefinedGlobalVariables() { :; }
+            else
+                Internal "Global variable declaration mechanism should not be hit in this scenario!"
+            fi
+        fi
+    fi
+    DeclareOutputRelatedGlobalVariables
+    #Here be more friendly with user (no unbound errors, she/he could type wrong)
+    set +u; DeclareUserDefinedGlobalVariables; set -u
+    DeclarePathRelatedGlobalVariables
+    DeclareBaHaMASGlobalVariables
+}
+
 
 MakeFunctionsDefinedInThisFileReadonly

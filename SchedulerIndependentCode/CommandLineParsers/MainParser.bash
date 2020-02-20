@@ -384,5 +384,38 @@ function ParseCommandLineOption()
     declare -rga BHMAS_parameterPrefixes
 }
 
+function IsTestModeOn()
+{
+    if [ -n "${BHMAS_testModeOn:+x}" ] && [ ${BHMAS_testModeOn} = 'TRUE' ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+function WasAnyOfTheseOptionsGivenToBaHaMAS()
+{
+    # It would be nice to use here "${BASH_ARGV[@]: -${BASH_ARGC}}"
+    # to retrieve the script command line options but the bash
+    # manual v5.0 says is not reliable if the extended debug mode is
+    # not activated, which we do not want => global array.
+    #   https://unix.stackexchange.com/q/568747/370049
+    local option
+    for option in "$@"; do
+        if ElementInArray "${option}" "${BHMAS_specifiedCommandLineOptions[@]}"; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+function IsBaHaMASRunInSetupMode()
+{
+    if WasAnyOfTheseOptionsGivenToBaHaMAS '--setup'; then
+        return 0
+    else
+        return 1
+    fi
+}
 
 MakeFunctionsDefinedInThisFileReadonly
