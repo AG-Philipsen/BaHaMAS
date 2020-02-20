@@ -19,6 +19,7 @@
 
 function SourceCodebaseGeneralFiles()
 {
+    readonly BHMAS_userSetupFile="${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/UserSpecificVariables.bash"
     local schedulerIndependentFiles fileToBeSourced
     #Source error codes and fail with error hard coded since variable defined in file which is sourced!
     source "${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/ErrorCodes.bash" || exit 64
@@ -53,8 +54,7 @@ function SourceCodebaseGeneralFiles()
     elif IsTestModeOn; then
         source ${BHMAS_repositoryTopLevelPath}/Tests/SetupUserVariables.bash || exit $BHMAS_fatalBuiltin
     else
-        fileToBeSourced="${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/UserSpecificVariables.bash"
-        if [ ! -f "${fileToBeSourced}" ]; then
+        if [ ! -f "${BHMAS_userSetupFile}" ]; then
             declare -g BHMAS_coloredOutput='FALSE' #This is needed in cecho but is a user variable! Declare it here manually
             if WasAnyOfTheseOptionsGivenToBaHaMAS '-h' '--help'; then
                 Warning -N "BaHaMAS was not set up yet, but help was asked, some default values might not be displayed."
@@ -62,7 +62,7 @@ function SourceCodebaseGeneralFiles()
                 Fatal $BHMAS_fatalFileNotFound "BaHaMAS has not been configured, yet! Please, run BaHaMAS with the --setup option to configure it!"
             fi
         else
-            source ${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/UserSpecificVariables.bash || exit $BHMAS_fatalBuiltin
+            source "${BHMAS_userSetupFile}" || exit $BHMAS_fatalBuiltin
         fi
     fi
 }

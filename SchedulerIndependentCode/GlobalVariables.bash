@@ -214,7 +214,7 @@ function DeclareAllGlobalVariables()
     if IsBaHaMASRunInSetupMode; then
         return 0
     else
-        if ! IsTestModeOn && [[ ! -f "${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/UserSpecificVariables.bash" ]]; then
+        if ! IsTestModeOn && [[ ! -f "${BHMAS_userSetupFile}" ]]; then
             if WasAnyOfTheseOptionsGivenToBaHaMAS '-h' '--help'; then
                 #Make a fake BaHaMAS setup here to treat this corner case
                 function DeclareOutputRelatedGlobalVariables() { BHMAS_coloredOutput='FALSE'; }

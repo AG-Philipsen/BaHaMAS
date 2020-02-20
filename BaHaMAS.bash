@@ -48,7 +48,7 @@ source "${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/SourceCodebaseF
 
 #If the user asked for the Setup, it has to be done immediately and that's it
 if IsBaHaMASRunInSetupMode; then
-    MakeInteractiveSetupAndCreateUserDefinedVariablesFile "$fileToBeSourced"
+    MakeInteractiveSetupAndCreateUserDefinedVariablesFile
     exit $BHMAS_successExitCode
 fi
 
