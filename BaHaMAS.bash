@@ -55,8 +55,8 @@ fi
 DeclareAllGlobalVariables
 
 if [ $# -ne 0 ]; then
-    PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem BHMAS_specifiedCommandLineOptions "$@"
-    PrintHelperAndExitIfUserAskedForIt "${BHMAS_specifiedCommandLineOptions[@]}"
+    PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem
+    PrintHelperAndExitIfUserAskedForIt
 fi
 
 if ! ElementInArray '--jobstatus' ${BHMAS_specifiedCommandLineOptions[@]+"${BHMAS_specifiedCommandLineOptions[@]}"}; then
