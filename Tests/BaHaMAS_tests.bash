@@ -161,3 +161,5 @@ PrintTestsReport
 if [ $cleanTestFolder = 'TRUE' ] && [ $testsFailed -eq 0 ]; then
     DeleteAuxiliaryFilesAndFolders
 fi
+
+exit ${testsFailed}
