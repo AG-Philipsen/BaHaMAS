@@ -21,7 +21,7 @@ function GetJobScriptFilename()
 {
     local stringWithBetaValues; stringWithBetaValues="$1"
 
-    if [ $BHMAS_invertConfigurationsOption = "TRUE" ]; then
+    if [ ${BHMAS_executionMode} = 'mode:invert-configurations' ]; then
         printf "${BHMAS_jobScriptPrefix}_${BHMAS_parametersString}__${stringWithBetaValues}_INV"
     else
         if [ "$BHMAS_betaPostfix" == "_thermalizeFromConf" ]; then
@@ -117,12 +117,12 @@ function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
         betasString="$(__static__GetJobBetasStringUsing ${betasForJobScript[@]})"
         jobScriptFilename="$(GetJobScriptFilename ${betasString})"
         jobScriptGlobalPath="${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName/$jobScriptFilename"
-        if [ $BHMAS_submitonlyOption = "FALSE" ]; then
+        if [ ${BHMAS_executionMode} != 'mode:submit-only' ]; then
             if [ -e $jobScriptGlobalPath ]; then
                 mv $jobScriptGlobalPath ${jobScriptGlobalPath}_$(date +'%F_%H%M') || exit $BHMAS_fatalBuiltin
             fi
             #Call the file to produce the jobscript file
-            if [ $BHMAS_invertConfigurationsOption = "TRUE" ]; then
+            if [ ${BHMAS_executionMode} = 'mode:invert-configurations' ]; then
                 walltime="$(__static__CalculateWalltimeForInverter)"
                 ProduceInverterJobscript_CL2QCD "$jobScriptGlobalPath" "$jobScriptFilename" "$walltime" "${betasForJobScript[@]}"
             else

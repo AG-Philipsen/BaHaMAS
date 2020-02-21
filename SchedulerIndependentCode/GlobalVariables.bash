@@ -136,34 +136,23 @@ function DeclareBaHaMASGlobalVariables()
     declare -gA BHMAS_startConfigurationGlobalPath=()
 
     #Mutually exclusive options variables
-    BHMAS_submitOption='FALSE'
-    BHMAS_submitonlyOption='FALSE'
-    BHMAS_thermalizeOption='FALSE'
-    BHMAS_continueOption='FALSE'
+    BHMAS_executionMode='mode:unspecified'
+
+    #Values of mutually exclusive and secondary options
     BHMAS_trajectoryNumberUpToWhichToContinue=0
-    BHMAS_continueThermalizationOption='FALSE'
-    BHMAS_jobstatusOption='FALSE'
     BHMAS_jobstatusUser="$(whoami)"
     BHMAS_jobstatusAll='FALSE'
     BHMAS_jobstatusLocal='FALSE'
-    BHMAS_liststatusOption='FALSE'
     BHMAS_liststatusMeasureTimeOption='TRUE'
     BHMAS_liststatusShowOnlyQueuedOption='FALSE'
-    BHMAS_accRateReportOption='FALSE'
     BHMAS_accRateReportInterval=1000
-    BHMAS_cleanOutputFilesOption='FALSE'
     BHMAS_cleanAllOutputFiles='FALSE'
-    BHMAS_completeBetasFileOption='FALSE'
     BHMAS_numberOfChainsToBeInTheBetasFile=4
-    BHMAS_uncommentBetasOption='FALSE'
-    BHMAS_commentBetasOption='FALSE'
     BHMAS_betasWithSeedToBeToggled=()
     BHMAS_betasToBeToggled=()
-    BHMAS_invertConfigurationsOption='FALSE'
     readonly BHMAS_inversionSrunCommandsFilename="srunCommandsFileForInversions"
     readonly BHMAS_correlatorDirection=0
     readonly BHMAS_numberOfSourcesForCorrelators=8
-    BHMAS_databaseOption='FALSE'
     BHMAS_optionsToBePassedToDatabase=()
 
     #Variables for output color

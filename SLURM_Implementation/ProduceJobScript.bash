@@ -190,7 +190,7 @@ function ProduceJobscript_CL2QCD()
         __static__AddToJobscriptFile "rm \$dir${index}/$BHMAS_hmcFilename || exit $BHMAS_fatalBuiltin"
     done
     __static__AddToJobscriptFile ""
-    if [ $BHMAS_thermalizeOption = "TRUE" ] || [ $BHMAS_continueThermalizationOption = "TRUE" ]; then
+    if [ ${BHMAS_executionMode} = 'mode:thermalize' ] || [ ${BHMAS_executionMode} = "mode:continue-thermalization" ]; then
         __static__AddToJobscriptFile "# Copy last configuration to Thermalized Configurations folder"
         if [ $BHMAS_betaPostfix == "_thermalizeFromHot" ]; then
             for index in "${!betaValues[@]}"; do

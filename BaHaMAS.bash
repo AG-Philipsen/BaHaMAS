@@ -73,7 +73,7 @@ if ! WasAnyOfTheseOptionsGivenToBaHaMAS '--jobstatus'; then
     CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase
 fi
 
-if [ $BHMAS_databaseOption = 'FALSE' ] && [ $BHMAS_jobstatusOption = 'FALSE' ]; then
+if [ ${BHMAS_executionMode} != 'mode:database' ] && [ ${BHMAS_executionMode} != 'mode:job-status' ]; then
     CheckSingleOccurrenceInPath $(sed 's/\// /g' <<< "$BHMAS_submitDiskGlobalPath")\
                                 "${BHMAS_nflavourPrefix}${BHMAS_nflavourRegex}"\
                                 "${BHMAS_chempotPrefix}${BHMAS_chempotRegex}"\
@@ -89,25 +89,25 @@ fi
 #  Treat each mutually exclusive option separately, even if some steps are in common. This improves readability!  #
 #-----------------------------------------------------------------------------------------------------------------#
 
-if [ $BHMAS_databaseOption = 'TRUE' ]; then
+if [ ${BHMAS_executionMode} = 'mode:database' ]; then
 
     projectStatisticsDatabase ${BHMAS_optionsToBePassedToDatabase[@]+"${BHMAS_optionsToBePassedToDatabase[@]}"}
 
-elif [ $BHMAS_submitonlyOption = 'TRUE' ]; then
+elif [ ${BHMAS_executionMode} = 'mode:submit-only' ]; then
 
     ParseBetasFile
     FindConfigurationGlobalPathFromWhichToStartTheSimulation #TODO: This should not be needed! Check if it is true!
     ProcessBetaValuesForSubmitOnly
     SubmitJobsForValidBetaValues
 
-elif [ $BHMAS_submitOption = 'TRUE' ]; then
+elif [ ${BHMAS_executionMode} = 'mode:submit' ]; then
 
     ParseBetasFile
     FindConfigurationGlobalPathFromWhichToStartTheSimulation
     ProduceInputFileAndJobScriptForEachBeta
     SubmitJobsForValidBetaValues
 
-elif [ $BHMAS_thermalizeOption = 'TRUE' ] || [ $BHMAS_continueThermalizationOption = 'TRUE' ]; then
+elif [ ${BHMAS_executionMode} = 'mode:thermalize' ] || [ ${BHMAS_executionMode} = 'mode:continue-thermalization' ]; then
 
     if [ $BHMAS_useMultipleChains = 'FALSE' ]; then
         if [ $BHMAS_thermalizeOption = 'TRUE' ] || [ $BHMAS_continueThermalizationOption = 'TRUE' ]; then
@@ -131,7 +131,7 @@ elif [ $BHMAS_thermalizeOption = 'TRUE' ] || [ $BHMAS_continueThermalizationOpti
         BHMAS_measurePbp='FALSE'
     fi
     ParseBetasFile
-    if [ $BHMAS_thermalizeOption = 'TRUE' ]; then
+    if [ ${BHMAS_executionMode} = 'mode:thermalize' ]; then
         FindConfigurationGlobalPathFromWhichToStartTheSimulation
         ProduceInputFileAndJobScriptForEachBeta
         AskUser "Check if everything is fine. Would you like to submit the jobs?"
@@ -139,31 +139,31 @@ elif [ $BHMAS_thermalizeOption = 'TRUE' ] || [ $BHMAS_continueThermalizationOpti
             cecho lr "\n No job will be submitted!\n"
             exit $BHMAS_successExitCode
         fi
-    elif [ $BHMAS_continueThermalizationOption = 'TRUE' ]; then
+    elif [ ${BHMAS_executionMode} = 'mode:continue-thermalization' ]; then
         ProcessBetaValuesForContinue
     fi
     SubmitJobsForValidBetaValues
 
-elif [ $BHMAS_continueOption = 'TRUE' ]; then
+elif [ ${BHMAS_executionMode} = 'mode:continue' ]; then
 
     ParseBetasFile
     ProcessBetaValuesForContinue
     SubmitJobsForValidBetaValues
 
-elif [ $BHMAS_jobstatusOption = 'TRUE' ]; then
+elif [ ${BHMAS_executionMode} = 'mode:job-status' ]; then
 
     ListJobsStatus
 
-elif [ $BHMAS_liststatusOption = 'TRUE' ]; then
+elif [ ${BHMAS_executionMode} = 'mode:simulation-status' ]; then
 
     ListSimulationsStatus
 
-elif [ $BHMAS_accRateReportOption = 'TRUE' ]; then
+elif [ ${BHMAS_executionMode} = 'mode:acceptance-rate-report' ]; then
 
     ParseBetasFile
     AcceptanceRateReport
 
-elif [ $BHMAS_cleanOutputFilesOption = 'TRUE' ]; then
+elif [ ${BHMAS_executionMode} = 'mode:clean-output-files' ]; then
 
     if [ $BHMAS_cleanAllOutputFiles = 'TRUE' ]; then
         BHMAS_betaValues=( $( ls $BHMAS_runDirWithBetaFolders | grep "^${BHMAS_betaPrefix}${BHMAS_betaRegex}" | awk '{print substr($1,2)}') )
@@ -172,22 +172,22 @@ elif [ $BHMAS_cleanOutputFilesOption = 'TRUE' ]; then
     fi
     CleanOutputFiles
 
-elif [ $BHMAS_completeBetasFileOption = 'TRUE' ]; then
+elif [ ${BHMAS_executionMode} = 'mode:complete-betas-file' ]; then
 
     CompleteBetasFile
     less "$BHMAS_betasFilename"
 
-elif [ $BHMAS_uncommentBetasOption = 'TRUE' ]; then
+elif [ ${BHMAS_executionMode} = 'mode:uncomment-betas' ]; then
 
     UncommentEntriesInBetasFile
     less "$BHMAS_betasFilename"
 
-elif [ $BHMAS_commentBetasOption = 'TRUE' ]; then
+elif [ ${BHMAS_executionMode} = 'mode:comment-betas' ]; then
 
     CommentEntriesInBetasFile
     less "$BHMAS_betasFilename"
 
-elif [ $BHMAS_invertConfigurationsOption = 'TRUE' ]; then
+elif [ ${BHMAS_executionMode} = 'mode:invert-configurations' ]; then
 
     ParseBetasFile
     ProcessBetaValuesForInversion

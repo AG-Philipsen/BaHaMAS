@@ -174,7 +174,7 @@ function ParseCommandLineOption()
 
             --doNotUseMultipleChains )
                 BHMAS_useMultipleChains="FALSE"
-                if [ $BHMAS_thermalizeOption = "FALSE" ]; then
+                if [ ${BHMAS_executionMode} != 'mode:thermalize' ]; then
                     BHMAS_betaPostfix=""
                 fi
                 shift ;;
@@ -213,22 +213,22 @@ function ParseCommandLineOption()
 
             --submit )
                 mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_submitOption="TRUE"
+                BHMAS_executionMode='mode:submit'
                 shift;;
 
             --submitonly )
                 mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_submitonlyOption="TRUE"
+                BHMAS_executionMode='mode:submit-only'
                 shift;;
 
             --thermalize )
                 mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_thermalizeOption="TRUE"
+                BHMAS_executionMode='mode:thermalize'
                 shift;;
 
             --continue )
                 mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_continueOption="TRUE"
+                BHMAS_executionMode='mode:continue'
                 if [[ ! ${2:-} =~ ^(-|$) ]]; then
                     if [[ ! $2 =~ ^[0-9]+$ ]];then
                         PrintOptionSpecificationErrorAndExit "$1"
@@ -241,7 +241,7 @@ function ParseCommandLineOption()
 
             --continueThermalization )
                 mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_continueThermalizationOption="TRUE"
+                BHMAS_executionMode='mode:continue-thermalization'
                 if [[ ! ${2:-} =~ ^(-|$) ]]; then
                     if [[ ! $2 =~ ^[0-9]+$ ]];then
                         PrintOptionSpecificationErrorAndExit "$1"
@@ -254,11 +254,11 @@ function ParseCommandLineOption()
 
             --jobstatus )
                 mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_jobstatusOption="TRUE"
+                BHMAS_executionMode='mode:job-status'
                 shift;;
 
             --user )
-                if [ $BHMAS_jobstatusOption = "FALSE" ]; then
+                if [ ${BHMAS_executionMode} != 'mode:job-status' ]; then
                     __static__PrintSecondaryOptionSpecificationErrorAndExit "-j | --jobstatus" "$1"
                 else
                     BHMAS_jobstatusUser="$2"
@@ -267,7 +267,7 @@ function ParseCommandLineOption()
                 shift ;;
 
             --local )
-                if [ $BHMAS_jobstatusOption = "FALSE" ]; then
+                if [ ${BHMAS_executionMode} != 'mode:job-status' ]; then
                     __static__PrintSecondaryOptionSpecificationErrorAndExit "-j | --jobstatus" "$1"
                 else
                     BHMAS_jobstatusLocal='TRUE'
@@ -276,11 +276,11 @@ function ParseCommandLineOption()
 
             --liststatus )
                 mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_liststatusOption="TRUE"
+                BHMAS_executionMode='mode:simulation-status'
                 shift;;
 
             --doNotMeasureTime )
-                if [ $BHMAS_liststatusOption = "FALSE" ]; then
+                if [ ${BHMAS_executionMode} != 'mode:simulation-status' ]; then
                     __static__PrintSecondaryOptionSpecificationErrorAndExit "-l | --liststatus" "$1"
                 else
                     BHMAS_liststatusMeasureTimeOption="FALSE"
@@ -288,7 +288,7 @@ function ParseCommandLineOption()
                 shift ;;
 
             --showOnlyQueued )
-                if [ $BHMAS_liststatusOption = "FALSE" ]; then
+                if [ ${BHMAS_executionMode} != 'mode:simulation-status' ]; then
                     __static__PrintSecondaryOptionSpecificationErrorAndExit "-l | --liststatus" "$1"
                 else
                     BHMAS_liststatusShowOnlyQueuedOption="TRUE"
@@ -297,7 +297,7 @@ function ParseCommandLineOption()
 
             --accRateReport )
                 mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_accRateReportOption="TRUE"
+                BHMAS_executionMode='mode:acceptance-rate-report'
                 if [[ ! ${2:-} =~ ^(-|$) ]]; then
                     if [[ ! $2 =~ ^[0-9]+$ ]];then
                         PrintOptionSpecificationErrorAndExit "$1"
@@ -310,22 +310,22 @@ function ParseCommandLineOption()
 
             --cleanOutputFiles )
                 mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_cleanOutputFilesOption="TRUE"
+                BHMAS_executionMode='mode:clean-output-files'
                 shift ;;
 
             --all )
-                if [ $BHMAS_cleanOutputFilesOption = "FALSE" ] && [ $BHMAS_jobstatusOption = "FALSE" ]; then
+                if [ ${BHMAS_executionMode} != 'mode:clean-output-files' ] && [ ${BHMAS_executionMode} != 'mode:job-status' ]; then
                     __static__PrintSecondaryOptionSpecificationErrorAndExit "--cleanOutputFiles" "$1"
-                elif [ $BHMAS_cleanOutputFilesOption = "TRUE" ]; then
+                elif [ ${BHMAS_executionMode} = 'mode:clean-output-files' ]; then
                     BHMAS_cleanAllOutputFiles="TRUE"
-                elif [ $BHMAS_jobstatusOption = "TRUE" ]; then
+                elif [ ${BHMAS_executionMode} = 'mode:job-status' ]; then
                     BHMAS_jobstatusAll='TRUE'
                 fi
                 shift ;;
 
             --completeBetasFile )
                 mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_completeBetasFileOption="TRUE"
+                BHMAS_executionMode='mode:complete-betas-file'
                 if [[ ! ${2:-} =~ ^(-|$) ]]; then
                     if [[ ! $2 =~ ^[0-9]+$ ]];then
                         PrintOptionSpecificationErrorAndExit "$1"
@@ -339,9 +339,9 @@ function ParseCommandLineOption()
             --uncommentBetas | --commentBetas )
                 mutuallyExclusiveOptionsPassed+=( $1 )
                 if [ $1 = '--uncommentBetas' ]; then
-                    BHMAS_commentBetasOption="FALSE"; BHMAS_uncommentBetasOption="TRUE"
+                    BHMAS_executionMode='mode:uncomment-betas'
                 elif [ $1 = '--commentBetas' ]; then
-                    BHMAS_uncommentBetasOption="FALSE"; BHMAS_commentBetasOption="TRUE"
+                    BHMAS_executionMode='mode:comment-betas'
                 fi
                 while [[ ! ${2:-} =~ ^(-|$) ]]; do
                     if [[ $2 =~ ^[0-9]\.[0-9]{4}_${BHMAS_seedPrefix}[0-9]{4}(_(NC|fC|fH))*$ ]]; then
@@ -357,12 +357,12 @@ function ParseCommandLineOption()
 
             --invertConfigurations)
                 mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_invertConfigurationsOption="TRUE"
+                BHMAS_executionMode='mode:invert-configurations'
                 shift ;;
 
             --database)
-                BHMAS_databaseOption="TRUE"
                 mutuallyExclusiveOptionsPassed+=( $1 )
+                BHMAS_executionMode='mode:database'
                 shift
                 BHMAS_optionsToBePassedToDatabase=( $@ )
                 shift $# ;;

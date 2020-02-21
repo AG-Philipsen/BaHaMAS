@@ -200,7 +200,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
     fi
 
     #Check variables depending on BaHaMAS invocation
-    if [ $BHMAS_submitOption = 'TRUE' ]; then
+    if [ ${BHMAS_executionMode} = 'mode:submit' ]; then
         option="$(cecho -d "with the " B "--submit" uB)"
         variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]}  ${schedulerVariables[@]}
                                        BHMAS_thermConfsGlobalPath )
@@ -208,7 +208,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
         neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
         readonly BHMAS_walltimeIsNeeded='TRUE'
 
-    elif [ $BHMAS_submitonlyOption = 'TRUE' ]; then
+    elif [ ${BHMAS_executionMode} = 'mode:submit-only' ]; then
         option="$(cecho -d "with the " B "--submitonly" uB)"
         variablesThatMustBeNotEmpty+=( BHMAS_inputFilename
                                        BHMAS_jobScriptPrefix
@@ -217,7 +217,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
         neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]:-} )
         neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
 
-    elif [ $BHMAS_thermalizeOption = 'TRUE' ]; then
+    elif [ ${BHMAS_executionMode} = 'mode:thermalize' ]; then
         option="$(cecho -d "with the " B "--thermalize" uB)"
         variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
                                        BHMAS_thermConfsGlobalPath )
@@ -225,14 +225,14 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
         neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
         readonly BHMAS_walltimeIsNeeded='TRUE'
 
-    elif [ $BHMAS_continueOption = 'TRUE' ]; then
+    elif [ ${BHMAS_executionMode} = 'mode:continue' ]; then
         option="$(cecho -d "with the " B "--continue" uB)"
         variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]} )
         neededFolders+=( ${rationalApproxFolder[@]:-} )
         neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
         readonly BHMAS_walltimeIsNeeded='TRUE'
 
-    elif [ $BHMAS_continueThermalizationOption = 'TRUE' ]; then
+    elif [ ${BHMAS_executionMode} = 'mode:continue-thermalization' ]; then
         option="$(cecho -d "with the " B "--continueThermalization" uB)"
         variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
                                        BHMAS_thermConfsGlobalPath )
@@ -240,7 +240,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
         neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
         readonly BHMAS_walltimeIsNeeded='TRUE'
 
-    elif [ $BHMAS_liststatusOption = 'TRUE' ]; then
+    elif [ ${BHMAS_executionMode} = 'mode:simulation-status' ]; then
         option="$(cecho -d "with the " B "--liststatus" uB)"
         variablesThatMustBeNotEmpty+=( BHMAS_hmcGlobalPath #TODO: Remove, now it's only for --measureTime
                                        BHMAS_inputFilename
@@ -250,24 +250,24 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
                                        BHMAS_acceptanceColumn
                                        BHMAS_trajectoryTimeColumn )
 
-    elif [ $BHMAS_accRateReportOption = 'TRUE' ]; then
+    elif [ ${BHMAS_executionMode} = 'mode:acceptance-rate-report' ]; then
         option="$(cecho -d "with the " B "--accRateReport" uB)"
         variablesThatMustBeNotEmpty+=( BHMAS_acceptanceColumn  BHMAS_outputFilename )
 
-    elif [ $BHMAS_cleanOutputFilesOption = 'TRUE' ]; then
+    elif [ ${BHMAS_executionMode} = 'mode:clean-output-files' ]; then
         option="$(cecho -d "with the " B "--cleanOutputFiles" uB)"
         variablesThatMustBeNotEmpty+=( BHMAS_outputFilename )
 
-    elif [ $BHMAS_completeBetasFileOption = 'TRUE' ]; then
+    elif [ ${BHMAS_executionMode} = 'mode:complete-betas-file' ]; then
         option="$(cecho -d "with the " B "--completeBetasFile" uB)"
 
-    elif [ $BHMAS_uncommentBetasOption = 'TRUE' ]; then
+    elif [ ${BHMAS_executionMode} = 'mode:uncomment-betas' ]; then
         option="$(cecho -d "with the " B "--uncommentBetas" uB)"
 
-    elif [ $BHMAS_commentBetasOption = 'TRUE' ]; then
+    elif [ ${BHMAS_executionMode} = 'mode:comment-betas' ]; then
         option="$(cecho -d "with the " B "--commentBetas" uB)"
 
-    elif [ $BHMAS_invertConfigurationsOption = 'TRUE' ]; then
+    elif [ ${BHMAS_executionMode} = 'mode:invert-configurations' ]; then
         option="$(cecho -d "with the " B "--invertConfigurations" uB)"
         variablesThatMustBeNotEmpty+=( BHMAS_jobScriptPrefix
                                        BHMAS_jobScriptFolderName
@@ -275,7 +275,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
                                        ${schedulerVariables[@]} )
         neededFiles+=( "$BHMAS_inverterGlobalPath" )
 
-    elif [ $BHMAS_databaseOption = 'TRUE' ]; then
+    elif [ ${BHMAS_executionMode} = 'mode:database' ]; then
         option="$(cecho -d "with the " B "--dataBase" uB)"
         variablesThatMustBeNotEmpty+=( BHMAS_inputFilename
                                        BHMAS_outputFilename
