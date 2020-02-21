@@ -46,13 +46,13 @@ set -euo pipefail                                                               
 readonly BHMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"
 source "${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/SourceCodebaseFiles.bash" "$@"
 
+DeclareAllGlobalVariables
+
 #If the user asked for the Setup, it has to be done immediately and that's it
 if IsBaHaMASRunInSetupMode; then
     MakeInteractiveSetupAndCreateUserDefinedVariablesFile
     exit $BHMAS_successExitCode
 fi
-
-DeclareAllGlobalVariables
 
 if [ $# -ne 0 ]; then
     PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem
