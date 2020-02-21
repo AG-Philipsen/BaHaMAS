@@ -136,7 +136,7 @@ function DeclareBaHaMASGlobalVariables()
     declare -gA BHMAS_startConfigurationGlobalPath=()
 
     #Mutually exclusive options variables
-    BHMAS_executionMode='mode:unspecified'
+    BHMAS_executionMode='mode:default'
 
     #Values of mutually exclusive and secondary options
     BHMAS_trajectoryNumberUpToWhichToContinue=0

@@ -199,102 +199,123 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
                                "${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}*$BHMAS_approxMetropolisFilename" )
     fi
 
-    #Check variables depending on BaHaMAS invocation
-    if [ ${BHMAS_executionMode} = 'mode:submit' ]; then
-        option="$(cecho -d "with the " B "--submit" uB)"
-        variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]}  ${schedulerVariables[@]}
-                                       BHMAS_thermConfsGlobalPath )
-        neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]:-} )
-        neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
-        readonly BHMAS_walltimeIsNeeded='TRUE'
+    #Check variables depending on BaHaMAS execution mode
+    case ${BHMAS_executionMode} in
 
-    elif [ ${BHMAS_executionMode} = 'mode:submit-only' ]; then
-        option="$(cecho -d "with the " B "--submitonly" uB)"
-        variablesThatMustBeNotEmpty+=( BHMAS_inputFilename
-                                       BHMAS_jobScriptPrefix
-                                       BHMAS_jobScriptFolderName
-                                       BHMAS_thermConfsGlobalPath )
-        neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]:-} )
-        neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
+        mode:submit )
+            option="$(cecho -d "with the " B "--submit" uB)"
+            variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]}  ${schedulerVariables[@]}
+                                           BHMAS_thermConfsGlobalPath )
+            neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]:-} )
+            neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
+            readonly BHMAS_walltimeIsNeeded='TRUE'
+            ;;
 
-    elif [ ${BHMAS_executionMode} = 'mode:thermalize' ]; then
-        option="$(cecho -d "with the " B "--thermalize" uB)"
-        variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
-                                       BHMAS_thermConfsGlobalPath )
-        neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]:-} )
-        neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
-        readonly BHMAS_walltimeIsNeeded='TRUE'
+        mode:submit-only )
 
-    elif [ ${BHMAS_executionMode} = 'mode:continue' ]; then
-        option="$(cecho -d "with the " B "--continue" uB)"
-        variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]} )
-        neededFolders+=( ${rationalApproxFolder[@]:-} )
-        neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
-        readonly BHMAS_walltimeIsNeeded='TRUE'
+            option="$(cecho -d "with the " B "--submitonly" uB)"
+            variablesThatMustBeNotEmpty+=( BHMAS_inputFilename
+                                           BHMAS_jobScriptPrefix
+                                           BHMAS_jobScriptFolderName
+                                           BHMAS_thermConfsGlobalPath )
+            neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]:-} )
+            neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
+            ;;
 
-    elif [ ${BHMAS_executionMode} = 'mode:continue-thermalization' ]; then
-        option="$(cecho -d "with the " B "--continueThermalization" uB)"
-        variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
-                                       BHMAS_thermConfsGlobalPath )
-        neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]:-} )
-        neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
-        readonly BHMAS_walltimeIsNeeded='TRUE'
+        mode:thermalize )
+            option="$(cecho -d "with the " B "--thermalize" uB)"
+            variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
+                                           BHMAS_thermConfsGlobalPath )
+            neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]:-} )
+            neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
+            readonly BHMAS_walltimeIsNeeded='TRUE'
+            ;;
 
-    elif [ ${BHMAS_executionMode} = 'mode:simulation-status' ]; then
-        option="$(cecho -d "with the " B "--liststatus" uB)"
-        variablesThatMustBeNotEmpty+=( BHMAS_hmcGlobalPath #TODO: Remove, now it's only for --measureTime
-                                       BHMAS_inputFilename
-                                       BHMAS_outputFilename
-                                       BHMAS_plaquetteColumn
-                                       BHMAS_deltaHColumn
-                                       BHMAS_acceptanceColumn
-                                       BHMAS_trajectoryTimeColumn )
+        mode:continue )
+            option="$(cecho -d "with the " B "--continue" uB)"
+            variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]} )
+            neededFolders+=( ${rationalApproxFolder[@]:-} )
+            neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
+            readonly BHMAS_walltimeIsNeeded='TRUE'
+            ;;
 
-    elif [ ${BHMAS_executionMode} = 'mode:acceptance-rate-report' ]; then
-        option="$(cecho -d "with the " B "--accRateReport" uB)"
-        variablesThatMustBeNotEmpty+=( BHMAS_acceptanceColumn  BHMAS_outputFilename )
+        mode:continue-thermalization )
+            option="$(cecho -d "with the " B "--continueThermalization" uB)"
+            variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
+                                           BHMAS_thermConfsGlobalPath )
+            neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]:-} )
+            neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
+            readonly BHMAS_walltimeIsNeeded='TRUE'
+            ;;
 
-    elif [ ${BHMAS_executionMode} = 'mode:clean-output-files' ]; then
-        option="$(cecho -d "with the " B "--cleanOutputFiles" uB)"
-        variablesThatMustBeNotEmpty+=( BHMAS_outputFilename )
+        mode:simulation-status )
+            option="$(cecho -d "with the " B "--liststatus" uB)"
+            variablesThatMustBeNotEmpty+=( BHMAS_hmcGlobalPath #TODO: Remove, now it's only for --measureTime
+                                           BHMAS_inputFilename
+                                           BHMAS_outputFilename
+                                           BHMAS_plaquetteColumn
+                                           BHMAS_deltaHColumn
+                                           BHMAS_acceptanceColumn
+                                           BHMAS_trajectoryTimeColumn )
+            ;;
 
-    elif [ ${BHMAS_executionMode} = 'mode:complete-betas-file' ]; then
-        option="$(cecho -d "with the " B "--completeBetasFile" uB)"
+        mode:acceptance-rate-report )
+            option="$(cecho -d "with the " B "--accRateReport" uB)"
+            variablesThatMustBeNotEmpty+=( BHMAS_acceptanceColumn  BHMAS_outputFilename )
+            ;;
 
-    elif [ ${BHMAS_executionMode} = 'mode:uncomment-betas' ]; then
-        option="$(cecho -d "with the " B "--uncommentBetas" uB)"
+        mode:clean-output-files )
+            option="$(cecho -d "with the " B "--cleanOutputFiles" uB)"
+            variablesThatMustBeNotEmpty+=( BHMAS_outputFilename )
+            ;;
 
-    elif [ ${BHMAS_executionMode} = 'mode:comment-betas' ]; then
-        option="$(cecho -d "with the " B "--commentBetas" uB)"
+        mode:complete-betas-file )
+            option="$(cecho -d "with the " B "--completeBetasFile" uB)"
+            ;;
 
-    elif [ ${BHMAS_executionMode} = 'mode:invert-configurations' ]; then
-        option="$(cecho -d "with the " B "--invertConfigurations" uB)"
-        variablesThatMustBeNotEmpty+=( BHMAS_jobScriptPrefix
-                                       BHMAS_jobScriptFolderName
-                                       BHMAS_inverterGlobalPath
-                                       ${schedulerVariables[@]} )
-        neededFiles+=( "$BHMAS_inverterGlobalPath" )
+        mode:uncomment-betas )
+            option="$(cecho -d "with the " B "--uncommentBetas" uB)"
+            ;;
 
-    elif [ ${BHMAS_executionMode} = 'mode:database' ]; then
-        option="$(cecho -d "with the " B "--dataBase" uB)"
-        variablesThatMustBeNotEmpty+=( BHMAS_inputFilename
-                                       BHMAS_outputFilename
-                                       BHMAS_plaquetteColumn
-                                       BHMAS_deltaHColumn
-                                       BHMAS_acceptanceColumn
-                                       BHMAS_trajectoryTimeColumn
-                                       BHMAS_databaseGlobalPath
-                                       BHMAS_databaseFilename )
-        neededFolders+=( "$BHMAS_databaseGlobalPath" )
+        mode:comment-betas )
+            option="$(cecho -d "with the " B "--commentBetas" uB)"
+            ;;
 
-    else
-        option='without any mutually exclusive'
-        variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
-                                       BHMAS_thermConfsGlobalPath )
-        neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]:-} )
-        neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
-        readonly BHMAS_walltimeIsNeeded='TRUE'
-    fi
+        mode:invert-configurations )
+            option="$(cecho -d "with the " B "--invertConfigurations" uB)"
+            variablesThatMustBeNotEmpty+=( BHMAS_jobScriptPrefix
+                                           BHMAS_jobScriptFolderName
+                                           BHMAS_inverterGlobalPath
+                                           ${schedulerVariables[@]} )
+            neededFiles+=( "$BHMAS_inverterGlobalPath" )
+            ;;
+
+        mode:database )
+            option="$(cecho -d "with the " B "--dataBase" uB)"
+            variablesThatMustBeNotEmpty+=( BHMAS_inputFilename
+                                           BHMAS_outputFilename
+                                           BHMAS_plaquetteColumn
+                                           BHMAS_deltaHColumn
+                                           BHMAS_acceptanceColumn
+                                           BHMAS_trajectoryTimeColumn
+                                           BHMAS_databaseGlobalPath
+                                           BHMAS_databaseFilename )
+            neededFolders+=( "$BHMAS_databaseGlobalPath" )
+            ;;
+
+        mode:default )
+            option='without any mutually exclusive'
+            variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
+                                           BHMAS_thermConfsGlobalPath )
+            neededFolders+=( "$BHMAS_thermConfsGlobalPath" ${rationalApproxFolder[@]:-} )
+            neededFiles+=( "$BHMAS_hmcGlobalPath" ${rationalApproxFiles[@]:-} )
+            readonly BHMAS_walltimeIsNeeded='TRUE'
+            ;;
+
+        * )
+            Internal "Unknown execution mode \"${BHMAS_executionMode}\" in ${FUNCNAME} function."
+            ;;
+    esac
 
     #If BHMAS_walltimeIsNeeded not declared, put it false
     [ "${BHMAS_walltimeIsNeeded:-}" = '' ] && readonly BHMAS_walltimeIsNeeded='FALSE'

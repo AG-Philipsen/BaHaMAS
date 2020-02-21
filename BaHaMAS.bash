@@ -89,115 +89,136 @@ fi
 #  Treat each mutually exclusive option separately, even if some steps are in common. This improves readability!  #
 #-----------------------------------------------------------------------------------------------------------------#
 
-if [ ${BHMAS_executionMode} = 'mode:database' ]; then
+case ${BHMAS_executionMode} in
 
-    projectStatisticsDatabase ${BHMAS_optionsToBePassedToDatabase[@]+"${BHMAS_optionsToBePassedToDatabase[@]}"}
+    mode:database )
 
-elif [ ${BHMAS_executionMode} = 'mode:submit-only' ]; then
+        projectStatisticsDatabase ${BHMAS_optionsToBePassedToDatabase[@]+"${BHMAS_optionsToBePassedToDatabase[@]}"}
+        ;;
 
-    ParseBetasFile
-    FindConfigurationGlobalPathFromWhichToStartTheSimulation #TODO: This should not be needed! Check if it is true!
-    ProcessBetaValuesForSubmitOnly
-    SubmitJobsForValidBetaValues
+    mode:submit-only )
 
-elif [ ${BHMAS_executionMode} = 'mode:submit' ]; then
+        ParseBetasFile
+        FindConfigurationGlobalPathFromWhichToStartTheSimulation #TODO: This should not be needed! Check if it is true!
+        ProcessBetaValuesForSubmitOnly
+        SubmitJobsForValidBetaValues
+        ;;
 
-    ParseBetasFile
-    FindConfigurationGlobalPathFromWhichToStartTheSimulation
-    ProduceInputFileAndJobScriptForEachBeta
-    SubmitJobsForValidBetaValues
+    mode:submit )
 
-elif [ ${BHMAS_executionMode} = 'mode:thermalize' ] || [ ${BHMAS_executionMode} = 'mode:continue-thermalization' ]; then
-
-    if [ $BHMAS_useMultipleChains = 'FALSE' ]; then
-        Fatal $BHMAS_fatalCommandLine "Options " emph "--thermalize" " and " emph "--continueThermalization"\
-              " implemented " emph "only not" " combined not with " emph "--doNotUseMultipleChains" " option!"
-    fi
-    #Here we fix the beta postfix just looking for thermalized conf from hot at the actual parameters (no matter at which beta);
-    #if at least one configuration thermalized from hot is present, it means the thermalization has to be done from conf (the
-    #correct beta to be used is selected then later in the script ---> see where the array BHMAS_startConfigurationGlobalPath is filled
-    #
-    # TODO: If a thermalization from hot is finished but one other crashed and one wishes to resume it, the postfix should be
-    #       from Hot but it is from conf since in $BHMAS_thermConfsGlobalPath a conf from hot is found. Think about how to fix this.
-    if [ $(ls $BHMAS_thermConfsGlobalPath | grep "${BHMAS_configurationPrefix}${BHMAS_parametersString}_${BHMAS_betaPrefix}${BHMAS_betaRegex}_${BHMAS_seedPrefix}${BHMAS_seedRegex}_fromHot[[:digit:]]\+.*" | wc -l) -eq 0 ]; then
-        BHMAS_betaPostfix="_thermalizeFromHot"
-    else
-        BHMAS_betaPostfix="_thermalizeFromConf"
-    fi
-    if [ $BHMAS_measurePbp = 'TRUE' ]; then
-        cecho ly B "\n Measurement of PBP switched off during thermalization!"
-        BHMAS_measurePbp='FALSE'
-    fi
-    ParseBetasFile
-    if [ ${BHMAS_executionMode} = 'mode:thermalize' ]; then
+        ParseBetasFile
         FindConfigurationGlobalPathFromWhichToStartTheSimulation
         ProduceInputFileAndJobScriptForEachBeta
-        AskUser "Check if everything is fine. Would you like to submit the jobs?"
-        if UserSaidNo; then
-            cecho lr "\n No job will be submitted!\n"
-            exit $BHMAS_successExitCode
+        SubmitJobsForValidBetaValues
+        ;;
+
+    mode:thermalize | mode:continue-thermalization )
+
+        if [ $BHMAS_useMultipleChains = 'FALSE' ]; then
+            Fatal $BHMAS_fatalCommandLine "Options " emph "--thermalize" " and " emph "--continueThermalization"\
+                  " implemented " emph "only not" " combined not with " emph "--doNotUseMultipleChains" " option!"
         fi
-    elif [ ${BHMAS_executionMode} = 'mode:continue-thermalization' ]; then
-        ProcessBetaValuesForContinue
-    fi
-    SubmitJobsForValidBetaValues
-
-elif [ ${BHMAS_executionMode} = 'mode:continue' ]; then
-
-    ParseBetasFile
-    ProcessBetaValuesForContinue
-    SubmitJobsForValidBetaValues
-
-elif [ ${BHMAS_executionMode} = 'mode:job-status' ]; then
-
-    ListJobsStatus
-
-elif [ ${BHMAS_executionMode} = 'mode:simulation-status' ]; then
-
-    ListSimulationsStatus
-
-elif [ ${BHMAS_executionMode} = 'mode:acceptance-rate-report' ]; then
-
-    ParseBetasFile
-    AcceptanceRateReport
-
-elif [ ${BHMAS_executionMode} = 'mode:clean-output-files' ]; then
-
-    if [ $BHMAS_cleanAllOutputFiles = 'TRUE' ]; then
-        BHMAS_betaValues=( $( ls $BHMAS_runDirWithBetaFolders | grep "^${BHMAS_betaPrefix}${BHMAS_betaRegex}" | awk '{print substr($1,2)}') )
-    else
+        #Here we fix the beta postfix just looking for thermalized conf from hot at the actual parameters (no matter at which beta);
+        #if at least one configuration thermalized from hot is present, it means the thermalization has to be done from conf (the
+        #correct beta to be used is selected then later in the script ---> see where the array BHMAS_startConfigurationGlobalPath is filled
+        #
+        # TODO: If a thermalization from hot is finished but one other crashed and one wishes to resume it, the postfix should be
+        #       from Hot but it is from conf since in $BHMAS_thermConfsGlobalPath a conf from hot is found. Think about how to fix this.
+        if [ $(ls $BHMAS_thermConfsGlobalPath | grep "${BHMAS_configurationPrefix}${BHMAS_parametersString}_${BHMAS_betaPrefix}${BHMAS_betaRegex}_${BHMAS_seedPrefix}${BHMAS_seedRegex}_fromHot[[:digit:]]\+.*" | wc -l) -eq 0 ]; then
+            BHMAS_betaPostfix="_thermalizeFromHot"
+        else
+            BHMAS_betaPostfix="_thermalizeFromConf"
+        fi
+        if [ $BHMAS_measurePbp = 'TRUE' ]; then
+            cecho ly B "\n Measurement of PBP switched off during thermalization!"
+            BHMAS_measurePbp='FALSE'
+        fi
         ParseBetasFile
-    fi
-    CleanOutputFiles
+        if [ ${BHMAS_executionMode} = 'mode:thermalize' ]; then
+            FindConfigurationGlobalPathFromWhichToStartTheSimulation
+            ProduceInputFileAndJobScriptForEachBeta
+            AskUser "Check if everything is fine. Would you like to submit the jobs?"
+            if UserSaidNo; then
+                cecho lr "\n No job will be submitted!\n"
+                exit $BHMAS_successExitCode
+            fi
+        elif [ ${BHMAS_executionMode} = 'mode:continue-thermalization' ]; then
+            ProcessBetaValuesForContinue
+        fi
+        SubmitJobsForValidBetaValues
+        ;;
 
-elif [ ${BHMAS_executionMode} = 'mode:complete-betas-file' ]; then
+    mode:continue )
 
-    CompleteBetasFile
-    less "$BHMAS_betasFilename"
+        ParseBetasFile
+        ProcessBetaValuesForContinue
+        SubmitJobsForValidBetaValues
+        ;;
 
-elif [ ${BHMAS_executionMode} = 'mode:uncomment-betas' ]; then
+    mode:job-status )
 
-    UncommentEntriesInBetasFile
-    less "$BHMAS_betasFilename"
+        ListJobsStatus
+        ;;
 
-elif [ ${BHMAS_executionMode} = 'mode:comment-betas' ]; then
+    mode:simulation-status )
 
-    CommentEntriesInBetasFile
-    less "$BHMAS_betasFilename"
+        ListSimulationsStatus
+        ;;
 
-elif [ ${BHMAS_executionMode} = 'mode:invert-configurations' ]; then
+    mode:acceptance-rate-report )
 
-    ParseBetasFile
-    ProcessBetaValuesForInversion
-    SubmitJobsForValidBetaValues
+        ParseBetasFile
+        AcceptanceRateReport
+        ;;
 
-else
+    mode:clean-output-files )
 
-    ParseBetasFile
-    FindConfigurationGlobalPathFromWhichToStartTheSimulation
-    ProduceInputFileAndJobScriptForEachBeta
+        if [ $BHMAS_cleanAllOutputFiles = 'TRUE' ]; then
+            BHMAS_betaValues=( $( ls $BHMAS_runDirWithBetaFolders | grep "^${BHMAS_betaPrefix}${BHMAS_betaRegex}" | awk '{print substr($1,2)}') )
+        else
+            ParseBetasFile
+        fi
+        CleanOutputFiles
+        ;;
 
-fi
+    mode:complete-betas-file )
+
+        CompleteBetasFile
+        ;;&
+
+    mode:uncomment-betas )
+
+        UncommentEntriesInBetasFile
+        ;;&
+
+    mode:comment-betas )
+
+        CommentEntriesInBetasFile
+        ;;&
+
+    mode:complete-betas-file | mode:comment-betas | mode:uncomment-betas )
+        less "${BHMAS_betasFilename}"
+        ;;
+
+    mode:invert-configurations )
+
+        ParseBetasFile
+        ProcessBetaValuesForInversion
+        SubmitJobsForValidBetaValues
+        ;;
+
+    mode:default )
+
+        ParseBetasFile
+        FindConfigurationGlobalPathFromWhichToStartTheSimulation
+        ProduceInputFileAndJobScriptForEachBeta
+        ;;
+
+    * )
+        Internal "Unknown execution mode \"${BHMAS_executionMode}\" in main file."
+        ;;
+
+esac
 
 #------------------------------------------------------------------------------------------------------------------------------#
 # Report on eventual problems
