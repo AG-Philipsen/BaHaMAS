@@ -92,7 +92,7 @@ function ListSimulationsStatus_SLURM()
           numberLastTrajectory acceptanceAllRun acceptanceLastBunchOfTrajectories\
           maxSpikeToMeanAsNSigma maxSpikePlaquetteAsNSigma meanPlaquetteLastBunchOfTrajectories deltaMaxPlaquette\
           timeFromLastTrajectory integrationSteps0 integrationSteps1 integrationSteps2 kappaMassPreconditioning
-    # This function can be called by the JobHandler either in the BHMAS_liststatusOption setup or in the DATABASE setup.
+    # This function can be called by the JobHandler either in mode:job-status or in mode:database.
     # The crucial difference is that in the first case the BHMAS_parametersString and BHMAS_parametersPath variable
     # must be the global ones, otherwise they have to be built on the basis of some given information.
     # Then we make this function accept one and ONLY ONE argument (given only in the DATABASE setup)
@@ -375,17 +375,4 @@ function __static__ColorDelta()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         __static__ExtractBetasFrom\
-         __static__ExtractPostfixFrom\
-         __static__ExtractMetaInformationFromQueuedJobs\
-         ListSimulationsStatus_SLURM\
-         __static__GetShortenedBetaString\
-         GoodAcc\
-         __static__ColorStatus\
-         __static__ColorTime\
-         __static__ColorClean\
-         __static__ColorBeta\
-         __static__ColorDelta
+MakeFunctionsDefinedInThisFileReadonly

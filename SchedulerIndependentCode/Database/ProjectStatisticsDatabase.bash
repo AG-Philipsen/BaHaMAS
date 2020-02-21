@@ -832,9 +832,4 @@ function __static__DisplayDatabaseFile()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         join\
-         projectStatisticsDatabase\
-         __static__DisplayDatabaseFile
+MakeFunctionsDefinedInThisFileReadonly

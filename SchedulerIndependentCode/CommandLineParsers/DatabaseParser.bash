@@ -305,8 +305,4 @@ function ParseDatabaseCommandLineOption()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         __static__CheckMutuallyExclusiveOptions\
-         ParseDatabaseCommandLineOption
+MakeFunctionsDefinedInThisFileReadonly

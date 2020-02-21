@@ -266,25 +266,19 @@ function ConvertFromBytesToHumanReadable()
         {print human($1)}' <<< "$BYTES"
 }
 
+function MakeFunctionsDefinedInThisFileReadonly()
+{
+    # Here we assume all BaHaMAS functions are defined with the same stile,
+    # including empty parenteses and the braces on new lines! I.e.
+    #    function nameOfTheFunction()
+    # NOTE: The file from which this function is called is ${BASH_SOURCE[1]}
+    local declaredFunctions functionName
+    declaredFunctions=(
+        $(grep -E '^[[:space:]]*function[[:space:]]+[[:alnum:]_]+\(\)[[:space:]]*$' "${BASH_SOURCE[1]}" |\
+           sed -E 's/^[[:space:]]*function[[:space:]]+([^(]+)\(\)[[:space:]]*$/\1/')
+    )
+    readonly -f "${declaredFunctions[@]}"
+}
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         TimeToSeconds\
-         SecondsToTime\
-         SecondsToTimeString\
-         TimeStringToSecond\
-         SecondsToTimeStringWithDays\
-         GetLargestWalltimeBetweenTwo\
-         GetSmallestWalltimeBetweenTwo\
-         MinimumOfArray\
-         KeyOfMinimumOfArray\
-         MaximumOfArray\
-         KeyOfMaximumOfArray\
-         FindPositionOfFirstMinimumOfArray\
-         LengthOfLongestEntryInArray\
-         ElementInArray\
-         KeyInArray\
-         FindValueOfClosestElementInArrayToGivenValue\
-         PrintArray\
-         ConvertFromBytesToHumanReadable
+
+MakeFunctionsDefinedInThisFileReadonly

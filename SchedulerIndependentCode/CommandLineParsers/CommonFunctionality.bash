@@ -82,19 +82,20 @@ function __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray()
                            ['-w']='--walltime' )
     local option databaseOption
     databaseOption='FALSE'
-    for option in "${commandLineOptions[@]}"; do
+    BHMAS_specifiedCommandLineOptions=() # Empty it to fill it again with only long options
+    for option in "$@"; do
         #Replace short options if they are NOT for dabase!
         if [ $databaseOption = 'FALSE' ]; then
            KeyInArray $option mapOptions && option=${mapOptions[$option]}
            #More logic for repeated short options with different long one
            if [ $option = '-l' ]; then
-               if ElementInArray '--jobstatus' "${arrayNameWhereToStoreTheProcessedOptions[@]:-}"; then
+               if ElementInArray '--jobstatus' "${BHMAS_specifiedCommandLineOptions[@]}"; then
                    option='--local'
                else
                    option='--liststatus'
                fi
            elif [ $option = '-u' ]; then
-               if ElementInArray '--jobstatus' "${arrayNameWhereToStoreTheProcessedOptions[@]:-}"; then
+               if ElementInArray '--jobstatus' "${BHMAS_specifiedCommandLineOptions[@]}"; then
                    option='--user'
                else
                    option='--commentBetas'
@@ -107,8 +108,8 @@ function __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray()
                option='--helpDatabase'
            fi
         fi
-        arrayNameWhereToStoreTheProcessedOptions[${#arrayNameWhereToStoreTheProcessedOptions[@]}]="$option"
-        if ElementInArray '--database' "${arrayNameWhereToStoreTheProcessedOptions[@]}"; then
+        BHMAS_specifiedCommandLineOptions[${#BHMAS_specifiedCommandLineOptions[@]}]="$option"
+        if ElementInArray '--database' "${BHMAS_specifiedCommandLineOptions[@]}"; then
             databaseOption='TRUE'
         fi
     done
@@ -116,21 +117,20 @@ function __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray()
 
 function PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem()
 {
-    local arrayNameWhereToStoreTheProcessedOptions commandLineOptions option
-    declare -ga $1=\(\)
-    declare -n arrayNameWhereToStoreTheProcessedOptions=$1; shift #Reference to variable
+    local partiallyProcessedCommandLineOptions
     #The following two lines are not combined to respect potential spaces in options
-    readarray -t commandLineOptions <<< "$(PrepareGivenOptionToBeProcessed "$@")"
-    readarray -t commandLineOptions <<< "$(SplitCombinedShortOptionsInSingleOptions "${commandLineOptions[@]}")"
-    __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray
+    readarray -t partiallyProcessedCommandLineOptions <<< "$(PrepareGivenOptionToBeProcessed "${BHMAS_specifiedCommandLineOptions[@]}")"
+    readarray -t partiallyProcessedCommandLineOptions <<< "$(SplitCombinedShortOptionsInSingleOptions "${partiallyProcessedCommandLineOptions[@]}")"
+    __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray "${partiallyProcessedCommandLineOptions[@]}"
+    readonly BHMAS_specifiedCommandLineOptions
 }
 
 
 function PrintHelperAndExitIfUserAskedForIt()
 {
-    if ElementInArray '--help' "$@"; then
+    if WasAnyOfTheseOptionsGivenToBaHaMAS '--help'; then
         PrintMainHelper; exit $BHMAS_successExitCode
-    elif ElementInArray '--helpDatabase' "$@"; then
+    elif WasAnyOfTheseOptionsGivenToBaHaMAS '--helpDatabase'; then
         PrintDatabaseHelper; exit $BHMAS_successExitCode
     else
         return 0
@@ -148,13 +148,4 @@ function PrintOptionSpecificationErrorAndExit()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         PrepareGivenOptionToBeProcessed\
-         SplitCombinedShortOptionsInSingleOptions\
-         __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray\
-         PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem\
-         PrintHelperAndExitIfUserAskedForIt\
-         PrintInvalidOptionErrorAndExit\
-         PrintOptionSpecificationErrorAndExit
+MakeFunctionsDefinedInThisFileReadonly

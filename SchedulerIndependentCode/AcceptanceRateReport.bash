@@ -108,7 +108,4 @@ function AcceptanceRateReport()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         AcceptanceRateReport
+MakeFunctionsDefinedInThisFileReadonly

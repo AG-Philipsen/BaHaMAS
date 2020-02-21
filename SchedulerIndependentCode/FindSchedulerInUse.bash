@@ -48,7 +48,4 @@ function SelectClusterSchedulerName()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         SelectClusterSchedulerName
+MakeFunctionsDefinedInThisFileReadonly

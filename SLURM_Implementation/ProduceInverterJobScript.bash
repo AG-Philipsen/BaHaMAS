@@ -208,8 +208,4 @@ function ProduceInverterJobscript_CL2QCD()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         __static__AddToInverterJobscriptFile\
-         ProduceInverterJobscript_CL2QCD
+MakeFunctionsDefinedInThisFileReadonly

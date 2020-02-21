@@ -54,7 +54,4 @@ function ProcessBetaValuesForSubmitOnly_SLURM()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         ProcessBetaValuesForSubmitOnly_SLURM
+MakeFunctionsDefinedInThisFileReadonly

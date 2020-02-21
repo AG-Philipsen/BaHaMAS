@@ -32,7 +32,4 @@ function PrintReportForProblematicBeta()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         PrintReportForProblematicBeta
+MakeFunctionsDefinedInThisFileReadonly

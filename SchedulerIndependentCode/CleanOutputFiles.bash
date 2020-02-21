@@ -91,9 +91,4 @@ function CleanOutputFiles()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         __static__CheckFileForSuspiciousTrajectory\
-         __static__CleanFile\
-         CleanOutputFiles
+MakeFunctionsDefinedInThisFileReadonly

@@ -249,17 +249,4 @@ function Internal()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         __static__SetColorCodes\
-         __static__SetEmphasizeCodes\
-         cecho\
-         AskUser\
-         UserSaidYes\
-         UserSaidNo\
-         __static__PrintMessageToScreen\
-         Warning\
-         Error\
-         Fatal\
-         Internal
+MakeFunctionsDefinedInThisFileReadonly

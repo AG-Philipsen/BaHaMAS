@@ -95,10 +95,4 @@ function CheckSystemRequirements()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         __static__CheckAvailabilityOfProgram\
-         __static__IsFoundVersionOlderThanRequired\
-         __static__CheckAboutProgram\
-         CheckSystemRequirements
+MakeFunctionsDefinedInThisFileReadonly

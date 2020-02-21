@@ -136,34 +136,23 @@ function DeclareBaHaMASGlobalVariables()
     declare -gA BHMAS_startConfigurationGlobalPath=()
 
     #Mutually exclusive options variables
-    BHMAS_submitOption='FALSE'
-    BHMAS_submitonlyOption='FALSE'
-    BHMAS_thermalizeOption='FALSE'
-    BHMAS_continueOption='FALSE'
+    BHMAS_executionMode='mode:default'
+
+    #Values of mutually exclusive and secondary options
     BHMAS_trajectoryNumberUpToWhichToContinue=0
-    BHMAS_continueThermalizationOption='FALSE'
-    BHMAS_jobstatusOption='FALSE'
     BHMAS_jobstatusUser="$(whoami)"
     BHMAS_jobstatusAll='FALSE'
     BHMAS_jobstatusLocal='FALSE'
-    BHMAS_liststatusOption='FALSE'
     BHMAS_liststatusMeasureTimeOption='TRUE'
     BHMAS_liststatusShowOnlyQueuedOption='FALSE'
-    BHMAS_accRateReportOption='FALSE'
     BHMAS_accRateReportInterval=1000
-    BHMAS_cleanOutputFilesOption='FALSE'
     BHMAS_cleanAllOutputFiles='FALSE'
-    BHMAS_completeBetasFileOption='FALSE'
     BHMAS_numberOfChainsToBeInTheBetasFile=4
-    BHMAS_uncommentBetasOption='FALSE'
-    BHMAS_commentBetasOption='FALSE'
     BHMAS_betasWithSeedToBeToggled=()
     BHMAS_betasToBeToggled=()
-    BHMAS_invertConfigurationsOption='FALSE'
     readonly BHMAS_inversionSrunCommandsFilename="srunCommandsFileForInversions"
     readonly BHMAS_correlatorDirection=0
     readonly BHMAS_numberOfSourcesForCorrelators=8
-    BHMAS_databaseOption='FALSE'
     BHMAS_optionsToBePassedToDatabase=()
 
     #Variables for output color
@@ -209,10 +198,27 @@ function DeclareBetaFoldersPathsAsGlobalVariables()
     readonly BHMAS_runDirWithBetaFolders="$BHMAS_runDiskGlobalPath/$BHMAS_projectSubpath$BHMAS_parametersPath"
 }
 
+function DeclareAllGlobalVariables()
+{
+    if IsBaHaMASRunInSetupMode; then
+        return 0
+    else
+        if ! IsTestModeOn && [[ ! -f "${BHMAS_userSetupFile}" ]]; then
+            if WasAnyOfTheseOptionsGivenToBaHaMAS '-h' '--help'; then
+                #Make a fake BaHaMAS setup here to treat this corner case
+                function DeclareOutputRelatedGlobalVariables() { BHMAS_coloredOutput='FALSE'; }
+                function DeclareUserDefinedGlobalVariables() { :; }
+            else
+                Internal "Global variable declaration mechanism should not be hit in this scenario!"
+            fi
+        fi
+    fi
+    DeclareOutputRelatedGlobalVariables
+    #Here be more friendly with user (no unbound errors, she/he could type wrong)
+    set +u; DeclareUserDefinedGlobalVariables; set -u
+    DeclarePathRelatedGlobalVariables
+    DeclareBaHaMASGlobalVariables
+}
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         DeclarePathRelatedGlobalVariables\
-         DeclareBaHaMASGlobalVariables\
-         DeclareBetaFoldersPathsAsGlobalVariables
+
+MakeFunctionsDefinedInThisFileReadonly

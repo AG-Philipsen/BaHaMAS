@@ -40,15 +40,15 @@ function __static__ReadVariablesFromTemplateFile()
 function __static__FillInVariablesFromMaybeExistentUserSetup()
 {
     local variable unableToRecover occurences
-    if [ -f "$filenameUserSetup" ]; then
-        BHMAS_coloredOutput=( $(sed -n "s/^[^#].*BHMAS_coloredOutput=\(.*\)/\1/p" $filenameUserSetup | sed "s/['\"]//g") )
+    if [ -f "$BHMAS_userSetupFile" ]; then
+        BHMAS_coloredOutput=( $(sed -n "s/^[^#].*BHMAS_coloredOutput=\(.*\)/\1/p" $BHMAS_userSetupFile | sed "s/['\"]//g") )
         if [ ${#BHMAS_coloredOutput[@]} -ne 1 ]; then
             BHMAS_coloredOutput='FALSE'
         fi
         unableToRecover=()
         for variable in ${!userVariables[@]}; do
             #TODO: What about several formulations?!
-            occurences=( $(sed -n "s/^[^#].*\(${variable}=.*\)/\1/p" $filenameUserSetup | sed "s/['\"]//g") )
+            occurences=( $(sed -n "s/^[^#].*\(${variable}=.*\)/\1/p" $BHMAS_userSetupFile | sed "s/['\"]//g") )
             if [ ${#occurences[@]} -eq 1 ]; then
                 userVariables[$variable]=${occurences[0]##*=}
             else
@@ -70,19 +70,19 @@ function __static__FillInVariablesFromMaybeExistentUserSetup()
 function __static__ProduceUserVariableFile()
 {
     local backupFile variable
-    backupFile="${filenameUserSetup}_$(date +%H%M%S)"
-    if [ -f $filenameUserSetup ]; then
-        mv $filenameUserSetup $backupFile || exit $BHMAS_fatalBuiltin
+    backupFile="${BHMAS_userSetupFile}_$(date +%H%M%S)"
+    if [ -f $BHMAS_userSetupFile ]; then
+        mv $BHMAS_userSetupFile $backupFile || exit $BHMAS_fatalBuiltin
     fi
-    cp $filenameTemplate $filenameUserSetup || exit $BHMAS_fatalBuiltin
+    cp $filenameTemplate $BHMAS_userSetupFile || exit $BHMAS_fatalBuiltin
     #Delete commented lines from user file
-    sed -i '/^[[:space:]]*[#]/d' $filenameUserSetup
+    sed -i '/^[[:space:]]*[#]/d' $BHMAS_userSetupFile
     #Set variables
     for variable in ${!userVariables[@]}; do
         if [ $(grep -o '\$' <<< "${userVariables[$variable]}" | wc -l) -eq 0 ]; then
-            sed -i "s#\(^.*${variable}=\).*#\1'${userVariables[$variable]}'#g" $filenameUserSetup
+            sed -i "s#\(^.*${variable}=\).*#\1'${userVariables[$variable]}'#g" $BHMAS_userSetupFile
         else
-            sed -i "s#\(^.*${variable}=\).*#\1\"${userVariables[$variable]}\"#g" $filenameUserSetup
+            sed -i "s#\(^.*${variable}=\).*#\1\"${userVariables[$variable]}\"#g" $BHMAS_userSetupFile
         fi
     done
     rm -f $backupFile
@@ -90,10 +90,9 @@ function __static__ProduceUserVariableFile()
 
 function MakeInteractiveSetupAndCreateUserDefinedVariablesFile()
 {
-    local filenameUserSetup filenameTemplate variableNames
+    local filenameTemplate variableNames
     declare -A userVariables=()
-    filenameUserSetup="$1"
-    filenameTemplate="${filenameUserSetup/.bash/_template.bash}"
+    filenameTemplate="${BHMAS_userSetupFile/.bash/_template.bash}"
     variableNames=()
 
     __static__ReadVariablesFromTemplateFile
@@ -113,10 +112,4 @@ function MakeInteractiveSetupAndCreateUserDefinedVariablesFile()
 }
 
 
-#----------------------------------------------------------------#
-#Set functions readonly
-readonly -f\
-         __static__ReadVariablesFromTemplateFile\
-         __static__FillInVariablesFromMaybeExistentUserSetup\
-         __static__ProduceUserVariableFile\
-         MakeInteractiveSetupAndCreateUserDefinedVariablesFile
+MakeFunctionsDefinedInThisFileReadonly

@@ -44,81 +44,36 @@ set -euo pipefail                                                               
 
 #Load auxiliary bash files that will be used
 readonly BHMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"
-readonly BHMAS_filesToBeSourced=( 'SchedulerIndependentCode/AcceptanceRateReport.bash'
-                                  'SchedulerIndependentCode/CheckGlobalVariables.bash'
-                                  'SchedulerIndependentCode/CleanOutputFiles.bash'
-                                  'SchedulerIndependentCode/CommandLineParsers/CommonFunctionality.bash'
-                                  'SchedulerIndependentCode/CommandLineParsers/MainParser.bash'
-                                  'SchedulerIndependentCode/CommandLineParsers/DatabaseParser.bash'
-                                  'SchedulerIndependentCode/Database/ProjectStatisticsDatabase.bash'
-                                  'SchedulerIndependentCode/FindSchedulerInUse.bash'
-                                  'SchedulerIndependentCode/FindStartingConfiguration.bash'
-                                  'SchedulerIndependentCode/GlobalVariables.bash'
-                                  'SchedulerIndependentCode/OperationsOnBetasFile.bash'
-                                  'SchedulerIndependentCode/OutputFunctionality.bash'
-                                  'SchedulerIndependentCode/PathManagementFunctionality.bash'
-                                  'SchedulerIndependentCode/ReportOnProblematicBetas.bash'
-                                  'SchedulerIndependentCode/SchedulerSpecificFunctionsCall.bash'
-                                  'SchedulerIndependentCode/Setup/Setup.bash'
-                                  'SchedulerIndependentCode/SystemRequirements.bash'
-                                  'SchedulerIndependentCode/UtilityFunctions.bash' )
-#Source error codes and fail with error hard coded since variable defined in file which is sourced!
-source "${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/ErrorCodes.bash" || exit 64
-for fileToBeSourced in "${BHMAS_filesToBeSourced[@]}"; do
-    source "${BHMAS_repositoryTopLevelPath}/${fileToBeSourced}" || exit $BHMAS_fatalBuiltin
-done
-SourceClusterSpecificCode
+source "${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/SourceCodebaseFiles.bash" "$@"
 
-#User file to be sourced depending on test mode
-if [ -n "${BHMAS_testModeOn:+x}" ] && [ ${BHMAS_testModeOn} = 'TRUE' ]; then
-    source ${BHMAS_repositoryTopLevelPath}/Tests/SetupUserVariables.bash || exit $BHMAS_fatalBuiltin
-    DeclareUserDefinedGlobalVariablesForTests
-    DeclareOutputRelatedGlobalVariables
-else
-    fileToBeSourced="${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/UserSpecificVariables.bash"
-    if ElementInArray '--setup' "$@"; then
-        MakeInteractiveSetupAndCreateUserDefinedVariablesFile "$fileToBeSourced"
-        exit $BHMAS_successExitCode
-    else
-        if [ ! -f "$fileToBeSourced" ]; then
-            BHMAS_coloredOutput='FALSE' #This is needed in cecho but is a user variable! Declare it here manually
-            if [ $# -ne 0 ] && { ElementInArray '--help' "$@" || ElementInArray '-h' "$@"; }; then
-                Warning -N "BaHaMAS was not set up yet, but help was asked, some default values might not be displayed."
-            else
-                Fatal $BHMAS_fatalFileNotFound "BaHaMAS has not been configured, yet! Please, run BaHaMAS with the --setup option to configure it!"
-            fi
-        else
-            source ${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/UserSpecificVariables.bash || exit $BHMAS_fatalBuiltin
-            #Here be more friendly with user (no unbound errors, she/he could type wrong)
-            set +u; DeclareUserDefinedGlobalVariables; set -u
-            DeclareOutputRelatedGlobalVariables
-        fi
-    fi
+DeclareAllGlobalVariables
+
+#If the user asked for the Setup, it has to be done immediately and that's it
+if IsBaHaMASRunInSetupMode; then
+    MakeInteractiveSetupAndCreateUserDefinedVariablesFile
+    exit $BHMAS_successExitCode
 fi
 
-DeclarePathRelatedGlobalVariables
-DeclareBaHaMASGlobalVariables
-
-if [ $# -ne 0 ]; then
-    PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem BHMAS_specifiedCommandLineOptions "$@"
-    PrintHelperAndExitIfUserAskedForIt "${BHMAS_specifiedCommandLineOptions[@]}"
+if [[ $# -ne 0 ]]; then
+    PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem
+    PrintHelperAndExitIfUserAskedForIt
 fi
 
-if ! ElementInArray '--jobstatus' ${BHMAS_specifiedCommandLineOptions[@]+"${BHMAS_specifiedCommandLineOptions[@]}"}; then
+if ! WasAnyOfTheseOptionsGivenToBaHaMAS '--jobstatus'; then
     CheckSystemRequirements
     CheckWilsonStaggeredVariables
     CheckUserDefinedVariablesAndDefineDependentAdditionalVariables
 fi
 
-if [ $# -ne 0 ]; then
+if [[ $# -ne 0 ]]; then
     ParseCommandLineOption "${BHMAS_specifiedCommandLineOptions[@]}"
 fi
 
-if ! ElementInArray '--jobstatus' ${BHMAS_specifiedCommandLineOptions[@]+"${BHMAS_specifiedCommandLineOptions[@]}"}; then
+if ! WasAnyOfTheseOptionsGivenToBaHaMAS '--jobstatus'; then
     CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase
 fi
 
-if [ $BHMAS_databaseOption = 'FALSE' ] && [ $BHMAS_jobstatusOption = 'FALSE' ]; then
+if [[ ${BHMAS_executionMode} != 'mode:database' ]] && [[ ${BHMAS_executionMode} != 'mode:job-status' ]]; then
     CheckSingleOccurrenceInPath $(sed 's/\// /g' <<< "$BHMAS_submitDiskGlobalPath")\
                                 "${BHMAS_nflavourPrefix}${BHMAS_nflavourRegex}"\
                                 "${BHMAS_chempotPrefix}${BHMAS_chempotRegex}"\
@@ -134,117 +89,136 @@ fi
 #  Treat each mutually exclusive option separately, even if some steps are in common. This improves readability!  #
 #-----------------------------------------------------------------------------------------------------------------#
 
-if [ $BHMAS_databaseOption = 'TRUE' ]; then
+case ${BHMAS_executionMode} in
 
-    projectStatisticsDatabase ${BHMAS_optionsToBePassedToDatabase[@]+"${BHMAS_optionsToBePassedToDatabase[@]}"}
+    mode:database )
 
-elif [ $BHMAS_submitonlyOption = 'TRUE' ]; then
+        projectStatisticsDatabase ${BHMAS_optionsToBePassedToDatabase[@]+"${BHMAS_optionsToBePassedToDatabase[@]}"}
+        ;;
 
-    ParseBetasFile
-    FindConfigurationGlobalPathFromWhichToStartTheSimulation #TODO: This should not be needed! Check if it is true!
-    ProcessBetaValuesForSubmitOnly
-    SubmitJobsForValidBetaValues
+    mode:submit-only )
 
-elif [ $BHMAS_submitOption = 'TRUE' ]; then
+        ParseBetasFile
+        FindConfigurationGlobalPathFromWhichToStartTheSimulation #TODO: This should not be needed! Check if it is true!
+        ProcessBetaValuesForSubmitOnly
+        SubmitJobsForValidBetaValues
+        ;;
 
-    ParseBetasFile
-    FindConfigurationGlobalPathFromWhichToStartTheSimulation
-    ProduceInputFileAndJobScriptForEachBeta
-    SubmitJobsForValidBetaValues
+    mode:submit )
 
-elif [ $BHMAS_thermalizeOption = 'TRUE' ] || [ $BHMAS_continueThermalizationOption = 'TRUE' ]; then
+        ParseBetasFile
+        FindConfigurationGlobalPathFromWhichToStartTheSimulation
+        ProduceInputFileAndJobScriptForEachBeta
+        SubmitJobsForValidBetaValues
+        ;;
 
-    if [ $BHMAS_useMultipleChains = 'FALSE' ]; then
-        if [ $BHMAS_thermalizeOption = 'TRUE' ] || [ $BHMAS_continueThermalizationOption = 'TRUE' ]; then
+    mode:thermalize | mode:continue-thermalization )
+
+        if [[ $BHMAS_useMultipleChains = 'FALSE' ]]; then
             Fatal $BHMAS_fatalCommandLine "Options " emph "--thermalize" " and " emph "--continueThermalization"\
                   " implemented " emph "only not" " combined not with " emph "--doNotUseMultipleChains" " option!"
         fi
-    fi
-    #Here we fix the beta postfix just looking for thermalized conf from hot at the actual parameters (no matter at which beta);
-    #if at least one configuration thermalized from hot is present, it means the thermalization has to be done from conf (the
-    #correct beta to be used is selected then later in the script ---> see where the array BHMAS_startConfigurationGlobalPath is filled
-    #
-    # TODO: If a thermalization from hot is finished but one other crashed and one wishes to resume it, the postfix should be
-    #       from Hot but it is from conf since in $BHMAS_thermConfsGlobalPath a conf from hot is found. Think about how to fix this.
-    if [ $(ls $BHMAS_thermConfsGlobalPath | grep "${BHMAS_configurationPrefix}${BHMAS_parametersString}_${BHMAS_betaPrefix}${BHMAS_betaRegex}_${BHMAS_seedPrefix}${BHMAS_seedRegex}_fromHot[[:digit:]]\+.*" | wc -l) -eq 0 ]; then
-        BHMAS_betaPostfix="_thermalizeFromHot"
-    else
-        BHMAS_betaPostfix="_thermalizeFromConf"
-    fi
-    if [ $BHMAS_measurePbp = 'TRUE' ]; then
-        cecho ly B "\n Measurement of PBP switched off during thermalization!"
-        BHMAS_measurePbp='FALSE'
-    fi
-    ParseBetasFile
-    if [ $BHMAS_thermalizeOption = 'TRUE' ]; then
+        #Here we fix the beta postfix just looking for thermalized conf from hot at the actual parameters (no matter at which beta);
+        #if at least one configuration thermalized from hot is present, it means the thermalization has to be done from conf (the
+        #correct beta to be used is selected then later in the script ---> see where the array BHMAS_startConfigurationGlobalPath is filled
+        #
+        # TODO: If a thermalization from hot is finished but one other crashed and one wishes to resume it, the postfix should be
+        #       from Hot but it is from conf since in $BHMAS_thermConfsGlobalPath a conf from hot is found. Think about how to fix this.
+        if [[ $(ls $BHMAS_thermConfsGlobalPath | grep "${BHMAS_configurationPrefix}${BHMAS_parametersString}_${BHMAS_betaPrefix}${BHMAS_betaRegex}_${BHMAS_seedPrefix}${BHMAS_seedRegex}_fromHot[[:digit:]]\+.*" | wc -l) -eq 0 ]]; then
+            BHMAS_betaPostfix="_thermalizeFromHot"
+        else
+            BHMAS_betaPostfix="_thermalizeFromConf"
+        fi
+        if [[ $BHMAS_measurePbp = 'TRUE' ]]; then
+            cecho ly B "\n Measurement of PBP switched off during thermalization!"
+            BHMAS_measurePbp='FALSE'
+        fi
+        ParseBetasFile
+        if [[ ${BHMAS_executionMode} = 'mode:thermalize' ]]; then
+            FindConfigurationGlobalPathFromWhichToStartTheSimulation
+            ProduceInputFileAndJobScriptForEachBeta
+            AskUser "Check if everything is fine. Would you like to submit the jobs?"
+            if UserSaidNo; then
+                cecho lr "\n No job will be submitted!\n"
+                exit $BHMAS_successExitCode
+            fi
+        elif [[ ${BHMAS_executionMode} = 'mode:continue-thermalization' ]]; then
+            ProcessBetaValuesForContinue
+        fi
+        SubmitJobsForValidBetaValues
+        ;;
+
+    mode:continue )
+
+        ParseBetasFile
+        ProcessBetaValuesForContinue
+        SubmitJobsForValidBetaValues
+        ;;
+
+    mode:job-status )
+
+        ListJobsStatus
+        ;;
+
+    mode:simulation-status )
+
+        ListSimulationsStatus
+        ;;
+
+    mode:acceptance-rate-report )
+
+        ParseBetasFile
+        AcceptanceRateReport
+        ;;
+
+    mode:clean-output-files )
+
+        if [[ $BHMAS_cleanAllOutputFiles = 'TRUE' ]]; then
+            BHMAS_betaValues=( $( ls $BHMAS_runDirWithBetaFolders | grep "^${BHMAS_betaPrefix}${BHMAS_betaRegex}" | awk '{print substr($1,2)}') )
+        else
+            ParseBetasFile
+        fi
+        CleanOutputFiles
+        ;;
+
+    mode:complete-betas-file )
+
+        CompleteBetasFile
+        ;;&
+
+    mode:uncomment-betas )
+
+        UncommentEntriesInBetasFile
+        ;;&
+
+    mode:comment-betas )
+
+        CommentEntriesInBetasFile
+        ;;&
+
+    mode:complete-betas-file | mode:comment-betas | mode:uncomment-betas )
+        less "${BHMAS_betasFilename}"
+        ;;
+
+    mode:invert-configurations )
+
+        ParseBetasFile
+        ProcessBetaValuesForInversion
+        SubmitJobsForValidBetaValues
+        ;;
+
+    mode:default )
+
+        ParseBetasFile
         FindConfigurationGlobalPathFromWhichToStartTheSimulation
         ProduceInputFileAndJobScriptForEachBeta
-        AskUser "Check if everything is fine. Would you like to submit the jobs?"
-        if UserSaidNo; then
-            cecho lr "\n No job will be submitted!\n"
-            exit $BHMAS_successExitCode
-        fi
-    elif [ $BHMAS_continueThermalizationOption = 'TRUE' ]; then
-        ProcessBetaValuesForContinue
-    fi
-    SubmitJobsForValidBetaValues
+        ;;
 
-elif [ $BHMAS_continueOption = 'TRUE' ]; then
+    * )
+        Internal "Unknown execution mode \"${BHMAS_executionMode}\" in main file."
+        ;;
 
-    ParseBetasFile
-    ProcessBetaValuesForContinue
-    SubmitJobsForValidBetaValues
-
-elif [ $BHMAS_jobstatusOption = 'TRUE' ]; then
-
-    ListJobsStatus
-
-elif [ $BHMAS_liststatusOption = 'TRUE' ]; then
-
-    ListSimulationsStatus
-
-elif [ $BHMAS_accRateReportOption = 'TRUE' ]; then
-
-    ParseBetasFile
-    AcceptanceRateReport
-
-elif [ $BHMAS_cleanOutputFilesOption = 'TRUE' ]; then
-
-    if [ $BHMAS_cleanAllOutputFiles = 'TRUE' ]; then
-        BHMAS_betaValues=( $( ls $BHMAS_runDirWithBetaFolders | grep "^${BHMAS_betaPrefix}${BHMAS_betaRegex}" | awk '{print substr($1,2)}') )
-    else
-        ParseBetasFile
-    fi
-    CleanOutputFiles
-
-elif [ $BHMAS_completeBetasFileOption = 'TRUE' ]; then
-
-    CompleteBetasFile
-    less "$BHMAS_betasFilename"
-
-elif [ $BHMAS_uncommentBetasOption = 'TRUE' ]; then
-
-    UncommentEntriesInBetasFile
-    less "$BHMAS_betasFilename"
-
-elif [ $BHMAS_commentBetasOption = 'TRUE' ]; then
-
-    CommentEntriesInBetasFile
-    less "$BHMAS_betasFilename"
-
-elif [ $BHMAS_invertConfigurationsOption = 'TRUE' ]; then
-
-    ParseBetasFile
-    ProcessBetaValuesForInversion
-    SubmitJobsForValidBetaValues
-
-else
-
-    ParseBetasFile
-    FindConfigurationGlobalPathFromWhichToStartTheSimulation
-    ProduceInputFileAndJobScriptForEachBeta
-
-fi
+esac
 
 #------------------------------------------------------------------------------------------------------------------------------#
 # Report on eventual problems
