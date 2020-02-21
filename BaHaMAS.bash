@@ -54,7 +54,7 @@ if IsBaHaMASRunInSetupMode; then
     exit $BHMAS_successExitCode
 fi
 
-if [ $# -ne 0 ]; then
+if [[ $# -ne 0 ]]; then
     PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem
     PrintHelperAndExitIfUserAskedForIt
 fi
@@ -65,7 +65,7 @@ if ! WasAnyOfTheseOptionsGivenToBaHaMAS '--jobstatus'; then
     CheckUserDefinedVariablesAndDefineDependentAdditionalVariables
 fi
 
-if [ $# -ne 0 ]; then
+if [[ $# -ne 0 ]]; then
     ParseCommandLineOption "${BHMAS_specifiedCommandLineOptions[@]}"
 fi
 
@@ -73,7 +73,7 @@ if ! WasAnyOfTheseOptionsGivenToBaHaMAS '--jobstatus'; then
     CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase
 fi
 
-if [ ${BHMAS_executionMode} != 'mode:database' ] && [ ${BHMAS_executionMode} != 'mode:job-status' ]; then
+if [[ ${BHMAS_executionMode} != 'mode:database' ]] && [[ ${BHMAS_executionMode} != 'mode:job-status' ]]; then
     CheckSingleOccurrenceInPath $(sed 's/\// /g' <<< "$BHMAS_submitDiskGlobalPath")\
                                 "${BHMAS_nflavourPrefix}${BHMAS_nflavourRegex}"\
                                 "${BHMAS_chempotPrefix}${BHMAS_chempotRegex}"\
@@ -114,7 +114,7 @@ case ${BHMAS_executionMode} in
 
     mode:thermalize | mode:continue-thermalization )
 
-        if [ $BHMAS_useMultipleChains = 'FALSE' ]; then
+        if [[ $BHMAS_useMultipleChains = 'FALSE' ]]; then
             Fatal $BHMAS_fatalCommandLine "Options " emph "--thermalize" " and " emph "--continueThermalization"\
                   " implemented " emph "only not" " combined not with " emph "--doNotUseMultipleChains" " option!"
         fi
@@ -124,17 +124,17 @@ case ${BHMAS_executionMode} in
         #
         # TODO: If a thermalization from hot is finished but one other crashed and one wishes to resume it, the postfix should be
         #       from Hot but it is from conf since in $BHMAS_thermConfsGlobalPath a conf from hot is found. Think about how to fix this.
-        if [ $(ls $BHMAS_thermConfsGlobalPath | grep "${BHMAS_configurationPrefix}${BHMAS_parametersString}_${BHMAS_betaPrefix}${BHMAS_betaRegex}_${BHMAS_seedPrefix}${BHMAS_seedRegex}_fromHot[[:digit:]]\+.*" | wc -l) -eq 0 ]; then
+        if [[ $(ls $BHMAS_thermConfsGlobalPath | grep "${BHMAS_configurationPrefix}${BHMAS_parametersString}_${BHMAS_betaPrefix}${BHMAS_betaRegex}_${BHMAS_seedPrefix}${BHMAS_seedRegex}_fromHot[[:digit:]]\+.*" | wc -l) -eq 0 ]]; then
             BHMAS_betaPostfix="_thermalizeFromHot"
         else
             BHMAS_betaPostfix="_thermalizeFromConf"
         fi
-        if [ $BHMAS_measurePbp = 'TRUE' ]; then
+        if [[ $BHMAS_measurePbp = 'TRUE' ]]; then
             cecho ly B "\n Measurement of PBP switched off during thermalization!"
             BHMAS_measurePbp='FALSE'
         fi
         ParseBetasFile
-        if [ ${BHMAS_executionMode} = 'mode:thermalize' ]; then
+        if [[ ${BHMAS_executionMode} = 'mode:thermalize' ]]; then
             FindConfigurationGlobalPathFromWhichToStartTheSimulation
             ProduceInputFileAndJobScriptForEachBeta
             AskUser "Check if everything is fine. Would you like to submit the jobs?"
@@ -142,7 +142,7 @@ case ${BHMAS_executionMode} in
                 cecho lr "\n No job will be submitted!\n"
                 exit $BHMAS_successExitCode
             fi
-        elif [ ${BHMAS_executionMode} = 'mode:continue-thermalization' ]; then
+        elif [[ ${BHMAS_executionMode} = 'mode:continue-thermalization' ]]; then
             ProcessBetaValuesForContinue
         fi
         SubmitJobsForValidBetaValues
@@ -173,7 +173,7 @@ case ${BHMAS_executionMode} in
 
     mode:clean-output-files )
 
-        if [ $BHMAS_cleanAllOutputFiles = 'TRUE' ]; then
+        if [[ $BHMAS_cleanAllOutputFiles = 'TRUE' ]]; then
             BHMAS_betaValues=( $( ls $BHMAS_runDirWithBetaFolders | grep "^${BHMAS_betaPrefix}${BHMAS_betaRegex}" | awk '{print substr($1,2)}') )
         else
             ParseBetasFile
