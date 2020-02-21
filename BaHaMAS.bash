@@ -110,10 +110,8 @@ elif [ ${BHMAS_executionMode} = 'mode:submit' ]; then
 elif [ ${BHMAS_executionMode} = 'mode:thermalize' ] || [ ${BHMAS_executionMode} = 'mode:continue-thermalization' ]; then
 
     if [ $BHMAS_useMultipleChains = 'FALSE' ]; then
-        if [ $BHMAS_thermalizeOption = 'TRUE' ] || [ $BHMAS_continueThermalizationOption = 'TRUE' ]; then
-            Fatal $BHMAS_fatalCommandLine "Options " emph "--thermalize" " and " emph "--continueThermalization"\
-                  " implemented " emph "only not" " combined not with " emph "--doNotUseMultipleChains" " option!"
-        fi
+        Fatal $BHMAS_fatalCommandLine "Options " emph "--thermalize" " and " emph "--continueThermalization"\
+              " implemented " emph "only not" " combined not with " emph "--doNotUseMultipleChains" " option!"
     fi
     #Here we fix the beta postfix just looking for thermalized conf from hot at the actual parameters (no matter at which beta);
     #if at least one configuration thermalized from hot is present, it means the thermalization has to be done from conf (the
