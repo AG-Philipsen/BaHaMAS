@@ -356,7 +356,7 @@ function __static__HandleMeasurementsInInputFile()
     #
     #
     local optionsToBeAddedOrModified numberOfTrajectoriesAlreadyProduced
-    if ElementInArray '-m' "${BHMAS_specifiedCommandLineOptions[@]}" || ElementInArray '--measurements' "${BHMAS_specifiedCommandLineOptions[@]}"; then
+    if WasAnyOfTheseOptionsGivenToBaHaMAS '-m' '--measurements'; then
         optionsToBeAddedOrModified="measurements=$BHMAS_numberOfTrajectories"
     elif [ $BHMAS_trajectoryNumberUpToWhichToContinue -ne 0 ]; then
         __static__FindAndSetNumberOfTrajectoriesAlreadyProduced || { __static__RestoreOriginalInputFile && return 1; }

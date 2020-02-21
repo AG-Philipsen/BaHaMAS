@@ -128,9 +128,9 @@ function PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem()
 
 function PrintHelperAndExitIfUserAskedForIt()
 {
-    if ElementInArray '--help' "${BHMAS_specifiedCommandLineOptions[@]}"; then
+    if WasAnyOfTheseOptionsGivenToBaHaMAS '--help'; then
         PrintMainHelper; exit $BHMAS_successExitCode
-    elif ElementInArray '--helpDatabase' "${BHMAS_specifiedCommandLineOptions[@]}"; then
+    elif WasAnyOfTheseOptionsGivenToBaHaMAS '--helpDatabase'; then
         PrintDatabaseHelper; exit $BHMAS_successExitCode
     else
         return 0

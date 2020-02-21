@@ -59,7 +59,7 @@ if [ $# -ne 0 ]; then
     PrintHelperAndExitIfUserAskedForIt
 fi
 
-if ! ElementInArray '--jobstatus' ${BHMAS_specifiedCommandLineOptions[@]+"${BHMAS_specifiedCommandLineOptions[@]}"}; then
+if ! WasAnyOfTheseOptionsGivenToBaHaMAS '--jobstatus'; then
     CheckSystemRequirements
     CheckWilsonStaggeredVariables
     CheckUserDefinedVariablesAndDefineDependentAdditionalVariables
@@ -69,7 +69,7 @@ if [ $# -ne 0 ]; then
     ParseCommandLineOption "${BHMAS_specifiedCommandLineOptions[@]}"
 fi
 
-if ! ElementInArray '--jobstatus' ${BHMAS_specifiedCommandLineOptions[@]+"${BHMAS_specifiedCommandLineOptions[@]}"}; then
+if ! WasAnyOfTheseOptionsGivenToBaHaMAS '--jobstatus'; then
     CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase
 fi
 
