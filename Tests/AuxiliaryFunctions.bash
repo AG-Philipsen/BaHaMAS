@@ -22,12 +22,12 @@ function CheckTestEnvironment()
     local name postfix
     postfix="$(date +%H%M%S)"
     for name in "${listOfAuxiliaryFilesAndFolders[@]}"; do
-        if [ "$(basename $name)" = 'Tests.log' ]; then
+        if [[ "$(basename ${name})" = 'Tests.log' ]]; then
             continue
         fi
-        if [ "$(find $(pwd) -path "$name")" = "$name" ]; then
-            cecho ly "\n " B U "WARNING" uU ": " uB "Found " emph "$name" ", renaming it!"
-            mv "$name" "${name}_${postfix}"
+        if [[ "$(find $(pwd) -path "${name}")" = "${name}" ]]; then
+            cecho ly "\n " B U "WARNING" uU ": " uB "Found " emph "${name}" ", renaming it!"
+            mv "${name}" "${name}_${postfix}"
         fi
     done
 }
@@ -35,7 +35,7 @@ function CheckTestEnvironment()
 
 function __static__CreateParametersFolders()
 {
-    mkdir -p "${testFolder}${testParametersPath}" || exit $BHMAS_fatalBuiltin
+    mkdir -p "${testFolder}${testParametersPath}" || exit ${BHMAS_fatalBuiltin}
 }
 function __static__CreateRationalApproxFolderWithFiles()
 {
@@ -47,30 +47,30 @@ function __static__CreateRationalApproxFolderWithFiles()
 }
 function __static__CreateBetaFolder()
 {
-    mkdir "${testFolder}${testParametersPath}/${betaFolder}" || exit $BHMAS_fatalBuiltin
+    mkdir "${testFolder}${testParametersPath}/${betaFolder}" || exit ${BHMAS_fatalBuiltin}
 }
 function __static__CreateFilesInBetaFolder()
 {
     local file
     for file in "$@"; do
-        touch "${testFolder}${testParametersPath}/${betaFolder}/${file}" || exit $BHMAS_fatalBuiltin
+        touch "${testFolder}${testParametersPath}/${betaFolder}/${file}" || exit ${BHMAS_fatalBuiltin}
     done
 }
 function __static__AddStringToFirstLineBetasFile()
 {
     local line
     line="$(head -n 1 "${testFolder}${testParametersPath}/betas")"
-    cecho -n -d "$line   $1" > "${testFolder}${testParametersPath}/betas" || exit $BHMAS_fatalBuiltin
+    cecho -n -d "${line}   $1" > "${testFolder}${testParametersPath}/betas" || exit ${BHMAS_fatalBuiltin}
 }
 function __static__CopyAuxiliaryFileAtBetaFolderLevel()
 {
-    cp "${BHMAS_testsFolderAuxFiles}/$1" "${testFolder}${testParametersPath}/$2" || exit $BHMAS_fatalBuiltin
+    cp "${BHMAS_testsFolderAuxFiles}/$1" "${testFolder}${testParametersPath}/$2" || exit ${BHMAS_fatalBuiltin}
 }
 function __static__CopyAuxiliaryFilesToBetaFolder()
 {
     local file
     for file in "$@"; do
-        cp "${BHMAS_testsFolderAuxFiles}/${file}" "${testFolder}${testParametersPath}/${betaFolder}" || exit $BHMAS_fatalBuiltin
+        cp "${BHMAS_testsFolderAuxFiles}/${file}" "${testFolder}${testParametersPath}/${betaFolder}" || exit ${BHMAS_fatalBuiltin}
     done
 }
 function __static__CompleteInputFileWithCorrectPaths()
@@ -79,15 +79,15 @@ function __static__CompleteInputFileWithCorrectPaths()
     printf '%s\n'\
            "rationalApproxFileHB=${testFolder}/Rational_Approximations/Nf2_Approx_Heatbath"\
            "rationalApproxFileMD=${testFolder}/Rational_Approximations/Nf2_Approx_MD"\
-           "rationalApproxFileMetropolis=${testFolder}/Rational_Approximations/Nf2_Approx_Metropolis"  >> "${testFolder}${testParametersPath}/${betaFolder}/fakeInput" || exit $BHMAS_fatalBuiltin
+           "rationalApproxFileMetropolis=${testFolder}/Rational_Approximations/Nf2_Approx_Metropolis"  >> "${testFolder}${testParametersPath}/${betaFolder}/fakeInput" || exit ${BHMAS_fatalBuiltin}
 }
 function __static__CreateThermalizedConfigurationFolder()
 {
-    mkdir "${testFolder}/Thermalized_Configurations" || exit $BHMAS_fatalBuiltin
+    mkdir "${testFolder}/Thermalized_Configurations" || exit ${BHMAS_fatalBuiltin}
 }
 function __static__CreateThermalizedConfiguration()
 {
-    touch "${testFolder}/Thermalized_Configurations/conf.${testParametersString}_${betaFolder%_*}_$1" || exit $BHMAS_fatalBuiltin
+    touch "${testFolder}/Thermalized_Configurations/conf.${testParametersString}_${betaFolder%_*}_$1" || exit ${BHMAS_fatalBuiltin}
 }
 
 function MakeTestPreliminaryOperations()
@@ -95,7 +95,7 @@ function MakeTestPreliminaryOperations()
     local trashFolderName file folder
     #Always create params folders and go at betafolder level
     __static__CreateParametersFolders
-    cd "${testFolder}${testParametersPath}" || exit $BHMAS_fatalBuiltin
+    cd "${testFolder}${testParametersPath}" || exit ${BHMAS_fatalBuiltin}
     #Always use completed file and then in case overwrite
     cp "${BHMAS_testsFolderAuxFiles}/fakeBetas" "${testFolder}${testParametersPath}/betas"
 
@@ -114,7 +114,7 @@ function MakeTestPreliminaryOperations()
             __static__CreateThermalizedConfiguration "fromConf4000"
             __static__CreateBetaFolder
             __static__CopyAuxiliaryFilesToBetaFolder "fakeInput"
-            mkdir "Jobscripts_TEST" || exit $BHMAS_fatalBuiltin
+            mkdir "Jobscripts_TEST" || exit ${BHMAS_fatalBuiltin}
             printf "NOT EMPTY\n" > "${testFolder}${testParametersPath}/Jobscripts_TEST/fakePrefix_${testParametersString}__${betaFolder%_*}"
             ;;
         thermalize* )
@@ -145,7 +145,7 @@ function MakeTestPreliminaryOperations()
             esac
             if [[ $1 =~ therm ]]; then
                 __static__CreateThermalizedConfigurationFolder
-                mv "$betaFolder" "${betaFolder/continueWithNewChain/thermalizeFromHot}"
+                mv "${betaFolder}" "${betaFolder/continueWithNewChain/thermalizeFromHot}"
             fi
             ;;
         liststatus* )
@@ -203,10 +203,10 @@ function RunBaHaMASInTestMode()
 {
     local testName
     testName=$1; shift
-    printf "\n===============================\n" >> $logFile
-    printf " $(date)\n" >> $logFile
-    printf "===============================\n" >> $logFile
-    printf "Running test \"$testName\":\n    ${BHMAS_command} $@\n\n" >> $logFile
+    printf "\n===============================\n" >> ${logFile}
+    printf " $(date)\n" >> ${logFile}
+    printf "===============================\n" >> ${logFile}
+    printf "Running test \"${testName}\":\n    ${BHMAS_command} $@\n\n" >> ${logFile}
     # NOTE: Here we run BaHaMAS in subshell to exclude any potential variables conflict.
     #       Moreover we activate the test mode defining a variable before running it and
     #       we inhibit some commands in order to avoid job summission. Observe also that
@@ -216,10 +216,10 @@ function RunBaHaMASInTestMode()
     #       and it has to be taken in mind in future! Observe also that we want to avoid
     #       any interactve Y/N question of BaHaMAS and we do it answering always Y.
     (
-        InhibitBaHaMASCommands "$testName"
-        BHMAS_testModeOn='TRUE' ${BHMAS_command} $@ < <(yes 'Y') >> $logFile 2>&1
+        InhibitBaHaMASCommands "${testName}"
+        BHMAS_testModeOn='TRUE' ${BHMAS_command} $@ < <(yes 'Y') >> ${logFile} 2>&1
     )
-    if [ $? -eq 0 ]; then
+    if [[ $? -eq 0 ]]; then
         return 0
     else
         return 1
@@ -231,21 +231,21 @@ function RunTest()
     local testName stringTest
     testName=$1; shift
     (( testsRun++ ))
-    if [ $reportLevel -eq 3 ]; then
+    if [[ ${reportLevel} -eq 3 ]]; then
         printf -v stringTest "%-38s" "__${testName}$(cecho -d bb)_"
         stringTest="${stringTest// /.}"
         cecho -n lp "  $(printf '%+2s' ${testsRun})/$(printf '%-2s' ${#testsToBeRun[@]})" lc "${stringTest//_/ }"
     fi
-    RunBaHaMASInTestMode "$testName" "$@"
-    if [ $? -eq 0 ]; then
+    RunBaHaMASInTestMode "${testName}" "$@"
+    if [[ $? -eq 0 ]]; then
         (( testsPassed++ ))
-        if [ $reportLevel -eq 3 ]; then
+        if [[ ${reportLevel} -eq 3 ]]; then
             cecho lg "  passed"
         fi
     else
         (( testsFailed++ ))
-        whichFailed+=( "$testName" )
-        if [ $reportLevel -eq 3 ]; then
+        whichFailed+=( "${testName}" )
+        if [[ ${reportLevel} -eq 3 ]]; then
             cecho lr "  failed"
         fi
     fi
@@ -257,12 +257,12 @@ function CleanTestsEnvironmentForFollowingTest()
     bigTrash="Trash"
     #Always go to simulation path level and move everything inside a Trash folder
     #which contains in the name also the test name (easy debug in case of failure)
-    cd "$testFolder" || exit $BHMAS_fatalBuiltin
-    mkdir -p "$bigTrash" || exit $BHMAS_fatalBuiltin
-    if [ "$(ls -A)" ]; then
+    cd "${testFolder}" || exit ${BHMAS_fatalBuiltin}
+    mkdir -p "${bigTrash}" || exit ${BHMAS_fatalBuiltin}
+    if [[ "$(ls -A)" ]]; then
         trashFolderName="Trash_$(date +%H%M%S-%3N)_$1"
-        mkdir "${bigTrash}/${trashFolderName}" || exit $BHMAS_fatalBuiltin
-        mv !("$bigTrash") "${bigTrash}/${trashFolderName}/." || exit $BHMAS_fatalBuiltin
+        mkdir "${bigTrash}/${trashFolderName}" || exit ${BHMAS_fatalBuiltin}
+        mv !("${bigTrash}") "${bigTrash}/${trashFolderName}/." || exit ${BHMAS_fatalBuiltin}
     else
         Internal "Folder " dir "$(pwd)" " empty but it should not be the case!"
     fi
@@ -272,27 +272,27 @@ function PrintTestsReport()
 {
     local indentation name percentage
     indentation='          '
-    if [ $reportLevel -ge 1 ]; then
+    if [[ ${reportLevel} -ge 1 ]]; then
         cecho bb "\n${indentation}===============================\n"\
-              lp "${indentation}   Run " emph "$(printf '%2d' $testsRun)" " test(s): "\
-              lg "$(printf '%2d' $testsPassed) passed\n"\
-              lr "${indentation}                   $(printf '%2d' $testsFailed) failed\n"\
+              lp "${indentation}   Run " emph "$(printf '%2d' ${testsRun})" " test(s): "\
+              lg "$(printf '%2d' ${testsPassed}) passed\n"\
+              lr "${indentation}                   $(printf '%2d' ${testsFailed}) failed\n"\
               bb "${indentation}==============================="
     fi
-    if [ $reportLevel -ge 2 ]; then
-        percentage=$(awk '{printf "%3.0f%%%%", 100*$1/$2}' <<< "$testsPassed $testsRun")
-        cecho wg "${indentation}     $percentage of tests passed!"
+    if [[ ${reportLevel} -ge 2 ]]; then
+        percentage=$(awk '{printf "%3.0f%%%%", 100*$1/$2}' <<< "${testsPassed} ${testsRun}")
+        cecho wg "${indentation}     ${percentage} of tests passed!"
         cecho bb "${indentation}==============================="
-        if [ $testsFailed -ne 0 ]; then
+        if [[ ${testsFailed} -ne 0 ]]; then
             cecho lr "${indentation}  The following tests failed:"
             for name in "${whichFailed[@]}"; do
-                cecho lr "${indentation}   - " emph "$name"
+                cecho lr "${indentation}   - " emph "${name}"
             done
             cecho bb "${indentation}==============================="
         fi
     fi
     cecho ''
-    if [ $testsFailed -ne 0 ]; then
+    if [[ ${testsFailed} -ne 0 ]]; then
         cecho lr B " Failures were detected! Not deleting log file!\n"
     else
         cecho lg B " All tests passed!\n"
@@ -302,17 +302,17 @@ function PrintTestsReport()
 function DeleteAuxiliaryFilesAndFolders()
 {
     local name
-    cd "$BHMAS_testsFolder" || exit $BHMAS_fatalBuiltin
-    [ $reportLevel -eq 3 ] && cecho bb " In $(pwd):"
+    cd "${BHMAS_testsFolder}" || exit ${BHMAS_fatalBuiltin}
+    [[ ${reportLevel} -eq 3 ]] && cecho bb " In $(pwd):"
     for name in "${listOfAuxiliaryFilesAndFolders[@]}"; do
-        if [ -d "$name" ]; then
-            [ $reportLevel -eq 3 ] && cecho p " - Removing " dir "$name"
-        elif [ -f "$name" ]; then
-            [ $reportLevel -eq 3 ] && cecho p " - Removing " file "$name"
-        elif ls "$name" 1>/dev/null 2>&1; then
-            cecho lr "   Error in $FUNCNAME: " emph "$name" " neither file or directory, leaving it!"; continue
+        if [[ -d "${name}" ]]; then
+            [[ ${reportLevel} -eq 3 ]] && cecho p " - Removing " dir "${name}"
+        elif [[ -f "${name}" ]]; then
+            [[ ${reportLevel} -eq 3 ]] && cecho p " - Removing " file "${name}"
+        elif ls "${name}" 1>/dev/null 2>&1; then
+            cecho lr "   Error in ${FUNCNAME}: " emph "${name}" " neither file or directory, leaving it!"; continue
         fi
-        [ $(pwd) = "$BHMAS_testsFolder" ] && rm -rf "$name"
+        [[ $(pwd) = "${BHMAS_testsFolder}" ]] && rm -rf "${name}"
     done
     cecho ''
 }

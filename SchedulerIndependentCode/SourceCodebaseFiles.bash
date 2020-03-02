@@ -44,7 +44,7 @@ function SourceCodebaseGeneralFiles()
         'SystemRequirements.bash'
     )
     for fileToBeSourced in "${schedulerIndependentFiles[@]}"; do
-        source "${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/${fileToBeSourced}" || exit $BHMAS_fatalBuiltin
+        source "${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/${fileToBeSourced}" || exit ${BHMAS_fatalBuiltin}
     done
     SourceClusterSpecificCode
 
@@ -52,17 +52,17 @@ function SourceCodebaseGeneralFiles()
     if IsBaHaMASRunInSetupMode; then
         return 0
     elif IsTestModeOn; then
-        source ${BHMAS_repositoryTopLevelPath}/Tests/SetupUserVariables.bash || exit $BHMAS_fatalBuiltin
+        source ${BHMAS_repositoryTopLevelPath}/Tests/SetupUserVariables.bash || exit ${BHMAS_fatalBuiltin}
     else
-        if [ ! -f "${BHMAS_userSetupFile}" ]; then
+        if [[ ! -f "${BHMAS_userSetupFile}" ]]; then
             declare -g BHMAS_coloredOutput='FALSE' #This is needed in cecho but is a user variable! Declare it here manually
             if WasAnyOfTheseOptionsGivenToBaHaMAS '-h' '--help'; then
                 Warning -N "BaHaMAS was not set up yet, but help was asked, some default values might not be displayed."
             else
-                Fatal $BHMAS_fatalFileNotFound "BaHaMAS has not been configured, yet! Please, run BaHaMAS with the --setup option to configure it!"
+                Fatal ${BHMAS_fatalFileNotFound} "BaHaMAS has not been configured, yet! Please, run BaHaMAS with the --setup option to configure it!"
             fi
         else
-            source "${BHMAS_userSetupFile}" || exit $BHMAS_fatalBuiltin
+            source "${BHMAS_userSetupFile}" || exit ${BHMAS_fatalBuiltin}
         fi
     fi
 }

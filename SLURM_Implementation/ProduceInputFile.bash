@@ -19,8 +19,8 @@
 
 function __static__AddToInputFile()
 {
-    while [ $# -ne 0 ]; do
-        printf "%s\n" "$1" >> $inputFileGlobalPath
+    while [[ $# -ne 0 ]]; do
+        printf "%s\n" "$1" >> ${inputFileGlobalPath}
         shift
     done
 }
@@ -31,24 +31,24 @@ function ProduceInputFile_CL2QCD()
     betaValue="$1"
     inputFileGlobalPath="$2"
     numberOfTrajectoriesToBeDone=$3
-    rm -f $inputFileGlobalPath || exit $BHMAS_fatalBuiltin
-    touch $inputFileGlobalPath || exit $BHMAS_fatalBuiltin
-    if [ $(grep -c "[.]" <<< "${BHMAS_mass}") -eq 0 ]; then
+    rm -f ${inputFileGlobalPath} || exit ${BHMAS_fatalBuiltin}
+    touch ${inputFileGlobalPath} || exit ${BHMAS_fatalBuiltin}
+    if [[ $(grep -c "[.]" <<< "${BHMAS_mass}") -eq 0 ]]; then
         massAsNumber="0.${BHMAS_mass}"
     else
         massAsNumber="${BHMAS_mass}"
     fi
 
     #This input file is for CL2QCD only!
-    if [ $BHMAS_wilson = "TRUE" ]; then
+    if [[ ${BHMAS_wilson} = "TRUE" ]]; then
         __static__AddToInputFile "fermionAction=wilson"
-    elif [ $BHMAS_staggered = "TRUE" ]; then
+    elif [[ ${BHMAS_staggered} = "TRUE" ]]; then
         __static__AddToInputFile \
             "fermionAction=rooted_stagg"\
-            "nTastes=$BHMAS_nflavour"
-        if [ $BHMAS_useRationalApproxFiles = "TRUE" ]; then
+            "nTastes=${BHMAS_nflavour}"
+        if [[ ${BHMAS_useRationalApproxFiles} = "TRUE" ]]; then
             __static__AddToInputFile "readRationalApproxFromFile=1"
-            if [ $BHMAS_numberOfPseudofermions -eq 1 ]; then
+            if [[ ${BHMAS_numberOfPseudofermions} -eq 1 ]]; then
                 __static__AddToInputFile\
                     "rationalApproxFileHB=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_${BHMAS_approxHeatbathFilename}"\
                     "rationalApproxFileMD=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_${BHMAS_approxMDFilename}"\
@@ -71,31 +71,31 @@ function ProduceInputFile_CL2QCD()
         "thetaFermionSpatial=0"\
         "thetaFermionTemporal=1"\
         "useEO=1"
-    if [ $BHMAS_chempot = "0" ]; then
+    if [[ ${BHMAS_chempot} = "0" ]]; then
         __static__AddToInputFile "useChemicalPotentialIm=0"
     else
         __static__AddToInputFile "useChemicalPotentialIm=1"
-        if [ $BHMAS_chempot = "PiT" ]; then
+        if [[ ${BHMAS_chempot} = "PiT" ]]; then
             __static__AddToInputFile "chemicalPotentialIm=$(awk -v ntime="${BHMAS_ntime}" 'BEGIN{printf "%.15f\n", atan2(0, -1)/ntime}')"
         else
-            Fatal $BHMAS_fatalValueError "Unknown value " emph "$BHMAS_chempot" " of imaginary chemical potential for input file!"
+            Fatal ${BHMAS_fatalValueError} "Unknown value " emph "${BHMAS_chempot}" " of imaginary chemical potential for input file!"
         fi
     fi
     #Information about solver and measurements
-    if [ $BHMAS_wilson = "TRUE" ]; then
+    if [[ ${BHMAS_wilson} = "TRUE" ]]; then
         __static__AddToInputFile "solver=cg"
     fi
     __static__AddToInputFile \
         "solverMaxIterations=15000"\
         "measureCorrelators=0"
-    if [ $BHMAS_measurePbp = "TRUE" ]; then
+    if [[ ${BHMAS_measurePbp} = "TRUE" ]]; then
         __static__AddToInputFile \
             "measurePbp=1"\
             "sourceType=volume"\
             "sourceContent=gaussian"
-        if [ $BHMAS_wilson = "TRUE" ]; then
+        if [[ ${BHMAS_wilson} = "TRUE" ]]; then
             __static__AddToInputFile "nSources=16"
-        elif [ $BHMAS_staggered = "TRUE" ]; then
+        elif [[ ${BHMAS_staggered} = "TRUE" ]]; then
             __static__AddToInputFile \
                 "nSources=1"\
                 "pbpMeasurements=8"
@@ -105,62 +105,62 @@ function ProduceInputFile_CL2QCD()
             "fermObsPbpPrefix=${BHMAS_outputFilename}"
     fi
     #Information about integrators
-    if [ $BHMAS_wilson = "TRUE" ]; then
+    if [[ ${BHMAS_wilson} = "TRUE" ]]; then
         __static__AddToInputFile \
             "solverRestartEvery=2000"\
             "useKernelMergingFermionMatrix=1"
-        if KeyInArray "$betaValue" BHMAS_massPreconditioningValues; then
+        if KeyInArray "${betaValue}" BHMAS_massPreconditioningValues; then
             __static__AddToInputFile \
                 "solverResiduumCheckEvery=10"\
                 "useMP=1"\
                 "solverMP=cg"\
-                "kappaMP=0.${BHMAS_massPreconditioningValues[$betaValue]#*,}"\
+                "kappaMP=0.${BHMAS_massPreconditioningValues[${betaValue}]#*,}"\
                 "nTimeScales=3"\
                 "integrator2=twomn"\
-                "integrationSteps2=${BHMAS_massPreconditioningValues[$betaValue]%,*}"
+                "integrationSteps2=${BHMAS_massPreconditioningValues[${betaValue}]%,*}"
         else
             __static__AddToInputFile \
-                "solverResiduumCheckEvery=$BHMAS_inverterBlockSize"\
+                "solverResiduumCheckEvery=${BHMAS_inverterBlockSize}"\
                 "nTimeScales=2"
         fi
-    elif [ $BHMAS_staggered = "TRUE" ]; then
+    elif [[ ${BHMAS_staggered} = "TRUE" ]]; then
         __static__AddToInputFile \
-            "solverResiduumCheckEvery=$BHMAS_inverterBlockSize"\
+            "solverResiduumCheckEvery=${BHMAS_inverterBlockSize}"\
             "nTimeScales=2"
     fi
     __static__AddToInputFile \
         "tau=1"\
         "integrator0=twomn"\
         "integrator1=twomn"\
-        "integrationSteps0=${BHMAS_scaleZeroIntegrationSteps[$betaValue]}"\
-        "integrationSteps1=${BHMAS_scaleOneIntegrationSteps[$betaValue]}"\
-        "nSpace=$BHMAS_nspace"\
-        "nTime=$BHMAS_ntime"
-    if [ $BHMAS_wilson = "TRUE" ]; then
+        "integrationSteps0=${BHMAS_scaleZeroIntegrationSteps[${betaValue}]}"\
+        "integrationSteps1=${BHMAS_scaleOneIntegrationSteps[${betaValue}]}"\
+        "nSpace=${BHMAS_nspace}"\
+        "nTime=${BHMAS_ntime}"
+    if [[ ${BHMAS_wilson} = "TRUE" ]]; then
         __static__AddToInputFile \
             "kappa=${massAsNumber}"\
-            "nHmcSteps=$numberOfTrajectoriesToBeDone"
-    elif [ $BHMAS_staggered = "TRUE" ]; then
+            "nHmcSteps=${numberOfTrajectoriesToBeDone}"
+    elif [[ ${BHMAS_staggered} = "TRUE" ]]; then
         __static__AddToInputFile \
             "mass=${massAsNumber}"\
-            "nRhmcSteps=$numberOfTrajectoriesToBeDone"
+            "nRhmcSteps=${numberOfTrajectoriesToBeDone}"
     fi
     __static__AddToInputFile \
-        "createCheckpointEvery=$BHMAS_checkpointFrequency"\
-        "overwriteTemporaryCheckpointEvery=$BHMAS_savepointFrequency"
-    if [ ${BHMAS_startConfigurationGlobalPath[$betaValue]} == "notFoundHenceStartFromHot" ]; then
+        "createCheckpointEvery=${BHMAS_checkpointFrequency}"\
+        "overwriteTemporaryCheckpointEvery=${BHMAS_savepointFrequency}"
+    if [[ ${BHMAS_startConfigurationGlobalPath[${betaValue}]} == "notFoundHenceStartFromHot" ]]; then
         __static__AddToInputFile "startCondition=hot"
     else
         __static__AddToInputFile \
             "startCondition=continue"\
-            "initialConf=${BHMAS_startConfigurationGlobalPath[$betaValue]}"
+            "initialConf=${BHMAS_startConfigurationGlobalPath[${betaValue}]}"
     fi
-    if [ $BHMAS_useMultipleChains == "TRUE" ]; then
-        local SEED_EXTRACTED_FROM_BETA="$(awk '{split($1, result, "_"); print substr(result[2],2)}' <<< "$betaValue")"
-        if [[ ! $SEED_EXTRACTED_FROM_BETA =~ ^[[:digit:]]{4}$ ]] || [[ $SEED_EXTRACTED_FROM_BETA == "0000" ]]; then
-            Fatal $BHMAS_fatalValueError "Seed " emph "$SEED_EXTRACTED_FROM_BETA" " not allowed to be put in inputfile for CL2QCD!"
+    if [[ ${BHMAS_useMultipleChains} == "TRUE" ]]; then
+        local SEED_EXTRACTED_FROM_BETA="$(awk '{split($1, result, "_"); print substr(result[2],2)}' <<< "${betaValue}")"
+        if [[ ! ${SEED_EXTRACTED_FROM_BETA} =~ ^[[:digit:]]{4}$ ]] || [[ ${SEED_EXTRACTED_FROM_BETA} == "0000" ]]; then
+            Fatal ${BHMAS_fatalValueError} "Seed " emph "${SEED_EXTRACTED_FROM_BETA}" " not allowed to be put in inputfile for CL2QCD!"
         else
-            __static__AddToInputFile "hostSeed=$SEED_EXTRACTED_FROM_BETA"
+            __static__AddToInputFile "hostSeed=${SEED_EXTRACTED_FROM_BETA}"
         fi
     fi
 }

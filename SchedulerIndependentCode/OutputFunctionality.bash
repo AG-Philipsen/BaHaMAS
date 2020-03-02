@@ -78,7 +78,7 @@ function __static__SetEmphasizeCodes()
 {
     local code
     for code in "${!colorCodes[@]}"; do
-        emphCodes[$code]=d
+        emphCodes[${code}]=d
     done
     emphCodes[r]=y
     emphCodes[y]=c
@@ -111,21 +111,21 @@ function cecho()
     __static__SetFormatCodes
     __static__SetColorCodes
     __static__SetEmphasizeCodes
-    while [ $# -ne 0 ]; do
+    while [[ $# -ne 0 ]]; do
         case "$1" in
             #Font format
             B | U | uB | uU )
                 format="${formatCodes[$1]}"
-                previousFormat+="$format" ;;
+                previousFormat+="${format}" ;;
             d | bk | r | g | y | b | m | c | gr | dgr | lr | lg | ly | lb | lm | lc | w | bb | bc | wg | yg | p | lp | pk | o | lo )
                 format="${colorCodes[$1]}"
-                previousColor="$1"; previousFormat="$format" ;;
+                previousColor="$1"; previousFormat="${format}" ;;
             #classes of strings to highlight
-            file) format="$fileFormat"; shift; text="$1"; restore='TRUE' ;;
-            dir)  format="$dirsFormat"; shift; text="$1"; restore='TRUE' ;;
+            file) format="${fileFormat}"; shift; text="$1"; restore='TRUE' ;;
+            dir)  format="${dirsFormat}"; shift; text="$1"; restore='TRUE' ;;
             emph)
-                if [ "$previousColor" != '' ]; then
-                    format="${colorCodes[${emphCodes[$previousColor]}]}"
+                if [[ "${previousColor}" != '' ]]; then
+                    format="${colorCodes[${emphCodes[${previousColor}]}]}"
                     shift; text="$1"; restore='TRUE'
                 fi ;;
             #Other options
@@ -134,20 +134,20 @@ function cecho()
             *) text="$1"
         esac
         shift
-        if [ "$format" != '' ]; then
-            [ "$BHMAS_coloredOutput" = 'TRUE' ] && outputString+="$format"
+        if [[ "${format}" != '' ]]; then
+            [[ "${BHMAS_coloredOutput}" = 'TRUE' ]] && outputString+="${format}"
         fi
-        if [ "$text" != '' ]; then
-            outputString+="$text"
-            if [ $restore = 'TRUE' ]; then
-                [ "$BHMAS_coloredOutput" = 'TRUE' ] && outputString+="$previousFormat"
+        if [[ "${text}" != '' ]]; then
+            outputString+="${text}"
+            if [[ ${restore} = 'TRUE' ]]; then
+                [[ "${BHMAS_coloredOutput}" = 'TRUE' ]] && outputString+="${previousFormat}"
             fi
             restore='FALSE'
         fi
         format=''; text='' #To avoid to put them again in outputString
     done
-    outputString+="$defaultFormat$endline"
-    printf "$outputString"
+    outputString+="${defaultFormat}${endline}"
+    printf "${outputString}"
 }
 
 #-------------------------------------------------------------------------------#
@@ -156,7 +156,7 @@ function AskUser()
 {
     local initialEndline
     initialEndline="\n"
-    [ "$1" = '-n' ] && initialEndline='' && shift
+    [[ "$1" = '-n' ]] && initialEndline='' && shift
     cecho -n "${initialEndline}" lc " $1" "  [Y/N]  "
 }
 
@@ -164,9 +164,9 @@ function UserSaidYes()
 {
     local userAnswer
     while read userAnswer; do
-        if [ "$userAnswer" = "Y" ]; then
+        if [[ "${userAnswer}" = "Y" ]]; then
             return 0
-        elif [ "$userAnswer" = "N" ]; then
+        elif [[ "${userAnswer}" = "N" ]]; then
             return 1
         else
             cecho -n ly "\n Please enter " B "Y" uB " (yes) or " B "N" uB " (no): "
@@ -202,7 +202,7 @@ function __static__PrintMessageToScreen()
         shift
     done
     #[ "$1" = '-n' ] && initialEndline='' && shift
-    case "$typeOfMessage" in
+    case "${typeOfMessage}" in
         WARNING )
             messageColor='ly' ;;
         ERROR | FATAL )
@@ -211,20 +211,20 @@ function __static__PrintMessageToScreen()
             messageColor='lo'
             finalString='Please contact the developers!' ;;
     esac
-    [ "$1" = '-e' ] && typeOfMessage="${typeOfMessage//?/ }" && shift
-    fullMessage="$(cecho $messageColor "${@//\\n/$'\n' ${typeOfMessage//?/ }  }")"
-    if [ $printMessageLabel = 'TRUE' ]; then
-        cecho "$initialEndline " $messageColor B U "${typeOfMessage}" uU ": " uB "${fullMessage}"
+    [[ "$1" = '-e' ]] && typeOfMessage="${typeOfMessage//?/ }" && shift
+    fullMessage="$(cecho ${messageColor} "${@//\\n/$'\n' ${typeOfMessage//?/ }  }")"
+    if [[ ${printMessageLabel} = 'TRUE' ]]; then
+        cecho "${initialEndline} " ${messageColor} B U "${typeOfMessage}" uU ": " uB "${fullMessage}"
     else
-        cecho "$initialEndline " $messageColor "${typeOfMessage//?/ }  ${fullMessage}"
+        cecho "${initialEndline} " ${messageColor} "${typeOfMessage//?/ }  ${fullMessage}"
     fi
-    if [ "$finalString" != '' ]; then
-        cecho lr "\n ${typeOfMessage//?/ }  $finalString${finalEndline}"
+    if [[ "${finalString}" != '' ]]; then
+        cecho lr "\n ${typeOfMessage//?/ }  ${finalString}${finalEndline}"
     else
         cecho -n "${finalEndline}"
     fi
-    if [ $exitCode -ne 0 ]; then
-        exit $exitCode
+    if [[ ${exitCode} -ne 0 ]]; then
+        exit ${exitCode}
     fi
 }
 
@@ -245,7 +245,7 @@ function Fatal()
 
 function Internal()
 {
-    __static__PrintMessageToScreen 'INTERNAL' "$BHMAS_internal" "$@" 1>&2
+    __static__PrintMessageToScreen 'INTERNAL' "${BHMAS_internal}" "$@" 1>&2
 }
 
 

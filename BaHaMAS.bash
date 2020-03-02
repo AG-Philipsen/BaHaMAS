@@ -51,7 +51,7 @@ DeclareAllGlobalVariables
 #If the user asked for the Setup, it has to be done immediately and that's it
 if IsBaHaMASRunInSetupMode; then
     MakeInteractiveSetupAndCreateUserDefinedVariablesFile
-    exit $BHMAS_successExitCode
+    exit ${BHMAS_successExitCode}
 fi
 
 if [[ $# -ne 0 ]]; then
@@ -74,7 +74,7 @@ if ! WasAnyOfTheseOptionsGivenToBaHaMAS '--jobstatus'; then
 fi
 
 if [[ ${BHMAS_executionMode} != 'mode:database' ]] && [[ ${BHMAS_executionMode} != 'mode:job-status' ]]; then
-    CheckSingleOccurrenceInPath $(sed 's/\// /g' <<< "$BHMAS_submitDiskGlobalPath")\
+    CheckSingleOccurrenceInPath $(sed 's/\// /g' <<< "${BHMAS_submitDiskGlobalPath}")\
                                 "${BHMAS_nflavourPrefix}${BHMAS_nflavourRegex}"\
                                 "${BHMAS_chempotPrefix}${BHMAS_chempotRegex}"\
                                 "${BHMAS_massPrefix}${BHMAS_massRegex}"\
@@ -114,8 +114,8 @@ case ${BHMAS_executionMode} in
 
     mode:thermalize | mode:continue-thermalization )
 
-        if [[ $BHMAS_useMultipleChains = 'FALSE' ]]; then
-            Fatal $BHMAS_fatalCommandLine "Options " emph "--thermalize" " and " emph "--continueThermalization"\
+        if [[ ${BHMAS_useMultipleChains} = 'FALSE' ]]; then
+            Fatal ${BHMAS_fatalCommandLine} "Options " emph "--thermalize" " and " emph "--continueThermalization"\
                   " implemented " emph "only not" " combined not with " emph "--doNotUseMultipleChains" " option!"
         fi
         #Here we fix the beta postfix just looking for thermalized conf from hot at the actual parameters (no matter at which beta);
@@ -123,13 +123,13 @@ case ${BHMAS_executionMode} in
         #correct beta to be used is selected then later in the script ---> see where the array BHMAS_startConfigurationGlobalPath is filled
         #
         # TODO: If a thermalization from hot is finished but one other crashed and one wishes to resume it, the postfix should be
-        #       from Hot but it is from conf since in $BHMAS_thermConfsGlobalPath a conf from hot is found. Think about how to fix this.
-        if [[ $(ls $BHMAS_thermConfsGlobalPath | grep "${BHMAS_configurationPrefix}${BHMAS_parametersString}_${BHMAS_betaPrefix}${BHMAS_betaRegex}_${BHMAS_seedPrefix}${BHMAS_seedRegex}_fromHot[[:digit:]]\+.*" | wc -l) -eq 0 ]]; then
+        #       from Hot but it is from conf since in ${BHMAS_thermConfsGlobalPath} a conf from hot is found. Think about how to fix this.
+        if [[ $(ls ${BHMAS_thermConfsGlobalPath} | grep "${BHMAS_configurationPrefix}${BHMAS_parametersString}_${BHMAS_betaPrefix}${BHMAS_betaRegex}_${BHMAS_seedPrefix}${BHMAS_seedRegex}_fromHot[[:digit:]]\+.*" | wc -l) -eq 0 ]]; then
             BHMAS_betaPostfix="_thermalizeFromHot"
         else
             BHMAS_betaPostfix="_thermalizeFromConf"
         fi
-        if [[ $BHMAS_measurePbp = 'TRUE' ]]; then
+        if [[ ${BHMAS_measurePbp} = 'TRUE' ]]; then
             cecho ly B "\n Measurement of PBP switched off during thermalization!"
             BHMAS_measurePbp='FALSE'
         fi
@@ -140,7 +140,7 @@ case ${BHMAS_executionMode} in
             AskUser "Check if everything is fine. Would you like to submit the jobs?"
             if UserSaidNo; then
                 cecho lr "\n No job will be submitted!\n"
-                exit $BHMAS_successExitCode
+                exit ${BHMAS_successExitCode}
             fi
         elif [[ ${BHMAS_executionMode} = 'mode:continue-thermalization' ]]; then
             ProcessBetaValuesForContinue
@@ -173,8 +173,8 @@ case ${BHMAS_executionMode} in
 
     mode:clean-output-files )
 
-        if [[ $BHMAS_cleanAllOutputFiles = 'TRUE' ]]; then
-            BHMAS_betaValues=( $( ls $BHMAS_runDirWithBetaFolders | grep "^${BHMAS_betaPrefix}${BHMAS_betaRegex}" | awk '{print substr($1,2)}') )
+        if [[ ${BHMAS_cleanAllOutputFiles} = 'TRUE' ]]; then
+            BHMAS_betaValues=( $( ls ${BHMAS_runDirWithBetaFolders} | grep "^${BHMAS_betaPrefix}${BHMAS_betaRegex}" | awk '{print substr($1,2)}') )
         else
             ParseBetasFile
         fi
@@ -227,4 +227,4 @@ PrintReportForProblematicBeta
 
 cecho ''
 
-exit $BHMAS_successExitCode
+exit ${BHMAS_successExitCode}

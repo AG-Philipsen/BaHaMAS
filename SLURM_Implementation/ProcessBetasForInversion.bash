@@ -22,36 +22,36 @@ function __static__ProduceSrunCommandsFileForInversionsPerBeta()
 {
     local betaDirectory betaValue filename massAsNumber
     betaDirectory="$1"; betaValue="$2"; filename="$3"
-    if [ "$BHMAS_chempot" != '0' ]; then
-        Fatal $BHMAS_fatalValueError "Inversion of configuration with nonzero chemical potential not allowed!"
+    if [[ "${BHMAS_chempot}" != '0' ]]; then
+        Fatal ${BHMAS_fatalValueError} "Inversion of configuration with nonzero chemical potential not allowed!"
     fi
 
-    if [ $(($BHMAS_nspace*$BHMAS_nspace*$BHMAS_nspace*$BHMAS_ntime)) -lt $BHMAS_numberOfSourcesForCorrelators ]; then
-        Fatal $BHMAS_fatalValueError "Number of required sources bigger than available positions ("\
-              emph "$(($BHMAS_nspace*$BHMAS_nspace*$BHMAS_nspace*$BHMAS_ntime)) <= $BHMAS_numberOfSourcesForCorrelators" ")!"
+    if [[ $((${BHMAS_nspace}*${BHMAS_nspace}*${BHMAS_nspace}*${BHMAS_ntime})) -lt ${BHMAS_numberOfSourcesForCorrelators} ]]; then
+        Fatal ${BHMAS_fatalValueError} "Number of required sources bigger than available positions ("\
+              emph "$((${BHMAS_nspace}*${BHMAS_nspace}*${BHMAS_nspace}*${BHMAS_ntime})) <= ${BHMAS_numberOfSourcesForCorrelators}" ")!"
     fi
-    if [ $(grep -c "[.]" <<< "${BHMAS_mass}") -eq 0 ]; then
+    if [[ $(grep -c "[.]" <<< "${BHMAS_mass}") -eq 0 ]]; then
         massAsNumber="0.${BHMAS_mass}"
     else
         massAsNumber="${BHMAS_mass}"
     fi
-    ls $betaDirectory | grep "^conf\.[[:digit:]]\{5\}\($\|.*corr\)" | awk -v randomSeed="$RANDOM" \
-                                                                          -v ns="$BHMAS_nspace" \
-                                                                          -v nt="$BHMAS_ntime" \
+    ls ${betaDirectory} | grep "^conf\.[[:digit:]]\{5\}\($\|.*corr\)" | awk -v randomSeed="${RANDOM}" \
+                                                                          -v ns="${BHMAS_nspace}" \
+                                                                          -v nt="${BHMAS_ntime}" \
                                                                           -v useCpu="false"   \
                                                                           -v startcondition="continue" \
                                                                           -v logLevel="info" \
                                                                           -v beta="${betaValue%%_*}" \
-                                                                          -v mass="$massAsNumber" \
-                                                                          -v corrDir="$BHMAS_correlatorDirection" \
+                                                                          -v mass="${massAsNumber}" \
+                                                                          -v corrDir="${BHMAS_correlatorDirection}" \
                                                                           -v solver="cg" \
                                                                           -v solverMaxIterations="30000" \
                                                                           -v solverResidCheckEvery="50" \
                                                                           -v thetaFermionTemporal="1" \
-                                                                          -v maxNrCorrs="$BHMAS_numberOfSourcesForCorrelators" \
-                                                                          -v chemPot="$BHMAS_chempot" \
-                                                                          -v wilson="$BHMAS_wilson" \
-                                                                          -v staggered="$BHMAS_staggered" '
+                                                                          -v maxNrCorrs="${BHMAS_numberOfSourcesForCorrelators}" \
+                                                                          -v chemPot="${BHMAS_chempot}" \
+                                                                          -v wilson="${BHMAS_wilson}" \
+                                                                          -v staggered="${BHMAS_staggered}" '
         BEGIN{
             srand(randomSeed);
             if(chemPot == 0){
@@ -97,7 +97,7 @@ function __static__ProduceSrunCommandsFileForInversionsPerBeta()
                 split(list_of_correlators_to_calculate[i], parts_of_correlator_name, "_");
                 print "--initialConf=" parts_of_correlator_name[1] " --useCPU=" useCpu " --startCondition=" startcondition " --logLevel=" logLevel " --nSpace=" ns " --nTime=" nt " --sourceX=" parts_of_correlator_name[2] " --sourceY=" parts_of_correlator_name[3] " --sourceZ=" parts_of_correlator_name[4] " --sourceT=" parts_of_correlator_name[5] " --beta=" beta " --measureCorrelators=1 --correlatorDirection=" corrDir " --solver=" solver " --solverMaxIterations=" solverMaxIterations " --solverResiduumCheckEvery=" solverResidCheckEvery " --thetaFermionTemporal=" thetaFermionTemporal " --fermObsCorrelatorsPostfix=" "_" parts_of_correlator_name[2] "_" parts_of_correlator_name[3] "_" parts_of_correlator_name[4] "_" parts_of_correlator_name[5] "_corr" " " chemPotString " " options_discretization;
             }
-        }' > "$filename"
+        }' > "${filename}"
 
 }
 
@@ -108,29 +108,29 @@ function ProcessBetaValuesForInversion_SLURM()
     betaValuesToBeSubmitted=()
     for beta in ${BHMAS_betaValues[@]}; do
         runBetaDirectory="${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${beta}"
-        numberOfConfigurationsInBetaDirectory=$(find $runBetaDirectory -regex "$runBetaDirectory/conf[.][0-9]*" | wc -l)
-        numberOfTotalCorrelators=$(($numberOfConfigurationsInBetaDirectory * $BHMAS_numberOfSourcesForCorrelators))
-        numberOfExistingCorrelators=$(find $runBetaDirectory -regextype posix-extended -regex "$runBetaDirectory/conf[.][0-9]*(_[0-9]+){4}_corr" | wc -l)
-        numberOfMissingCorrelators=$(($numberOfTotalCorrelators - $numberOfExistingCorrelators))
-        __static__ProduceSrunCommandsFileForInversionsPerBeta "$runBetaDirectory" "$beta" "${runBetaDirectory}/${BHMAS_inversionSrunCommandsFilename}"
-        numberOfInversionCommands=$(wc -l < $runBetaDirectory/$BHMAS_inversionSrunCommandsFilename)
-        if [ $numberOfMissingCorrelators -ne $numberOfInversionCommands ]; then
-            cecho lr "\n File with commands for inversion expected to contain " emph "$numberOfMissingCorrelators"\
-                  " lines, but having " emph "$numberOfInversionCommands" ". The value " emph "beta = $beta" " will be skipped!\n"
-            BHMAS_problematicBetaValues+=( $beta )
+        numberOfConfigurationsInBetaDirectory=$(find ${runBetaDirectory} -regex "${runBetaDirectory}/conf[.][0-9]*" | wc -l)
+        numberOfTotalCorrelators=$((${numberOfConfigurationsInBetaDirectory} * ${BHMAS_numberOfSourcesForCorrelators}))
+        numberOfExistingCorrelators=$(find ${runBetaDirectory} -regextype posix-extended -regex "${runBetaDirectory}/conf[.][0-9]*(_[0-9]+){4}_corr" | wc -l)
+        numberOfMissingCorrelators=$((${numberOfTotalCorrelators} - ${numberOfExistingCorrelators}))
+        __static__ProduceSrunCommandsFileForInversionsPerBeta "${runBetaDirectory}" "${beta}" "${runBetaDirectory}/${BHMAS_inversionSrunCommandsFilename}"
+        numberOfInversionCommands=$(wc -l < ${runBetaDirectory}/${BHMAS_inversionSrunCommandsFilename})
+        if [[ ${numberOfMissingCorrelators} -ne ${numberOfInversionCommands} ]]; then
+            cecho lr "\n File with commands for inversion expected to contain " emph "${numberOfMissingCorrelators}"\
+                  " lines, but having " emph "${numberOfInversionCommands}" ". The value " emph "beta = ${beta}" " will be skipped!\n"
+            BHMAS_problematicBetaValues+=( ${beta} )
             continue
         fi
-        if [ ! -s $runBetaDirectory/$BHMAS_inversionSrunCommandsFilename ] && [ $numberOfMissingCorrelators -ne 0 ]; then
+        if [[ ! -s ${runBetaDirectory}/${BHMAS_inversionSrunCommandsFilename} ]] && [[ ${numberOfMissingCorrelators} -ne 0 ]]; then
             cecho lr "\n File with commands for inversion found to be " emph "empty" ", but expected to contain "\
-                  emph "$numberOfMissingCorrelators" " lines! The value " emph "beta = $beta" " will be skipped!\n"
-            BHMAS_problematicBetaValues+=( $beta )
+                  emph "${numberOfMissingCorrelators}" " lines! The value " emph "beta = ${beta}" " will be skipped!\n"
+            BHMAS_problematicBetaValues+=( ${beta} )
             continue
         fi
         #If file seems fine put it to submit list
-        betaValuesToBeSubmitted+=( $beta )
+        betaValuesToBeSubmitted+=( ${beta} )
     done
-    if [ ${#betaValuesToBeSubmitted[@]} -ne 0 ]; then
-        mkdir -p ${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName || exit $BHMAS_fatalBuiltin
+    if [[ ${#betaValuesToBeSubmitted[@]} -ne 0 ]]; then
+        mkdir -p ${BHMAS_submitDirWithBetaFolders}/${BHMAS_jobScriptFolderName} || exit ${BHMAS_fatalBuiltin}
         PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles "${betaValuesToBeSubmitted[@]}"
     fi
 }

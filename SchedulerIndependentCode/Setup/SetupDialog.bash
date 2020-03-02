@@ -20,11 +20,11 @@
 function __static__ParseSetupResultAndFillInUserVariablesArray()
 {
     local oldIFS entry index
-    oldIFS=$IFS; IFS="|"; index=0
-    for entry in $resultOfBox; do
-        userVariables[${variableNames[$index]}]="$entry"
+    oldIFS=${IFS}; IFS="|"; index=0
+    for entry in ${resultOfBox}; do
+        userVariables[${variableNames[${index}]}]="${entry}"
         (( index++ )) || true
-    done; IFS=$oldIFS
+    done; IFS=${oldIFS}
 }
 
 function MakeInteractiveSetupUsingDialog()
@@ -57,13 +57,13 @@ function MakeInteractiveSetupUsingDialog()
                                 --backtitle 'BaHaMAS setup'
                                 --title 'BaHaMAS configuration'
                                 --separator '|'
-                                --form '$formHeader'
-                         $dialogHeight $dialogWidth $formHeight"
+                                --form '${formHeader}'
+                         ${dialogHeight} ${dialogWidth} ${formHeight}"
     #Complete dialog box command
     index=1
     for variable in ${variableNames[@]}; do
-        if [ $variable != 'BHMAS_coloredOutput' ]; then
-            commandToBeExecuted+=" '${variable}:' $index 3 '${userVariables[$variable]}'  $index $variableNameFieldLength $variableValueFieldLength 0 "
+        if [[ ${variable} != 'BHMAS_coloredOutput' ]]; then
+            commandToBeExecuted+=" '${variable}:' ${index} 3 '${userVariables[${variable}]}'  ${index} ${variableNameFieldLength} ${variableValueFieldLength} 0 "
             (( index++ )) || true
         fi
     done

@@ -27,9 +27,9 @@
 # NOTE: Use the variables 'BHMAS_wilson' and 'BHMAS_staggered' to define
 #       differently the same variables in the two cases. For example:
 #
-#         if [ $BHMAS_wilson = "TRUE" ]; then
+#         if [[ ${BHMAS_wilson} = "TRUE" ]]; then
 #             ...
-#         elif [ $BHMAS_staggered = "TRUE" ]; then
+#         elif [[ ${BHMAS_staggered} = "TRUE" ]]; then
 #             ...
 #         fi
 #
@@ -117,8 +117,8 @@ MakeFunctionsDefinedInThisFileReadonly
 #   The BHMAS_submitDiskGlobalPath, BHMAS_runDiskGlobalPath, BHMAS_projectSubpath variables above could be a bit confusing. Basically, they are used to build the global
 #   path of the folders from which the jobs are submitted and run. In particular:
 #
-#       - folder global path from which jobs are submitted:  $BHMAS_submitDiskGlobalPath/$BHMAS_projectSubpath/$BHMAS_parametersPath
-#       -       folder global path from which jobs are run:  $BHMAS_runDiskGlobalPath/$BHMAS_projectSubpath/$BHMAS_parametersPath
+#       - folder global path from which jobs are submitted:  ${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath}/${BHMAS_parametersPath}
+#       -       folder global path from which jobs are run:  ${BHMAS_runDiskGlobalPath}/${BHMAS_projectSubpath}/${BHMAS_parametersPath}
 #
-#   where $BHMAS_parametersPath is the folder structure like 'Nf2/muiPiT/k1550/nt6/ns12' or like 'Nf3/mui0/mass0250/nt4/ns8'.
+#   where ${BHMAS_parametersPath} is the folder structure like 'Nf2/muiPiT/k1550/nt6/ns12' or like 'Nf3/mui0/mass0250/nt4/ns8'.
 #

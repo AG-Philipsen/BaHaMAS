@@ -49,7 +49,7 @@ readonly BHMAS_filesToBeSourced=( "${BHMAS_repositoryTopLevelPath}/SchedulerInde
 #Source error codes and fail with error hard coded since variable defined in file which is sourced!
 source ${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/ErrorCodes.bash || exit 64
 for fileToBeSourced in "${BHMAS_filesToBeSourced[@]}"; do
-    source "${fileToBeSourced}" || exit $BHMAS_fatalBuiltin
+    source "${fileToBeSourced}" || exit ${BHMAS_fatalBuiltin}
 done
 
 #Helper has priority
@@ -71,7 +71,7 @@ readonly logFile="${BHMAS_testsFolder}/Tests.log"
 readonly testParametersString='Nf2_mui0_mass0050_nt6_ns18'
 readonly testParametersPath="/${testParametersString//_/\/}"
 readonly betaFolder='b5.1111_s3333_continueWithNewChain'
-readonly listOfAuxiliaryFilesAndFolders=( "$testFolder" "$logFile" )
+readonly listOfAuxiliaryFilesAndFolders=( "${testFolder}" "${logFile}" )
 
 
 #Possible Tests
@@ -143,22 +143,22 @@ ParseCommandLineOption "$@"
 CheckTestEnvironment
 
 #Run tests
-if [ $reportLevel -eq 3 ]; then
+if [[ ${reportLevel} -eq 3 ]]; then
     cecho wg "\n " U "Running " emph "${#testsToBeRun[@]}" " test(s)" uU ":\n"
 fi
 for testName in "${testsToBeRun[@]}"; do
-    if [ -n "${availableTests[$testName]:+x}" ]; then
-        MakeTestPreliminaryOperations "$testName"
-        RunTest "$testName" "${availableTests[$testName]}"
+    if [[ -n "${availableTests[${testName}]:+x}" ]]; then
+        MakeTestPreliminaryOperations "${testName}"
+        RunTest "${testName}" "${availableTests[${testName}]}"
     else
-        Fatal $BHMAS_fatalLogicError "Test " emph "$testName" " not found among availableTests!"
+        Fatal ${BHMAS_fatalLogicError} "Test " emph "${testName}" " not found among availableTests!"
     fi
-    CleanTestsEnvironmentForFollowingTest "$testName"
+    CleanTestsEnvironmentForFollowingTest "${testName}"
 done && unset -v 'testName'
 
 #Print report and clean test folder
 PrintTestsReport
-if [ $cleanTestFolder = 'TRUE' ] && [ $testsFailed -eq 0 ]; then
+if [[ ${cleanTestFolder} = 'TRUE' ]] && [[ ${testsFailed} -eq 0 ]]; then
     DeleteAuxiliaryFilesAndFolders
 fi
 
