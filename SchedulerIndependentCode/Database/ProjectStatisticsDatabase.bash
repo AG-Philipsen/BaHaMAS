@@ -148,7 +148,7 @@ function projectStatisticsDatabase()
             fi
             local PROJECT_DATABASE_FILE=$BHMAS_databaseGlobalPath/$LATEST_DATABASE_FILE
         else
-            if [ ! f $FILENAME_GIVEN_AS_INPUT ]; then
+            if [ ! -f $FILENAME_GIVEN_AS_INPUT ]; then
                 Fatal $BHMAS_fatalFileNotFound "File " file "$FILENAME_GIVEN_AS_INPUT" " does not exist!"
             fi
             local PROJECT_DATABASE_FILE=$FILENAME_GIVEN_AS_INPUT
