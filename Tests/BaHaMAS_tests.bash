@@ -143,11 +143,11 @@ ParseCommandLineOption "$@"
 CheckTestEnvironment
 
 #Run tests
-if [ $reportLevel -eq 3 ]; then
+if [[ $reportLevel -eq 3 ]]; then
     cecho wg "\n " U "Running " emph "${#testsToBeRun[@]}" " test(s)" uU ":\n"
 fi
 for testName in "${testsToBeRun[@]}"; do
-    if [ -n "${availableTests[$testName]:+x}" ]; then
+    if [[ -n "${availableTests[$testName]:+x}" ]]; then
         MakeTestPreliminaryOperations "$testName"
         RunTest "$testName" "${availableTests[$testName]}"
     else
@@ -158,7 +158,7 @@ done && unset -v 'testName'
 
 #Print report and clean test folder
 PrintTestsReport
-if [ $cleanTestFolder = 'TRUE' ] && [ $testsFailed -eq 0 ]; then
+if [[ $cleanTestFolder = 'TRUE' ]] && [[ $testsFailed -eq 0 ]]; then
     DeleteAuxiliaryFilesAndFolders
 fi
 

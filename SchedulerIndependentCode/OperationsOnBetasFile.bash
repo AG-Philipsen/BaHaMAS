@@ -26,7 +26,7 @@
 
 function __static__CheckExistenceBetasFileAndAddEndOfLineAtTheEndIfMissing()
 {
-    if [ ! -e $BHMAS_betasFilename ]; then
+    if [[ ! -e $BHMAS_betasFilename ]]; then
         Fatal $BHMAS_fatalFileNotFound "File " emph "$BHMAS_betasFilename" " not found in " emph "$(pwd)" "."
     else
         #Add a end of line at end of file if missing
@@ -88,8 +88,8 @@ function __static__CheckAndParseSingleLine()
             entriesToBeParsed+=( "$entry" )
         fi
     done
-    if [ $BHMAS_useMultipleChains == "TRUE" ]; then
-        if [ "$tmpSeed" = '' ]; then
+    if [[ $BHMAS_useMultipleChains == "TRUE" ]]; then
+        if [[ "$tmpSeed" = '' ]]; then
             Fatal $BHMAS_fatalWrongBetasFile "Seed missing in " file "$BHMAS_betasFilename" " file for " emph "beta = $beta" "."
         fi
         beta+="_${BHMAS_seedPrefix}${tmpSeed}${BHMAS_betaPostfix}"
@@ -97,12 +97,12 @@ function __static__CheckAndParseSingleLine()
     set -- "${entriesToBeParsed[@]}"
     #Put information in global variables
     BHMAS_betaValues+=( "$beta" )
-    while [ $# -ne 0 ]; do
+    while [[ $# -ne 0 ]]; do
         case "$1" in
             i* )
                 entry=${1:1}
                 __static__CheckFormatBetasFileEntry integrationSteps "$entry"
-                if [ $(grep -o "-" <<< "$entry" | wc -l) -ne 1 ]; then
+                if [[ $(grep -o "-" <<< "$entry" | wc -l) -ne 1 ]]; then
                     Fatal $BHMAS_fatalMissingFeature "Unable to use a different number of integration steps different than " emph "2" " for " emph "beta = ${beta%_*}" "!"
                 fi
                 BHMAS_scaleZeroIntegrationSteps["$beta"]=${entry%%-*}
@@ -153,7 +153,7 @@ function __static__ParseBetaFileLineByLineExtractingInformationAndOptionallyCoun
 function __static__CheckConsistencyInformationExtractedFromBetasFile()
 {
     #Check for missing entries which need to be there
-    if [ ${#BHMAS_betaValues[@]} -eq 0 ]; then
+    if [[ ${#BHMAS_betaValues[@]} -eq 0 ]]; then
         Fatal $BHMAS_fatalWrongBetasFile "No beta values in betas file."
     fi
     for beta in "${BHMAS_betaValues[@]}"; do
@@ -161,14 +161,14 @@ function __static__CheckConsistencyInformationExtractedFromBetasFile()
             Fatal $BHMAS_fatalWrongBetasFile "Integration steps information missing in " file "$BHMAS_betasFilename" " file for " emph "beta = ${beta%_*}" "!"
         fi
     done
-    if [ $BHMAS_useMultipleChains = 'TRUE' ]; then
+    if [[ $BHMAS_useMultipleChains = 'TRUE' ]]; then
         #Check whether same seed is provided multiple times for same beta
-        if [ $(printf "%s\n" "${BHMAS_betaValues[@]%_*}" | sort -n | uniq -d | wc -l) -ne 0 ]; then
+        if [[ $(printf "%s\n" "${BHMAS_betaValues[@]%_*}" | sort -n | uniq -d | wc -l) -ne 0 ]]; then
             Fatal $BHMAS_fatalWrongBetasFile "The " emph "same seed" " was provided multiple times for the same beta in the " file "$BHMAS_betasFilename" " file!"
         fi
     else
         #Check whether same beta is provided multiple times
-        if [ $(printf "%s\n" "${BHMAS_betaValues[@]}" | sort -n | uniq -d | wc -l) -ne 0 ]; then
+        if [[ $(printf "%s\n" "${BHMAS_betaValues[@]}" | sort -n | uniq -d | wc -l) -ne 0 ]]; then
             Fatal $BHMAS_fatalWrongBetasFile "The " emph "same beta" " was provided multiple times in the " file "$BHMAS_betasFilename" " file!"
         fi
     fi
@@ -176,8 +176,8 @@ function __static__CheckConsistencyInformationExtractedFromBetasFile()
 
 function __static__FillMissingTimesPerTrajectoryIfAnyIsSpecified()
 {
-    if [ ${#BHMAS_timesPerTrajectory[@]} -eq 0 ]; then
-        if [ $BHMAS_walltimeIsNeeded = 'TRUE' ] && [ "$BHMAS_walltime" = '' ]; then
+    if [[ ${#BHMAS_timesPerTrajectory[@]} -eq 0 ]]; then
+        if [[ $BHMAS_walltimeIsNeeded = 'TRUE' ]] && [[ "$BHMAS_walltime" = '' ]]; then
             Fatal $BHMAS_fatalWrongBetasFile "The " emph "--walltime" " option was not given and "\
                   emph "no time" " was provided in the " file "$BHMAS_betasFilename" " file!"
         else
@@ -254,7 +254,7 @@ function __static__GetNonZeroFourDigitsRandomNumberDifferentFrom()
 {
     local fourDigitsNumber; fourDigitsNumber='0000'
     RANDOM=$(date +%N)  #RANDOM seed from date
-    until [ $(grep -o "$fourDigitsNumber" <<< "0000 $@" | wc -l) -eq 0 ]; do
+    until [[ $(grep -o "$fourDigitsNumber" <<< "0000 $@" | wc -l) -eq 0 ]]; do
         fourDigitsNumber=$(( (RANDOM+1000)%10000 )) # $RANDOM is in [0,32767]
     done
     printf "%04d" $fourDigitsNumber
@@ -262,7 +262,7 @@ function __static__GetNonZeroFourDigitsRandomNumberDifferentFrom()
 
 function CompleteBetasFile()
 {
-    if [ $BHMAS_useMultipleChains = 'FALSE' ]; then
+    if [[ $BHMAS_useMultipleChains = 'FALSE' ]]; then
         Fatal $BHMAS_fatalLogicError "Option " emph "--doNotUseMultipleChains" " not compatible with " emph "--completeBetasFile" " one."
     fi
     __static__CheckExistenceBetasFileAndAddEndOfLineAtTheEndIfMissing
@@ -289,8 +289,8 @@ function CompleteBetasFile()
         (( betaCounter[$beta]++ )) || true  #'|| true' because of set -e option
         alreadyUsedSeeds[$beta]+="$seed "
         cecho -d "$line" >> $BHMAS_betasFilename
-        if [ ${betaCounter[$beta]} -eq ${betaOccurences[$beta]} ]; then
-            while [ ${betaCounter[$beta]} -lt $BHMAS_numberOfChainsToBeInTheBetasFile ]; do
+        if [[ ${betaCounter[$beta]} -eq ${betaOccurences[$beta]} ]]; then
+            while [[ ${betaCounter[$beta]} -lt $BHMAS_numberOfChainsToBeInTheBetasFile ]]; do
                 seed='s'$(__static__GetNonZeroFourDigitsRandomNumberDifferentFrom ${alreadyUsedSeeds[$beta]} )
                 #Replace last occurence of seed in 'line' using new one
                 #NOTE: since if user had more seeds on the same line, only the last

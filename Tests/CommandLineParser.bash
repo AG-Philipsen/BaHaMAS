@@ -26,7 +26,7 @@ function __static__AddOptionToHelper()
     color="$normalColor"
     name="$1"; description="$2"; shift 2
     cecho $color "$(printf "%s%-${lengthOption}s" "$indentation" "$name")" d "  ->  " $helperColor "$description"
-    while [ "$1" != '' ]; do
+    while [[ "$1" != '' ]]; do
         cecho "$(printf "%s%${lengthOption}s" "$indentation" "")      " $helperColor "$1"
         shift
     done
@@ -76,7 +76,7 @@ function ParseCommandLineOption()
     #Reset argument function to be able to parse them
     set -- "${commandLineOptions[@]}"
 
-    while [ "$1" != "" ]; do
+    while [[ "$1" != "" ]]; do
         case $1 in
             -h | --help )
                 __static__PrintHelper
@@ -91,13 +91,13 @@ function ParseCommandLineOption()
                 fi
                 shift 2 ;;
             -t | --runTests )
-                if [[ ! $2 =~ ^- ]] && [ "$2" != '' ]; then
+                if [[ ! $2 =~ ^- ]] && [[ "$2" != '' ]]; then
                     if [[ $2 =~ ^[1-9][0-9]*([,\-][1-9][0-9]*)*$ ]]; then
                         testsNumericList=( $(awk 'BEGIN{RS=","}/\-/{split($0, res, "-"); for(i=res[1]; i<=res[2]; i++){printf "%d\n", i}; next}{printf "%d\n", $0}' <<< $2) )
                         testsNameList=()
                         for number in "${testsNumericList[@]}"; do
                             (( number-- ))
-                            if [ $number -ge ${#testsToBeRun[@]} ]; then
+                            if [[ $number -ge ${#testsToBeRun[@]} ]]; then
                                 Fatal $BHMAS_fatalCommandLine "Specified tests numbers " emph "$2" " not available!"
                             fi
                             testsNameList+=( "${testsToBeRun[$number]}" )

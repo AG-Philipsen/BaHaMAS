@@ -32,7 +32,7 @@ function __static__ExtractBetasFrom()
     for element in "${temporaryArray[@]}"; do
         betaValue=${element%%_*}
         seedsArray=( $(grep -o "${BHMAS_seedPrefix}[[:alnum:]]\{4\}" <<< "${element#*_}") )
-        if [ ${#seedsArray[@]} -gt 0 ]; then
+        if [[ ${#seedsArray[@]} -gt 0 ]]; then
             for seed in "${seedsArray[@]}"; do
                 betaValuesArray+=( "${BHMAS_betaPrefix}${betaValue}_${seed}" )
             done
@@ -48,16 +48,16 @@ function __static__ExtractPostfixFrom()
     local jobName postfix
     jobName="$1"
     postfix=${jobName##*_}
-    if [ "$postfix" == "TC" ]; then
+    if [[ "$postfix" == "TC" ]]; then
         printf "thermalizeFromConf"
-    elif [ "$postfix" == "TH" ]; then
+    elif [[ "$postfix" == "TH" ]]; then
         printf "thermalizeFromHot"
-    elif [ "$postfix" == "Thermalize" ]; then
+    elif [[ "$postfix" == "Thermalize" ]]; then
         printf "thermalize_old"
-    elif [ "$postfix" == "Tuning" ]; then
+    elif [[ "$postfix" == "Tuning" ]]; then
         printf "tuning"
         #Also in the "TC" and "TH" cases we have seeds in the name, but such a cases are exluded from the elif
-    elif [ $(grep -o "_${BHMAS_seedPrefix}[[:alnum:]]\{4\}" <<< "$jobName" | wc -l) -ne 0 ]; then
+    elif [[ $(grep -o "_${BHMAS_seedPrefix}[[:alnum:]]\{4\}" <<< "$jobName" | wc -l) -ne 0 ]]; then
         printf "continueWithNewChain"
     else
         printf ""
@@ -76,9 +76,9 @@ function __static__ExtractMetaInformationFromQueuedJobs()
         jobNamePostfix=$(__static__ExtractPostfixFrom $jobName)
         jobParametersString="${jobName%%__*}"
         #If jobParametersString is not at the beginning of the jobname, skip job
-        [ $(grep "^${jobParametersString}" <<< "$jobName" | wc -l) -eq 0 ] && continue
+        [[ $(grep "^${jobParametersString}" <<< "$jobName" | wc -l) -eq 0 ]] && continue
         #If the status is COMPLETING, skip job
-        [ $jobStatus == "COMPLETING" ] && continue
+        [[ $jobStatus == "COMPLETING" ]] && continue
         metaInformationArray+=( $(sed 's/ //g' <<< "${jobParametersString} | $(sed 's/ /_/g' <<< "${jobNameBetas[@]}") | postfix=${jobNamePostfix} | ${jobStatus}") )
     done
     printf "%s " "${metaInformationArray[@]:-}"
@@ -99,10 +99,10 @@ function ListSimulationsStatus_SLURM()
     # containing the BHMAS_parametersPath (e.g. /muiPiT/k1550/nt6/ns12) and we will define local
     # BHMAS_parametersString and BHMAS_parametersPath variables filled differently in the two cases.
     # In the DATABASE setup the BHMAS_parametersString is built using the argument given.
-    if [ $# -eq 0 ]; then
+    if [[ $# -eq 0 ]]; then
         localParametersPath="$BHMAS_parametersPath"
         localParametersString="$BHMAS_parametersString"
-    elif [ $# -eq 1 ]; then
+    elif [[ $# -eq 1 ]]; then
         localParametersPath="$1"
         localParametersString=${localParametersPath//\//_}
         localParametersString=${localParametersString:1}
@@ -135,10 +135,10 @@ function ListSimulationsStatus_SLURM()
         jobStatus=( $(sed 's/ /\n/g' <<< "${jobsMetainformationArray[@]:-}" | grep "${localParametersString}" | grep "${BHMAS_betaPrefix}${beta%_*}" | grep "postfix=${postfixFromFolder}|" | cut -d'|' -f4) )
         set -e
 
-        if [ ${#jobStatus[@]} -eq 0 ]; then
-            [ $BHMAS_liststatusShowOnlyQueuedOption = "TRUE" ] && continue
+        if [[ ${#jobStatus[@]} -eq 0 ]]; then
+            [[ $BHMAS_liststatusShowOnlyQueuedOption = "TRUE" ]] && continue
             jobStatus="notQueued"
-        elif [ ${#jobStatus[@]} -eq 1 ]; then
+        elif [[ ${#jobStatus[@]} -eq 1 ]]; then
             jobStatus=${jobStatus[0]}
         else
             Fatal $BHMAS_fatalLogicError "There are more than one job with " emph "${localParametersString}" " and " emph "beta = $beta" " as parameters! This should not happen!"
@@ -148,9 +148,9 @@ function ListSimulationsStatus_SLURM()
         outputFileGlobalPath="$BHMAS_runDiskGlobalPath/$BHMAS_projectSubpath$localParametersPath/$BHMAS_betaPrefix$beta/$BHMAS_outputFilename"
         inputFileGlobalPath="$BHMAS_submitDiskGlobalPath/$BHMAS_projectSubpath$localParametersPath/$BHMAS_betaPrefix$beta/$BHMAS_inputFilename"
         #---------------------------------------------------------------------------------------------------------------------------------------#
-        if [ -f $outputFileGlobalPath ] && [ $(wc -l < $outputFileGlobalPath) -gt 0 ]; then
+        if [[ -f $outputFileGlobalPath ]] && [[ $(wc -l < $outputFileGlobalPath) -gt 0 ]]; then
             toBeCleaned=$(awk 'BEGIN{traj_num = -1; file_to_be_cleaned=0}{if($1>traj_num){traj_num = $1} else {file_to_be_cleaned=1; exit;}}END{print file_to_be_cleaned}' $outputFileGlobalPath)
-            if [ $toBeCleaned -eq 0 ]; then
+            if [[ $toBeCleaned -eq 0 ]]; then
                 trajectoriesDone=$(wc -l < $outputFileGlobalPath)
             else
                 trajectoriesDone=$(awk 'NR==1{startTr=$1}END{print $1 - startTr + 1}' $outputFileGlobalPath)
@@ -158,7 +158,7 @@ function ListSimulationsStatus_SLURM()
             numberLastTrajectory=$(awk 'END{print $1}' $outputFileGlobalPath)
             acceptanceAllRun=$(awk '{ sum+=$'$BHMAS_acceptanceColumn'} END {printf "%5.2f", 100*sum/(NR)}' $outputFileGlobalPath)
 
-            if [ $trajectoriesDone -ge 1000 ]; then
+            if [[ $trajectoriesDone -ge 1000 ]]; then
                 acceptanceLastBunchOfTrajectories=$(tail -n1000 $outputFileGlobalPath | awk '{ sum+=$'$BHMAS_acceptanceColumn'} END {printf "%5.2f", 100*sum/(NR)}')
                 meanPlaquetteLastBunchOfTrajectories=$(tail -n1000 $outputFileGlobalPath | awk '{ sum+=$'$BHMAS_plaquetteColumn'} END {printf "% .6f", sum/(NR)}')
             else
@@ -188,7 +188,7 @@ function ListSimulationsStatus_SLURM()
                 timeFromLastTrajectory="------"
             fi
 
-            if [ $BHMAS_liststatusMeasureTimeOption = "TRUE" ]; then
+            if [[ $BHMAS_liststatusMeasureTimeOption = "TRUE" ]]; then
                 averageTimePerTrajectory=$(awk '{ time=$'$BHMAS_trajectoryTimeColumn'; if(time!=0){sum+=time; counter+=1}} END {if(counter!=0){printf "%d", sum/counter}else{printf "%d", 0}}' $outputFileGlobalPath)
                 timeLastTrajectory=$(awk 'END{printf "%d", $'$BHMAS_trajectoryTimeColumn'}' $outputFileGlobalPath)
             else
@@ -210,14 +210,14 @@ function ListSimulationsStatus_SLURM()
             timeLastTrajectory="----"
         fi
 
-        if [ -f $inputFileGlobalPath ]; then
+        if [[ -f $inputFileGlobalPath ]]; then
             integrationSteps0=$( sed -n '/integrationSteps0=[[:digit:]]\+/p'  $inputFileGlobalPath | sed 's/integrationSteps0=\([[:digit:]]\+\)/\1/' )
             integrationSteps1=$( sed -n '/integrationSteps1=[[:digit:]]\+/p'  $inputFileGlobalPath | sed 's/integrationSteps1=\([[:digit:]]\+\)/\1/' )
             if [[ ! $integrationSteps0 =~ ^[[:digit:]]+$ ]] || [[ ! $integrationSteps1 =~ ^[[:digit:]]+$ ]]; then
                 integrationSteps0="--"
                 integrationSteps1="--"
             fi
-            if [ $(grep -o "useMP=1" $inputFileGlobalPath | wc -l) -eq 1 ]; then
+            if [[ $(grep -o "useMP=1" $inputFileGlobalPath | wc -l) -eq 1 ]]; then
                 integrationSteps2="-$( sed -n '/integrationSteps2=[[:digit:]]\+/p'  $inputFileGlobalPath | sed 's/integrationSteps2=\([[:digit:]]\+\)/\1/' )"
                 kappaMassPreconditioning="-$( sed -n '/kappaMP=[[:digit:]]\+[.][[:digit:]]\+/p'  $inputFileGlobalPath | sed 's/kappaMP=\(.*\)/\1/' )"
                 if [[ ! $integrationSteps2 =~ ^-[[:digit:]]+$ ]] || [[ ! $kappaMassPreconditioning =~ ^-[[:digit:]]+[.][[:digit:]]+$ ]]; then
@@ -258,7 +258,7 @@ $(__static__ColorTime $timeFromLastTrajectory)%s${BHMAS_defaultListstatusColor}\
             "$numberLastTrajectory" \
             "$(awk '{if($1 ~ /^[[:digit:]]+$/ && $2 ~ /^[[:digit:]]+$/){printf "%3ds | %3ds", $1, $2}else{print "notMeasured"}}' <<< "$timeLastTrajectory $averageTimePerTrajectory")"
 
-        if [ $toBeCleaned -eq 0 ]; then
+        if [[ $toBeCleaned -eq 0 ]]; then
             printf "%s\t\t%8s (%s %%) [%s %%]  %s-%s%s%s\t%9s\t%s\n"   "$(__static__GetShortenedBetaString)"   "$trajectoriesDone"   "$acceptanceAllRun"   "$acceptanceLastBunchOfTrajectories"   "$integrationSteps0" "$integrationSteps1" "$integrationSteps2" "$kappaMassPreconditioning"   "$jobStatus"   "$maxSpikeToMeanAsNSigma" >> $jobsStatusFile
         else
             printf "%s\t\t%8s (%s %%) [%s %%]  %s-%s%s%s\t%9s\t%s\t ---> File to be cleaned!\n"   "$(__static__GetShortenedBetaString)"   "$trajectoriesDone"   "$acceptanceAllRun"   "$acceptanceLastBunchOfTrajectories"   "$integrationSteps0" "$integrationSteps1" "$integrationSteps2" "$kappaMassPreconditioning"   "$jobStatus"   "$maxSpikeToMeanAsNSigma" >> $jobsStatusFile
@@ -271,11 +271,11 @@ $(__static__ColorTime $timeFromLastTrajectory)%s${BHMAS_defaultListstatusColor}\
 
 function __static__GetShortenedBetaString()
 {
-    if [ "$postfixFromFolder" == "continueWithNewChain" ]; then
+    if [[ "$postfixFromFolder" == "continueWithNewChain" ]]; then
         printf "${beta%_*}_NC"
-    elif [ "$postfixFromFolder" == "thermalizeFromHot" ]; then
+    elif [[ "$postfixFromFolder" == "thermalizeFromHot" ]]; then
         printf "${beta%_*}_fH"
-    elif [ "$postfixFromFolder" == "thermalizeFromConf" ]; then
+    elif [[ "$postfixFromFolder" == "thermalizeFromConf" ]]; then
         printf "${beta%_*}_fC"
     else
         printf "${beta%_*}"
@@ -311,13 +311,13 @@ function __static__ColorTime()
     if [[ ! $1 =~ ^[[:digit:]]+$ ]]; then
         printf $BHMAS_defaultListstatusColor
     else
-        [ $1 -gt 450 ] && printf $BHMAS_stuckSimulationListstatusColor || printf $BHMAS_fineSimulationListstatusColor
+        [[ $1 -gt 450 ]] && printf $BHMAS_stuckSimulationListstatusColor || printf $BHMAS_fineSimulationListstatusColor
     fi
 }
 
 function __static__ColorClean()
 {
-    [ $1 -eq 0 ] && printf $BHMAS_defaultListstatusColor || printf $BHMAS_toBeCleanedListstatusColor
+    [[ $1 -eq 0 ]] && printf $BHMAS_defaultListstatusColor || printf $BHMAS_toBeCleanedListstatusColor
 }
 
 function __static__ColorBeta()
@@ -334,7 +334,7 @@ function __static__ColorBeta()
     local auxiliaryVariable1 auxiliaryVariable2 errorCode
     auxiliaryVariable1=$(printf "%s," "${observablesColumns[@]}")
     auxiliaryVariable2=$(printf "%s," "${!observablesColumns[@]}")
-    if [ ! -f $outputFileGlobalPath ]; then
+    if [[ ! -f $outputFileGlobalPath ]]; then
         printf $BHMAS_defaultListstatusColor
         return
     fi
@@ -347,9 +347,9 @@ function __static__ColorBeta()
         -f ${BHMAS_repositoryTopLevelPath}/SLURM_Implementation/CheckCorrectnessCl2qcdOutputFile.awk $outputFileGlobalPath
     errorCode=$?
 
-    if [ $errorCode -eq ${BHMAS_successExitCode} ]; then
+    if [[ $errorCode -eq ${BHMAS_successExitCode} ]]; then
         printf $BHMAS_defaultListstatusColor
-    elif [ $errorCode -eq ${BHMAS_fatalLogicError} ]; then
+    elif [[ $errorCode -eq ${BHMAS_fatalLogicError} ]]; then
         printf $BHMAS_wrongBetaListstatusColor
     else
         printf $BHMAS_suspiciousBetaListstatusColor
@@ -366,7 +366,7 @@ function __static__ColorDelta()
         local thresholdVariableName tooHighColorVariableName
         thresholdVariableName="BHMAS_delta${1}Threshold"
         tooHighColorVariableName="BHMAS_tooHighDelta${1}ListstatusColor"
-        if [ "$postfixFromFolder" == "continueWithNewChain" ] && [ $(awk -v threshold=${!thresholdVariableName} -v value=$2 'BEGIN{if(value >= threshold)print 1; else print 0;}') -eq 1 ]; then
+        if [[ "$postfixFromFolder" == "continueWithNewChain" ]] && [[ $(awk -v threshold=${!thresholdVariableName} -v value=$2 'BEGIN{if(value >= threshold)print 1; else print 0;}') -eq 1 ]]; then
             printf ${!tooHighColorVariableName}
         else
             printf $BHMAS_defaultListstatusColor

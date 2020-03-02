@@ -38,9 +38,9 @@ function SelectClusterSchedulerName()
         fi
     done
 
-    if [ ${#availableScheduler[@]} -eq 0 ]; then
+    if [[ ${#availableScheduler[@]} -eq 0 ]]; then
         Fatal $BHMAS_fatalMissingFeature "No known scheduler was found!"
-    elif [ ${#availableScheduler[@]} -gt 1 ]; then
+    elif [[ ${#availableScheduler[@]} -gt 1 ]]; then
         Warning "More than one scheduler was found! Using " o B "${availableScheduler[0]}" uB ly "."
     fi
 

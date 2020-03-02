@@ -19,7 +19,7 @@
 
 function SubmitJobsForValidBetaValues_SLURM()
 {
-    if [ ${#BHMAS_betaValuesToBeSubmitted[@]} -gt 0 ]; then
+    if [[ ${#BHMAS_betaValuesToBeSubmitted[@]} -gt 0 ]]; then
         local betaString stringToBeGreppedFor submittingDirectory jobScriptFilename
         cecho lc "\n==================================================================================="
         cecho bb " Jobs will be submitted for the following beta values:"
@@ -27,12 +27,12 @@ function SubmitJobsForValidBetaValues_SLURM()
             cecho "  - $betaString"
         done
         for betaString in ${BHMAS_betaValuesToBeSubmitted[@]}; do
-            if [ $BHMAS_useMultipleChains == "FALSE" ]; then
+            if [[ $BHMAS_useMultipleChains == "FALSE" ]]; then
                 stringToBeGreppedFor="${BHMAS_betaPrefix}${BHMAS_betaRegex}"
             else
                 stringToBeGreppedFor="${BHMAS_seedPrefix}${BHMAS_seedRegex}"
             fi
-            if [ $(grep -o "${stringToBeGreppedFor}" <<< "$betaString" | wc -l) -ne $BHMAS_GPUsPerNode ]; then
+            if [[ $(grep -o "${stringToBeGreppedFor}" <<< "$betaString" | wc -l) -ne $BHMAS_GPUsPerNode ]]; then
                 cecho -n ly B "\n " U "WARNING" uU ":" uB " At least one job is being submitted with less than " emph "$BHMAS_GPUsPerNode" " runs inside."
                 AskUser "         Would you like to submit in any case?"
                 if UserSaidNo; then

@@ -24,7 +24,7 @@ function AcceptanceRateReport()
     #-----------------------------------------#
     for INDEX in "${!BETAVALUES_COPY[@]}"; do
         local OUTPUTFILE_GLOBALPATH=$BHMAS_runDirWithBetaFolders/$BHMAS_betaPrefix${BETAVALUES_COPY[$INDEX]}/$BHMAS_outputFilename
-        if [ ! -f $OUTPUTFILE_GLOBALPATH ]; then
+        if [[ ! -f $OUTPUTFILE_GLOBALPATH ]]; then
             cecho lr "\n File " file "$BHMAS_outputFilename" " not found in " dir "$BHMAS_runDirWithBetaFolders/$BHMAS_betaPrefix${BETAVALUES_COPY[$INDEX]}"\
                   " folder! The value " emph "beta = ${BETAVALUES_COPY[$INDEX]}" " will be skipped!\n"
             BHMAS_problematicBetaValues+=( ${BETAVALUES_COPY[$INDEX]} )
@@ -32,7 +32,7 @@ function AcceptanceRateReport()
         fi
     done
     #Make BETAVALUES_COPY not sparse if not empty
-    if [ ${#BETAVALUES_COPY[@]} -eq 0 ]; then
+    if [[ ${#BETAVALUES_COPY[@]} -eq 0 ]]; then
         cecho '' && return
     else
         BETAVALUES_COPY=( ${BETAVALUES_COPY[@]} )
@@ -52,7 +52,7 @@ function AcceptanceRateReport()
     #Find largest number of intervals to print table properly
     local LENGTH_LONGEST_COLUMN=0
     for NRLINES in ${NRLINES_ARRAY[@]}; do
-        [ $NRLINES -gt $LENGTH_LONGEST_COLUMN ] && LENGTH_LONGEST_COLUMN=$NRLINES
+        [[ $NRLINES -gt $LENGTH_LONGEST_COLUMN ]] && LENGTH_LONGEST_COLUMN=$NRLINES
     done
     #Print table in proper form
     printf -v SPACE_AT_THE_BEGINNING_OF_EACH_LINE '%*s' 10 ''
@@ -73,26 +73,26 @@ function AcceptanceRateReport()
     cecho lc "\n${SPACE_AT_THE_BEGINNING_OF_EACH_LINE}${LINE_OF_EQUAL// /=}"
     local BETA_COUNTER=0
     cecho lp -n "${SPACE_AT_THE_BEGINNING_OF_EACH_LINE}${EMPTY_SEPARATOR}Intervals$EMPTY_SEPARATOR"
-    while [ $BETA_COUNTER -lt ${#BETAVALUES_COPY[@]} ]; do
+    while [[ $BETA_COUNTER -lt ${#BETAVALUES_COPY[@]} ]]; do
         cecho lp -n "$(printf "${EMPTY_SEPARATOR}%s${EMPTY_SEPARATOR}" ${DATA_ARRAY[${POSITION_BETA_STRING_IN_DATA_ARRAY[$BETA_COUNTER]}]})"
         (( BETA_COUNTER++ )) || true #'|| true' because of set -e option
     done
     cecho lc "\n${SPACE_AT_THE_BEGINNING_OF_EACH_LINE}${LINE_OF_EQUAL// /=}"
     #Body
     local COUNTER=1
-    while [ $COUNTER -le $LENGTH_LONGEST_COLUMN ];do
+    while [[ $COUNTER -le $LENGTH_LONGEST_COLUMN ]];do
         cecho -n "$(printf "${SPACE_AT_THE_BEGINNING_OF_EACH_LINE}${EMPTY_SEPARATOR}%6d   $EMPTY_SEPARATOR" $COUNTER)"
         local POS_INDEX=1
         for POS in ${POSITION_BETA_STRING_IN_DATA_ARRAY[@]}; do
             DATA_INDEX=$(expr $POS + $COUNTER)
-            if [ $POS_INDEX -eq ${#POSITION_BETA_STRING_IN_DATA_ARRAY[@]} ]; then                  # "If I am printing the last column"
-                if [ $DATA_INDEX -lt ${#DATA_ARRAY[@]} ]; then                                     # "If there are still data to print, print"
+            if [[ $POS_INDEX -eq ${#POSITION_BETA_STRING_IN_DATA_ARRAY[@]} ]]; then                  # "If I am printing the last column"
+                if [[ $DATA_INDEX -lt ${#DATA_ARRAY[@]} ]]; then                                     # "If there are still data to print, print"
                     cecho -n "$(printf "$(GoodAcc ${DATA_ARRAY[$DATA_INDEX]})$EMPTY_SEPARATOR%${ACCEPTANCE_FIELD_LENGTH}s%${SPACE_AFTER_ACCEPTANCE_FIELD}s$EMPTY_SEPARATOR\e[0m" ${DATA_ARRAY[$DATA_INDEX]} "")"
                 else                                                                               # "otherwise print blank space"
                     cecho -n "{$EMPTY_SEPARATOR}${EMPTY_SEPARATOR}"
                 fi
-            elif [ $POS_INDEX -lt ${#POSITION_BETA_STRING_IN_DATA_ARRAY[@]} ]; then                # "If I am printing not the last column"
-                if [ $DATA_INDEX -lt ${POSITION_BETA_STRING_IN_DATA_ARRAY[$POS_INDEX]} ]; then     # "If there are still data to print, print"
+            elif [[ $POS_INDEX -lt ${#POSITION_BETA_STRING_IN_DATA_ARRAY[@]} ]]; then                # "If I am printing not the last column"
+                if [[ $DATA_INDEX -lt ${POSITION_BETA_STRING_IN_DATA_ARRAY[$POS_INDEX]} ]]; then     # "If there are still data to print, print"
                     cecho -n "$(printf "$(GoodAcc ${DATA_ARRAY[$DATA_INDEX]})$EMPTY_SEPARATOR%${ACCEPTANCE_FIELD_LENGTH}s%${SPACE_AFTER_ACCEPTANCE_FIELD}s$EMPTY_SEPARATOR\e[0m" ${DATA_ARRAY[$DATA_INDEX]} "")"
                 else                                                                               # "otherwise print blank space"
                     cecho -n "${EMPTY_SEPARATOR}${EMPTY_SEPARATOR}"

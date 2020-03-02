@@ -62,7 +62,7 @@ function MakeInteractiveSetupUsingDialog()
     #Complete dialog box command
     index=1
     for variable in ${variableNames[@]}; do
-        if [ $variable != 'BHMAS_coloredOutput' ]; then
+        if [[ $variable != 'BHMAS_coloredOutput' ]]; then
             commandToBeExecuted+=" '${variable}:' $index 3 '${userVariables[$variable]}'  $index $variableNameFieldLength $variableValueFieldLength 0 "
             (( index++ )) || true
         fi

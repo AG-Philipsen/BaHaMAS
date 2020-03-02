@@ -44,12 +44,12 @@
 function DeclarePathRelatedGlobalVariables()
 {
     #Setting of the correct formulation based on the path.
-    if [ $(grep "[sS]taggered" <<< "$PWD" | wc -l) -gt 0 ]; then
+    if [[ $(grep "[sS]taggered" <<< "$PWD" | wc -l) -gt 0 ]]; then
         readonly BHMAS_staggered='TRUE'
     else
         readonly BHMAS_staggered='FALSE'
     fi
-    if [ $(grep "[wW]ilson" <<< "$PWD" | wc -l) -gt 0 ]; then
+    if [[ $(grep "[wW]ilson" <<< "$PWD" | wc -l) -gt 0 ]]; then
         readonly BHMAS_wilson='TRUE'
     else
         readonly BHMAS_wilson='FALSE'
@@ -63,7 +63,7 @@ function DeclarePathRelatedGlobalVariables()
     #Parameters prefixes (here not readonly since they can be changed by user -> set as readonly in command line parser!)
     BHMAS_nflavourPrefix="Nf"
     BHMAS_chempotPrefix="mui"
-    [ $BHMAS_wilson = "TRUE" ] && BHMAS_massPrefix="k" || BHMAS_massPrefix="mass"
+    [[ $BHMAS_wilson = "TRUE" ]] && BHMAS_massPrefix="k" || BHMAS_massPrefix="mass"
     BHMAS_ntimePrefix="nt"
     BHMAS_nspacePrefix="ns"
     declare -ga BHMAS_parameterPrefixes=( [$BHMAS_nflavourPosition]=$BHMAS_nflavourPrefix

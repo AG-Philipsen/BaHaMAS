@@ -54,7 +54,7 @@ function SourceCodebaseGeneralFiles()
     elif IsTestModeOn; then
         source ${BHMAS_repositoryTopLevelPath}/Tests/SetupUserVariables.bash || exit $BHMAS_fatalBuiltin
     else
-        if [ ! -f "${BHMAS_userSetupFile}" ]; then
+        if [[ ! -f "${BHMAS_userSetupFile}" ]]; then
             declare -g BHMAS_coloredOutput='FALSE' #This is needed in cecho but is a user variable! Declare it here manually
             if WasAnyOfTheseOptionsGivenToBaHaMAS '-h' '--help'; then
                 Warning -N "BaHaMAS was not set up yet, but help was asked, some default values might not be displayed."

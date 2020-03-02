@@ -20,7 +20,7 @@
 
 function __static__AddToJobscriptFile()
 {
-    while [ $# -ne 0 ]; do
+    while [[ $# -ne 0 ]]; do
         printf "%s\n" "$1" >> $jobScriptGlobalPath
         shift
     done
@@ -47,27 +47,27 @@ function ProduceJobscript_CL2QCD()
         "#SBATCH --error=${BHMAS_hmcFilename}.%j.err"\
         "#SBATCH --no-requeue"
 
-    [ "$BHMAS_clusterPartition"       != '' ] && __static__AddToJobscriptFile "#SBATCH --partition=$BHMAS_clusterPartition"
-    [ "$BHMAS_clusterNode"            != '' ] && __static__AddToJobscriptFile "#SBATCH --nodelist=$BHMAS_clusterNode"
-    [ "$BHMAS_clusterGenericResource" != '' ] && __static__AddToJobscriptFile "#SBATCH --gres=$BHMAS_clusterGenericResource"
-    [ "$BHMAS_clusterConstraint"      != '' ] && __static__AddToJobscriptFile "#SBATCH --constraint=$BHMAS_clusterConstraint"
+    [[ "$BHMAS_clusterPartition"       != '' ]] && __static__AddToJobscriptFile "#SBATCH --partition=$BHMAS_clusterPartition"
+    [[ "$BHMAS_clusterNode"            != '' ]] && __static__AddToJobscriptFile "#SBATCH --nodelist=$BHMAS_clusterNode"
+    [[ "$BHMAS_clusterGenericResource" != '' ]] && __static__AddToJobscriptFile "#SBATCH --gres=$BHMAS_clusterGenericResource"
+    [[ "$BHMAS_clusterConstraint"      != '' ]] && __static__AddToJobscriptFile "#SBATCH --constraint=$BHMAS_clusterConstraint"
 
     #Trying to retrieve information about the list of nodes to be excluded if user gave file
-    if [ "$BHMAS_excludeNodesGlobalPath" != '' ]; then
+    if [[ "$BHMAS_excludeNodesGlobalPath" != '' ]]; then
         set +e #Here we want to "allow" grep or ssh to fail, since there could e.g. be connection problems. Afterwards we check excludeString.
-        if [ -f "$BHMAS_excludeNodesGlobalPath" ]; then
+        if [[ -f "$BHMAS_excludeNodesGlobalPath" ]]; then
             excludeString=$(grep -oE '\-\-exclude=.*\[.*\]' $BHMAS_excludeNodesGlobalPath 2>/dev/null)
-            if [ $? -eq 2 ]; then
+            if [[ $? -eq 2 ]]; then
                 Error "It was not possible to recover the exclude nodes string from " file "${BHMAS_excludeNodesGlobalPath}" " file!"
             fi
         elif [[ $BHMAS_excludeNodesGlobalPath =~ : ]]; then
             excludeString=$(ssh ${BHMAS_excludeNodesGlobalPath%%:*} "grep -oE '\-\-exclude=.*\[.*\]' ${BHMAS_excludeNodesGlobalPath#*:} 2>/dev/null")
-            if [ $? -eq 2 ]; then
+            if [[ $? -eq 2 ]]; then
                 Error "It was not possible to recover the exclude nodes string over ssh connection!"
             fi
         fi
         set -e
-        if [ "${excludeString:-}" != "" ]; then
+        if [[ "${excludeString:-}" != "" ]]; then
             __static__AddToJobscriptFile "#SBATCH $excludeString"
         else
             Warning -n "No string to exclude nodes in jobscript is available!"
@@ -103,7 +103,7 @@ function ProduceJobscript_CL2QCD()
         "# Check if directories exist"
     for index in "${!betaValues[@]}"; do
         __static__AddToJobscriptFile\
-            "if [ ! -d \$dir${index} ]; then"\
+            "if [[ ! -d \$dir${index} ]]; then"\
             "  echo \"Could not find directory \\\"\$dir${index}\\\" for runs. Aborting...\"" \
             "  exit $BHMAS_fatalFileNotFound" \
             "fi" \
@@ -125,7 +125,7 @@ function ProduceJobscript_CL2QCD()
         __static__AddToJobscriptFile "rm -f \$dir${index}/$BHMAS_hmcFilename && cp -a $BHMAS_hmcGlobalPath \$dir${index} || exit $BHMAS_fatalBuiltin"
     done
     __static__AddToJobscriptFile "echo \"...done!\"" ""
-    if [ "$BHMAS_submitDiskGlobalPath" != "$BHMAS_runDiskGlobalPath" ]; then
+    if [[ "$BHMAS_submitDiskGlobalPath" != "$BHMAS_runDiskGlobalPath" ]]; then
         __static__AddToJobscriptFile "#Copy inputfile from home to work directories..."
         for index in "${!betaValues[@]}"; do
             __static__AddToJobscriptFile "mkdir -p \$workdir${index} && cp \$dir${index}/$BHMAS_inputFilename \$workdir${index}/$BHMAS_inputFilename.\$SLURM_JOB_ID || exit $BHMAS_fatalBuiltin"
@@ -163,7 +163,7 @@ function ProduceJobscript_CL2QCD()
     __static__AddToJobscriptFile\
         ""\
         "# Terminating job manually to get an email in case of failure of any run"\
-        "if [ \"\$ERROR_OCCURRED\" = \"TRUE\" ]; then"\
+        "if [[ \"\$ERROR_OCCURRED\" = \"TRUE\" ]]; then"\
         "   printf \"\nTerminating job with non zero exit code... (\$(date))\n\""\
         "   exit $BHMAS_fatalGeneric"\
         "fi"\
@@ -175,11 +175,11 @@ function ProduceJobscript_CL2QCD()
         ""\
         "echo \"Date and time: \$(date)\""\
         "" ""
-    if [ "$BHMAS_submitDiskGlobalPath" != "$BHMAS_runDiskGlobalPath" ]; then
+    if [[ "$BHMAS_submitDiskGlobalPath" != "$BHMAS_runDiskGlobalPath" ]]; then
         __static__AddToJobscriptFile "# Backup files"
         for index in "${!betaValues[@]}"; do
             __static__AddToJobscriptFile "cd \$dir${index} || exit $BHMAS_fatalBuiltin"
-            if [ $BHMAS_measurePbp = "TRUE" ]; then
+            if [[ $BHMAS_measurePbp = "TRUE" ]]; then
                 __static__AddToJobscriptFile "cp \$workdir${index}/${BHMAS_outputFilename}_pbp.dat \$dir${index}/${BHMAS_outputFilename}_pbp.\$SLURM_JOB_ID || exit $BHMAS_fatalBuiltin"
             fi
             __static__AddToJobscriptFile "cp \$workdir${index}/$BHMAS_outputFilename \$dir${index}/$BHMAS_outputFilename.\$SLURM_JOB_ID || exit $BHMAS_fatalBuiltin" ""
@@ -190,15 +190,15 @@ function ProduceJobscript_CL2QCD()
         __static__AddToJobscriptFile "rm \$dir${index}/$BHMAS_hmcFilename || exit $BHMAS_fatalBuiltin"
     done
     __static__AddToJobscriptFile ""
-    if [ ${BHMAS_executionMode} = 'mode:thermalize' ] || [ ${BHMAS_executionMode} = "mode:continue-thermalization" ]; then
+    if [[ ${BHMAS_executionMode} = 'mode:thermalize' ]] || [[ ${BHMAS_executionMode} = "mode:continue-thermalization" ]]; then
         __static__AddToJobscriptFile "# Copy last configuration to Thermalized Configurations folder"
-        if [ $BHMAS_betaPostfix == "_thermalizeFromHot" ]; then
+        if [[ $BHMAS_betaPostfix == "_thermalizeFromHot" ]]; then
             for index in "${!betaValues[@]}"; do
                 __static__AddToJobscriptFile\
                     "NUMBER_LAST_CONFIGURATION_IN_FOLDER=\$(ls \$workdir${index} | grep '${BHMAS_configurationPrefix}[0-9]\+' | grep -o '[0-9]\+' | sort -V | tail -n1)" \
                     "cp \$workdir${index}/${BHMAS_configurationPrefix//\\/}\${NUMBER_LAST_CONFIGURATION_IN_FOLDER} ${BHMAS_thermConfsGlobalPath}/${BHMAS_configurationPrefix//\\/}${BHMAS_parametersString}_${BHMAS_betaPrefix}${betaValues[${index}]%_*}_fromHot\$(sed 's/^0*//' <<< \"\$NUMBER_LAST_CONFIGURATION_IN_FOLDER\") || exit $BHMAS_fatalBuiltin"
             done
-        elif [ $BHMAS_betaPostfix == "_thermalizeFromConf" ]; then
+        elif [[ $BHMAS_betaPostfix == "_thermalizeFromConf" ]]; then
             for index in "${!betaValues[@]}"; do
                 __static__AddToJobscriptFile "NUMBER_LAST_CONFIGURATION_IN_FOLDER=\$(ls \$workdir${index} | grep '${BHMAS_configurationPrefix}[0-9]\+' | grep -o '[0-9]\+' | sort -V | tail -n1)"
                 #TODO: For the moment we assume 1000 tr. are done from hot. Better to avoid it

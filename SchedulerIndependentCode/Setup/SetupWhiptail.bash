@@ -35,7 +35,7 @@ function __static__DisplayMenuBoxWithPresentVariablesAndActOnInput()
     #Complete dialog box command
     index=1
     for variable in ${variableNames[@]}; do
-        if [ $variable != 'BHMAS_coloredOutput' ]; then
+        if [[ $variable != 'BHMAS_coloredOutput' ]]; then
             commandToBeExecuted+=" '${variable}:' '${userVariables[$variable]}' "
             (( index++ )) || true
         fi
@@ -57,19 +57,19 @@ function __static__DisplayFreeInputBoxAndSetGivenInputValue()
 {
     local variableInputBox inputHeader variable inputBoxLines
     variableInputBox="$resultOfBox"; inputBoxLines=8
-    if [ "$variableInputBox" = "Configure BaHaMAS" ]; then
+    if [[ "$variableInputBox" = "Configure BaHaMAS" ]]; then
         return 0
     else
         inputHeader=''
         for variable in ${variableNames[@]}; do
-            if [ $variable = ${variableInputBox%?} ]; then
+            if [[ $variable = ${variableInputBox%?} ]]; then
                 break
             else
                 inputHeader+=" $variable\n"
                 (( inputBoxLines++ )) || true
             fi
         done
-        [ "$inputHeader" != '' ] && inputHeader="\n Possible variables to be used:\n\n$inputHeader"
+        [[ "$inputHeader" != '' ]] && inputHeader="\n Possible variables to be used:\n\n$inputHeader"
         inputHeader+='\n\n Enter the value for the variable:'
         commandToBeExecuted="whiptail --title '${variableInputBox%?}'
                                       --backtitle 'BaHaMAS setup'

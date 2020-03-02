@@ -23,8 +23,8 @@ function ProduceInputFileAndJobScriptForEachBeta_SLURM()
     betaValuesCopy=(${BHMAS_betaValues[@]})
     for index in "${!betaValuesCopy[@]}"; do
         local submitBetaDirectory="$BHMAS_submitDirWithBetaFolders/$BHMAS_betaPrefix${betaValuesCopy[$index]}"
-        if [ -d "$submitBetaDirectory" ]; then
-            if [ $(ls $submitBetaDirectory | wc -l) -gt 0 ]; then
+        if [[ -d "$submitBetaDirectory" ]]; then
+            if [[ $(ls $submitBetaDirectory | wc -l) -gt 0 ]]; then
                 cecho lr "\n There are already files in " dir "$submitBetaDirectory" ".\n The value " emph "beta = ${betaValuesCopy[$index]}" " will be skipped!\n"
                 BHMAS_problematicBetaValues+=( ${betaValuesCopy[$index]} )
                 unset -v 'betaValuesCopy[$index]' #Here betaValuesCopy becomes sparse
@@ -32,7 +32,7 @@ function ProduceInputFileAndJobScriptForEachBeta_SLURM()
             fi
         fi
     done
-    if [ ${#betaValuesCopy[@]} -eq 0 ]; then
+    if [[ ${#betaValuesCopy[@]} -eq 0 ]]; then
         return
     fi
     #Make betaValuesCopy not sparse

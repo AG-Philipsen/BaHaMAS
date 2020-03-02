@@ -28,14 +28,14 @@ function __static__CheckAvailabilityOfProgram()
 
 function __static__IsFoundVersionOlderThanRequired()
 {
-    [ $1 = $2 ] && return 1
+    [[ $1 = $2 ]] && return 1
     #Here I suppose 'sort -V' is available, even though it is part
     #of Linux coreutils. In any case we use coreutils functionalities
     #around in BaHaMAS and at the moment we do not make further checks.
     local foundVersion requiredVersion newerVersion
     requiredVersion=$1; foundVersion=$2
     newerVersion=$(printf '%s\n%s' $requiredVersion $foundVersion | sort -V | tail -n1)
-    if [ $newerVersion = $requiredVersion ]; then
+    if [[ $newerVersion = $requiredVersion ]]; then
         return 0
     else
         return 1
@@ -88,7 +88,7 @@ function CheckSystemRequirements()
         __static__CheckAboutProgram $program
         (( returnValue+=$? )) || true #'|| true' because of set -e option
     done
-    if [ $returnValue -gt 0 ]; then
+    if [[ $returnValue -gt 0 ]]; then
         cecho -n "\e[1A"
         Fatal $BHMAS_fatalRequirement "Please (maybe locally) install the required versions of the above programs and run " B "BaHaMAS" uB " again."
     fi

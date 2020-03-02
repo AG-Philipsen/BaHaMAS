@@ -33,7 +33,7 @@ function __static__AddOptionToDatabaseHelper()
     lengthOption=15; indentation='     '
     name="$1"; description="$2"; shift 2
     cecho $groupExclusiveColor "$(printf "%s%-${lengthOption}s" "$indentation" "$name")" d "  ->  " $groupExclusiveColor "$description"
-    while [ $# -ne 0 ]; do
+    while [[ $# -ne 0 ]]; do
         cecho "$(printf "%s%${lengthOption}s" "$indentation" "")      " $groupExclusiveColor "$1"
         shift
     done
@@ -43,7 +43,7 @@ function PrintDatabaseHelper()
 {
     local sectionColor groupExclusiveColor defaultMassParameter
     defaultMassParameter='\e[91m${massPrefix}\e[0m'
-    [ "${MASS_PARAMETER:-}" = '' ] && MASS_PARAMETER="$defaultMassParameter"
+    [[ "${MASS_PARAMETER:-}" = '' ]] && MASS_PARAMETER="$defaultMassParameter"
     declare -A groupColors=( ['DISPLAY']='p' ['UPDATE']='pk' ['REPORT']='lc' ['GENERAL']='o' )
     sectionColor='g'
     __static__AddSectionLine "Displaying options"
@@ -117,7 +117,7 @@ function PrintDatabaseHelper()
     cecho ly "  " B U\
           "NOTE" uU ":" uB " Please, remember that the " ${groupColors['DISPLAY']} "display" ly ", " ${groupColors['UPDATE']} "update" ly " and " ${groupColors['REPORT']} "report/show" ly " options are not compatible!"
     cecho ''
-    if [ $MASS_PARAMETER = "$defaultMassParameter" ]; then
+    if [[ $MASS_PARAMETER = "$defaultMassParameter" ]]; then
         cecho lr "  " B U\
               "ATTENTION" uU ":" uB lc " Note that " lr "$MASS_PARAMETER" lc " refers to the mass prefix that will be used in simulations (e.g. " ly "mass" lc " or " ly "k" lc ")."
         cecho ''

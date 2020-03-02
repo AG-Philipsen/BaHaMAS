@@ -21,14 +21,14 @@ function __static__AddOptionToHelper()
 {
     local name description color lengthOption indentation
     lengthOption=38; indentation='    '
-    if [ "$1" = '-e' ]; then
+    if [[ "$1" = '-e' ]]; then
         color="$mutuallyExclusiveColor"; shift
     else
         color="$normalColor"
     fi
     name="$1"; description="$2"; shift 2
     cecho $color "$(printf "%s%-${lengthOption}s" "$indentation" "$name")" d "  ->  " $helperColor "$description"
-    while [ "${1:-}" != '' ]; do
+    while [[ "${1:-}" != '' ]]; do
         cecho "$(printf "%s%${lengthOption}s" "$indentation" "")      " $helperColor "$1"
         shift
     done
@@ -36,7 +36,7 @@ function __static__AddOptionToHelper()
 
 function __static__PrintDefault()
 {
-    if [ "${1:-}" = '' ]; then
+    if [[ "${1:-}" = '' ]]; then
         cecho -n -d o 'unset' $helperColor
     else
         #The ' \e[1D' insert a space and then moves back the cursor by one column.

@@ -35,7 +35,7 @@ function PrepareGivenOptionToBeProcessed()
     local newOptions value tmp
     newOptions=()
     for value in "$@"; do
-        [ "$value" = '=' ] && continue
+        [[ "$value" = '=' ]] && continue
         if [[ $value =~ ^-.*=.* ]]; then
             tmp="$(sed 's/=/ /' <<< "$value")"
             newOptions+=( ${tmp%% *} )  #Part before '=' without spaces (option name)
@@ -85,26 +85,26 @@ function __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray()
     BHMAS_specifiedCommandLineOptions=() # Empty it to fill it again with only long options
     for option in "$@"; do
         #Replace short options if they are NOT for dabase!
-        if [ $databaseOption = 'FALSE' ]; then
+        if [[ $databaseOption = 'FALSE' ]]; then
            KeyInArray $option mapOptions && option=${mapOptions[$option]}
            #More logic for repeated short options with different long one
-           if [ $option = '-l' ]; then
+           if [[ $option = '-l' ]]; then
                if ElementInArray '--jobstatus' "${BHMAS_specifiedCommandLineOptions[@]}"; then
                    option='--local'
                else
                    option='--liststatus'
                fi
-           elif [ $option = '-u' ]; then
+           elif [[ $option = '-u' ]]; then
                if ElementInArray '--jobstatus' "${BHMAS_specifiedCommandLineOptions[@]}"; then
                    option='--user'
                else
                    option='--commentBetas'
                fi
-           elif [ $option = '-h' ]; then
+           elif [[ $option = '-h' ]]; then
                option='--help'
            fi
         else
-           if [ $option = '-h' ]; then
+           if [[ $option = '-h' ]]; then
                option='--helpDatabase'
            fi
         fi

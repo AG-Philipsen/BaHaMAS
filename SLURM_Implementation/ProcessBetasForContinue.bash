@@ -41,15 +41,15 @@ function __static__GetStatusOfJobsContainingBetavalues()
 
 function __static__CheckWhetherAnyRequiredFileOrFolderIsMissing()
 {
-    if [ ! -d $runBetaDirectory ]; then
+    if [[ ! -d $runBetaDirectory ]]; then
         Error "The directory " dir "$runBetaDirectory" " does not exist!\n" "The value " emph "beta = $betaValue" " will be skipped!"
         BHMAS_problematicBetaValues+=( $betaValue )
         return 1
-    elif [ ! -d $submitBetaDirectory ]; then
+    elif [[ ! -d $submitBetaDirectory ]]; then
         Error "The directory " dir "$submitBetaDirectory" " does not exist!\n" "The value " emph "beta = $betaValue" " will be skipped!"
         BHMAS_problematicBetaValues+=( $betaValue )
         return 1
-    elif [ ! -f $inputFileGlobalPath ]; then
+    elif [[ ! -f $inputFileGlobalPath ]]; then
         Error "The file " file "$inputFileGlobalPath" " does not exist!\n" "The value " emph "beta = $betaValue" " will be skipped!"
         BHMAS_problematicBetaValues+=( $betaValue )
         return 1
@@ -60,10 +60,10 @@ function __static__CheckWhetherAnyRequiredFileOrFolderIsMissing()
 function __static__CheckWhetherSimulationForGivenBetaIsAlreadyEnqueued()
 {
     local jobStatus; jobStatus="${statusOfJobsContainingGivenBeta[$betaValue]}"
-    if [ "$jobStatus" = "" ]; then
+    if [[ "$jobStatus" = "" ]]; then
         return 0
     else
-        if [ $(grep -c "\(RUNNING\|PENDING\)" <<< "$jobStatus") -gt 0 ]; then
+        if [[ $(grep -c "\(RUNNING\|PENDING\)" <<< "$jobStatus") -gt 0 ]]; then
             Error "The simulation seems to be already running with " emph "job-id $(cut -d'@' -f1 <<< "$jobStatus")" " and it cannot be continued!\n"\
                   "The value " emph "beta = $betaValue" " will be skipped!"
             BHMAS_problematicBetaValues+=( $betaValue )
@@ -80,7 +80,7 @@ function __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAnd
     if KeyInArray $betaValue BHMAS_trajectoriesToBeResumedFrom; then
         #NOTE: If the user wishes to resume from the last avialable checkpoint, then we have to find here which is
         #      the "last" valid one. Valid means that both the conf and the prng file are present with the same number
-        if [ ${BHMAS_trajectoriesToBeResumedFrom[$betaValue]} = "last" ]; then
+        if [[ ${BHMAS_trajectoriesToBeResumedFrom[$betaValue]} = "last" ]]; then
             #comm expects alphabetically sorted input, then we sort numerically the output and we take the last number
             BHMAS_trajectoriesToBeResumedFrom[$betaValue]=$(comm -12  <(ls -1 $runBetaDirectory | sed -n 's/^'${BHMAS_configurationPrefix}'0*\([1-9][0-9]*\)$/\1/p' | sort)\
                                                                  <(ls -1 $runBetaDirectory | sed -n 's/^'${BHMAS_prngPrefix}'0*\([1-9][0-9]*\)$/\1/p' | sort) | sort -n | tail -n1)
@@ -98,18 +98,18 @@ function __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAnd
         #       function (ideally asking the user again if he wants to restore everything as it was).
 
         nameOfLastConfiguration=$(printf "${BHMAS_configurationPrefix//\\/}%0${BHMAS_checkpointMinimumNumberOfDigits}d" "${BHMAS_trajectoriesToBeResumedFrom[$betaValue]}")
-        if [ ! -f "${runBetaDirectory}/${nameOfLastConfiguration}" ];then
+        if [[ ! -f "${runBetaDirectory}/${nameOfLastConfiguration}" ]];then
             Error "Configuration " emph "$nameOfLastConfiguration" " not found in "\
                   dir "$runBetaDirectory" " folder.\n" "The value " emph "beta = $betaValue" " will be skipped!"
             BHMAS_problematicBetaValues+=( $betaValue )
             return 1
         fi
         nameOfLastPRNG=$(printf "${BHMAS_prngPrefix//\\/}%0${BHMAS_checkpointMinimumNumberOfDigits}d" "${BHMAS_trajectoriesToBeResumedFrom[$betaValue]}")
-        if [ ! -f "${runBetaDirectory}/${nameOfLastPRNG}" ]; then
+        if [[ ! -f "${runBetaDirectory}/${nameOfLastPRNG}" ]]; then
             nameOfLastPRNG="" #If the prng.xxxxx is not found, use random seed
         fi
         #If the BHMAS_outputFilename is not in the runBetaDirectory stop and not do anything else for this betaValue
-        if [ ! -f $outputFileGlobalPath ]; then
+        if [[ ! -f $outputFileGlobalPath ]]; then
             Error "File " file "$BHMAS_outputFilename" " not found in " dir "$runBetaDirectory" " folder.\n" "The value " emph "beta = $betaValue" " will be skipped!"
             BHMAS_problematicBetaValues+=( $betaValue )
             return 1
@@ -122,7 +122,7 @@ function __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAnd
         for filename in $(ls -1 $runBetaDirectory | sed -n -e '/^'${BHMAS_configurationRegex}'.*$/p' -e '/^'${BHMAS_prngRegex}'.*$/p'); do
             #Move to trash only 'conf.xxxxx(whatever)' or 'prng.xxxxx(whatever)' files with xxxxx larger than the resume from trajectory
             numberFromFile=$(sed -n 's/^\('${BHMAS_configurationPrefix}'\|'${BHMAS_prngPrefix}'\)0*\([1-9][0-9]*\).*$/\2/p' <<< "${filename}")
-            if [ $numberFromFile -gt ${BHMAS_trajectoriesToBeResumedFrom[$betaValue]} ]; then
+            if [[ $numberFromFile -gt ${BHMAS_trajectoriesToBeResumedFrom[$betaValue]} ]]; then
                 mv $runBetaDirectory/$filename $trashFolderName
             fi
         done
@@ -145,7 +145,7 @@ function __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAnd
             return 1
         fi
         #Make same operations on pbp file, if existing
-        if [ -f $outputPbpFileGlobalPath ]; then
+        if [[ -f $outputPbpFileGlobalPath ]]; then
             mv $outputPbpFileGlobalPath $trashFolderName || exit $BHMAS_fatalBuiltin
             if ! awk -v tr="${BHMAS_trajectoriesToBeResumedFrom[$betaValue]}"\
                  'BEGIN{found=1} $1<tr{print $0} $1==(tr-1){found=0} END{exit found}'\
@@ -158,9 +158,9 @@ function __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAnd
                 return 1
             fi
         fi
-    elif [ -f "$runBetaDirectory/${BHMAS_configurationPrefix//\\/}${BHMAS_standardCheckpointPostfix}" ]; then #If resumefrom has not been given use conf.save if present, otherwise use the last checkpoint
+    elif [[ -f "$runBetaDirectory/${BHMAS_configurationPrefix//\\/}${BHMAS_standardCheckpointPostfix}" ]]; then #If resumefrom has not been given use conf.save if present, otherwise use the last checkpoint
         nameOfLastConfiguration="${BHMAS_configurationPrefix//\\/}${BHMAS_standardCheckpointPostfix}"
-        if [ -f "$runBetaDirectory/${BHMAS_prngPrefix//\\/}${BHMAS_standardCheckpointPostfix}" ]; then
+        if [[ -f "$runBetaDirectory/${BHMAS_prngPrefix//\\/}${BHMAS_standardCheckpointPostfix}" ]]; then
             nameOfLastPRNG="${BHMAS_prngPrefix//\\/}${BHMAS_standardCheckpointPostfix}"
         else
             nameOfLastPRNG=""
@@ -175,17 +175,17 @@ function __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAnd
 function __static__CheckWhetherFoundCheckpointIsGoodToContinue()
 {
     #The variable nameOfLastConfiguration should be set here, if not it means no conf was available!
-    if [ "$nameOfLastConfiguration" == "" ]; then
+    if [[ "$nameOfLastConfiguration" == "" ]]; then
         Error "No configuration found in " dir "$runBetaDirectory" ".\n" "The value " emph "beta = $betaValue" " will be skipped!"
         BHMAS_problematicBetaValues+=( $betaValue )
         return 1
     fi
-    if [ "$nameOfLastPRNG" = "" ]; then
+    if [[ "$nameOfLastPRNG" = "" ]]; then
         Warning "No valid PRNG file for configuration " file "${BHMAS_betaPrefix}${betaValue}/$nameOfLastConfiguration" " was found! Using a random seed."
     fi
     #Check that, in case the continue is done from a "numeric" configuration, the number of conf and prng is the same
     if [[ "$nameOfLastConfiguration" =~ [.][0-9]+$ ]] && [[ "$nameOfLastPRNG" =~ [.][0-9]+$ ]]; then
-        if [ $(sed 's/^0*//g' <<< "${nameOfLastConfiguration#*.}") -ne $(sed 's/^0*//g' <<< "${nameOfLastPRNG#*.}") ]; then
+        if [[ $(sed 's/^0*//g' <<< "${nameOfLastConfiguration#*.}") -ne $(sed 's/^0*//g' <<< "${nameOfLastPRNG#*.}") ]]; then
             Error "The numbers of " emph "${BHMAS_configurationPrefix//\\/}xxxxx" " and "\
                   emph "${BHMAS_prngPrefix//\\/}xxxxx" " are different! Check the respective folder!\n"\
                   "The value " emph "beta = $betaValue" " will be skipped!"
@@ -218,19 +218,19 @@ function __static__AddOptionsToInputFile()
 
 function __static__FindAndReplaceSingleOccurenceInFile()
 {
-    if [ $# -ne 3 ]; then
+    if [[ $# -ne 3 ]]; then
         Internal "The function " emph "$FUNCNAME" " has been wrongly called (" emph "3 arguments needed" ")!"
     fi
     local filename stringToBeFound replaceString
     filename="$1"; stringToBeFound="$2"; replaceString="$3"
-    if [ ! -f "$filename" ]; then
+    if [[ ! -f "$filename" ]]; then
         Fatal $BHMAS_fatalFileNotFound "File " file "$filename" " has not been found!"
-    elif [ $(grep -c "$stringToBeFound" $filename) -eq 0 ]; then
+    elif [[ $(grep -c "$stringToBeFound" $filename) -eq 0 ]]; then
         Error "The string " emph "$stringToBeFound" " has " emph "not been found" " in file "\
               file "${filename##$BHMAS_runDirWithBetaFolders/}" "!\n" "The value " emph "beta = $betaValue" " will be skipped!"
         BHMAS_problematicBetaValues+=( $betaValue )
         return 1
-    elif [ $(grep -c "$stringToBeFound" $filename) -gt 1 ]; then
+    elif [[ $(grep -c "$stringToBeFound" $filename) -gt 1 ]]; then
         Error "The string " emph "$stringToBeFound" " occurs " emph "more than once" " in file "\
               file "${filename##$BHMAS_runDirWithBetaFolders/}" "!\n" "The value " emph "beta = $betaValue" " will be skipped!"
         BHMAS_problematicBetaValues+=( $betaValue )
@@ -242,7 +242,7 @@ function __static__FindAndReplaceSingleOccurenceInFile()
 function __static__ModifyOptionsInInputFile()
 {
     local oldString newString
-    while [ $# -gt 0 ]; do
+    while [[ $# -gt 0 ]]; do
         case $1 in
             startCondition=* )                  oldString="startCondition=[[:alpha:]]\+";                newString="startCondition=${1#*=}" ;;
             initialConf=* )                     oldString="initialConf=[[:alnum:][:punct:]]*";           newString="initialConf=${1#*=}" ;;
@@ -275,12 +275,12 @@ function __static__PrintAboutOptionsToStandardOutput()
 {
     local addedOrSet toInto
     addedOrSet="${1:?Argument not properly passed to function $FUNCNAME}"; shift
-    [ $addedOrSet = 'Added' ] && toInto='to' || toInto='into'
-    if [ $# -eq 1 ]; then
+    [[ $addedOrSet = 'Added' ]] && toInto='to' || toInto='into'
+    if [[ $# -eq 1 ]]; then
         cecho wg " ${addedOrSet} option " emph "$1" " $toInto the " file "$(basename $inputFileGlobalPath)" " file."
     else
         cecho wg " ${addedOrSet} options " emph "$1"; shift
-        while [ $# -gt 1 ]; do
+        while [[ $# -gt 1 ]]; do
             cecho wg "             " emph "$1"; shift
         done
         cecho wg "             " emph "$1" " $toInto the " file "$(basename $inputFileGlobalPath)" " file."
@@ -305,15 +305,15 @@ function __static__FindAndSetNumberOfTrajectoriesAlreadyProduced()
     #   3) if the output file exists, use it. Otherwise,
     #   4) print an error and skip beta.
     numberOfTrajectoriesAlreadyProduced="$(sed -n 's/^[^1-9]*\([0-9]\+\)[^0-9]*$/\1/p' <<< "$nameOfLastConfiguration")" #extract number without leading zeros (only if exactly one number is in conf name)
-    if [ "$numberOfTrajectoriesAlreadyProduced" = '' ]; then
+    if [[ "$numberOfTrajectoriesAlreadyProduced" = '' ]]; then
         numberOfTrajectoriesAlreadyProduced="$(sed -n "s/^trajectory nr = \([1-9][0-9]*\)$/\1/p" ${runBetaDirectory}/${nameOfLastConfiguration} || true)"
     fi
-    if [ "$numberOfTrajectoriesAlreadyProduced" = '' ]; then
-        if [ -f $outputFileGlobalPath ]; then
+    if [[ "$numberOfTrajectoriesAlreadyProduced" = '' ]]; then
+        if [[ -f $outputFileGlobalPath ]]; then
             numberOfTrajectoriesAlreadyProduced=$(awk 'END{print $1 + 1}' $outputFileGlobalPath) #The +1 is here necessary because the first tr. is supposed to be the number 0.
         fi
     fi
-    if [ "$numberOfTrajectoriesAlreadyProduced" = '' ]; then
+    if [[ "$numberOfTrajectoriesAlreadyProduced" = '' ]]; then
         Error "It was not possible to deduce the number of already produced trajectories!\n" "The value " emph "beta = $betaValue" " will be skipped!"
         BHMAS_problematicBetaValues+=( $betaValue )
         return 1
@@ -326,15 +326,15 @@ function __static__IsSimulationFinished()
 {
     local startingStatistics goalStatistics continueOptionString
     startingStatistics=$1; goalStatistics=$2; continueOptionString="--continue"
-    if [ $startingStatistics -gt $goalStatistics ]; then
-        if [ $BHMAS_trajectoryNumberUpToWhichToContinue -ne 0 ]; then
+    if [[ $startingStatistics -gt $goalStatistics ]]; then
+        if [[ $BHMAS_trajectoryNumberUpToWhichToContinue -ne 0 ]]; then
             continueOptionString+="=$BHMAS_trajectoryNumberUpToWhichToContinue"
         fi
         Error "It was found that the number of done measurements is " emph "$startingStatistics > $goalStatistics = goal trajectory" ".\n"\
               "The option " emph "--continue" " cannot be applied. The value " emph "beta = $betaValue" " will be skipped!"
         BHMAS_problematicBetaValues+=( $betaValue )
         return 1
-    elif [ $startingStatistics -eq $goalStatistics ]; then
+    elif [[ $startingStatistics -eq $goalStatistics ]]; then
         if KeyInArray $betaValue BHMAS_trajectoriesToBeResumedFrom; then
             #If we resume from and simulation is finished, delete from std output the 'ATTENTION' line
             cecho -d -n "\e[1A\e[K"
@@ -358,7 +358,7 @@ function __static__HandleMeasurementsInInputFile()
     local optionsToBeAddedOrModified numberOfTrajectoriesAlreadyProduced
     if WasAnyOfTheseOptionsGivenToBaHaMAS '-m' '--measurements'; then
         optionsToBeAddedOrModified="measurements=$BHMAS_numberOfTrajectories"
-    elif [ $BHMAS_trajectoryNumberUpToWhichToContinue -ne 0 ]; then
+    elif [[ $BHMAS_trajectoryNumberUpToWhichToContinue -ne 0 ]]; then
         __static__FindAndSetNumberOfTrajectoriesAlreadyProduced || { __static__RestoreOriginalInputFile && return 1; }
         __static__IsSimulationFinished $numberOfTrajectoriesAlreadyProduced $BHMAS_trajectoryNumberUpToWhichToContinue || { __static__RestoreOriginalInputFile && return 1; }
         optionsToBeAddedOrModified="measurements=$(( BHMAS_trajectoryNumberUpToWhichToContinue - numberOfTrajectoriesAlreadyProduced ))"
@@ -377,20 +377,20 @@ function __static__HandleMeasurementsInInputFile()
 function __static__HandlePbpInInputFile()
 {
     local measurePbpValueForInputFile string pbpStrings optionsToBeAddedOrModified
-    if [ $BHMAS_measurePbp = "FALSE" ]; then
+    if [[ $BHMAS_measurePbp = "FALSE" ]]; then
         measurePbpValueForInputFile=0
-    elif [ $BHMAS_measurePbp = "TRUE" ]; then
+    elif [[ $BHMAS_measurePbp = "TRUE" ]]; then
         measurePbpValueForInputFile=1
         #If the pbp file already exists non empty, add end of line to it to be sure the prompt is at the beginning of a new line
-        if [ -f $outputPbpFileGlobalPath ] && [ $(wc -l < $outputPbpFileGlobalPath) -ne 0 ]; then
+        if [[ -f $outputPbpFileGlobalPath ]] && [[ $(wc -l < $outputPbpFileGlobalPath) -ne 0 ]]; then
             sed -i '$a\' $outputPbpFileGlobalPath
         fi
     fi
     optionsToBeAddedOrModified=("measurePbp=$measurePbpValueForInputFile")
-    if [ $(grep -c "measurePbp" $inputFileGlobalPath) -eq 0 ]; then
+    if [[ $(grep -c "measurePbp" $inputFileGlobalPath) -eq 0 ]]; then
         pbpStrings=(sourceType sourceContent nSources pbpMeasurements fermObsInSingleFile fermObsPbpPrefix)
         for string in "${pbpStrings[@]}"; do
-            if [ $(grep -c "$string" $inputFileGlobalPath) -ne 0 ]; then
+            if [[ $(grep -c "$string" $inputFileGlobalPath) -ne 0 ]]; then
                 Error "The option " emph "measurePbp" " is not present in the input file but one or more specification about how to calculate\n"\
                       "the chiral condensate are present. Suspicious situation, investigate! The value " emph "beta = $betaValue" " will be skipped!"
                 BHMAS_problematicBetaValues+=( $betaValue )
@@ -398,9 +398,9 @@ function __static__HandlePbpInInputFile()
             fi
         done
         optionsToBeAddedOrModified+=("sourceType=volume" "sourceContent=gaussian")
-        if [ $BHMAS_wilson = "TRUE" ]; then
+        if [[ $BHMAS_wilson = "TRUE" ]]; then
             optionsToBeAddedOrModified+=("nSources=16")
-        elif [ $BHMAS_staggered = "TRUE" ]; then
+        elif [[ $BHMAS_staggered = "TRUE" ]]; then
             optionsToBeAddedOrModified+=("nSources=1" "pbpMeasurements=8" "fermObsInSingleFile=1" "fermObsPbpPrefix=${BHMAS_outputFilename}")
         fi
         __static__AddOptionsToInputFile ${optionsToBeAddedOrModified[@]}
@@ -415,10 +415,10 @@ function __static__HandlePbpInInputFile()
 
 function __static__HandleMultiplePseudofermionsInInputFile()
 {
-    if [ $BHMAS_staggered = "TRUE" ]; then #Multiple pseudofermions simply ignored if not staggered
+    if [[ $BHMAS_staggered = "TRUE" ]]; then #Multiple pseudofermions simply ignored if not staggered
         local oldOption newOption optionsToBeAddedOrModified
         optionsToBeAddedOrModified=("nPseudoFermions=${BHMAS_numberOfPseudofermions}")
-        if [ $(grep -c "nPseudoFermions" $inputFileGlobalPath) -eq 0 ]; then
+        if [[ $(grep -c "nPseudoFermions" $inputFileGlobalPath) -eq 0 ]]; then
             __static__AddOptionsToInputFile ${optionsToBeAddedOrModified[@]}
             __static__PrintAddedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
         else
@@ -428,17 +428,17 @@ function __static__HandleMultiplePseudofermionsInInputFile()
         #Always replace approx files with correct ones (maybe unnecessary, but easy to be done always)
         oldOption="rationalApproxFileHB=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_\(pf[1-9]\+_\)\?Approx_Heatbath"
         newOption="${oldOption%/*}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Heatbath"
-        [ $BHMAS_numberOfPseudofermions -gt 1 ] && newOption="${newOption/Approx_Heatbath/pf${BHMAS_numberOfPseudofermions}_Approx_Heatbath}"
+        [[ $BHMAS_numberOfPseudofermions -gt 1 ]] && newOption="${newOption/Approx_Heatbath/pf${BHMAS_numberOfPseudofermions}_Approx_Heatbath}"
         __static__FindAndReplaceSingleOccurenceInFile $inputFileGlobalPath "$oldOption" "$newOption" || { __static__RestoreOriginalInputFile && return 1; }
         __static__PrintModifiedOptionsToStandardOutput ${newOption}
         oldOption="rationalApproxFileMD=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_\(pf[1-9]\+_\)\?Approx_MD"
         newOption="${oldOption%/*}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_MD"
-        [ $BHMAS_numberOfPseudofermions -gt 1 ] && newOption="${newOption/Approx_MD/pf${BHMAS_numberOfPseudofermions}_Approx_MD}"
+        [[ $BHMAS_numberOfPseudofermions -gt 1 ]] && newOption="${newOption/Approx_MD/pf${BHMAS_numberOfPseudofermions}_Approx_MD}"
         __static__FindAndReplaceSingleOccurenceInFile $inputFileGlobalPath "$oldOption" "$newOption" || { __static__RestoreOriginalInputFile && return 1; }
         __static__PrintModifiedOptionsToStandardOutput ${newOption}
         oldOption="rationalApproxFileMetropolis=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_\(pf[1-9]\+_\)\?Approx_Metropolis"
         newOption="${oldOption%/*}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Metropolis"
-        [ $BHMAS_numberOfPseudofermions -gt 1 ] && newOption="${newOption/Approx_Metropolis/pf${BHMAS_numberOfPseudofermions}_Approx_Metropolis}"
+        [[ $BHMAS_numberOfPseudofermions -gt 1 ]] && newOption="${newOption/Approx_Metropolis/pf${BHMAS_numberOfPseudofermions}_Approx_Metropolis}"
         __static__FindAndReplaceSingleOccurenceInFile $inputFileGlobalPath "$oldOption" "$newOption" || { __static__RestoreOriginalInputFile && return 1; }
         __static__PrintModifiedOptionsToStandardOutput ${newOption}
     fi
@@ -447,14 +447,14 @@ function __static__HandleMultiplePseudofermionsInInputFile()
 
 function __static__HandleMassPreconditioningInInputFile()
 {
-    if [ $BHMAS_wilson = "TRUE" ]; then #Mass preconditioning simply ignored if not Wilson
+    if [[ $BHMAS_wilson = "TRUE" ]]; then #Mass preconditioning simply ignored if not Wilson
         local string massPreconditioningStrings optionsToBeAddedOrModified
         if KeyInArray $betaValue BHMAS_massPreconditioningValues; then
             optionsToBeAddedOrModified=("useMP=1")
-            if [ $(grep -c "useMP" $inputFileGlobalPath) -eq 0 ]; then
+            if [[ $(grep -c "useMP" $inputFileGlobalPath) -eq 0 ]]; then
                 massPreconditioningStrings=(solverMP kappaMP integrator2 integrationSteps2)
                 for string in "${massPreconditioningStrings[@]}"; do
-                    if [ $(grep -c "$string" $inputFileGlobalPath) -ne 0 ]; then
+                    if [[ $(grep -c "$string" $inputFileGlobalPath) -ne 0 ]]; then
                         Error "The option " emph "useMP" " is not present in the input file but one or more specification about how to use\n"\
                               "mass preconditioning are present. Suspicious situation, investigate! The value " emph "beta = $betaValue" " will be skipped!"
                         BHMAS_problematicBetaValues+=( $betaValue )
@@ -478,7 +478,7 @@ function __static__HandleMassPreconditioningInInputFile()
             fi
         else
             #Here check if mass preconditioning is in the input file and if so switch it off
-            if [ $(grep -c "useMP" $inputFileGlobalPath) -gt 0 ]; then #Use '-gt 0' instead of '-eq 1' so that we also check multiple occurences
+            if [[ $(grep -c "useMP" $inputFileGlobalPath) -gt 0 ]]; then #Use '-gt 0' instead of '-eq 1' so that we also check multiple occurences
                 optionsToBeAddedOrModified=("useMP=0" "solverResiduumCheckEvery=50" "nTimeScales=2")
                 __static__ModifyOptionsInInputFile ${optionsToBeAddedOrModified[@]} || { __static__RestoreOriginalInputFile && return 1; }
                 __static__PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
@@ -499,7 +499,7 @@ function __static__HandleStartConfigurationInInputFile()
 {
     local optionsToBeAddedOrModified
     optionsToBeAddedOrModified="initialConf=$runBetaDirectory/${nameOfLastConfiguration}"
-    if [ $(grep -c "initialConf=[[:alnum:][:punct:]]*" $inputFileGlobalPath) -eq 0 ]; then
+    if [[ $(grep -c "initialConf=[[:alnum:][:punct:]]*" $inputFileGlobalPath) -eq 0 ]]; then
         __static__AddOptionsToInputFile $optionsToBeAddedOrModified
         __static__PrintAddedOptionsToStandardOutput $optionsToBeAddedOrModified
     else
@@ -513,11 +513,11 @@ function __static__HandleStartConfigurationInInputFile()
 function __static__HandlePRNGStateInInputFile()
 {
     local optionsToBeAddedOrModified
-    if [ "$nameOfLastPRNG" == "" ]; then
+    if [[ "$nameOfLastPRNG" == "" ]]; then
         #Delete eventual line from input file with initialPRNG (here we must use a random seed)
         sed -i '/initialPRNG/d' $inputFileGlobalPath
         optionsToBeAddedOrModified="hostSeed=$(printf "%04d" $(( (RANDOM+1000)%10000 )) )"
-        if [ $(grep -c "hostSeed=[0-9]\{4\}" $inputFileGlobalPath) -eq 0 ]; then
+        if [[ $(grep -c "hostSeed=[0-9]\{4\}" $inputFileGlobalPath) -eq 0 ]]; then
             __static__AddOptionsToInputFile $optionsToBeAddedOrModified
             __static__PrintAddedOptionsToStandardOutput $optionsToBeAddedOrModified
         else
@@ -528,7 +528,7 @@ function __static__HandlePRNGStateInInputFile()
         #Delete eventual line from input file with hostSeed (here we use an initialPRNG)
         sed -i '/hostSeed/d' $inputFileGlobalPath
         optionsToBeAddedOrModified="initialPRNG=$runBetaDirectory/${nameOfLastPRNG}"
-        if [ $(grep -c "initialPRNG=[[:alnum:][:punct:]]*" $inputFileGlobalPath) -eq 0 ]; then
+        if [[ $(grep -c "initialPRNG=[[:alnum:][:punct:]]*" $inputFileGlobalPath) -eq 0 ]]; then
             __static__AddOptionsToInputFile $optionsToBeAddedOrModified
             __static__PrintAddedOptionsToStandardOutput $optionsToBeAddedOrModified
         else
@@ -562,7 +562,7 @@ function __static__HandleFurtherOptionsInInputFile()
         fi
         optionsToBeAddedOrModified+=("${option##*-}=${BHMAS_specifiedCommandLineOptions[$((index+1))]}")
     done
-    if [ ${#optionsToBeAddedOrModified[@]} -ne 0 ]; then
+    if [[ ${#optionsToBeAddedOrModified[@]} -ne 0 ]]; then
         __static__ModifyOptionsInInputFile ${optionsToBeAddedOrModified[@]} || { __static__RestoreOriginalInputFile && return 1; }
         __static__PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
     fi
@@ -598,7 +598,7 @@ function ProcessBetaValuesForContinue_SLURM()
         rm $originalInputFileGlobalPath
         betaValuesToBeSubmitted+=( $betaValue )
     done
-    if [ ${#betaValuesToBeSubmitted[@]} -ne 0 ]; then
+    if [[ ${#betaValuesToBeSubmitted[@]} -ne 0 ]]; then
        mkdir -p ${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName || exit $BHMAS_fatalBuiltin
        PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles "${betaValuesToBeSubmitted[@]}"
        #Ask the user if he want to continue submitting job

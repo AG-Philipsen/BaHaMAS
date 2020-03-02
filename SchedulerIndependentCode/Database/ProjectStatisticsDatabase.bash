@@ -66,8 +66,8 @@ function projectStatisticsDatabase()
                                                       [accRateLast1KC]="%+$((${FSNA[accRateLast1KC]}+1))s" [maxDsC]="%+$((${FSNA[maxDsC]}+1))s" [maxPlaqC]="%+$((${FSNA[maxPlaqC]}+1))s"
                                                       [statusC]="%+$((${FSNA[statusC]}+1))s" [lastTrajC]="%+$((${FSNA[lastTrajC]}+1))s" [timeTrajC]="%+$((${FSNA[timeTrajC]}+1))s" )
 
-    [ $BHMAS_wilson = "TRUE" ] && MASS_PARAMETER="kappa"
-    [ $BHMAS_staggered = "TRUE" ] && MASS_PARAMETER="mass"
+    [[ $BHMAS_wilson = "TRUE" ]] && MASS_PARAMETER="kappa"
+    [[ $BHMAS_staggered = "TRUE" ]] && MASS_PARAMETER="mass"
 
     declare -A HEADER_PRINTF_PARAMETER_ARRAY=( [nfC]="nf" [muC]=$BHMAS_chempotPrefix [kC]=$MASS_PARAMETER [ntC]=$BHMAS_ntimePrefix [nsC]=$BHMAS_nspacePrefix [betaC]="beta_chain_type" [trajNoC]="trajNo"
                                                [accRateC]="acc" [accRateLast1KC]="accLast1K" [maxDsC]="maxSpikeDS/s" [maxPlaqC]="maxSpikeDP/s" [statusC]="status" [lastTrajC]="l.Tr[s]" [timeTrajC]="Time/Tr" )
@@ -140,22 +140,22 @@ function projectStatisticsDatabase()
     cecho ''
     # The PROJECT_DATABASE_FILE variable refers to a file which is an input in the filtering/displaying scenario and which is an output in the update scenario.
     # Then it has to be initialized accordingly!
-    if [ "$UPDATE" = "FALSE" ]; then
-        if [ "$FILENAME_GIVEN_AS_INPUT" = "" ]; then
+    if [[ "$UPDATE" = "FALSE" ]]; then
+        if [[ "$FILENAME_GIVEN_AS_INPUT" = "" ]]; then
             LATEST_DATABASE_FILE=$(ls $BHMAS_databaseGlobalPath | grep -E [0-9]{2}_[0-9]{2}_[0-9]{2}_$BHMAS_databaseFilename | sort -t "_" -k 1,1 -k 2,2 -k 3,3 | tail -n1)
-            if [ "$LATEST_DATABASE_FILE" = "" ]; then
+            if [[ "$LATEST_DATABASE_FILE" = "" ]]; then
                 Fatal $BHMAS_fatalFileNotFound "No older database versions found!"
             fi
             local PROJECT_DATABASE_FILE=$BHMAS_databaseGlobalPath/$LATEST_DATABASE_FILE
         else
-            if [ ! -f $FILENAME_GIVEN_AS_INPUT ]; then
+            if [[ ! -f $FILENAME_GIVEN_AS_INPUT ]]; then
                 Fatal $BHMAS_fatalFileNotFound "File " file "$FILENAME_GIVEN_AS_INPUT" " does not exist!"
             fi
             local PROJECT_DATABASE_FILE=$FILENAME_GIVEN_AS_INPUT
         fi
     else
-        if [ "$FILENAME_GIVEN_AS_INPUT" != "" ] ; then
-            if [ ! -f $FILENAME_GIVEN_AS_INPUT ]; then
+        if [[ "$FILENAME_GIVEN_AS_INPUT" != "" ]] ; then
+            if [[ ! -f $FILENAME_GIVEN_AS_INPUT ]]; then
                 Fatal $BHMAS_fatalFileNotFound "File " emph "$FILENAME_GIVEN_AS_INPUT" " does not exist!"
             fi
             local FILE_WITH_DIRECTORIES=$FILENAME_GIVEN_AS_INPUT
@@ -167,7 +167,7 @@ function projectStatisticsDatabase()
 
 
 
-    if [ $DISPLAY = "TRUE" ]; then
+    if [[ $DISPLAY = "TRUE" ]]; then
 
         NF_STRING=$(join "|" "${NF_ARRAY[@]:-}")
         MU_STRING=$(join "|" "${MU_ARRAY[@]:-}")
@@ -178,17 +178,17 @@ function projectStatisticsDatabase()
         TYPE_STRING=$(join "|" "${TYPE_ARRAY[@]:-}")
         STATUS_STRING=$(join "|" "${STATUS_ARRAY[@]:-}")
 
-        [ "$FILTER_TRAJNO" = "TRUE" ] && [ "$TRAJ_LOW_VALUE" = "" ]  && TRAJ_LOW_VALUE=0
-        [ "$FILTER_TRAJNO" = "TRUE" ] && [ "$TRAJ_HIGH_VALUE" = "" ]  && TRAJ_HIGH_VALUE=9999999
+        [[ "$FILTER_TRAJNO" = "TRUE" ]] && [[ "$TRAJ_LOW_VALUE" = "" ]]  && TRAJ_LOW_VALUE=0
+        [[ "$FILTER_TRAJNO" = "TRUE" ]] && [[ "$TRAJ_HIGH_VALUE" = "" ]]  && TRAJ_HIGH_VALUE=9999999
 
-        [ "$FILTER_ACCRATE" = "TRUE" ] && [ "$ACCRATE_LOW_VALUE" = "" ]  && ACCRATE_LOW_VALUE=0.0
-        [ "$FILTER_ACCRATE" = "TRUE" ] && [ "$ACCRATE_HIGH_VALUE" = "" ]  && ACCRATE_HIGH_VALUE=100.00
+        [[ "$FILTER_ACCRATE" = "TRUE" ]] && [[ "$ACCRATE_LOW_VALUE" = "" ]]  && ACCRATE_LOW_VALUE=0.0
+        [[ "$FILTER_ACCRATE" = "TRUE" ]] && [[ "$ACCRATE_HIGH_VALUE" = "" ]]  && ACCRATE_HIGH_VALUE=100.00
 
-        [ "$FILTER_ACCRATE_LAST1K" = "TRUE" ] && [ "$ACCRATE_LAST1K_LOW_VALUE" = "" ]  && ACCRATE_LAST1K_LOW_VALUE=0.0
-        [ "$FILTER_ACCRATE_LAST1K" = "TRUE" ] && [ "$ACCRATE_LAST1K_HIGH_VALUE" = "" ]  && ACCRATE_LAST1K_HIGH_VALUE=100.00
+        [[ "$FILTER_ACCRATE_LAST1K" = "TRUE" ]] && [[ "$ACCRATE_LAST1K_LOW_VALUE" = "" ]]  && ACCRATE_LAST1K_LOW_VALUE=0.0
+        [[ "$FILTER_ACCRATE_LAST1K" = "TRUE" ]] && [[ "$ACCRATE_LAST1K_HIGH_VALUE" = "" ]]  && ACCRATE_LAST1K_HIGH_VALUE=100.00
 
 
-        if [ "$CUSTOMIZE_COLUMNS" = "FALSE" ]; then
+        if [[ "$CUSTOMIZE_COLUMNS" = "FALSE" ]]; then
             NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=( nfC muC kC ntC nsC betaC trajNoC accRateC accRateLast1KC maxDsC maxPlaqC statusC lastTrajC timeTrajC )
         fi
 
@@ -205,7 +205,7 @@ function projectStatisticsDatabase()
         done
 
         for NAME_OF_COLUMN in ${NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER[@]}; do
-            [ "$NAME_OF_COLUMN" = "trajNoC" ] && break
+            [[ "$NAME_OF_COLUMN" = "trajNoC" ]] && break
             NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN=$(($NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN+${FSNA[$NAME_OF_COLUMN]}+1))
         done
         NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN=$((NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN+${FSNA[trajNoC]}+1))
@@ -378,9 +378,9 @@ function projectStatisticsDatabase()
 
     #==========================================================================================================================================================================================#
 
-    if [ $UPDATE = "TRUE" ]; then
+    if [[ $UPDATE = "TRUE" ]]; then
 
-        if [ "$SLEEP_TIME" != "" ] && [ "$UPDATE_TIME" != "" ]; then
+        if [[ "$SLEEP_TIME" != "" ]] && [[ "$UPDATE_TIME" != "" ]]; then
             Internal "Values for both " emph "SLEEP_TIME" " and " emph "UPDATE_TIME" " are specified but it should not be the case!"
         fi
 
@@ -397,9 +397,9 @@ function projectStatisticsDatabase()
 
         while :
         do
-            if [ "$UPDATE_TIME" != "" ]; then
+            if [[ "$UPDATE_TIME" != "" ]]; then
                 CURRENT_EPOCH=$(date +%s)
-                if [ $CURRENT_EPOCH -gt $(date -d "$UPDATE_TIME" +%s) ]; then
+                if [[ $CURRENT_EPOCH -gt $(date -d "$UPDATE_TIME" +%s) ]]; then
                     TARGET_EPOCH=$(date -d "$UPDATE_TIME tomorrow" +%s)
                     cecho lp B "\n\tEntering sleeping mode. Performing next update on " emph "$(date -d "$UPDATE_TIME tomorrow" +"%d.%m.%Y \e[38;5;147mat\e[38;5;86m %H:%M")" "\n"
                 else
@@ -410,10 +410,10 @@ function projectStatisticsDatabase()
                 sleep $SLEEP_SECONDS
             fi
 
-            [ "$FILE_WITH_DIRECTORIES" = "" ] && find $BHMAS_submitDiskGlobalPath/$BHMAS_projectSubpath -regextype grep -regex "$REGEX_STRING" -type d > $TEMPORARY_FILE_WITH_DIRECTORIES
-            [ "$FILE_WITH_DIRECTORIES" != "" ] && cat $FILE_WITH_DIRECTORIES > $TEMPORARY_FILE_WITH_DIRECTORIES
+            [[ "$FILE_WITH_DIRECTORIES" = "" ]] && find $BHMAS_submitDiskGlobalPath/$BHMAS_projectSubpath -regextype grep -regex "$REGEX_STRING" -type d > $TEMPORARY_FILE_WITH_DIRECTORIES
+            [[ "$FILE_WITH_DIRECTORIES" != "" ]] && cat $FILE_WITH_DIRECTORIES > $TEMPORARY_FILE_WITH_DIRECTORIES
 
-            if [ ! -s "$TEMPORARY_FILE_WITH_DIRECTORIES" ]; then
+            if [[ ! -s "$TEMPORARY_FILE_WITH_DIRECTORIES" ]]; then
                 Fatal $BHMAS_fatalLogicError -n emph "No directory" " for the database update! Please check the given file or the folder structure!"
             fi
 
@@ -425,7 +425,7 @@ function projectStatisticsDatabase()
                     continue
                 fi
 
-                if [ -d $line ]; then
+                if [[ -d $line ]]; then
                     cecho -n lo "\tUpdating: " wg "$line "
                     cd $line
                 else
@@ -462,7 +462,7 @@ function projectStatisticsDatabase()
                 cecho lg "...done!"
             done < <(cat $TEMPORARY_FILE_WITH_DIRECTORIES)
 
-            if [ ! -f $TEMPORARY_DATABASE_FILE ] || [ "$(wc -l < $TEMPORARY_DATABASE_FILE)" -eq 0 ]; then
+            if [[ ! -f $TEMPORARY_DATABASE_FILE ]] || [[ "$(wc -l < $TEMPORARY_DATABASE_FILE)" -eq 0 ]]; then
                 Internal "After the database procedure, the database seems to be " emph "empty" "! Temporary files\n"\
                          file "   $TEMPORARY_DATABASE_FILE" "\n"\
                          file "   $TEMPORARY_FILE_WITH_DIRECTORIES\n"\
@@ -477,12 +477,12 @@ function projectStatisticsDatabase()
             rm $TEMPORARY_DATABASE_FILE
             rm $TEMPORARY_FILE_WITH_DIRECTORIES
 
-            if [ "$SLEEP_TIME" != "" ]; then
+            if [[ "$SLEEP_TIME" != "" ]]; then
                 cecho lp B "\n\tSleeping " emph "$SLEEP_TIME" " starting on " emph "$(date +"%d.%m.%Y at %H:%M:%S")" "\n"
                 sleep $SLEEP_TIME
             fi
 
-            if [ "$SLEEP_TIME" = "" ] && [ "$UPDATE_TIME" = "" ]; then
+            if [[ "$SLEEP_TIME" = "" ]] && [[ "$UPDATE_TIME" = "" ]]; then
                 break
             fi
         done
@@ -491,7 +491,7 @@ function projectStatisticsDatabase()
 
     #==========================================================================================================================================================================================#
 
-    if [ $REPORT = "TRUE" ]; then
+    if [[ $REPORT = "TRUE" ]]; then
 
         cecho lm "\n\t\t\t  " U "AUTOMATIC REPORT FROM DATABASE (status on "\
               B "$(date -r $PROJECT_DATABASE_FILE "$(cecho -n -d '+%%d.%%m.%%Y' uB ' at ' B '%%H:%%M')")" uB ")\n"
@@ -580,7 +580,7 @@ failure=1
 string[0]= "\t\t" pink "                     Simulations on " bold " broken GPU"def pink": %s%s%4d " def "\n"
 string[1]= "\t\t" blue "  Simulations with" bold " too low acceptance" def blue " - " bold "last 1k" def blue ": %s%s%4d" def blue "  - %s%s%4d" def blue "  [  0%%,  %2d%% )  " def "\n"
 string[2]= "\t\t" blue "      Simulations with" bold " low acceptance" def blue " - " bold "last 1k" def blue ": %s%s%4d" def blue "  - %s%s%4d" def blue "  [ %2d%%,  %2d%% ) " def "\n"
-string[3]= "\t\t" blue "  Simulations with" bold " optimal acceptance" def blue " - " bold "last 1k" def blue ": %s%s%4d" def blue "  - %s%s%4d" def blue "  [ %2d%%,  %2d%% ] " def "\n"
+string[3]= "\t\t" blue "  Simulations with" bold " optimal acceptance" def blue " - " bold "last 1k" def blue ": %s%s%4d" def blue "  - %s%s%4d" def blue "  [[ %2d%%,  %2d%% ]] " def "\n"
 string[4]= "\t\t" blue "     Simulations with" bold " high acceptance" def blue " - " bold "last 1k" def blue ": %s%s%4d" def blue "  - %s%s%4d" def blue "  ( %2d%%,  %2d%% ] " def "\n"
 string[5]= "\t\t" blue " Simulations with" bold " too high acceptance" def blue " - " bold "last 1k" def blue ": %s%s%4d" def blue "  - %s%s%4d" def blue "  ( %2d%%, 100%% ]  " def "\n"
 string[6]= "\t\t" pink "                           Simulations " bold " running" def pink ": %s%s%4d " def "\n"
@@ -604,7 +604,7 @@ printf string[10], (filesToBeCleaned>0 ? lightOrange : green), bold, filesToBeCl
 if (criticalSituation == 1) {exit failure} else {exit success}
         }' $PROJECT_DATABASE_FILE || exitCodeAwk=1
 
-        if [ $exitCodeAwk -ne 0 ]; then
+        if [[ $exitCodeAwk -ne 0 ]]; then
             cecho -d -n lr "\n\t\t\t"
         else
             cecho -d -n wg "\n\t\t\t"
@@ -614,7 +614,7 @@ if (criticalSituation == 1) {exit failure} else {exit success}
 
     #==========================================================================================================================================================================================#
 
-    if [ $SHOW = "TRUE" ]; then
+    if [[ $SHOW = "TRUE" ]]; then
 
         local TEMPORARY_DATABASE_FILE="tmpDatabaseForShowing.dat"
         rm -f $BHMAS_databaseGlobalPath/$TEMPORARY_DATABASE_FILE
@@ -717,7 +717,7 @@ if (criticalSituation == 1) {exit failure} else {exit success}
             awk --posix -v columnToFilter="${COLUMNS_TO_FILTER[$i]}" -v valueToMatch="${VALUES_TO_MATCH[$i]}" '$columnToFilter == valueToMatch{print $0}' $PROJECT_DATABASE_FILE >> $BHMAS_databaseGlobalPath/$TEMPORARY_DATABASE_FILE
         done
 
-        if [ $(wc -l < $BHMAS_databaseGlobalPath/$TEMPORARY_DATABASE_FILE) -eq 0 ]; then
+        if [[ $(wc -l < $BHMAS_databaseGlobalPath/$TEMPORARY_DATABASE_FILE) -eq 0 ]]; then
             cecho o emph "  $SIMULATION" " not found in database (last update ended on "\
                   B "$(date -r $PROJECT_DATABASE_FILE "$(cecho -n -d '+%%d.%%m.%%Y' uB ' at ' B '%%H:%%M')")" uB ").\n"
         else
@@ -737,7 +737,7 @@ if (criticalSituation == 1) {exit failure} else {exit success}
 function __static__DisplayDatabaseFile()
 {
 
-    if [ "$CUSTOMIZE_COLUMNS" = "FALSE" ]; then
+    if [[ "$CUSTOMIZE_COLUMNS" = "FALSE" ]]; then
         NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=( nfC muC kC ntC nsC betaC trajNoC accRateC accRateLast1KC maxDsC maxPlaqC statusC lastTrajC timeTrajC )
     fi
 

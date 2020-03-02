@@ -44,7 +44,7 @@ function __static__CheckExistenceOfFunctionAndCallIt()
 {
     local nameOfTheFunction
     nameOfTheFunction=$1
-    if [ "$(type -t $nameOfTheFunction)" = 'function' ]; then
+    if [[ "$(type -t $nameOfTheFunction)" = 'function' ]]; then
         $nameOfTheFunction
     else
         Fatal $BHMAS_fatalMissingFeature "Function " emph "$nameOfTheFunction" " for " emph "$BHMAS_clusterScheduler" " scheduler not found!\n"\

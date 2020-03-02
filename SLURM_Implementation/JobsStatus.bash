@@ -38,7 +38,7 @@ function ListJobsStatus_SLURM()
           lineOfEquals tableFormat index
     declare -A squeueFormatCode=()
     squeueFormatCodeString=''; slurmOkVersion='slurm 14.03.0'; slurmVersion="$(squeue --version)"
-    if [ "$BHMAS_clusterPartition" != '' ]; then
+    if [[ "$BHMAS_clusterPartition" != '' ]]; then
         partitionDirective='-p $BHMAS_clusterPartition'
     fi
     #Format codes for squeue command in order to get specific information
@@ -60,18 +60,18 @@ function ListJobsStatus_SLURM()
     done
     #Get information via squeue and in case filter jobs -> ATTENTION: Double quoting here is CRUCIAL (to respect endlines)!!
     #NOTE: It seems that the sacct command can give a similar result, but at the moment there is no analog to the %Z field.
-    if [ $BHMAS_jobstatusAll = 'TRUE' ]; then
+    if [[ $BHMAS_jobstatusAll = 'TRUE' ]]; then
         squeueOutput="$(squeue --noheader ${partitionDirective:-} -o ${squeueFormatCodeString:1} 2>/dev/null)"
     else
         squeueOutput="$(squeue --noheader -u $BHMAS_jobstatusUser -o "${squeueFormatCodeString:1}" 2>/dev/null)"
     fi
-    if [ "$squeueOutput" = '' ]; then
+    if [[ "$squeueOutput" = '' ]]; then
         cecho lc "\n No job found according to given options!"
         return 0
     fi
     #------------------------------------------------------------------------------------------------------------------------------#
     #The following is a workaround for slurm versions before 14.03.0 (when squeue formats %Z and %V were not available)
-    if [ "$(printf "%s\n" "$slurmVersion" "$slurmOkVersion" | sort -V | tail -n1)" = "$slurmOkVersion" ]; then
+    if [[ "$(printf "%s\n" "$slurmVersion" "$slurmOkVersion" | sort -V | tail -n1)" = "$slurmOkVersion" ]]; then
         jobSubmissionFolder=""
         jobSubmissionTime=""
         for jobId in $(cut -d'@' -f1  <<< "$squeueOutput"); do
@@ -102,7 +102,7 @@ function ListJobsStatus_SLURM()
                                 }' <<< "$squeueOutput")
     fi
     #------------------------------------------------------------------------------------------------------------------------------#
-    if [ $BHMAS_jobstatusLocal = 'TRUE' ]; then
+    if [[ $BHMAS_jobstatusLocal = 'TRUE' ]]; then
         squeueOutput="$(grep --color=never "${PWD}" <<< "$squeueOutput")"
     fi
     #If any field is empty, fill it with empty word in order to have later all arrays with same number of elements
@@ -138,10 +138,10 @@ function ListJobsStatus_SLURM()
     cecho lc "\n" B "$lineOfEquals\n"\
           o "$(printf "$tableFormat" "jobId:" ""   "  JOB NAME:" ""   "STATUS:" ""   "START/END TIME:" ""   "WALL/RUNTIME:" ""   "SUBMITTED FROM:")"
     #Print table sorting according jobname
-    while [ ${#jobName[@]} -gt 0 ]; do
+    while [[ ${#jobName[@]} -gt 0 ]]; do
         index=$(FindPositionOfFirstMinimumOfArray "${jobName[@]}")
 
-        if [ ${jobStatus[$index]} = "RUNNING" ]; then
+        if [[ ${jobStatus[$index]} = "RUNNING" ]]; then
             cecho -d -n lg
         elif [[ ${jobStatus[$index]} == "PENDING" ]]; then
             if [[ ${jobStartTime[$index]} != "N/A" ]]; then

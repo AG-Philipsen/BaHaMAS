@@ -22,14 +22,14 @@ source ${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/CommandLineParse
 function __static__CheckMutuallyExclusiveOptions()
 {
     local reportShow
-    if [ $REPORT = 'TRUE' ] || [ $SHOW = 'TRUE' ]; then
+    if [[ $REPORT = 'TRUE' ]] || [[ $SHOW = 'TRUE' ]]; then
         reportShow='TRUE'
     else
         reportShow='FALSE'
     fi
-    if [ $(grep -o 'TRUE' <<< "$DISPLAY $UPDATE $reportShow" | wc -l) -eq 0 ]; then
+    if [[ $(grep -o 'TRUE' <<< "$DISPLAY $UPDATE $reportShow" | wc -l) -eq 0 ]]; then
         DISPLAY='TRUE'
-    elif [ $(grep -o 'TRUE' <<< "$DISPLAY $UPDATE $reportShow" | wc -l) -gt 1 ]; then
+    elif [[ $(grep -o 'TRUE' <<< "$DISPLAY $UPDATE $reportShow" | wc -l) -gt 1 ]]; then
         Fatal $BHMAS_fatalCommandLine "Options for " emph "UPDATE" ", " emph "DISPLAY/FILTERING" " and " emph "REPORT" " scenarios cannot be mixed!"
     fi
 }
@@ -50,7 +50,7 @@ function ParseDatabaseCommandLineOption()
         set -- ${newOptions[@]:-} "--mu" "$BHMAS_chempot" "--$MASS_PARAMETER" "$BHMAS_mass" "--nt" "$BHMAS_ntime" "--ns" "$BHMAS_nspace"
     fi
     #Here it is fine to assume that option names and values are separated by spaces
-    while [ $# -gt 0 ]; do
+    while [[ $# -gt 0 ]]; do
         case $1 in
 
             -c | --columns)
@@ -104,7 +104,7 @@ function ParseDatabaseCommandLineOption()
                     NF_ARRAY+=( $2 )
                     shift
                 done
-                [ ${#NF_ARRAY[@]} -eq 0 ] && PrintOptionSpecificationErrorAndExit "$1"
+                [[ ${#NF_ARRAY[@]} -eq 0 ]] && PrintOptionSpecificationErrorAndExit "$1"
                 ;;
 
             --mu)
@@ -125,7 +125,7 @@ function ParseDatabaseCommandLineOption()
                             shift
                     esac
                 done
-                [ ${#MU_ARRAY[@]} -eq 0 ] && PrintOptionSpecificationErrorAndExit "$1"
+                [[ ${#MU_ARRAY[@]} -eq 0 ]] && PrintOptionSpecificationErrorAndExit "$1"
                 ;;
 
             --$MASS_PARAMETER)
@@ -135,7 +135,7 @@ function ParseDatabaseCommandLineOption()
                     MASS_ARRAY+=( $2 )
                     shift
                 done
-                [ ${#MASS_ARRAY[@]} -eq 0 ] && PrintOptionSpecificationErrorAndExit "$1"
+                [[ ${#MASS_ARRAY[@]} -eq 0 ]] && PrintOptionSpecificationErrorAndExit "$1"
                 ;;
 
             --nt)
@@ -145,7 +145,7 @@ function ParseDatabaseCommandLineOption()
                     NT_ARRAY+=( $2 )
                     shift
                 done
-                [ ${#NT_ARRAY[@]} -eq 0 ] && PrintOptionSpecificationErrorAndExit "$1"
+                [[ ${#NT_ARRAY[@]} -eq 0 ]] && PrintOptionSpecificationErrorAndExit "$1"
                 ;;
 
             --ns)
@@ -155,7 +155,7 @@ function ParseDatabaseCommandLineOption()
                     NS_ARRAY+=( $2 )
                     shift
                 done
-                [ ${#NS_ARRAY[@]} -eq 0 ] && PrintOptionSpecificationErrorAndExit "$1"
+                [[ ${#NS_ARRAY[@]} -eq 0 ]] && PrintOptionSpecificationErrorAndExit "$1"
                 ;;
 
             --beta)
@@ -165,7 +165,7 @@ function ParseDatabaseCommandLineOption()
                     BETA_ARRAY+=( $2 )
                     shift
                 done
-                [ ${#BETA_ARRAY[@]} -eq 0 ] && PrintOptionSpecificationErrorAndExit "$1"
+                [[ ${#BETA_ARRAY[@]} -eq 0 ]] && PrintOptionSpecificationErrorAndExit "$1"
                 ;;
 
             --type)
@@ -190,7 +190,7 @@ function ParseDatabaseCommandLineOption()
                             shift
                     esac
                 done
-                [ ${#TYPE_ARRAY[@]} -eq 0 ] && PrintOptionSpecificationErrorAndExit "$1"
+                [[ ${#TYPE_ARRAY[@]} -eq 0 ]] && PrintOptionSpecificationErrorAndExit "$1"
                 ;;
 
             --traj)
@@ -201,7 +201,7 @@ function ParseDatabaseCommandLineOption()
                     [[ ${2:-} =~ ^\<[0-9]+ ]] && TRAJ_HIGH_VALUE=${2#\<*}
                     shift
                 done
-                [ "$TRAJ_LOW_VALUE" = "" ] && [ "$TRAJ_HIGH_VALUE" = "" ] && PrintOptionSpecificationErrorAndExit "$1"
+                [[ "$TRAJ_LOW_VALUE" = "" ]] && [[ "$TRAJ_HIGH_VALUE" = "" ]] && PrintOptionSpecificationErrorAndExit "$1"
                 ;;
 
             --acc)
@@ -212,7 +212,7 @@ function ParseDatabaseCommandLineOption()
                     [[ ${2:-} =~ ^\<[0-9]+ ]] && ACCRATE_HIGH_VALUE=${2#\<*}
                     shift
                 done
-                [ "$ACCRATE_LOW_VALUE" = "" ] && [ "$ACCRATE_HIGH_VALUE" = "" ] && PrintOptionSpecificationErrorAndExit "$1"
+                [[ "$ACCRATE_LOW_VALUE" = "" ]] && [[ "$ACCRATE_HIGH_VALUE" = "" ]] && PrintOptionSpecificationErrorAndExit "$1"
                 ;;
 
             --accLast1K)
@@ -223,7 +223,7 @@ function ParseDatabaseCommandLineOption()
                     [[ ${2:-} =~ ^\<[0-9]+ ]] && ACCRATE_LAST1K_HIGH_VALUE=${2#\<*}
                     shift
                 done
-                [ "$ACCRATE_LAST1K_LOW_VALUE" = "" ] && [ "$ACCRATE_LAST1K_HIGH_VALUE" = "" ] && PrintOptionSpecificationErrorAndExit "$1"
+                [[ "$ACCRATE_LAST1K_LOW_VALUE" = "" ]] && [[ "$ACCRATE_LAST1K_HIGH_VALUE" = "" ]] && PrintOptionSpecificationErrorAndExit "$1"
                 ;;
 
             --maxDS)
@@ -253,7 +253,7 @@ function ParseDatabaseCommandLineOption()
                             shift
                     esac
                 done
-                [ ${#STATUS_ARRAY[@]} -eq 0 ] && PrintOptionSpecificationErrorAndExit "$1"
+                [[ ${#STATUS_ARRAY[@]} -eq 0 ]] && PrintOptionSpecificationErrorAndExit "$1"
                 ;;
 
             --lastTraj)
@@ -263,7 +263,7 @@ function ParseDatabaseCommandLineOption()
                     LAST_TRAJ_TIME=$2
                     shift
                 fi
-                [ "$LAST_TRAJ_TIME" = "" ] && PrintOptionSpecificationErrorAndExit "$1"
+                [[ "$LAST_TRAJ_TIME" = "" ]] && PrintOptionSpecificationErrorAndExit "$1"
                 ;;
 
             -u | --update)

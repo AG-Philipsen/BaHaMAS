@@ -22,15 +22,15 @@ function __static__ProduceSrunCommandsFileForInversionsPerBeta()
 {
     local betaDirectory betaValue filename massAsNumber
     betaDirectory="$1"; betaValue="$2"; filename="$3"
-    if [ "$BHMAS_chempot" != '0' ]; then
+    if [[ "$BHMAS_chempot" != '0' ]]; then
         Fatal $BHMAS_fatalValueError "Inversion of configuration with nonzero chemical potential not allowed!"
     fi
 
-    if [ $(($BHMAS_nspace*$BHMAS_nspace*$BHMAS_nspace*$BHMAS_ntime)) -lt $BHMAS_numberOfSourcesForCorrelators ]; then
+    if [[ $(($BHMAS_nspace*$BHMAS_nspace*$BHMAS_nspace*$BHMAS_ntime)) -lt $BHMAS_numberOfSourcesForCorrelators ]]; then
         Fatal $BHMAS_fatalValueError "Number of required sources bigger than available positions ("\
               emph "$(($BHMAS_nspace*$BHMAS_nspace*$BHMAS_nspace*$BHMAS_ntime)) <= $BHMAS_numberOfSourcesForCorrelators" ")!"
     fi
-    if [ $(grep -c "[.]" <<< "${BHMAS_mass}") -eq 0 ]; then
+    if [[ $(grep -c "[.]" <<< "${BHMAS_mass}") -eq 0 ]]; then
         massAsNumber="0.${BHMAS_mass}"
     else
         massAsNumber="${BHMAS_mass}"
@@ -114,13 +114,13 @@ function ProcessBetaValuesForInversion_SLURM()
         numberOfMissingCorrelators=$(($numberOfTotalCorrelators - $numberOfExistingCorrelators))
         __static__ProduceSrunCommandsFileForInversionsPerBeta "$runBetaDirectory" "$beta" "${runBetaDirectory}/${BHMAS_inversionSrunCommandsFilename}"
         numberOfInversionCommands=$(wc -l < $runBetaDirectory/$BHMAS_inversionSrunCommandsFilename)
-        if [ $numberOfMissingCorrelators -ne $numberOfInversionCommands ]; then
+        if [[ $numberOfMissingCorrelators -ne $numberOfInversionCommands ]]; then
             cecho lr "\n File with commands for inversion expected to contain " emph "$numberOfMissingCorrelators"\
                   " lines, but having " emph "$numberOfInversionCommands" ". The value " emph "beta = $beta" " will be skipped!\n"
             BHMAS_problematicBetaValues+=( $beta )
             continue
         fi
-        if [ ! -s $runBetaDirectory/$BHMAS_inversionSrunCommandsFilename ] && [ $numberOfMissingCorrelators -ne 0 ]; then
+        if [[ ! -s $runBetaDirectory/$BHMAS_inversionSrunCommandsFilename ]] && [[ $numberOfMissingCorrelators -ne 0 ]]; then
             cecho lr "\n File with commands for inversion found to be " emph "empty" ", but expected to contain "\
                   emph "$numberOfMissingCorrelators" " lines! The value " emph "beta = $beta" " will be skipped!\n"
             BHMAS_problematicBetaValues+=( $beta )
@@ -129,7 +129,7 @@ function ProcessBetaValuesForInversion_SLURM()
         #If file seems fine put it to submit list
         betaValuesToBeSubmitted+=( $beta )
     done
-    if [ ${#betaValuesToBeSubmitted[@]} -ne 0 ]; then
+    if [[ ${#betaValuesToBeSubmitted[@]} -ne 0 ]]; then
         mkdir -p ${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName || exit $BHMAS_fatalBuiltin
         PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles "${betaValuesToBeSubmitted[@]}"
     fi

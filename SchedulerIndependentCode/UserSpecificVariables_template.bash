@@ -27,9 +27,9 @@
 # NOTE: Use the variables 'BHMAS_wilson' and 'BHMAS_staggered' to define
 #       differently the same variables in the two cases. For example:
 #
-#         if [ $BHMAS_wilson = "TRUE" ]; then
+#         if [[ $BHMAS_wilson = "TRUE" ]]; then
 #             ...
-#         elif [ $BHMAS_staggered = "TRUE" ]; then
+#         elif [[ $BHMAS_staggered = "TRUE" ]]; then
 #             ...
 #         fi
 #

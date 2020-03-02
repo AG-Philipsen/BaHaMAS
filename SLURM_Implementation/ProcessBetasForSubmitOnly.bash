@@ -25,15 +25,15 @@ function ProcessBetaValuesForSubmitOnly_SLURM()
     for index in "${!betaValuesCopy[@]}"; do
         submitBetaDirectory="$BHMAS_submitDirWithBetaFolders/$BHMAS_betaPrefix${betaValuesCopy[$index]}"
         inputFileGlobalPath="${submitBetaDirectory}/$BHMAS_inputFilename"
-        if [ ! -d $submitBetaDirectory ]; then
+        if [[ ! -d $submitBetaDirectory ]]; then
             cecho lr "\n The directory " dir "$submitBetaDirectory" " does not exist! \n The value " emph "beta = ${betaValuesCopy[$index]}" " will be skipped!\n"
             BHMAS_problematicBetaValues+=( ${betaValuesCopy[$index]} )
             unset -v 'betaValuesCopy[$index]'
             continue
         else
-            if [ -f "$inputFileGlobalPath" ]; then
+            if [[ -f "$inputFileGlobalPath" ]]; then
                 # In the 'submitBetaDirectory' there should be ONLY the inputfile
-                if [ $(ls $submitBetaDirectory | wc -l) -gt 1 ]; then
+                if [[ $(ls $submitBetaDirectory | wc -l) -gt 1 ]]; then
                     cecho lr "\n There are already files in " dir "$submitBetaDirectory" " beyond the input file.\n"\
                           " The value " emph "beta = ${betaValuesCopy[$index]}" " will be skipped!\n"
                     BHMAS_problematicBetaValues+=( ${betaValuesCopy[$index]} )
@@ -48,7 +48,7 @@ function ProcessBetaValuesForSubmitOnly_SLURM()
             fi
         fi
     done
-    if [ ${#betaValuesCopy[@]} -gt 0 ]; then
+    if [[ ${#betaValuesCopy[@]} -gt 0 ]]; then
         PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles "${betaValuesCopy[@]}"
     fi
 }

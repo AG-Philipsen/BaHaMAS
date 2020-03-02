@@ -36,7 +36,7 @@ function ParseCommandLineOption()
     mutuallyExclusiveOptionsPassed=()
 
     #Here it is fine to assume that option names and values are separated by spaces
-    while [ $# -gt 0 ]; do
+    while [[ $# -gt 0 ]]; do
         case $1 in
 
             --jobscript_prefix )
@@ -174,7 +174,7 @@ function ParseCommandLineOption()
 
             --doNotUseMultipleChains )
                 BHMAS_useMultipleChains="FALSE"
-                if [ ${BHMAS_executionMode} != 'mode:thermalize' ]; then
+                if [[ ${BHMAS_executionMode} != 'mode:thermalize' ]]; then
                     BHMAS_betaPostfix=""
                 fi
                 shift ;;
@@ -258,7 +258,7 @@ function ParseCommandLineOption()
                 shift;;
 
             --user )
-                if [ ${BHMAS_executionMode} != 'mode:job-status' ]; then
+                if [[ ${BHMAS_executionMode} != 'mode:job-status' ]]; then
                     __static__PrintSecondaryOptionSpecificationErrorAndExit "-j | --jobstatus" "$1"
                 else
                     BHMAS_jobstatusUser="$2"
@@ -267,7 +267,7 @@ function ParseCommandLineOption()
                 shift ;;
 
             --local )
-                if [ ${BHMAS_executionMode} != 'mode:job-status' ]; then
+                if [[ ${BHMAS_executionMode} != 'mode:job-status' ]]; then
                     __static__PrintSecondaryOptionSpecificationErrorAndExit "-j | --jobstatus" "$1"
                 else
                     BHMAS_jobstatusLocal='TRUE'
@@ -280,7 +280,7 @@ function ParseCommandLineOption()
                 shift;;
 
             --doNotMeasureTime )
-                if [ ${BHMAS_executionMode} != 'mode:simulation-status' ]; then
+                if [[ ${BHMAS_executionMode} != 'mode:simulation-status' ]]; then
                     __static__PrintSecondaryOptionSpecificationErrorAndExit "-l | --liststatus" "$1"
                 else
                     BHMAS_liststatusMeasureTimeOption="FALSE"
@@ -288,7 +288,7 @@ function ParseCommandLineOption()
                 shift ;;
 
             --showOnlyQueued )
-                if [ ${BHMAS_executionMode} != 'mode:simulation-status' ]; then
+                if [[ ${BHMAS_executionMode} != 'mode:simulation-status' ]]; then
                     __static__PrintSecondaryOptionSpecificationErrorAndExit "-l | --liststatus" "$1"
                 else
                     BHMAS_liststatusShowOnlyQueuedOption="TRUE"
@@ -314,11 +314,11 @@ function ParseCommandLineOption()
                 shift ;;
 
             --all )
-                if [ ${BHMAS_executionMode} != 'mode:clean-output-files' ] && [ ${BHMAS_executionMode} != 'mode:job-status' ]; then
+                if [[ ${BHMAS_executionMode} != 'mode:clean-output-files' ]] && [[ ${BHMAS_executionMode} != 'mode:job-status' ]]; then
                     __static__PrintSecondaryOptionSpecificationErrorAndExit "--cleanOutputFiles" "$1"
-                elif [ ${BHMAS_executionMode} = 'mode:clean-output-files' ]; then
+                elif [[ ${BHMAS_executionMode} = 'mode:clean-output-files' ]]; then
                     BHMAS_cleanAllOutputFiles="TRUE"
-                elif [ ${BHMAS_executionMode} = 'mode:job-status' ]; then
+                elif [[ ${BHMAS_executionMode} = 'mode:job-status' ]]; then
                     BHMAS_jobstatusAll='TRUE'
                 fi
                 shift ;;
@@ -338,9 +338,9 @@ function ParseCommandLineOption()
 
             --uncommentBetas | --commentBetas )
                 mutuallyExclusiveOptionsPassed+=( $1 )
-                if [ $1 = '--uncommentBetas' ]; then
+                if [[ $1 = '--uncommentBetas' ]]; then
                     BHMAS_executionMode='mode:uncomment-betas'
-                elif [ $1 = '--commentBetas' ]; then
+                elif [[ $1 = '--commentBetas' ]]; then
                     BHMAS_executionMode='mode:comment-betas'
                 fi
                 while [[ ! ${2:-} =~ ^(-|$) ]]; do
@@ -372,7 +372,7 @@ function ParseCommandLineOption()
         esac
     done
 
-    if [ ${#mutuallyExclusiveOptionsPassed[@]} -gt 1 ]; then
+    if [[ ${#mutuallyExclusiveOptionsPassed[@]} -gt 1 ]]; then
         listOfOptionsAsString=''
         for option in "${mutuallyExclusiveOptions[@]}"; do
             listOfOptionsAsString+="\n$(cecho -d lo "  ") $option"
@@ -386,7 +386,7 @@ function ParseCommandLineOption()
 
 function IsTestModeOn()
 {
-    if [ -n "${BHMAS_testModeOn:+x}" ] && [ ${BHMAS_testModeOn} = 'TRUE' ]; then
+    if [[ -n "${BHMAS_testModeOn:+x}" ]] && [[ ${BHMAS_testModeOn} = 'TRUE' ]]; then
         return 0
     else
         return 1

@@ -78,23 +78,23 @@ function GetLargestWalltimeBetweenTwo()
     first="$1"; second="$2"
     [[ ! $first =~ ^[0-9]+- ]] && first="0-$first"
     [[ ! $second =~ ^[0-9]+- ]] && second="0-$second"
-    if [ ${first%%-*} -gt ${second%%-*} ]; then
+    if [[ ${first%%-*} -gt ${second%%-*} ]]; then
         printf "$1"; return 0
-    elif [ ${first%%-*} -lt ${second%%-*} ]; then
+    elif [[ ${first%%-*} -lt ${second%%-*} ]]; then
         printf "$2"; return 0
     else
         first=${first##*-}; second=${second##*-}
-        if [ $(cut -d':' -f1 <<< "$first") -gt $(cut -d':' -f1 <<< "$second") ]; then
+        if [[ $(cut -d':' -f1 <<< "$first") -gt $(cut -d':' -f1 <<< "$second") ]]; then
             printf "$1"; return 0
-        elif [ $(cut -d':' -f1 <<< "$first") -lt $(cut -d':' -f1 <<< "$second") ]; then
+        elif [[ $(cut -d':' -f1 <<< "$first") -lt $(cut -d':' -f1 <<< "$second") ]]; then
             printf "$2"; return 0
         else
-            if [ $(cut -d':' -f2 <<< "$first") -gt $(cut -d':' -f2 <<< "$second") ]; then
+            if [[ $(cut -d':' -f2 <<< "$first") -gt $(cut -d':' -f2 <<< "$second") ]]; then
                 printf "$1"; return 0
-            elif [ $(cut -d':' -f2 <<< "$first") -lt $(cut -d':' -f2 <<< "$second") ]; then
+            elif [[ $(cut -d':' -f2 <<< "$first") -lt $(cut -d':' -f2 <<< "$second") ]]; then
                 printf "$2"; return 0
             else
-                if [ $(cut -d':' -f3 <<< "$first") -gt $(cut -d':' -f3 <<< "$second") ]; then
+                if [[ $(cut -d':' -f3 <<< "$first") -gt $(cut -d':' -f3 <<< "$second") ]]; then
                     printf "$1"; return 0
                 else
                     printf "$2"; return 0
@@ -107,16 +107,16 @@ function GetLargestWalltimeBetweenTwo()
 function GetSmallestWalltimeBetweenTwo()
 {
     local largest; largest=$(GetLargestWalltimeBetweenTwo "$1" "$2")
-    [ "$largest" = '' ] && return 1
-    [ "$1" = "$largest" ] && printf "$2" || printf "$1"
+    [[ "$largest" = '' ]] && return 1
+    [[ "$1" = "$largest" ]] && printf "$2" || printf "$1"
     return 0
 }
 
 function MinimumOfArray()
 {
     local MIN=$1; shift
-    while [ $# -gt 0 ]; do
-        if [ $(awk '{print ($1<$2)}' <<< "$1 $MIN") -eq 1 ]; then
+    while [[ $# -gt 0 ]]; do
+        if [[ $(awk '{print ($1<$2)}' <<< "$1 $MIN") -eq 1 ]]; then
             MIN=$1
         fi
         shift
@@ -129,9 +129,9 @@ function KeyOfMinimumOfArray()
     local COUNTER=0
     local KEY_AT_MIN=0
     local MIN=$1; shift
-    while [ $# -ne 0 ]; do
+    while [[ $# -ne 0 ]]; do
         (( COUNTER++ ))
-        if [ $(awk '{print ($1<$2)}' <<< "$1 $MIN") -eq 1 ]; then
+        if [[ $(awk '{print ($1<$2)}' <<< "$1 $MIN") -eq 1 ]]; then
             MIN=$1
             KEY_AT_MIN=$COUNTER
         fi
@@ -143,8 +143,8 @@ function KeyOfMinimumOfArray()
 function MaximumOfArray()
 {
     local MAX=$1; shift
-    while [ $# -gt 0 ]; do
-        if [ $(awk '{print ($1>$2)}' <<< "$1 $MAX") -eq 1 ]; then
+    while [[ $# -gt 0 ]]; do
+        if [[ $(awk '{print ($1>$2)}' <<< "$1 $MAX") -eq 1 ]]; then
             MAX=$1
         fi
         shift
@@ -157,9 +157,9 @@ function KeyOfMaximumOfArray()
     local COUNTER=0
     local KEY_AT_MAX=0
     local MAX=$1; shift
-    while [ $# -gt 0 ]; do
+    while [[ $# -gt 0 ]]; do
         (( COUNTER++ ))
-        if [ $(awk '{print ($1>$2)}' <<< "$1 $MAX") -eq 1 ]; then
+        if [[ $(awk '{print ($1>$2)}' <<< "$1 $MAX") -eq 1 ]]; then
             MAX=$1
             KEY_AT_MAX=$COUNTER
         fi
@@ -174,7 +174,7 @@ function FindPositionOfFirstMinimumOfArray()
     local ARRAY=("$@")
     local MIN=$(MinimumOfArray "${ARRAY_TMP[@]}")
     for (( i=0; i<${#ARRAY[@]}; i++ )); do
-        if [ "${ARRAY[$i]}" = "${MIN}" ]; then
+        if [[ "${ARRAY[$i]}" = "${MIN}" ]]; then
             printf "$i";
             break
         fi
@@ -184,8 +184,8 @@ function FindPositionOfFirstMinimumOfArray()
 function LengthOfLongestEntryInArray()
 {
     local LENGTH_MAX=${#1}; shift
-    while [ $# -gt 0 ]; do
-        if [ ${#1} -gt $LENGTH_MAX ]; then
+    while [[ $# -gt 0 ]]; do
+        if [[ ${#1} -gt $LENGTH_MAX ]]; then
             LENGTH_MAX=${#1}
         fi
         shift
@@ -233,7 +233,7 @@ function PrintArray()
 {
     local NAME_OF_THE_ARRAY="$1[@]"
     local ARRAY_CONTENT=( "${!NAME_OF_THE_ARRAY}" )
-    [ ${#ARRAY_CONTENT[@]} -eq 0 ] && printf "Array $1 is empty or undeclared!\n" && return 1
+    [[ ${#ARRAY_CONTENT[@]} -eq 0 ]] && printf "Array $1 is empty or undeclared!\n" && return 1
     local ARRAY_DECLARATION=$(declare -p "$1")
     if [[ $ARRAY_DECLARATION =~ ^declare\ -a ]]; then # normal array
         for INDEX in "${!ARRAY_CONTENT[@]}"; do

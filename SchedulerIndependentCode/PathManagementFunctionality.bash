@@ -19,7 +19,7 @@
 
 function CheckWilsonStaggeredVariables()
 {
-    if [ "$BHMAS_wilson" == "$BHMAS_staggered" ]; then
+    if [[ "$BHMAS_wilson" == "$BHMAS_staggered" ]]; then
         Fatal $BHMAS_fatalPathError "The variables " emph "BHMAS_wilson" " and " emph "BHMAS_staggered"\
               " are both set to the same value (please check the position from where the script was run)!"
     fi
@@ -38,7 +38,7 @@ function __static__IsAnyParameterUnsetAmong()
     local prefix
     for prefix in "$@"; do
         __static__CheckPrefixExistence "$prefix"
-        if [ -z "${!BHMAS_parameterVariableNames[$prefix]:+x}" ]; then
+        if [[ -z "${!BHMAS_parameterVariableNames[$prefix]:+x}" ]]; then
             return 0
         fi
     done
@@ -47,7 +47,7 @@ function __static__IsAnyParameterUnsetAmong()
 
 function __static__CheckNoArguments()
 {
-    if [ $2 -eq 0 ]; then
+    if [[ $2 -eq 0 ]]; then
         Internal "Function " emph "$1" " called without needed arguments!"
     fi
 }
@@ -95,7 +95,7 @@ function __static__SetParametersPathAndString()
 #NOTE: The prefix must appear after a slash in the path!
 function __static__ReadSingleParameterFromPath()
 {
-    if [ $# -ne 2 ]; then
+    if [[ $# -ne 2 ]]; then
         Internal "Function " emph "$FUNCNAME" " called with wrong number of parameters!"
     fi
     local pathToBeSearchedIn prefixToBeUsed pieceOfPathWithParameter
@@ -143,7 +143,7 @@ function ReadParametersFromPathAndSetRelatedVariables()
     done
     __static__CheckParametersExtractedFromPath "${BHMAS_parameterPrefixes[@]}"
     __static__SetParametersPathAndString
-    if [ -z "${BHMAS_parametersString:+x}" ] || [ -z "${BHMAS_parametersPath:+x}" ]; then
+    if [[ -z "${BHMAS_parametersString:+x}" ]] || [[ -z "${BHMAS_parametersPath:+x}" ]]; then
         Internal "Either " emph "BHMAS_parametersString" " or " emph "BHMAS_parametersPath" " unset or empty!"
     fi
 }
@@ -152,7 +152,7 @@ function CheckSingleOccurrenceInPath()
 {
     local variable
     for variable in $@; do
-        if [ $(grep -o "$variable" <<< "$(pwd)" | wc -l) -ne 1 ] ; then
+        if [[ $(grep -o "$variable" <<< "$(pwd)" | wc -l) -ne 1 ]] ; then
             Fatal $BHMAS_fatalPathError "The string " emph "$variable" " must occur " B "once and only once" uB " in the path!"
         fi
     done
