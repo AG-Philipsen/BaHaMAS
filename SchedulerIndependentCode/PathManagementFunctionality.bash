@@ -19,8 +19,8 @@
 
 function CheckWilsonStaggeredVariables()
 {
-    if [[ "$BHMAS_wilson" == "$BHMAS_staggered" ]]; then
-        Fatal $BHMAS_fatalPathError "The variables " emph "BHMAS_wilson" " and " emph "BHMAS_staggered"\
+    if [[ "${BHMAS_wilson}" == "${BHMAS_staggered}" ]]; then
+        Fatal ${BHMAS_fatalPathError} "The variables " emph "BHMAS_wilson" " and " emph "BHMAS_staggered"\
               " are both set to the same value (please check the position from where the script was run)!"
     fi
 }
@@ -37,8 +37,8 @@ function __static__IsAnyParameterUnsetAmong()
 {
     local prefix
     for prefix in "$@"; do
-        __static__CheckPrefixExistence "$prefix"
-        if [[ -z "${!BHMAS_parameterVariableNames[$prefix]:+x}" ]]; then
+        __static__CheckPrefixExistence "${prefix}"
+        if [[ -z "${!BHMAS_parameterVariableNames[${prefix}]:+x}" ]]; then
             return 0
         fi
     done
@@ -56,19 +56,19 @@ function __static__CheckUnsetParameters()
 {
     local functionName; functionName="$1"; shift
     if __static__IsAnyParameterUnsetAmong "$@"; then
-        Internal "Function " emph "$functionName" " called before extracting parameters!"
+        Internal "Function " emph "${functionName}" " called before extracting parameters!"
     fi
 }
 
 #This function get the prefixes of parameters with which the string has to be built (order as given) -> e.g. Nf2_mui0_ns8
 function __static__GetParametersString()
 {
-    __static__CheckNoArguments "$FUNCNAME" $#
-    __static__CheckUnsetParameters "$FUNCNAME" "$@"
+    __static__CheckNoArguments "${FUNCNAME}" $#
+    __static__CheckUnsetParameters "${FUNCNAME}" "$@"
     local prefix resultingString
     resultingString=''
     for prefix in "$@"; do
-        resultingString+="${prefix}${!BHMAS_parameterVariableNames[$prefix]}_"
+        resultingString+="${prefix}${!BHMAS_parameterVariableNames[${prefix}]}_"
     done
     printf "${resultingString%?}" #Remove last underscore
 }
@@ -76,8 +76,8 @@ function __static__GetParametersString()
 #This function get the prefixes of parameters with which the path has to be built (order as given) -> e,g, /Nf2/nt4/ns8
 function __static__GetParametersPath()
 {
-    __static__CheckNoArguments "$FUNCNAME" $#
-    __static__CheckUnsetParameters "$FUNCNAME" "$@"
+    __static__CheckNoArguments "${FUNCNAME}" $#
+    __static__CheckUnsetParameters "${FUNCNAME}" "$@"
     local prefix resultingPath
     resultingPath=$(__static__GetParametersString "${BHMAS_parameterPrefixes[@]}")
     printf "/${resultingPath//_/\/}"
@@ -86,7 +86,7 @@ function __static__GetParametersPath()
 #This function set the global variables BHMAS_parametersPath and BHMAS_parametersString after having checked that the parameters have been extracted
 function __static__SetParametersPathAndString()
 {
-    __static__CheckUnsetParameters "$FUNCNAME" "$@"
+    __static__CheckUnsetParameters "${FUNCNAME}" "$@"
     readonly BHMAS_parametersString="$(__static__GetParametersString "${BHMAS_parameterPrefixes[@]}")"
     readonly BHMAS_parametersPath="$(__static__GetParametersPath "${BHMAS_parameterPrefixes[@]}")"
 }
@@ -96,39 +96,39 @@ function __static__SetParametersPathAndString()
 function __static__ReadSingleParameterFromPath()
 {
     if [[ $# -ne 2 ]]; then
-        Internal "Function " emph "$FUNCNAME" " called with wrong number of parameters!"
+        Internal "Function " emph "${FUNCNAME}" " called with wrong number of parameters!"
     fi
     local pathToBeSearchedIn prefixToBeUsed pieceOfPathWithParameter
     pathToBeSearchedIn="/$1/" #Add in front and back a "/" just to be general in the search
     prefixToBeUsed="$2"
-    __static__CheckPrefixExistence "$prefixToBeUsed"
-    case $(grep -o "/$prefixToBeUsed" <<< "$pathToBeSearchedIn" | wc -l) in
+    __static__CheckPrefixExistence "${prefixToBeUsed}"
+    case $(grep -o "/${prefixToBeUsed}" <<< "${pathToBeSearchedIn}" | wc -l) in
         0)
-            Fatal $BHMAS_fatalPathError "Unable to recover " emph "$prefixToBeUsed" " from the path " dir "$1" "." ;;
+            Fatal ${BHMAS_fatalPathError} "Unable to recover " emph "${prefixToBeUsed}" " from the path " dir "$1" "." ;;
         1)
-            pieceOfPathWithParameter="$(grep -o "/${prefixToBeUsed}[^/]*" <<< "$pathToBeSearchedIn")"
-            declare -gr ${BHMAS_parameterVariableNames["$prefixToBeUsed"]}="${pieceOfPathWithParameter##*$prefixToBeUsed}"
+            pieceOfPathWithParameter="$(grep -o "/${prefixToBeUsed}[^/]*" <<< "${pathToBeSearchedIn}")"
+            declare -gr ${BHMAS_parameterVariableNames["${prefixToBeUsed}"]}="${pieceOfPathWithParameter##*${prefixToBeUsed}}"
             ;;
         *)
-            Fatal $BHMAS_fatalPathError "Prefix " emph "$prefixToBeUsed" " found several times in path " dir "$1" "." ;;
+            Fatal ${BHMAS_fatalPathError} "Prefix " emph "${prefixToBeUsed}" " found several times in path " dir "$1" "." ;;
     esac
 }
 
 # This function get a bunch of prefixes and checks that the corresponding variable has a value that makes sense
 # NOTE: Here we check any variable content as if it could contain several values. This should not hurt, since
-#       ${var[@]} should coincide with $var in case of a simple variable.
+#       ${var[@]} should coincide with ${var} in case of a simple variable.
 function __static__CheckParametersExtractedFromPath()
 {
-    __static__CheckNoArguments "$FUNCNAME" $#
-    __static__CheckUnsetParameters "$FUNCNAME" "$@"
+    __static__CheckNoArguments "${FUNCNAME}" $#
+    __static__CheckUnsetParameters "${FUNCNAME}" "$@"
     local prefix value variableName variableRegex
     for prefix in "$@"; do
-        variableName="${BHMAS_parameterVariableNames[$prefix]}"
+        variableName="${BHMAS_parameterVariableNames[${prefix}]}"
         variableRegex="${variableName}Regex"
         variableName+="[@]" #See NOTE above
         for value in ${!variableName}; do
-            if [[ ! $value =~ ^${!variableRegex//\\/}$ ]]; then
-                Fatal $BHMAS_fatalPathError "Parameter " emph "$prefix" " extracted from the path not matching "\
+            if [[ ! ${value} =~ ^${!variableRegex//\\/}$ ]]; then
+                Fatal ${BHMAS_fatalPathError} "Parameter " emph "${prefix}" " extracted from the path not matching "\
                       emph "${!variableRegex//\\/}" "!"
             fi
         done
@@ -137,9 +137,9 @@ function __static__CheckParametersExtractedFromPath()
 
 function ReadParametersFromPathAndSetRelatedVariables()
 {
-    __static__CheckNoArguments "$FUNCNAME" $#
+    __static__CheckNoArguments "${FUNCNAME}" $#
     for prefix in "${BHMAS_parameterPrefixes[@]}"; do
-        __static__ReadSingleParameterFromPath "$1" "$prefix"
+        __static__ReadSingleParameterFromPath "$1" "${prefix}"
     done
     __static__CheckParametersExtractedFromPath "${BHMAS_parameterPrefixes[@]}"
     __static__SetParametersPathAndString
@@ -152,8 +152,8 @@ function CheckSingleOccurrenceInPath()
 {
     local variable
     for variable in $@; do
-        if [[ $(grep -o "$variable" <<< "$(pwd)" | wc -l) -ne 1 ]] ; then
-            Fatal $BHMAS_fatalPathError "The string " emph "$variable" " must occur " B "once and only once" uB " in the path!"
+        if [[ $(grep -o "${variable}" <<< "$(pwd)" | wc -l) -ne 1 ]] ; then
+            Fatal ${BHMAS_fatalPathError} "The string " emph "${variable}" " must occur " B "once and only once" uB " in the path!"
         fi
     done
 }

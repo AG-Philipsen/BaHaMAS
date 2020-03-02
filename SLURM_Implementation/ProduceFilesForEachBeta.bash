@@ -22,12 +22,12 @@ function ProduceInputFileAndJobScriptForEachBeta_SLURM()
     local betaValuesCopy index beta submitBetaDirectory temporaryNumberOfTrajectories
     betaValuesCopy=(${BHMAS_betaValues[@]})
     for index in "${!betaValuesCopy[@]}"; do
-        local submitBetaDirectory="$BHMAS_submitDirWithBetaFolders/$BHMAS_betaPrefix${betaValuesCopy[$index]}"
-        if [[ -d "$submitBetaDirectory" ]]; then
-            if [[ $(ls $submitBetaDirectory | wc -l) -gt 0 ]]; then
-                cecho lr "\n There are already files in " dir "$submitBetaDirectory" ".\n The value " emph "beta = ${betaValuesCopy[$index]}" " will be skipped!\n"
-                BHMAS_problematicBetaValues+=( ${betaValuesCopy[$index]} )
-                unset -v 'betaValuesCopy[$index]' #Here betaValuesCopy becomes sparse
+        local submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${betaValuesCopy[${index}]}"
+        if [[ -d "${submitBetaDirectory}" ]]; then
+            if [[ $(ls ${submitBetaDirectory} | wc -l) -gt 0 ]]; then
+                cecho lr "\n There are already files in " dir "${submitBetaDirectory}" ".\n The value " emph "beta = ${betaValuesCopy[${index}]}" " will be skipped!\n"
+                BHMAS_problematicBetaValues+=( ${betaValuesCopy[${index}]} )
+                unset -v 'betaValuesCopy[${index}]' #Here betaValuesCopy becomes sparse
                 continue
             fi
         fi
@@ -39,18 +39,18 @@ function ProduceInputFileAndJobScriptForEachBeta_SLURM()
     betaValuesCopy=(${betaValuesCopy[@]})
     for beta in "${betaValuesCopy[@]}"; do
         submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${beta}"
-        cecho -n b " Creating directory " dir "$submitBetaDirectory" "..."
-        mkdir -p $submitBetaDirectory || exit $BHMAS_fatalBuiltin
+        cecho -n b " Creating directory " dir "${submitBetaDirectory}" "..."
+        mkdir -p ${submitBetaDirectory} || exit ${BHMAS_fatalBuiltin}
         cecho lg " done!"
-        cecho lc "   Configuration used: " file "${BHMAS_startConfigurationGlobalPath[$beta]}"
-        if KeyInArray "$beta" BHMAS_goalStatistics; then
-            temporaryNumberOfTrajectories=${BHMAS_goalStatistics["$beta"]}
+        cecho lc "   Configuration used: " file "${BHMAS_startConfigurationGlobalPath[${beta}]}"
+        if KeyInArray "${beta}" BHMAS_goalStatistics; then
+            temporaryNumberOfTrajectories=${BHMAS_goalStatistics["${beta}"]}
         else
-            temporaryNumberOfTrajectories=$BHMAS_numberOfTrajectories
+            temporaryNumberOfTrajectories=${BHMAS_numberOfTrajectories}
         fi
-        ProduceInputFile_CL2QCD "${beta}" "${submitBetaDirectory}/${BHMAS_inputFilename}" $temporaryNumberOfTrajectories
+        ProduceInputFile_CL2QCD "${beta}" "${submitBetaDirectory}/${BHMAS_inputFilename}" ${temporaryNumberOfTrajectories}
     done
-    mkdir -p ${BHMAS_submitDirWithBetaFolders}/$BHMAS_jobScriptFolderName || exit $BHMAS_fatalBuiltin
+    mkdir -p ${BHMAS_submitDirWithBetaFolders}/${BHMAS_jobScriptFolderName} || exit ${BHMAS_fatalBuiltin}
     PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles "${betaValuesCopy[@]}"
 }
 

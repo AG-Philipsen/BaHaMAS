@@ -17,11 +17,11 @@
 #  along with BaHaMAS. If not, see <http://www.gnu.org/licenses/>.
 #
 
-source ${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/CommandLineParsers/MainHelper.bash || exit $BHMAS_fatalBuiltin
+source ${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/CommandLineParsers/MainHelper.bash || exit ${BHMAS_fatalBuiltin}
 
 function __static__PrintSecondaryOptionSpecificationErrorAndExit()
 {
-    Fatal $BHMAS_fatalCommandLine "The option " emph "$2" " is a secondary option of " emph "$1" " and it has to be given after it!"
+    Fatal ${BHMAS_fatalCommandLine} "The option " emph "$2" " is a secondary option of " emph "$1" " and it has to be given after it!"
 }
 
 function ParseCommandLineOption()
@@ -52,7 +52,7 @@ function ParseCommandLineOption()
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     readonly BHMAS_nflavourPrefix="$2"
-                    BHMAS_parameterPrefixes[$BHMAS_nflavourPosition]=$BHMAS_nflavourPrefix
+                    BHMAS_parameterPrefixes[${BHMAS_nflavourPosition}]=${BHMAS_nflavourPrefix}
                 fi
                 shift 2 ;;
 
@@ -61,7 +61,7 @@ function ParseCommandLineOption()
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     readonly BHMAS_chempotPrefix="$2"
-                    BHMAS_parameterPrefixes[$BHMAS_chempotPosition]=$BHMAS_chempotPrefix
+                    BHMAS_parameterPrefixes[${BHMAS_chempotPosition}]=${BHMAS_chempotPrefix}
                 fi
                 shift 2 ;;
 
@@ -70,7 +70,7 @@ function ParseCommandLineOption()
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     readonly BHMAS_massPrefix="$2"
-                    BHMAS_parameterPrefixes[$BHMAS_massPosition]=$BHMAS_massPrefix
+                    BHMAS_parameterPrefixes[${BHMAS_massPosition}]=${BHMAS_massPrefix}
                 fi
                 shift 2 ;;
 
@@ -79,7 +79,7 @@ function ParseCommandLineOption()
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     readonly BHMAS_ntimePrefix="$2"
-                    BHMAS_parameterPrefixes[$BHMAS_ntimePosition]=$BHMAS_ntimePrefix
+                    BHMAS_parameterPrefixes[${BHMAS_ntimePosition}]=${BHMAS_ntimePrefix}
                 fi
                 shift 2 ;;
 
@@ -88,7 +88,7 @@ function ParseCommandLineOption()
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     readonly BHMAS_nspacePrefix="$2"
-                    BHMAS_parameterPrefixes[$BHMAS_nspacePosition]=$BHMAS_nspacePrefix
+                    BHMAS_parameterPrefixes[${BHMAS_nspacePosition}]=${BHMAS_nspacePrefix}
                 fi
                 shift 2 ;;
 
@@ -105,8 +105,8 @@ function ParseCommandLineOption()
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     readonly BHMAS_seedPrefix="$2"
-                    readonly BHMAS_betaFolderShortRegex=$BHMAS_betaRegex'_'$BHMAS_seedPrefix'[0-9]\{4\}_[[:alpha:]]\+'
-                    readonly BHMAS_betaFolderRegex=$BHMAS_betaPrefix$BHMAS_betaFolderShortRegex
+                    readonly BHMAS_betaFolderShortRegex=${BHMAS_betaRegex}'_'${BHMAS_seedPrefix}'[0-9]\{4\}_[[:alpha:]]\+'
+                    readonly BHMAS_betaFolderRegex=${BHMAS_betaPrefix}${BHMAS_betaFolderShortRegex}
                 fi
                 shift 2 ;;
 
@@ -124,7 +124,7 @@ function ParseCommandLineOption()
                 else
                     BHMAS_walltime="${2:-}"
                 fi
-                if [[ ! $BHMAS_walltime =~ ^([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]]; then
+                if [[ ! ${BHMAS_walltime} =~ ^([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 fi
                 shift 2 ;;
@@ -375,9 +375,9 @@ function ParseCommandLineOption()
     if [[ ${#mutuallyExclusiveOptionsPassed[@]} -gt 1 ]]; then
         listOfOptionsAsString=''
         for option in "${mutuallyExclusiveOptions[@]}"; do
-            listOfOptionsAsString+="\n$(cecho -d lo "  ") $option"
+            listOfOptionsAsString+="\n$(cecho -d lo "  ") ${option}"
         done
-        Fatal $BHMAS_fatalCommandLine "The following options are mutually exclusive and cannot be combined: $listOfOptionsAsString"
+        Fatal ${BHMAS_fatalCommandLine} "The following options are mutually exclusive and cannot be combined: ${listOfOptionsAsString}"
     fi
 
     #Mark as readonly the BHMAS_parameterPrefixes array, since from now on prefixes cannot change any more!

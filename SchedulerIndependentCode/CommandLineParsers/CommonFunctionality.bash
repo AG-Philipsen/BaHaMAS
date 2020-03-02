@@ -35,13 +35,13 @@ function PrepareGivenOptionToBeProcessed()
     local newOptions value tmp
     newOptions=()
     for value in "$@"; do
-        [[ "$value" = '=' ]] && continue
-        if [[ $value =~ ^-.*=.* ]]; then
-            tmp="$(sed 's/=/ /' <<< "$value")"
+        [[ "${value}" = '=' ]] && continue
+        if [[ ${value} =~ ^-.*=.* ]]; then
+            tmp="$(sed 's/=/ /' <<< "${value}")"
             newOptions+=( ${tmp%% *} )  #Part before '=' without spaces (option name)
             newOptions+=( "${tmp#* }" ) #Part after '=' potentially with spaces
         else
-            newOptions+=( "$(sed 's/^=//' <<< "$value")" )
+            newOptions+=( "$(sed 's/^=//' <<< "${value}")" )
         fi
     done
     printf "%s\n" "${newOptions[@]}"
@@ -52,13 +52,13 @@ function SplitCombinedShortOptionsInSingleOptions()
     local newOptions value option splittedOptions
     newOptions=()
     for value in "$@"; do
-        if [[ $value =~ ^-[[:alpha:]]+$ ]]; then
+        if [[ ${value} =~ ^-[[:alpha:]]+$ ]]; then
             splittedOptions=( $(grep -o "." <<< "${value:1}") )
             for option in "${splittedOptions[@]}"; do
-                newOptions+=( "-$option" )
+                newOptions+=( "-${option}" )
             done
         else
-            newOptions+=( "$value" )
+            newOptions+=( "${value}" )
         fi
     done
     printf "%s\n" "${newOptions[@]}"
@@ -85,30 +85,30 @@ function __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray()
     BHMAS_specifiedCommandLineOptions=() # Empty it to fill it again with only long options
     for option in "$@"; do
         #Replace short options if they are NOT for dabase!
-        if [[ $databaseOption = 'FALSE' ]]; then
-           KeyInArray $option mapOptions && option=${mapOptions[$option]}
+        if [[ ${databaseOption} = 'FALSE' ]]; then
+           KeyInArray ${option} mapOptions && option=${mapOptions[${option}]}
            #More logic for repeated short options with different long one
-           if [[ $option = '-l' ]]; then
+           if [[ ${option} = '-l' ]]; then
                if ElementInArray '--jobstatus' "${BHMAS_specifiedCommandLineOptions[@]}"; then
                    option='--local'
                else
                    option='--liststatus'
                fi
-           elif [[ $option = '-u' ]]; then
+           elif [[ ${option} = '-u' ]]; then
                if ElementInArray '--jobstatus' "${BHMAS_specifiedCommandLineOptions[@]}"; then
                    option='--user'
                else
                    option='--commentBetas'
                fi
-           elif [[ $option = '-h' ]]; then
+           elif [[ ${option} = '-h' ]]; then
                option='--help'
            fi
         else
-           if [[ $option = '-h' ]]; then
+           if [[ ${option} = '-h' ]]; then
                option='--helpDatabase'
            fi
         fi
-        BHMAS_specifiedCommandLineOptions[${#BHMAS_specifiedCommandLineOptions[@]}]="$option"
+        BHMAS_specifiedCommandLineOptions[${#BHMAS_specifiedCommandLineOptions[@]}]="${option}"
         if ElementInArray '--database' "${BHMAS_specifiedCommandLineOptions[@]}"; then
             databaseOption='TRUE'
         fi
@@ -129,9 +129,9 @@ function PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem()
 function PrintHelperAndExitIfUserAskedForIt()
 {
     if WasAnyOfTheseOptionsGivenToBaHaMAS '--help'; then
-        PrintMainHelper; exit $BHMAS_successExitCode
+        PrintMainHelper; exit ${BHMAS_successExitCode}
     elif WasAnyOfTheseOptionsGivenToBaHaMAS '--helpDatabase'; then
-        PrintDatabaseHelper; exit $BHMAS_successExitCode
+        PrintDatabaseHelper; exit ${BHMAS_successExitCode}
     else
         return 0
     fi
@@ -139,12 +139,12 @@ function PrintHelperAndExitIfUserAskedForIt()
 
 function PrintInvalidOptionErrorAndExit()
 {
-    Fatal $BHMAS_fatalCommandLine "Invalid option " emph "$1" " specified! Use the " emph "--help" " option to get further information."
+    Fatal ${BHMAS_fatalCommandLine} "Invalid option " emph "$1" " specified! Use the " emph "--help" " option to get further information."
 }
 
 function PrintOptionSpecificationErrorAndExit()
 {
-    Fatal $BHMAS_fatalCommandLine "The value of the option " emph "$1" " was not correctly specified (either " emph "forgotten" " or " emph "invalid" ")!"
+    Fatal ${BHMAS_fatalCommandLine} "The value of the option " emph "$1" " was not correctly specified (either " emph "forgotten" " or " emph "invalid" ")!"
 }
 
 

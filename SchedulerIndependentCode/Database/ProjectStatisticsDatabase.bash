@@ -27,7 +27,7 @@
 function join()
 {
     local IFS="$1"; shift
-    printf "$*" # "$*" expands to a single argument with all the elements delimited by the first character of $IFS
+    printf "$*" # "$*" expands to a single argument with all the elements delimited by the first character of ${IFS}
 }
 
 function projectStatisticsDatabase()
@@ -51,8 +51,8 @@ function projectStatisticsDatabase()
     local LASTTRAJ_C=$((2*13))
     local TIME_TRAJ_C=$((2*14))
 
-    declare -A COLUMNS=( [nfC]=$NF_C [muC]=$MU_C [kC]=$K_C [ntC]=$NT_C [nsC]=$NS_C [betaC]=$BETA_C [trajNoC]=$TRAJNO_C [accRateC]=$ACCRATE_C [accRateLast1KC]=$ACCRATE_LAST1K_C
-                         [maxDsC]=$MAX_ACTION_C [maxPlaqC]=$MAX_PLAQ_C [statusC]=$STATUS_C [lastTrajC]=$LASTTRAJ_C [timeTrajC]=$TIME_TRAJ_C )
+    declare -A COLUMNS=( [nfC]=${NF_C} [muC]=${MU_C} [kC]=${K_C} [ntC]=${NT_C} [nsC]=${NS_C} [betaC]=${BETA_C} [trajNoC]=${TRAJNO_C} [accRateC]=${ACCRATE_C} [accRateLast1KC]=${ACCRATE_LAST1K_C}
+                         [maxDsC]=${MAX_ACTION_C} [maxPlaqC]=${MAX_PLAQ_C} [statusC]=${STATUS_C} [lastTrajC]=${LASTTRAJ_C} [timeTrajC]=${TIME_TRAJ_C} )
 
     #FSNA = FORMAT_SPECIFIER_NUMBER_ARRAY
     declare -A FSNA=( [nfC]="6" [muC]="7" [kC]="8" [ntC]="6" [nsC]="6" [betaC]="19" [trajNoC]="11" [accRateC]="8" [accRateLast1KC]="12" [maxDsC]="16" [maxPlaqC]="16" [statusC]="13" [lastTrajC]="11" [timeTrajC]="10" )
@@ -66,10 +66,10 @@ function projectStatisticsDatabase()
                                                       [accRateLast1KC]="%+$((${FSNA[accRateLast1KC]}+1))s" [maxDsC]="%+$((${FSNA[maxDsC]}+1))s" [maxPlaqC]="%+$((${FSNA[maxPlaqC]}+1))s"
                                                       [statusC]="%+$((${FSNA[statusC]}+1))s" [lastTrajC]="%+$((${FSNA[lastTrajC]}+1))s" [timeTrajC]="%+$((${FSNA[timeTrajC]}+1))s" )
 
-    [[ $BHMAS_wilson = "TRUE" ]] && MASS_PARAMETER="kappa"
-    [[ $BHMAS_staggered = "TRUE" ]] && MASS_PARAMETER="mass"
+    [[ ${BHMAS_wilson} = "TRUE" ]] && MASS_PARAMETER="kappa"
+    [[ ${BHMAS_staggered} = "TRUE" ]] && MASS_PARAMETER="mass"
 
-    declare -A HEADER_PRINTF_PARAMETER_ARRAY=( [nfC]="nf" [muC]=$BHMAS_chempotPrefix [kC]=$MASS_PARAMETER [ntC]=$BHMAS_ntimePrefix [nsC]=$BHMAS_nspacePrefix [betaC]="beta_chain_type" [trajNoC]="trajNo"
+    declare -A HEADER_PRINTF_PARAMETER_ARRAY=( [nfC]="nf" [muC]=${BHMAS_chempotPrefix} [kC]=${MASS_PARAMETER} [ntC]=${BHMAS_ntimePrefix} [nsC]=${BHMAS_nspacePrefix} [betaC]="beta_chain_type" [trajNoC]="trajNo"
                                                [accRateC]="acc" [accRateLast1KC]="accLast1K" [maxDsC]="maxSpikeDS/s" [maxPlaqC]="maxSpikeDP/s" [statusC]="status" [lastTrajC]="l.Tr[s]" [timeTrajC]="Time/Tr" )
 
     declare -a NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=()
@@ -140,34 +140,34 @@ function projectStatisticsDatabase()
     cecho ''
     # The PROJECT_DATABASE_FILE variable refers to a file which is an input in the filtering/displaying scenario and which is an output in the update scenario.
     # Then it has to be initialized accordingly!
-    if [[ "$UPDATE" = "FALSE" ]]; then
-        if [[ "$FILENAME_GIVEN_AS_INPUT" = "" ]]; then
-            LATEST_DATABASE_FILE=$(ls $BHMAS_databaseGlobalPath | grep -E [0-9]{2}_[0-9]{2}_[0-9]{2}_$BHMAS_databaseFilename | sort -t "_" -k 1,1 -k 2,2 -k 3,3 | tail -n1)
-            if [[ "$LATEST_DATABASE_FILE" = "" ]]; then
-                Fatal $BHMAS_fatalFileNotFound "No older database versions found!"
+    if [[ "${UPDATE}" = "FALSE" ]]; then
+        if [[ "${FILENAME_GIVEN_AS_INPUT}" = "" ]]; then
+            LATEST_DATABASE_FILE=$(ls ${BHMAS_databaseGlobalPath} | grep -E [0-9]{2}_[0-9]{2}_[0-9]{2}_${BHMAS_databaseFilename} | sort -t "_" -k 1,1 -k 2,2 -k 3,3 | tail -n1)
+            if [[ "${LATEST_DATABASE_FILE}" = "" ]]; then
+                Fatal ${BHMAS_fatalFileNotFound} "No older database versions found!"
             fi
-            local PROJECT_DATABASE_FILE=$BHMAS_databaseGlobalPath/$LATEST_DATABASE_FILE
+            local PROJECT_DATABASE_FILE=${BHMAS_databaseGlobalPath}/${LATEST_DATABASE_FILE}
         else
-            if [[ ! -f $FILENAME_GIVEN_AS_INPUT ]]; then
-                Fatal $BHMAS_fatalFileNotFound "File " file "$FILENAME_GIVEN_AS_INPUT" " does not exist!"
+            if [[ ! -f ${FILENAME_GIVEN_AS_INPUT} ]]; then
+                Fatal ${BHMAS_fatalFileNotFound} "File " file "${FILENAME_GIVEN_AS_INPUT}" " does not exist!"
             fi
-            local PROJECT_DATABASE_FILE=$FILENAME_GIVEN_AS_INPUT
+            local PROJECT_DATABASE_FILE=${FILENAME_GIVEN_AS_INPUT}
         fi
     else
-        if [[ "$FILENAME_GIVEN_AS_INPUT" != "" ]] ; then
-            if [[ ! -f $FILENAME_GIVEN_AS_INPUT ]]; then
-                Fatal $BHMAS_fatalFileNotFound "File " emph "$FILENAME_GIVEN_AS_INPUT" " does not exist!"
+        if [[ "${FILENAME_GIVEN_AS_INPUT}" != "" ]] ; then
+            if [[ ! -f ${FILENAME_GIVEN_AS_INPUT} ]]; then
+                Fatal ${BHMAS_fatalFileNotFound} "File " emph "${FILENAME_GIVEN_AS_INPUT}" " does not exist!"
             fi
-            local FILE_WITH_DIRECTORIES=$FILENAME_GIVEN_AS_INPUT
+            local FILE_WITH_DIRECTORIES=${FILENAME_GIVEN_AS_INPUT}
         else
             local FILE_WITH_DIRECTORIES=''
         fi
-        local PROJECT_DATABASE_FILE=$BHMAS_databaseGlobalPath/$(date +%Y_%m_%d)_$BHMAS_databaseFilename
+        local PROJECT_DATABASE_FILE=${BHMAS_databaseGlobalPath}/$(date +%Y_%m_%d)_${BHMAS_databaseFilename}
     fi
 
 
 
-    if [[ $DISPLAY = "TRUE" ]]; then
+    if [[ ${DISPLAY} = "TRUE" ]]; then
 
         NF_STRING=$(join "|" "${NF_ARRAY[@]:-}")
         MU_STRING=$(join "|" "${MU_ARRAY[@]:-}")
@@ -178,39 +178,39 @@ function projectStatisticsDatabase()
         TYPE_STRING=$(join "|" "${TYPE_ARRAY[@]:-}")
         STATUS_STRING=$(join "|" "${STATUS_ARRAY[@]:-}")
 
-        [[ "$FILTER_TRAJNO" = "TRUE" ]] && [[ "$TRAJ_LOW_VALUE" = "" ]]  && TRAJ_LOW_VALUE=0
-        [[ "$FILTER_TRAJNO" = "TRUE" ]] && [[ "$TRAJ_HIGH_VALUE" = "" ]]  && TRAJ_HIGH_VALUE=9999999
+        [[ "${FILTER_TRAJNO}" = "TRUE" ]] && [[ "${TRAJ_LOW_VALUE}" = "" ]]  && TRAJ_LOW_VALUE=0
+        [[ "${FILTER_TRAJNO}" = "TRUE" ]] && [[ "${TRAJ_HIGH_VALUE}" = "" ]]  && TRAJ_HIGH_VALUE=9999999
 
-        [[ "$FILTER_ACCRATE" = "TRUE" ]] && [[ "$ACCRATE_LOW_VALUE" = "" ]]  && ACCRATE_LOW_VALUE=0.0
-        [[ "$FILTER_ACCRATE" = "TRUE" ]] && [[ "$ACCRATE_HIGH_VALUE" = "" ]]  && ACCRATE_HIGH_VALUE=100.00
+        [[ "${FILTER_ACCRATE}" = "TRUE" ]] && [[ "${ACCRATE_LOW_VALUE}" = "" ]]  && ACCRATE_LOW_VALUE=0.0
+        [[ "${FILTER_ACCRATE}" = "TRUE" ]] && [[ "${ACCRATE_HIGH_VALUE}" = "" ]]  && ACCRATE_HIGH_VALUE=100.00
 
-        [[ "$FILTER_ACCRATE_LAST1K" = "TRUE" ]] && [[ "$ACCRATE_LAST1K_LOW_VALUE" = "" ]]  && ACCRATE_LAST1K_LOW_VALUE=0.0
-        [[ "$FILTER_ACCRATE_LAST1K" = "TRUE" ]] && [[ "$ACCRATE_LAST1K_HIGH_VALUE" = "" ]]  && ACCRATE_LAST1K_HIGH_VALUE=100.00
+        [[ "${FILTER_ACCRATE_LAST1K}" = "TRUE" ]] && [[ "${ACCRATE_LAST1K_LOW_VALUE}" = "" ]]  && ACCRATE_LAST1K_LOW_VALUE=0.0
+        [[ "${FILTER_ACCRATE_LAST1K}" = "TRUE" ]] && [[ "${ACCRATE_LAST1K_HIGH_VALUE}" = "" ]]  && ACCRATE_LAST1K_HIGH_VALUE=100.00
 
 
-        if [[ "$CUSTOMIZE_COLUMNS" = "FALSE" ]]; then
+        if [[ "${CUSTOMIZE_COLUMNS}" = "FALSE" ]]; then
             NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=( nfC muC kC ntC nsC betaC trajNoC accRateC accRateLast1KC maxDsC maxPlaqC statusC lastTrajC timeTrajC )
         fi
 
         for NAME_OF_COLUMN in ${!COLUMNS[@]}; do
-            NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL=$NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL$NAME_OF_COLUMN-${COLUMNS[$NAME_OF_COLUMN]}"|"
+            NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL=${NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL}${NAME_OF_COLUMN}-${COLUMNS[${NAME_OF_COLUMN}]}"|"
         done
 
         for NAME_OF_COLUMN in ${NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER[@]}; do
-            NAME_OF_COLUMN_NR_OF_COLUMN_STRING=$NAME_OF_COLUMN_NR_OF_COLUMN_STRING$NAME_OF_COLUMN-${COLUMNS[$NAME_OF_COLUMN]}"|"
-            NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING=$NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING$NAME_OF_COLUMN--${PRINTF_FORMAT_SPECIFIER_ARRAY[$NAME_OF_COLUMN]}"|"
-            NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING=$NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING$NAME_OF_COLUMN-${HEADER_PRINTF_PARAMETER_ARRAY[$NAME_OF_COLUMN]}"|"
-            NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING=$NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING$NAME_OF_COLUMN--${HEADER_PRINTF_FORMAT_SPECIFIER_ARRAY[$NAME_OF_COLUMN]}"|"
-            LENGTH_OF_HEADER_SEPERATOR=$(($LENGTH_OF_HEADER_SEPERATOR+${FSNA[$NAME_OF_COLUMN]}+1))
+            NAME_OF_COLUMN_NR_OF_COLUMN_STRING=${NAME_OF_COLUMN_NR_OF_COLUMN_STRING}${NAME_OF_COLUMN}-${COLUMNS[${NAME_OF_COLUMN}]}"|"
+            NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING=${NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING}${NAME_OF_COLUMN}--${PRINTF_FORMAT_SPECIFIER_ARRAY[${NAME_OF_COLUMN}]}"|"
+            NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING=${NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING}${NAME_OF_COLUMN}-${HEADER_PRINTF_PARAMETER_ARRAY[${NAME_OF_COLUMN}]}"|"
+            NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING=${NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING}${NAME_OF_COLUMN}--${HEADER_PRINTF_FORMAT_SPECIFIER_ARRAY[${NAME_OF_COLUMN}]}"|"
+            LENGTH_OF_HEADER_SEPERATOR=$((${LENGTH_OF_HEADER_SEPERATOR}+${FSNA[${NAME_OF_COLUMN}]}+1))
         done
 
         for NAME_OF_COLUMN in ${NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER[@]}; do
-            [[ "$NAME_OF_COLUMN" = "trajNoC" ]] && break
-            NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN=$(($NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN+${FSNA[$NAME_OF_COLUMN]}+1))
+            [[ "${NAME_OF_COLUMN}" = "trajNoC" ]] && break
+            NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN=$((${NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN}+${FSNA[${NAME_OF_COLUMN}]}+1))
         done
         NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN=$((NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN+${FSNA[trajNoC]}+1))
         STATISTICS_PRINTF_FORMAT_SPECIFIER_STRING="%${NUMBER_OF_WHITESPACES_TILL_TRAJECTORY_COLUMN}s\n"
-        LENGTH_OF_HEADER_SEPERATOR=$(($LENGTH_OF_HEADER_SEPERATOR+${FSNA[nfC]}+1-${#BHMAS_nflavourPrefix})) #Add dynamicly to symmetrize the line under the header (the +1 is the space that is at the beginning of the line)
+        LENGTH_OF_HEADER_SEPERATOR=$((${LENGTH_OF_HEADER_SEPERATOR}+${FSNA[nfC]}+1-${#BHMAS_nflavourPrefix})) #Add dynamicly to symmetrize the line under the header (the +1 is the space that is at the beginning of the line)
         #STRIPPING OF THE LAST | SYMBOL FROM THE STRING
         NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL="${NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL%|}"
         NAME_OF_COLUMN_NR_OF_COLUMN_STRING="${NAME_OF_COLUMN_NR_OF_COLUMN_STRING%|})"
@@ -218,21 +218,21 @@ function projectStatisticsDatabase()
         NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING="${NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING%|}"
         NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING="${NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING%|}"
 
-        awk --posix -v filterNf=$FILTER_NF -v filterMu=$FILTER_MU -v filterKappa=$FILTER_MASS -v filterNt=$FILTER_NT -v filterNs=$FILTER_NS \
-            -v filterBeta=$FILTER_BETA -v filterType=$FILTER_TYPE \
-            -v filterTrajNo=$FILTER_TRAJNO -v filterAccRate=$FILTER_ACCRATE -v filterAccRateLast1K=$FILTER_ACCRATE_LAST1K \
-            -v filterStatus=$FILTER_STATUS -v filterLastTrajTime=$FILTER_LASTTRAJ -v statisticsSummary=$STATISTICS_SUMMARY \
-            -v nfString="$NF_STRING" -v muString="$MU_STRING" -v kappaString="$MASS_STRING" -v nsString="$NS_STRING" -v ntString="$NT_STRING" -v betaString="$BETA_STRING" \
-            -v typeString=$TYPE_STRING -v statusString="$STATUS_STRING" \
-            -v trajLowValue=$TRAJ_LOW_VALUE -v trajHighValue=$TRAJ_HIGH_VALUE -v accRateLowValue=$ACCRATE_LOW_VALUE -v accRateHighValue=$ACCRATE_HIGH_VALUE \
-            -v accRateLast1KLowValue=$ACCRATE_LAST1K_LOW_VALUE -v accRateLast1KHighValue=$ACCRATE_LAST1K_HIGH_VALUE -v lastTrajTime=$LAST_TRAJ_TIME \
-            -v nameOfColumnsAndNumberOfColumnsString=$NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL \
-            -v nameOfDisplayedColumnsAndnrOfDisplayedColumnsString=$NAME_OF_COLUMN_NR_OF_COLUMN_STRING \
-            -v nameOfDisplayedColumnsAndSpecOfColumnsString=$NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING \
-            -v nameOfColumnsAndHeaderOfColumnsString=$NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING \
-            -v nameOfColumnsAndHeaderSpecOfColumnsString=$NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING \
-            -v statisticsFormatSpecString=$STATISTICS_PRINTF_FORMAT_SPECIFIER_STRING \
-            -v lengthOfHeaderSeperator=$LENGTH_OF_HEADER_SEPERATOR '
+        awk --posix -v filterNf=${FILTER_NF} -v filterMu=${FILTER_MU} -v filterKappa=${FILTER_MASS} -v filterNt=${FILTER_NT} -v filterNs=${FILTER_NS} \
+            -v filterBeta=${FILTER_BETA} -v filterType=${FILTER_TYPE} \
+            -v filterTrajNo=${FILTER_TRAJNO} -v filterAccRate=${FILTER_ACCRATE} -v filterAccRateLast1K=${FILTER_ACCRATE_LAST1K} \
+            -v filterStatus=${FILTER_STATUS} -v filterLastTrajTime=${FILTER_LASTTRAJ} -v statisticsSummary=${STATISTICS_SUMMARY} \
+            -v nfString="${NF_STRING}" -v muString="${MU_STRING}" -v kappaString="${MASS_STRING}" -v nsString="${NS_STRING}" -v ntString="${NT_STRING}" -v betaString="${BETA_STRING}" \
+            -v typeString=${TYPE_STRING} -v statusString="${STATUS_STRING}" \
+            -v trajLowValue=${TRAJ_LOW_VALUE} -v trajHighValue=${TRAJ_HIGH_VALUE} -v accRateLowValue=${ACCRATE_LOW_VALUE} -v accRateHighValue=${ACCRATE_HIGH_VALUE} \
+            -v accRateLast1KLowValue=${ACCRATE_LAST1K_LOW_VALUE} -v accRateLast1KHighValue=${ACCRATE_LAST1K_HIGH_VALUE} -v lastTrajTime=${LAST_TRAJ_TIME} \
+            -v nameOfColumnsAndNumberOfColumnsString=${NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL} \
+            -v nameOfDisplayedColumnsAndnrOfDisplayedColumnsString=${NAME_OF_COLUMN_NR_OF_COLUMN_STRING} \
+            -v nameOfDisplayedColumnsAndSpecOfColumnsString=${NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING} \
+            -v nameOfColumnsAndHeaderOfColumnsString=${NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING} \
+            -v nameOfColumnsAndHeaderSpecOfColumnsString=${NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING} \
+            -v statisticsFormatSpecString=${STATISTICS_PRINTF_FORMAT_SPECIFIER_STRING} \
+            -v lengthOfHeaderSeperator=${LENGTH_OF_HEADER_SEPERATOR} '
 
                      BEGIN{
                          nrOfTotalColumns=split(nameOfColumnsAndNumberOfColumnsString,columnNamesAndNumbersArray,"|");
@@ -371,69 +371,69 @@ function projectStatisticsDatabase()
                         }
                         printf("\033[0m\n");
                     }
-        ' $PROJECT_DATABASE_FILE
+        ' ${PROJECT_DATABASE_FILE}
 
-        cecho "\n Last update ended on " B "$(date -r $PROJECT_DATABASE_FILE +"%d.%m.%Y\e[21m at \e[1m%H:%M")" uB o "  --->  " file "$PROJECT_DATABASE_FILE" "\n"
+        cecho "\n Last update ended on " B "$(date -r ${PROJECT_DATABASE_FILE} +"%d.%m.%Y\e[21m at \e[1m%H:%M")" uB o "  --->  " file "${PROJECT_DATABASE_FILE}" "\n"
     fi
 
     #==========================================================================================================================================================================================#
 
-    if [[ $UPDATE = "TRUE" ]]; then
+    if [[ ${UPDATE} = "TRUE" ]]; then
 
-        if [[ "$SLEEP_TIME" != "" ]] && [[ "$UPDATE_TIME" != "" ]]; then
+        if [[ "${SLEEP_TIME}" != "" ]] && [[ "${UPDATE_TIME}" != "" ]]; then
             Internal "Values for both " emph "SLEEP_TIME" " and " emph "UPDATE_TIME" " are specified but it should not be the case!"
         fi
 
         local TEMPORARY_FILE_WITH_DIRECTORIES="${BHMAS_databaseGlobalPath}/temporaryFileWithDirectoriesForDatabaseUpdate.dat"
-        rm -f $TEMPORARY_FILE_WITH_DIRECTORIES
+        rm -f ${TEMPORARY_FILE_WITH_DIRECTORIES}
         local TEMPORARY_DATABASE_FILE="${BHMAS_databaseGlobalPath}/temporaryDatabaseForUpdate.dat"
-        rm -f $TEMPORARY_DATABASE_FILE
+        rm -f ${TEMPORARY_DATABASE_FILE}
 
         REGEX_STRING=".*/"
         for i in ${!BHMAS_parameterPrefixes[@]}; do
-            REGEX_STRING=$REGEX_STRING${BHMAS_parameterPrefixes[$i]}${BHMAS_parameterRegexes[$i]}/
+            REGEX_STRING=${REGEX_STRING}${BHMAS_parameterPrefixes[$i]}${BHMAS_parameterRegexes[$i]}/
         done
         REGEX_STRING=${REGEX_STRING%/}
 
         while :
         do
-            if [[ "$UPDATE_TIME" != "" ]]; then
+            if [[ "${UPDATE_TIME}" != "" ]]; then
                 CURRENT_EPOCH=$(date +%s)
-                if [[ $CURRENT_EPOCH -gt $(date -d "$UPDATE_TIME" +%s) ]]; then
-                    TARGET_EPOCH=$(date -d "$UPDATE_TIME tomorrow" +%s)
-                    cecho lp B "\n\tEntering sleeping mode. Performing next update on " emph "$(date -d "$UPDATE_TIME tomorrow" +"%d.%m.%Y \e[38;5;147mat\e[38;5;86m %H:%M")" "\n"
+                if [[ ${CURRENT_EPOCH} -gt $(date -d "${UPDATE_TIME}" +%s) ]]; then
+                    TARGET_EPOCH=$(date -d "${UPDATE_TIME} tomorrow" +%s)
+                    cecho lp B "\n\tEntering sleeping mode. Performing next update on " emph "$(date -d "${UPDATE_TIME} tomorrow" +"%d.%m.%Y \e[38;5;147mat\e[38;5;86m %H:%M")" "\n"
                 else
-                    TARGET_EPOCH=$(date -d "$UPDATE_TIME" +%s)
-                    cecho lp B "\n\tEntering sleeping mode. Performing next update today at " emph "$(date -d "$UPDATE_TIME" +"%H:%M")" "\n"
+                    TARGET_EPOCH=$(date -d "${UPDATE_TIME}" +%s)
+                    cecho lp B "\n\tEntering sleeping mode. Performing next update today at " emph "$(date -d "${UPDATE_TIME}" +"%H:%M")" "\n"
                 fi
-                SLEEP_SECONDS=$(( $TARGET_EPOCH - $CURRENT_EPOCH ))
-                sleep $SLEEP_SECONDS
+                SLEEP_SECONDS=$(( ${TARGET_EPOCH} - ${CURRENT_EPOCH} ))
+                sleep ${SLEEP_SECONDS}
             fi
 
-            [[ "$FILE_WITH_DIRECTORIES" = "" ]] && find $BHMAS_submitDiskGlobalPath/$BHMAS_projectSubpath -regextype grep -regex "$REGEX_STRING" -type d > $TEMPORARY_FILE_WITH_DIRECTORIES
-            [[ "$FILE_WITH_DIRECTORIES" != "" ]] && cat $FILE_WITH_DIRECTORIES > $TEMPORARY_FILE_WITH_DIRECTORIES
+            [[ "${FILE_WITH_DIRECTORIES}" = "" ]] && find ${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath} -regextype grep -regex "${REGEX_STRING}" -type d > ${TEMPORARY_FILE_WITH_DIRECTORIES}
+            [[ "${FILE_WITH_DIRECTORIES}" != "" ]] && cat ${FILE_WITH_DIRECTORIES} > ${TEMPORARY_FILE_WITH_DIRECTORIES}
 
-            if [[ ! -s "$TEMPORARY_FILE_WITH_DIRECTORIES" ]]; then
-                Fatal $BHMAS_fatalLogicError -n emph "No directory" " for the database update! Please check the given file or the folder structure!"
+            if [[ ! -s "${TEMPORARY_FILE_WITH_DIRECTORIES}" ]]; then
+                Fatal ${BHMAS_fatalLogicError} -n emph "No directory" " for the database update! Please check the given file or the folder structure!"
             fi
 
             while read line
             do
-                if [[ "$line" =~ ^[^#] ]]; then
-                    PARAMS=( $(awk 'BEGIN{FS="/"}{print $(NF-4) " " $(NF-3) " " $(NF-2) " " $(NF-1) " " $(NF)}' <<< "$line") )
+                if [[ "${line}" =~ ^[^#] ]]; then
+                    PARAMS=( $(awk 'BEGIN{FS="/"}{print $(NF-4) " " $(NF-3) " " $(NF-2) " " $(NF-1) " " $(NF)}' <<< "${line}") )
                 else
                     continue
                 fi
 
-                if [[ -d $line ]]; then
-                    cecho -n lo "\tUpdating: " wg "$line "
-                    cd $line
+                if [[ -d ${line} ]]; then
+                    cecho -n lo "\tUpdating: " wg "${line} "
+                    cd ${line}
                 else
-                    cecho lr "\n Directory " dir "$line" " not found, skipped!"
+                    cecho lr "\n Directory " dir "${line}" " not found, skipped!"
                     continue
                 fi
 
-                PARAMETER_DIRECTORY_STRUCTURE=${line##*$BHMAS_projectSubpath}
+                PARAMETER_DIRECTORY_STRUCTURE=${line##*${BHMAS_projectSubpath}}
 
                 #Explaination of the below sed commands:
                 # 1) Remove %[(])| symbols but not the [ of a color code.
@@ -447,42 +447,42 @@ function projectStatisticsDatabase()
                 #                       colorStatus status            colorLastTrAgo lastTrAgo        averageTimePerTrajectory
                 #
                 # NOTE: Each numeric field in the awk command has a color in front, either from the simulation status or put here by hand
-                ListSimulationsStatus_${BHMAS_clusterScheduler} $PARAMETER_DIRECTORY_STRUCTURE | \
+                ListSimulationsStatus_${BHMAS_clusterScheduler} ${PARAMETER_DIRECTORY_STRUCTURE} | \
                     sed -r 's/([^(\x1b)])\[|\]|\(|\)|%|\|/\1/g' | \
                     sed -r 's/(\x1B\[[0-9]{1,2};[0-9]{0,2};[0-9]{0,3}m)(.)/\1 \2/g' | \
                     sed -r 's/(.)(\x1B\[.{1,2};.{1,2}m)/\1 \2/g' | \
                     sed -r 's/(\x1B\[.{1,2};.{1,2}m)(.)/\1 \2/g' |
-                    awk --posix -v nf=${PARAMS[0]#$BHMAS_nflavourPrefix*} -v mu=${PARAMS[1]#$BHMAS_chempotPrefix*} -v k=${PARAMS[2]#$BHMAS_massPrefix*} -v nt=${PARAMS[3]#$BHMAS_ntimePrefix*} -v ns=${PARAMS[4]#*$BHMAS_nspacePrefix} '
+                    awk --posix -v nf=${PARAMS[0]#${BHMAS_nflavourPrefix}*} -v mu=${PARAMS[1]#${BHMAS_chempotPrefix}*} -v k=${PARAMS[2]#${BHMAS_massPrefix}*} -v nt=${PARAMS[3]#${BHMAS_ntimePrefix}*} -v ns=${PARAMS[4]#*${BHMAS_nspacePrefix}} '
                             $3 ~ /^[0-9]\.[0-9]{4}/{
                             print "\033[36m " nf " \033[36m " mu " \033[36m " k " \033[36m " nt " \033[36m " ns " " $(3-1) " " $3 " " $(5-1) " " $5 " " $(8-1) " " $8 " " $(11-1) " " $(11) " " $(18-1) " " $(18) " " $(23-1) " " $(23) " " $(15-1) " " $(15) " " $(26-1) " " $(26) " \033[36m " $(32) " \033[0m"
                             }
-                        ' >> $TEMPORARY_DATABASE_FILE
+                        ' >> ${TEMPORARY_DATABASE_FILE}
 
-                cd $CURRENT_DIRECTORY
+                cd ${CURRENT_DIRECTORY}
                 cecho lg "...done!"
-            done < <(cat $TEMPORARY_FILE_WITH_DIRECTORIES)
+            done < <(cat ${TEMPORARY_FILE_WITH_DIRECTORIES})
 
-            if [[ ! -f $TEMPORARY_DATABASE_FILE ]] || [[ "$(wc -l < $TEMPORARY_DATABASE_FILE)" -eq 0 ]]; then
+            if [[ ! -f ${TEMPORARY_DATABASE_FILE} ]] || [[ "$(wc -l < ${TEMPORARY_DATABASE_FILE})" -eq 0 ]]; then
                 Internal "After the database procedure, the database seems to be " emph "empty" "! Temporary files\n"\
-                         file "   $TEMPORARY_DATABASE_FILE" "\n"\
-                         file "   $TEMPORARY_FILE_WITH_DIRECTORIES\n"\
+                         file "   ${TEMPORARY_DATABASE_FILE}" "\n"\
+                         file "   ${TEMPORARY_FILE_WITH_DIRECTORIES}\n"\
                          "have been left for further investigation!"
             fi
 
             #Updating the content of PROJECT_DATABASE_FILE
-            local PROJECT_DATABASE_FILE=$BHMAS_databaseGlobalPath/$(date +%Y_%m_%d)_$BHMAS_databaseFilename
-            cp $TEMPORARY_DATABASE_FILE $PROJECT_DATABASE_FILE
+            local PROJECT_DATABASE_FILE=${BHMAS_databaseGlobalPath}/$(date +%Y_%m_%d)_${BHMAS_databaseFilename}
+            cp ${TEMPORARY_DATABASE_FILE} ${PROJECT_DATABASE_FILE}
 
             #Clean up
-            rm $TEMPORARY_DATABASE_FILE
-            rm $TEMPORARY_FILE_WITH_DIRECTORIES
+            rm ${TEMPORARY_DATABASE_FILE}
+            rm ${TEMPORARY_FILE_WITH_DIRECTORIES}
 
-            if [[ "$SLEEP_TIME" != "" ]]; then
-                cecho lp B "\n\tSleeping " emph "$SLEEP_TIME" " starting on " emph "$(date +"%d.%m.%Y at %H:%M:%S")" "\n"
-                sleep $SLEEP_TIME
+            if [[ "${SLEEP_TIME}" != "" ]]; then
+                cecho lp B "\n\tSleeping " emph "${SLEEP_TIME}" " starting on " emph "$(date +"%d.%m.%Y at %H:%M:%S")" "\n"
+                sleep ${SLEEP_TIME}
             fi
 
-            if [[ "$SLEEP_TIME" = "" ]] && [[ "$UPDATE_TIME" = "" ]]; then
+            if [[ "${SLEEP_TIME}" = "" ]] && [[ "${UPDATE_TIME}" = "" ]]; then
                 break
             fi
         done
@@ -491,10 +491,10 @@ function projectStatisticsDatabase()
 
     #==========================================================================================================================================================================================#
 
-    if [[ $REPORT = "TRUE" ]]; then
+    if [[ ${REPORT} = "TRUE" ]]; then
 
         cecho lm "\n\t\t\t  " U "AUTOMATIC REPORT FROM DATABASE (status on "\
-              B "$(date -r $PROJECT_DATABASE_FILE "$(cecho -n -d '+%%d.%%m.%%Y' uB ' at ' B '%%H:%%M')")" uB ")\n"
+              B "$(date -r ${PROJECT_DATABASE_FILE} "$(cecho -n -d '+%%d.%%m.%%Y' uB ' at ' B '%%H:%%M')")" uB ")\n"
 
         local exitCodeAwk
         exitCodeAwk=0
@@ -547,22 +547,22 @@ simOnBrokenGPU = 0
 criticalSituation = 0
 }
 {
-if($betaColorColumn == wrongBetaColor || $maxDsColorColumn == tooHighMaxDsColor || $maxDPColorColumn == tooHighMaxDPColor){simOnBrokenGPU+=1; criticalSituation=1}
-if($trajNoColorColumn == toBeCleanedColor){filesToBeCleaned+=1}
-if($accRateColorColumn == tooLowAccColor){simTooLowAcc+=1; criticalSituation=1}
-if($accRateColorColumn == lowAccColor){simLowAcc+=1}
-if($accRateColorColumn == optimalAccColor){simOptimalAcc+=1}
-if($accRateColorColumn == highAccColor){simHighAcc+=1}
-if($accRateColorColumn == tooHighAccColor){simTooHighAcc+=1}
-if($accRateLast1KColorColumn == tooLowAccColor){simTooLowAcc1K+=1; criticalSituation=1}
-if($accRateLast1KColorColumn == lowAccColor){simLowAcc1K+=1}
-if($accRateLast1KColorColumn == optimalAccColor){simOptimalAcc1K+=1}
-if($accRateLast1KColorColumn == highAccColor){simHighAcc1K+=1}
-if($accRateLast1KColorColumn == tooHighAccColor){simTooHighAcc1K+=1}
-if($statusColorColumn == runningColor){simRunning+=1}
-if($statusColorColumn == pendingColor){simPending+=1}
-if($lastTrajColorColumn == stuckColor){simStuck+=1; criticalSituation=1}
-if($lastTrajColorColumn == fineColor){simFine+=1}
+if(${betaColorColumn} == wrongBetaColor || ${maxDsColorColumn} == tooHighMaxDsColor || ${maxDPColorColumn} == tooHighMaxDPColor){simOnBrokenGPU+=1; criticalSituation=1}
+if(${trajNoColorColumn} == toBeCleanedColor){filesToBeCleaned+=1}
+if(${accRateColorColumn} == tooLowAccColor){simTooLowAcc+=1; criticalSituation=1}
+if(${accRateColorColumn} == lowAccColor){simLowAcc+=1}
+if(${accRateColorColumn} == optimalAccColor){simOptimalAcc+=1}
+if(${accRateColorColumn} == highAccColor){simHighAcc+=1}
+if(${accRateColorColumn} == tooHighAccColor){simTooHighAcc+=1}
+if(${accRateLast1KColorColumn} == tooLowAccColor){simTooLowAcc1K+=1; criticalSituation=1}
+if(${accRateLast1KColorColumn} == lowAccColor){simLowAcc1K+=1}
+if(${accRateLast1KColorColumn} == optimalAccColor){simOptimalAcc1K+=1}
+if(${accRateLast1KColorColumn} == highAccColor){simHighAcc1K+=1}
+if(${accRateLast1KColorColumn} == tooHighAccColor){simTooHighAcc1K+=1}
+if(${statusColorColumn} == runningColor){simRunning+=1}
+if(${statusColorColumn} == pendingColor){simPending+=1}
+if(${lastTrajColorColumn} == stuckColor){simStuck+=1; criticalSituation=1}
+if(${lastTrajColorColumn} == fineColor){simFine+=1}
 }
 END{
 def="\033[0m"
@@ -602,9 +602,9 @@ printf string[9] , green                                     , bold, simFine
 printf string[10], (filesToBeCleaned>0 ? lightOrange : green), bold, filesToBeCleaned
 
 if (criticalSituation == 1) {exit failure} else {exit success}
-        }' $PROJECT_DATABASE_FILE || exitCodeAwk=1
+        }' ${PROJECT_DATABASE_FILE} || exitCodeAwk=1
 
-        if [[ $exitCodeAwk -ne 0 ]]; then
+        if [[ ${exitCodeAwk} -ne 0 ]]; then
             cecho -d -n lr "\n\t\t\t"
         else
             cecho -d -n wg "\n\t\t\t"
@@ -614,10 +614,10 @@ if (criticalSituation == 1) {exit failure} else {exit success}
 
     #==========================================================================================================================================================================================#
 
-    if [[ $SHOW = "TRUE" ]]; then
+    if [[ ${SHOW} = "TRUE" ]]; then
 
         local TEMPORARY_DATABASE_FILE="tmpDatabaseForShowing.dat"
-        rm -f $BHMAS_databaseGlobalPath/$TEMPORARY_DATABASE_FILE
+        rm -f ${BHMAS_databaseGlobalPath}/${TEMPORARY_DATABASE_FILE}
 
         local POSSIBLE_SIMULATIONS_TO_SHOW=( "Simulations on broken GPU"
                                              "Simulations stuck (or finished)"
@@ -638,10 +638,10 @@ if (criticalSituation == 1) {exit failure} else {exit success}
         cecho -d yg "Which simulations would you like to show?\n" lp
         PS3=$(cecho -d yg '\nEnter the number corresponding to the desired set: ' lp)
         select SIMULATION in "${POSSIBLE_SIMULATIONS_TO_SHOW[@]}"; do
-            if ! ElementInArray "$SIMULATION" "${POSSIBLE_SIMULATIONS_TO_SHOW[@]}"; then
+            if ! ElementInArray "${SIMULATION}" "${POSSIBLE_SIMULATIONS_TO_SHOW[@]}"; then
                 continue
             else
-                case $SIMULATION in
+                case ${SIMULATION} in
                     "Simulations on broken GPU")
                         local COLUMNS_TO_FILTER=( "$((${COLUMNS[betaC]} -1 ))" )
                         COLUMNS_TO_FILTER+=( "$((${COLUMNS[maxDsC]} -1 ))" )
@@ -714,19 +714,19 @@ if (criticalSituation == 1) {exit failure} else {exit success}
 
         for i in ${!COLUMNS_TO_FILTER[@]}
         do
-            awk --posix -v columnToFilter="${COLUMNS_TO_FILTER[$i]}" -v valueToMatch="${VALUES_TO_MATCH[$i]}" '$columnToFilter == valueToMatch{print $0}' $PROJECT_DATABASE_FILE >> $BHMAS_databaseGlobalPath/$TEMPORARY_DATABASE_FILE
+            awk --posix -v columnToFilter="${COLUMNS_TO_FILTER[$i]}" -v valueToMatch="${VALUES_TO_MATCH[$i]}" '${columnToFilter} == valueToMatch{print $0}' ${PROJECT_DATABASE_FILE} >> ${BHMAS_databaseGlobalPath}/${TEMPORARY_DATABASE_FILE}
         done
 
-        if [[ $(wc -l < $BHMAS_databaseGlobalPath/$TEMPORARY_DATABASE_FILE) -eq 0 ]]; then
-            cecho o emph "  $SIMULATION" " not found in database (last update ended on "\
-                  B "$(date -r $PROJECT_DATABASE_FILE "$(cecho -n -d '+%%d.%%m.%%Y' uB ' at ' B '%%H:%%M')")" uB ").\n"
+        if [[ $(wc -l < ${BHMAS_databaseGlobalPath}/${TEMPORARY_DATABASE_FILE}) -eq 0 ]]; then
+            cecho o emph "  ${SIMULATION}" " not found in database (last update ended on "\
+                  B "$(date -r ${PROJECT_DATABASE_FILE} "$(cecho -n -d '+%%d.%%m.%%Y' uB ' at ' B '%%H:%%M')")" uB ").\n"
         else
-            __static__DisplayDatabaseFile <(sort $BHMAS_databaseGlobalPath/$TEMPORARY_DATABASE_FILE | uniq)
-            cecho "\n Last update ended on " B "$(date -r $PROJECT_DATABASE_FILE "$(cecho -n -d '+%%d.%%m.%%Y' uB ' at ' B '%%H:%%M')")"\
-                  uB o "  --->  " file "$PROJECT_DATABASE_FILE" "\n"
+            __static__DisplayDatabaseFile <(sort ${BHMAS_databaseGlobalPath}/${TEMPORARY_DATABASE_FILE} | uniq)
+            cecho "\n Last update ended on " B "$(date -r ${PROJECT_DATABASE_FILE} "$(cecho -n -d '+%%d.%%m.%%Y' uB ' at ' B '%%H:%%M')")"\
+                  uB o "  --->  " file "${PROJECT_DATABASE_FILE}" "\n"
         fi
 
-        rm $BHMAS_databaseGlobalPath/$TEMPORARY_DATABASE_FILE
+        rm ${BHMAS_databaseGlobalPath}/${TEMPORARY_DATABASE_FILE}
 
     fi
 
@@ -737,23 +737,23 @@ if (criticalSituation == 1) {exit failure} else {exit success}
 function __static__DisplayDatabaseFile()
 {
 
-    if [[ "$CUSTOMIZE_COLUMNS" = "FALSE" ]]; then
+    if [[ "${CUSTOMIZE_COLUMNS}" = "FALSE" ]]; then
         NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER=( nfC muC kC ntC nsC betaC trajNoC accRateC accRateLast1KC maxDsC maxPlaqC statusC lastTrajC timeTrajC )
     fi
 
     for NAME_OF_COLUMN in ${!COLUMNS[@]}; do
-        NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL=$NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL$NAME_OF_COLUMN-${COLUMNS[$NAME_OF_COLUMN]}"|"
+        NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL=${NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL}${NAME_OF_COLUMN}-${COLUMNS[${NAME_OF_COLUMN}]}"|"
     done
 
     for NAME_OF_COLUMN in ${NAME_OF_COLUMNS_TO_DISPLAY_IN_ORDER[@]}; do
-        NAME_OF_COLUMN_NR_OF_COLUMN_STRING=$NAME_OF_COLUMN_NR_OF_COLUMN_STRING$NAME_OF_COLUMN-${COLUMNS[$NAME_OF_COLUMN]}"|"
-        NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING=$NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING$NAME_OF_COLUMN--${PRINTF_FORMAT_SPECIFIER_ARRAY[$NAME_OF_COLUMN]}"|"
-        NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING=$NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING$NAME_OF_COLUMN-${HEADER_PRINTF_PARAMETER_ARRAY[$NAME_OF_COLUMN]}"|"
-        NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING=$NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING$NAME_OF_COLUMN--${HEADER_PRINTF_FORMAT_SPECIFIER_ARRAY[$NAME_OF_COLUMN]}"|"
-        LENGTH_OF_HEADER_SEPERATOR=$(($LENGTH_OF_HEADER_SEPERATOR+${FSNA[$NAME_OF_COLUMN]}+1))
+        NAME_OF_COLUMN_NR_OF_COLUMN_STRING=${NAME_OF_COLUMN_NR_OF_COLUMN_STRING}${NAME_OF_COLUMN}-${COLUMNS[${NAME_OF_COLUMN}]}"|"
+        NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING=${NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING}${NAME_OF_COLUMN}--${PRINTF_FORMAT_SPECIFIER_ARRAY[${NAME_OF_COLUMN}]}"|"
+        NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING=${NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING}${NAME_OF_COLUMN}-${HEADER_PRINTF_PARAMETER_ARRAY[${NAME_OF_COLUMN}]}"|"
+        NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING=${NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING}${NAME_OF_COLUMN}--${HEADER_PRINTF_FORMAT_SPECIFIER_ARRAY[${NAME_OF_COLUMN}]}"|"
+        LENGTH_OF_HEADER_SEPERATOR=$((${LENGTH_OF_HEADER_SEPERATOR}+${FSNA[${NAME_OF_COLUMN}]}+1))
     done
 
-    LENGTH_OF_HEADER_SEPERATOR=$(($LENGTH_OF_HEADER_SEPERATOR+${FSNA[muC]}+1-${#BHMAS_chempotPrefix})) #Add dynamicly to simmetrize the line under the header (the +1 is the space that is at the beginning of the line)
+    LENGTH_OF_HEADER_SEPERATOR=$((${LENGTH_OF_HEADER_SEPERATOR}+${FSNA[muC]}+1-${#BHMAS_chempotPrefix})) #Add dynamicly to simmetrize the line under the header (the +1 is the space that is at the beginning of the line)
     #STRIPPING OF THE LAST | SYMBOL FROM THE STRING
     NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL="${NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL%|}"
     NAME_OF_COLUMN_NR_OF_COLUMN_STRING="${NAME_OF_COLUMN_NR_OF_COLUMN_STRING%|}"
@@ -761,12 +761,12 @@ function __static__DisplayDatabaseFile()
     NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING="${NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING%|}"
     NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING="${NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING%|}"
 
-    awk --posix -v nameOfColumnsAndNumberOfColumnsString=$NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL \
-        -v nameOfDisplayedColumnsAndnrOfDisplayedColumnsString=$NAME_OF_COLUMN_NR_OF_COLUMN_STRING \
-        -v nameOfDisplayedColumnsAndSpecOfColumnsString=$NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING \
-        -v nameOfColumnsAndHeaderOfColumnsString=$NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING \
-        -v nameOfColumnsAndHeaderSpecOfColumnsString=$NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING \
-        -v lengthOfHeaderSeperator=$LENGTH_OF_HEADER_SEPERATOR '
+    awk --posix -v nameOfColumnsAndNumberOfColumnsString=${NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL} \
+        -v nameOfDisplayedColumnsAndnrOfDisplayedColumnsString=${NAME_OF_COLUMN_NR_OF_COLUMN_STRING} \
+        -v nameOfDisplayedColumnsAndSpecOfColumnsString=${NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING} \
+        -v nameOfColumnsAndHeaderOfColumnsString=${NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING} \
+        -v nameOfColumnsAndHeaderSpecOfColumnsString=${NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING} \
+        -v lengthOfHeaderSeperator=${LENGTH_OF_HEADER_SEPERATOR} '
                      BEGIN{
                          nrOfTotalColumns=split(nameOfColumnsAndNumberOfColumnsString,columnNamesAndNumbersArray,"|");
 

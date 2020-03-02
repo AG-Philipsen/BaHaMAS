@@ -30,13 +30,13 @@ function __static__DisplayMenuBoxWithPresentVariablesAndActOnInput()
                                   --cancel-button 'Abort setup'
                                   --backtitle 'BaHaMAS setup'
                                   --title 'BaHaMAS configuration'
-                                  --menu '$menuHeader'
+                                  --menu '${menuHeader}'
                          $((lines-6)) $((columns-10)) $((lines-22))"
     #Complete dialog box command
     index=1
     for variable in ${variableNames[@]}; do
-        if [[ $variable != 'BHMAS_coloredOutput' ]]; then
-            commandToBeExecuted+=" '${variable}:' '${userVariables[$variable]}' "
+        if [[ ${variable} != 'BHMAS_coloredOutput' ]]; then
+            commandToBeExecuted+=" '${variable}:' '${userVariables[${variable}]}' "
             (( index++ )) || true
         fi
     done
@@ -50,30 +50,30 @@ function __static__DisplayMenuBoxWithPresentVariablesAndActOnInput()
 
 function __static__SetValueOfVariableObtainedFromUser()
 {
-    userVariables[${variableInputBox%?}]="$resultOfBox"
+    userVariables[${variableInputBox%?}]="${resultOfBox}"
 }
 
 function __static__DisplayFreeInputBoxAndSetGivenInputValue()
 {
     local variableInputBox inputHeader variable inputBoxLines
-    variableInputBox="$resultOfBox"; inputBoxLines=8
-    if [[ "$variableInputBox" = "Configure BaHaMAS" ]]; then
+    variableInputBox="${resultOfBox}"; inputBoxLines=8
+    if [[ "${variableInputBox}" = "Configure BaHaMAS" ]]; then
         return 0
     else
         inputHeader=''
         for variable in ${variableNames[@]}; do
-            if [[ $variable = ${variableInputBox%?} ]]; then
+            if [[ ${variable} = ${variableInputBox%?} ]]; then
                 break
             else
-                inputHeader+=" $variable\n"
+                inputHeader+=" ${variable}\n"
                 (( inputBoxLines++ )) || true
             fi
         done
-        [[ "$inputHeader" != '' ]] && inputHeader="\n Possible variables to be used:\n\n$inputHeader"
+        [[ "${inputHeader}" != '' ]] && inputHeader="\n Possible variables to be used:\n\n${inputHeader}"
         inputHeader+='\n\n Enter the value for the variable:'
         commandToBeExecuted="whiptail --title '${variableInputBox%?}'
                                       --backtitle 'BaHaMAS setup'
-                                      --inputbox '$inputHeader'
+                                      --inputbox '${inputHeader}'
                              $((inputBoxLines+5)) 78 ${userVariables[${variableInputBox%?}]//\$/\\\$}" #Escape $ sign to avoid evaluation of variable
         FireUpTheDialogBoxStoringResultAndActingAccordingly\
             __static__SetValueOfVariableObtainedFromUser\

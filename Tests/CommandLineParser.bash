@@ -17,17 +17,17 @@
 #  along with BaHaMAS. If not, see <http://www.gnu.org/licenses/>.
 #
 
-source ${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/CommandLineParsers/CommonFunctionality.bash || exit $BHMAS_fatalBuiltin
+source ${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/CommandLineParsers/CommonFunctionality.bash || exit ${BHMAS_fatalBuiltin}
 
 function __static__AddOptionToHelper()
 {
     local name description color lengthOption indentation
     lengthOption=28; indentation='    '
-    color="$normalColor"
+    color="${normalColor}"
     name="$1"; description="$2"; shift 2
-    cecho $color "$(printf "%s%-${lengthOption}s" "$indentation" "$name")" d "  ->  " $helperColor "$description"
+    cecho ${color} "$(printf "%s%-${lengthOption}s" "${indentation}" "${name}")" d "  ->  " ${helperColor} "${description}"
     while [[ "$1" != '' ]]; do
-        cecho "$(printf "%s%${lengthOption}s" "$indentation" "")      " $helperColor "$1"
+        cecho "$(printf "%s%${lengthOption}s" "${indentation}" "")      " ${helperColor} "$1"
         shift
     done
 }
@@ -35,7 +35,7 @@ function __static__PrintHelper()
 {
     local helperColor normalColor
     helperColor='g'; normalColor='m'
-    cecho -d $helperColor
+    cecho -d ${helperColor}
     cecho -d " Call " B "BaHaMAS tests" uB " with the following optional arguments:" "\n"
     __static__AddOptionToHelper "-h | --help"        "Print this help"
     __static__AddOptionToHelper "-r | --reportLevel" "Verbosity of test report. To be chosen among"\
@@ -54,13 +54,13 @@ function __static__PrintListOfTests()
     local index list termCols longestString colsWidth maxNumCols formatString
     cecho B lm "\n " U "List of available tests" uU ":\n"
     list=( "${testsToBeRun[@]}" )
-    for index in "${!list[@]}" ; do  list[$index]="$(cecho -d -n bb "$(printf "%2d)" "$((index+1))") " lp "${list[$index]}")"; done
+    for index in "${!list[@]}" ; do  list[${index}]="$(cecho -d -n bb "$(printf "%2d)" "$((index+1))") " lp "${list[${index}]}")"; done
     termCols=$(tput cols)
     longestString=$(printf "%s\n" "${list[@]}" | awk '{print length}' | sort -n | tail -n1)
     colsWidth=$((longestString+3))
     maxNumCols=$((termCols/colsWidth))
     formatString=""; for((index=0; index<maxNumCols; index++)); do formatString+="%-${colsWidth}s"; done
-    printf "$formatString\n" "${list[@]}"
+    printf "${formatString}\n" "${list[@]}"
     cecho ''
     #TODO: Print list going vertically and not horizontally!
 }
@@ -80,7 +80,7 @@ function ParseCommandLineOption()
         case $1 in
             -h | --help )
                 __static__PrintHelper
-                exit $BHMAS_successExitCode
+                exit ${BHMAS_successExitCode}
                 shift ;;
 
             -r | --reportLevel )
@@ -97,10 +97,10 @@ function ParseCommandLineOption()
                         testsNameList=()
                         for number in "${testsNumericList[@]}"; do
                             (( number-- ))
-                            if [[ $number -ge ${#testsToBeRun[@]} ]]; then
-                                Fatal $BHMAS_fatalCommandLine "Specified tests numbers " emph "$2" " not available!"
+                            if [[ ${number} -ge ${#testsToBeRun[@]} ]]; then
+                                Fatal ${BHMAS_fatalCommandLine} "Specified tests numbers " emph "$2" " not available!"
                             fi
-                            testsNameList+=( "${testsToBeRun[$number]}" )
+                            testsNameList+=( "${testsToBeRun[${number}]}" )
                         done
                         testsToBeRun=( "${testsNameList[@]}" )
                     else
@@ -108,7 +108,7 @@ function ParseCommandLineOption()
                     fi
                 else
                     __static__PrintListOfTests
-                    exit $BHMAS_successExitCode
+                    exit ${BHMAS_successExitCode}
                 fi
                 shift 2 ;;
             -l | --doNotCleanTestFolder )
