@@ -344,7 +344,7 @@ function __static__ColorBeta()
         -v wrongVariable="${BHMAS_fatalVariableUnset}" \
         -v success="${BHMAS_successExitCode}" \
         -v failure="${BHMAS_fatalLogicError}" \
-        -f ${BHMAS_repositoryTopLevelPath}/SLURM_Implementation/CheckCorrectnessCl2qcdOutputFile.awk ${outputFileGlobalPath}
+        -f ${BHMAS_repositoryTopLevelPath}/Scheduler_Dependent_Code/${BHMAS_clusterScheduler}/CheckCorrectnessCl2qcdOutputFile.awk ${outputFileGlobalPath}
     errorCode=$?
 
     if [[ ${errorCode} -eq ${BHMAS_successExitCode} ]]; then
