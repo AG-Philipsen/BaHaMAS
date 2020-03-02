@@ -44,7 +44,7 @@ set -euo pipefail                                                               
 
 #Load auxiliary bash files that will be used
 readonly BHMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"
-source "${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/SourceCodebaseFiles.bash" "$@"
+source "${BHMAS_repositoryTopLevelPath}/Generic_Code/SourceCodebaseFiles.bash" "$@"
 
 DeclareAllGlobalVariables
 
