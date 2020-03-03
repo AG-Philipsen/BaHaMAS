@@ -47,6 +47,7 @@ function SourceCodebaseGeneralFiles()
         source "${BHMAS_repositoryTopLevelPath}/Generic_Code/${fileToBeSourced}" || exit ${BHMAS_fatalBuiltin}
     done
     SourceClusterSpecificCode
+    SourceLqcdSoftwareSpecificCode
 
     #User file to be sourced depending on test mode
     if IsBaHaMASRunInSetupMode; then

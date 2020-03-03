@@ -20,23 +20,28 @@
 function SourceClusterSpecificCode()
 {
     readonly BHMAS_clusterScheduler="$(SelectClusterSchedulerName)"
-    local listOfFilesToBeSourced
-    listOfFilesToBeSourced=( 'ProduceJobScript.bash'
-                             'ProduceInverterJobScript.bash'
-                             'CommonFunctionality.bash'
-                             'ProduceInputFile.bash'
-                             'ProduceFilesForEachBeta.bash'
-                             'ProcessBetasForSubmitOnly.bash'
-                             'ProcessBetasForContinue.bash'
-                             'ProcessBetasForInversion.bash'
-                             'JobsSubmission.bash'
-                             'JobsStatus.bash'
-                             'SimulationsStatus.bash' )
+    local fileToBeSourced
+    # Source all files for the scheduler. It is better than giving a fixed list, because
+    # then implementation for different scheduler might differ, e.g. a feature may be
+    # implemented for one scheduler only.
+    for fileToBeSourced in "${BHMAS_repositoryTopLevelPath}"/Scheduler_Dependent_Code/"${BHMAS_clusterScheduler}"/*.bash; do
+        if [[ -f "${fileToBeSourced}" ]]; then
+            source "${fileToBeSourced}" # The if is due to avoid nullglob
+        fi
+    done
+}
 
-    #The following source commands could fail since the file for the cluster scheduler could not be there,
-    #then suppress the error and continue to avoid that the script exits due to 'set -e'
-    for fileToBeSourced in "${listOfFilesToBeSourced[@]}"; do
-        source "${BHMAS_repositoryTopLevelPath}/Scheduler_Dependent_Code/${BHMAS_clusterScheduler}/${fileToBeSourced}" 2>/dev/null || continue
+function SourceLqcdSoftwareSpecificCode()
+{
+    # Here we do not know which software is going to be used, since source happens
+    # before declaring global variables, including those of the user setup, among
+    # which BHMAS_lqcdSoftware is. Hence, source here all implementations. It should
+    # not hurt since each function name has the LQCD software in the name.
+    local fileToBeSourced
+    for fileToBeSourced in "${BHMAS_repositoryTopLevelPath}"/LQCD_Software_Dependent_Code/*/*.bash; do
+        if [[ -f "${fileToBeSourced}" ]]; then
+            source "${fileToBeSourced}" # The if is due to avoid nullglob
+        fi
     done
 }
 
@@ -58,30 +63,25 @@ function ProduceInputFileAndJobScriptForEachBeta()
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler}
 }
 
-
 function ProcessBetaValuesForSubmitOnly()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler}
 }
-
 
 function ProcessBetaValuesForContinue()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler}
 }
 
-
 function ProcessBetaValuesForInversion()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler}
 }
 
-
 function SubmitJobsForValidBetaValues()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler}
 }
-
 
 function ListJobsStatus()
 {
