@@ -121,7 +121,7 @@ function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
             if [[ -e ${jobScriptGlobalPath} ]]; then
                 mv ${jobScriptGlobalPath} ${jobScriptGlobalPath}_$(date +'%F_%H%M') || exit ${BHMAS_fatalBuiltin}
             fi
-            #Call the file to produce the jobscript file
+            #Call the function to produce the jobscript file
             if [[ ${BHMAS_executionMode} = 'mode:invert-configurations' ]]; then
                 walltime="$(__static__CalculateWalltimeForInverter)"
                 ProduceInverterJobscript_CL2QCD "${jobScriptGlobalPath}" "${jobScriptFilename}" "${walltime}" "${betasForJobScript[@]}"
