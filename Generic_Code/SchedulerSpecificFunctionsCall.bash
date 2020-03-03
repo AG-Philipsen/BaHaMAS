@@ -58,22 +58,7 @@ function __static__CheckExistenceOfFunctionAndCallIt()
 }
 
 
-function ProduceInputFileAndJobScriptForEachBeta()
-{
-    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler}
-}
-
-function ProcessBetaValuesForSubmitOnly()
-{
-    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler}
-}
-
 function ProcessBetaValuesForContinue()
-{
-    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler}
-}
-
-function ProcessBetaValuesForInversion()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler}
 }

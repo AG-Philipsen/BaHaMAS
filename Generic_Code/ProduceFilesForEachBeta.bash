@@ -17,7 +17,7 @@
 #  along with BaHaMAS. If not, see <http://www.gnu.org/licenses/>.
 #
 
-function ProduceInputFileAndJobScriptForEachBeta_SLURM()
+function ProduceInputFileAndJobScriptForEachBeta()
 {
     local betaValuesCopy index beta submitBetaDirectory temporaryNumberOfTrajectories
     betaValuesCopy=(${BHMAS_betaValues[@]})
