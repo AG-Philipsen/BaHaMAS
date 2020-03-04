@@ -68,7 +68,7 @@ function SubmitJobsForValidBetaValues()
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler}
 }
 
-function ListJobsStatus()
+function GatherJobsInformation()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler}
 }

@@ -157,7 +157,7 @@ case ${BHMAS_executionMode} in
 
     mode:job-status )
 
-        ListJobsStatus
+        GatherAndPrintJobsInformation
         ;;
 
     mode:simulation-status )
