@@ -447,7 +447,7 @@ function projectStatisticsDatabase()
                 #                       colorStatus status            colorLastTrAgo lastTrAgo        averageTimePerTrajectory
                 #
                 # NOTE: Each numeric field in the awk command has a color in front, either from the simulation status or put here by hand
-                ListSimulationsStatus_${BHMAS_clusterScheduler} ${PARAMETER_DIRECTORY_STRUCTURE} | \
+                ListSimulationsStatus ${PARAMETER_DIRECTORY_STRUCTURE} | \
                     sed -r 's/([^(\x1b)])\[|\]|\(|\)|%|\|/\1/g' | \
                     sed -r 's/(\x1B\[[0-9]{1,2};[0-9]{0,2};[0-9]{0,3}m)(.)/\1 \2/g' | \
                     sed -r 's/(.)(\x1B\[.{1,2};.{1,2}m)/\1 \2/g' | \

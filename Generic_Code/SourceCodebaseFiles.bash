@@ -45,6 +45,7 @@ function SourceCodebaseGeneralFiles()
         'ProduceFilesForEachBeta.bash'
         'ReportOnProblematicBetas.bash'
         'SchedulerSpecificFunctionsCall.bash'
+        'SimulationsStatus.bash'
         'SubmitJobs.bash'
         'Setup/Setup.bash'
         'SystemRequirements.bash'
