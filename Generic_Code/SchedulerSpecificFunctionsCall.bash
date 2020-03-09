@@ -78,5 +78,10 @@ function GatherJobsInformationForSimulationStatusMode()
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler}
 }
 
+function GatherJobsInformationForContinueMode()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler}
+}
+
 
 MakeFunctionsDefinedInThisFileReadonly

@@ -136,5 +136,21 @@ function GatherJobsInformationForSimulationStatusMode_SLURM()
     done < <(squeue --noheader -u "$(whoami)" -o "%j@%T")
 }
 
+# This function has to set the array "jobsInformation" with each element being
+# the information for each job as a @-separated list with the following fields:
+#   Job ID
+#   Job name
+#   Job running status
+function GatherJobsInformationForContinueMode_SLURM()
+{
+    # In the following line we assume that no newline are contained
+    # neither in the job name nor in the job status, it seems so in SLURM
+    local line
+    jobsInformation=()
+    while IFS= read -r line; do
+        jobsInformation+=( "${line}" )
+    done < <(squeue --noheader -u "$(whoami)" -o "%i@%j@%T")
+}
+
 
 MakeFunctionsDefinedInThisFileReadonly

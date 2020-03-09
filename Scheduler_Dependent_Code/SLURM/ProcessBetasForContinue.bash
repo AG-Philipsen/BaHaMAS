@@ -18,6 +18,32 @@
 #  along with BaHaMAS. If not, see <http://www.gnu.org/licenses/>.
 #
 
+function __static__CheckWhetherAnySimulationForGivenBetaValuesIsAlreadyEnqueued()
+{
+    local jobsInformation runId jobString betaString seedString regex abort
+    #Fill jobsInformation array with jobID@jobName@jobStatus
+    GatherJobsInformationForContinueMode
+    for runId in ${BHMAS_betaValues[@]}; do
+        betaString="${BHMAS_betaPrefix}${runId%%_*}"
+        seedString="$(cut -d'_' -f2 <<< "${runId}")"
+        regex="^.*${BHMAS_parametersString}.*${betaString}.*${seedString}.*(RUNNING|PENDING)\$"
+        abort=1
+        for jobString in "${jobsInformation[@]}"; do
+            if [[ ${jobString} =~ ${regex} ]]; then
+                Error "The simulation " emph "${BHMAS_betaPrefix}${runId}" " seems to be " emph "${jobString##*@}" " with " emph "job-id = ${jobString%%@*}" "."
+                abort=0
+            fi
+        done
+    done
+    if [[ ${abort} -eq 0 ]]; then
+        Fatal ${BHMAS_fatalLogicError}\
+              "Some simulation to be continued are either running or pending.\n"\
+              "BaHaMAS cannot procede in contiue mode with the given betas."
+    else
+        return 0
+    fi
+}
+
 function __static__SetBetaRelatedPathVariables()
 {
     runBetaDirectory="${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${betaValue}"
@@ -25,17 +51,6 @@ function __static__SetBetaRelatedPathVariables()
     inputFileGlobalPath="${submitBetaDirectory}/${BHMAS_inputFilename}"
     outputFileGlobalPath="${runBetaDirectory}/${BHMAS_outputFilename}"
     outputPbpFileGlobalPath="${outputFileGlobalPath}_pbp.dat"
-    return 0
-}
-
-function __static__GetStatusOfJobsContainingBetavalues()
-{
-    local beta jobsInformation
-    jobsInformation="$(squeue --noheader -u $(whoami) -o "%i@%j@%T")"
-    for beta in ${BHMAS_betaValues[@]}; do
-        #In sed !d deletes the non matching entries -> here we keep jobs with desired beta, seed and parameters
-        statusOfJobsContainingGivenBeta["${beta}"]=$(sed '/'${BHMAS_betaPrefix}${beta%%_*}'/!d; /'$(cut -d'_' -f2 <<< "${beta}")'/!d; /'${BHMAS_parametersString}'/!d' <<< "${jobsInformation}")
-    done
     return 0
 }
 
@@ -55,23 +70,6 @@ function __static__CheckWhetherAnyRequiredFileOrFolderIsMissing()
         return 1
     fi
     return 0
-}
-
-function __static__CheckWhetherSimulationForGivenBetaIsAlreadyEnqueued()
-{
-    local jobStatus; jobStatus="${statusOfJobsContainingGivenBeta[${betaValue}]}"
-    if [[ "${jobStatus}" = "" ]]; then
-        return 0
-    else
-        if [[ $(grep -c "\(RUNNING\|PENDING\)" <<< "${jobStatus}") -gt 0 ]]; then
-            Error "The simulation seems to be already running with " emph "job-id $(cut -d'@' -f1 <<< "${jobStatus}")" " and it cannot be continued!\n"\
-                  "The value " emph "beta = ${betaValue}" " will be skipped!"
-            BHMAS_problematicBetaValues+=( ${betaValue} )
-            return 1
-        else
-            return 0
-        fi
-    fi
 }
 
 function __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAndOutputFileIfNeeded()
@@ -574,14 +572,11 @@ function ProcessBetaValuesForContinue_SLURM()
     local betaValue runBetaDirectory submitBetaDirectory inputFileGlobalPath outputFileGlobalPath outputPbpFileGlobalPath\
           betaValuesToBeSubmitted nameOfLastConfiguration nameOfLastPRNG originalInputFileGlobalPath
     betaValuesToBeSubmitted=()
-    #Associative array filled in the function called immediately after (global because of bug, see link here below)
-    declare -A -g statusOfJobsContainingGivenBeta=() #http://lists.gnu.org/archive/html/bug-bash/2013-09/msg00025.html
-    __static__GetStatusOfJobsContainingBetavalues
+    __static__CheckWhetherAnySimulationForGivenBetaValuesIsAlreadyEnqueued
     for betaValue in ${BHMAS_betaValues[@]}; do
         cecho ''
         __static__SetBetaRelatedPathVariables                                                      || continue
         __static__CheckWhetherAnyRequiredFileOrFolderIsMissing                                     || continue
-        __static__CheckWhetherSimulationForGivenBetaIsAlreadyEnqueued                              || continue
         __static__SetLastConfigurationAndLastPRNGFilenamesCleaningBetafolderAndOutputFileIfNeeded  || continue
         __static__CheckWhetherFoundCheckpointIsGoodToContinue                                      || continue
         __static__MakeTemporaryCopyOfOriginalInputFile
@@ -608,7 +603,6 @@ function ProcessBetaValuesForContinue_SLURM()
            exit ${BHMAS_successExitCode}
        fi
     fi
-    unset -v 'statusOfJobsContainingGivenBeta'
 }
 
 
