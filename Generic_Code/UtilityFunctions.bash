@@ -266,6 +266,26 @@ function ConvertFromBytesToHumanReadable()
         {print human($1)}' <<< "${BYTES}"
 }
 
+function CheckIfVariablesAreSet()
+{
+    local variableName
+    for variableName in "$@"; do
+        variableName+='[@]' #Try also if it is a sparse or associative array
+        if [[ ! -v "${variableName}" ]]; then
+            Internal "Variable " emph "${variableName/%\[@\]/}" " not set but needed to be set in function " emph "${FUNCNAME[1]}" "."
+        fi
+    done
+}
+
+function CheckNumberOfFunctionArguments()
+{
+    if [[ $1 -ne $2 ]]; then
+        Internal "Function " emph "${FUNCNAME[1]}" " called with " emph "$2" " argument(s) but " emph "$1" " needed!"
+    fi
+}
+
+
+
 function MakeFunctionsDefinedInThisFileReadonly()
 {
     # Here we assume all BaHaMAS functions are defined with the same stile,

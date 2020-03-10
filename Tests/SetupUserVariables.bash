@@ -24,6 +24,7 @@ function DeclareOutputRelatedGlobalVariables()
 
 function DeclareUserDefinedGlobalVariables()
 {
+    readonly BHMAS_lqcdSoftware="CL2QCD"
     readonly BHMAS_userEmail="user@test.com"
     readonly BHMAS_submitDiskGlobalPath="${BHMAS_repositoryTopLevelPath}/Tests"
     readonly BHMAS_runDiskGlobalPath="${BHMAS_repositoryTopLevelPath}/Tests"

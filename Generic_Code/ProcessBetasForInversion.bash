@@ -36,22 +36,22 @@ function __static__ProduceSrunCommandsFileForInversionsPerBeta()
         massAsNumber="${BHMAS_mass}"
     fi
     ls ${betaDirectory} | grep "^conf\.[[:digit:]]\{5\}\($\|.*corr\)" | awk -v randomSeed="${RANDOM}" \
-                                                                          -v ns="${BHMAS_nspace}" \
-                                                                          -v nt="${BHMAS_ntime}" \
-                                                                          -v useCpu="false"   \
-                                                                          -v startcondition="continue" \
-                                                                          -v logLevel="info" \
-                                                                          -v beta="${betaValue%%_*}" \
-                                                                          -v mass="${massAsNumber}" \
-                                                                          -v corrDir="${BHMAS_correlatorDirection}" \
-                                                                          -v solver="cg" \
-                                                                          -v solverMaxIterations="30000" \
-                                                                          -v solverResidCheckEvery="50" \
-                                                                          -v thetaFermionTemporal="1" \
-                                                                          -v maxNrCorrs="${BHMAS_numberOfSourcesForCorrelators}" \
-                                                                          -v chemPot="${BHMAS_chempot}" \
-                                                                          -v wilson="${BHMAS_wilson}" \
-                                                                          -v staggered="${BHMAS_staggered}" '
+                                                                            -v ns="${BHMAS_nspace}" \
+                                                                            -v nt="${BHMAS_ntime}" \
+                                                                            -v useCpu="false"   \
+                                                                            -v startcondition="continue" \
+                                                                            -v logLevel="info" \
+                                                                            -v beta="${betaValue%%_*}" \
+                                                                            -v mass="${massAsNumber}" \
+                                                                            -v corrDir="${BHMAS_correlatorDirection}" \
+                                                                            -v solver="cg" \
+                                                                            -v solverMaxIterations="30000" \
+                                                                            -v solverResidCheckEvery="50" \
+                                                                            -v thetaFermionTemporal="1" \
+                                                                            -v maxNrCorrs="${BHMAS_numberOfSourcesForCorrelators}" \
+                                                                            -v chemPot="${BHMAS_chempot}" \
+                                                                            -v wilson="${BHMAS_wilson}" \
+                                                                            -v staggered="${BHMAS_staggered}" '
         BEGIN{
             srand(randomSeed);
             if(chemPot == 0){
@@ -101,7 +101,7 @@ function __static__ProduceSrunCommandsFileForInversionsPerBeta()
 
 }
 
-function ProcessBetaValuesForInversion_SLURM()
+function ProcessBetaValuesForInversion()
 {
     local betaValuesToBeSubmitted beta runBetaDirectory numberOfConfigurationsInBetaDirectory\
           numberOfTotalCorrelators numberOfExistingCorrelators numberOfMissingCorrelators numberOfInversionCommands

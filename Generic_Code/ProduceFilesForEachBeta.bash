@@ -17,7 +17,7 @@
 #  along with BaHaMAS. If not, see <http://www.gnu.org/licenses/>.
 #
 
-function ProduceInputFileAndJobScriptForEachBeta_SLURM()
+function ProduceInputFileAndJobScriptForEachBeta()
 {
     local betaValuesCopy index beta submitBetaDirectory temporaryNumberOfTrajectories
     betaValuesCopy=(${BHMAS_betaValues[@]})
@@ -48,7 +48,7 @@ function ProduceInputFileAndJobScriptForEachBeta_SLURM()
         else
             temporaryNumberOfTrajectories=${BHMAS_numberOfTrajectories}
         fi
-        ProduceInputFile_CL2QCD "${beta}" "${submitBetaDirectory}/${BHMAS_inputFilename}" ${temporaryNumberOfTrajectories}
+        ProduceInputFile_${BHMAS_lqcdSoftware} "${beta}" "${submitBetaDirectory}/${BHMAS_inputFilename}" ${temporaryNumberOfTrajectories}
     done
     mkdir -p ${BHMAS_submitDirWithBetaFolders}/${BHMAS_jobScriptFolderName} || exit ${BHMAS_fatalBuiltin}
     PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles "${betaValuesCopy[@]}"

@@ -17,7 +17,7 @@
 #  along with BaHaMAS. If not, see <http://www.gnu.org/licenses/>.
 #
 
-function SubmitJobsForValidBetaValues_SLURM()
+function SubmitJobsForValidBetaValues()
 {
     if [[ ${#BHMAS_betaValuesToBeSubmitted[@]} -gt 0 ]]; then
         local betaString stringToBeGreppedFor submittingDirectory jobScriptFilename
@@ -45,9 +45,14 @@ function SubmitJobsForValidBetaValues_SLURM()
             submittingDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_jobScriptFolderName}"
             jobScriptFilename="$(GetJobScriptFilename ${betaString})"
             cd ${submittingDirectory}
-            cecho bb "\n Actual location: " dir "$(pwd)"\
-                  B "\n      Submitting: " uB emph "sbatch ${jobScriptFilename}"
-            sbatch ${jobScriptFilename}
+            if [[ -f "${jobScriptFilename}" ]]; then
+                cecho bb "\n Actual location: " dir "$(pwd)"\
+                      B "\n      Submitting: " uB emph "sbatch ${jobScriptFilename}"
+                sbatch "${jobScriptFilename}"
+            else
+                Internal "Jobscript " file "${jobScriptFilename}" " not found in\n"\
+                         dir "${submittingDirectory}" " folder, but it should be there!"
+            fi
         done
         cecho lc "==================================================================================="
     else

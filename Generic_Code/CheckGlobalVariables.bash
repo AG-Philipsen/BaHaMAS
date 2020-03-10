@@ -24,7 +24,8 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
           variablesThatIfNotEmptyMustNotEndWithSlash\
           index variable mustReturn listOfVariablesAsString
     mustReturn='TRUE'
-    variablesThatMustBeNotEmpty=( BHMAS_userEmail
+    variablesThatMustBeNotEmpty=( BHMAS_lqcdSoftware
+                                  BHMAS_userEmail
                                   BHMAS_submitDiskGlobalPath
                                   BHMAS_runDiskGlobalPath )
     variablesThatMustBeDeclared=( BHMAS_GPUsPerNode
@@ -87,6 +88,10 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
     cecho ''
 
     #Check variables values (those not checked have no requirement at this point)
+    if [[ ! ${BHMAS_lqcdSoftware:-} =~ ^(CL2QCD|openQCD-FASTSUM)$ ]]; then
+        Error -n B emph "BHMAS_lqcdSoftware" uB " variable must be set either to " emph "CL2QCD" " or to " emph "openQCD-FASTSUM"
+        mustReturn='FALSE'
+    fi
     if [[ "${BHMAS_coloredOutput:-}" != 'TRUE' ]] && [[ "${BHMAS_coloredOutput:-}" != 'FALSE' ]]; then
         #Since in the following we use cecho which rely on the variable "BHMAS_coloredOutput",
         #if this was wrongly set, let us set it to 'FALSE' but still report on it

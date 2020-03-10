@@ -19,10 +19,10 @@
 
 function SourceCodebaseGeneralFiles()
 {
-    readonly BHMAS_userSetupFile="${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/UserSpecificVariables.bash"
+    readonly BHMAS_userSetupFile="${BHMAS_repositoryTopLevelPath}/Generic_Code/UserSpecificVariables.bash"
     local schedulerIndependentFiles fileToBeSourced
     #Source error codes and fail with error hard coded since variable defined in file which is sourced!
-    source "${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/ErrorCodes.bash" || exit 64
+    source "${BHMAS_repositoryTopLevelPath}/Generic_Code/ErrorCodes.bash" || exit 64
     schedulerIndependentFiles=(
         'UtilityFunctions.bash'
         'AcceptanceRateReport.bash'
@@ -34,19 +34,28 @@ function SourceCodebaseGeneralFiles()
         'Database/ProjectStatisticsDatabase.bash'
         'FindSchedulerInUse.bash'
         'FindStartingConfiguration.bash'
+        'JobScriptFunctionality.bash'
         'GlobalVariables.bash'
         'OperationsOnBetasFile.bash'
         'OutputFunctionality.bash'
         'PathManagementFunctionality.bash'
+        'PrintJobsInformation.bash'
+        'ProcessBetasForContinue.bash'
+        'ProcessBetasForSubmitOnly.bash'
+        'ProcessBetasForInversion.bash'
+        'ProduceFilesForEachBeta.bash'
         'ReportOnProblematicBetas.bash'
         'SchedulerSpecificFunctionsCall.bash'
+        'SimulationsStatus.bash'
+        'SubmitJobs.bash'
         'Setup/Setup.bash'
         'SystemRequirements.bash'
     )
     for fileToBeSourced in "${schedulerIndependentFiles[@]}"; do
-        source "${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/${fileToBeSourced}" || exit ${BHMAS_fatalBuiltin}
+        source "${BHMAS_repositoryTopLevelPath}/Generic_Code/${fileToBeSourced}" || exit ${BHMAS_fatalBuiltin}
     done
     SourceClusterSpecificCode
+    SourceLqcdSoftwareSpecificCode
 
     #User file to be sourced depending on test mode
     if IsBaHaMASRunInSetupMode; then

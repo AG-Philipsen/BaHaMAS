@@ -19,7 +19,7 @@
 
 #Load needed files
 for fileToBeSourced in "CommonFunctionality" "SetupDialog" "SetupWhiptail"; do
-    source "${BHMAS_repositoryTopLevelPath}/SchedulerIndependentCode/Setup/${fileToBeSourced}.bash" || exit ${BHMAS_fatalBuiltin}
+    source "${BHMAS_repositoryTopLevelPath}/Generic_Code/Setup/${fileToBeSourced}.bash" || exit ${BHMAS_fatalBuiltin}
 done && unset -v 'fileToBeSourced'
 
 

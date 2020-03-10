@@ -17,9 +17,10 @@
 #  along with BaHaMAS. If not, see <http://www.gnu.org/licenses/>.
 #
 
-function ProcessBetaValuesForSubmitOnly_SLURM()
+function ProcessBetaValuesForSubmitOnly()
 {
-    local betaValuesCopy index submitBetaDirectory inputFileGlobalPath
+    trap "$(shopt -p)" RETURN
+    local betaValuesCopy index submitBetaDirectory inputFileGlobalPath existingFiles oldShopt
     #-----------------------------------------#
     betaValuesCopy=(${BHMAS_betaValues[@]})
     for index in "${!betaValuesCopy[@]}"; do
@@ -31,9 +32,10 @@ function ProcessBetaValuesForSubmitOnly_SLURM()
             unset -v 'betaValuesCopy[${index}]'
             continue
         else
+            shopt -s dotglob nullglob;  existingFiles=( "${submitBetaDirectory}"/* )
             if [[ -f "${inputFileGlobalPath}" ]]; then
                 # In the 'submitBetaDirectory' there should be ONLY the inputfile
-                if [[ $(ls ${submitBetaDirectory} | wc -l) -gt 1 ]]; then
+                if [[ ${#existingFiles[@]} -gt 1 ]]; then
                     cecho lr "\n There are already files in " dir "${submitBetaDirectory}" " beyond the input file.\n"\
                           " The value " emph "beta = ${betaValuesCopy[${index}]}" " will be skipped!\n"
                     BHMAS_problematicBetaValues+=( ${betaValuesCopy[${index}]} )
