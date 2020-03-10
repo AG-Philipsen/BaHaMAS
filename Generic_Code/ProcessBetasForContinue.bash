@@ -92,7 +92,7 @@ function __static__RemoveOriginalInputFile()
 }
 
 
-function ProcessBetaValuesForContinue_SLURM()
+function ProcessBetaValuesForContinue()
 {
     local betaValue runBetaDirectory submitBetaDirectory inputFileGlobalPath outputFileGlobalPath outputPbpFileGlobalPath\
           betaValuesToBeSubmitted nameOfLastConfiguration nameOfLastPRNG originalInputFileGlobalPath

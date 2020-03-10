@@ -40,6 +40,7 @@ function SourceCodebaseGeneralFiles()
         'OutputFunctionality.bash'
         'PathManagementFunctionality.bash'
         'PrintJobsInformation.bash'
+        'ProcessBetasForContinue.bash'
         'ProcessBetasForSubmitOnly.bash'
         'ProcessBetasForInversion.bash'
         'ProduceFilesForEachBeta.bash'

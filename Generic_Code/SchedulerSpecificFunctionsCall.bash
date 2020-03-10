@@ -58,11 +58,6 @@ function __static__CheckExistenceOfFunctionAndCallIt()
 }
 
 
-function ProcessBetaValuesForContinue()
-{
-    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler}
-}
-
 function SubmitJob()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler}
