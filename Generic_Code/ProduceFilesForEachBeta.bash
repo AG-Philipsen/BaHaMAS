@@ -48,7 +48,7 @@ function ProduceInputFileAndJobScriptForEachBeta()
         else
             temporaryNumberOfTrajectories=${BHMAS_numberOfTrajectories}
         fi
-        ProduceInputFile_${BHMAS_lqcdSoftware} "${beta}" "${submitBetaDirectory}/${BHMAS_inputFilename}" ${temporaryNumberOfTrajectories}
+        ProduceInputFile "${beta}" "${submitBetaDirectory}/${BHMAS_inputFilename}" ${temporaryNumberOfTrajectories}
     done
     mkdir -p ${BHMAS_submitDirWithBetaFolders}/${BHMAS_jobScriptFolderName} || exit ${BHMAS_fatalBuiltin}
     PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles "${betaValuesCopy[@]}"

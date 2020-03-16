@@ -110,7 +110,7 @@ function ListSimulationsStatus()
         integrationSteps1="--"
         integrationSteps2="--"
         kappaMassPreconditioning="-----"
-        ExtractSimulationInformationFromFiles_${BHMAS_lqcdSoftware}
+        ExtractSimulationInformationFromFiles
         __static__PrintSimulationStatusLine
     done #Loop on BETA
 
@@ -277,31 +277,15 @@ function __static__ColorClean()
 
 function __static__ColorBeta()
 {
-    #Columns here below ranges from 1 on, since they are used in awk
-    declare -A observablesColumns=( ["TrajectoryNr"]=1
-                                    ["Plaquette"]=${BHMAS_plaquetteColumn}
-                                    ["PlaquetteSpatial"]=3
-                                    ["PlaquetteTemporal"]=4
-                                    ["PolyakovLoopRe"]=5
-                                    ["PolyakovLoopIm"]=6
-                                    ["PolyakovLoopSq"]=7
-                                    ["Accepted"]=${BHMAS_acceptanceColumn} )
-    local auxiliaryVariable1 auxiliaryVariable2 errorCode
-    auxiliaryVariable1=$(printf "%s," "${observablesColumns[@]}")
-    auxiliaryVariable2=$(printf "%s," "${!observablesColumns[@]}")
     if [[ ! -f ${outputFileGlobalPath} ]]; then
         printf ${BHMAS_defaultListstatusColor}
         return
     fi
-
-    awk -v obsColumns="${auxiliaryVariable1%?}" \
-        -v obsNames="${auxiliaryVariable2%?}" \
-        -v wrongVariable="${BHMAS_fatalVariableUnset}" \
-        -v success="${BHMAS_successExitCode}" \
-        -v failure="${BHMAS_fatalLogicError}" \
-        -f ${BHMAS_repositoryTopLevelPath}/Scheduler_Dependent_Code/${BHMAS_clusterScheduler}/CheckCorrectnessCl2qcdOutputFile.awk ${outputFileGlobalPath}
+    local errorCode
+    set +e
+    CheckCorrectnessOutputFile "${outputFileGlobalPath}"
     errorCode=$?
-
+    set -e
     if [[ ${errorCode} -eq ${BHMAS_successExitCode} ]]; then
         printf ${BHMAS_defaultListstatusColor}
     elif [[ ${errorCode} -eq ${BHMAS_fatalLogicError} ]]; then
@@ -309,7 +293,6 @@ function __static__ColorBeta()
     else
         printf ${BHMAS_suspiciousBetaListstatusColor}
     fi
-
 }
 
 

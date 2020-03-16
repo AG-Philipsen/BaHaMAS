@@ -106,10 +106,10 @@ function ProcessBetaValuesForContinue()
         __static__SetBetaRelatedPathVariables                                  || continue
         __static__CheckWhetherAnyRequiredFileOrFolderIsMissing                 || continue
         # LQCD software specific operations
-        HandleEnvironmentForGivenSimulation_${BHMAS_lqcdSoftware} ${betaValue} || continue
-        HandleOutputFilesForGivenSimulation_${BHMAS_lqcdSoftware} ${betaValue} || continue
+        HandleEnvironmentForGivenSimulation ${betaValue} || continue
+        HandleOutputFilesForGivenSimulation ${betaValue} || continue
         __static__MakeTemporaryCopyOfOriginalInputFile
-        if ! HandleInputFileForGivenSimulation_${BHMAS_lqcdSoftware} ${betaValue}; then
+        if ! HandleInputFileForGivenSimulation ${betaValue}; then
             __static__RestoreOriginalInputFile
             continue
         fi
