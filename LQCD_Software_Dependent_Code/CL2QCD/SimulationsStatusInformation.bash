@@ -111,5 +111,33 @@ function ExtractSimulationInformationFromFiles_CL2QCD()
     fi
 }
 
+# This function has to invoke correctly the awk script to check the correctness of the output file
+# and return 0 if it is fine and 1 if not. The arguments in input are the following:
+#
+#  $1 -> outputFileGlobalPath
+#
+function CheckCorrectnessOutputFile_CL2QCD()
+{
+    #Columns here below ranges from 1 on, since they are used in awk
+    declare -A observablesColumns=( ["TrajectoryNr"]=1
+                                    ["Plaquette"]=${BHMAS_plaquetteColumn}
+                                    ["PlaquetteSpatial"]=3
+                                    ["PlaquetteTemporal"]=4
+                                    ["PolyakovLoopRe"]=5
+                                    ["PolyakovLoopIm"]=6
+                                    ["PolyakovLoopSq"]=7
+                                    ["Accepted"]=${BHMAS_acceptanceColumn} )
+    local auxiliaryVariable1 auxiliaryVariable2 errorCode
+    auxiliaryVariable1=$(printf "%s," "${observablesColumns[@]}")
+    auxiliaryVariable2=$(printf "%s," "${!observablesColumns[@]}")
+
+    awk -v obsColumns="${auxiliaryVariable1%?}" \
+        -v obsNames="${auxiliaryVariable2%?}" \
+        -v wrongVariable="${BHMAS_fatalVariableUnset}" \
+        -v success="${BHMAS_successExitCode}" \
+        -v failure="${BHMAS_fatalLogicError}" \
+        -f ${BHMAS_repositoryTopLevelPath}/LQCD_Software_Dependent_Code/${BHMAS_lqcdSoftware}/CheckCorrectnessOutputFile.awk "$1"
+}
+
 
 MakeFunctionsDefinedInThisFileReadonly

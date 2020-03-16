@@ -23,8 +23,9 @@
 # This awk script needs 5 input variables:
 #  - the observable columns (from 1 on) in a variable named "obsColumns"
 #  - the observables names in a variable named "obsNames"
-#     [These variablse must be two strings with elements separated
-#      by commas (,) and without any space inside.]
+#     [These variables must be strings with elements separated
+#      by commas (,) and without any space inside. Two names are
+#      fixed and must be present: 'TrajectoryNr' and 'Accepted']
 #  - three variables named "wrongVariable", "success", "failure" which
 #    are the error codes to be returned.
 #

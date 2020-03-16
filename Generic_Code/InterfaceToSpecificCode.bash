@@ -53,6 +53,7 @@ function __static__CheckExistenceOfFunctionAndCallIt()
     nameOfTheFunction=$1; shift
     if [[ "$(type -t ${nameOfTheFunction})" = 'function' ]]; then
         ${nameOfTheFunction} "$@"
+        # Return value propagates automatically since a function returns the last exit code!
     else
         Fatal ${BHMAS_fatalMissingFeature} "Function " emph "${nameOfTheFunction}" " for " emph "${BHMAS_clusterScheduler}" " scheduler not found!\n"\
               "Please provide an implementation following the " B "BaHaMAS" uB " documentation and source the file."
@@ -117,6 +118,12 @@ function ExtractSimulationInformationFromFiles()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
+
+function CheckCorrectnessOutputFile()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
+}
+
 
 
 MakeFunctionsDefinedInThisFileReadonly
