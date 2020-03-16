@@ -63,7 +63,7 @@ function SubmitJob()
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler}
 }
 
-function GatherJobsInformation()
+function GatherJobsInformationForJobStatusMode()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler}
 }

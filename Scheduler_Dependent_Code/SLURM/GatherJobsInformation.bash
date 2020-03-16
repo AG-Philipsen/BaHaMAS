@@ -44,16 +44,14 @@ function __static__ExtractParametersFromJobInformation()
 #   End time
 #   Working directory
 #   Number of nodes used
-function GatherJobsInformation_SLURM()
+function GatherJobsInformationForJobStatusMode_SLURM()
 {
     local squeueFormatCodeString squeueFormatCodeOrder label\
-          slurmOkVersion slurmVersion partitionDirective\
+          slurmOkVersion slurmVersion squeueAdditionalOptions\
           jobId jobSubmissionTime jobSubmissionFolder
     declare -A squeueFormatCode=()
-    squeueFormatCodeString=''; slurmOkVersion='slurm 14.03.0'; slurmVersion="$(squeue --version)"
-    if [[ "${BHMAS_clusterPartition}" != '' ]]; then
-        partitionDirective='-p ${BHMAS_clusterPartition}'
-    fi
+    squeueFormatCodeString=''; squeueAdditionalOptions=''
+    slurmOkVersion='slurm 14.03.0'; slurmVersion="$(squeue --version)"
     #Format codes for squeue command in order to get specific information
     squeueFormatCode=(
         ["JobId"]="%i"
@@ -75,12 +73,22 @@ function GatherJobsInformation_SLURM()
     done
     #Get information via squeue and in case filter jobs -> ATTENTION: Double quoting here is CRUCIAL (to respect endlines)!!
     #NOTE: It seems that the sacct command can give a similar result, but at the moment there is no analog to the %Z field.
-    if [[ ${BHMAS_jobstatusAll} = 'TRUE' ]]; then
-        jobsInformation="$(squeue --noheader ${partitionDirective:-} -o ${squeueFormatCodeString:1} 2>/dev/null)"
-    else
-        jobsInformation="$(squeue --noheader -u ${BHMAS_jobstatusUser} -o "${squeueFormatCodeString:1}" 2>/dev/null)"
+    if [[ "${BHMAS_clusterPartition}" != '' ]]; then
+        squeueAdditionalOptions+='-p ${BHMAS_clusterPartition} '
     fi
-    if [[ "${jobsInformation}" = '' ]]; then
+    if [[ ${BHMAS_jobstatusAll} = 'FALSE' ]]; then
+        squeueAdditionalOptions+="-u ${BHMAS_jobstatusUser} "
+    fi
+    # In the following line we assume that no newline are contained
+    # in any of the information retrieved by squeue, it seems so in SLURM
+    # NOTE: It seems that the sacct command can give a similar result,
+    #       but at the moment there is no analog to the %Z field.
+    local line
+    jobsInformation=()
+    while IFS= read -r line; do
+        jobsInformation+=( "${line}" )
+    done < <(squeue --noheader ${squeueAdditionalOptions} -o "${squeueFormatCodeString:1}" 2>/dev/null)
+    if [[ "${#jobsInformation[@]}" = '' ]]; then
         return 0
     fi
     #------------------------------------------------------------------------------------------------------------------------------#
@@ -88,7 +96,7 @@ function GatherJobsInformation_SLURM()
     if [[ "$(printf "%s\n" "${slurmVersion}" "${slurmOkVersion}" | sort -V | tail -n1)" = "${slurmOkVersion}" ]]; then
         jobSubmissionFolder=""
         jobSubmissionTime=""
-        for jobId in $(cut -d'@' -f1  <<< "${jobsInformation}"); do
+        for jobId in $(cut -d'@' -f1  <<< "$(printf '%s\n' ${jobsInformation[@]})"); do
             declare -A extractedJobInformation=()
             __static__ExtractParametersFromJobInformation "${jobId}" "WorkDir" "SubmitTime"
             jobSubmissionFolder="${jobSubmissionFolder}|${jobId}@${extractedJobInformation[WorkDir]}"
@@ -113,11 +121,16 @@ function GatherJobsInformation_SLURM()
                                     $5=jobSubmissionTime[$1]
                                     $10=jobSubmissionFolder[$1]
                                     print $0
-                                }' <<< "${jobsInformation}")
+                                }' <<< "$(printf '%s\n' ${jobsInformation[@]})")
     fi
     #------------------------------------------------------------------------------------------------------------------------------#
     if [[ ${BHMAS_jobstatusLocal} = 'TRUE' ]]; then
-        jobsInformation="$(grep --color=never "${PWD}" <<< "${jobsInformation}")"
+        jobsInformation="$(grep --color=never "${PWD}" <<< "$(printf '%s\n' ${jobsInformation[@]})")"
+    fi
+    #If any field is empty (like the node list for pending jobs) replace value with 'empty' word, it facilitate later handling
+    jobsInformation=( "${jobsInformation[@]//@@/@empty@}" )
+    if [[ ${jobsInformation[@]} =~ @@ ]]; then
+        Internal "Retrieved empty information from scheduler. It should not happen.\n\n" $(printf '%s\\n' ${jobsInformation[@]})
     fi
 }
 
@@ -133,7 +146,7 @@ function GatherJobsInformationForSimulationStatusMode_SLURM()
     jobsInformation=()
     while IFS= read -r line; do
         jobsInformation+=( "${line}" )
-    done < <(squeue --noheader -u "$(whoami)" -o "%j@%T")
+    done < <(squeue --noheader -u "$(whoami)" -o "%j@%T" 2>/dev/null)
 }
 
 # This function has to set the array "jobsInformation" with each element being
@@ -149,7 +162,7 @@ function GatherJobsInformationForContinueMode_SLURM()
     jobsInformation=()
     while IFS= read -r line; do
         jobsInformation+=( "${line}" )
-    done < <(squeue --noheader -u "$(whoami)" -o "%i@%j@%T")
+    done < <(squeue --noheader -u "$(whoami)" -o "%i@%j@%T" 2>/dev/null)
 }
 
 

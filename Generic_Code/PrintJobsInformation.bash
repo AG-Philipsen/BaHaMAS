@@ -22,28 +22,28 @@ function GatherAndPrintJobsInformation()
     local jobsInformation\
           jobId jobName jobStatus jobNodeList jobSubmissionTime jobWalltime\
           jobStartTime jobRunTime jobEndTime jobSubmissionFolder jobNumberOfNodes\
-          lengthOfLongestEntry numberOfJobs numberOfRunningJobs numberOfPendingJobs numberOfOtherJobs\
+          lengthOfLongestEntry\
+          numberOfJobs numberOfRunningJobs numberOfPendingJobs numberOfOtherJobs\
           lineOfEquals tableFormat index
     #Call function scheduler specific: It will fill jobsInformation
-    GatherJobsInformation
+    GatherJobsInformationForJobStatusMode
     if [[ "${jobsInformation}" = '' ]]; then
         cecho lc "\n No job found according to given options!"
         return 0
     fi
-    #If any field is empty, fill it with empty word in order to have later all arrays with same number of elements
-    jobsInformation=$(sed "s/@@/@empty@/g" <<< "${jobsInformation}")
-    #Split squeue output and prepare table layout
-    jobId=(               $(cut -d'@' -f1  <<< "${jobsInformation}") )
-    jobName=(             $(cut -d'@' -f2  <<< "${jobsInformation}") )
-    jobStatus=(           $(cut -d'@' -f3  <<< "${jobsInformation}") )
-    jobNodeList=(         $(cut -d'@' -f4  <<< "${jobsInformation}") )
-    jobSubmissionTime=(   $(cut -d'@' -f5  <<< "${jobsInformation}") )
-    jobWalltime=(         $(cut -d'@' -f6  <<< "${jobsInformation}") )
-    jobStartTime=(        $(cut -d'@' -f7  <<< "${jobsInformation}") )
-    jobRunTime=(          $(cut -d'@' -f8  <<< "${jobsInformation}") )
-    jobEndTime=(          $(cut -d'@' -f9  <<< "${jobsInformation}") )
-    jobSubmissionFolder=( $(cut -d'@' -f10 <<< "${jobsInformation}") )
-    jobNumberOfNodes=(    $(cut -d'@' -f11 <<< "${jobsInformation}") )
+    #Split job information in different arrays using '@' as separator
+    # NOTE: it might be done with builtins only, but less compact and less readable!
+    jobId=(               $(cut -d'@' -f1  <<< "$(printf '%s\n' ${jobsInformation[@]})") )
+    jobName=(             $(cut -d'@' -f2  <<< "$(printf '%s\n' ${jobsInformation[@]})") )
+    jobStatus=(           $(cut -d'@' -f3  <<< "$(printf '%s\n' ${jobsInformation[@]})") )
+    jobNodeList=(         $(cut -d'@' -f4  <<< "$(printf '%s\n' ${jobsInformation[@]})") )
+    jobSubmissionTime=(   $(cut -d'@' -f5  <<< "$(printf '%s\n' ${jobsInformation[@]})") )
+    jobWalltime=(         $(cut -d'@' -f6  <<< "$(printf '%s\n' ${jobsInformation[@]})") )
+    jobStartTime=(        $(cut -d'@' -f7  <<< "$(printf '%s\n' ${jobsInformation[@]})") )
+    jobRunTime=(          $(cut -d'@' -f8  <<< "$(printf '%s\n' ${jobsInformation[@]})") )
+    jobEndTime=(          $(cut -d'@' -f9  <<< "$(printf '%s\n' ${jobsInformation[@]})") )
+    jobSubmissionFolder=( $(cut -d'@' -f10 <<< "$(printf '%s\n' ${jobsInformation[@]})") )
+    jobNumberOfNodes=(    $(cut -d'@' -f11 <<< "$(printf '%s\n' ${jobsInformation[@]})") )
     #Shorten path (it works only if the user is 'whoami'
     jobSubmissionFolder=( ${jobSubmissionFolder[@]/${BHMAS_submitDiskGlobalPath}/SUBMIT} )
     jobSubmissionFolder=( ${jobSubmissionFolder[@]/${BHMAS_runDiskGlobalPath}/WORK} )
