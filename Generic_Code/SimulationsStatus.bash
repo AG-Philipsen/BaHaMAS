@@ -110,7 +110,7 @@ function ListSimulationsStatus()
         integrationSteps1="--"
         integrationSteps2="--"
         kappaMassPreconditioning="-----"
-        ExtractSimulationInformationFromFiles_${BHMAS_lqcdSoftware}
+        ExtractSimulationInformationFromFiles
         __static__PrintSimulationStatusLine
     done #Loop on BETA
 

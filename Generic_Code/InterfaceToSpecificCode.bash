@@ -45,37 +45,77 @@ function SourceLqcdSoftwareSpecificCode()
     done
 }
 
+#-------------------------------------------------------------------------------------------------------------------------#
+
 function __static__CheckExistenceOfFunctionAndCallIt()
 {
     local nameOfTheFunction
-    nameOfTheFunction=$1
+    nameOfTheFunction=$1; shift
     if [[ "$(type -t ${nameOfTheFunction})" = 'function' ]]; then
-        ${nameOfTheFunction}
+        ${nameOfTheFunction} "$@"
     else
         Fatal ${BHMAS_fatalMissingFeature} "Function " emph "${nameOfTheFunction}" " for " emph "${BHMAS_clusterScheduler}" " scheduler not found!\n"\
               "Please provide an implementation following the " B "BaHaMAS" uB " documentation and source the file."
     fi
 }
 
+#-------------------------------------------------------------------------------------------------------------------------#
 
 function SubmitJob()
 {
-    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler}
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler} "$@"
 }
 
 function GatherJobsInformationForJobStatusMode()
 {
-    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler}
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler} "$@"
 }
 
 function GatherJobsInformationForSimulationStatusMode()
 {
-    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler}
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler} "$@"
 }
 
 function GatherJobsInformationForContinueMode()
 {
-    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler}
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler} "$@"
+}
+
+#-------------------------------------------------------------------------------------------------------------------------#
+
+function ProduceInputFile()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
+}
+
+function ProduceJobscript()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
+}
+
+function ProduceInverterJobscript()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
+}
+
+function HandleEnvironmentForGivenSimulation()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
+}
+
+function HandleInputFileForGivenSimulation()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
+}
+
+function HandleOutputFilesForGivenSimulation()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
+}
+
+function ExtractSimulationInformationFromFiles()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
 
 

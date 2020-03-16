@@ -124,10 +124,10 @@ function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
             #Call the function to produce the jobscript file
             if [[ ${BHMAS_executionMode} = 'mode:invert-configurations' ]]; then
                 walltime="$(__static__CalculateWalltimeForInverter)"
-                ProduceInverterJobscript_${BHMAS_lqcdSoftware} "${jobScriptGlobalPath}" "${jobScriptFilename}" "${walltime}" "${betasForJobScript[@]}"
+                ProduceInverterJobscript "${jobScriptGlobalPath}" "${jobScriptFilename}" "${walltime}" "${betasForJobScript[@]}"
             else
                 walltime="$(__static__CalculateWalltimeExtractingNumberOfTrajectoriesPerBetaAndUsingTimesPerTrajectoryIfGiven "${betasForJobScript[@]}")"
-                ProduceJobscript_${BHMAS_lqcdSoftware} "${jobScriptGlobalPath}" "${jobScriptFilename}" "${walltime}" "${betasForJobScript[@]}"
+                ProduceJobscript "${jobScriptGlobalPath}" "${jobScriptFilename}" "${walltime}" "${betasForJobScript[@]}"
             fi
             if [[ -e ${jobScriptGlobalPath} ]]; then
                 BHMAS_betaValuesToBeSubmitted+=( "${betasString}" )
