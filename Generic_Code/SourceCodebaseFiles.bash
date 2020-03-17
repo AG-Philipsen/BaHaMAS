@@ -50,6 +50,7 @@ function SourceCodebaseGeneralFiles()
         'SubmitJobs.bash'
         'Setup/Setup.bash'
         'SystemRequirements.bash'
+        'Version.bash'
     )
     for fileToBeSourced in "${schedulerIndependentFiles[@]}"; do
         source "${BHMAS_repositoryTopLevelPath}/Generic_Code/${fileToBeSourced}" || exit ${BHMAS_fatalBuiltin}

@@ -48,9 +48,12 @@ source "${BHMAS_repositoryTopLevelPath}/Generic_Code/SourceCodebaseFiles.bash" "
 
 DeclareAllGlobalVariables
 
-#If the user asked for the Setup, it has to be done immediately and that's it
+#If the user asked for the setup or the version, act and exit
 if IsBaHaMASRunInSetupMode; then
     MakeInteractiveSetupAndCreateUserDefinedVariablesFile
+    exit ${BHMAS_successExitCode}
+elif WasAnyOfTheseOptionsGivenToBaHaMAS '--version'; then
+    PrintCodeVersion
     exit ${BHMAS_successExitCode}
 fi
 
