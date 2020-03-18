@@ -17,7 +17,7 @@
 #  along with BaHaMAS. If not, see <http://www.gnu.org/licenses/>.
 #
 
-function SourceCodebaseGeneralFiles()
+function __static__SourceCodebaseGeneralFiles()
 {
     readonly BHMAS_userSetupFile="${BHMAS_repositoryTopLevelPath}/Generic_Code/UserSpecificVariables.bash"
     local schedulerIndependentFiles fileToBeSourced
@@ -80,7 +80,7 @@ function SourceCodebaseGeneralFiles()
 #Call the function above and source the codebase files when this script is sourced
 if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
     BHMAS_specifiedCommandLineOptions=( "$@" )
-    SourceCodebaseGeneralFiles
+    __static__SourceCodebaseGeneralFiles
 fi
 
 MakeFunctionsDefinedInThisFileReadonly
