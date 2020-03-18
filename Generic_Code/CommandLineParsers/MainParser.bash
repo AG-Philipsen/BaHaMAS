@@ -24,6 +24,72 @@ function __static__PrintSecondaryOptionSpecificationErrorAndExit()
     Fatal ${BHMAS_fatalCommandLine} "The option " emph "$2" " is a secondary option of " emph "$1" " and it has to be given after it!"
 }
 
+function ParseCommandLineOptionsTillMode()
+{
+    #Locally set function arguments to take advantage of shift
+    set -- "${BHMAS_commandLineOptionsToBeParsed[@]}"
+    #The first option can be a LQCD software
+    if [[ $1 =~ ^(CL2QCD|OpenQCD-FASTSUM)$ ]]; then
+        BHMAS_lqcdSoftware="$1"
+        shift
+    fi
+    case $1 in
+        '' | help )
+            BHMAS_executionMode='mode:general-help'
+            ;;
+        submit-only )
+            BHMAS_executionMode='mode:submit-only'
+            ;;
+        submit )
+            BHMAS_executionMode='mode:submit'
+            ;;
+        thermalize )
+            BHMAS_executionMode='mode:thermalize'
+            ;;
+        continue-thermalization )
+            BHMAS_executionMode='mode:continue-thermalization'
+            ;;
+        continue )
+            BHMAS_executionMode='mode:continue'
+            ;;
+        job-status )
+            BHMAS_executionMode='mode:job-status'
+            ;;
+        simulation-status )
+            BHMAS_executionMode='mode:simulation-status'
+            ;;
+        acceptance-rate-report )
+            BHMAS_executionMode='mode:acceptance-rate-report'
+            ;;
+        clean-output-files )
+            BHMAS_executionMode='mode:clean-output-files'
+            ;;
+        complete-betas-file )
+            BHMAS_executionMode='mode:complete-betas-file'
+            ;;
+        uncomment-betas )
+            BHMAS_executionMode='mode:uncomment-betas'
+            ;;
+        comment-betas )
+            BHMAS_executionMode='mode:comment-betas'
+            ;;
+        invert-configurations )
+            BHMAS_executionMode='mode:invert-configurations'
+            ;;
+        database )
+            BHMAS_executionMode='mode:database'
+            ;;
+        default )
+            BHMAS_executionMode='mode:default'
+            ;;
+        * )
+            Fatal ${BHMAS_fatalCommandLine} "No valid mode specified! Run " emph "BaHaMAS --help" " to get further information."
+    esac
+    shift
+    #Update the global array with remaining options to be parsed
+    BHMAS_commandLineOptionsToBeParsed=( "$@" )
+}
+
 function ParseCommandLineOption()
 {
 

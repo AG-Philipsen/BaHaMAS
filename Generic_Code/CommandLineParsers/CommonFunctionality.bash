@@ -123,6 +123,8 @@ function PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem()
     readarray -t partiallyProcessedCommandLineOptions <<< "$(SplitCombinedShortOptionsInSingleOptions "${partiallyProcessedCommandLineOptions[@]}")"
     __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray "${partiallyProcessedCommandLineOptions[@]}"
     readonly BHMAS_specifiedCommandLineOptions
+    #Create a to-be-modified array with options to be parsed
+    BHMAS_commandLineOptionsToBeParsed=( "${BHMAS_specifiedCommandLineOptions[@]}" )
 }
 
 
