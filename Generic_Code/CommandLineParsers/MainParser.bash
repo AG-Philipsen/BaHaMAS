@@ -364,7 +364,7 @@ function ParseCommandLineOption()
                 mutuallyExclusiveOptionsPassed+=( $1 )
                 BHMAS_executionMode='mode:database'
                 shift
-                BHMAS_optionsToBePassedToDatabase=( $@ )
+                BHMAS_optionsToBePassedToDatabase=( "$@" )
                 shift $# ;;
 
             * )
