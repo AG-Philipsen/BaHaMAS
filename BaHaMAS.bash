@@ -28,13 +28,6 @@
 #        /_____/   \__,_/  /_/ /_/   \__,_/  /_/  /_/  /_/  |_| /____/          #
 #                                                                               #
 #-------------------------------------------------------------------------------#
-#                                                                               #
-#         Copyright (c)  2014  Alessandro Sciarra, Christopher Czaban           #
-#                        2015  Alessandro Sciarra, Christopher Czaban           #
-#                        2016  Alessandro Sciarra, Christopher Czaban           #
-#                        2017  Alessandro Sciarra                               #
-#                                                                               #
-#-------------------------------------------------------------------------------#
 
 #-----------------------------------------------------------------------------------------------#
 # Set stricter shell mode. This implies for the developer to be aware of what is going on,      #
