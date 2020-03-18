@@ -20,28 +20,37 @@
 #NOTE: We want to discard a potential equal sign between option name
 #      and option value, but still we want to allow a potential equal
 #      sign in the option value. Hence it is wrong to blindly replace
-#      all the equal signs by spaces. We then iterate over the command
-#      line arguments and
-#       1) If the argument starts with '-' we remove only the first equal
-#          sign, if present
-#       2) If the argument does not start with '-' then we remove an equal
-#          sign, only if it is present as first character of the argument
+#      all the equal signs by spaces. Moreover, there are modes which
+#      are not starting with '-', but which might be followed by a
+#      value that the user specified using an equal sign. It is then
+#      impossible to consider all possible cases, without knowing
+#      whether the option being considered is a mode or a value of
+#      another option. We need a compromise. We then iterate over the
+#      command line arguments and
+#       1) We ignore any '=' only option (e.g. the equal in "-m = 1000")
+#       2) We remove only the first equal sign, if present. This will
+#          make "-m = X=Y" be parsed in a wrong way. There is no option
+#          value at the moment which can contain an equal sign, though.
+#          We can live with that, then. Btw, "-m=X=Y" would be still
+#          parsed correctly.
 #
 #NOTE: The following two functions will be used with readarray and therefore
 #      the printf in the end uses '\n' as separator (this preserves spaces
 #      in options)
 function PrepareGivenOptionToBeProcessed()
 {
-    local newOptions value tmp
+    local newOptions value index
     newOptions=()
     for value in "$@"; do
         [[ "${value}" = '=' ]] && continue
-        if [[ ${value} =~ ^-.*=.* ]]; then
-            tmp="$(sed 's/=/ /' <<< "${value}")"
-            newOptions+=( ${tmp%% *} )  #Part before '=' without spaces (option name)
-            newOptions+=( "${tmp#* }" ) #Part after '=' potentially with spaces
+        if [[ ${value} =~ ([^=]*)=(.*) ]]; then
+            for index in 1 2; do
+                if [[ "${BASH_REMATCH[index]}" != '' ]]; then
+                    newOptions+=( "${BASH_REMATCH[index]}" )
+                fi
+            done
         else
-            newOptions+=( "$(sed 's/^=//' <<< "${value}")" )
+            newOptions+=( "${value}" )
         fi
     done
     printf "%s\n" "${newOptions[@]}"
