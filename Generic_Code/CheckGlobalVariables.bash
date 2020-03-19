@@ -168,7 +168,7 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
     if [[ ${mustReturn} = 'TRUE' ]]; then
         cecho -n '\e[1A'; return
     else
-        Fatal ${BHMAS_fatalVariableUnset} "Please set the above variables properly using the " emph "--setup" " option and run " B "BaHaMAS" uB " again."
+        Fatal ${BHMAS_fatalVariableUnset} "Please set the above variables properly using the " emph "setup" " mode and run " B "BaHaMAS" uB " again."
     fi
 }
 
@@ -178,7 +178,7 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
 # Checks also existence directories/files depending on what BaHaMAS should do
 function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
 {
-    local index variable option variablesThatMustBeNotEmpty jobsNeededVariables schedulerVariables\
+    local index variable variablesThatMustBeNotEmpty jobsNeededVariables schedulerVariables\
           neededFolders neededFiles rationalApproxFolder rationalApproxFiles listOfVariablesAsString
     mustReturn='TRUE'
     jobsNeededVariables=(BHMAS_inputFilename  BHMAS_outputFilename  BHMAS_hmcGlobalPath  BHMAS_jobScriptPrefix  BHMAS_jobScriptFolderName)
@@ -208,7 +208,6 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
     case ${BHMAS_executionMode} in
 
         mode:submit )
-            option="$(cecho -d "with the " B "--submit" uB)"
             variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]}  ${schedulerVariables[@]}
                                            BHMAS_thermConfsGlobalPath )
             neededFolders+=( "${BHMAS_thermConfsGlobalPath}" ${rationalApproxFolder[@]:-} )
@@ -217,8 +216,6 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
             ;;
 
         mode:submit-only )
-
-            option="$(cecho -d "with the " B "--submitonly" uB)"
             variablesThatMustBeNotEmpty+=( BHMAS_inputFilename
                                            BHMAS_jobScriptPrefix
                                            BHMAS_jobScriptFolderName
@@ -228,7 +225,6 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
             ;;
 
         mode:thermalize )
-            option="$(cecho -d "with the " B "--thermalize" uB)"
             variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
                                            BHMAS_thermConfsGlobalPath )
             neededFolders+=( "${BHMAS_thermConfsGlobalPath}" ${rationalApproxFolder[@]:-} )
@@ -237,7 +233,6 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
             ;;
 
         mode:continue )
-            option="$(cecho -d "with the " B "--continue" uB)"
             variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]} )
             neededFolders+=( ${rationalApproxFolder[@]:-} )
             neededFiles+=( "${BHMAS_hmcGlobalPath}" ${rationalApproxFiles[@]:-} )
@@ -245,7 +240,6 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
             ;;
 
         mode:continue-thermalization )
-            option="$(cecho -d "with the " B "--continueThermalization" uB)"
             variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
                                            BHMAS_thermConfsGlobalPath )
             neededFolders+=( "${BHMAS_thermConfsGlobalPath}" ${rationalApproxFolder[@]:-} )
@@ -254,7 +248,6 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
             ;;
 
         mode:simulation-status )
-            option="$(cecho -d "with the " B "--liststatus" uB)"
             variablesThatMustBeNotEmpty+=( BHMAS_hmcGlobalPath #TODO: Remove, now it's only for --measureTime
                                            BHMAS_inputFilename
                                            BHMAS_outputFilename
@@ -265,29 +258,23 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
             ;;
 
         mode:acceptance-rate-report )
-            option="$(cecho -d "with the " B "--accRateReport" uB)"
             variablesThatMustBeNotEmpty+=( BHMAS_acceptanceColumn  BHMAS_outputFilename )
             ;;
 
         mode:clean-output-files )
-            option="$(cecho -d "with the " B "--cleanOutputFiles" uB)"
             variablesThatMustBeNotEmpty+=( BHMAS_outputFilename )
             ;;
 
         mode:complete-betas-file )
-            option="$(cecho -d "with the " B "--completeBetasFile" uB)"
             ;;
 
         mode:uncomment-betas )
-            option="$(cecho -d "with the " B "--uncommentBetas" uB)"
             ;;
 
         mode:comment-betas )
-            option="$(cecho -d "with the " B "--commentBetas" uB)"
             ;;
 
         mode:invert-configurations )
-            option="$(cecho -d "with the " B "--invertConfigurations" uB)"
             variablesThatMustBeNotEmpty+=( BHMAS_jobScriptPrefix
                                            BHMAS_jobScriptFolderName
                                            BHMAS_inverterGlobalPath
@@ -296,7 +283,6 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
             ;;
 
         mode:database )
-            option="$(cecho -d "with the " B "--dataBase" uB)"
             variablesThatMustBeNotEmpty+=( BHMAS_inputFilename
                                            BHMAS_outputFilename
                                            BHMAS_plaquetteColumn
@@ -308,7 +294,6 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
             neededFolders+=( "${BHMAS_databaseGlobalPath}" )
             ;;
 
-            option='without any mutually exclusive'
         mode:prepare-only )
             variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
                                            BHMAS_thermConfsGlobalPath )
@@ -338,8 +323,9 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
         for variable in "${variablesThatMustBeNotEmpty[@]}"; do
             listOfVariablesAsString+="\n$(cecho -d ly " " B) ${variable}"
         done
-        Error "To run " B "BaHaMAS" uB " ${option} " "option, the following " emph "variable(s)" " must be " emph "set" " and " emph "not empty" ": ${listOfVariablesAsString}"
-        Fatal ${BHMAS_fatalVariableUnset} -n "Please set the above variables properly using the " emph "--setup" " option and run " B "BaHaMAS" uB " again."
+        Error "To run " B "BaHaMAS" uB " in " emph "${BHMAS_executionMode#mode:}"\
+              " execution mode, the following " emph "variable(s)" " must be " emph "set" " and " emph "not empty" ": ${listOfVariablesAsString}"
+        Fatal ${BHMAS_fatalVariableUnset} -n "Please set the above variables properly using the " emph "setup" " mode and run " B "BaHaMAS" uB " again."
     else
         for index in "${!neededFolders[@]}"; do
             if [[ -d "${neededFolders[${index}]}" ]]; then
@@ -363,7 +349,8 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
         for variable in ${neededFiles[@]+"${neededFiles[@]}"}; do
             listOfVariablesAsString+="\n$(cecho -d file " ") ${variable}"
         done
-        Error "To run " B "BaHaMAS" uB " ${option} " "option, the following specified " B dir "folder(s)" uB " or " file "file(s)" " must " emph "exist" ": ${listOfVariablesAsString}"
+        Error "To run " B "BaHaMAS" uB " in " emph "${BHMAS_executionMode}"\
+              " execution mode, the following specified " B dir "folder(s)" uB " or " file "file(s)" " must " emph "exist" ": ${listOfVariablesAsString}"
         Fatal ${BHMAS_fatalFileNotFound} -n "Please check the path variables in the " B "BaHaMAS" uB " setup and run the program again."
     fi
 }

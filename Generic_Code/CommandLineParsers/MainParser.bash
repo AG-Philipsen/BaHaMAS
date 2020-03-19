@@ -110,15 +110,7 @@ function ParseCommandLineOptionsTillMode()
 
 function ParseRemainingCommandLineOptions()
 {
-    local mutuallyExclusiveOptions mutuallyExclusiveOptionsPassed option listOfOptionsAsString
-
     __static__ParseFirstOfRemainingOptions
-
-    mutuallyExclusiveOptions=( "-s | --submit"        "-c | --continue"    "-C | --continueThermalization"
-                               "-t | --thermalize"    "-j | --jobstatus"   "-l | --liststatus"  "-U | --uncommentBetas"
-                               "-u | --commentBetas"  "-d | --database"    "-i | --invertConfigurations"
-                               "--submitonly"  "--accRateReport"  "--cleanOutputFiles"  "--completeBetasFile")
-    mutuallyExclusiveOptionsPassed=()
 
     #Locally set function arguments to take advantage of shift
     set -- "${BHMAS_commandLineOptionsToBeParsed[@]}"
@@ -298,52 +290,6 @@ function ParseRemainingCommandLineOptions()
                 fi
                 shift 2 ;;
 
-            --submit )
-                mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_executionMode='mode:submit'
-                shift;;
-
-            --submitonly )
-                mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_executionMode='mode:submit-only'
-                shift;;
-
-            --thermalize )
-                mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_executionMode='mode:thermalize'
-                shift;;
-
-            --continue )
-                mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_executionMode='mode:continue'
-                if [[ ! ${2:-} =~ ^(-|$) ]]; then
-                    if [[ ! $2 =~ ^[0-9]+$ ]];then
-                        PrintOptionSpecificationErrorAndExit "$1"
-                    else
-                        BHMAS_trajectoryNumberUpToWhichToContinue=$2
-                        shift
-                    fi
-                fi
-                shift ;;
-
-            --continueThermalization )
-                mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_executionMode='mode:continue-thermalization'
-                if [[ ! ${2:-} =~ ^(-|$) ]]; then
-                    if [[ ! $2 =~ ^[0-9]+$ ]];then
-                        PrintOptionSpecificationErrorAndExit "$1"
-                    else
-                        BHMAS_trajectoryNumberUpToWhichToContinue=$2
-                        shift
-                    fi
-                fi
-                shift ;;
-
-            --jobstatus )
-                mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_executionMode='mode:job-status'
-                shift;;
-
             --user )
                 if [[ ${BHMAS_executionMode} != 'mode:job-status' ]]; then
                     __static__PrintSecondaryOptionSpecificationErrorAndExit "-j | --jobstatus" "$1"
@@ -361,11 +307,6 @@ function ParseRemainingCommandLineOptions()
                 fi
                 shift ;;
 
-            --liststatus )
-                mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_executionMode='mode:simulation-status'
-                shift;;
-
             --doNotMeasureTime )
                 if [[ ${BHMAS_executionMode} != 'mode:simulation-status' ]]; then
                     __static__PrintSecondaryOptionSpecificationErrorAndExit "-l | --liststatus" "$1"
@@ -382,24 +323,6 @@ function ParseRemainingCommandLineOptions()
                 fi
                 shift ;;
 
-            --accRateReport )
-                mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_executionMode='mode:acceptance-rate-report'
-                if [[ ! ${2:-} =~ ^(-|$) ]]; then
-                    if [[ ! $2 =~ ^[0-9]+$ ]];then
-                        PrintOptionSpecificationErrorAndExit "$1"
-                    else
-                        BHMAS_accRateReportInterval=$2
-                        shift
-                    fi
-                fi
-                shift ;;
-
-            --cleanOutputFiles )
-                mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_executionMode='mode:clean-output-files'
-                shift ;;
-
             --all )
                 if [[ ${BHMAS_executionMode} != 'mode:clean-output-files' ]] && [[ ${BHMAS_executionMode} != 'mode:job-status' ]]; then
                     __static__PrintSecondaryOptionSpecificationErrorAndExit "--cleanOutputFiles" "$1"
@@ -410,62 +333,10 @@ function ParseRemainingCommandLineOptions()
                 fi
                 shift ;;
 
-            --completeBetasFile )
-                mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_executionMode='mode:complete-betas-file'
-                if [[ ! ${2:-} =~ ^(-|$) ]]; then
-                    if [[ ! $2 =~ ^[0-9]+$ ]];then
-                        PrintOptionSpecificationErrorAndExit "$1"
-                    else
-                        BHMAS_numberOfChainsToBeInTheBetasFile=$2
-                        shift
-                    fi
-                fi
-                shift ;;
-
-            --uncommentBetas | --commentBetas )
-                mutuallyExclusiveOptionsPassed+=( $1 )
-                if [[ $1 = '--uncommentBetas' ]]; then
-                    BHMAS_executionMode='mode:uncomment-betas'
-                elif [[ $1 = '--commentBetas' ]]; then
-                    BHMAS_executionMode='mode:comment-betas'
-                fi
-                while [[ ! ${2:-} =~ ^(-|$) ]]; do
-                    if [[ $2 =~ ^[0-9]\.[0-9]{4}_${BHMAS_seedPrefix}[0-9]{4}(_(NC|fC|fH))*$ ]]; then
-                        BHMAS_betasToBeToggled+=( $2 )
-                    elif [[ $2 =~ ^[0-9]\.[0-9]*$ ]]; then
-                        BHMAS_betasToBeToggled+=( $(awk '{printf "%1.4f", $1}' <<< "$2") )
-                    else
-                        PrintOptionSpecificationErrorAndExit "${mutuallyExclusiveOptionsPassed[-1]}"
-                    fi
-                    shift
-                done
-                shift ;;
-
-            --invertConfigurations)
-                mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_executionMode='mode:invert-configurations'
-                shift ;;
-
-            --database)
-                mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_executionMode='mode:database'
-                shift
-                BHMAS_optionsToBePassedToDatabase=( "$@" )
-                shift $# ;;
-
             * )
                 PrintInvalidOptionErrorAndExit "$1" ;;
         esac
     done
-
-    if [[ ${#mutuallyExclusiveOptionsPassed[@]} -gt 1 ]]; then
-        listOfOptionsAsString=''
-        for option in "${mutuallyExclusiveOptions[@]}"; do
-            listOfOptionsAsString+="\n$(cecho -d lo "  ") ${option}"
-        done
-        Fatal ${BHMAS_fatalCommandLine} "The following options are mutually exclusive and cannot be combined: ${listOfOptionsAsString}"
-    fi
 
     #Mark as readonly the BHMAS_parameterPrefixes array, since from now on prefixes cannot change any more!
     declare -rga BHMAS_parameterPrefixes
