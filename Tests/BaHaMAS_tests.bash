@@ -79,7 +79,7 @@ availableTests=(
     ['help-3']='--help'
     ['version-1']='--version'
     ['version-2']='version'
-    ['default']='default -w=1d'
+    ['prepare-only']='prepare-only -w=1d'
     ['submit']='submit --walltime 1d'
     ['submit-goal']='submit --walltime 1d'
     ['submitonly']='submit-only'

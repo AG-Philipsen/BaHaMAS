@@ -205,7 +205,7 @@ case ${BHMAS_executionMode} in
         SubmitJobsForValidBetaValues
         ;;
 
-    mode:default )
+    mode:prepare-only )
 
         ParseBetasFile
         FindConfigurationGlobalPathFromWhichToStartTheSimulation

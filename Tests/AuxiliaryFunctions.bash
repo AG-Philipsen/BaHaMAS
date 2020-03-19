@@ -100,7 +100,7 @@ function MakeTestPreliminaryOperations()
     cp "${BHMAS_testsFolderAuxFiles}/fakeBetas" "${testFolder}${testParametersPath}/betas"
 
     case "$1" in
-        default | submit | submit-goal )
+        prepare-only | submit | submit-goal )
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateThermalizedConfigurationFolder
             __static__CreateThermalizedConfiguration "fromConf4000"

@@ -308,8 +308,8 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
             neededFolders+=( "${BHMAS_databaseGlobalPath}" )
             ;;
 
-        mode:default )
             option='without any mutually exclusive'
+        mode:prepare-only )
             variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
                                            BHMAS_thermConfsGlobalPath )
             neededFolders+=( "${BHMAS_thermConfsGlobalPath}" ${rationalApproxFolder[@]:-} )

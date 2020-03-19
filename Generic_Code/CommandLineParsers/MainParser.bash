@@ -91,8 +91,8 @@ function ParseCommandLineOptionsTillMode()
             BHMAS_optionsToBePassedToDatabase=( "${@:2}" )
             shift $(( $# - 1 )) #The shift after esac
             ;;
-        default )
-            BHMAS_executionMode='mode:default'
+        prepare-only )
+            BHMAS_executionMode='mode:prepare-only'
             ;;
         * )
             Fatal ${BHMAS_fatalCommandLine} "No valid mode specified! Run " emph "BaHaMAS --help" " to get further information."
