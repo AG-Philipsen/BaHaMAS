@@ -36,6 +36,7 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 ## Version 0.1.0 &ensp;<sub><sup>17 February 2020</sup></sub>
 
+* :boom: BaHaMAS execution modes have been added and mutually exclusive options removed.
 * :sos: BaHaMAS requested the setup to be done before the help could be displayed. This condition was relaxed.
 * :x: The **Hooks** folder has been removed from the repository since the [GitHooks](https://github.com/AxelKrypton/GitHooks) shall be used.
 * :new: Add **CONTRIBUTING.md** and **CHANGELOG.md** files to repository.

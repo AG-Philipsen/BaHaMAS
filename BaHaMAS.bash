@@ -40,32 +40,34 @@ readonly BHMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") r
 source "${BHMAS_repositoryTopLevelPath}/Generic_Code/SourceCodebaseFiles.bash" "$@"
 
 DeclareAllGlobalVariables
+PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem
+ParseCommandLineOptionsTillMode
 
 #If the user asked for the setup or the version, act and exit
-if IsBaHaMASRunInSetupMode; then
-    MakeInteractiveSetupAndCreateUserDefinedVariablesFile
-    exit ${BHMAS_successExitCode}
-elif WasAnyOfTheseOptionsGivenToBaHaMAS '--version'; then
-    PrintCodeVersion
+case ${BHMAS_executionMode} in
+    mode:*help )
+        GiveRequiredHelp
+        ;;
+    mode:version )
+        PrintCodeVersion
+        ;;
+    mode:setup )
+        MakeInteractiveSetupAndCreateUserDefinedVariablesFile
+        ;;
+esac
+if [[ ${BHMAS_executionMode} =~ ^mode:(.*help|version|setup)$ ]]; then
     exit ${BHMAS_successExitCode}
 fi
 
-if [[ $# -ne 0 ]]; then
-    PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem
-    PrintHelperAndExitIfUserAskedForIt
-fi
-
-if ! WasAnyOfTheseOptionsGivenToBaHaMAS '--jobstatus'; then
+if [[ ${BHMAS_executionMode} != 'mode:job-status' ]]; then
     CheckSystemRequirements
     CheckWilsonStaggeredVariables
     CheckUserDefinedVariablesAndDefineDependentAdditionalVariables
 fi
 
-if [[ $# -ne 0 ]]; then
-    ParseCommandLineOption "${BHMAS_specifiedCommandLineOptions[@]}"
-fi
+ParseRemainingCommandLineOptions
 
-if ! WasAnyOfTheseOptionsGivenToBaHaMAS '--jobstatus'; then
+if [[ ${BHMAS_executionMode} != 'mode:job-status' ]]; then
     CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase
 fi
 

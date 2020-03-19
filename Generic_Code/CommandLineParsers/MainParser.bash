@@ -26,6 +26,10 @@ function __static__PrintSecondaryOptionSpecificationErrorAndExit()
 
 function ParseCommandLineOptionsTillMode()
 {
+    if [[ ${#BHMAS_commandLineOptionsToBeParsed[@]} -eq 0 ]]; then
+        BHMAS_executionMode='mode:help'
+        return 0
+    fi
     #Locally set function arguments to take advantage of shift
     set -- "${BHMAS_commandLineOptionsToBeParsed[@]}"
     #The first option can be a LQCD software
@@ -34,8 +38,14 @@ function ParseCommandLineOptionsTillMode()
         shift
     fi
     case $1 in
-        '' | help )
-            BHMAS_executionMode='mode:general-help'
+        help | --help )
+            BHMAS_executionMode='mode:help'
+            ;;
+        version | --version )
+            BHMAS_executionMode='mode:version'
+            ;;
+        setup | --setup )
+            BHMAS_executionMode='mode:setup'
             ;;
         submit-only )
             BHMAS_executionMode='mode:submit-only'
@@ -78,6 +88,8 @@ function ParseCommandLineOptionsTillMode()
             ;;
         database )
             BHMAS_executionMode='mode:database'
+            BHMAS_optionsToBePassedToDatabase=( "${@:2}" )
+            shift $(( $# - 1 )) #The shift after esac
             ;;
         default )
             BHMAS_executionMode='mode:default'
@@ -88,12 +100,19 @@ function ParseCommandLineOptionsTillMode()
     shift
     #Update the global array with remaining options to be parsed
     BHMAS_commandLineOptionsToBeParsed=( "$@" )
+    #If user specified --help in a given mode, act accrdingly
+    if [[ ${BHMAS_executionMode} != 'mode:help' ]]; then
+        if  ElementInArray '--help' "${BHMAS_commandLineOptionsToBeParsed[@]}" "${BHMAS_optionsToBePassedToDatabase[@]}"; then
+            BHMAS_executionMode+='-help'
+        fi
+    fi
 }
 
-function ParseCommandLineOption()
+function ParseRemainingCommandLineOptions()
 {
-
     local mutuallyExclusiveOptions mutuallyExclusiveOptionsPassed option listOfOptionsAsString
+
+    __static__ParseFirstOfRemainingOptions
 
     mutuallyExclusiveOptions=( "-s | --submit"        "-c | --continue"    "-C | --continueThermalization"
                                "-t | --thermalize"    "-j | --jobstatus"   "-l | --liststatus"  "-U | --uncommentBetas"
@@ -101,6 +120,8 @@ function ParseCommandLineOption()
                                "--submitonly"  "--accRateReport"  "--cleanOutputFiles"  "--completeBetasFile")
     mutuallyExclusiveOptionsPassed=()
 
+    #Locally set function arguments to take advantage of shift
+    set -- "${BHMAS_commandLineOptionsToBeParsed[@]}"
     #Here it is fine to assume that option names and values are separated by spaces
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -448,6 +469,87 @@ function ParseCommandLineOption()
 
     #Mark as readonly the BHMAS_parameterPrefixes array, since from now on prefixes cannot change any more!
     declare -rga BHMAS_parameterPrefixes
+}
+
+function __static__ParseFirstOfRemainingOptions()
+{
+    #Locally set function arguments to take advantage of shift
+    set -- "${BHMAS_commandLineOptionsToBeParsed[@]}"
+    case ${BHMAS_executionMode} in
+        mode:continue )
+            if [[ ! ${1:-} =~ ^(-|$) ]]; then
+                if [[ ! $1 =~ ^[0-9]+$ ]];then
+                    PrintOptionSpecificationErrorAndExit "continue"
+                else
+                    BHMAS_trajectoryNumberUpToWhichToContinue=$1
+                    shift
+                fi
+            fi
+            ;;
+        mode:continue-thermalization )
+            if [[ ! ${1:-} =~ ^(-|$) ]]; then
+                if [[ ! $1 =~ ^[0-9]+$ ]];then
+                    PrintOptionSpecificationErrorAndExit "continue-thermalization"
+                else
+                    BHMAS_trajectoryNumberUpToWhichToContinue=$1
+                    shift
+                fi
+            fi
+            ;;
+        mode:acceptance-rate-report )
+            if [[ ! ${1:-} =~ ^(-|$) ]]; then
+                if [[ ! $1 =~ ^[0-9]+$ ]];then
+                    PrintOptionSpecificationErrorAndExit "acceptance-rate-report"
+                else
+                    BHMAS_accRateReportInterval=$1
+                    shift
+                fi
+            fi
+            ;;
+        mode:complete-betas-file )
+            if [[ ! ${1:-} =~ ^(-|$) ]]; then
+                if [[ ! $1 =~ ^[0-9]+$ ]];then
+                    PrintOptionSpecificationErrorAndExit "complete-betas-file"
+                else
+                    BHMAS_numberOfChainsToBeInTheBetasFile=$1
+                    shift
+                fi
+            fi
+            ;;
+        mode:comment-betas | mode:uncomment-betas )
+            while [[ ! ${1:-} =~ ^(-|$) ]]; do
+                if [[ $1 =~ ^[0-9]\.[0-9]{4}_${BHMAS_seedPrefix}[0-9]{4}(_(NC|fC|fH))*$ ]]; then
+                    BHMAS_betasToBeToggled+=( $1 )
+                elif [[ $1 =~ ^[0-9]\.[0-9]*$ ]]; then
+                    BHMAS_betasToBeToggled+=( $(awk '{printf "%1.4f", $1}' <<< "$1") )
+                else
+                    PrintOptionSpecificationErrorAndExit "${BHMAS_executionMode#mode:}"
+                fi
+                shift
+            done
+            ;;
+        * )
+            ;;
+    esac
+    #Update the global array with remaining options to be parsed
+    BHMAS_commandLineOptionsToBeParsed=( "$@" )
+}
+
+
+
+function GiveRequiredHelp()
+{
+    case ${BHMAS_executionMode#mode:} in
+        help )
+            PrintMainHelper
+            ;;
+        database-help )
+            PrintDatabaseHelper
+            ;;
+        * )
+            Error "Manual for " emph "${BHMAS_executionMode%-help}" " mode has not yet been written."
+            ;;
+    esac
 }
 
 function IsTestModeOn()

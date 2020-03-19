@@ -402,7 +402,8 @@ function __static__HandleFurtherOptionsInInputFile()
     local commandLineOptionsToBeConsidered index option optionsToBeAddedOrModified
     commandLineOptionsToBeConsidered=( "-f" "--confSaveFrequency" "-F" "--confSavePointFrequency" )
     optionsToBeAddedOrModified=()
-    #Here it is fine to assume option value follows option name after a space (see ParseCommandLineOption function)
+    #Here it is fine to assume option value follows option name after a space
+    # -> see Generic_Code/CommandLineParsers/CommonFunctionality.bash file
     for index in ${!BHMAS_specifiedCommandLineOptions[@]}; do
         option=${BHMAS_specifiedCommandLineOptions[${index}]}
         if ! ElementInArray ${option} ${commandLineOptionsToBeConsidered[@]}; then

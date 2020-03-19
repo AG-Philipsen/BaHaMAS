@@ -138,18 +138,6 @@ function PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem()
     BHMAS_commandLineOptionsToBeParsed=( "${BHMAS_specifiedCommandLineOptions[@]}" )
 }
 
-
-function PrintHelperAndExitIfUserAskedForIt()
-{
-    if WasAnyOfTheseOptionsGivenToBaHaMAS '--help'; then
-        PrintMainHelper; exit ${BHMAS_successExitCode}
-    elif WasAnyOfTheseOptionsGivenToBaHaMAS '--helpDatabase'; then
-        PrintDatabaseHelper; exit ${BHMAS_successExitCode}
-    else
-        return 0
-    fi
-}
-
 function PrintInvalidOptionErrorAndExit()
 {
     Fatal ${BHMAS_fatalCommandLine} "Invalid option " emph "$1" " specified! Use the " emph "--help" " option to get further information."
