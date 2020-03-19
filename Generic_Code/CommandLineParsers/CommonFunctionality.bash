@@ -127,11 +127,13 @@ function __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray()
 function PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem()
 {
     local partiallyProcessedCommandLineOptions
-    #The following two lines are not combined to respect potential spaces in options
-    readarray -t partiallyProcessedCommandLineOptions <<< "$(PrepareGivenOptionToBeProcessed "${BHMAS_specifiedCommandLineOptions[@]}")"
-    readarray -t partiallyProcessedCommandLineOptions <<< "$(SplitCombinedShortOptionsInSingleOptions "${partiallyProcessedCommandLineOptions[@]}")"
-    __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray "${partiallyProcessedCommandLineOptions[@]}"
-    readonly BHMAS_specifiedCommandLineOptions
+    if [[ ${#BHMAS_specifiedCommandLineOptions[@]} -ne 0 ]]; then
+        #The following two lines are not combined to respect potential spaces in options
+        readarray -t partiallyProcessedCommandLineOptions <<< "$(PrepareGivenOptionToBeProcessed "${BHMAS_specifiedCommandLineOptions[@]}")"
+        readarray -t partiallyProcessedCommandLineOptions <<< "$(SplitCombinedShortOptionsInSingleOptions "${partiallyProcessedCommandLineOptions[@]}")"
+        __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray "${partiallyProcessedCommandLineOptions[@]}"
+        readonly BHMAS_specifiedCommandLineOptions
+    fi
     #Create a to-be-modified array with options to be parsed
     BHMAS_commandLineOptionsToBeParsed=( "${BHMAS_specifiedCommandLineOptions[@]}" )
 }
