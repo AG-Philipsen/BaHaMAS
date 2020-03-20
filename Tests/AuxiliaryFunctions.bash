@@ -148,7 +148,7 @@ function MakeTestPreliminaryOperations()
                 mv "${betaFolder}" "${betaFolder/continueWithNewChain/thermalizeFromHot}"
             fi
             ;;
-        liststatus* )
+        simulation-status* )
             __static__CreateBetaFolder
             __static__CopyAuxiliaryFilesToBetaFolder "fakeExecutable.123456.out" "fakeInput" "fakeOutput"
             ;;
