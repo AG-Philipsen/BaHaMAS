@@ -97,7 +97,6 @@ case ${BHMAS_executionMode} in
     mode:submit-only )
 
         ParseBetasFile
-        FindConfigurationGlobalPathFromWhichToStartTheSimulation #TODO: This should not be needed! Check if it is true!
         ProcessBetaValuesForSubmitOnly
         SubmitJobsForValidBetaValues
         ;;

@@ -253,9 +253,8 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
                 BHMAS_inputFilename
                 BHMAS_jobScriptPrefix
                 BHMAS_jobScriptFolderName
-                BHMAS_thermConfsGlobalPath
             )
-            neededFolders+=( "${BHMAS_thermConfsGlobalPath}" "${rationalApproxFolder[@]:-}" )
+            neededFolders+=( "${rationalApproxFolder[@]:-}" )
             neededFiles+=( "${BHMAS_hmcGlobalPath}" "${rationalApproxFiles[@]:-}" )
             ;;
 
