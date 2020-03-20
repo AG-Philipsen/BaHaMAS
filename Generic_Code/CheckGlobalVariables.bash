@@ -293,7 +293,6 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
 
         mode:simulation-status )
             variablesThatMustBeNotEmpty+=(
-                BHMAS_hmcGlobalPath #TODO: Remove, now it's only for --measureTime
                 BHMAS_inputFilename
                 BHMAS_outputFilename
                 BHMAS_plaquetteColumn
