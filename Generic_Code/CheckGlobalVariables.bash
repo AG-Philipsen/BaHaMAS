@@ -24,44 +24,50 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
           variablesThatIfNotEmptyMustNotEndWithSlash\
           index variable mustReturn listOfVariablesAsString
     mustReturn='TRUE'
-    variablesThatMustBeNotEmpty=( BHMAS_lqcdSoftware
-                                  BHMAS_userEmail
-                                  BHMAS_submitDiskGlobalPath
-                                  BHMAS_runDiskGlobalPath )
-    variablesThatMustBeDeclared=( BHMAS_GPUsPerNode
-                                  BHMAS_jobScriptFolderName
-                                  BHMAS_projectSubpath
-                                  BHMAS_inputFilename
-                                  BHMAS_jobScriptPrefix
-                                  BHMAS_outputFilename
-                                  BHMAS_plaquetteColumn
-                                  BHMAS_deltaHColumn
-                                  BHMAS_acceptanceColumn
-                                  BHMAS_trajectoryTimeColumn
-                                  BHMAS_databaseFilename
-                                  BHMAS_databaseGlobalPath
-                                  BHMAS_thermConfsGlobalPath
-                                  BHMAS_hmcGlobalPath
-                                  BHMAS_inverterGlobalPath
-                                  BHMAS_excludeNodesGlobalPath
-                                  BHMAS_rationalApproxGlobalPath
-                                  BHMAS_approxHeatbathFilename
-                                  BHMAS_approxMDFilename
-                                  BHMAS_approxMetropolisFilename
-                                  BHMAS_clusterPartition
-                                  BHMAS_clusterNode
-                                  BHMAS_clusterConstraint
-                                  BHMAS_clusterGenericResource
-                                  BHMAS_walltime
-                                  BHMAS_maximumWalltime )
-    variablesThatIfNotEmptyMustNotEndWithSlash=(BHMAS_submitDiskGlobalPath
-                                                BHMAS_runDiskGlobalPath
-                                                BHMAS_projectSubpath
-                                                BHMAS_databaseGlobalPath
-                                                BHMAS_thermConfsGlobalPath
-                                                BHMAS_hmcGlobalPath
-                                                BHMAS_inverterGlobalPath
-                                                BHMAS_rationalApproxGlobalPath )
+    variablesThatMustBeNotEmpty=(
+        BHMAS_lqcdSoftware
+        BHMAS_userEmail
+        BHMAS_submitDiskGlobalPath
+        BHMAS_runDiskGlobalPath
+    )
+    variablesThatMustBeDeclared=(
+        BHMAS_GPUsPerNode
+        BHMAS_jobScriptFolderName
+        BHMAS_projectSubpath
+        BHMAS_inputFilename
+        BHMAS_jobScriptPrefix
+        BHMAS_outputFilename
+        BHMAS_plaquetteColumn
+        BHMAS_deltaHColumn
+        BHMAS_acceptanceColumn
+        BHMAS_trajectoryTimeColumn
+        BHMAS_databaseFilename
+        BHMAS_databaseGlobalPath
+        BHMAS_thermConfsGlobalPath
+        BHMAS_hmcGlobalPath
+        BHMAS_inverterGlobalPath
+        BHMAS_excludeNodesGlobalPath
+        BHMAS_rationalApproxGlobalPath
+        BHMAS_approxHeatbathFilename
+        BHMAS_approxMDFilename
+        BHMAS_approxMetropolisFilename
+        BHMAS_clusterPartition
+        BHMAS_clusterNode
+        BHMAS_clusterConstraint
+        BHMAS_clusterGenericResource
+        BHMAS_walltime
+        BHMAS_maximumWalltime
+    )
+    variablesThatIfNotEmptyMustNotEndWithSlash=(
+        BHMAS_submitDiskGlobalPath
+        BHMAS_runDiskGlobalPath
+        BHMAS_projectSubpath
+        BHMAS_databaseGlobalPath
+        BHMAS_thermConfsGlobalPath
+        BHMAS_hmcGlobalPath
+        BHMAS_inverterGlobalPath
+        BHMAS_rationalApproxGlobalPath
+    )
 
     #Check variables and unset them if they are fine
     for index in "${!variablesThatMustBeNotEmpty[@]}"; do
@@ -84,7 +90,7 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
         fi
     done
 
-    #Leave an empty line that I remove later if no error occurred (just to have better output
+    #Leave an empty line that I remove later if no error occurred (just to have better output)
     cecho ''
 
     #Check variables values (those not checked have no requirement at this point)
@@ -181,12 +187,32 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
     local index variable variablesThatMustBeNotEmpty jobsNeededVariables schedulerVariables\
           neededFolders neededFiles rationalApproxFolder rationalApproxFiles listOfVariablesAsString
     mustReturn='TRUE'
-    jobsNeededVariables=(BHMAS_inputFilename  BHMAS_outputFilename  BHMAS_hmcGlobalPath  BHMAS_jobScriptPrefix  BHMAS_jobScriptFolderName)
-    schedulerVariables=(BHMAS_GPUsPerNode  BHMAS_maximumWalltime  BHMAS_userEmail) #BHMAS_walltime can be empty here, we check later if user gave time in betas file!
-    variablesThatMustBeNotEmpty=(BHMAS_submitDiskGlobalPath  BHMAS_runDiskGlobalPath  BHMAS_projectSubpath)
-    neededFolders=( "${BHMAS_submitDiskGlobalPath}" "${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath}" )
+    jobsNeededVariables=(
+        BHMAS_inputFilename
+        BHMAS_outputFilename
+        BHMAS_hmcGlobalPath
+        BHMAS_jobScriptPrefix
+        BHMAS_jobScriptFolderName
+    )
+    schedulerVariables=( #BHMAS_walltime can be empty here, we check later if user gave time in betas file!
+        BHMAS_GPUsPerNode
+        BHMAS_maximumWalltime
+        BHMAS_userEmail
+    )
+    variablesThatMustBeNotEmpty=(
+        BHMAS_submitDiskGlobalPath
+        BHMAS_runDiskGlobalPath
+        BHMAS_projectSubpath
+    )
+    neededFolders=(
+        "${BHMAS_submitDiskGlobalPath}"
+        "${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath}"
+    )
     if [[ "${BHMAS_submitDiskGlobalPath}" != "${BHMAS_runDiskGlobalPath}" ]]; then
-        neededFolders+=( "${BHMAS_runDiskGlobalPath}" "${BHMAS_runDiskGlobalPath}/${BHMAS_projectSubpath}" )
+        neededFolders+=(
+            "${BHMAS_runDiskGlobalPath}"
+            "${BHMAS_runDiskGlobalPath}/${BHMAS_projectSubpath}"
+        )
     fi
     neededFiles=()
     rationalApproxFolder=()
@@ -194,71 +220,94 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
 
     #If user wants to read the rational approximation from file check relative variables
     if [[ ${BHMAS_useRationalApproxFiles} = 'TRUE' ]]; then
-        jobsNeededVariables+=( BHMAS_rationalApproxGlobalPath
-                               BHMAS_approxHeatbathFilename
-                               BHMAS_approxMDFilename
-                               BHMAS_approxMetropolisFilename )
+        jobsNeededVariables+=(
+            BHMAS_rationalApproxGlobalPath
+            BHMAS_approxHeatbathFilename
+            BHMAS_approxMDFilename
+            BHMAS_approxMetropolisFilename
+        )
         rationalApproxFolder+=( "${BHMAS_rationalApproxGlobalPath}" )
-        rationalApproxFiles+=( "${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}*${BHMAS_approxHeatbathFilename}"
-                               "${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}*${BHMAS_approxMDFilename}"
-                               "${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}*${BHMAS_approxMetropolisFilename}" )
+        rationalApproxFiles+=(
+            "${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}*${BHMAS_approxHeatbathFilename}"
+            "${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}*${BHMAS_approxMDFilename}"
+            "${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}*${BHMAS_approxMetropolisFilename}"
+        )
     fi
 
     #Check variables depending on BaHaMAS execution mode
     case ${BHMAS_executionMode} in
 
         mode:submit )
-            variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]}  ${schedulerVariables[@]}
-                                           BHMAS_thermConfsGlobalPath )
-            neededFolders+=( "${BHMAS_thermConfsGlobalPath}" ${rationalApproxFolder[@]:-} )
-            neededFiles+=( "${BHMAS_hmcGlobalPath}" ${rationalApproxFiles[@]:-} )
+            variablesThatMustBeNotEmpty+=(
+                ${jobsNeededVariables[@]}
+                ${schedulerVariables[@]}
+                BHMAS_thermConfsGlobalPath
+            )
+            neededFolders+=( "${BHMAS_thermConfsGlobalPath}" "${rationalApproxFolder[@]:-}" )
+            neededFiles+=( "${BHMAS_hmcGlobalPath}" "${rationalApproxFiles[@]:-}" )
             readonly BHMAS_walltimeIsNeeded='TRUE'
             ;;
 
         mode:submit-only )
-            variablesThatMustBeNotEmpty+=( BHMAS_inputFilename
-                                           BHMAS_jobScriptPrefix
-                                           BHMAS_jobScriptFolderName
-                                           BHMAS_thermConfsGlobalPath )
-            neededFolders+=( "${BHMAS_thermConfsGlobalPath}" ${rationalApproxFolder[@]:-} )
-            neededFiles+=( "${BHMAS_hmcGlobalPath}" ${rationalApproxFiles[@]:-} )
+            variablesThatMustBeNotEmpty+=(
+                BHMAS_inputFilename
+                BHMAS_jobScriptPrefix
+                BHMAS_jobScriptFolderName
+                BHMAS_thermConfsGlobalPath
+            )
+            neededFolders+=( "${BHMAS_thermConfsGlobalPath}" "${rationalApproxFolder[@]:-}" )
+            neededFiles+=( "${BHMAS_hmcGlobalPath}" "${rationalApproxFiles[@]:-}" )
             ;;
 
         mode:thermalize )
-            variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
-                                           BHMAS_thermConfsGlobalPath )
-            neededFolders+=( "${BHMAS_thermConfsGlobalPath}" ${rationalApproxFolder[@]:-} )
-            neededFiles+=( "${BHMAS_hmcGlobalPath}" ${rationalApproxFiles[@]:-} )
+            variablesThatMustBeNotEmpty+=(
+                ${jobsNeededVariables[@]}
+                ${schedulerVariables[@]}
+                BHMAS_thermConfsGlobalPath
+            )
+            neededFolders+=( "${BHMAS_thermConfsGlobalPath}" "${rationalApproxFolder[@]:-}" )
+            neededFiles+=( "${BHMAS_hmcGlobalPath}" "${rationalApproxFiles[@]:-}" )
             readonly BHMAS_walltimeIsNeeded='TRUE'
             ;;
 
         mode:continue )
-            variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]} )
-            neededFolders+=( ${rationalApproxFolder[@]:-} )
-            neededFiles+=( "${BHMAS_hmcGlobalPath}" ${rationalApproxFiles[@]:-} )
+            variablesThatMustBeNotEmpty+=(
+                ${jobsNeededVariables[@]}
+                ${schedulerVariables[@]}
+            )
+            neededFolders+=( "${rationalApproxFolder[@]:-}" )
+            neededFiles+=( "${BHMAS_hmcGlobalPath}" "${rationalApproxFiles[@]:-}" )
             readonly BHMAS_walltimeIsNeeded='TRUE'
             ;;
 
         mode:continue-thermalization )
-            variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
-                                           BHMAS_thermConfsGlobalPath )
-            neededFolders+=( "${BHMAS_thermConfsGlobalPath}" ${rationalApproxFolder[@]:-} )
-            neededFiles+=( "${BHMAS_hmcGlobalPath}" ${rationalApproxFiles[@]:-} )
+            variablesThatMustBeNotEmpty+=(
+                ${jobsNeededVariables[@]}
+                ${schedulerVariables[@]}
+                BHMAS_thermConfsGlobalPath
+            )
+            neededFolders+=( "${BHMAS_thermConfsGlobalPath}" "${rationalApproxFolder[@]:-}" )
+            neededFiles+=( "${BHMAS_hmcGlobalPath}" "${rationalApproxFiles[@]:-}" )
             readonly BHMAS_walltimeIsNeeded='TRUE'
             ;;
 
         mode:simulation-status )
-            variablesThatMustBeNotEmpty+=( BHMAS_hmcGlobalPath #TODO: Remove, now it's only for --measureTime
-                                           BHMAS_inputFilename
-                                           BHMAS_outputFilename
-                                           BHMAS_plaquetteColumn
-                                           BHMAS_deltaHColumn
-                                           BHMAS_acceptanceColumn
-                                           BHMAS_trajectoryTimeColumn )
+            variablesThatMustBeNotEmpty+=(
+                BHMAS_hmcGlobalPath #TODO: Remove, now it's only for --measureTime
+                BHMAS_inputFilename
+                BHMAS_outputFilename
+                BHMAS_plaquetteColumn
+                BHMAS_deltaHColumn
+                BHMAS_acceptanceColumn
+                BHMAS_trajectoryTimeColumn
+            )
             ;;
 
         mode:acceptance-rate-report )
-            variablesThatMustBeNotEmpty+=( BHMAS_acceptanceColumn  BHMAS_outputFilename )
+            variablesThatMustBeNotEmpty+=(
+                BHMAS_acceptanceColumn
+                BHMAS_outputFilename
+            )
             ;;
 
         mode:clean-output-files )
@@ -275,30 +324,37 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
             ;;
 
         mode:invert-configurations )
-            variablesThatMustBeNotEmpty+=( BHMAS_jobScriptPrefix
-                                           BHMAS_jobScriptFolderName
-                                           BHMAS_inverterGlobalPath
-                                           ${schedulerVariables[@]} )
+            variablesThatMustBeNotEmpty+=(
+                BHMAS_jobScriptPrefix
+                BHMAS_jobScriptFolderName
+                BHMAS_inverterGlobalPath
+                ${schedulerVariables[@]}
+            )
             neededFiles+=( "${BHMAS_inverterGlobalPath}" )
             ;;
 
         mode:database )
-            variablesThatMustBeNotEmpty+=( BHMAS_inputFilename
-                                           BHMAS_outputFilename
-                                           BHMAS_plaquetteColumn
-                                           BHMAS_deltaHColumn
-                                           BHMAS_acceptanceColumn
-                                           BHMAS_trajectoryTimeColumn
-                                           BHMAS_databaseGlobalPath
-                                           BHMAS_databaseFilename )
+            variablesThatMustBeNotEmpty+=(
+                BHMAS_inputFilename
+                BHMAS_outputFilename
+                BHMAS_plaquetteColumn
+                BHMAS_deltaHColumn
+                BHMAS_acceptanceColumn
+                BHMAS_trajectoryTimeColumn
+                BHMAS_databaseGlobalPath
+                BHMAS_databaseFilename
+            )
             neededFolders+=( "${BHMAS_databaseGlobalPath}" )
             ;;
 
         mode:prepare-only )
-            variablesThatMustBeNotEmpty+=( ${jobsNeededVariables[@]} ${schedulerVariables[@]}
-                                           BHMAS_thermConfsGlobalPath )
-            neededFolders+=( "${BHMAS_thermConfsGlobalPath}" ${rationalApproxFolder[@]:-} )
-            neededFiles+=( "${BHMAS_hmcGlobalPath}" ${rationalApproxFiles[@]:-} )
+            variablesThatMustBeNotEmpty+=(
+                ${jobsNeededVariables[@]}
+                ${schedulerVariables[@]}
+                BHMAS_thermConfsGlobalPath
+            )
+            neededFolders+=( "${BHMAS_thermConfsGlobalPath}" "${rationalApproxFolder[@]:-}" )
+            neededFiles+=( "${BHMAS_hmcGlobalPath}" "${rationalApproxFiles[@]:-}" )
             readonly BHMAS_walltimeIsNeeded='TRUE'
             ;;
 
@@ -333,7 +389,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
             fi
         done
         for index in "${!neededFiles[@]}"; do
-            #use stat in if instead of [[ -f ]] since we have a glob * in name (for database)
+            #use stat in if instead of [[ -f ]] since we have a glob * in name
             if stat -t ${neededFiles[${index}]} >/dev/null 2>&1; then
                 unset -v 'neededFiles[${index}]'
             fi
