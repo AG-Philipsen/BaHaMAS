@@ -55,8 +55,8 @@ function __static__CheckExistenceOfFunctionAndCallIt()
         ${nameOfTheFunction} "$@"
         # Return value propagates automatically since a function returns the last exit code!
     else
-        Fatal ${BHMAS_fatalMissingFeature} "Function " emph "${nameOfTheFunction}" " for " emph "${BHMAS_clusterScheduler}" " scheduler not found!\n"\
-              "Please provide an implementation following the " B "BaHaMAS" uB " documentation and source the file."
+        Fatal ${BHMAS_fatalMissingFeature} "Function " emph "${nameOfTheFunction}" " not found!\n"\
+              "Please provide an implementation following the " B "BaHaMAS" uB " documentation."
     fi
 }
 
