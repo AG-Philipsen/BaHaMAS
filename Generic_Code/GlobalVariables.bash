@@ -61,11 +61,15 @@ function DeclarePathRelatedGlobalVariables()
     readonly BHMAS_ntimePosition=3
     readonly BHMAS_nspacePosition=4
     #Parameters prefixes (here not readonly since they can be changed by user -> set as readonly in command line parser!)
-    BHMAS_nflavourPrefix="Nf"
-    BHMAS_chempotPrefix="mui"
-    [[ ${BHMAS_wilson} = "TRUE" ]] && BHMAS_massPrefix="k" || BHMAS_massPrefix="mass"
-    BHMAS_ntimePrefix="nt"
-    BHMAS_nspacePrefix="ns"
+    readonly BHMAS_nflavourPrefix="Nf"
+    readonly BHMAS_chempotPrefix="mui"
+    if [[ ${BHMAS_wilson} = "TRUE" ]]; then
+        readonly BHMAS_massPrefix="k"
+    else
+        readonly BHMAS_massPrefix="mass"
+    fi
+    readonly BHMAS_ntimePrefix="nt"
+    readonly BHMAS_nspacePrefix="ns"
     declare -ga BHMAS_parameterPrefixes=( [${BHMAS_nflavourPosition}]=${BHMAS_nflavourPrefix}
                                            [${BHMAS_chempotPosition}]=${BHMAS_chempotPrefix}
                                            [${BHMAS_massPosition}]=${BHMAS_massPrefix}
@@ -94,10 +98,10 @@ function DeclarePathRelatedGlobalVariables()
     #Beta and seed information (intentionally not in arrays of prefixes, regexes, etc.)
     #(here not readonly since they can be changed by user -> set as readonly in command line parser!)
     readonly BHMAS_betaPosition=5
-    BHMAS_betaPrefix='b'
+    readonly BHMAS_betaPrefix='b'
     BHMAS_betaPostfix='_continueWithNewChain' #Here we set it supposing it is not a thermalization. If indeed it is, the postfix will be overwritten!
     readonly BHMAS_betaRegex='[0-9][.][0-9]\{4\}'
-    BHMAS_seedPrefix='s'
+    readonly BHMAS_seedPrefix='s'
     readonly BHMAS_seedRegex='[0-9]\{4\}'
     BHMAS_betaFolderShortRegex=${BHMAS_betaRegex}'_'${BHMAS_seedPrefix}'[0-9]\{4\}_[[:alpha:]]\+'
     BHMAS_betaFolderRegex=${BHMAS_betaPrefix}${BHMAS_betaFolderShortRegex}
