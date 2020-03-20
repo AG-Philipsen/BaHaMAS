@@ -125,7 +125,6 @@ function DeclareBaHaMASGlobalVariables()
     BHMAS_useMultipleChains='TRUE'
     BHMAS_measurePbp='TRUE'
     BHMAS_numberOfPseudofermions=1
-    readonly JOBS_STATUS_PREFIX='jobs_status_'
 
     #Internal BaHaMAS variables
     BHMAS_betaValues=()
