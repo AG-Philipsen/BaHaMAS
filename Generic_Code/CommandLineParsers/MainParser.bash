@@ -406,8 +406,6 @@ function __static__ParseFirstOfRemainingOptions()
     BHMAS_commandLineOptionsToBeParsed=( "$@" )
 }
 
-
-
 function GiveRequiredHelp()
 {
     case ${BHMAS_executionMode#mode:} in
@@ -421,15 +419,6 @@ function GiveRequiredHelp()
             Error "Manual for " emph "${BHMAS_executionMode%-help}" " mode has not yet been written."
             ;;
     esac
-}
-
-function IsTestModeOn()
-{
-    if [[ -n "${BHMAS_testModeOn:+x}" ]] && [[ ${BHMAS_testModeOn} = 'TRUE' ]]; then
-        return 0
-    else
-        return 1
-    fi
 }
 
 function WasAnyOfTheseOptionsGivenToBaHaMAS()

@@ -198,6 +198,18 @@ function DeclareBetaFoldersPathsAsGlobalVariables()
     readonly BHMAS_runDirWithBetaFolders="${BHMAS_runDiskGlobalPath}/${BHMAS_projectSubpath}${BHMAS_parametersPath}"
 }
 
+function IsTestModeOn()
+{
+    # The global variable BHMAS_TESTMODE is an environment variable which
+    # is defined in functional tests BaHaMAS execution line in order to let
+    # BaHaMAS behave slightly differently (e.g. source test user variable file)
+    if [[ -n "${BHMAS_TESTMODE:+x}" ]] && [[ ${BHMAS_TESTMODE} = 'TRUE' ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 function DeclareAllGlobalVariables()
 {
     if IsBaHaMASRunInSetupMode; then

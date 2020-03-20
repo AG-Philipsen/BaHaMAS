@@ -217,7 +217,7 @@ function RunBaHaMASInTestMode()
     #       any interactve Y/N question of BaHaMAS and we do it answering always Y.
     (
         InhibitBaHaMASCommands "${testName}"
-        BHMAS_testModeOn='TRUE' ${BHMAS_command} $@ < <(yes 'Y') >> ${logFile} 2>&1
+        BHMAS_TESTMODE='TRUE' ${BHMAS_command} $@ < <(yes 'Y') >> ${logFile} 2>&1
     )
     if [[ $? -eq 0 ]]; then
         return 0
