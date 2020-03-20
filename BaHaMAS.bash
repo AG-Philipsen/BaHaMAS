@@ -47,17 +47,17 @@ ParseCommandLineOptionsTillMode
 case ${BHMAS_executionMode} in
     mode:*help )
         GiveRequiredHelp
-        ;;
+        ;;&
     mode:version )
         PrintCodeVersion
-        ;;
+        ;;&
     mode:setup )
         MakeInteractiveSetupAndCreateUserDefinedVariablesFile
+        ;;&
+    mode:*help | mode:version | mode:setup )
+        exit ${BHMAS_successExitCode}
         ;;
 esac
-if [[ ${BHMAS_executionMode} =~ ^mode:(.*help|version|setup)$ ]]; then
-    exit ${BHMAS_successExitCode}
-fi
 
 if [[ ${BHMAS_executionMode} != 'mode:job-status' ]]; then
     CheckSystemRequirements
