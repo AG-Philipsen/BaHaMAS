@@ -37,7 +37,7 @@ function ParseCommandLineOptionsTillMode()
         BHMAS_lqcdSoftware="$1"
         shift
     fi
-    case $1 in
+    case "$1" in
         help | --help )
             BHMAS_executionMode='mode:help'
             ;;
@@ -46,6 +46,9 @@ function ParseCommandLineOptionsTillMode()
             ;;
         setup | --setup )
             BHMAS_executionMode='mode:setup'
+            ;;
+        prepare-only )
+            BHMAS_executionMode='mode:prepare-only'
             ;;
         submit-only )
             BHMAS_executionMode='mode:submit-only'
@@ -56,11 +59,11 @@ function ParseCommandLineOptionsTillMode()
         thermalize )
             BHMAS_executionMode='mode:thermalize'
             ;;
-        continue-thermalization )
-            BHMAS_executionMode='mode:continue-thermalization'
-            ;;
         continue )
             BHMAS_executionMode='mode:continue'
+            ;;
+        continue-thermalization )
+            BHMAS_executionMode='mode:continue-thermalization'
             ;;
         job-status )
             BHMAS_executionMode='mode:job-status'
@@ -77,11 +80,11 @@ function ParseCommandLineOptionsTillMode()
         complete-betas-file )
             BHMAS_executionMode='mode:complete-betas-file'
             ;;
-        uncomment-betas )
-            BHMAS_executionMode='mode:uncomment-betas'
-            ;;
         comment-betas )
             BHMAS_executionMode='mode:comment-betas'
+            ;;
+        uncomment-betas )
+            BHMAS_executionMode='mode:uncomment-betas'
             ;;
         invert-configurations )
             BHMAS_executionMode='mode:invert-configurations'
@@ -90,9 +93,6 @@ function ParseCommandLineOptionsTillMode()
             BHMAS_executionMode='mode:database'
             BHMAS_optionsToBePassedToDatabase=( "${@:2}" )
             shift $(( $# - 1 )) #The shift after esac
-            ;;
-        prepare-only )
-            BHMAS_executionMode='mode:prepare-only'
             ;;
         * )
             Fatal ${BHMAS_fatalCommandLine} "No valid mode specified! Run " emph "BaHaMAS --help" " to get further information."
