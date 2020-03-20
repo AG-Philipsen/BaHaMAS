@@ -406,9 +406,11 @@ function __static__ParseFirstOfRemainingOptions()
     BHMAS_commandLineOptionsToBeParsed=( "$@" )
 }
 
+
 function GiveRequiredHelp()
 {
-    case ${BHMAS_executionMode#mode:} in
+    local modeName; modeName=${BHMAS_executionMode#mode:}
+    case ${modeName} in
         help )
             PrintMainHelper
             ;;
@@ -416,7 +418,7 @@ function GiveRequiredHelp()
             PrintDatabaseHelper
             ;;
         * )
-            Error "Manual for " emph "${BHMAS_executionMode%-help}" " mode has not yet been written."
+            Error "Manual for " emph "${modeName%-help}" " mode has not yet been written."
             ;;
     esac
 }
@@ -437,6 +439,8 @@ function WasAnyOfTheseOptionsGivenToBaHaMAS()
     return 1
 }
 
+# This function is needed before the variable
+# BHMAS_executionMode is available and set!
 function IsBaHaMASRunInSetupMode()
 {
     if WasAnyOfTheseOptionsGivenToBaHaMAS '--setup'; then
