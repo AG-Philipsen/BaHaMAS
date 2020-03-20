@@ -27,7 +27,7 @@ function GatherAndPrintJobsInformation()
           lineOfEquals tableFormat index
     #Call function scheduler specific: It will fill jobsInformation
     GatherJobsInformationForJobStatusMode
-    if [[ "${jobsInformation}" = '' ]]; then
+    if [[ "${jobsInformation[@]}" = '' ]]; then
         cecho lc "\n No job found according to given options!"
         return 0
     fi
