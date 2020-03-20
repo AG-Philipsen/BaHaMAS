@@ -116,25 +116,23 @@ function ParseRemainingCommandLineOptions()
     set -- "${BHMAS_commandLineOptionsToBeParsed[@]}"
     #Here it is fine to assume that option names and values are separated by spaces
     while [[ $# -gt 0 ]]; do
-        case $1 in
-
+        case "$1" in
             --jobscript_prefix )
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     readonly BHMAS_jobScriptPrefix="$2"
                 fi
-                shift 2 ;;
-
-
+                shift 2
+                ;;
             --betasfile )
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_betasFilename="$2"
                 fi
-                shift 2 ;;
-
+                shift 2
+                ;;
             --walltime )
                 if [[ ${2:-} =~ ^([0-9]+[dhms])+$ ]]; then
                     BHMAS_walltime=$(SecondsToTimeStringWithDays $(TimeStringToSecond $2) )
@@ -144,82 +142,84 @@ function ParseRemainingCommandLineOptions()
                 if [[ ! ${BHMAS_walltime} =~ ^([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 fi
-                shift 2 ;;
-
+                shift 2
+                ;;
             --measurements )
                 if [[ ! ${2:-} =~ ^[0-9]+$ ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_numberOfTrajectories=$2
                 fi
-                shift 2 ;;
-
+                shift 2
+                ;;
             --confSaveFrequency )
                 if [[ ! ${2:-} =~ ^[0-9]+$ ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_checkpointFrequency=$2
                 fi
-                shift 2 ;;
-
+                shift 2
+                ;;
             --confSavePointFrequency )
                 if [[ ! ${2:-} =~ ^[0-9]+$ ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_savepointFrequency=$2
                 fi
-                shift 2 ;;
-
+                shift 2
+                ;;
             --cgbs )
                 if [[ ! ${2:-} =~ ^[0-9]+$ ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_inverterBlockSize=$2
                 fi
-                shift 2 ;;
-
+                shift 2
+                ;;
             --pf )
                 if [[ ! ${2:-} =~ ^[1-9][0-9]*$ ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_numberOfPseudofermions=$2
                 fi
-                shift 2 ;;
-
+                shift 2
+                ;;
             --doNotMeasurePbp )
-                BHMAS_measurePbp="FALSE"; shift ;;
-
+                BHMAS_measurePbp="FALSE"
+                shift
+                ;;
             --partition )
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_clusterPartition="$2"
                 fi
-                shift 2 ;;
-
+                shift 2
+                ;;
             --node )
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_clusterNode="$2"
                 fi
-                shift 2 ;;
-
+                shift 2
+                ;;
             --constraint )
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_clusterConstraint="$2"
                 fi
-                shift 2 ;;
-
+                shift 2
+                ;;
             --resource )
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_clusterGenericResource="$2"
                 fi
-                shift 2 ;;
+                shift 2
+                ;;
 
             --user )
                 if [[ ${BHMAS_executionMode} != 'mode:job-status' ]]; then
