@@ -110,7 +110,7 @@ function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
     local betaValuesToBeSplit betasForJobScript betasString jobScriptFilename jobScriptGlobalPath walltime
     betaValuesToBeSplit=( $@ )
     cecho lc "\n================================================================================="
-    cecho bb "  The following beta values have been grouped (together with the seed if used):"
+    cecho bb " The following beta values have been grouped (together with the seed if used):"
     while [[ "${!betaValuesToBeSplit[@]}" != "" ]]; do
         betasForJobScript=(${betaValuesToBeSplit[@]:0:${BHMAS_GPUsPerNode}})
         betaValuesToBeSplit=(${betaValuesToBeSplit[@]:${BHMAS_GPUsPerNode}})
@@ -139,6 +139,7 @@ function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
         else
             if [[ -e ${jobScriptGlobalPath} ]]; then
                 BHMAS_betaValuesToBeSubmitted+=( "${betasString}" )
+                cecho "  - ${betasString}"
             else
                 cecho lr "\n Jobscript " file "${jobScriptFilename}" " not found! Option " emph "--submitonly" " cannot be applied! Skipping this job submission!\n"
                 BHMAS_problematicBetaValues+=( "${betasString}" )

@@ -81,7 +81,7 @@ function ProduceJobscript_CL2QCD()
     fi
 
     #Print to the screen the set of betas together with the excluded nodes if available
-    cecho -n "   ->"
+    cecho -n "  -"
     for betaValue in "${betaValues[@]}"; do
         cecho -n "    ${BHMAS_betaPrefix}${betaValue%_*}"
     done
