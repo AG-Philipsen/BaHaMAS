@@ -18,6 +18,7 @@
 #
 
 source ${BHMAS_repositoryTopLevelPath}/Generic_Code/CommandLineParsers/MainHelper.bash || exit ${BHMAS_fatalBuiltin}
+source ${BHMAS_repositoryTopLevelPath}/Generic_Code/CommandLineParsers/SpecificModeParser.bash || exit ${BHMAS_fatalBuiltin}
 
 function __static__PrintSecondaryOptionSpecificationErrorAndExit()
 {
@@ -108,11 +109,8 @@ function ParseCommandLineOptionsTillMode()
     fi
 }
 
-function ParseRemainingCommandLineOptions()
+function __static__ParseRemainingGeneralOptions()
 {
-    __static__ParseFirstOfRemainingOptions
-
-    #Locally set function arguments to take advantage of shift
     set -- "${BHMAS_commandLineOptionsToBeParsed[@]}"
     #Here it is fine to assume that option names and values are separated by spaces
     while [[ $# -gt 0 ]]; do
@@ -220,57 +218,78 @@ function ParseRemainingCommandLineOptions()
                 fi
                 shift 2
                 ;;
-
-            --user )
-                if [[ ${BHMAS_executionMode} != 'mode:job-status' ]]; then
-                    __static__PrintSecondaryOptionSpecificationErrorAndExit "-j | --jobstatus" "$1"
-                else
-                    BHMAS_jobstatusUser="$2"
-                    shift
-                fi
-                shift ;;
-
-            --local )
-                if [[ ${BHMAS_executionMode} != 'mode:job-status' ]]; then
-                    __static__PrintSecondaryOptionSpecificationErrorAndExit "-j | --jobstatus" "$1"
-                else
-                    BHMAS_jobstatusLocal='TRUE'
-                fi
-                shift ;;
-
-            --doNotMeasureTime )
-                if [[ ${BHMAS_executionMode} != 'mode:simulation-status' ]]; then
-                    __static__PrintSecondaryOptionSpecificationErrorAndExit "-l | --liststatus" "$1"
-                else
-                    BHMAS_liststatusMeasureTimeOption="FALSE"
-                fi
-                shift ;;
-
-            --showOnlyQueued )
-                if [[ ${BHMAS_executionMode} != 'mode:simulation-status' ]]; then
-                    __static__PrintSecondaryOptionSpecificationErrorAndExit "-l | --liststatus" "$1"
-                else
-                    BHMAS_liststatusShowOnlyQueuedOption="TRUE"
-                fi
-                shift ;;
-
-            --all )
-                if [[ ${BHMAS_executionMode} != 'mode:clean-output-files' ]] && [[ ${BHMAS_executionMode} != 'mode:job-status' ]]; then
-                    __static__PrintSecondaryOptionSpecificationErrorAndExit "--cleanOutputFiles" "$1"
-                elif [[ ${BHMAS_executionMode} = 'mode:clean-output-files' ]]; then
-                    BHMAS_cleanAllOutputFiles="TRUE"
-                elif [[ ${BHMAS_executionMode} = 'mode:job-status' ]]; then
-                    BHMAS_jobstatusAll='TRUE'
-                fi
-                shift ;;
-
             * )
                 PrintInvalidOptionErrorAndExit "$1" ;;
         esac
     done
+}
+
+
+
+
+
+
+
+
+function ParseRemainingCommandLineOptions()
+{
+    __static__ParseFirstOfRemainingOptions
+
+    # Each execution mode does not accept the same options and it makes
+    # sense to be stricter and to allow only the used ones instead of
+    # just ignoring them if not used. An associative array allows to have
+    # here an overview, we will use one entry of it later in the sub-parsers
+    #
+    # Possible options:
+    #  --betasfile --doNotMeasurePbp
+    #  --measurements --confSaveFrequency --confSavePointFrequency --pf
+    #  --jobscript_prefix --walltime  --partition  --node  --constraint  --resource
+    local productionOptions clusterOptions
+    productionOptions='--measurements --confSaveFrequency --confSavePointFrequency --pf'
+    clusterOptions='--walltime  --partition  --node  --constraint  --resource'
+    declare -A allowedGeneralOptions=(
+        ['mode:prepare-only']='--betasfile --jobscript_prefix'
+        ['mode:submit-only']='--betasfile --jobscript_prefix'
+        ['mode:submit']="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
+        ['mode:thermalize']="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
+        ['mode:continue']="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
+        ['mode:continue-thermalization']="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
+        ['mode:job-status']=''
+        ['mode:simulation-status']=''
+        ['mode:acceptance-rate-report']='--betasfile'
+        ['mode:clean-output-files']='--betasfile'
+        ['mode:complete-betas-file']='--betasfile'
+        ['mode:comment-betas']='--betasfile'
+        ['mode:uncomment-betas']='--betasfile'
+        ['mode:invert-configurations']='--betasfile --jobscript_prefix ${clusterOptions}'
+        ['mode:database']=''
+    )
+
+    if [[ ${BHMAS_executionMode} =~ ^mode:((job|simulation)-status|clean-output-files)$ ]]; then
+        if [[ "$(type -t ParseSpecificModeOptions_${BHMAS_executionMode#mode:})" = 'function' ]]; then
+            ParseSpecificModeOptions_${BHMAS_executionMode#mode:}
+        else
+            Internal 'Parser for ' emph "${BHMAS_executionMode#mode:}" ' mode not implemented but tried to be called!'
+        fi
+    fi
+
+    __static__CheckIfOnlyValidOptionsWereGiven ${allowedGeneralOptions[@]} # <- let word splitting split options
+    __static__ParseRemainingGeneralOptions
 
     #Mark as readonly the BHMAS_parameterPrefixes array, since from now on prefixes cannot change any more!
     declare -rga BHMAS_parameterPrefixes
+}
+
+function __static__CheckIfOnlyValidOptionsWereGiven()
+{
+    local validOptions option
+    validOptions=( "$@" )
+    for option in "${BHMAS_commandLineOptionsToBeParsed[@]}"; do
+        [[ ! ${option} =~ ^- ]] && continue
+        if ! ElementInArray "${option}" "${validOptions[@]}"; then
+            Fatal ${BHMAS_fatalCommandLine} 'Option ' emph "${option}" ' non accepted in ' emph "${BHMAS_executionMode#mode:}" ' mode.'
+        fi
+    done
 }
 
 function __static__ParseFirstOfRemainingOptions()
