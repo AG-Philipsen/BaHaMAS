@@ -189,13 +189,6 @@ function ParseRemainingCommandLineOptions()
             --doNotMeasurePbp )
                 BHMAS_measurePbp="FALSE"; shift ;;
 
-            --doNotUseMultipleChains )
-                BHMAS_useMultipleChains="FALSE"
-                if [[ ${BHMAS_executionMode} != 'mode:thermalize' ]]; then
-                    BHMAS_betaPostfix=""
-                fi
-                shift ;;
-
             --partition )
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
