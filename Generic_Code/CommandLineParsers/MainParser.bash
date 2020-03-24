@@ -106,8 +106,6 @@ function ParseCommandLineOptionsTillMode()
 
 function ParseRemainingCommandLineOptions()
 {
-    __static__ParseFirstOfRemainingOptions
-
     # Each execution mode does not accept the same options and it makes
     # sense to be stricter and to allow only the used ones instead of
     # just ignoring them if not used. An associative array allows to have
@@ -117,7 +115,7 @@ function ParseRemainingCommandLineOptions()
     #  --betasfile --doNotMeasurePbp
     #  --measurements --confSaveFrequency --confSavePointFrequency --pf
     #  --jobscript_prefix --walltime  --partition  --node  --constraint  --resource
-    local productionOptions clusterOptions
+    local productionOptions clusterOptions modesWithOwnParser
     productionOptions='--measurements --confSaveFrequency --confSavePointFrequency --pf'
     clusterOptions='--walltime  --partition  --node  --constraint  --resource'
     declare -A allowedGeneralOptions=(
@@ -138,7 +136,18 @@ function ParseRemainingCommandLineOptions()
         ['mode:database']=''
     )
 
-    if [[ ${BHMAS_executionMode} =~ ^mode:((job|simulation)-status|clean-output-files)$ ]]; then
+    modesWithOwnParser=(
+        'mode:continue'
+        'mode:continue-thermalization'
+        'mode:job-status'
+        'mode:simulation-status'
+        'mode:acceptance-rate-report'
+        'mode:clean-output-files'
+        'mode:complete-betas-file'
+        'mode:comment-betas'
+        'mode:uncomment-betas'
+    )
+    if ElementInArray ${BHMAS_executionMode} ${modesWithOwnParser[@]}; then
         if [[ "$(type -t ParseSpecificModeOptions_${BHMAS_executionMode#mode:})" = 'function' ]]; then
             ParseSpecificModeOptions_${BHMAS_executionMode#mode:}
         else
@@ -278,70 +287,6 @@ function __static__ParseRemainingGeneralOptions()
                 PrintInvalidOptionErrorAndExit "$1" ;;
         esac
     done
-}
-
-function __static__ParseFirstOfRemainingOptions()
-{
-    #Locally set function arguments to take advantage of shift
-    set -- "${BHMAS_commandLineOptionsToBeParsed[@]}"
-    case ${BHMAS_executionMode} in
-        mode:continue )
-            if [[ ! ${1:-} =~ ^(-|$) ]]; then
-                if [[ ! $1 =~ ^[0-9]+$ ]];then
-                    PrintOptionSpecificationErrorAndExit "continue"
-                else
-                    BHMAS_trajectoryNumberUpToWhichToContinue=$1
-                    shift
-                fi
-            fi
-            ;;
-        mode:continue-thermalization )
-            if [[ ! ${1:-} =~ ^(-|$) ]]; then
-                if [[ ! $1 =~ ^[0-9]+$ ]];then
-                    PrintOptionSpecificationErrorAndExit "continue-thermalization"
-                else
-                    BHMAS_trajectoryNumberUpToWhichToContinue=$1
-                    shift
-                fi
-            fi
-            ;;
-        mode:acceptance-rate-report )
-            if [[ ! ${1:-} =~ ^(-|$) ]]; then
-                if [[ ! $1 =~ ^[0-9]+$ ]];then
-                    PrintOptionSpecificationErrorAndExit "acceptance-rate-report"
-                else
-                    BHMAS_accRateReportInterval=$1
-                    shift
-                fi
-            fi
-            ;;
-        mode:complete-betas-file )
-            if [[ ! ${1:-} =~ ^(-|$) ]]; then
-                if [[ ! $1 =~ ^[0-9]+$ ]];then
-                    PrintOptionSpecificationErrorAndExit "complete-betas-file"
-                else
-                    BHMAS_numberOfChainsToBeInTheBetasFile=$1
-                    shift
-                fi
-            fi
-            ;;
-        mode:comment-betas | mode:uncomment-betas )
-            while [[ ! ${1:-} =~ ^(-|$) ]]; do
-                if [[ $1 =~ ^[0-9]\.[0-9]{4}_${BHMAS_seedPrefix}[0-9]{4}(_(NC|fC|fH))*$ ]]; then
-                    BHMAS_betasToBeToggled+=( $1 )
-                elif [[ $1 =~ ^[0-9]\.[0-9]*$ ]]; then
-                    BHMAS_betasToBeToggled+=( $(awk '{printf "%1.4f", $1}' <<< "$1") )
-                else
-                    PrintOptionSpecificationErrorAndExit "${BHMAS_executionMode#mode:}"
-                fi
-                shift
-            done
-            ;;
-        * )
-            ;;
-    esac
-    #Update the global array with remaining options to be parsed
-    BHMAS_commandLineOptionsToBeParsed=( "$@" )
 }
 
 function GiveRequiredHelp()

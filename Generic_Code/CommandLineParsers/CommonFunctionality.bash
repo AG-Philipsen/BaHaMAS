@@ -20,19 +20,20 @@
 #NOTE: We want to discard a potential equal sign between option name
 #      and option value, but still we want to allow a potential equal
 #      sign in the option value. Hence it is wrong to blindly replace
-#      all the equal signs by spaces. Moreover, there are modes which
-#      are not starting with '-', but which might be followed by a
-#      value that the user specified using an equal sign. It is then
-#      impossible to consider all possible cases, without knowing
-#      whether the option being considered is a mode or a value of
-#      another option. We need a compromise. We then iterate over the
-#      command line arguments and
-#       1) We ignore any '=' only option (e.g. the equal in "-m = 1000")
-#       2) We remove only the first equal sign, if present. This will
-#          make "-m = X=Y" be parsed in a wrong way. There is no option
-#          value at the moment which can contain an equal sign, though.
-#          We can live with that, then. Btw, "-m=X=Y" would be still
-#          parsed correctly.
+#      all the equal signs by spaces. Execution modes do not accept
+#      a value and, then, we can iterate over the command line
+#      options and if we encounter an option (string starting with'-')
+#      we act as following:
+#         i) the part before an equal sign if present
+#            is the option name and it is saved
+#        ii) a value is given to the option if
+#             - the option contains an '=' sign
+#             - the following argument is a '='
+#             - the following argument contains a '='
+#            the value is processed ('=' removed if needed) and stored
+#
+#       This of course rely on the rule that no equal sign can be part
+#       neither of an execution mode name nor of an option.
 #
 #NOTE: The following two functions will be used with readarray and therefore
 #      the printf in the end uses '\n' as separator (this preserves spaces
@@ -41,17 +42,36 @@ function PrepareGivenOptionToBeProcessed()
 {
     local newOptions value index
     newOptions=()
-    for value in "$@"; do
-        [[ "${value}" = '=' ]] && continue
-        if [[ ${value} =~ ([^=]*)=(.*) ]]; then
-            for index in 1 2; do
-                if [[ "${BASH_REMATCH[index]}" != '' ]]; then
-                    newOptions+=( "${BASH_REMATCH[index]}" )
+    while [[ $# -ne 0 ]]; do
+        case "$1" in
+            -* )
+                newOptions+=( "${1%%=*}" )
+                if [[ "$1" = *=* ]]; then # Otherwise value gets set to option value
+                    value="${1#*=}"
+                else
+                    value=''
                 fi
-            done
-        else
-            newOptions+=( "${value}" )
-        fi
+                if [[ "${value}" != '' ]]; then
+                    newOptions+=( "${value}" )
+                elif [[ "${2-}" != -* ]]; then # Another option follows
+                    if [[ "$1" =~ = ]]; then # equal was in $1, do not remove it in $2
+                        # If $2 was not given but '=' is in $1 then add empty value
+                        newOptions+=( "${2-}" )
+                        shift
+                    elif [[ "${2-}" = '=' ]]; then # Single equal sign following
+                        # If $3 was not given but $2 is '=' then add empty value
+                        newOptions+=( "$3" )
+                        shift 2
+                    elif [[ "${2-}" =~ = ]]; then # fill value if required
+                        newOptions+=( "${2#=}" )
+                        shift
+                    fi
+                fi
+                ;;
+            * )
+                newOptions+=( "$1" )
+        esac
+        shift
     done
     printf "%s\n" "${newOptions[@]}"
 }

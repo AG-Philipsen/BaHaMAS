@@ -30,6 +30,33 @@
 #       later (general in the sense of common to more than one
 #       execution mode). These are parsed in the main parser.
 
+function ParseSpecificModeOptions_continue()
+{
+    set -- "${BHMAS_commandLineOptionsToBeParsed[@]}"
+    BHMAS_commandLineOptionsToBeParsed=()
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --till )
+                if [[ ! ${2:-} =~ ^(-|$) ]]; then
+                    if [[ ! $2 =~ ^[0-9]+$ ]];then
+                        PrintOptionSpecificationErrorAndExit "$1"
+                    else
+                        BHMAS_trajectoryNumberUpToWhichToContinue=$2
+                    fi
+                fi
+                shift 2 ;;
+            * )
+                BHMAS_commandLineOptionsToBeParsed+=( "$1" )
+                shift ;;
+        esac
+    done
+}
+
+function ParseSpecificModeOptions_continue-thermalization()
+{
+    ParseSpecificModeOptions_continue
+}
+
 function ParseSpecificModeOptions_job-status()
 {
     set -- "${BHMAS_commandLineOptionsToBeParsed[@]}"
@@ -75,6 +102,28 @@ function ParseSpecificModeOptions_simulation-status()
     done
 }
 
+function ParseSpecificModeOptions_acceptance-rate-report()
+{
+    set -- "${BHMAS_commandLineOptionsToBeParsed[@]}"
+    BHMAS_commandLineOptionsToBeParsed=()
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --interval )
+                if [[ ! ${2:-} =~ ^(-|$) ]]; then
+                    if [[ ! $2 =~ ^[1-9][0-9]*$ ]];then
+                        PrintOptionSpecificationErrorAndExit "$1"
+                    else
+                        BHMAS_accRateReportInterval=$2
+                    fi
+                fi
+                shift 2 ;;
+            * )
+                BHMAS_commandLineOptionsToBeParsed+=( "$1" )
+                shift ;;
+        esac
+    done
+}
+
 function ParseSpecificModeOptions_clean-output-files()
 {
     set -- "${BHMAS_commandLineOptionsToBeParsed[@]}"
@@ -89,4 +138,56 @@ function ParseSpecificModeOptions_clean-output-files()
                 shift ;;
         esac
     done
+}
+
+function ParseSpecificModeOptions_complete-betas-file()
+{
+    set -- "${BHMAS_commandLineOptionsToBeParsed[@]}"
+    BHMAS_commandLineOptionsToBeParsed=()
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --chains )
+                if [[ ! ${1:-} =~ ^(-|$) ]]; then
+                    if [[ ! $1 =~ ^[0-9]+$ ]];then
+                        PrintOptionSpecificationErrorAndExit "complete-betas-file"
+                    else
+                        BHMAS_numberOfChainsToBeInTheBetasFile=$1
+                    fi
+                fi
+                shift 2 ;;
+            * )
+                BHMAS_commandLineOptionsToBeParsed+=( "$1" )
+                shift ;;
+        esac
+    done
+}
+
+function ParseSpecificModeOptions_comment-betas()
+{
+    set -- "${BHMAS_commandLineOptionsToBeParsed[@]}"
+    BHMAS_commandLineOptionsToBeParsed=()
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --betas )
+                while [[ ! ${2:-} =~ ^(-|$) ]]; do
+                    if [[ $2 =~ ^[0-9]\.[0-9]{4}_${BHMAS_seedPrefix}[0-9]{4}(_(NC|fC|fH))*$ ]]; then
+                        BHMAS_betasToBeToggled+=( $2 )
+                    elif [[ $2 =~ ^[0-9]\.[0-9]*$ ]]; then
+                        BHMAS_betasToBeToggled+=( $(awk '{printf "%1.4f", $1}' <<< "$2") )
+                    else
+                        PrintOptionSpecificationErrorAndExit "$1"
+                    fi
+                    shift
+                done
+                shift ;;
+            * )
+                BHMAS_commandLineOptionsToBeParsed+=( "$1" )
+                shift ;;
+        esac
+    done
+}
+
+function ParseSpecificModeOptions_uncomment-betas()
+{
+    ParseSpecificModeOptions_comment-betas
 }
