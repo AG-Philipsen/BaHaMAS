@@ -108,7 +108,7 @@ function MakeTestPreliminaryOperations()
                 __static__AddStringToFirstLineBetasFile "g15000"
             fi
             ;;
-        submitonly )
+        submit-only )
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateThermalizedConfigurationFolder
             __static__CreateThermalizedConfiguration "fromConf4000"

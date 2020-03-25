@@ -119,7 +119,7 @@ function ParseRemainingCommandLineOptions()
     productionOptions='--measurements --confSaveFrequency --confSavePointFrequency --pf'
     clusterOptions='--walltime  --partition  --node  --constraint  --resource'
     declare -A allowedGeneralOptions=(
-        ['mode:prepare-only']='--betasfile --jobscript_prefix'
+        ['mode:prepare-only']="--betasfile --jobscript_prefix ${clusterOptions}"
         ['mode:submit-only']='--betasfile --jobscript_prefix'
         ['mode:submit']="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
         ['mode:thermalize']="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
@@ -132,7 +132,7 @@ function ParseRemainingCommandLineOptions()
         ['mode:complete-betas-file']='--betasfile'
         ['mode:comment-betas']='--betasfile'
         ['mode:uncomment-betas']='--betasfile'
-        ['mode:invert-configurations']='--betasfile --jobscript_prefix ${clusterOptions}'
+        ['mode:invert-configurations']="--betasfile --jobscript_prefix ${clusterOptions}"
         ['mode:database']=''
     )
 
@@ -155,7 +155,7 @@ function ParseRemainingCommandLineOptions()
         fi
     fi
 
-    __static__CheckIfOnlyValidOptionsWereGiven ${allowedGeneralOptions[@]} # <- let word splitting split options
+    __static__CheckIfOnlyValidOptionsWereGiven ${allowedGeneralOptions[${BHMAS_executionMode}]} # <- let word splitting split options
     __static__ParseRemainingGeneralOptions
 
     #Mark as readonly the BHMAS_parameterPrefixes array, since from now on prefixes cannot change any more!

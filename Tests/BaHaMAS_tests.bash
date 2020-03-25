@@ -82,7 +82,7 @@ availableTests=(
     ['prepare-only']='prepare-only -w=1d'
     ['submit']='submit --walltime = 1d'
     ['submit-goal']='submit --walltime= 1d'
-    ['submitonly']='submit-only --walltime =1d'
+    ['submit-only']='submit-only --betasfile betas'
     ['thermalize-hot']='thermalize --walltime 1d'
     ['thermalize-conf']='thermalize --walltime 1d'
     ['continue-save']='continue --walltime 1d -F 80 -f 140 -m=1234'
