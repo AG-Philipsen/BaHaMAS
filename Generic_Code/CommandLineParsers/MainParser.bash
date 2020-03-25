@@ -17,8 +17,10 @@
 #  along with BaHaMAS. If not, see <http://www.gnu.org/licenses/>.
 #
 
-source ${BHMAS_repositoryTopLevelPath}/Generic_Code/CommandLineParsers/MainHelper.bash || exit ${BHMAS_fatalBuiltin}
-source ${BHMAS_repositoryTopLevelPath}/Generic_Code/CommandLineParsers/SpecificModeParser.bash || exit ${BHMAS_fatalBuiltin}
+#Load needed files
+for fileToBeSourced in 'DatabaseHelper.bash' 'DatabaseParser.bash' 'MainHelper.bash' 'ParserUtilities.bash' 'SubParsers.bash'; do
+    source "${BHMAS_repositoryTopLevelPath}/Generic_Code/CommandLineParsers/${fileToBeSourced}" || exit ${BHMAS_fatalBuiltin}
+done && unset -v 'fileToBeSourced'
 
 function ParseCommandLineOptionsTillMode()
 {
