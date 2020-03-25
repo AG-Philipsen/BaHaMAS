@@ -24,14 +24,13 @@ function DeclareOutputRelatedGlobalVariables()
 
 function DeclareUserDefinedGlobalVariables()
 {
-    readonly BHMAS_lqcdSoftware="CL2QCD"
+    BHMAS_lqcdSoftware="CL2QCD"
     readonly BHMAS_userEmail="user@test.com"
     readonly BHMAS_submitDiskGlobalPath="${BHMAS_repositoryTopLevelPath}/Tests"
     readonly BHMAS_runDiskGlobalPath="${BHMAS_repositoryTopLevelPath}/Tests"
     readonly BHMAS_GPUsPerNode=999
     readonly BHMAS_jobScriptFolderName="Jobscripts_TEST"
     readonly BHMAS_excludeNodesGlobalPath="${BHMAS_submitDiskGlobalPath}/ExcludeNodes_TEST"
-
     readonly BHMAS_projectSubpath="StaggeredFakeProject"
     readonly BHMAS_hmcGlobalPath="${BHMAS_submitDiskGlobalPath}/AuxiliaryFiles/fakeExecutable"
     readonly BHMAS_inputFilename="fakeInput"
@@ -58,7 +57,6 @@ function DeclareUserDefinedGlobalVariables()
     BHMAS_clusterConstraint=""
     BHMAS_clusterGenericResource=""
     BHMAS_maximumWalltime="1-00:00:00"
-
 }
 
 

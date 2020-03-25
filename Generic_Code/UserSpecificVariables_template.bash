@@ -42,7 +42,7 @@ function DeclareOutputRelatedGlobalVariables()
 
 function DeclareUserDefinedGlobalVariables()
 {
-    readonly BHMAS_lqcdSoftware="CL2QCD"
+    BHMAS_lqcdSoftware="CL2QCD"
     readonly BHMAS_userEmail=""
     readonly BHMAS_submitDiskGlobalPath=""
     readonly BHMAS_runDiskGlobalPath=""

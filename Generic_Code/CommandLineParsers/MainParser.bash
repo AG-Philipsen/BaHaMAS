@@ -33,6 +33,7 @@ function ParseCommandLineOptionsTillMode()
         BHMAS_lqcdSoftware="$1"
         shift
     fi
+    readonly BHMAS_lqcdSoftware
     case "$1" in
         help | --help )
             BHMAS_executionMode='mode:help'
