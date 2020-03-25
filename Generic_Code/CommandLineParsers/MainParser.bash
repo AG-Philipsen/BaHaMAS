@@ -107,16 +107,56 @@ function ParseCommandLineOptionsTillMode()
 
 function ParseRemainingCommandLineOptions()
 {
+    # In general we have options that can be
+    #   1) mode-specific && software-specific options;
+    #   2) mode-specific && for-all-software  options;
+    #   3) for-all-modes && software-specific options;
+    #   4) mode-specific && multiple-software options;
+    #   5) multiple-mode && software-specific options;
+    #   6) multiple-mode && multiple-software options.
+    # Then,
+    #  - for categories 1,2,3 we implement sub-parsers;
+    #  - for categories 4,5,6 we have a pool of options which are
+    #    parsed all together but preliminary checked if allowed.
+    #
+    # https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/issues/27
+    local modeSpecificAllSoftwareParser functionName
+    modeSpecificAllSoftwareParser=(
+        'mode:continue'
+        'mode:continue-thermalization'
+        'mode:job-status'
+        'mode:simulation-status'
+        'mode:acceptance-rate-report'
+        'mode:clean-output-files'
+        'mode:complete-betas-file'
+        'mode:comment-betas'
+        'mode:uncomment-betas'
+    )
+    if ElementInArray ${BHMAS_executionMode} ${modeSpecificAllSoftwareParser[@]}; then
+        __static__CallSubParserIfExisting "${BHMAS_executionMode#mode:}"
+    fi
+
+    local modeSpecificSoftwareSpecificParser
+    modeSpecificSoftwareSpecificParser=()
+    if ElementInArray "${BHMAS_executionMode}_${BHMAS_lqcdSoftware}" ${modeSpecificSoftwareSpecificParser[@]}; then
+        __static__CallSubParserIfExisting "${BHMAS_executionMode}_${BHMAS_lqcdSoftware}"
+    fi
+
+    local softwareSpecificAllModesParser
+    softwareSpecificAllModesParser=()
+    if ElementInArray ${BHMAS_lqcdSoftware} ${softwareSpecificAllModesParser[@]}; then
+        __static__CallSubParserIfExisting "${BHMAS_lqcdSoftware}"
+    fi
+
     # Each execution mode does not accept the same options and it makes
     # sense to be stricter and to allow only the used ones instead of
-    # just ignoring them if not used. An associative array allows to have
-    # here an overview, we will use one entry of it later in the sub-parsers
-    #
-    # Possible options:
-    #  --betasfile --doNotMeasurePbp
-    #  --measurements --confSaveFrequency --confSavePointFrequency --pf
-    #  --jobscript_prefix --walltime  --partition  --node  --constraint  --resource
-    local productionOptions clusterOptions modesWithOwnParser
+    # just ignoring them if not used. The same is valid for options which
+    # are restricted to some software only. Note that here we refer option
+    # which are either in common to multiple modes or in common to multiple
+    # software. An associative array allows to have here an overview. We use
+    # as key either a mode or a software to then put in the value those options
+    # that are allowed. We will use then two entries of it later to validate.
+    local productionOptions clusterOptions
     productionOptions='--measurements --confSaveFrequency --confSavePointFrequency --pf'
     clusterOptions='--walltime  --partition  --node  --constraint  --resource'
     declare -A allowedGeneralOptions=(
@@ -135,30 +175,30 @@ function ParseRemainingCommandLineOptions()
         ['mode:uncomment-betas']='--betasfile'
         ['mode:invert-configurations']="--betasfile --jobscript_prefix ${clusterOptions}"
         ['mode:database']=''
+        #-------------------------------------------------------------------------------
+        ['CL2QCD']='--cgbs'
+        ['OpenQCD-FASTSUM']=''
     )
-
-    modesWithOwnParser=(
-        'mode:continue'
-        'mode:continue-thermalization'
-        'mode:job-status'
-        'mode:simulation-status'
-        'mode:acceptance-rate-report'
-        'mode:clean-output-files'
-        'mode:complete-betas-file'
-        'mode:comment-betas'
-        'mode:uncomment-betas'
-    )
-    if ElementInArray ${BHMAS_executionMode} ${modesWithOwnParser[@]}; then
-        if [[ "$(type -t ParseSpecificModeOptions_${BHMAS_executionMode#mode:})" = 'function' ]]; then
-            ParseSpecificModeOptions_${BHMAS_executionMode#mode:}
-        else
-            Internal 'Parser for ' emph "${BHMAS_executionMode#mode:}" ' mode not implemented but tried to be called!'
-        fi
-    fi
-
-    __static__CheckIfOnlyValidOptionsWereGiven ${allowedGeneralOptions[${BHMAS_executionMode}]} # <- let word splitting split options
+    __static__CheckIfOnlyValidOptionsWereGiven\
+        ${allowedGeneralOptions[${BHMAS_executionMode}]}\
+        ${allowedGeneralOptions[${BHMAS_lqcdSoftware}]} # <- let word splitting split options
     __static__ParseRemainingGeneralOptions
+}
 
+function __static__CallSubParserIfExisting()
+{
+    local functionName
+    functionName="ParseSpecificModeOptions_"
+    if [[ "${1-}" != '' ]]; then
+        functionName+="$1"
+    else
+        Internal 'Function ' emph "${FUNCNAME}" ' wrongly called!'
+    fi
+    if [[ "$(type -t ${functionName})" = 'function' ]]; then
+        ${functionName}
+    else
+        Internal 'Parser for ' emph "$1" ' not implemented but tried to be called!'
+    fi
 }
 
 function __static__CheckIfOnlyValidOptionsWereGiven()

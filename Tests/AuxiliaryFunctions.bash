@@ -100,7 +100,7 @@ function MakeTestPreliminaryOperations()
     cp "${BHMAS_testsFolderAuxFiles}/fakeBetas" "${testFolder}${testParametersPath}/betas"
 
     case "$1" in
-        prepare-only | submit | submit-goal )
+        CL2QCD-prepare-only | CL2QCD-submit | CL2QCD-submit-goal )
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateThermalizedConfigurationFolder
             __static__CreateThermalizedConfiguration "fromConf4000"
@@ -108,7 +108,7 @@ function MakeTestPreliminaryOperations()
                 __static__AddStringToFirstLineBetasFile "g15000"
             fi
             ;;
-        submit-only )
+        CL2QCD-submit-only )
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateThermalizedConfigurationFolder
             __static__CreateThermalizedConfiguration "fromConf4000"
@@ -117,14 +117,14 @@ function MakeTestPreliminaryOperations()
             mkdir "Jobscripts_TEST" || exit ${BHMAS_fatalBuiltin}
             printf "NOT EMPTY\n" > "${testFolder}${testParametersPath}/Jobscripts_TEST/fakePrefix_${testParametersString}__${betaFolder%_*}"
             ;;
-        thermalize* )
+        CL2QCD-thermalize* )
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateThermalizedConfigurationFolder
             if [[ $1 =~ conf$ ]]; then
                 __static__CreateThermalizedConfiguration "fromHot1000"
             fi
             ;;
-        continue-* )
+        CL2QCD-continue-* )
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateBetaFolder
             __static__CopyAuxiliaryFilesToBetaFolder "fakeInput" "fakeOutput" "fakeOutput_pbp.dat"
@@ -148,7 +148,7 @@ function MakeTestPreliminaryOperations()
                 mv "${betaFolder}" "${betaFolder/continueWithNewChain/thermalizeFromHot}"
             fi
             ;;
-        simulation-status* )
+        CL2QCD-simulation-status* )
             __static__CreateBetaFolder
             __static__CopyAuxiliaryFilesToBetaFolder "fakeExecutable.123456.out" "fakeInput" "fakeOutput"
             ;;
@@ -166,7 +166,7 @@ function MakeTestPreliminaryOperations()
         commentBetas* | uncommentBetas* )
             __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeBetasToBeCommented" "betas"
             ;;
-        invertConfs* )
+        CL2QCD-invertConfs* )
             __static__CreateBetaFolder
             __static__CreateFilesInBetaFolder "conf.00100" "conf.00200" "conf.00300" "conf.00400"
             if [[ $1 =~ some$ ]]; then
@@ -232,7 +232,7 @@ function RunTest()
     testName=$1; shift
     (( testsRun++ ))
     if [[ ${reportLevel} -eq 3 ]]; then
-        printf -v stringTest "%-38s" "__${testName}$(cecho -d bb)_"
+        printf -v stringTest "%-50s" "__${testName}$(cecho -d bb)_"
         stringTest="${stringTest// /.}"
         cecho -n lp "  $(printf '%+2s' ${testsRun})/$(printf '%-2s' ${#testsToBeRun[@]})" lc "${stringTest//_/ }"
     fi
