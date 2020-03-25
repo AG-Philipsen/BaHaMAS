@@ -35,10 +35,37 @@
 #       This of course rely on the rule that no equal sign can be part
 #       neither of an execution mode name nor of an option.
 #
+
+function PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem()
+{
+    local partiallyProcessedCommandLineOptions
+    if [[ ${#BHMAS_specifiedCommandLineOptions[@]} -ne 0 ]]; then
+        #The following two lines are not combined to respect potential spaces in options
+        readarray -t partiallyProcessedCommandLineOptions <<<\
+                  "$(__static__PrepareGivenOptionToBeProcessed "${BHMAS_specifiedCommandLineOptions[@]}")"
+        readarray -t partiallyProcessedCommandLineOptions <<<\
+                  "$(__static__SplitCombinedShortOptionsInSingleOptions "${partiallyProcessedCommandLineOptions[@]}")"
+        __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray "${partiallyProcessedCommandLineOptions[@]}"
+        readonly BHMAS_specifiedCommandLineOptions
+    fi
+    #Create a to-be-modified array with options to be parsed
+    BHMAS_commandLineOptionsToBeParsed=( "${BHMAS_specifiedCommandLineOptions[@]}" )
+}
+
+function PrintInvalidOptionErrorAndExit()
+{
+    Fatal ${BHMAS_fatalCommandLine} "Invalid option " emph "$1" " specified! Use the " emph "--help" " option to get further information."
+}
+
+function PrintOptionSpecificationErrorAndExit()
+{
+    Fatal ${BHMAS_fatalCommandLine} "The value of the option " emph "$1" " was not correctly specified (either " emph "forgotten" " or " emph "invalid" ")!"
+}
+
 #NOTE: The following two functions will be used with readarray and therefore
 #      the printf in the end uses '\n' as separator (this preserves spaces
 #      in options)
-function PrepareGivenOptionToBeProcessed()
+function __static__PrepareGivenOptionToBeProcessed()
 {
     local newOptions value index
     newOptions=()
@@ -76,7 +103,7 @@ function PrepareGivenOptionToBeProcessed()
     printf "%s\n" "${newOptions[@]}"
 }
 
-function SplitCombinedShortOptionsInSingleOptions()
+function __static__SplitCombinedShortOptionsInSingleOptions()
 {
     local newOptions value option splittedOptions
     newOptions=()
@@ -143,30 +170,5 @@ function __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray()
         fi
     done
 }
-
-function PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem()
-{
-    local partiallyProcessedCommandLineOptions
-    if [[ ${#BHMAS_specifiedCommandLineOptions[@]} -ne 0 ]]; then
-        #The following two lines are not combined to respect potential spaces in options
-        readarray -t partiallyProcessedCommandLineOptions <<< "$(PrepareGivenOptionToBeProcessed "${BHMAS_specifiedCommandLineOptions[@]}")"
-        readarray -t partiallyProcessedCommandLineOptions <<< "$(SplitCombinedShortOptionsInSingleOptions "${partiallyProcessedCommandLineOptions[@]}")"
-        __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray "${partiallyProcessedCommandLineOptions[@]}"
-        readonly BHMAS_specifiedCommandLineOptions
-    fi
-    #Create a to-be-modified array with options to be parsed
-    BHMAS_commandLineOptionsToBeParsed=( "${BHMAS_specifiedCommandLineOptions[@]}" )
-}
-
-function PrintInvalidOptionErrorAndExit()
-{
-    Fatal ${BHMAS_fatalCommandLine} "Invalid option " emph "$1" " specified! Use the " emph "--help" " option to get further information."
-}
-
-function PrintOptionSpecificationErrorAndExit()
-{
-    Fatal ${BHMAS_fatalCommandLine} "The value of the option " emph "$1" " was not correctly specified (either " emph "forgotten" " or " emph "invalid" ")!"
-}
-
 
 MakeFunctionsDefinedInThisFileReadonly
