@@ -159,8 +159,6 @@ function ParseRemainingCommandLineOptions()
     __static__CheckIfOnlyValidOptionsWereGiven ${allowedGeneralOptions[${BHMAS_executionMode}]} # <- let word splitting split options
     __static__ParseRemainingGeneralOptions
 
-    #Mark as readonly the BHMAS_parameterPrefixes array, since from now on prefixes cannot change any more!
-    declare -rga BHMAS_parameterPrefixes
 }
 
 function __static__CheckIfOnlyValidOptionsWereGiven()

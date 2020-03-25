@@ -70,7 +70,7 @@ function DeclarePathRelatedGlobalVariables()
     fi
     readonly BHMAS_ntimePrefix="nt"
     readonly BHMAS_nspacePrefix="ns"
-    declare -ga BHMAS_parameterPrefixes=( [${BHMAS_nflavourPosition}]=${BHMAS_nflavourPrefix}
+    declare -rga BHMAS_parameterPrefixes=( [${BHMAS_nflavourPosition}]=${BHMAS_nflavourPrefix}
                                            [${BHMAS_chempotPosition}]=${BHMAS_chempotPrefix}
                                            [${BHMAS_massPosition}]=${BHMAS_massPrefix}
                                            [${BHMAS_ntimePosition}]=${BHMAS_ntimePrefix}
