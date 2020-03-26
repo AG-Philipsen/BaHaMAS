@@ -17,25 +17,6 @@
 #  along with BaHaMAS. If not, see <http://www.gnu.org/licenses/>.
 #
 
-#NOTE: We want to discard a potential equal sign between option name
-#      and option value, but still we want to allow a potential equal
-#      sign in the option value. Hence it is wrong to blindly replace
-#      all the equal signs by spaces. Execution modes do not accept
-#      a value and, then, we can iterate over the command line
-#      options and if we encounter an option (string starting with'-')
-#      we act as following:
-#         i) the part before an equal sign if present
-#            is the option name and it is saved
-#        ii) a value is given to the option if
-#             - the option contains an '=' sign
-#             - the following argument is a '='
-#             - the following argument contains a '='
-#            the value is processed ('=' removed if needed) and stored
-#
-#       This of course rely on the rule that no equal sign can be part
-#       neither of an execution mode name nor of an option.
-#
-
 function PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem()
 {
     local partiallyProcessedCommandLineOptions
@@ -65,6 +46,25 @@ function PrintOptionSpecificationErrorAndExit()
 #NOTE: The following two functions will be used with readarray and therefore
 #      the printf in the end uses '\n' as separator (this preserves spaces
 #      in options)
+
+#NOTE: We want to discard a potential equal sign between option name
+#      and option value, but still we want to allow a potential equal
+#      sign in the option value. Hence it is wrong to blindly replace
+#      all the equal signs by spaces. Execution modes do not accept
+#      a value and, then, we can iterate over the command line
+#      options and if we encounter an option (string starting with'-')
+#      we act as following:
+#         i) the part before an equal sign if present
+#            is the option name and it is saved
+#        ii) a value is given to the option if
+#             - the option contains an '=' sign
+#             - the following argument is a '='
+#             - the following argument contains a '='
+#            the value is processed ('=' removed if needed) and stored
+#
+#       This of course rely on the rule that no equal sign can be part
+#       neither of an execution mode name nor of an option.
+#
 function __static__PrepareGivenOptionToBeProcessed()
 {
     local newOptions value index
@@ -123,40 +123,23 @@ function __static__SplitCombinedShortOptionsInSingleOptions()
 function __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray()
 {
     declare -A mapOptions=(['-a']='--all'
-                           ['-c']='--continue'
-                           ['-C']='--continueThermalization'
-                           ['-d']='--database'
                            ['-f']='--confSaveFrequency'
                            ['-F']='--confSavePointFrequency'
-                           ['-i']='--invertConfigurations'
-                           ['-j']='--jobstatus'
+                           ['-l']='--local'
                            ['-m']='--measurements'
                            ['-p']='--doNotMeasurePbp'
-                           ['-s']='--submit'
-                           ['-t']='--thermalize'
-                           ['-U']='--uncommentBetas'
+                           ['-t']='--till'
+                           ['-u']='--user'
                            ['-w']='--walltime' )
     local option databaseOption
     databaseOption='FALSE'
     BHMAS_specifiedCommandLineOptions=() # Empty it to fill it again with only long options
     for option in "$@"; do
-        #Replace short options if they are NOT for dabase!
+        #Replace short options if they are NOT for database!
         if [[ ${databaseOption} = 'FALSE' ]]; then
            KeyInArray ${option} mapOptions && option=${mapOptions[${option}]}
            #More logic for repeated short options with different long one
-           if [[ ${option} = '-l' ]]; then
-               if ElementInArray '--jobstatus' "${BHMAS_specifiedCommandLineOptions[@]}"; then
-                   option='--local'
-               else
-                   option='--liststatus'
-               fi
-           elif [[ ${option} = '-u' ]]; then
-               if ElementInArray '--jobstatus' "${BHMAS_specifiedCommandLineOptions[@]}"; then
-                   option='--user'
-               else
-                   option='--commentBetas'
-               fi
-           elif [[ ${option} = '-h' ]]; then
+           if [[ ${option} = '-h' ]]; then
                option='--help'
            fi
         else
@@ -170,5 +153,6 @@ function __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray()
         fi
     done
 }
+
 
 MakeFunctionsDefinedInThisFileReadonly
