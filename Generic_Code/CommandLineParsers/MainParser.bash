@@ -332,7 +332,8 @@ function __static__ParseRemainingGeneralOptions()
 
 function GiveRequiredHelp()
 {
-    local modeName; modeName=${BHMAS_executionMode#mode:}
+    local modeName manualFile
+    modeName=${BHMAS_executionMode#mode:}
     case ${modeName} in
         help )
             PrintMainHelper
@@ -341,7 +342,18 @@ function GiveRequiredHelp()
             PrintDatabaseHelper
             ;;
         * )
-            Error "Manual for " emph "${modeName%-help}" " mode has not yet been written."
+            (
+                cd "${BHMAS_repositoryTopLevelPath}/Manual_Pages"
+                if ! make >> /dev/null 2>&1; then
+                    Internal "Error occurred producing manual files!"
+                fi
+            )
+            manualFile="${BHMAS_repositoryTopLevelPath}/Manual_Pages/BaHaMAS-${modeName}.1"
+            if [[ -f "${manualFile}" ]]; then
+                man -l "${manualFile}"
+            else
+                Error "Manual for " emph "${modeName%-help}" " mode has not yet been written."
+            fi
             ;;
     esac
 }
