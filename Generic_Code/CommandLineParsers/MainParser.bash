@@ -100,7 +100,7 @@ function ParseCommandLineOptionsTillMode()
     #Update the global array with remaining options to be parsed
     BHMAS_commandLineOptionsToBeParsed=( "$@" )
     #If user specified --help in a given mode, act accrdingly
-    if [[ ${BHMAS_executionMode} != 'mode:help' ]]; then
+    if [[ ! ${BHMAS_executionMode} =~ ^mode:(help|version|setup)$ ]]; then
         if  ElementInArray '--help' "${BHMAS_commandLineOptionsToBeParsed[@]}" "${BHMAS_optionsToBePassedToDatabase[@]}"; then
             BHMAS_executionMode+='-help'
         fi
