@@ -18,7 +18,7 @@
 #
 
 #Load needed files
-for fileToBeSourced in 'DatabaseHelper.bash' 'DatabaseParser.bash' 'MainHelper.bash' 'ParserUtilities.bash' 'SubParsers.bash'; do
+for fileToBeSourced in 'DatabaseHelper.bash' 'DatabaseParser.bash' 'Helper.bash' 'ParserUtilities.bash' 'SubParsers.bash'; do
     source "${BHMAS_repositoryTopLevelPath}/Generic_Code/CommandLineParsers/${fileToBeSourced}" || exit ${BHMAS_fatalBuiltin}
 done && unset -v 'fileToBeSourced'
 
