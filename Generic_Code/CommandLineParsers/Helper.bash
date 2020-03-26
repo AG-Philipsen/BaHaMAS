@@ -17,6 +17,42 @@
 #  along with BaHaMAS. If not, see <http://www.gnu.org/licenses/>.
 #
 
+function CreateManualPages()
+(
+    # This function body is a sub-shell because of the cd
+    if command -v pandoc >> /dev/null 2>&1; then
+        cd "${BHMAS_repositoryTopLevelPath}/Manual_Pages"
+        if ! make >> /dev/null 2>&1; then
+            Internal "Error occurred producing manual files!"
+        fi
+    else
+        Error "Command pandoc not found! Manual pages cannot be produced."
+    fi
+)
+
+function GiveRequiredHelp()
+{
+    local modeName manualFile
+    modeName=${BHMAS_executionMode#mode:}
+    case ${modeName} in
+        help )
+            PrintMainHelper
+            ;;
+        database-help )
+            PrintDatabaseHelper
+            ;;
+        * )
+            CreateManualPages
+            manualFile="${BHMAS_repositoryTopLevelPath}/Manual_Pages/BaHaMAS-${modeName}.1"
+            if [[ -f "${manualFile}" ]]; then
+                man -l "${manualFile}"
+            else
+                Error "Manual for " emph "${modeName%-help}" " mode has not yet been written."
+            fi
+            ;;
+    esac
+}
+
 function PrintMainHelper()
 {
     declare -A runSimulationsModesDescription monitorModesDescription\

@@ -43,7 +43,7 @@ DeclareAllGlobalVariables
 PrepareGivenOptionToBeParsedAndFillGlobalArrayContainingThem
 ParseCommandLineOptionsTillMode
 
-#If the user asked for the setup or the version, act and exit
+#If the user asked for help, setup or version, act and exit
 case ${BHMAS_executionMode} in
     mode:*help )
         GiveRequiredHelp
@@ -52,6 +52,7 @@ case ${BHMAS_executionMode} in
         PrintCodeVersion
         ;;&
     mode:setup )
+        CreateManualPages
         MakeInteractiveSetupAndCreateUserDefinedVariablesFile
         ;;&
     mode:*help | mode:version | mode:setup )
