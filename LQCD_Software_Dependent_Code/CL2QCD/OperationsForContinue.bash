@@ -202,10 +202,9 @@ function __static__HandleMeasurementsInInputFile()
     # There are different possibilities to set the number of measurements in the input file
     # and we have to decide a list of priorities:
     #   1) if the '--measurements' option is given, then it will be used. Otherwise,
-    #   2) if the '--continue=[number]' option is given, then it will be used. Otherwise,
+    #   2) if the '--till=[number]' option is given, then it will be used. Otherwise,
     #   3) if the 'g[number]' field is present in the betas file, then it will be used. Otherwise,
     #   4) the measurement option in the input file is not modified!
-    #
     #
     local optionsToBeAddedOrModified numberOfTrajectoriesAlreadyProduced
     if WasAnyOfTheseOptionsGivenToBaHaMAS '-m' '--measurements'; then
@@ -418,7 +417,6 @@ function __static__HandleFurtherOptionsInInputFile()
     return 0
 }
 
-
 function __static__FindAndSetNumberOfTrajectoriesAlreadyProduced()
 {
     # Strategy to recover the number of done measurement:
@@ -450,7 +448,7 @@ function __static__IsSimulationFinished()
     startingStatistics=$1; goalStatistics=$2
     if [[ ${startingStatistics} -gt ${goalStatistics} ]]; then
         Error "It was found that the number of done measurements is " emph "${startingStatistics} > ${goalStatistics} = goal trajectory" ".\n"\
-              "The option " emph "--continue" " cannot be applied. The value " emph "beta = ${runId}" " will be skipped!"
+              "The simulation cannot be continued. The value " emph "beta = ${runId}" " will be skipped!"
         BHMAS_problematicBetaValues+=( ${runId} )
         return 1
     elif [[ ${startingStatistics} -eq ${goalStatistics} ]]; then
