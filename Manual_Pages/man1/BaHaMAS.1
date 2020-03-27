@@ -8,7 +8,7 @@ BaHaMAS - Bash Handler to Monitor and Administrate Simulations
 .SH SYNOPSIS
 .PP
 \f[B]BaHaMAS\f[R] [\[en]help] [\[en]version] [\[en]setup]
-\f[I]execution-mode\f[R] [\f[I]options\f[R] \&...]
+\f[I]execution-mode\f[R] [\f[I]option\f[R] \&...]
 .SH DESCRIPTION
 .PP
 \f[C]BaHaMAS\f[R] is a tool to efficiently run LQCD simulations on
@@ -67,10 +67,10 @@ Otherwise, if the \f[B]g\f[R]\f[I]number\f[R] field is present in the
 .IP \[bu] 2
 Otherwise, the measurement option in the input file is not modified.
 .PP
-To resume a simulation from a given trajectory, add `r[number]' in the
-\f[B]betas\f[R] file.
-Use `rlast' in the \f[B]betas\f[R] file to resume a simulation from the
-last saved checkpoint.
+To resume a simulation from a given trajectory, add a
+\f[B]r\f[R]\f[I]number\f[R] field in the \f[B]betas\f[R] file.
+Use \f[B]rlast\f[R] in the \f[B]betas\f[R] file to resume a simulation
+from the last saved checkpoint.
 .RE
 .TP
 .B continue-thermalization

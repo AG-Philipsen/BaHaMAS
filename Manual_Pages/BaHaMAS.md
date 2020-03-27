@@ -9,7 +9,7 @@ BaHaMAS - Bash Handler to Monitor and Administrate Simulations
 # SYNOPSIS
 
 **BaHaMAS** [--help] [--version] [--setup]
-         *execution-mode* [*options* ...]
+         *execution-mode* [*option* ...]
 
 # DESCRIPTION
 
@@ -53,8 +53,8 @@ continue
      * Otherwise, if the **g***number* field is present in the **betas** file, then it will be used.
      * Otherwise, the measurement option in the input file is not modified.
 
-    To resume a simulation from a given trajectory, add 'r[number]' in the **betas** file.
-    Use 'rlast' in the **betas** file to resume a simulation from the last saved checkpoint.
+    To resume a simulation from a given trajectory, add a **r***number* field in the **betas** file.
+    Use **rlast** in the **betas** file to resume a simulation from the last saved checkpoint.
 
 continue-thermalization
 :   As **continue**, but for thermalization runs.
