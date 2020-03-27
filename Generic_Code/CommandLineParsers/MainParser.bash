@@ -110,6 +110,57 @@ function ParseCommandLineOptionsTillMode()
     fi
 }
 
+# This function will be reused in manual composition
+# to populate the option sections of each manual page.
+function DeclareAllowedOptionsPerModeOrSoftware()
+{
+    # Each execution mode does not accept the same options and it makes
+    # sense to be stricter and to allow only the used ones instead of
+    # just ignoring them if not used. The same is valid for options which
+    # are restricted to some software only. Note that here we refer option
+    # which are either in common to multiple modes or in common to multiple
+    # software. An associative array allows to have here an overview. We use
+    # as key either a mode or a software to then put in the value those options
+    # that are allowed. We will use then two entries of it later to validate.
+    #
+    # NOTE: The associative array must be declared in the caller
+    local productionOptions clusterOptions
+    productionOptions='--measurements --checkpointEvery --pf'
+    clusterOptions='--walltime  --partition  --node  --constraint  --resource'
+    allowedOptionsPerModeOrSoftware=(
+        ['mode:prepare-only']="--betasfile --jobscript_prefix ${clusterOptions}"
+        ['mode:submit-only']='--betasfile --jobscript_prefix'
+        ['mode:submit']="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
+        ['mode:thermalize']="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
+        ['mode:continue']="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
+        ['mode:continue-thermalization']="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
+        ['mode:job-status']=''
+        ['mode:simulation-status']=''
+        ['mode:acceptance-rate-report']='--betasfile'
+        ['mode:clean-output-files']='--betasfile'
+        ['mode:complete-betas-file']='--betasfile'
+        ['mode:comment-betas']='--betasfile'
+        ['mode:uncomment-betas']='--betasfile'
+        ['mode:invert-configurations']="--betasfile --jobscript_prefix ${clusterOptions}"
+        ['mode:database']=''
+        #-------------------------------------------------------------------------------
+        ['CL2QCD']='--confSaveEvery --cgbs'
+        ['OpenQCD-FASTSUM']=''
+    )
+    # Sub-parser options
+    if [[ "${BHMAS_MANUALMODE:+x}" = 'TRUE' ]]; then
+        allowedOptionsPerModeOrSoftware['mode:continue']+=' --till'
+        allowedOptionsPerModeOrSoftware['mode:continue-thermalization']+=' --till'
+        allowedOptionsPerModeOrSoftware['mode:job-status']+=' --user --local --all'
+        allowedOptionsPerModeOrSoftware['mode:simulation-status']+=' --doNotMeasureTime --showOnlyQueued'
+        allowedOptionsPerModeOrSoftware['mode:acceptance-rate-report']+=' --interval'
+        allowedOptionsPerModeOrSoftware['mode:clean-output-files']+=' --all'
+        allowedOptionsPerModeOrSoftware['mode:complete-betas-file']+=' --chains'
+        allowedOptionsPerModeOrSoftware['mode:comment-betas']+=' --betas'
+        allowedOptionsPerModeOrSoftware['mode:uncomment-betas']+=' --betas'
+    fi
+}
+
 function ParseRemainingCommandLineOptions()
 {
     # In general we have options that can be
@@ -125,7 +176,7 @@ function ParseRemainingCommandLineOptions()
     #    parsed all together but preliminary checked if allowed.
     #
     # https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/issues/27
-    local modeSpecificAllSoftwareParser functionName
+    local modeSpecificAllSoftwareParser
     modeSpecificAllSoftwareParser=(
         'mode:continue'
         'mode:continue-thermalization'
@@ -153,40 +204,11 @@ function ParseRemainingCommandLineOptions()
         __static__CallSubParserIfExisting "${BHMAS_lqcdSoftware}"
     fi
 
-    # Each execution mode does not accept the same options and it makes
-    # sense to be stricter and to allow only the used ones instead of
-    # just ignoring them if not used. The same is valid for options which
-    # are restricted to some software only. Note that here we refer option
-    # which are either in common to multiple modes or in common to multiple
-    # software. An associative array allows to have here an overview. We use
-    # as key either a mode or a software to then put in the value those options
-    # that are allowed. We will use then two entries of it later to validate.
-    local productionOptions clusterOptions
-    productionOptions='--measurements --checkpointEvery --confSaveEvery --pf'
-    clusterOptions='--walltime  --partition  --node  --constraint  --resource'
-    declare -A allowedGeneralOptions=(
-        ['mode:prepare-only']="--betasfile --jobscript_prefix ${clusterOptions}"
-        ['mode:submit-only']='--betasfile --jobscript_prefix'
-        ['mode:submit']="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
-        ['mode:thermalize']="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
-        ['mode:continue']="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
-        ['mode:continue-thermalization']="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
-        ['mode:job-status']=''
-        ['mode:simulation-status']=''
-        ['mode:acceptance-rate-report']='--betasfile'
-        ['mode:clean-output-files']='--betasfile'
-        ['mode:complete-betas-file']='--betasfile'
-        ['mode:comment-betas']='--betasfile'
-        ['mode:uncomment-betas']='--betasfile'
-        ['mode:invert-configurations']="--betasfile --jobscript_prefix ${clusterOptions}"
-        ['mode:database']=''
-        #-------------------------------------------------------------------------------
-        ['CL2QCD']='--cgbs'
-        ['OpenQCD-FASTSUM']=''
-    )
+    declare -A allowedOptionsPerModeOrSoftware
+    DeclareAllowedOptionsPerModeOrSoftware
     __static__CheckIfOnlyValidOptionsWereGiven\
-        ${allowedGeneralOptions[${BHMAS_executionMode}]}\
-        ${allowedGeneralOptions[${BHMAS_lqcdSoftware}]} # <- let word splitting split options
+        ${allowedOptionsPerModeOrSoftware[${BHMAS_executionMode}]}\
+        ${allowedOptionsPerModeOrSoftware[${BHMAS_lqcdSoftware}]} # <- let word splitting split options
     __static__ParseRemainingGeneralOptions
 }
 
