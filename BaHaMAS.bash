@@ -52,10 +52,12 @@ case ${BHMAS_executionMode} in
         PrintCodeVersion
         ;;&
     mode:setup )
-        CreateManualPages
         MakeInteractiveSetupAndCreateUserDefinedVariablesFile
         ;;&
-    mode:*help | mode:version | mode:setup )
+    mode:update-manuals )
+        UpdateManualPages
+        ;;&
+    mode:*help | mode:version | mode:setup | mode:update-manuals )
         exit ${BHMAS_successExitCode}
         ;;
 esac

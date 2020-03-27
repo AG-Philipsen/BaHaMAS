@@ -46,6 +46,9 @@ function ParseCommandLineOptionsTillMode()
         setup | --setup )
             BHMAS_executionMode='mode:setup'
             ;;
+        update-manuals )
+            BHMAS_executionMode='mode:update-manuals'
+            ;;
         prepare-only )
             BHMAS_executionMode='mode:prepare-only'
             ;;

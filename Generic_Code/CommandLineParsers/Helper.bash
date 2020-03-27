@@ -17,19 +17,6 @@
 #  along with BaHaMAS. If not, see <http://www.gnu.org/licenses/>.
 #
 
-function CreateManualPages()
-(
-    # This function body is a sub-shell because of the cd
-    if command -v pandoc >> /dev/null 2>&1; then
-        cd "${BHMAS_repositoryTopLevelPath}/Manual_Pages"
-        if ! make >> /dev/null 2>&1; then
-            Internal "Error occurred producing manual files!"
-        fi
-    else
-        Error "Command pandoc not found! Manual pages cannot be produced."
-    fi
-)
-
 function GiveRequiredHelp()
 {
     local modeName manualFile
@@ -42,8 +29,8 @@ function GiveRequiredHelp()
             PrintDatabaseHelper
             ;;
         * )
-            CreateManualPages
-            manualFile="${BHMAS_repositoryTopLevelPath}/Manual_Pages/BaHaMAS-${modeName}.1"
+            manualFile="${BHMAS_repositoryTopLevelPath}/Manual_Pages/BaHaMAS-${modeName%-help}.1"
+            __static__CheckIfManualIsUpToDate "${manualFile}"
             if [[ -f "${manualFile}" ]]; then
                 man -l "${manualFile}"
             else
@@ -52,6 +39,21 @@ function GiveRequiredHelp()
             ;;
     esac
 }
+
+function UpdateManualPages()
+(
+    # This function body is a sub-shell because of the cd
+    if command -v pandoc >> /dev/null 2>&1; then
+        cd "${BHMAS_repositoryTopLevelPath}/Manual_Pages"
+        if ! make >> /dev/null 2>&1; then
+            Internal "Error occurred producing manual pages!"
+        else
+            cecho lg '\n Manual pages successfully created!\n'
+        fi
+    else
+        Fatal ${BHMAS_failureExitCode} "Command pandoc not found! Manual pages cannot be produced."
+    fi
+)
 
 function PrintMainHelper()
 {
@@ -120,6 +122,24 @@ function __static__PrintModesDescription()
         unset -v 'reference'
     done
     cecho bb '\n  Use ' wg '--help' bb ' after each mode to get more information about a given mode.\n'
+}
+
+function __static__CheckIfManualIsUpToDate()
+{
+    local manualFile
+    manualFile="$1"
+    if [[ ! -s "${manualFile/%.1/.md}" ]]; then
+        return
+    fi
+    if [[ "${manualFile/%.1/.md}" -nt "${manualFile}" ]]; then
+        Warning 'The required file page is not up-to-date! Try to run\n'\
+                emph '   BaHaMAS update-manuals'\
+                '\nand see if it is possible to fix the problem.'
+        AskUser -n "Do you want to anyway open the file?"
+        if UserSaidNo; then
+            cecho ''; exit ${BHMAS_failureExitCode}
+        fi
+    fi
 }
 
 
