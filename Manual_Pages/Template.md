@@ -1,6 +1,6 @@
-% XXX(1) version | User Manuals
+% BaHaMAS-XXX(1) Version X.Y.Z | User Manual
 % Author <- it automatically create author section if absent
-% Months DD, YYYY
+% DD Months YYYY
 
 Guidelines for each section can be found e.g. [here](http://www.tldp.org/HOWTO/Man-Page/q3.html).
 
