@@ -12,5 +12,5 @@ manuals: $(OUTPUTS)
 .PHONY: manuals
 
 %.$(MANSECTION): %.md
-	@$(PANDOC) --standalone $(PANDOCFLAGS) --to man $< -o $@
+	@$(PANDOC) --standalone $(PANDOCFLAGS) --to man $< -o man1/$@
 	@echo Manual from $< created.
