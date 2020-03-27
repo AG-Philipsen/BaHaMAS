@@ -162,7 +162,7 @@ function ParseRemainingCommandLineOptions()
     # as key either a mode or a software to then put in the value those options
     # that are allowed. We will use then two entries of it later to validate.
     local productionOptions clusterOptions
-    productionOptions='--measurements --confSaveFrequency --confSavePointFrequency --pf'
+    productionOptions='--measurements --checkpointEvery --confSaveEvery --pf'
     clusterOptions='--walltime  --partition  --node  --constraint  --resource'
     declare -A allowedGeneralOptions=(
         ['mode:prepare-only']="--betasfile --jobscript_prefix ${clusterOptions}"
@@ -259,7 +259,7 @@ function __static__ParseRemainingGeneralOptions()
                 fi
                 shift 2
                 ;;
-            --confSaveFrequency )
+           --checkpointEvery )
                 if [[ ! ${2:-} =~ ^[0-9]+$ ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
@@ -267,7 +267,7 @@ function __static__ParseRemainingGeneralOptions()
                 fi
                 shift 2
                 ;;
-            --confSavePointFrequency )
+            --confSaveEvery )
                 if [[ ! ${2:-} =~ ^[0-9]+$ ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else

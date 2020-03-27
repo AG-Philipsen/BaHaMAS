@@ -399,7 +399,7 @@ function __static__HandleIntegrationStepsInInputFile()
 function __static__HandleFurtherOptionsInInputFile()
 {
     local commandLineOptionsToBeConsidered index option optionsToBeAddedOrModified
-    commandLineOptionsToBeConsidered=( "-f" "--confSaveFrequency" "-F" "--confSavePointFrequency" )
+    commandLineOptionsToBeConsidered=( "-f" "--checkpointEvery" "-F" "--confSaveEvery" )
     optionsToBeAddedOrModified=()
     #Here it is fine to assume option value follows option name after a space
     # -> see Generic_Code/CommandLineParsers/CommonFunctionality.bash file
@@ -504,8 +504,8 @@ function __static__ModifyOptionsInInputFile()
             hostSeed=* )                        oldString="hostSeed=[0-9]\+";                            newString="hostSeed=${1#*=}" ;;
             intsteps0=* )                       oldString="integrationSteps0=[0-9]\+";                   newString="integrationSteps0=${1#*=}" ;;
             intsteps1=* )                       oldString="integrationSteps1=[0-9]\+";                   newString="integrationSteps1=${1#*=}" ;;
-            f=* | confSaveFrequency=* )         oldString="createCheckpointEvery=[0-9]\+";               newString="createCheckpointEvery=${1#*=}" ;;
-            F=* | confSavePointFrequency=* )    oldString="overwriteTemporaryCheckpointEvery=[0-9]\+";   newString="overwriteTemporaryCheckpointEvery=${1#*=}" ;;
+            f=* | checkpointEvery=* )           oldString="createCheckpointEvery=[0-9]\+";               newString="createCheckpointEvery=${1#*=}" ;;
+            F=* | confSaveEvery=* )             oldString="overwriteTemporaryCheckpointEvery=[0-9]\+";   newString="overwriteTemporaryCheckpointEvery=${1#*=}" ;;
             m=* | measurements=* )              oldString="mcSteps=[0-9]\+";                             newString="mcSteps=${1#*=}" ;;  # This replacement works both with nHmcSteps and nRhmcSteps
             measurePbp=* )                      oldString="measurePbp=[0-9]\+";                          newString="measurePbp=${1#*=}" ;;
             useMP=* )                           oldString="useMP=[0-9]\+";                               newString="useMP=${1#*=}" ;;

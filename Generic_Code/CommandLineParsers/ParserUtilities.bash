@@ -123,8 +123,8 @@ function __static__SplitCombinedShortOptionsInSingleOptions()
 function __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray()
 {
     declare -A mapOptions=(['-a']='--all'
-                           ['-f']='--confSaveFrequency'
-                           ['-F']='--confSavePointFrequency'
+                           ['-f']='--checkpointEvery'
+                           ['-F']='--confSaveEvery'
                            ['-l']='--local'
                            ['-m']='--measurements'
                            ['-p']='--doNotMeasurePbp'

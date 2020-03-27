@@ -118,7 +118,7 @@ function DeclareBaHaMASGlobalVariables()
 {
     #Variables about general options
     BHMAS_betasFilename='betas'
-    BHMAS_numberOfTrajectories=20000
+    BHMAS_numberOfTrajectories=1000
     BHMAS_checkpointFrequency=100
     BHMAS_savepointFrequency=20
     BHMAS_inverterBlockSize=50
@@ -141,7 +141,7 @@ function DeclareBaHaMASGlobalVariables()
     #Execution mode variable
     BHMAS_executionMode='mode:_unset_'
 
-    #Values of mutually exclusive and secondary options
+    #Values of execution mode options
     BHMAS_trajectoryNumberUpToWhichToContinue=0
     BHMAS_jobstatusUser="$(whoami)"
     BHMAS_jobstatusAll='FALSE'
