@@ -114,6 +114,20 @@ function ParseCommandLineOptionsTillMode()
 # to populate the option sections of each manual page.
 function DeclareAllowedOptionsPerModeOrSoftware()
 {
+    # Sub-parser options
+    if [[ "${BHMAS_MANUALMODE-x}" = 'TRUE' ]]; then
+        allowedOptionsPerModeOrSoftware=(
+            ['mode:continue']='--till '
+            ['mode:continue-thermalization']='--till '
+            ['mode:job-status']='--user --local --all '
+            ['mode:simulation-status']='--doNotMeasureTime --showOnlyQueued '
+            ['mode:acceptance-rate-report']='--interval '
+            ['mode:clean-output-files']='--all '
+            ['mode:complete-betas-file']='--chains '
+            ['mode:comment-betas']='--betas '
+            ['mode:uncomment-betas']='--betas '
+        )
+    fi
     # Each execution mode does not accept the same options and it makes
     # sense to be stricter and to allow only the used ones instead of
     # just ignoring them if not used. The same is valid for options which
@@ -127,38 +141,26 @@ function DeclareAllowedOptionsPerModeOrSoftware()
     local productionOptions clusterOptions
     productionOptions='--measurements --checkpointEvery --pf'
     clusterOptions='--walltime  --partition  --node  --constraint  --resource'
-    allowedOptionsPerModeOrSoftware=(
-        ['mode:prepare-only']="--betasfile --jobscript_prefix ${clusterOptions}"
-        ['mode:submit-only']='--betasfile --jobscript_prefix'
-        ['mode:submit']="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
-        ['mode:thermalize']="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
-        ['mode:continue']="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
-        ['mode:continue-thermalization']="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
-        ['mode:job-status']=''
-        ['mode:simulation-status']=''
-        ['mode:acceptance-rate-report']='--betasfile'
-        ['mode:clean-output-files']='--betasfile'
-        ['mode:complete-betas-file']='--betasfile'
-        ['mode:comment-betas']='--betasfile'
-        ['mode:uncomment-betas']='--betasfile'
-        ['mode:invert-configurations']="--betasfile --jobscript_prefix ${clusterOptions}"
-        ['mode:database']=''
+    allowedOptionsPerModeOrSoftware+=(
+        ['mode:prepare-only']+="--betasfile --jobscript_prefix ${clusterOptions}"
+        ['mode:submit-only']+='--betasfile --jobscript_prefix'
+        ['mode:submit']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
+        ['mode:thermalize']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
+        ['mode:continue']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
+        ['mode:continue-thermalization']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
+        ['mode:job-status']+=''
+        ['mode:simulation-status']+=''
+        ['mode:acceptance-rate-report']+='--betasfile'
+        ['mode:clean-output-files']+='--betasfile'
+        ['mode:complete-betas-file']+='--betasfile'
+        ['mode:comment-betas']+='--betasfile'
+        ['mode:uncomment-betas']+='--betasfile'
+        ['mode:invert-configurations']+="--betasfile --jobscript_prefix ${clusterOptions}"
+        ['mode:database']+=''
         #-------------------------------------------------------------------------------
-        ['CL2QCD']='--confSaveEvery --cgbs'
-        ['OpenQCD-FASTSUM']=''
+        ['CL2QCD']+='--confSaveEvery --cgbs'
+        ['OpenQCD-FASTSUM']+=''
     )
-    # Sub-parser options
-    if [[ "${BHMAS_MANUALMODE:+x}" = 'TRUE' ]]; then
-        allowedOptionsPerModeOrSoftware['mode:continue']+=' --till'
-        allowedOptionsPerModeOrSoftware['mode:continue-thermalization']+=' --till'
-        allowedOptionsPerModeOrSoftware['mode:job-status']+=' --user --local --all'
-        allowedOptionsPerModeOrSoftware['mode:simulation-status']+=' --doNotMeasureTime --showOnlyQueued'
-        allowedOptionsPerModeOrSoftware['mode:acceptance-rate-report']+=' --interval'
-        allowedOptionsPerModeOrSoftware['mode:clean-output-files']+=' --all'
-        allowedOptionsPerModeOrSoftware['mode:complete-betas-file']+=' --chains'
-        allowedOptionsPerModeOrSoftware['mode:comment-betas']+=' --betas'
-        allowedOptionsPerModeOrSoftware['mode:uncomment-betas']+=' --betas'
-    fi
 }
 
 function ParseRemainingCommandLineOptions()
