@@ -18,6 +18,13 @@
 #  along with BaHaMAS. If not, see <http://www.gnu.org/licenses/>.
 #
 
+function print()
+{
+    if [[ ${VERBOSE} -gt 0 ]]; then
+        cecho "$@"
+    fi
+}
+
 function GetAllowedOptionsAndPutThemInManualSection()
 {
     local classesOfOption class arrayOfOptions extractedOptions
@@ -33,10 +40,13 @@ function GetAllowedOptionsAndPutThemInManualSection()
         if [[ ${#arrayOfOptions[@]} -eq 0 ]]; then
             continue
         fi
-        cecho bb '\n The follwing options where found for ' emph "${class#mode:}" ':'
+        print bb '\n The follwing options where found for ' emph "${class#mode:}" ':'
         for option in "${arrayOfOptions[@]}"; do
-            cecho wg "   ${option}"
-        done | columns -W $(tput cols | awk '{printf "%d", $1*0.7}')
+            print wg "   ${option}"
+        done |
+            if [[ ${VERBOSE} -gt 0 ]]; then # to suppress warnings of columns which go to stdout
+                columns -W $(tput cols | awk '{printf "%d", $1*0.7}')
+            fi
 
         #Add particular section if needed
         case "${class}" in
@@ -85,7 +95,7 @@ function GetAllowedOptionsAndPutThemInManualSection()
     done
 
     # Remove 'OPTIONS' section and put in the pool extracted options
-    cecho -n bb ' Populating options for ' emph "${BHMAS_executionMode#mode:}" ' execution mode manual...'
+    print -n bb ' Populating options in manual for ' emph "${BHMAS_executionMode#mode:}" ' execution mode...'
     extractedOptions="${extractedOptions//\\/\\\\}" # <- for awk which interpret \- as - otherwise
     awk -i inplace -v newOptions="${extractedOptions%?}"\
         'BEGIN{out=1}
@@ -103,7 +113,7 @@ function GetAllowedOptionsAndPutThemInManualSection()
             }
         }' "${BHMAS_manualFile}"
 
-    cecho bb ' done!\n'
+    print bb ' done!\n'
 }
 
 #-----------------------------------------------------------------------------------------------------------------#
