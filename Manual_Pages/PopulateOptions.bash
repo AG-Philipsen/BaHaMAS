@@ -51,18 +51,35 @@ function GetAllowedOptionsAndPutThemInManualSection()
         esac
         # Extracting options from pool
         for option in "${arrayOfOptions[@]}"; do
-            case $(grep -c "^\\${option//-/\\-}" "${BHMAS_optionPool}") in
+            case $(grep -cE "^\\${option//-/\\-}[^@]*@${BHMAS_executionMode}@[[:space:]]*$" "${BHMAS_optionPool}") in
                 0 )
-                    Error 'Option ' emph "${option}" ' not found in pool of options.'
+                    case $(grep -c "^\\${option//-/\\-}[^@]*$" "${BHMAS_optionPool}") in
+                        0 )
+                            Error 'Option ' emph "${option}"\
+                                  ' not found in pool of options (needed for '\
+                                  emph "${BHMAS_executionMode#mode:}" ' execution mode).'
+                            ;;
+                        1 )
+                            ;;
+                        * )
+                            Fatal ${BHMAS_fatalLogicError} 'Option '\
+                                  emph "${option}" ' found ' emph 'several times'\
+                                  ' in pool of options.'
+                            ;;
+                    esac
                     ;;
                 1 )
                     ;;
                 * )
-                    Fatal ${BHMAS_fatalLogicError} 'Option ' emph "${option}" ' found ' emph 'several times' ' in pool of options.'
+                    Fatal ${BHMAS_fatalLogicError} 'Option '\
+                          emph "${option}" ' found ' emph 'several times'\
+                          ' for ' emph "${BHMAS_executionMode#mode:}"\
+                          ' execution mode in pool of options.'
                     ;;
             esac
             # Command substitution removes trailing newlines -> https://stackoverflow.com/a/15184414
-            IFS= read -rd '' tmpString < <( sed -n '/^\'"${option//-/\\-}"'/,/^$/p' "${BHMAS_optionPool}" )
+            # Second sed command: remove specific option label, which should not go into the manual
+            IFS= read -rd '' tmpString < <( sed -n '/^\'"${option//-/\\-}"'/,/^$/p' "${BHMAS_optionPool}" | sed '1 s/@.*$//')
             extractedOptions+="${tmpString}"
         done
     done
