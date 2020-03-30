@@ -1,8 +1,9 @@
 # Cheatsheet https://devhints.io/makefile
 
 PANDOC ?= pandoc
+POPULATE_OPTIONS ?= ./PopulateOptions.bash
 MANSECTION ?= 1
-OUTPUTS  = $(patsubst %.md, %.1, $(wildcard BaHaMAS*.md))
+OUTPUTS  = $(patsubst %.md, man1/%.1, $(wildcard BaHaMAS*.md))
 
 #---------------------------------------------
 
@@ -11,6 +12,11 @@ manuals: $(OUTPUTS)
 
 .PHONY: manuals
 
-%.$(MANSECTION): %.md
-	@$(PANDOC) --standalone $(PANDOCFLAGS) --to man $< -o man1/$@
+man1/BaHaMAS.$(MANSECTION): BaHaMAS.md
+	@$(PANDOC) --standalone $(PANDOCFLAGS) --to man $< -o $@
+	@echo Manual from $< created.
+
+man1/%.$(MANSECTION): %.md OptionsPool.md
+	@$(POPULATE_OPTIONS) $<
+	@$(PANDOC) --standalone $(PANDOCFLAGS) --to man $< -o $@
 	@echo Manual from $< created.
