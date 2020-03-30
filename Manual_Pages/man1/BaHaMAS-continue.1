@@ -96,9 +96,14 @@ For instance, for SLURM, this will use the \f[B]--constraint\f[R] sbatch
 directive.
 .SH CL2QCD OPTIONS
 .TP
-.B --confSavePointFrequency
+.B --confSaveEvery
 Specify every how many trajectories the \f[B].save\f[R] checkpoint is
 overwritten (default: 20).
+.TP
+.B --cgbs \f[I]number\f[R]
+Specify the conjugate gradient block-size and namely every how many
+iterations on the device the residuum is checked for convergence on the
+host (default: 50).
 .SH FILES
 .TP
 .B ./betas

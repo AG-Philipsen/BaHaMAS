@@ -47,3 +47,9 @@
 
 \--confSaveEvery
 :   Specify every how many trajectories the **.save** checkpoint is overwritten (default: 20).
+
+\--cgbs *number*
+:   Specify the conjugate gradient block-size and namely every how many iterations on the device the residuum is checked for convergence on the host (default: 50).
+
+
+# This line is here just to avoid that any git hook remove trailing empty lines relevant for manuals

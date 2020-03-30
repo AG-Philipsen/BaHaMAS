@@ -73,8 +73,11 @@ If possible, based on the provided information, it is checked if each simulation
 
 # CL2QCD OPTIONS
 
-\--confSavePointFrequency
+\--confSaveEvery
 :   Specify every how many trajectories the **.save** checkpoint is overwritten (default: 20).
+
+\--cgbs *number*
+:   Specify the conjugate gradient block-size and namely every how many iterations on the device the residuum is checked for convergence on the host (default: 50).
 
 # FILES
 
