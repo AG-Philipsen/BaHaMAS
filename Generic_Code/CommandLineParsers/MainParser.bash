@@ -138,10 +138,13 @@ function DeclareAllowedOptionsPerModeOrSoftware()
     # that are allowed. We will use then two entries of it later to validate.
     #
     # NOTE: The associative array must be declared in the caller
-    local productionOptions clusterOptions
+    local productionOptions productionOptionsCL2QCD clusterOptions
     productionOptions='--measurements --checkpointEvery --pf'
+    productionOptionsCL2QCD='--confSaveEvery --cgbs'
     clusterOptions='--walltime  --partition  --node  --constraint  --resource'
     allowedOptionsPerModeOrSoftware+=(
+        #-------------------------------------------------------------------------------
+        # Specific-mode, all-software options
         ['mode:prepare-only']+="--betasfile --jobscript_prefix ${clusterOptions}"
         ['mode:submit-only']+='--betasfile --jobscript_prefix'
         ['mode:submit']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
@@ -158,7 +161,15 @@ function DeclareAllowedOptionsPerModeOrSoftware()
         ['mode:invert-configurations']+="--betasfile --jobscript_prefix ${clusterOptions}"
         ['mode:database']+=''
         #-------------------------------------------------------------------------------
-        ['CL2QCD']+='--confSaveEvery --cgbs'
+        # Multiple mode, specific/multiple-software options
+        ["mode:prepare-only_CL2QCD"]+="${productionOptionsCL2QCD}"
+        ["mode:submit_CL2QCD"]+="${productionOptionsCL2QCD}"
+        ["mode:thermalize_CL2QCD"]+="${productionOptionsCL2QCD}"
+        ["mode:continue_CL2QCD"]+="${productionOptionsCL2QCD}"
+        ["mode:continue-thermalization_CL2QCD"]+="${productionOptionsCL2QCD}"
+        #-------------------------------------------------------------------------------
+        # All-modes, specific-software options
+        ['CL2QCD']+=''
         ['OpenQCD-FASTSUM']+=''
     )
 }
@@ -190,7 +201,7 @@ function ParseRemainingCommandLineOptions()
         'mode:comment-betas'
         'mode:uncomment-betas'
     )
-    if ElementInArray ${BHMAS_executionMode} ${modeSpecificAllSoftwareParser[@]}; then
+    if ElementInArray "${BHMAS_executionMode}" ${modeSpecificAllSoftwareParser[@]}; then
         __static__CallSubParserIfExisting "${BHMAS_executionMode#mode:}"
     fi
 
@@ -202,15 +213,16 @@ function ParseRemainingCommandLineOptions()
 
     local softwareSpecificAllModesParser
     softwareSpecificAllModesParser=()
-    if ElementInArray ${BHMAS_lqcdSoftware} ${softwareSpecificAllModesParser[@]}; then
+    if ElementInArray "${BHMAS_lqcdSoftware}" ${softwareSpecificAllModesParser[@]}; then
         __static__CallSubParserIfExisting "${BHMAS_lqcdSoftware}"
     fi
 
     declare -A allowedOptionsPerModeOrSoftware
     DeclareAllowedOptionsPerModeOrSoftware
     __static__CheckIfOnlyValidOptionsWereGiven\
-        ${allowedOptionsPerModeOrSoftware[${BHMAS_executionMode}]}\
-        ${allowedOptionsPerModeOrSoftware[${BHMAS_lqcdSoftware}]} # <- let word splitting split options
+        ${allowedOptionsPerModeOrSoftware["${BHMAS_executionMode}"]}\
+        ${allowedOptionsPerModeOrSoftware["${BHMAS_executionMode}_${BHMAS_lqcdSoftware}"]}\
+        ${allowedOptionsPerModeOrSoftware["${BHMAS_lqcdSoftware}"]} # <- let word splitting split options
     __static__ParseRemainingGeneralOptions
 }
 
