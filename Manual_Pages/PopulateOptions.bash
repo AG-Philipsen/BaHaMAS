@@ -30,7 +30,7 @@ function print()
 # LQCD software as remaining arguments.
 function GetAllowedOptionsAndPutThemInManualSection()
 {
-    local executionMode class arrayOfOptions extractedOptions
+    local executionMode class arrayOfOptions extractedOptions foundSpecificOption sedString
     executionMode="$1"
     extractedOptions=''
 
@@ -71,16 +71,18 @@ function GetAllowedOptionsAndPutThemInManualSection()
                 ;;
         esac
         # Extracting options from pool
+        print ''
         for option in "${arrayOfOptions[@]}"; do
-            case $(grep -cE "^\\${option//-/\\-}[^@]*@${BHMAS_executionMode}@[[:space:]]*$" "${BHMAS_optionPool}") in
+            case $(grep -cE "^\\${option//-/\\-}\b[^@]*@${BHMAS_executionMode}@[[:space:]]*$" "${BHMAS_optionPool}") in
                 0 )
-                    case $(grep -c "^\\${option//-/\\-}[^@]*$" "${BHMAS_optionPool}") in
+                    case $(grep -cE "^\\${option//-/\\-}\b[[:space:]]*($|[^@]+)$" "${BHMAS_optionPool}") in
                         0 )
-                            Error 'Option ' emph "${option}"\
+                            Error -n -N 'Option ' emph "${option}"\
                                   ' not found in pool of options (needed for '\
                                   emph "${BHMAS_executionMode#mode:}" ' execution mode).'
                             ;;
                         1 )
+                            foundSpecificOption='FALSE'
                             ;;
                         * )
                             Fatal ${BHMAS_fatalLogicError} 'Option '\
@@ -90,6 +92,7 @@ function GetAllowedOptionsAndPutThemInManualSection()
                     esac
                     ;;
                 1 )
+                    foundSpecificOption='TRUE'
                     ;;
                 * )
                     Fatal ${BHMAS_fatalLogicError} 'Option '\
@@ -100,9 +103,16 @@ function GetAllowedOptionsAndPutThemInManualSection()
             esac
             # Command substitution removes trailing newlines -> https://stackoverflow.com/a/15184414
             # Second sed command: remove specific option label, which should not go into the manual
-            IFS= read -rd '' tmpString < <( sed -n '/^\'"${option//-/\\-}"'/,/^$/p' "${BHMAS_optionPool}" | sed '1 s/@.*$//')
+            sedString="^\\${option//-/\\-}\b"
+            if [[ ${foundSpecificOption} = 'TRUE' ]]; then
+                sedString+="[^@]*@${BHMAS_executionMode}@[[:space:]]*$"
+            else
+                sedString+='(|[^@]+)$'
+            fi
+            IFS= read -rd '' tmpString < <( sed -E -n '/'"${sedString}"'/,/^$/p' "${BHMAS_optionPool}" | sed '1 s/@.*$//')
             extractedOptions+="${tmpString}"
         done
+        print ''
     done
 
     # Remove 'OPTIONS' section and put in the pool extracted options
