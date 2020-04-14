@@ -1,39 +1,29 @@
+% BaHaMAS-submit(1) Version 1.0.0 | User Manual
+% [Alessandro Sciarra](sciarra@itp.uni-frankfurt.de)
+% 14 April 2020
+
+# NAME
+
+BaHaMAS-submit - Prepare what is needed and submit new-chain simulation(s)
+
+# SYNOPSIS
+
+**BaHaMAS submit** [*option* ...]
+
+# DESCRIPTION
+
+The **betas** file is parsed in order to gather information about the simulations that should be submitted (only uncommented lines are considered in this mode).
+This mode operates exclusively on new-chain jobs.
+After having prepared everything that is needed (e.g. input file. job script), jobs for the selected betas are submitted.
+
+The starting configuration for the new-chain is automatically searched in the thermalized configurations folder and information about it is given to the user.
+A thermalized configuration "from conf" must exist.
+If one with the same seed of the one being considered exists, it is used.
+Otherwise one of those with the same parameters but different seed is chosen (if more than one exist, the user is asked to choose).
+
+Most of the information for the simulation input file(s) is retrieved from the **betas** file, but the user can also tune some input via the command line options.
+
 # OPTIONS
-
-\--till *number*
-:   Specify till which trajectory number the simulations should be continued.
-
-\--interval *number*
-:   Specify how many trajectories should be considered to calculate the acceptance rate.
-
-\--all @mode:job-status@
-:   All enqueued jobs are considered in the report.
-
-\--partition *string* @mode:job-status@
-:   Limit the report to the specified partition (default: own setup).
-
-\--user @mode:job-status@
-:   Only the jobs enqueued by the specified user are considered in the report (default: user that runs the command).
-
-\--local @mode:job-status@
-:   Only jobs submitted from the present directory are considered in the report.
-
-\--all @mode:clean-output-files@
-:   All existing new-chain folders are considered and the **betas** file is not parsed.
-
-\--doNotMeasureTime
-:   Switch off trajectory times measurement.
-    No information about production time per trajectory will be displayed.
-
-\--showOnlyQueued
-:   Limit the simulation status report to simulations for which a job is enqueued.
-    This option can be useful when many simulations are run in the same folder.
-
-\--chains *number*
-:   The number of chains that must exist per beta value in the **betas** file (default: 4).
-
-\--betas *space-separated_list*
-:   The beta line(s) to be toggled in the **betas** file.
 
 \--betasfile *filename*
 :   Use *filename* instead of **betas** file.
@@ -83,5 +73,15 @@
 \--cgbs *number*
 :   Specify the conjugate gradient block-size and namely every how many iterations on the device the residuum is checked for convergence on the host (default: 50).
 
+# FILES
 
-# This line is here just to avoid that any git hook remove trailing empty lines relevant for manuals
+./betas
+:   Only uncommented lines in the **betas** file are considered in this mode.
+
+# SEE ALSO
+
+**BaHaMAS**(1), **BaHaMAS-continue**(1)
+
+# BAHAMAS
+
+Part of the **BaHaMAS** software.
