@@ -17,7 +17,7 @@ BaHaMAS - Bash Handler to Monitor and Administrate Simulations
 During years, it has grown and improved, so that it has by now plenty of functionality to submit, monitor, continue and resume jobs.
 
 It should be intuitive to use it, especially if you are a bit familiar with the git version control system.
-Several execution modes are available and you can obtain usage information for each of them using their **--help** option.
+Several execution modes are available and you can obtain usage information for each of them using their **\--help** option.
 
 A more detailed general overview is available [online](https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/-/wikis/home).
 
@@ -48,8 +48,8 @@ continue
     The input file of each simulation is adjusted according to the option passed.
     The number of trajectories which will be done is determined as follows.
 
-     * If the **--measurements** option is given, then it will be used.
-     * Otherwise, if the **--till***=number* option is given, then it will be used.
+     * If the **\--measurements** option is given, then it will be used.
+     * Otherwise, if the **\--till***=number* option is given, then it will be used.
      * Otherwise, if the **g***number* field is present in the **betas** file, then it will be used.
      * Otherwise, the measurement option in the input file is not modified.
 

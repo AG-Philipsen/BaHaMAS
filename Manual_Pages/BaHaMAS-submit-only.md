@@ -4,7 +4,7 @@
 
 # NAME
 
-BaHaMAS-submit-only - Prepare needed files and folders to submit new-chain simulation(s)
+BaHaMAS-submit-only - Submit new-chain simulation(s) after needed consistency checks
 
 # SYNOPSIS
 

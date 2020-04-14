@@ -12,10 +12,10 @@ BaHaMAS-invert-configurations - Prepare what is needed and submit measurement si
 
 # DESCRIPTION
 
-The **betas** file is parsed in order to gather information about on which configuration sets should be acted (only uncommented lines are considered in this mode).
+The **betas** file is parsed in order to gather information about on which configuration sets it should be acted (only uncommented lines are considered in this mode).
 This mode operates exclusively on new-chains folders.
 
-CL2QCD behaviour consists in calculating correlators on the given configurations.
+**CL2QCD** behaviour consists in calculating correlators on the given configurations.
 Running this mode e.g. on an unfinished beta folder will result in an attempt to complete the calculation.
 Said differently, already existing correlators will not be evaluated agian.
 

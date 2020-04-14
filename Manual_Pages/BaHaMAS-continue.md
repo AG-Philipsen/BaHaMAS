@@ -17,8 +17,8 @@ This mode operates exclusively on new-chains jobs and it tries to continue them.
 The input file of each simulation is adjusted according to the option passed and some sanity checks are performed.
 The number of trajectories which will be done is determined as follows.
 
- * If the **--measurements** option is given, then it will be used.
- * Otherwise, if the **--till***=number* option is given, then it will be used.
+ * If the **\--measurements** option is given, then it will be used.
+ * Otherwise, if the **\--till***=number* option is given, then it will be used.
  * Otherwise, if the **g***number* field is present in the **betas** file, then it will be used.
  * Otherwise, the measurement option in the input file is not modified.
 
