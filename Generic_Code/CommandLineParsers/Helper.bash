@@ -29,7 +29,7 @@ function GiveRequiredHelp()
             PrintDatabaseHelper
             ;;
         * )
-            manualFile="${BHMAS_repositoryTopLevelPath}/Manual_Pages/BaHaMAS-${modeName%-help}.1"
+            manualFile="${BHMAS_repositoryTopLevelPath}/Manual_Pages/man1/BaHaMAS-${modeName%-help}.1"
             __static__CheckIfManualIsUpToDate "${manualFile}"
             if [[ -f "${manualFile}" ]]; then
                 man -l "${manualFile}"
