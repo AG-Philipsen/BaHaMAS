@@ -83,7 +83,7 @@ function PrintMainHelper()
     betasfileModesDescription=(
         ['complete-betas-file']='Complete the betas file adding new chains to it'
         ['comment-betas']='Comment lines in the betas file'
-        ['uncomment-betas']='Uomment lines in the betas file'
+        ['uncomment-betas']='Uncomment lines in the betas file'
     )
     __static__PrintHelperHeaderAndUsage
     __static__PrintModesDescription
