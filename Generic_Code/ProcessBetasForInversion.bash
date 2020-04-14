@@ -46,7 +46,7 @@ function __static__ProduceSrunCommandsFileForInversionsPerBeta()
                                                                             -v corrDir="${BHMAS_correlatorDirection}" \
                                                                             -v solver="cg" \
                                                                             -v solverMaxIterations="30000" \
-                                                                            -v solverResidCheckEvery="50" \
+                                                                            -v solverResidCheckEvery="${BHMAS_inverterBlockSize}" \
                                                                             -v thetaFermionTemporal="1" \
                                                                             -v maxNrCorrs="${BHMAS_numberOfSourcesForCorrelators}" \
                                                                             -v chemPot="${BHMAS_chempot}" \
