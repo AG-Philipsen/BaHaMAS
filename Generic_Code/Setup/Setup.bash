@@ -87,6 +87,41 @@ function __static__ProduceUserVariableFile()
     rm -f ${backupFile}
 }
 
+function __static__GiveMessageToUserAboutManualPages()
+{
+    local commandString manualPath
+    manualPath="${BHMAS_repositoryTopLevelPath}/Manual_Pages"
+    if [[ ! ${MANPATH} =~ (^|:)${manualPath}(:|$) ]]; then
+        cecho lc '\n'\
+              'If you would like to be able to use the man command to get information\n'\
+              'about BaHaMAS and its execution modes, you can add the following snippet\n'\
+              'to your shell login file (e.g. ~/.bashrc):'\
+              ''
+        cecho -d '\033[48;5;16m'
+        cecho -d lr '# To have access to BaHaMAS manuals'
+        cecho -d ly 'if ' w '[[ ! ' lg '"${MANPATH:-}"' w " =~ (^|:)${manualPath// /\\ }(:|$) ]];" ly ' then'
+        cecho -d bb '    export ' o 'MANPATH' w '=' lg "\"\${MANPATH:-}:${manualPath}\""
+        cecho ly 'fi'
+        cecho ''
+        if [[ $(grep -c '# To have access to BaHaMAS manuals' ~/.bashrc) -eq 0 ]]; then
+            cecho lc 'Adapt the above lines accordingly if you use a different shell than bash.\n'
+            AskUser -n '\e[1DWould you like to add the snippet above to your \"~/.bashrc\" file?'
+            if UserSaidYes; then
+                cecho -d '\n# To have access to BaHaMAS manuals\n'\
+                      'if [[ ! "${MANPATH:-}" =~ (^|:)'"${manualPath}"'(:|$) ]]; then\n'\
+                      '    export MANPATH="${MANPATH:-}:'"${manualPath}\"\n"\
+                      'fi' >> "${HOME}/.bashrc"
+                cecho lo '\nDo not forget to source the ' emph '~/.bashrc' ' file in order to let the changes take effect.'
+            fi
+            cecho ''
+        else
+            cecho lo\
+                  'It seems that the snippet above was already added to your ' emph '~/.bashrc' ' file.\n'\
+                  'You need source the ' emph '~/.bashrc' ' file in order to use commands like ' emph 'man BaHaMAS' '.\n'
+        fi
+    fi
+}
+
 function MakeInteractiveSetupAndCreateUserDefinedVariablesFile()
 {
     local filenameTemplate variableNames
@@ -108,6 +143,8 @@ function MakeInteractiveSetupAndCreateUserDefinedVariablesFile()
 
     #Produce final setup file
     __static__ProduceUserVariableFile
+
+    __static__GiveMessageToUserAboutManualPages
 }
 
 
