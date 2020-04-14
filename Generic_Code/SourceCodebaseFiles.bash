@@ -64,9 +64,7 @@ function __static__SourceCodebaseGeneralFiles()
     else
         if [[ ! -f "${BHMAS_userSetupFile}" ]]; then
             declare -g BHMAS_coloredOutput='FALSE' #This is needed in cecho but is a user variable! Declare it here manually
-            if WasAnyOfTheseOptionsGivenToBaHaMAS '-h' '--help'; then
-                Warning -N "BaHaMAS was not set up yet, but help was asked, some default values might not be displayed."
-            else
+            if ! WasAnyOfTheseOptionsGivenToBaHaMAS '-h' '--help'; then
                 Fatal ${BHMAS_fatalFileNotFound} "BaHaMAS has not been configured, yet! Please, run BaHaMAS with the --setup option to configure it!"
             fi
         else
