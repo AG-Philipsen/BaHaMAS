@@ -151,7 +151,7 @@ function DeclareAllowedOptionsPerModeOrSoftware()
         ['mode:thermalize']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
         ['mode:continue']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
         ['mode:continue-thermalization']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
-        ['mode:job-status']+=''
+        ['mode:job-status']+='--partition'
         ['mode:simulation-status']+=''
         ['mode:acceptance-rate-report']+='--betasfile'
         ['mode:clean-output-files']+='--betasfile'
