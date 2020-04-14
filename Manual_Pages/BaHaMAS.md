@@ -141,7 +141,7 @@ Be as specific as possible in order to reproduce the issue and, in case you got 
 
 # AUTHOR
 
-`BaHaMAS` was started by Alessandro Sciarra in 2014.
+`BaHaMAS` was started by [Alessandro Sciarra](sciarra@itp.uni-frankfurt.de) in 2014.
 You can have a look to the Contributors page in the Repository on GitLab to have more information.
 If you cloned the repository on your machine, you can also use git commands like `git shortlog -sne` to get an overview.
 

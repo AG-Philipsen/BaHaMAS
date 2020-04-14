@@ -1,5 +1,5 @@
 % BaHaMAS-continue(1) Version 1.0.0 | User Manual
-% Alessandro Sciarra
+% [Alessandro Sciarra](sciarra@itp.uni-frankfurt.de)
 % 27 March 2020
 
 # NAME
