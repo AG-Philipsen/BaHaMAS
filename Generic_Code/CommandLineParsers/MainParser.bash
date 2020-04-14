@@ -389,7 +389,7 @@ function WasAnyOfTheseOptionsGivenToBaHaMAS()
 # BHMAS_executionMode is available and set!
 function IsBaHaMASRunInSetupMode()
 {
-    if WasAnyOfTheseOptionsGivenToBaHaMAS '--setup'; then
+    if WasAnyOfTheseOptionsGivenToBaHaMAS 'setup' '--setup'; then
         return 0
     else
         return 1
