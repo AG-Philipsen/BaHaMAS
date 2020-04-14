@@ -25,18 +25,29 @@ function print()
     fi
 }
 
+# This function is supposed to be called as it is done below
+# with the execution mode as first argument and a list of
+# LQCD software as remaining arguments.
 function GetAllowedOptionsAndPutThemInManualSection()
 {
-    local classesOfOption class arrayOfOptions extractedOptions
-    classesOfOption=( "$@" )
+    local executionMode class arrayOfOptions extractedOptions
+    executionMode="$1"
     extractedOptions=''
 
     # Look for options to be put in manual
-    #
-    # In the following array assignment, word splitting will split the options and
-    # do not assign anything if entry of the associative array is empty
     for class in "$@"; do
-        arrayOfOptions=( ${allowedOptionsPerModeOrSoftware["${class}"]} )
+        # In the following array assignments, word splitting will split the options and
+        # do not assign anything if entry of the associative array is empty.
+        #
+        # NOTE: In the if-clause we add code-specific options for the selected mode.
+        arrayOfOptions=(
+            ${allowedOptionsPerModeOrSoftware["${class}"]}
+        )
+        if [[ "${class}" != "${executionMode}" ]]; then
+            arrayOfOptions+=(
+                ${allowedOptionsPerModeOrSoftware["${executionMode}_${class}"]}
+            )
+        fi
         if [[ ${#arrayOfOptions[@]} -eq 0 ]]; then
             continue
         fi
