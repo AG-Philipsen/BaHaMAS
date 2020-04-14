@@ -220,9 +220,9 @@ function ParseRemainingCommandLineOptions()
     declare -A allowedOptionsPerModeOrSoftware
     DeclareAllowedOptionsPerModeOrSoftware
     __static__CheckIfOnlyValidOptionsWereGiven\
-        ${allowedOptionsPerModeOrSoftware["${BHMAS_executionMode}"]}\
-        ${allowedOptionsPerModeOrSoftware["${BHMAS_executionMode}_${BHMAS_lqcdSoftware}"]}\
-        ${allowedOptionsPerModeOrSoftware["${BHMAS_lqcdSoftware}"]} # <- let word splitting split options
+        ${allowedOptionsPerModeOrSoftware["${BHMAS_executionMode}"]:-}\
+        ${allowedOptionsPerModeOrSoftware["${BHMAS_executionMode}_${BHMAS_lqcdSoftware}"]:-}\
+        ${allowedOptionsPerModeOrSoftware["${BHMAS_lqcdSoftware}"]:-} # <- let word splitting split options
     __static__ParseRemainingGeneralOptions
 }
 
