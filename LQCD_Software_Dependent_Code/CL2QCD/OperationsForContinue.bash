@@ -24,7 +24,7 @@
 #
 # Exit codes: 0 if fine
 #             1 if runId is problematic -> Added to BHMAS_problematicBetaValues array
-function HandleEnvironmentForGivenSimulation_CL2QCD()
+function HandleEnvironmentForContinueForGivenSimulation_CL2QCD()
 {
     local runId; runId="$1"
     CheckIfVariablesAreSet nameOfLastConfiguration nameOfLastPRNG runBetaDirectory
@@ -102,7 +102,7 @@ function HandleEnvironmentForGivenSimulation_CL2QCD()
 #
 # Exit codes: 0 if fine
 #             1 if runId is problematic -> Added to BHMAS_problematicBetaValues array
-function HandleOutputFilesForGivenSimulation_CL2QCD()
+function HandleOutputFilesForContinueForGivenSimulation_CL2QCD()
 {
     local runId; runId="$1"
     CheckIfVariablesAreSet runBetaDirectory outputFileGlobalPath outputPbpFileGlobalPath
@@ -175,7 +175,7 @@ function HandleOutputFilesForGivenSimulation_CL2QCD()
 #
 # Exit codes: 0 if fine
 #             1 if runId is problematic -> Added to BHMAS_problematicBetaValues array
-function HandleInputFileForGivenSimulation_CL2QCD()
+function HandleInputFileForContinueForGivenSimulation_CL2QCD()
 {
     local runId; runId="$1"
     CheckIfVariablesAreSet inputFileGlobalPath outputFileGlobalPath runBetaDirectory

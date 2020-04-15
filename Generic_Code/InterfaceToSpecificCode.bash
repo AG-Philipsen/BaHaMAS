@@ -104,17 +104,17 @@ function ProduceMeasurementCommandsPerBeta()
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
 
-function HandleEnvironmentForGivenSimulation()
+function HandleEnvironmentForContinueForGivenSimulation()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
 
-function HandleInputFileForGivenSimulation()
+function HandleInputFileForContinueForGivenSimulation()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
 
-function HandleOutputFilesForGivenSimulation()
+function HandleOutputFilesForContinueForGivenSimulation()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
