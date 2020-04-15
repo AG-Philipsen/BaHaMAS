@@ -18,15 +18,13 @@
 #  along with BaHaMAS. If not, see <http://www.gnu.org/licenses/>.
 #
 
-
-
-#---------------------------------------------------------------------------#
-# This files contains a set of tests for the main code.                     #
-#                                                                           #
-# The only aim is to run BaHaMAS with all its possible mutually exclusive   #
-# options and check that no unexpected failure occures. Clearly, these      #
-# are not exhaustive tests, but they help refactoring the code.             #
-#---------------------------------------------------------------------------#
+#-------------------------------------------------------------------#
+# This files contains a set of functional tests for the main code.  #
+#                                                                   #
+# The only aim is to run BaHaMAS with in all its possible modes and #
+# check that no unexpected failure occures. Clearly, these are not  #
+# exhaustive tests, but they help refactoring the code.             #
+#-------------------------------------------------------------------#
 
 #Use extglob to facilitate some operations
 #NOTE: To be done here and not where used (see http://mywiki.wooledge.org/glob)
@@ -37,7 +35,7 @@ readonly BHMAS_coloredOutput='TRUE'
 
 #Retrieve information from git
 readonly BHMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"
-readonly BHMAS_command=${BHMAS_repositoryTopLevelPath}/BaHaMAS.bash
+readonly BHMAS_command=${BHMAS_repositoryTopLevelPath}/BaHaMAS
 readonly BHMAS_testsFolder=${BHMAS_repositoryTopLevelPath}/Tests
 readonly BHMAS_testsFolderAuxFiles=${BHMAS_testsFolder}/AuxiliaryFiles
 
@@ -75,66 +73,59 @@ readonly listOfAuxiliaryFilesAndFolders=( "${testFolder}" "${logFile}" )
 
 
 #Possible Tests
-availableTests['help']='--help'
-availableTests['default']='-w=1d'
-availableTests['submit']='--submit --walltime 1d'
-availableTests['submit-goal']='--submit --walltime 1d'
-availableTests['submitonly']='--submitonly'
-availableTests['thermalize-hot']='--thermalize --walltime 1d'
-availableTests['thermalize-conf']='--thermalize --walltime 1d'
-availableTests['continue-save']='--continue --walltime 1d -F 80 -f 140 -m=1234'
-availableTests['continue-last']='--continue --walltime 1d'
-availableTests['continue-resume']='--continue --walltime 1d'
-availableTests['continue-num']='--continue 10000 --walltime 1d'
-availableTests['continue-goal']='--continue --walltime 1d'
-availableTests['continue-therm-save']='--continueThermalization --walltime 1d -F 80 -f 140 -m=1234'
-availableTests['continue-therm-last']='--continueThermalization --walltime 1d'
-availableTests['continue-therm-resume']='--continueThermalization --walltime 1d'
-availableTests['continue-therm-num']='--continueThermalization 5000 --walltime 1d'
-availableTests['continue-therm-goal']='--continueThermalization --walltime 1d'
-availableTests['completeBetasFile']='--completeBetasFile'
-availableTests['completeBetasFile-num']='--completeBetasFile=3'
-availableTests['commentBetas']='--commentBetas'
-availableTests['liststatus']='--liststatus'
-availableTests['liststatus-time']='--liststatus --doNotMeasureTime'
-availableTests['liststatus-queued']='--liststatus --showOnlyQueued'
-availableTests['accRateReport']='--accRateReport'
-availableTests['accRateReport-num']='--accRateReport 300'
-availableTests['cleanOutputFiles']='--cleanOutputFiles'
-availableTests['cleanOutputFiles-all']='--cleanOutputFiles --all'
-availableTests['commentBetas-num']='--commentBetas 6.1111'
-availableTests['commentBetas-nums']='--commentBetas 6.1111 7.1111'
-availableTests['commentBetas-num-seed']='--commentBetas 6.1111_s2222_fH'
-availableTests['uncommentBetas']='--uncommentBetas'
-availableTests['uncommentBetas-num']='--uncommentBetas 5.1111'
-availableTests['uncommentBetas-nums']='--uncommentBetas 5.1111 6.1111'
-availableTests['uncommentBetas-num-seed']='--uncommentBetas 5.1111_s3333_NC'
-availableTests['invertConfs']='--invertConfigurations --walltime 1d'
-availableTests['invertConfs-some']='--invertConfigurations --walltime 1d'
-availableTests['database-help']='--helpDatabase'
-availableTests['database-display']='--database --sum'
-availableTests['database-local']='--database --local'
-availableTests['database-filter1']='--database --type NC --ns 18 --beta 5.4360'
-availableTests['database-filter2']='--database --status RUNNING --lastTraj 115'
-availableTests['database-report']='--database --report'
-availableTests['database-update']='--database --update'
-availableTests['database-update-file']='--database --update --file fakeDatabasePath'
-testsToBeRun=( 'help' 'default'
-               'submit' 'submit-goal' 'submitonly'
-               'thermalize-hot' 'thermalize-conf'
-               'continue-save' 'continue-last' 'continue-resume' 'continue-num' 'continue-goal'
-               'continue-therm-save' 'continue-therm-last' 'continue-therm-resume' 'continue-therm-num' 'continue-therm-goal'
-               'liststatus' 'liststatus-time' 'liststatus-queued'
-               'accRateReport' 'accRateReport-num'
-               'cleanOutputFiles' 'cleanOutputFiles-all'
-               'completeBetasFile' 'completeBetasFile-num'
-               'commentBetas' 'commentBetas-num' 'commentBetas-nums' 'commentBetas-num-seed'
-               'uncommentBetas' 'uncommentBetas-num' 'uncommentBetas-nums' 'uncommentBetas-num-seed'
-               'invertConfs' 'invertConfs-some'
-               'database-help' 'database-display' 'database-local'
-               'database-filter1' 'database-filter2' 'database-report'
-               'database-update' 'database-update-file'
-             )
+availableTests=(
+    ['help-1']=''
+    ['help-2']='help'
+    ['help-3']='--help'
+    ['version-1']='--version'
+    ['version-2']='version'
+    ['CL2QCD-prepare-only']='CL2QCD prepare-only -w=1d'
+    ['CL2QCD-submit']='CL2QCD submit --walltime = 1d'
+    ['CL2QCD-submit-goal']='CL2QCD submit --walltime= 1d'
+    ['CL2QCD-submit-only']='CL2QCD submit-only --betasfile betas'
+    ['CL2QCD-thermalize-hot']='CL2QCD thermalize --walltime 1d'
+    ['CL2QCD-thermalize-conf']='CL2QCD thermalize --walltime 1d'
+    ['CL2QCD-continue-save']='CL2QCD continue --walltime 1d -F 80 -f 140 -m=1234'
+    ['CL2QCD-continue-last']='CL2QCD continue --walltime 1d'
+    ['CL2QCD-continue-resume']='CL2QCD continue --walltime 1d'
+    ['CL2QCD-continue-num']='CL2QCD continue --till 10000 --walltime 1d'
+    ['CL2QCD-continue-goal']='CL2QCD continue --walltime 1d'
+    ['CL2QCD-continue-therm-save']='CL2QCD continue-thermalization --walltime 1d -F 80 -f 140 -m=1234'
+    ['CL2QCD-continue-therm-last']='CL2QCD continue-thermalization --walltime 1d'
+    ['CL2QCD-continue-therm-resume']='CL2QCD continue-thermalization --walltime 1d'
+    ['CL2QCD-continue-therm-num']='CL2QCD continue-thermalization --till 5000 --walltime 1d'
+    ['CL2QCD-continue-therm-goal']='CL2QCD continue-thermalization --walltime 1d'
+    ['CL2QCD-completeBetasFile']='complete-betas-file'
+    ['CL2QCD-completeBetasFile-num']='complete-betas-file --chains 3'
+    ['CL2QCD-simulation-status']='CL2QCD simulation-status'
+    ['CL2QCD-simulation-status-time']='CL2QCD simulation-status --doNotMeasureTime'
+    ['CL2QCD-simulation-status-queued']='CL2QCD simulation-status --showOnlyQueued'
+    ['CL2QCD-invertConfs']='CL2QCD invert-configurations --walltime 1d'
+    ['CL2QCD-invertConfs-some']='CL2QCD invert-configurations --walltime 1d'
+    ['accRateReport']='acceptance-rate-report'
+    ['accRateReport-num']='acceptance-rate-report --interval 300'
+    ['cleanOutputFiles']='clean-output-files'
+    ['cleanOutputFiles-all']='clean-output-files --all'
+    ['commentBetas']='comment-betas'
+    ['commentBetas-num']='comment-betas --betas 6.1111'
+    ['commentBetas-nums']='comment-betas --betas 6.1111 7.1111'
+    ['commentBetas-num-seed']='comment-betas --betas 6.1111_s2222_fH'
+    ['uncommentBetas']='uncomment-betas'
+    ['uncommentBetas-num']='uncomment-betas --betas 5.1111'
+    ['uncommentBetas-nums']='uncomment-betas --betas 5.1111 6.1111'
+    ['uncommentBetas-num-seed']='uncomment-betas --betas 5.1111_s3333_NC'
+    ['database-help']='database --help'
+    ['database-display']='database --sum'
+    ['database-local']='database --local'
+    ['database-filter1']='database --type NC --ns 18 --beta 5.4360'
+    ['database-filter2']='database --status RUNNING --lastTraj 115'
+    ['database-report']='database --report'
+    ['database-update']='database --update'
+    ['database-update-file']='database --update --file fakeDatabasePath'
+)
+
+#Declare array with indeces of availableTests array sorted
+readarray -d $'\0' -t testsToBeRun < <(printf '%s\0' "${!availableTests[@]}" | sort -z)
 
 #Get user setup
 ParseCommandLineOption "$@"
@@ -147,7 +138,7 @@ if [[ ${reportLevel} -eq 3 ]]; then
     cecho wg "\n " U "Running " emph "${#testsToBeRun[@]}" " test(s)" uU ":\n"
 fi
 for testName in "${testsToBeRun[@]}"; do
-    if [[ -n "${availableTests[${testName}]:+x}" ]]; then
+    if [[ -n "${availableTests[${testName}]+x}" ]]; then
         MakeTestPreliminaryOperations "${testName}"
         RunTest "${testName}" "${availableTests[${testName}]}"
     else

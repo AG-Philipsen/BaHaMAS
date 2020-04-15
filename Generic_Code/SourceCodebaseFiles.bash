@@ -17,7 +17,7 @@
 #  along with BaHaMAS. If not, see <http://www.gnu.org/licenses/>.
 #
 
-function SourceCodebaseGeneralFiles()
+function __static__SourceCodebaseGeneralFiles()
 {
     readonly BHMAS_userSetupFile="${BHMAS_repositoryTopLevelPath}/Generic_Code/UserSpecificVariables.bash"
     local schedulerIndependentFiles fileToBeSourced
@@ -28,9 +28,7 @@ function SourceCodebaseGeneralFiles()
         'AcceptanceRateReport.bash'
         'CheckGlobalVariables.bash'
         'CleanOutputFiles.bash'
-        'CommandLineParsers/CommonFunctionality.bash'
         'CommandLineParsers/MainParser.bash'
-        'CommandLineParsers/DatabaseParser.bash'
         'Database/ProjectStatisticsDatabase.bash'
         'FindSchedulerInUse.bash'
         'FindStartingConfiguration.bash'
@@ -50,6 +48,7 @@ function SourceCodebaseGeneralFiles()
         'SubmitJobs.bash'
         'Setup/Setup.bash'
         'SystemRequirements.bash'
+        'Version.bash'
     )
     for fileToBeSourced in "${schedulerIndependentFiles[@]}"; do
         source "${BHMAS_repositoryTopLevelPath}/Generic_Code/${fileToBeSourced}" || exit ${BHMAS_fatalBuiltin}
@@ -65,9 +64,7 @@ function SourceCodebaseGeneralFiles()
     else
         if [[ ! -f "${BHMAS_userSetupFile}" ]]; then
             declare -g BHMAS_coloredOutput='FALSE' #This is needed in cecho but is a user variable! Declare it here manually
-            if WasAnyOfTheseOptionsGivenToBaHaMAS '-h' '--help'; then
-                Warning -N "BaHaMAS was not set up yet, but help was asked, some default values might not be displayed."
-            else
+            if ! WasAnyOfTheseOptionsGivenToBaHaMAS '-h' '--help'; then
                 Fatal ${BHMAS_fatalFileNotFound} "BaHaMAS has not been configured, yet! Please, run BaHaMAS with the --setup option to configure it!"
             fi
         else
@@ -79,7 +76,7 @@ function SourceCodebaseGeneralFiles()
 #Call the function above and source the codebase files when this script is sourced
 if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
     BHMAS_specifiedCommandLineOptions=( "$@" )
-    SourceCodebaseGeneralFiles
+    __static__SourceCodebaseGeneralFiles
 fi
 
 MakeFunctionsDefinedInThisFileReadonly

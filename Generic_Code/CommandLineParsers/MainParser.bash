@@ -17,107 +17,265 @@
 #  along with BaHaMAS. If not, see <http://www.gnu.org/licenses/>.
 #
 
-source ${BHMAS_repositoryTopLevelPath}/Generic_Code/CommandLineParsers/MainHelper.bash || exit ${BHMAS_fatalBuiltin}
+#Load needed files
+for fileToBeSourced in 'DatabaseHelper.bash' 'DatabaseParser.bash' 'Helper.bash' 'ParserUtilities.bash' 'SubParsers.bash'; do
+    source "${BHMAS_repositoryTopLevelPath}/Generic_Code/CommandLineParsers/${fileToBeSourced}" || exit ${BHMAS_fatalBuiltin}
+done && unset -v 'fileToBeSourced'
 
-function __static__PrintSecondaryOptionSpecificationErrorAndExit()
+function ParseCommandLineOptionsTillMode()
 {
-    Fatal ${BHMAS_fatalCommandLine} "The option " emph "$2" " is a secondary option of " emph "$1" " and it has to be given after it!"
+    if [[ ${#BHMAS_commandLineOptionsToBeParsed[@]} -eq 0 ]]; then
+        BHMAS_executionMode='mode:help'
+        return 0
+    fi
+    #Locally set function arguments to take advantage of shift
+    set -- "${BHMAS_commandLineOptionsToBeParsed[@]}"
+    #The first option can be a LQCD software
+    if [[ $1 =~ ^(CL2QCD|OpenQCD-FASTSUM)$ ]]; then
+        BHMAS_lqcdSoftware="$1"
+        shift
+    fi
+    readonly BHMAS_lqcdSoftware
+    case "$1" in
+        help | --help )
+            BHMAS_executionMode='mode:help'
+            ;;
+        version | --version )
+            BHMAS_executionMode='mode:version'
+            ;;
+        setup | --setup )
+            BHMAS_executionMode='mode:setup'
+            ;;
+        update-manuals )
+            BHMAS_executionMode='mode:update-manuals'
+            ;;
+        prepare-only )
+            BHMAS_executionMode='mode:prepare-only'
+            ;;
+        submit-only )
+            BHMAS_executionMode='mode:submit-only'
+            ;;
+        submit )
+            BHMAS_executionMode='mode:submit'
+            ;;
+        thermalize )
+            BHMAS_executionMode='mode:thermalize'
+            ;;
+        continue )
+            BHMAS_executionMode='mode:continue'
+            ;;
+        continue-thermalization )
+            BHMAS_executionMode='mode:continue-thermalization'
+            ;;
+        job-status )
+            BHMAS_executionMode='mode:job-status'
+            ;;
+        simulation-status )
+            BHMAS_executionMode='mode:simulation-status'
+            ;;
+        acceptance-rate-report )
+            BHMAS_executionMode='mode:acceptance-rate-report'
+            ;;
+        clean-output-files )
+            BHMAS_executionMode='mode:clean-output-files'
+            ;;
+        complete-betas-file )
+            BHMAS_executionMode='mode:complete-betas-file'
+            ;;
+        comment-betas )
+            BHMAS_executionMode='mode:comment-betas'
+            ;;
+        uncomment-betas )
+            BHMAS_executionMode='mode:uncomment-betas'
+            ;;
+        invert-configurations )
+            BHMAS_executionMode='mode:invert-configurations'
+            ;;
+        database )
+            BHMAS_executionMode='mode:database'
+            BHMAS_optionsToBePassedToDatabase=( "${@:2}" )
+            shift $(( $# - 1 )) #The shift after esac
+            ;;
+        * )
+            Fatal ${BHMAS_fatalCommandLine} "No valid mode specified! Run " emph "BaHaMAS --help" " to get further information."
+    esac
+    shift
+    #Update the global array with remaining options to be parsed
+    BHMAS_commandLineOptionsToBeParsed=( "$@" )
+    #If user specified --help in a given mode, act accrdingly
+    if [[ ! ${BHMAS_executionMode} =~ ^mode:(help|version|setup)$ ]]; then
+        if  ElementInArray '--help' "${BHMAS_commandLineOptionsToBeParsed[@]}" "${BHMAS_optionsToBePassedToDatabase[@]}"; then
+            BHMAS_executionMode+='-help'
+        fi
+    fi
 }
 
-function ParseCommandLineOption()
+# This function will be reused in manual composition
+# to populate the option sections of each manual page.
+function DeclareAllowedOptionsPerModeOrSoftware()
 {
+    # Sub-parser options
+    if [[ "${BHMAS_MANUALMODE-x}" = 'TRUE' ]]; then
+        allowedOptionsPerModeOrSoftware=(
+            ['mode:continue']='--till '
+            ['mode:continue-thermalization']='--till '
+            ['mode:job-status']='--user --local --all '
+            ['mode:simulation-status']='--doNotMeasureTime --showOnlyQueued '
+            ['mode:acceptance-rate-report']='--interval '
+            ['mode:clean-output-files']='--all '
+            ['mode:complete-betas-file']='--chains '
+            ['mode:comment-betas']='--betas '
+            ['mode:uncomment-betas']='--betas '
+        )
+    fi
+    # Each execution mode does not accept the same options and it makes
+    # sense to be stricter and to allow only the used ones instead of
+    # just ignoring them if not used. The same is valid for options which
+    # are restricted to some software only. Note that here we refer option
+    # which are either in common to multiple modes or in common to multiple
+    # software. An associative array allows to have here an overview. We use
+    # as key either a mode or a software to then put in the value those options
+    # that are allowed. We will use then two entries of it later to validate.
+    #
+    # NOTE: The associative array must be declared in the caller
+    local productionOptions productionOptionsCL2QCD clusterOptions
+    productionOptions='--measurements --checkpointEvery --pf'
+    productionOptionsCL2QCD='--confSaveEvery --cgbs'
+    clusterOptions='--walltime  --partition  --node  --constraint  --resource'
+    allowedOptionsPerModeOrSoftware+=(
+        #-------------------------------------------------------------------------------
+        # Specific-mode, all-software options
+        ['mode:prepare-only']+="--betasfile --jobscript_prefix ${clusterOptions}"
+        ['mode:submit-only']+='--betasfile --jobscript_prefix'
+        ['mode:submit']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
+        ['mode:thermalize']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
+        ['mode:continue']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
+        ['mode:continue-thermalization']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
+        ['mode:job-status']+='--partition'
+        ['mode:simulation-status']+=''
+        ['mode:acceptance-rate-report']+='--betasfile'
+        ['mode:clean-output-files']+='--betasfile'
+        ['mode:complete-betas-file']+='--betasfile'
+        ['mode:comment-betas']+='--betasfile'
+        ['mode:uncomment-betas']+='--betasfile'
+        ['mode:invert-configurations']+="--betasfile --jobscript_prefix ${clusterOptions}"
+        ['mode:database']+=''
+        #-------------------------------------------------------------------------------
+        # Multiple mode, specific/multiple-software options
+        ["mode:prepare-only_CL2QCD"]+="${productionOptionsCL2QCD}"
+        ["mode:submit_CL2QCD"]+="${productionOptionsCL2QCD}"
+        ["mode:thermalize_CL2QCD"]+="${productionOptionsCL2QCD}"
+        ["mode:continue_CL2QCD"]+="${productionOptionsCL2QCD}"
+        ["mode:continue-thermalization_CL2QCD"]+="${productionOptionsCL2QCD}"
+        #-------------------------------------------------------------------------------
+        # All-modes, specific-software options
+        ['CL2QCD']+=''
+        ['OpenQCD-FASTSUM']+=''
+    )
+}
 
-    local mutuallyExclusiveOptions mutuallyExclusiveOptionsPassed option listOfOptionsAsString
+function ParseRemainingCommandLineOptions()
+{
+    # In general we have options that can be
+    #   1) mode-specific && software-specific options;
+    #   2) mode-specific && for-all-software  options;
+    #   3) for-all-modes && software-specific options;
+    #   4) mode-specific && multiple-software options;
+    #   5) multiple-mode && software-specific options;
+    #   6) multiple-mode && multiple-software options.
+    # Then,
+    #  - for categories 1,2,3 we implement sub-parsers;
+    #  - for categories 4,5,6 we have a pool of options which are
+    #    parsed all together but preliminary checked if allowed.
+    #
+    # https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/issues/27
+    local modeSpecificAllSoftwareParser
+    modeSpecificAllSoftwareParser=(
+        'mode:continue'
+        'mode:continue-thermalization'
+        'mode:job-status'
+        'mode:simulation-status'
+        'mode:acceptance-rate-report'
+        'mode:clean-output-files'
+        'mode:complete-betas-file'
+        'mode:comment-betas'
+        'mode:uncomment-betas'
+    )
+    if ElementInArray "${BHMAS_executionMode}" ${modeSpecificAllSoftwareParser[@]}; then
+        __static__CallSubParserIfExisting "${BHMAS_executionMode#mode:}"
+    fi
 
-    mutuallyExclusiveOptions=( "-s | --submit"        "-c | --continue"    "-C | --continueThermalization"
-                               "-t | --thermalize"    "-j | --jobstatus"   "-l | --liststatus"  "-U | --uncommentBetas"
-                               "-u | --commentBetas"  "-d | --database"    "-i | --invertConfigurations"
-                               "--submitonly"  "--accRateReport"  "--cleanOutputFiles"  "--completeBetasFile")
-    mutuallyExclusiveOptionsPassed=()
+    local modeSpecificSoftwareSpecificParser
+    modeSpecificSoftwareSpecificParser=()
+    if ElementInArray "${BHMAS_executionMode}_${BHMAS_lqcdSoftware}" ${modeSpecificSoftwareSpecificParser[@]}; then
+        __static__CallSubParserIfExisting "${BHMAS_executionMode}_${BHMAS_lqcdSoftware}"
+    fi
 
+    local softwareSpecificAllModesParser
+    softwareSpecificAllModesParser=()
+    if ElementInArray "${BHMAS_lqcdSoftware}" ${softwareSpecificAllModesParser[@]}; then
+        __static__CallSubParserIfExisting "${BHMAS_lqcdSoftware}"
+    fi
+
+    declare -A allowedOptionsPerModeOrSoftware
+    DeclareAllowedOptionsPerModeOrSoftware
+    __static__CheckIfOnlyValidOptionsWereGiven\
+        ${allowedOptionsPerModeOrSoftware["${BHMAS_executionMode}"]:-}\
+        ${allowedOptionsPerModeOrSoftware["${BHMAS_executionMode}_${BHMAS_lqcdSoftware}"]:-}\
+        ${allowedOptionsPerModeOrSoftware["${BHMAS_lqcdSoftware}"]:-} # <- let word splitting split options
+    __static__ParseRemainingGeneralOptions
+}
+
+function __static__CallSubParserIfExisting()
+{
+    local functionName
+    functionName="ParseSpecificModeOptions_"
+    if [[ "${1-}" != '' ]]; then
+        functionName+="$1"
+    else
+        Internal 'Function ' emph "${FUNCNAME}" ' wrongly called!'
+    fi
+    if [[ "$(type -t ${functionName})" = 'function' ]]; then
+        ${functionName}
+    else
+        Internal 'Parser for ' emph "$1" ' not implemented but tried to be called!'
+    fi
+}
+
+function __static__CheckIfOnlyValidOptionsWereGiven()
+{
+    local validOptions option
+    validOptions=( "$@" )
+    for option in "${BHMAS_commandLineOptionsToBeParsed[@]}"; do
+        [[ ! ${option} =~ ^- ]] && continue
+        if ! ElementInArray "${option}" "${validOptions[@]}"; then
+            Fatal ${BHMAS_fatalCommandLine} 'Option ' emph "${option}" ' non accepted in ' emph "${BHMAS_executionMode#mode:}" ' mode.'
+        fi
+    done
+}
+
+function __static__ParseRemainingGeneralOptions()
+{
+    set -- "${BHMAS_commandLineOptionsToBeParsed[@]}"
     #Here it is fine to assume that option names and values are separated by spaces
     while [[ $# -gt 0 ]]; do
-        case $1 in
-
+        case "$1" in
             --jobscript_prefix )
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     readonly BHMAS_jobScriptPrefix="$2"
                 fi
-                shift 2 ;;
-
-            --nflavor_prefix )
-                if [[ ${2:-} =~ ^(-|$) ]]; then
-                    PrintOptionSpecificationErrorAndExit "$1"
-                else
-                    readonly BHMAS_nflavourPrefix="$2"
-                    BHMAS_parameterPrefixes[${BHMAS_nflavourPosition}]=${BHMAS_nflavourPrefix}
-                fi
-                shift 2 ;;
-
-            --chempot_prefix )
-                if [[ ${2:-} =~ ^(-|$) ]]; then
-                    PrintOptionSpecificationErrorAndExit "$1"
-                else
-                    readonly BHMAS_chempotPrefix="$2"
-                    BHMAS_parameterPrefixes[${BHMAS_chempotPosition}]=${BHMAS_chempotPrefix}
-                fi
-                shift 2 ;;
-
-            --mass_prefix )
-                if [[ ${2:-} =~ ^(-|$) ]]; then
-                    PrintOptionSpecificationErrorAndExit "$1"
-                else
-                    readonly BHMAS_massPrefix="$2"
-                    BHMAS_parameterPrefixes[${BHMAS_massPosition}]=${BHMAS_massPrefix}
-                fi
-                shift 2 ;;
-
-            --ntime_prefix )
-                if [[ ${2:-} =~ ^(-|$) ]]; then
-                    PrintOptionSpecificationErrorAndExit "$1"
-                else
-                    readonly BHMAS_ntimePrefix="$2"
-                    BHMAS_parameterPrefixes[${BHMAS_ntimePosition}]=${BHMAS_ntimePrefix}
-                fi
-                shift 2 ;;
-
-            --nspace_prefix )
-                if [[ ${2:-} =~ ^(-|$) ]]; then
-                    PrintOptionSpecificationErrorAndExit "$1"
-                else
-                    readonly BHMAS_nspacePrefix="$2"
-                    BHMAS_parameterPrefixes[${BHMAS_nspacePosition}]=${BHMAS_nspacePrefix}
-                fi
-                shift 2 ;;
-
-            --beta_prefix )
-                if [[ ${2:-} =~ ^(-|$) ]]; then
-                    PrintOptionSpecificationErrorAndExit "$1"
-                else
-                    readonly BHMAS_betaPrefix="$2"
-                fi
-                shift 2 ;;
-
-            --seed_prefix )
-                if [[ ${2:-} =~ ^(-|$) ]]; then
-                    PrintOptionSpecificationErrorAndExit "$1"
-                else
-                    readonly BHMAS_seedPrefix="$2"
-                    readonly BHMAS_betaFolderShortRegex=${BHMAS_betaRegex}'_'${BHMAS_seedPrefix}'[0-9]\{4\}_[[:alpha:]]\+'
-                    readonly BHMAS_betaFolderRegex=${BHMAS_betaPrefix}${BHMAS_betaFolderShortRegex}
-                fi
-                shift 2 ;;
-
+                shift 2
+                ;;
             --betasfile )
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_betasFilename="$2"
                 fi
-                shift 2 ;;
-
+                shift 2
+                ;;
             --walltime )
                 if [[ ${2:-} =~ ^([0-9]+[dhms])+$ ]]; then
                     BHMAS_walltime=$(SecondsToTimeStringWithDays $(TimeStringToSecond $2) )
@@ -127,270 +285,88 @@ function ParseCommandLineOption()
                 if [[ ! ${BHMAS_walltime} =~ ^([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 fi
-                shift 2 ;;
-
+                shift 2
+                ;;
             --measurements )
                 if [[ ! ${2:-} =~ ^[0-9]+$ ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_numberOfTrajectories=$2
                 fi
-                shift 2 ;;
-
-            --confSaveFrequency )
+                shift 2
+                ;;
+           --checkpointEvery )
                 if [[ ! ${2:-} =~ ^[0-9]+$ ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_checkpointFrequency=$2
                 fi
-                shift 2 ;;
-
-            --confSavePointFrequency )
+                shift 2
+                ;;
+            --confSaveEvery )
                 if [[ ! ${2:-} =~ ^[0-9]+$ ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_savepointFrequency=$2
                 fi
-                shift 2 ;;
-
+                shift 2
+                ;;
             --cgbs )
                 if [[ ! ${2:-} =~ ^[0-9]+$ ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_inverterBlockSize=$2
                 fi
-                shift 2 ;;
-
+                shift 2
+                ;;
             --pf )
                 if [[ ! ${2:-} =~ ^[1-9][0-9]*$ ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_numberOfPseudofermions=$2
                 fi
-                shift 2 ;;
-
+                shift 2
+                ;;
             --doNotMeasurePbp )
-                BHMAS_measurePbp="FALSE"; shift ;;
-
-            --doNotUseMultipleChains )
-                BHMAS_useMultipleChains="FALSE"
-                if [[ ${BHMAS_executionMode} != 'mode:thermalize' ]]; then
-                    BHMAS_betaPostfix=""
-                fi
-                shift ;;
-
+                BHMAS_measurePbp="FALSE"
+                shift
+                ;;
             --partition )
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_clusterPartition="$2"
                 fi
-                shift 2 ;;
-
+                shift 2
+                ;;
             --node )
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_clusterNode="$2"
                 fi
-                shift 2 ;;
-
+                shift 2
+                ;;
             --constraint )
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_clusterConstraint="$2"
                 fi
-                shift 2 ;;
-
+                shift 2
+                ;;
             --resource )
                 if [[ ${2:-} =~ ^(-|$) ]]; then
                     PrintOptionSpecificationErrorAndExit "$1"
                 else
                     BHMAS_clusterGenericResource="$2"
                 fi
-                shift 2 ;;
-
-            --submit )
-                mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_executionMode='mode:submit'
-                shift;;
-
-            --submitonly )
-                mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_executionMode='mode:submit-only'
-                shift;;
-
-            --thermalize )
-                mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_executionMode='mode:thermalize'
-                shift;;
-
-            --continue )
-                mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_executionMode='mode:continue'
-                if [[ ! ${2:-} =~ ^(-|$) ]]; then
-                    if [[ ! $2 =~ ^[0-9]+$ ]];then
-                        PrintOptionSpecificationErrorAndExit "$1"
-                    else
-                        BHMAS_trajectoryNumberUpToWhichToContinue=$2
-                        shift
-                    fi
-                fi
-                shift ;;
-
-            --continueThermalization )
-                mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_executionMode='mode:continue-thermalization'
-                if [[ ! ${2:-} =~ ^(-|$) ]]; then
-                    if [[ ! $2 =~ ^[0-9]+$ ]];then
-                        PrintOptionSpecificationErrorAndExit "$1"
-                    else
-                        BHMAS_trajectoryNumberUpToWhichToContinue=$2
-                        shift
-                    fi
-                fi
-                shift ;;
-
-            --jobstatus )
-                mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_executionMode='mode:job-status'
-                shift;;
-
-            --user )
-                if [[ ${BHMAS_executionMode} != 'mode:job-status' ]]; then
-                    __static__PrintSecondaryOptionSpecificationErrorAndExit "-j | --jobstatus" "$1"
-                else
-                    BHMAS_jobstatusUser="$2"
-                    shift
-                fi
-                shift ;;
-
-            --local )
-                if [[ ${BHMAS_executionMode} != 'mode:job-status' ]]; then
-                    __static__PrintSecondaryOptionSpecificationErrorAndExit "-j | --jobstatus" "$1"
-                else
-                    BHMAS_jobstatusLocal='TRUE'
-                fi
-                shift ;;
-
-            --liststatus )
-                mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_executionMode='mode:simulation-status'
-                shift;;
-
-            --doNotMeasureTime )
-                if [[ ${BHMAS_executionMode} != 'mode:simulation-status' ]]; then
-                    __static__PrintSecondaryOptionSpecificationErrorAndExit "-l | --liststatus" "$1"
-                else
-                    BHMAS_liststatusMeasureTimeOption="FALSE"
-                fi
-                shift ;;
-
-            --showOnlyQueued )
-                if [[ ${BHMAS_executionMode} != 'mode:simulation-status' ]]; then
-                    __static__PrintSecondaryOptionSpecificationErrorAndExit "-l | --liststatus" "$1"
-                else
-                    BHMAS_liststatusShowOnlyQueuedOption="TRUE"
-                fi
-                shift ;;
-
-            --accRateReport )
-                mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_executionMode='mode:acceptance-rate-report'
-                if [[ ! ${2:-} =~ ^(-|$) ]]; then
-                    if [[ ! $2 =~ ^[0-9]+$ ]];then
-                        PrintOptionSpecificationErrorAndExit "$1"
-                    else
-                        BHMAS_accRateReportInterval=$2
-                        shift
-                    fi
-                fi
-                shift ;;
-
-            --cleanOutputFiles )
-                mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_executionMode='mode:clean-output-files'
-                shift ;;
-
-            --all )
-                if [[ ${BHMAS_executionMode} != 'mode:clean-output-files' ]] && [[ ${BHMAS_executionMode} != 'mode:job-status' ]]; then
-                    __static__PrintSecondaryOptionSpecificationErrorAndExit "--cleanOutputFiles" "$1"
-                elif [[ ${BHMAS_executionMode} = 'mode:clean-output-files' ]]; then
-                    BHMAS_cleanAllOutputFiles="TRUE"
-                elif [[ ${BHMAS_executionMode} = 'mode:job-status' ]]; then
-                    BHMAS_jobstatusAll='TRUE'
-                fi
-                shift ;;
-
-            --completeBetasFile )
-                mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_executionMode='mode:complete-betas-file'
-                if [[ ! ${2:-} =~ ^(-|$) ]]; then
-                    if [[ ! $2 =~ ^[0-9]+$ ]];then
-                        PrintOptionSpecificationErrorAndExit "$1"
-                    else
-                        BHMAS_numberOfChainsToBeInTheBetasFile=$2
-                        shift
-                    fi
-                fi
-                shift ;;
-
-            --uncommentBetas | --commentBetas )
-                mutuallyExclusiveOptionsPassed+=( $1 )
-                if [[ $1 = '--uncommentBetas' ]]; then
-                    BHMAS_executionMode='mode:uncomment-betas'
-                elif [[ $1 = '--commentBetas' ]]; then
-                    BHMAS_executionMode='mode:comment-betas'
-                fi
-                while [[ ! ${2:-} =~ ^(-|$) ]]; do
-                    if [[ $2 =~ ^[0-9]\.[0-9]{4}_${BHMAS_seedPrefix}[0-9]{4}(_(NC|fC|fH))*$ ]]; then
-                        BHMAS_betasToBeToggled+=( $2 )
-                    elif [[ $2 =~ ^[0-9]\.[0-9]*$ ]]; then
-                        BHMAS_betasToBeToggled+=( $(awk '{printf "%1.4f", $1}' <<< "$2") )
-                    else
-                        PrintOptionSpecificationErrorAndExit "${mutuallyExclusiveOptionsPassed[-1]}"
-                    fi
-                    shift
-                done
-                shift ;;
-
-            --invertConfigurations)
-                mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_executionMode='mode:invert-configurations'
-                shift ;;
-
-            --database)
-                mutuallyExclusiveOptionsPassed+=( $1 )
-                BHMAS_executionMode='mode:database'
-                shift
-                BHMAS_optionsToBePassedToDatabase=( $@ )
-                shift $# ;;
-
+                shift 2
+                ;;
             * )
                 PrintInvalidOptionErrorAndExit "$1" ;;
         esac
     done
-
-    if [[ ${#mutuallyExclusiveOptionsPassed[@]} -gt 1 ]]; then
-        listOfOptionsAsString=''
-        for option in "${mutuallyExclusiveOptions[@]}"; do
-            listOfOptionsAsString+="\n$(cecho -d lo "  ") ${option}"
-        done
-        Fatal ${BHMAS_fatalCommandLine} "The following options are mutually exclusive and cannot be combined: ${listOfOptionsAsString}"
-    fi
-
-    #Mark as readonly the BHMAS_parameterPrefixes array, since from now on prefixes cannot change any more!
-    declare -rga BHMAS_parameterPrefixes
-}
-
-function IsTestModeOn()
-{
-    if [[ -n "${BHMAS_testModeOn:+x}" ]] && [[ ${BHMAS_testModeOn} = 'TRUE' ]]; then
-        return 0
-    else
-        return 1
-    fi
 }
 
 function WasAnyOfTheseOptionsGivenToBaHaMAS()
@@ -409,9 +385,11 @@ function WasAnyOfTheseOptionsGivenToBaHaMAS()
     return 1
 }
 
+# This function is needed before the variable
+# BHMAS_executionMode is available and set!
 function IsBaHaMASRunInSetupMode()
 {
-    if WasAnyOfTheseOptionsGivenToBaHaMAS '--setup'; then
+    if WasAnyOfTheseOptionsGivenToBaHaMAS 'setup' '--setup'; then
         return 0
     else
         return 1

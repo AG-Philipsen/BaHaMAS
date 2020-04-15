@@ -22,7 +22,6 @@ for fileToBeSourced in "CommonFunctionality" "SetupDialog" "SetupWhiptail"; do
     source "${BHMAS_repositoryTopLevelPath}/Generic_Code/Setup/${fileToBeSourced}.bash" || exit ${BHMAS_fatalBuiltin}
 done && unset -v 'fileToBeSourced'
 
-
 function __static__ReadVariablesFromTemplateFile()
 {
     local variable variableName variableValue
@@ -88,6 +87,74 @@ function __static__ProduceUserVariableFile()
     rm -f ${backupFile}
 }
 
+function __static__GiveMessageToUserAboutEnvironmentVariables()
+{
+    local commandString manualPath grepString pathAlreadyAdded manpathAlreadyAdded
+    manualPath="${BHMAS_repositoryTopLevelPath}/Manual_Pages"
+    if [[ ! ${PATH} =~ (^|:)${BHMAS_repositoryTopLevelPath// /\\ }(:|$) ]]; then
+        grepString='# To use BaHaMAS from any position'
+        if [[ $(grep -c "${grepString}" ~/.bashrc) -eq 0 ]]; then
+            cecho wg '\n'\
+                  'If you would like to be able to use ' emph 'BaHaMAS' ' as command from any position,\n'\
+                  'you can add the following snippet to your shell login file (e.g. ~/.bashrc):'\
+                  ''
+            cecho -d '\033[48;5;16m'
+            cecho -d lr "${grepString}"
+            cecho -d ly 'if ' w '[[ ! ' lg '"${PATH:-}"' w " =~ (^|:)${BHMAS_repositoryTopLevelPath// /\\ }(:|$) ]];" ly ' then'
+            cecho -d bb '    export ' o 'PATH' w '=' lg "\"${BHMAS_repositoryTopLevelPath}:\${PATH:-}\""
+            cecho ly 'fi'
+            cecho ''
+            cecho wg 'Adapt the above lines accordingly if you use a different shell than bash.\n'
+            AskUser -n "\e[1DWould you like to add the snippet above to your $(cecho -d ly '~/.bashrc' lc) file?"
+            if UserSaidYes; then
+                cecho -d "\n${grepString}\n"\
+                      'if [[ ! "${PATH:-}" =~ (^|:)'"${BHMAS_repositoryTopLevelPath// /\\ }"'(:|$) ]]; then\n'\
+                      "    export PATH=\"${BHMAS_repositoryTopLevelPath}:\${PATH:-}\"\n"\
+                      'fi' >> "${HOME}/.bashrc"
+                cecho lo '\nDo not forget to source the ' emph '~/.bashrc' ' file in order to let the changes take effect.'
+            fi
+        else
+            pathAlreadyAdded='TRUE'
+            cecho lo '\n'\
+                  'It seems that the snippet to use the ' emph 'BaHaMAS' ' command was already added to\n'\
+                  'your ' emph '~/.bashrc' ' file. You need source it in order to use the ' emph 'BaHaMAS' ' command.'
+        fi
+    fi
+    if [[ ! ${MANPATH:-} =~ (^|:)${manualPath// /\\ }(:|$) ]]; then
+        grepString='# To have access to BaHaMAS manuals'
+        if [[ $(grep -c "${grepString}" ~/.bashrc) -eq 0 ]]; then
+            cecho wg '\n'\
+                  'If you would like to be able to use the ' emph 'man' ' command to get information\n'\
+                  'about BaHaMAS and its execution modes, you can add the following snippet\n'\
+                  'to your shell login file (e.g. ~/.bashrc):'\
+                  ''
+            cecho -d '\033[48;5;16m'
+            cecho -d lr "${grepString}"
+            cecho -d ly 'if ' w '[[ ! ' lg '"${MANPATH:-}"' w " =~ (^|:)${manualPath// /\\ }(:|$) ]];" ly ' then'
+            cecho -d bb '    export ' o 'MANPATH' w '=' lg "\"\${MANPATH:-}:${manualPath}\""
+            cecho ly 'fi'
+            cecho ''
+            cecho wg 'Adapt the above lines accordingly if you use a different shell than bash.\n'
+            AskUser -n "\e[1DWould you like to add the snippet above to your $(cecho -d ly '~/.bashrc' lc) file?"
+            if UserSaidYes; then
+                cecho -d "\n${grepString}\n"\
+                      'if [[ ! "${MANPATH:-}" =~ (^|:)'"${manualPath// /\\ }"'(:|$) ]]; then\n'\
+                      '    export MANPATH="${MANPATH:-}:'"${manualPath}\"\n"\
+                      'fi' >> "${HOME}/.bashrc"
+                cecho lo '\nDo not forget to source the ' emph '~/.bashrc' ' file in order to let the changes take effect.\n'
+            fi
+        else
+            manpathAlreadyAdded='TRUE'
+            cecho lo '\n'\
+                  'It seems that the snippet to use the ' emph 'man' ' command combined with BaHaMAS was already added\n'\
+                  'to your ' emph '~/.bashrc' ' file. You need source it in order to use commands like ' emph 'man BaHaMAS' '.'
+        fi
+    fi
+    if [[ ${pathAlreadyAdded:-}${manpathAlreadyAdded:-} = *TRUE* ]]; then
+        cecho ''
+    fi
+}
+
 function MakeInteractiveSetupAndCreateUserDefinedVariablesFile()
 {
     local filenameTemplate variableNames
@@ -109,6 +176,8 @@ function MakeInteractiveSetupAndCreateUserDefinedVariablesFile()
 
     #Produce final setup file
     __static__ProduceUserVariableFile
+
+    __static__GiveMessageToUserAboutEnvironmentVariables
 }
 
 

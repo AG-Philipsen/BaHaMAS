@@ -55,12 +55,17 @@ function __static__CheckExistenceOfFunctionAndCallIt()
         ${nameOfTheFunction} "$@"
         # Return value propagates automatically since a function returns the last exit code!
     else
-        Fatal ${BHMAS_fatalMissingFeature} "Function " emph "${nameOfTheFunction}" " for " emph "${BHMAS_clusterScheduler}" " scheduler not found!\n"\
-              "Please provide an implementation following the " B "BaHaMAS" uB " documentation and source the file."
+        Fatal ${BHMAS_fatalMissingFeature} "Function " emph "${nameOfTheFunction}" " not found!\n"\
+              "Please provide an implementation following the " B "BaHaMAS" uB " documentation."
     fi
 }
 
 #-------------------------------------------------------------------------------------------------------------------------#
+
+function AddSchedulerSpecificPartToJobScript()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler} "$@"
+}
 
 function SubmitJob()
 {
@@ -89,27 +94,32 @@ function ProduceInputFile()
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
 
-function ProduceJobscript()
+function AddSoftwareSpecificPartToProductionJobScript()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
 
-function ProduceInverterJobscript()
+function AddSoftwareSpecificPartToMeasurementJobScript()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
 
-function HandleEnvironmentForGivenSimulation()
+function ProduceMeasurementCommandsPerBeta()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
 
-function HandleInputFileForGivenSimulation()
+function HandleEnvironmentForContinueForGivenSimulation()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
 
-function HandleOutputFilesForGivenSimulation()
+function HandleInputFileForContinueForGivenSimulation()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
+}
+
+function HandleOutputFilesForContinueForGivenSimulation()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }

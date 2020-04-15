@@ -17,8 +17,6 @@
 #  along with BaHaMAS. If not, see <http://www.gnu.org/licenses/>.
 #
 
-source ${BHMAS_repositoryTopLevelPath}/Generic_Code/CommandLineParsers/DatabaseHelper.bash || exit ${BHMAS_fatalBuiltin}
-
 function __static__CheckMutuallyExclusiveOptions()
 {
     local reportShow

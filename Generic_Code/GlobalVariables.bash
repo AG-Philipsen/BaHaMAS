@@ -61,12 +61,16 @@ function DeclarePathRelatedGlobalVariables()
     readonly BHMAS_ntimePosition=3
     readonly BHMAS_nspacePosition=4
     #Parameters prefixes (here not readonly since they can be changed by user -> set as readonly in command line parser!)
-    BHMAS_nflavourPrefix="Nf"
-    BHMAS_chempotPrefix="mui"
-    [[ ${BHMAS_wilson} = "TRUE" ]] && BHMAS_massPrefix="k" || BHMAS_massPrefix="mass"
-    BHMAS_ntimePrefix="nt"
-    BHMAS_nspacePrefix="ns"
-    declare -ga BHMAS_parameterPrefixes=( [${BHMAS_nflavourPosition}]=${BHMAS_nflavourPrefix}
+    readonly BHMAS_nflavourPrefix="Nf"
+    readonly BHMAS_chempotPrefix="mui"
+    if [[ ${BHMAS_wilson} = "TRUE" ]]; then
+        readonly BHMAS_massPrefix="k"
+    else
+        readonly BHMAS_massPrefix="mass"
+    fi
+    readonly BHMAS_ntimePrefix="nt"
+    readonly BHMAS_nspacePrefix="ns"
+    declare -rga BHMAS_parameterPrefixes=( [${BHMAS_nflavourPosition}]=${BHMAS_nflavourPrefix}
                                            [${BHMAS_chempotPosition}]=${BHMAS_chempotPrefix}
                                            [${BHMAS_massPosition}]=${BHMAS_massPrefix}
                                            [${BHMAS_ntimePosition}]=${BHMAS_ntimePrefix}
@@ -94,10 +98,10 @@ function DeclarePathRelatedGlobalVariables()
     #Beta and seed information (intentionally not in arrays of prefixes, regexes, etc.)
     #(here not readonly since they can be changed by user -> set as readonly in command line parser!)
     readonly BHMAS_betaPosition=5
-    BHMAS_betaPrefix='b'
+    readonly BHMAS_betaPrefix='b'
     BHMAS_betaPostfix='_continueWithNewChain' #Here we set it supposing it is not a thermalization. If indeed it is, the postfix will be overwritten!
     readonly BHMAS_betaRegex='[0-9][.][0-9]\{4\}'
-    BHMAS_seedPrefix='s'
+    readonly BHMAS_seedPrefix='s'
     readonly BHMAS_seedRegex='[0-9]\{4\}'
     BHMAS_betaFolderShortRegex=${BHMAS_betaRegex}'_'${BHMAS_seedPrefix}'[0-9]\{4\}_[[:alpha:]]\+'
     BHMAS_betaFolderRegex=${BHMAS_betaPrefix}${BHMAS_betaFolderShortRegex}
@@ -114,14 +118,13 @@ function DeclareBaHaMASGlobalVariables()
 {
     #Variables about general options
     BHMAS_betasFilename='betas'
-    BHMAS_numberOfTrajectories=20000
+    BHMAS_numberOfTrajectories=1000
     BHMAS_checkpointFrequency=100
     BHMAS_savepointFrequency=20
     BHMAS_inverterBlockSize=50
     BHMAS_useMultipleChains='TRUE'
     BHMAS_measurePbp='TRUE'
     BHMAS_numberOfPseudofermions=1
-    readonly JOBS_STATUS_PREFIX='jobs_status_'
 
     #Internal BaHaMAS variables
     BHMAS_betaValues=()
@@ -135,10 +138,10 @@ function DeclareBaHaMASGlobalVariables()
     declare -gA BHMAS_goalStatistics=()
     declare -gA BHMAS_startConfigurationGlobalPath=()
 
-    #Mutually exclusive options variables
-    BHMAS_executionMode='mode:default'
+    #Execution mode variable
+    BHMAS_executionMode='mode:_unset_'
 
-    #Values of mutually exclusive and secondary options
+    #Values of execution mode options
     BHMAS_trajectoryNumberUpToWhichToContinue=0
     BHMAS_jobstatusUser="$(whoami)"
     BHMAS_jobstatusAll='FALSE'
@@ -196,6 +199,18 @@ function DeclareBetaFoldersPathsAsGlobalVariables()
 {
     readonly BHMAS_submitDirWithBetaFolders="${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath}${BHMAS_parametersPath}"
     readonly BHMAS_runDirWithBetaFolders="${BHMAS_runDiskGlobalPath}/${BHMAS_projectSubpath}${BHMAS_parametersPath}"
+}
+
+function IsTestModeOn()
+{
+    # The global variable BHMAS_TESTMODE is an environment variable which
+    # is defined in functional tests BaHaMAS execution line in order to let
+    # BaHaMAS behave slightly differently (e.g. source test user variable file)
+    if [[ -n "${BHMAS_TESTMODE:+x}" ]] && [[ ${BHMAS_TESTMODE} = 'TRUE' ]]; then
+        return 0
+    else
+        return 1
+    fi
 }
 
 function DeclareAllGlobalVariables()

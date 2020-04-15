@@ -105,12 +105,63 @@ function __static__CalculateWalltimeForInverter()
     fi
 }
 
+function __static__SetExcludedNodesString()
+{
+    CheckIfVariablesAreSet excludeNodesString
+    #Trying to retrieve information about the list of nodes to be excluded if user gave file
+    if [[ "${BHMAS_excludeNodesGlobalPath}" != '' ]]; then
+        set +e #Here we want to "allow" grep or ssh to fail, since there could e.g. be connection problems. Afterwards we check excludeString.
+        if [[ -f "${BHMAS_excludeNodesGlobalPath}" ]]; then
+            excludeString=$(grep -oE '\-\-exclude=.*\[.*\]' ${BHMAS_excludeNodesGlobalPath} 2>/dev/null)
+            if [[ $? -eq 2 ]]; then
+                Error "It was not possible to recover the exclude nodes list from " file "${BHMAS_excludeNodesGlobalPath}" " file!"
+            fi
+        elif [[ ${BHMAS_excludeNodesGlobalPath} =~ : ]]; then
+            excludeString=$(ssh ${BHMAS_excludeNodesGlobalPath%%:*} "grep -oE '\-\-exclude=.*\[.*\]' ${BHMAS_excludeNodesGlobalPath#*:} 2>/dev/null")
+            if [[ $? -eq 2 ]]; then
+                Error "It was not possible to recover the exclude nodes list over ssh connection!"
+            fi
+        fi
+        set -e
+    fi
+    if [[ "${excludeNodesString:-}" = "" ]]; then
+        Warning -n "No string to exclude nodes in jobscript is available!"
+        AskUser -n "         Do you still want to continue the jobscript creation?"
+        if UserSaidNo; then
+            cecho "\n" B lr "No job will be created. Exiting...\n"
+            exit ${BHMAS_failureExitCode}
+        fi
+    fi
+}
+
+function __static__ProduceJobScript()
+{
+    local jobScriptGlobalPath walltime betaValues betaValue excludeNodesString
+    jobScriptGlobalPath="$1"; walltime="$2"; shift 2
+    betaValues=( "$@" )
+    excludeNodesString=''
+    __static__SetExcludedNodesString
+    #Print to the screen the set of betas together with the excluded nodes if available
+    cecho -n "  -"
+    for betaValue in "${betaValues[@]}"; do
+        cecho -n "    ${BHMAS_betaPrefix}${betaValue%_*}"
+    done
+    cecho "     ${excludeNodesString}"
+    #Produce job script
+    AddSchedulerSpecificPartToJobScript "${jobScriptGlobalPath}" "${walltime}" "${excludeNodesString}"
+    if [[ ${BHMAS_executionMode} = 'mode:invert-configurations' ]]; then
+        AddSoftwareSpecificPartToMeasurementJobScript "${jobScriptGlobalPath}" "${betaValues[@]}"
+    else
+        AddSoftwareSpecificPartToProductionJobScript "${jobScriptGlobalPath}" "${betaValues[@]}"
+    fi
+}
+
 function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
 {
     local betaValuesToBeSplit betasForJobScript betasString jobScriptFilename jobScriptGlobalPath walltime
     betaValuesToBeSplit=( $@ )
     cecho lc "\n================================================================================="
-    cecho bb "  The following beta values have been grouped (together with the seed if used):"
+    cecho bb " The following beta values have been grouped (together with the seed if used):"
     while [[ "${!betaValuesToBeSplit[@]}" != "" ]]; do
         betasForJobScript=(${betaValuesToBeSplit[@]:0:${BHMAS_GPUsPerNode}})
         betaValuesToBeSplit=(${betaValuesToBeSplit[@]:${BHMAS_GPUsPerNode}})
@@ -124,11 +175,10 @@ function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
             #Call the function to produce the jobscript file
             if [[ ${BHMAS_executionMode} = 'mode:invert-configurations' ]]; then
                 walltime="$(__static__CalculateWalltimeForInverter)"
-                ProduceInverterJobscript "${jobScriptGlobalPath}" "${jobScriptFilename}" "${walltime}" "${betasForJobScript[@]}"
             else
                 walltime="$(__static__CalculateWalltimeExtractingNumberOfTrajectoriesPerBetaAndUsingTimesPerTrajectoryIfGiven "${betasForJobScript[@]}")"
-                ProduceJobscript "${jobScriptGlobalPath}" "${jobScriptFilename}" "${walltime}" "${betasForJobScript[@]}"
             fi
+            __static__ProduceJobScript "${jobScriptGlobalPath}" "${walltime}" "${betasForJobScript[@]}"
             if [[ -e ${jobScriptGlobalPath} ]]; then
                 BHMAS_betaValuesToBeSubmitted+=( "${betasString}" )
             else
@@ -139,6 +189,7 @@ function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
         else
             if [[ -e ${jobScriptGlobalPath} ]]; then
                 BHMAS_betaValuesToBeSubmitted+=( "${betasString}" )
+                cecho "  - ${betasString}"
             else
                 cecho lr "\n Jobscript " file "${jobScriptFilename}" " not found! Option " emph "--submitonly" " cannot be applied! Skipping this job submission!\n"
                 BHMAS_problematicBetaValues+=( "${betasString}" )
