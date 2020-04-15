@@ -19,10 +19,14 @@
 
 function AddSchedulerSpecificPartToJobScript_SLURM()
 {
-    local jobScriptGlobalPath walltime excludeNodesString jobScriptFilename
+    local jobScriptGlobalPath walltime excludeNodesString jobScriptFilename\
+          partitionDirective nodelistDirective gresDirective constraintDirective\
+          outputAndErrorFilename
     jobScriptGlobalPath="$1"; walltime="$2"; excludeNodesString="$3"; shift 3
     jobScriptFilename="$(basename "${jobScriptGlobalPath}")"
-    local partitionDirective nodelistDirective gresDirective constraintDirective
+    if [[ "${excludeNodesString}" != '' ]]; then
+        excludeNodesString="$SBATCH ${excludeNodesString}"
+    fi
     if [[ "${BHMAS_clusterPartition}" != '' ]]; then
         partitionDirective="#SBATCH --partition=${BHMAS_clusterPartition}"
     fi
@@ -35,6 +39,11 @@ function AddSchedulerSpecificPartToJobScript_SLURM()
     if [[ "${BHMAS_clusterConstraint}" != '' ]]; then
         constraintDirective="#SBATCH --constraint=${BHMAS_clusterConstraint}"
     fi
+    if [[ "${BHMAS_lqcdSoftware}" = 'mode:invert-configurations' ]]; then
+        outputAndErrorFilename="${BHMAS_inverterFilename}"
+    else
+        outputAndErrorFilename="${BHMAS_hmcFilename}"
+    fi
 
     exec 5>&1 1> "${jobScriptGlobalPath}"
     cat <<END_OF_INPUTFILE
@@ -44,11 +53,11 @@ function AddSchedulerSpecificPartToJobScript_SLURM()
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=${BHMAS_userEmail}
 #SBATCH --time=${walltime}
-#SBATCH --output=${BHMAS_hmcFilename}.%j.out
-#SBATCH --error=${BHMAS_hmcFilename}.%j.err
+#SBATCH --output=${outputAndErrorFilename}.%j.out
+#SBATCH --error=${outputAndErrorFilename}.%j.err
 #SBATCH --no-requeue
 #SBATCH --ntasks=${BHMAS_GPUsPerNode}
-#SBATCH ${excludeNodesString}
+${excludeNodesString}
 ${partitionDirective:-}
 ${nodelistDirective:-}
 ${gresDirective:-}

@@ -132,7 +132,7 @@ function AddSoftwareSpecificPartToProductionJobScript_CL2QCD()
         "echo \"Date and time: \$(date)\""\
         "" ""
 
-    #Backup important files if working on different disks and remove executable
+    #Backup important files if working on different disks and remove executable(s)
     if [[ "${BHMAS_submitDiskGlobalPath}" != "${BHMAS_runDiskGlobalPath}" ]]; then
         __static__AddToJobscriptFile "# Backup files"
         for index in "${!betaValues[@]}"; do

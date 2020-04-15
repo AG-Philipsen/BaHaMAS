@@ -149,7 +149,11 @@ function __static__ProduceJobScript()
     cecho "     ${excludeNodesString}"
     #Produce job script
     AddSchedulerSpecificPartToJobScript "${jobScriptGlobalPath}" "${walltime}" "${excludeNodesString}"
-    AddSoftwareSpecificPartToProductionJobScript "${jobScriptGlobalPath}" "${betaValues[@]}"
+    if [[ ${BHMAS_executionMode} = 'mode:invert-configurations' ]]; then
+        AddSoftwareSpecificPartToMeasurementJobScript "${jobScriptGlobalPath}" "${betaValues[@]}"
+    else
+        AddSoftwareSpecificPartToProductionJobScript "${jobScriptGlobalPath}" "${betaValues[@]}"
+    fi
 }
 
 function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
@@ -171,11 +175,10 @@ function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
             #Call the function to produce the jobscript file
             if [[ ${BHMAS_executionMode} = 'mode:invert-configurations' ]]; then
                 walltime="$(__static__CalculateWalltimeForInverter)"
-                ProduceInverterJobscript "${jobScriptGlobalPath}" "${jobScriptFilename}" "${walltime}" "${betasForJobScript[@]}"
             else
                 walltime="$(__static__CalculateWalltimeExtractingNumberOfTrajectoriesPerBetaAndUsingTimesPerTrajectoryIfGiven "${betasForJobScript[@]}")"
-                __static__ProduceJobScript "${jobScriptGlobalPath}" "${walltime}" "${betasForJobScript[@]}"
             fi
+            __static__ProduceJobScript "${jobScriptGlobalPath}" "${walltime}" "${betasForJobScript[@]}"
             if [[ -e ${jobScriptGlobalPath} ]]; then
                 BHMAS_betaValuesToBeSubmitted+=( "${betasString}" )
             else

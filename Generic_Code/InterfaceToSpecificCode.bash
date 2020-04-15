@@ -99,7 +99,7 @@ function AddSoftwareSpecificPartToProductionJobScript()
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
 
-function ProduceInverterJobscript()
+function AddSoftwareSpecificPartToMeasurementJobScript()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
