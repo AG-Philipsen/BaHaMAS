@@ -62,6 +62,11 @@ function __static__CheckExistenceOfFunctionAndCallIt()
 
 #-------------------------------------------------------------------------------------------------------------------------#
 
+function AddSchedulerSpecificPartToJobScript()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler} "$@"
+}
+
 function SubmitJob()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler} "$@"
@@ -89,7 +94,7 @@ function ProduceInputFile()
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
 
-function ProduceJobscript()
+function AddSoftwareSpecificPartToProductionJobScript()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }

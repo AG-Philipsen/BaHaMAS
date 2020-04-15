@@ -26,68 +26,13 @@ function __static__AddToJobscriptFile()
     done
 }
 
-function ProduceJobscript_CL2QCD()
+function AddSoftwareSpecificPartToProductionJobScript_CL2QCD()
 {
-    local jobScriptGlobalPath jobScriptFilename walltime betaValues betaValue index excludeString
-    jobScriptGlobalPath="$1"; jobScriptFilename="$2"; walltime="$3"; shift 3
+    local jobScriptGlobalPath betaValues index
+    jobScriptGlobalPath="$1"; shift
     betaValues=( "$@" )
 
-    rm -f ${jobScriptGlobalPath} || exit ${BHMAS_fatalBuiltin}
-    touch ${jobScriptGlobalPath} || exit ${BHMAS_fatalBuiltin}
-
-    #This jobscript is for CL2QCD only!
-    __static__AddToJobscriptFile\
-        "#!/bin/bash"\
-        ""\
-        "#SBATCH --job-name=${jobScriptFilename#${BHMAS_jobScriptPrefix}_*}"\
-        "#SBATCH --mail-type=FAIL"\
-        "#SBATCH --mail-user=${BHMAS_userEmail}"\
-        "#SBATCH --time=${walltime}"\
-        "#SBATCH --output=${BHMAS_hmcFilename}.%j.out"\
-        "#SBATCH --error=${BHMAS_hmcFilename}.%j.err"\
-        "#SBATCH --no-requeue"
-
-    [[ "${BHMAS_clusterPartition}"       != '' ]] && __static__AddToJobscriptFile "#SBATCH --partition=${BHMAS_clusterPartition}"
-    [[ "${BHMAS_clusterNode}"            != '' ]] && __static__AddToJobscriptFile "#SBATCH --nodelist=${BHMAS_clusterNode}"
-    [[ "${BHMAS_clusterGenericResource}" != '' ]] && __static__AddToJobscriptFile "#SBATCH --gres=${BHMAS_clusterGenericResource}"
-    [[ "${BHMAS_clusterConstraint}"      != '' ]] && __static__AddToJobscriptFile "#SBATCH --constraint=${BHMAS_clusterConstraint}"
-
-    #Trying to retrieve information about the list of nodes to be excluded if user gave file
-    if [[ "${BHMAS_excludeNodesGlobalPath}" != '' ]]; then
-        set +e #Here we want to "allow" grep or ssh to fail, since there could e.g. be connection problems. Afterwards we check excludeString.
-        if [[ -f "${BHMAS_excludeNodesGlobalPath}" ]]; then
-            excludeString=$(grep -oE '\-\-exclude=.*\[.*\]' ${BHMAS_excludeNodesGlobalPath} 2>/dev/null)
-            if [[ $? -eq 2 ]]; then
-                Error "It was not possible to recover the exclude nodes string from " file "${BHMAS_excludeNodesGlobalPath}" " file!"
-            fi
-        elif [[ ${BHMAS_excludeNodesGlobalPath} =~ : ]]; then
-            excludeString=$(ssh ${BHMAS_excludeNodesGlobalPath%%:*} "grep -oE '\-\-exclude=.*\[.*\]' ${BHMAS_excludeNodesGlobalPath#*:} 2>/dev/null")
-            if [[ $? -eq 2 ]]; then
-                Error "It was not possible to recover the exclude nodes string over ssh connection!"
-            fi
-        fi
-        set -e
-        if [[ "${excludeString:-}" != "" ]]; then
-            __static__AddToJobscriptFile "#SBATCH ${excludeString}"
-        else
-            Warning -n "No string to exclude nodes in jobscript is available!"
-            AskUser -n "         Do you still want to continue the jobscript creation?"
-            if UserSaidNo; then
-                cecho "\n" B lr "Exiting from job script creation process...\n"
-                rm -f ${jobScriptGlobalPath}
-                exit ${BHMAS_successExitCode}
-            fi
-        fi
-    fi
-
-    #Print to the screen the set of betas together with the excluded nodes if available
-    cecho -n "  -"
-    for betaValue in "${betaValues[@]}"; do
-        cecho -n "    ${BHMAS_betaPrefix}${betaValue%_*}"
-    done
-    cecho "     ${excludeString:-}"
-
-    __static__AddToJobscriptFile "#SBATCH --ntasks=${BHMAS_GPUsPerNode}" ""
+    #Job script variables
     for index in "${!betaValues[@]}"; do
         __static__AddToJobscriptFile "dir${index}=${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${betaValues[${index}]}"
     done
@@ -101,14 +46,18 @@ function ProduceJobscript_CL2QCD()
         "errFile=${BHMAS_hmcFilename}.\${SLURM_JOB_ID}.err"\
         ""\
         "# Check if directories exist"
+
+    #Job script directory checks
     for index in "${!betaValues[@]}"; do
         __static__AddToJobscriptFile\
-            "if [[ ! -d \${dir}${index} ]]; then"\
-            "  echo \"Could not find directory \\\"\${dir}${index}\\\" for runs. Aborting...\"" \
+            "if [[ ! -d \${dir${index}} ]]; then"\
+            "  echo \"Could not find directory \\\"\${dir${index}}\\\" for runs. Aborting...\"" \
             "  exit ${BHMAS_fatalFileNotFound}" \
             "fi" \
             ""
     done
+
+    #Print some information
     __static__AddToJobscriptFile\
         "# Print some information"\
         "echo \"$(printf "%s " ${betaValues[@]})\""\
@@ -117,21 +66,26 @@ function ProduceJobscript_CL2QCD()
         "echo \"GPU:  \${GPU_DEVICE_ORDINAL}\""\
         "echo \"Date and time: \$(date)\""\
         "echo \${SLURM_JOB_NODELIST} > ${BHMAS_hmcFilename}.${betasString:1}.\${SLURM_JOB_ID}.nodelist"\
-        ""\
+        ""
+
+    #Copying executable file(s) and if working on different disks also input file
+    __static__AddToJobscriptFile\
         "# TODO: this is necessary because the log file is produced in the directoy"\
         "#       of the exec. Copying it later does not guarantee that it is still the same..."\
         "echo \"Copy executable to beta directories in ${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}x.xxxx...\""
     for index in "${!betaValues[@]}"; do
-        __static__AddToJobscriptFile "rm -f \${dir}${index}/${BHMAS_hmcFilename} && cp -a ${BHMAS_hmcGlobalPath} \${dir}${index} || exit ${BHMAS_fatalBuiltin}"
+        __static__AddToJobscriptFile "rm -f \${dir${index}}/${BHMAS_hmcFilename} && cp -a ${BHMAS_hmcGlobalPath} \${dir${index}} || exit ${BHMAS_fatalBuiltin}"
     done
     __static__AddToJobscriptFile "echo \"...done!\"" ""
     if [[ "${BHMAS_submitDiskGlobalPath}" != "${BHMAS_runDiskGlobalPath}" ]]; then
         __static__AddToJobscriptFile "#Copy inputfile from home to work directories..."
         for index in "${!betaValues[@]}"; do
-            __static__AddToJobscriptFile "mkdir -p \${workdir}${index} && cp \${dir}${index}/${BHMAS_inputFilename} \${workdir}${index}/${BHMAS_inputFilename}.\${SLURM_JOB_ID} || exit ${BHMAS_fatalBuiltin}"
+            __static__AddToJobscriptFile "mkdir -p \${workdir${index}} && cp \${dir${index}}/${BHMAS_inputFilename} \${workdir${index}}/${BHMAS_inputFilename}.\${SLURM_JOB_ID} || exit ${BHMAS_fatalBuiltin}"
         done
         __static__AddToJobscriptFile "echo \"...done!\""
     fi
+
+    #Some more output information and run command(s)
     __static__AddToJobscriptFile\
         ""\
         "echo \"---------------------------\""\
@@ -145,17 +99,19 @@ function ProduceJobscript_CL2QCD()
         "# Run jobs from different directories"
     for index in "${!betaValues[@]}"; do
         __static__AddToJobscriptFile\
-            "mkdir -p \${workdir}${index} || exit ${BHMAS_fatalBuiltin}"\
-            "cd \${workdir}${index}"\
+            "mkdir -p \${workdir${index}} || exit ${BHMAS_fatalBuiltin}"\
+            "cd \${workdir${index}}"\
             "pwd &"\
             "if hash mbuffer 2>/dev/null; then"\
-            "    time \${dir}${index}/${BHMAS_hmcFilename} --inputFile=\${dir}${index}/${BHMAS_inputFilename} --deviceId=${index} --beta=${betaValues[${index}]%%_*} 2> \${dir}${index}/\${errFile} | mbuffer -q -m2M > \${dir}${index}/\${outFile} &"\
+            "    time \${dir${index}}/${BHMAS_hmcFilename} --inputFile=\${dir${index}}/${BHMAS_inputFilename} --deviceId=${index} --beta=${betaValues[${index}]%%_*} 2> \${dir${index}}/\${errFile} | mbuffer -q -m2M > \${dir${index}}/\${outFile} &"\
             "else"\
-            "    time srun -n 1 \${dir}${index}/${BHMAS_hmcFilename} --inputFile=\${dir}${index}/${BHMAS_inputFilename} --deviceId=${index} --beta=${betaValues[${index}]%%_*} > \${dir}${index}/\${outFile} 2> \${dir}${index}/\${errFile} &"\
+            "    time srun -n 1 \${dir${index}}/${BHMAS_hmcFilename} --inputFile=\${dir${index}}/${BHMAS_inputFilename} --deviceId=${index} --beta=${betaValues[${index}]%%_*} > \${dir${index}}/\${outFile} 2> \${dir${index}}/\${errFile} &"\
             "fi"\
             "PID_SRUN_${index}=\${!}"\
             ""
     done
+
+    #Waiting for job(s) and handling exit code
     __static__AddToJobscriptFile "#Execute wait \${PID} job after job"
     for index in "${!betaValues[@]}"; do
         __static__AddToJobscriptFile "wait \${PID_SRUN_}${index} || { printf \"\nError occurred in simulation at b${betaValues[${index}]%_*}. Please check (process id \${PID_SRUN_${index}})...\n\" && ERROR_OCCURRED=\"TRUE\"; }"
@@ -175,36 +131,40 @@ function ProduceJobscript_CL2QCD()
         ""\
         "echo \"Date and time: \$(date)\""\
         "" ""
+
+    #Backup important files if working on different disks and remove executable
     if [[ "${BHMAS_submitDiskGlobalPath}" != "${BHMAS_runDiskGlobalPath}" ]]; then
         __static__AddToJobscriptFile "# Backup files"
         for index in "${!betaValues[@]}"; do
-            __static__AddToJobscriptFile "cd \${dir}${index} || exit ${BHMAS_fatalBuiltin}"
+            __static__AddToJobscriptFile "cd \${dir${index}} || exit ${BHMAS_fatalBuiltin}"
             if [[ ${BHMAS_measurePbp} = "TRUE" ]]; then
-                __static__AddToJobscriptFile "cp \${workdir}${index}/${BHMAS_outputFilename}_pbp.dat \${dir}${index}/${BHMAS_outputFilename}_pbp.\${SLURM_JOB_ID} || exit ${BHMAS_fatalBuiltin}"
+                __static__AddToJobscriptFile "cp \${workdir${index}}/${BHMAS_outputFilename}_pbp.dat \${dir${index}}/${BHMAS_outputFilename}_pbp.\${SLURM_JOB_ID} || exit ${BHMAS_fatalBuiltin}"
             fi
-            __static__AddToJobscriptFile "cp \${workdir}${index}/${BHMAS_outputFilename} \${dir}${index}/${BHMAS_outputFilename}.\${SLURM_JOB_ID} || exit ${BHMAS_fatalBuiltin}" ""
+            __static__AddToJobscriptFile "cp \${workdir${index}}/${BHMAS_outputFilename} \${dir${index}}/${BHMAS_outputFilename}.\${SLURM_JOB_ID} || exit ${BHMAS_fatalBuiltin}" ""
         done
     fi
     __static__AddToJobscriptFile "# Remove executable"
     for index in "${!betaValues[@]}"; do
-        __static__AddToJobscriptFile "rm \${dir}${index}/${BHMAS_hmcFilename} || exit ${BHMAS_fatalBuiltin}"
+        __static__AddToJobscriptFile "rm \${dir${index}}/${BHMAS_hmcFilename} || exit ${BHMAS_fatalBuiltin}"
     done
     __static__AddToJobscriptFile ""
+
+    #If a thermalization was done, copy produced thermalized configuration to pool
     if [[ ${BHMAS_executionMode} = 'mode:thermalize' ]] || [[ ${BHMAS_executionMode} = "mode:continue-thermalization" ]]; then
         __static__AddToJobscriptFile "# Copy last configuration to Thermalized Configurations folder"
         if [[ ${BHMAS_betaPostfix} == "_thermalizeFromHot" ]]; then
             for index in "${!betaValues[@]}"; do
                 __static__AddToJobscriptFile\
-                    "NUMBER_LAST_CONFIGURATION_IN_FOLDER=\$(ls \${workdir}${index} | grep '${BHMAS_configurationPrefix}[0-9]\+' | grep -o '[0-9]\+' | sort -V | tail -n1)" \
-                    "cp \${workdir}${index}/${BHMAS_configurationPrefix//\\/}\${NUMBER_LAST_CONFIGURATION_IN_FOLDER} ${BHMAS_thermConfsGlobalPath}/${BHMAS_configurationPrefix//\\/}${BHMAS_parametersString}_${BHMAS_betaPrefix}${betaValues[${index}]%_*}_fromHot\$(sed 's/^0*//' <<< \"\${NUMBER_LAST_CONFIGURATION_IN_FOLDER}\") || exit ${BHMAS_fatalBuiltin}"
+                    "NUMBER_LAST_CONFIGURATION_IN_FOLDER=\$(ls \${workdir${index}} | grep '${BHMAS_configurationPrefix}[0-9]\+' | grep -o '[0-9]\+' | sort -V | tail -n1)" \
+                    "cp \${workdir${index}}/${BHMAS_configurationPrefix//\\/}\${NUMBER_LAST_CONFIGURATION_IN_FOLDER} ${BHMAS_thermConfsGlobalPath}/${BHMAS_configurationPrefix//\\/}${BHMAS_parametersString}_${BHMAS_betaPrefix}${betaValues[${index}]%_*}_fromHot\$(sed 's/^0*//' <<< \"\${NUMBER_LAST_CONFIGURATION_IN_FOLDER}\") || exit ${BHMAS_fatalBuiltin}"
             done
         elif [[ ${BHMAS_betaPostfix} == "_thermalizeFromConf" ]]; then
             for index in "${!betaValues[@]}"; do
-                __static__AddToJobscriptFile "NUMBER_LAST_CONFIGURATION_IN_FOLDER=\$(ls \${workdir}${index} | grep '${BHMAS_configurationPrefix}[0-9]\+' | grep -o '[0-9]\+' | sort -V | tail -n1)"
+                __static__AddToJobscriptFile "NUMBER_LAST_CONFIGURATION_IN_FOLDER=\$(ls \${workdir${index}} | grep '${BHMAS_configurationPrefix}[0-9]\+' | grep -o '[0-9]\+' | sort -V | tail -n1)"
                 #TODO: For the moment we assume 1000 tr. are done from hot. Better to avoid it
                 __static__AddToJobscriptFile\
                     "TRAJECTORIES_DONE_FROM_CONF=\$(( \$(sed 's/^0*//' <<< \"\${NUMBER_LAST_CONFIGURATION_IN_FOLDER}\") - 1000 ))"\
-                    "cp \${workdir}${index}/${BHMAS_configurationPrefix//\\/}\${NUMBER_LAST_CONFIGURATION_IN_FOLDER} ${BHMAS_thermConfsGlobalPath}/${BHMAS_configurationPrefix//\\/}${BHMAS_parametersString}_${BHMAS_betaPrefix}${betaValues[${index}]%_*}_fromConf\${TRAJECTORIES_DONE_FROM_CONF} || exit ${BHMAS_fatalBuiltin}"
+                    "cp \${workdir${index}}/${BHMAS_configurationPrefix//\\/}\${NUMBER_LAST_CONFIGURATION_IN_FOLDER} ${BHMAS_thermConfsGlobalPath}/${BHMAS_configurationPrefix//\\/}${BHMAS_parametersString}_${BHMAS_betaPrefix}${betaValues[${index}]%_*}_fromConf\${TRAJECTORIES_DONE_FROM_CONF} || exit ${BHMAS_fatalBuiltin}"
             done
         fi
     fi
