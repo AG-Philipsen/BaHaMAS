@@ -35,7 +35,7 @@ readonly BHMAS_coloredOutput='TRUE'
 
 #Retrieve information from git
 readonly BHMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"
-readonly BHMAS_command=${BHMAS_repositoryTopLevelPath}/BaHaMAS.bash
+readonly BHMAS_command=${BHMAS_repositoryTopLevelPath}/BaHaMAS
 readonly BHMAS_testsFolder=${BHMAS_repositoryTopLevelPath}/Tests
 readonly BHMAS_testsFolderAuxFiles=${BHMAS_testsFolder}/AuxiliaryFiles
 
