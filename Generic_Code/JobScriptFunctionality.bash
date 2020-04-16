@@ -21,7 +21,7 @@ function GetJobScriptFilename()
 {
     local stringWithBetaValues; stringWithBetaValues="$1"
 
-    if [[ ${BHMAS_executionMode} = 'mode:invert-configurations' ]]; then
+    if [[ ${BHMAS_executionMode} = 'mode:measure' ]]; then
         printf "${BHMAS_jobScriptPrefix}_${BHMAS_parametersString}__${stringWithBetaValues}_INV"
     else
         if [[ "${BHMAS_betaPostfix}" == "_thermalizeFromConf" ]]; then
@@ -149,7 +149,7 @@ function __static__ProduceJobScript()
     cecho "     ${excludeNodesString}"
     #Produce job script
     AddSchedulerSpecificPartToJobScript "${jobScriptGlobalPath}" "${walltime}" "${excludeNodesString}"
-    if [[ ${BHMAS_executionMode} = 'mode:invert-configurations' ]]; then
+    if [[ ${BHMAS_executionMode} = 'mode:measure' ]]; then
         AddSoftwareSpecificPartToMeasurementJobScript "${jobScriptGlobalPath}" "${betaValues[@]}"
     else
         AddSoftwareSpecificPartToProductionJobScript "${jobScriptGlobalPath}" "${betaValues[@]}"
@@ -173,7 +173,7 @@ function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
                 mv ${jobScriptGlobalPath} ${jobScriptGlobalPath}_$(date +'%F_%H%M') || exit ${BHMAS_fatalBuiltin}
             fi
             #Call the function to produce the jobscript file
-            if [[ ${BHMAS_executionMode} = 'mode:invert-configurations' ]]; then
+            if [[ ${BHMAS_executionMode} = 'mode:measure' ]]; then
                 walltime="$(__static__CalculateWalltimeForInverter)"
             else
                 walltime="$(__static__CalculateWalltimeExtractingNumberOfTrajectoriesPerBetaAndUsingTimesPerTrajectoryIfGiven "${betasForJobScript[@]}")"

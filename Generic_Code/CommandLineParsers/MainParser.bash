@@ -88,8 +88,8 @@ function ParseCommandLineOptionsTillMode()
         uncomment-betas )
             BHMAS_executionMode='mode:uncomment-betas'
             ;;
-        invert-configurations )
-            BHMAS_executionMode='mode:invert-configurations'
+        measure )
+            BHMAS_executionMode='mode:measure'
             ;;
         database )
             BHMAS_executionMode='mode:database'
@@ -158,7 +158,7 @@ function DeclareAllowedOptionsPerModeOrSoftware()
         ['mode:complete-betas-file']+='--betasfile'
         ['mode:comment-betas']+='--betasfile'
         ['mode:uncomment-betas']+='--betasfile'
-        ['mode:invert-configurations']+="--betasfile --jobscript_prefix ${clusterOptions}"
+        ['mode:measure']+="--betasfile --jobscript_prefix ${clusterOptions}"
         ['mode:database']+=''
         #-------------------------------------------------------------------------------
         # Multiple mode, specific/multiple-software options

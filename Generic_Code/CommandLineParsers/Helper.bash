@@ -71,7 +71,7 @@ function PrintMainHelper()
         ['thermalize']='Prepare what is needed and submit thermalization simulation(s)'
         ['continue']='Adjust input file(s) and resume new-chain simulation(s)'
         ['continue-thermalization']='Adjust input file(s) and resume thermalization simulation(s)'
-        ['invert-configurations']='Prepare what is needed and submit measurement simulation(s)'
+        ['measure']='Prepare what is needed and submit measurement job(s)'
     )
     monitorModesDescription=(
         ['job-status']='Give overview of submitted jobs getting information from scheduler'

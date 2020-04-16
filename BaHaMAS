@@ -200,7 +200,7 @@ case ${BHMAS_executionMode} in
         less "${BHMAS_betasFilename}"
         ;;
 
-    mode:invert-configurations )
+    mode:measure )
 
         ParseBetasFile
         ProcessBetaValuesForInversion

@@ -321,7 +321,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
         mode:comment-betas )
             ;;
 
-        mode:invert-configurations )
+        mode:measure )
             variablesThatMustBeNotEmpty+=(
                 BHMAS_jobScriptPrefix
                 BHMAS_jobScriptFolderName

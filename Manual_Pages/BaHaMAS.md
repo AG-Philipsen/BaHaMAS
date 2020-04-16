@@ -59,7 +59,7 @@ continue
 continue-thermalization
 :   As **continue**, but for thermalization runs.
 
-invert-configurations
+measure
 :   Prepare what is needed and submit measurement simulation(s).
 
 prepare-only

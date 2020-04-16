@@ -166,7 +166,7 @@ function MakeTestPreliminaryOperations()
         commentBetas* | uncommentBetas* )
             __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeBetasToBeCommented" "betas"
             ;;
-        CL2QCD-invertConfs* )
+        CL2QCD-measure* )
             __static__CreateBetaFolder
             __static__CreateFilesInBetaFolder "conf.00100" "conf.00200" "conf.00300" "conf.00400"
             if [[ $1 =~ some$ ]]; then
