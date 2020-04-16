@@ -67,11 +67,11 @@ function PrintMainHelper()
     runSimulationsModesDescription=(
         ['prepare-only']='Prepare needed files and folders to submit new-chain simulation(s)'
         ['submit-only']='Submit new-chain simulation(s) after needed consistency checks'
-        ['submit']='Prepare what is needed and submit new-chain simulation(s)'
+        ['new-chain']='Prepare what is needed and submit new-chain simulation(s)'
         ['thermalize']='Prepare what is needed and submit thermalization simulation(s)'
         ['continue']='Adjust input file(s) and resume new-chain simulation(s)'
         ['continue-thermalization']='Adjust input file(s) and resume thermalization simulation(s)'
-        ['invert-configurations']='Prepare what is needed and submit measurement simulation(s)'
+        ['measure']='Prepare what is needed and submit measurement job(s)'
     )
     monitorModesDescription=(
         ['job-status']='Give overview of submitted jobs getting information from scheduler'

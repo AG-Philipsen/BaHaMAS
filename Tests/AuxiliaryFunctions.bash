@@ -100,7 +100,7 @@ function MakeTestPreliminaryOperations()
     cp "${BHMAS_testsFolderAuxFiles}/fakeBetas" "${testFolder}${testParametersPath}/betas"
 
     case "$1" in
-        CL2QCD-prepare-only | CL2QCD-submit | CL2QCD-submit-goal )
+        CL2QCD-prepare-only | CL2QCD-new-chain | CL2QCD-new-chain-goal )
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateThermalizedConfigurationFolder
             __static__CreateThermalizedConfiguration "fromConf4000"
@@ -166,7 +166,7 @@ function MakeTestPreliminaryOperations()
         commentBetas* | uncommentBetas* )
             __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeBetasToBeCommented" "betas"
             ;;
-        CL2QCD-invertConfs* )
+        CL2QCD-measure* )
             __static__CreateBetaFolder
             __static__CreateFilesInBetaFolder "conf.00100" "conf.00200" "conf.00300" "conf.00400"
             if [[ $1 =~ some$ ]]; then

@@ -1,14 +1,14 @@
-% BaHaMAS-invert-configurations(1) Version 1.0.0 | User Manual
+% BaHaMAS-measure(1) Version 1.0.0 | User Manual
 % [Alessandro Sciarra](sciarra@itp.uni-frankfurt.de)
 % 14 April 2020
 
 # NAME
 
-BaHaMAS-invert-configurations - Prepare what is needed and submit measurement simulation(s)
+BaHaMAS-measure - Prepare what is needed and submit measurement job(s)
 
 # SYNOPSIS
 
-**BaHaMAS invert-configurations** [*option* ...]
+**BaHaMAS measure** [*option* ...]
 
 # DESCRIPTION
 
