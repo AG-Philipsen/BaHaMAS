@@ -42,8 +42,8 @@ function AddSoftwareSpecificPartToMeasurementJobScript_CL2QCD()
     done
     __static__AddToInverterJobscriptFile\
         ""\
-        "outFile=${BHMAS_inverterFilename}.\${SLURM_JOB_ID}.out"\
-        "errFile=${BHMAS_inverterFilename}.\${SLURM_JOB_ID}.err"\
+        "outFile=${BHMAS_measurementExecutableFilename}.\${SLURM_JOB_ID}.out"\
+        "errFile=${BHMAS_measurementExecutableFilename}.\${SLURM_JOB_ID}.err"\
         ""\
         "# Check if directories exist"
 
@@ -65,7 +65,7 @@ function AddSoftwareSpecificPartToMeasurementJobScript_CL2QCD()
         "echo \"Host: \$(hostname)\""\
         "echo \"GPU:  \${GPU_DEVICE_ORDINAL}\""\
         "echo \"Date and time: \$(date)\""\
-        "echo \${SLURM_JOB_NODELIST} > ${BHMAS_inverterFilename}.${betasString:1}.\${SLURM_JOB_ID}.nodelist"\
+        "echo \${SLURM_JOB_NODELIST} > ${BHMAS_measurementExecutableFilename}.${betasString:1}.\${SLURM_JOB_ID}.nodelist"\
         ""
 
     #Copying executable file(s) and if working on different disks also input file
@@ -74,7 +74,7 @@ function AddSoftwareSpecificPartToMeasurementJobScript_CL2QCD()
         "#       of the exec. Copying it later does not guarantee that it is still the same..."\
         "echo \"Copy executable to beta directories in ${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}x.xxxx...\""
     for index in "${!betaValues[@]}"; do
-        __static__AddToInverterJobscriptFile "rm -f \${dir${index}}/${BHMAS_inverterFilename} && cp -a ${BHMAS_inverterGlobalPath} \${dir${index}} || exit ${BHMAS_fatalBuiltin}"
+        __static__AddToInverterJobscriptFile "rm -f \${dir${index}}/${BHMAS_measurementExecutableFilename} && cp -a ${BHMAS_measurementExecutableGlobalPath} \${dir${index}} || exit ${BHMAS_fatalBuiltin}"
     done
 
     #Some more output information and run command(s)
@@ -110,9 +110,9 @@ function AddSoftwareSpecificPartToMeasurementJobScript_CL2QCD()
             "for line in \$(cat \${workdir${index}}/${BHMAS_inversionSrunCommandsFilename}); do"\
             "    IFS=\${OLD_IFS} #Restore here old IFS to give separated options (and not only one)to CL2QCD!"\
             "    if hash mbuffer 2>/dev/null; then"\
-            "        time \${dir${index}}/${BHMAS_inverterFilename} \${line} --deviceId=${index} 2>> \${dir${index}}/\${errFile} | mbuffer -q -m2M >> \${dir${index}}/\${outFile}"\
+            "        time \${dir${index}}/${BHMAS_measurementExecutableFilename} \${line} --deviceId=${index} 2>> \${dir${index}}/\${errFile} | mbuffer -q -m2M >> \${dir${index}}/\${outFile}"\
             "    else"\
-            "        time srun -n 1 \${dir${index}}/${BHMAS_inverterFilename} \${line} --deviceId=${index} 2>> \${dir${index}}/\${errFile} >> \${dir${index}}/\${outFile}"\
+            "        time srun -n 1 \${dir${index}}/${BHMAS_measurementExecutableFilename} \${line} --deviceId=${index} 2>> \${dir${index}}/\${errFile} >> \${dir${index}}/\${outFile}"\
             "    fi"\
             "    if [[ \$? -ne 0 ]]; then"\
             "        printf \"\nError occurred in simulation at b${betaValues[${index}]%_*}.\n\""\
@@ -144,7 +144,7 @@ function AddSoftwareSpecificPartToMeasurementJobScript_CL2QCD()
     #Remove executable(s) and check if calculation went fine
     __static__AddToInverterJobscriptFile "# Remove executable"
     for index in "${!betaValues[@]}"; do
-        __static__AddToInverterJobscriptFile "rm \${dir${index}}/${BHMAS_inverterFilename} || exit ${BHMAS_fatalBuiltin}"
+        __static__AddToInverterJobscriptFile "rm \${dir${index}}/${BHMAS_measurementExecutableFilename} || exit ${BHMAS_fatalBuiltin}"
     done
     __static__AddToInverterJobscriptFile ""
     for index in "${!betaValues[@]}"; do

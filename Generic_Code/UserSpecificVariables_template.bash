@@ -50,7 +50,7 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_jobScriptFolderName=""
     readonly BHMAS_excludeNodesGlobalPath=""
     readonly BHMAS_projectSubpath=""
-    readonly BHMAS_hmcGlobalPath=""
+    readonly BHMAS_productionExecutableGlobalPath=""
     readonly BHMAS_inputFilename=""
     readonly BHMAS_outputFilename=""
     readonly BHMAS_plaquetteColumn=
@@ -64,7 +64,7 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_approxMetropolisFilename=""
     readonly BHMAS_databaseFilename=""
     readonly BHMAS_databaseGlobalPath=""
-    readonly BHMAS_inverterGlobalPath=""
+    readonly BHMAS_measurementExecutableGlobalPath=""
     readonly BHMAS_thermConfsGlobalPath=""
     readonly BHMAS_maximumWalltime=""
 
@@ -82,37 +82,37 @@ MakeFunctionsDefinedInThisFileReadonly
 
 # Documentation:
 #
-#     BHMAS_coloredOutput              -->  it can be 'TRUE' or 'FALSE' and can be used to disable coloured output
-#     BHMAS_lqcdSoftware               -->  it can be either CL2QCD or openQCD-FASTSUM
-#     BHMAS_userEmail                  -->  mail to which job information (e.g. failures) is sent to
-#     BHMAS_submitDiskGlobalPath       -->  global path to the disk from which the jobs are submitted (see further informations below)
-#     BHMAS_runDiskGlobalPath          -->  global path to the disk from which the jobs are run (see further informations below)
-#     BHMAS_GPUsPerNode                -->  number of GPUs per node
-#     BHMAS_jobScriptFolderName        -->  name of the folder where the job scripts are collected
-#     BHMAS_excludeNodesGlobalPath     -->  local or remote global path to file containing the directive to exclude nodes
-#     BHMAS_projectSubpath             -->  path from HOME and WORK to the folder containing the parameters folders structure (see further informations below)
-#     BHMAS_hmcGlobalPath              -->  production executable global path
-#     BHMAS_inputFilename              -->  name of the inputfile
-#     BHMAS_jobScriptPrefix            -->  prefix of the jobscript name
-#     BHMAS_outputFilename             -->  name of the outputfile
-#     BHMAS_plaquetteColumn            -->  number of column containing the plaquette value [first column is column number 1].
-#     BHMAS_deltaHColumn               -->  number of column containing the dH value [first column is column number 1].
-#     BHMAS_acceptanceColumn           -->  number of column containing outcomes (zeros or ones) of Metropolis test [first column is column number 1].
-#     BHMAS_trajectoryTimeColumn       -->  number of column containing the trajectory time in seconds [first column is column number 1].
-#     BHMAS_rationalApproxGlobalPath   -->  global path to the folder containing the rational approximations
-#     BHMAS_approxHeatbathFilename     -->  rational approximation used for the pseudofermion fields
-#     BHMAS_approxMDFilename           -->  rational approximation used for the molecular dynamis
-#     BHMAS_approxMetropolisFilename   -->  rational approximation used for the metropolis test
-#     BHMAS_inverterGlobalPath         -->  inverter executable global path
-#     BHMAS_thermConfsGlobalPath       -->  global path to the folder containing the thermalized configurations
-#     BHMAS_databaseGlobalPath         -->  directory where the the simulation status files are stored (it MUST be a GLOBALPATH)
-#     BHMAS_databaseFilename           -->  name of the file containing the database
-#     BHMAS_maximumWalltime            -->  maximum walltime accepted by the scheduler in the format 'days-hours:min:sec'
-#     BHMAS_walltime                   -->  jobs walltime in the format 'days-hours:min:sec'
-#     BHMAS_clusterPartition           -->  name of the partition of the cluster that has to be used
-#     BHMAS_clusterNode                -->  list of nodes that have to be used
-#     BHMAS_clusterConstraint          -->  constraint on hardware of the cluster
-#     BHMAS_clusterGenericResource     -->  cluster resource selection
+#     BHMAS_coloredOutput                    -->  it can be 'TRUE' or 'FALSE' and can be used to disable coloured output
+#     BHMAS_lqcdSoftware                     -->  it can be either CL2QCD or openQCD-FASTSUM
+#     BHMAS_userEmail                        -->  mail to which job information (e.g. failures) is sent to
+#     BHMAS_submitDiskGlobalPath             -->  global path to the disk from which the jobs are submitted (see further informations below)
+#     BHMAS_runDiskGlobalPath                -->  global path to the disk from which the jobs are run (see further informations below)
+#     BHMAS_GPUsPerNode                      -->  number of GPUs per node
+#     BHMAS_jobScriptFolderName              -->  name of the folder where the job scripts are collected
+#     BHMAS_excludeNodesGlobalPath           -->  local or remote global path to file containing the directive to exclude nodes
+#     BHMAS_projectSubpath                   -->  path from HOME and WORK to the folder containing the parameters folders structure (see further informations below)
+#     BHMAS_productionExecutableGlobalPath   -->  production executable global path
+#     BHMAS_inputFilename                    -->  name of the inputfile
+#     BHMAS_jobScriptPrefix                  -->  prefix of the jobscript name
+#     BHMAS_outputFilename                   -->  name of the outputfile
+#     BHMAS_plaquetteColumn                  -->  number of column containing the plaquette value [first column is column number 1].
+#     BHMAS_deltaHColumn                     -->  number of column containing the dH value [first column is column number 1].
+#     BHMAS_acceptanceColumn                 -->  number of column containing outcomes (zeros or ones) of Metropolis test [first column is column number 1].
+#     BHMAS_trajectoryTimeColumn             -->  number of column containing the trajectory time in seconds [first column is column number 1].
+#     BHMAS_rationalApproxGlobalPath         -->  global path to the folder containing the rational approximations
+#     BHMAS_approxHeatbathFilename           -->  rational approximation used for the pseudofermion fields
+#     BHMAS_approxMDFilename                 -->  rational approximation used for the molecular dynamis
+#     BHMAS_approxMetropolisFilename         -->  rational approximation used for the metropolis test
+#     BHMAS_measurementExecutableGlobalPath  -->  inverter executable global path
+#     BHMAS_thermConfsGlobalPath             -->  global path to the folder containing the thermalized configurations
+#     BHMAS_databaseGlobalPath               -->  directory where the the simulation status files are stored (it MUST be a GLOBALPATH)
+#     BHMAS_databaseFilename                 -->  name of the file containing the database
+#     BHMAS_maximumWalltime                  -->  maximum walltime accepted by the scheduler in the format 'days-hours:min:sec'
+#     BHMAS_walltime                         -->  jobs walltime in the format 'days-hours:min:sec'
+#     BHMAS_clusterPartition                 -->  name of the partition of the cluster that has to be used
+#     BHMAS_clusterNode                      -->  list of nodes that have to be used
+#     BHMAS_clusterConstraint                -->  constraint on hardware of the cluster
+#     BHMAS_clusterGenericResource           -->  cluster resource selection
 #
 # Some further information:
 #

@@ -42,8 +42,8 @@ function AddSoftwareSpecificPartToProductionJobScript_CL2QCD()
     done
     __static__AddToJobscriptFile\
         ""\
-        "outFile=${BHMAS_hmcFilename}.\${SLURM_JOB_ID}.out"\
-        "errFile=${BHMAS_hmcFilename}.\${SLURM_JOB_ID}.err"\
+        "outFile=${BHMAS_productionExecutableFilename}.\${SLURM_JOB_ID}.out"\
+        "errFile=${BHMAS_productionExecutableFilename}.\${SLURM_JOB_ID}.err"\
         ""\
         "# Check if directories exist"
 
@@ -65,7 +65,7 @@ function AddSoftwareSpecificPartToProductionJobScript_CL2QCD()
         "echo \"Host: \$(hostname)\""\
         "echo \"GPU:  \${GPU_DEVICE_ORDINAL}\""\
         "echo \"Date and time: \$(date)\""\
-        "echo \${SLURM_JOB_NODELIST} > ${BHMAS_hmcFilename}.${betasString:1}.\${SLURM_JOB_ID}.nodelist"\
+        "echo \${SLURM_JOB_NODELIST} > ${BHMAS_productionExecutableFilename}.${betasString:1}.\${SLURM_JOB_ID}.nodelist"\
         ""
 
     #Copying executable file(s) and if working on different disks also input file
@@ -74,7 +74,7 @@ function AddSoftwareSpecificPartToProductionJobScript_CL2QCD()
         "#       of the exec. Copying it later does not guarantee that it is still the same..."\
         "echo \"Copy executable to beta directories in ${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}x.xxxx...\""
     for index in "${!betaValues[@]}"; do
-        __static__AddToJobscriptFile "rm -f \${dir${index}}/${BHMAS_hmcFilename} && cp -a ${BHMAS_hmcGlobalPath} \${dir${index}} || exit ${BHMAS_fatalBuiltin}"
+        __static__AddToJobscriptFile "rm -f \${dir${index}}/${BHMAS_productionExecutableFilename} && cp -a ${BHMAS_productionExecutableGlobalPath} \${dir${index}} || exit ${BHMAS_fatalBuiltin}"
     done
     __static__AddToJobscriptFile "echo \"...done!\"" ""
     if [[ "${BHMAS_submitDiskGlobalPath}" != "${BHMAS_runDiskGlobalPath}" ]]; then
@@ -103,9 +103,9 @@ function AddSoftwareSpecificPartToProductionJobScript_CL2QCD()
             "cd \${workdir${index}}"\
             "pwd &"\
             "if hash mbuffer 2>/dev/null; then"\
-            "    time \${dir${index}}/${BHMAS_hmcFilename} --inputFile=\${dir${index}}/${BHMAS_inputFilename} --deviceId=${index} --beta=${betaValues[${index}]%%_*} 2> \${dir${index}}/\${errFile} | mbuffer -q -m2M > \${dir${index}}/\${outFile} &"\
+            "    time \${dir${index}}/${BHMAS_productionExecutableFilename} --inputFile=\${dir${index}}/${BHMAS_inputFilename} --deviceId=${index} --beta=${betaValues[${index}]%%_*} 2> \${dir${index}}/\${errFile} | mbuffer -q -m2M > \${dir${index}}/\${outFile} &"\
             "else"\
-            "    time srun -n 1 \${dir${index}}/${BHMAS_hmcFilename} --inputFile=\${dir${index}}/${BHMAS_inputFilename} --deviceId=${index} --beta=${betaValues[${index}]%%_*} > \${dir${index}}/\${outFile} 2> \${dir${index}}/\${errFile} &"\
+            "    time srun -n 1 \${dir${index}}/${BHMAS_productionExecutableFilename} --inputFile=\${dir${index}}/${BHMAS_inputFilename} --deviceId=${index} --beta=${betaValues[${index}]%%_*} > \${dir${index}}/\${outFile} 2> \${dir${index}}/\${errFile} &"\
             "fi"\
             "PID_SRUN_${index}=\${!}"\
             ""
@@ -145,7 +145,7 @@ function AddSoftwareSpecificPartToProductionJobScript_CL2QCD()
     fi
     __static__AddToJobscriptFile "# Remove executable"
     for index in "${!betaValues[@]}"; do
-        __static__AddToJobscriptFile "rm \${dir${index}}/${BHMAS_hmcFilename} || exit ${BHMAS_fatalBuiltin}"
+        __static__AddToJobscriptFile "rm \${dir${index}}/${BHMAS_productionExecutableFilename} || exit ${BHMAS_fatalBuiltin}"
     done
     __static__AddToJobscriptFile ""
 

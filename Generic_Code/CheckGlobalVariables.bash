@@ -44,8 +44,8 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
         BHMAS_databaseFilename
         BHMAS_databaseGlobalPath
         BHMAS_thermConfsGlobalPath
-        BHMAS_hmcGlobalPath
-        BHMAS_inverterGlobalPath
+        BHMAS_productionExecutableGlobalPath
+        BHMAS_measurementExecutableGlobalPath
         BHMAS_excludeNodesGlobalPath
         BHMAS_rationalApproxGlobalPath
         BHMAS_approxHeatbathFilename
@@ -64,8 +64,8 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
         BHMAS_projectSubpath
         BHMAS_databaseGlobalPath
         BHMAS_thermConfsGlobalPath
-        BHMAS_hmcGlobalPath
-        BHMAS_inverterGlobalPath
+        BHMAS_productionExecutableGlobalPath
+        BHMAS_measurementExecutableGlobalPath
         BHMAS_rationalApproxGlobalPath
     )
 
@@ -163,11 +163,11 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
 
 
     #Define dependent additional variables
-    if [[ "${BHMAS_hmcGlobalPath:-}" != '' ]]; then
-        readonly BHMAS_hmcFilename="${BHMAS_hmcGlobalPath##*/}"
+    if [[ "${BHMAS_productionExecutableGlobalPath:-}" != '' ]]; then
+        readonly BHMAS_productionExecutableFilename="${BHMAS_productionExecutableGlobalPath##*/}"
     fi
-    if [[ "${BHMAS_inverterGlobalPath:-}" != '' ]]; then
-        readonly BHMAS_inverterFilename="${BHMAS_inverterGlobalPath##*/}"
+    if [[ "${BHMAS_measurementExecutableGlobalPath:-}" != '' ]]; then
+        readonly BHMAS_measurementExecutableFilename="${BHMAS_measurementExecutableGlobalPath##*/}"
     fi
 
     #Decide whether to return or to exit
@@ -180,7 +180,7 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
 
 
 # Make logical checks on variables that must be necessarily set only in some cases and therefore not always used
-# EXAMPLE: If user wants only to produce confs, BHMAS_inverterFilename can be unset
+# EXAMPLE: If user wants only to produce confs, BHMAS_measurementExecutableFilename can be unset
 # Checks also existence directories/files depending on what BaHaMAS should do
 function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
 {
@@ -190,7 +190,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
     jobsNeededVariables=(
         BHMAS_inputFilename
         BHMAS_outputFilename
-        BHMAS_hmcGlobalPath
+        BHMAS_productionExecutableGlobalPath
         BHMAS_jobScriptPrefix
         BHMAS_jobScriptFolderName
     )
@@ -244,7 +244,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
                 BHMAS_thermConfsGlobalPath
             )
             neededFolders+=( "${BHMAS_thermConfsGlobalPath}" "${rationalApproxFolder[@]:-}" )
-            neededFiles+=( "${BHMAS_hmcGlobalPath}" "${rationalApproxFiles[@]:-}" )
+            neededFiles+=( "${BHMAS_productionExecutableGlobalPath}" "${rationalApproxFiles[@]:-}" )
             readonly BHMAS_walltimeIsNeeded='TRUE'
             ;;
 
@@ -255,7 +255,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
                 BHMAS_jobScriptFolderName
             )
             neededFolders+=( "${rationalApproxFolder[@]:-}" )
-            neededFiles+=( "${BHMAS_hmcGlobalPath}" "${rationalApproxFiles[@]:-}" )
+            neededFiles+=( "${BHMAS_productionExecutableGlobalPath}" "${rationalApproxFiles[@]:-}" )
             ;;
 
         mode:thermalize )
@@ -265,7 +265,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
                 BHMAS_thermConfsGlobalPath
             )
             neededFolders+=( "${BHMAS_thermConfsGlobalPath}" "${rationalApproxFolder[@]:-}" )
-            neededFiles+=( "${BHMAS_hmcGlobalPath}" "${rationalApproxFiles[@]:-}" )
+            neededFiles+=( "${BHMAS_productionExecutableGlobalPath}" "${rationalApproxFiles[@]:-}" )
             readonly BHMAS_walltimeIsNeeded='TRUE'
             ;;
 
@@ -275,7 +275,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
                 ${schedulerVariables[@]}
             )
             neededFolders+=( "${rationalApproxFolder[@]:-}" )
-            neededFiles+=( "${BHMAS_hmcGlobalPath}" "${rationalApproxFiles[@]:-}" )
+            neededFiles+=( "${BHMAS_productionExecutableGlobalPath}" "${rationalApproxFiles[@]:-}" )
             readonly BHMAS_walltimeIsNeeded='TRUE'
             ;;
 
@@ -286,7 +286,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
                 BHMAS_thermConfsGlobalPath
             )
             neededFolders+=( "${BHMAS_thermConfsGlobalPath}" "${rationalApproxFolder[@]:-}" )
-            neededFiles+=( "${BHMAS_hmcGlobalPath}" "${rationalApproxFiles[@]:-}" )
+            neededFiles+=( "${BHMAS_productionExecutableGlobalPath}" "${rationalApproxFiles[@]:-}" )
             readonly BHMAS_walltimeIsNeeded='TRUE'
             ;;
 
@@ -325,10 +325,10 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
             variablesThatMustBeNotEmpty+=(
                 BHMAS_jobScriptPrefix
                 BHMAS_jobScriptFolderName
-                BHMAS_inverterGlobalPath
+                BHMAS_measurementExecutableGlobalPath
                 ${schedulerVariables[@]}
             )
-            neededFiles+=( "${BHMAS_inverterGlobalPath}" )
+            neededFiles+=( "${BHMAS_measurementExecutableGlobalPath}" )
             ;;
 
         mode:database )
@@ -352,7 +352,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
                 BHMAS_thermConfsGlobalPath
             )
             neededFolders+=( "${BHMAS_thermConfsGlobalPath}" "${rationalApproxFolder[@]:-}" )
-            neededFiles+=( "${BHMAS_hmcGlobalPath}" "${rationalApproxFiles[@]:-}" )
+            neededFiles+=( "${BHMAS_productionExecutableGlobalPath}" "${rationalApproxFiles[@]:-}" )
             readonly BHMAS_walltimeIsNeeded='TRUE'
             ;;
 

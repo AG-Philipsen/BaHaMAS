@@ -40,9 +40,9 @@ function AddSchedulerSpecificPartToJobScript_SLURM()
         constraintDirective="#SBATCH --constraint=${BHMAS_clusterConstraint}"
     fi
     if [[ "${BHMAS_lqcdSoftware}" = 'mode:measure' ]]; then
-        outputAndErrorFilename="${BHMAS_inverterFilename}"
+        outputAndErrorFilename="${BHMAS_measurementExecutableFilename}"
     else
-        outputAndErrorFilename="${BHMAS_hmcFilename}"
+        outputAndErrorFilename="${BHMAS_productionExecutableFilename}"
     fi
 
     exec 5>&1 1> "${jobScriptGlobalPath}"
