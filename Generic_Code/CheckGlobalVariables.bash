@@ -237,7 +237,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
     #Check variables depending on BaHaMAS execution mode
     case ${BHMAS_executionMode} in
 
-        mode:submit )
+        mode:new-chain )
             variablesThatMustBeNotEmpty+=(
                 ${jobsNeededVariables[@]}
                 ${schedulerVariables[@]}

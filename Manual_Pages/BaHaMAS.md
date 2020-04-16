@@ -1,6 +1,6 @@
 % BaHaMAS(1) Version 1.0.0 | General User Manual
 % Alessandro Sciarra
-% 26 March 2020
+% 16 April 2020
 
 # NAME
 
@@ -69,7 +69,7 @@ prepare-only
 submit-only
 :   After having checked that all needed files and jobscripts are available, new-chain simulation(s) are submitted.
 
-submit
+new-chain
 :   This mode is doing at the same time what can be done separately by **prepare-only** and **submit-only** modes.
 
 thermalize

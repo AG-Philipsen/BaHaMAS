@@ -55,8 +55,8 @@ function ParseCommandLineOptionsTillMode()
         submit-only )
             BHMAS_executionMode='mode:submit-only'
             ;;
-        submit )
-            BHMAS_executionMode='mode:submit'
+        new-chain )
+            BHMAS_executionMode='mode:new-chain'
             ;;
         thermalize )
             BHMAS_executionMode='mode:thermalize'
@@ -147,7 +147,7 @@ function DeclareAllowedOptionsPerModeOrSoftware()
         # Specific-mode, all-software options
         ['mode:prepare-only']+="--betasfile --jobscript_prefix ${clusterOptions}"
         ['mode:submit-only']+='--betasfile --jobscript_prefix'
-        ['mode:submit']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
+        ['mode:new-chain']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
         ['mode:thermalize']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
         ['mode:continue']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
         ['mode:continue-thermalization']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
@@ -163,7 +163,7 @@ function DeclareAllowedOptionsPerModeOrSoftware()
         #-------------------------------------------------------------------------------
         # Multiple mode, specific/multiple-software options
         ["mode:prepare-only_CL2QCD"]+="${productionOptionsCL2QCD}"
-        ["mode:submit_CL2QCD"]+="${productionOptionsCL2QCD}"
+        ["mode:new-chain_CL2QCD"]+="${productionOptionsCL2QCD}"
         ["mode:thermalize_CL2QCD"]+="${productionOptionsCL2QCD}"
         ["mode:continue_CL2QCD"]+="${productionOptionsCL2QCD}"
         ["mode:continue-thermalization_CL2QCD"]+="${productionOptionsCL2QCD}"

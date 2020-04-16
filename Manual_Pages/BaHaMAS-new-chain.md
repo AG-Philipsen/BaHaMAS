@@ -1,14 +1,14 @@
-% BaHaMAS-submit(1) Version 1.0.0 | User Manual
+% BaHaMAS-new-chain(1) Version 1.0.0 | User Manual
 % [Alessandro Sciarra](sciarra@itp.uni-frankfurt.de)
 % 14 April 2020
 
 # NAME
 
-BaHaMAS-submit - Prepare what is needed and submit new-chain simulation(s)
+BaHaMAS-new-chain - Prepare what is needed and submit new-chain simulation(s)
 
 # SYNOPSIS
 
-**BaHaMAS submit** [*option* ...]
+**BaHaMAS new-chain** [*option* ...]
 
 # DESCRIPTION
 

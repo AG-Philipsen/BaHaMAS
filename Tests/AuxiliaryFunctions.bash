@@ -100,7 +100,7 @@ function MakeTestPreliminaryOperations()
     cp "${BHMAS_testsFolderAuxFiles}/fakeBetas" "${testFolder}${testParametersPath}/betas"
 
     case "$1" in
-        CL2QCD-prepare-only | CL2QCD-submit | CL2QCD-submit-goal )
+        CL2QCD-prepare-only | CL2QCD-new-chain | CL2QCD-new-chain-goal )
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateThermalizedConfigurationFolder
             __static__CreateThermalizedConfiguration "fromConf4000"
