@@ -113,6 +113,7 @@ function MakeTestPreliminaryOperations()
             __static__CreateThermalizedConfigurationFolder
             __static__CreateThermalizedConfiguration "fromConf4000"
             __static__CreateBetaFolder
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata" ".BaHaMAS_metadata"
             __static__CopyAuxiliaryFilesToBetaFolder "fakeInput"
             mkdir "Jobscripts_TEST" || exit ${BHMAS_fatalBuiltin}
             printf "NOT EMPTY\n" > "${testFolder}${testParametersPath}/Jobscripts_TEST/fakePrefix_${testParametersString}__${betaFolder%_*}"
@@ -128,6 +129,7 @@ function MakeTestPreliminaryOperations()
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateBetaFolder
             __static__CopyAuxiliaryFilesToBetaFolder "fakeInput" "fakeOutput" "fakeOutput_pbp.dat"
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata" ".BaHaMAS_metadata"
             __static__CompleteInputFileWithCorrectPaths
             __static__CreateFilesInBetaFolder "conf.save" "prng.save"
             case "${1##*-}" in
@@ -154,10 +156,12 @@ function MakeTestPreliminaryOperations()
             ;;
         accRateReport* )
             __static__CreateBetaFolder
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata" ".BaHaMAS_metadata"
             __static__CopyAuxiliaryFilesToBetaFolder "fakeOutput"
             ;;
         cleanOutputFiles* )
             __static__CreateBetaFolder
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata" ".BaHaMAS_metadata"
             __static__CopyAuxiliaryFilesToBetaFolder "fakeOutput" "fakeOutput_pbp.dat"
             ;;
         completeBetasFile* )
@@ -168,6 +172,7 @@ function MakeTestPreliminaryOperations()
             ;;
         CL2QCD-measure* )
             __static__CreateBetaFolder
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata" ".BaHaMAS_metadata"
             __static__CreateFilesInBetaFolder "conf.00100" "conf.00200" "conf.00300" "conf.00400"
             if [[ $1 =~ some$ ]]; then
                 __static__CreateFilesInBetaFolder "conf.00100_2_3_7_1_corr" "conf.00100_1_2_3_1_corr"

@@ -100,6 +100,7 @@ case ${BHMAS_executionMode} in
     mode:submit-only )
 
         ParseBetasFile
+        ValidateParsedBetaValues
         ProcessBetaValuesForSubmitOnly
         SubmitJobsForValidBetaValues
         ;;
@@ -107,6 +108,7 @@ case ${BHMAS_executionMode} in
     mode:new-chain )
 
         ParseBetasFile
+        ValidateParsedBetaValues
         FindConfigurationGlobalPathFromWhichToStartTheSimulation
         ProduceInputFileAndJobScriptForEachBeta
         SubmitJobsForValidBetaValues
@@ -134,6 +136,7 @@ case ${BHMAS_executionMode} in
             BHMAS_measurePbp='FALSE'
         fi
         ParseBetasFile
+        ValidateParsedBetaValues
         if [[ ${BHMAS_executionMode} = 'mode:thermalize' ]]; then
             FindConfigurationGlobalPathFromWhichToStartTheSimulation
             ProduceInputFileAndJobScriptForEachBeta
@@ -151,6 +154,7 @@ case ${BHMAS_executionMode} in
     mode:continue )
 
         ParseBetasFile
+        ValidateParsedBetaValues
         ProcessBetaValuesForContinue
         SubmitJobsForValidBetaValues
         ;;
@@ -168,6 +172,7 @@ case ${BHMAS_executionMode} in
     mode:acceptance-rate-report )
 
         ParseBetasFile
+        ValidateParsedBetaValues
         AcceptanceRateReport
         ;;
 
@@ -178,6 +183,7 @@ case ${BHMAS_executionMode} in
         else
             ParseBetasFile
         fi
+        ValidateParsedBetaValues
         CleanOutputFiles
         ;;
 
@@ -203,6 +209,7 @@ case ${BHMAS_executionMode} in
     mode:measure )
 
         ParseBetasFile
+        ValidateParsedBetaValues
         ProcessBetaValuesForInversion
         SubmitJobsForValidBetaValues
         ;;
@@ -210,6 +217,7 @@ case ${BHMAS_executionMode} in
     mode:prepare-only )
 
         ParseBetasFile
+        ValidateParsedBetaValues
         FindConfigurationGlobalPathFromWhichToStartTheSimulation
         ProduceInputFileAndJobScriptForEachBeta
         ;;

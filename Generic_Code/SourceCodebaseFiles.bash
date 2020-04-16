@@ -35,6 +35,7 @@ function __static__SourceCodebaseGeneralFiles()
         'JobScriptFunctionality.bash'
         'GlobalVariables.bash'
         'InterfaceToSpecificCode.bash'
+        'MetadataFunctionality.bash'
         'OperationsOnBetasFile.bash'
         'OutputFunctionality.bash'
         'PathManagementFunctionality.bash'
