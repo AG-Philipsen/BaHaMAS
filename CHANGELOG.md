@@ -32,6 +32,7 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 ## [Unreleased](https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/compare/BaHaMAS-0.1.0...develop)
 
+* :new: Add a hidden metadata file mechanism to check LQCD software consistency.
 * :white_check_mark: The setup suggests and optionally helps the user to improve the environment for a better BaHaMAS usage.
 * :new: Manual pages have been added and connected to the `--help` option which acts now differently for each mode.
 * :recycle: LQCD software specific code and scheduler specific code has been moved to own directory and an interface to the generic code has been added.

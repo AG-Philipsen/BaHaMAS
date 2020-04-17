@@ -138,6 +138,9 @@ function DeclareBaHaMASGlobalVariables()
     declare -gA BHMAS_goalStatistics=()
     declare -gA BHMAS_startConfigurationGlobalPath=()
 
+    #Metadata variables
+    readonly BHMAS_metadataFilename='.BaHaMAS_metadata'
+
     #Execution mode variable
     BHMAS_executionMode='mode:_unset_'
 
