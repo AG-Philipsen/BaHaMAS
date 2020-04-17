@@ -201,7 +201,6 @@ function __static__PrintMessageToScreen()
         esac
         shift
     done
-    #[ "$1" = '-n' ] && initialEndline='' && shift
     case "${typeOfMessage}" in
         WARNING )
             messageColor='ly' ;;
@@ -211,7 +210,6 @@ function __static__PrintMessageToScreen()
             messageColor='lo'
             finalString='Please contact the developers!' ;;
     esac
-    [[ "$1" = '-e' ]] && typeOfMessage="${typeOfMessage//?/ }" && shift
     fullMessage="$(cecho ${messageColor} "${@//\\n/$'\n' ${typeOfMessage//?/ }  }")"
     if [[ ${printMessageLabel} = 'TRUE' ]]; then
         cecho "${initialEndline} " ${messageColor} B U "${typeOfMessage}" uU ": " uB "${fullMessage}"
