@@ -248,6 +248,17 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
             readonly BHMAS_walltimeIsNeeded='TRUE'
             ;;
 
+        mode:prepare-only )
+            variablesThatMustBeNotEmpty+=(
+                ${jobsNeededVariables[@]}
+                ${schedulerVariables[@]}
+                BHMAS_thermConfsGlobalPath
+            )
+            neededFolders+=( "${BHMAS_thermConfsGlobalPath}" "${rationalApproxFolder[@]:-}" )
+            neededFiles+=( "${BHMAS_productionExecutableGlobalPath}" "${rationalApproxFiles[@]:-}" )
+            readonly BHMAS_walltimeIsNeeded='TRUE'
+            ;;
+
         mode:submit-only )
             variablesThatMustBeNotEmpty+=(
                 BHMAS_inputFilename
@@ -343,17 +354,6 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
                 BHMAS_databaseFilename
             )
             neededFolders+=( "${BHMAS_databaseGlobalPath}" )
-            ;;
-
-        mode:prepare-only )
-            variablesThatMustBeNotEmpty+=(
-                ${jobsNeededVariables[@]}
-                ${schedulerVariables[@]}
-                BHMAS_thermConfsGlobalPath
-            )
-            neededFolders+=( "${BHMAS_thermConfsGlobalPath}" "${rationalApproxFolder[@]:-}" )
-            neededFiles+=( "${BHMAS_productionExecutableGlobalPath}" "${rationalApproxFiles[@]:-}" )
-            readonly BHMAS_walltimeIsNeeded='TRUE'
             ;;
 
         * )
