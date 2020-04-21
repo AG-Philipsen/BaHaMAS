@@ -26,11 +26,11 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
     mustReturn='TRUE'
     variablesThatMustBeNotEmpty=(
         BHMAS_lqcdSoftware
-        BHMAS_userEmail
         BHMAS_submitDiskGlobalPath
         BHMAS_runDiskGlobalPath
     )
     variablesThatMustBeDeclared=(
+        BHMAS_userEmail
         BHMAS_GPUsPerNode
         BHMAS_jobScriptFolderName
         BHMAS_projectSubpath
@@ -47,6 +47,7 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
         BHMAS_productionExecutableGlobalPath
         BHMAS_measurementExecutableGlobalPath
         BHMAS_excludeNodesGlobalPath
+        BHMAS_useRationalApproxFiles
         BHMAS_rationalApproxGlobalPath
         BHMAS_approxHeatbathFilename
         BHMAS_approxMDFilename
@@ -105,9 +106,11 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
         Error -n B emph "BHMAS_coloredOutput" uB " variable must be set either to " emph "TRUE" " or to " emph "FALSE"
         mustReturn='FALSE'
     fi
-    if [[ "${BHMAS_useRationalApproxFiles:-}" != 'TRUE' ]] && [[ "${BHMAS_useRationalApproxFiles:-}" != 'FALSE' ]]; then
-        Error -n B emph "BHMAS_useRationalApproxFiles" uB " variable must be set either to " emph "TRUE" " or to " emph "FALSE"
-        mustReturn='FALSE'
+    if [[ "${BHMAS_useRationalApproxFiles:-}" != '' ]]; then
+        if [[ "${BHMAS_useRationalApproxFiles}" != 'TRUE' ]] && [[ "${BHMAS_useRationalApproxFiles}" != 'FALSE' ]]; then
+            Error -n B emph "BHMAS_useRationalApproxFiles" uB " variable must be set either to " emph "TRUE" " or to " emph "FALSE"
+            mustReturn='FALSE'
+        fi
     fi
     for variable in BHMAS_walltime BHMAS_maximumWalltime; do
         if [[ "${!variable:-}" != '' ]] && [[ ! ${!variable} =~ ^([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]]; then
