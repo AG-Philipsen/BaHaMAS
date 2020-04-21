@@ -43,6 +43,11 @@ function PrepareSoftwareSpecificGlobalVariableValidation_OpenQCD-FASTSUM()
     # OpenQCD-FASTSUM requires to compile the production executable for
     # each job and hence BaHaMAS has to know what to do
     productionJobsNeededVariables+=(
+        BHMAS_productionCodebaseGlobalPath
+        BHMAS_productionMakefileTarget
+        BHMAS_Compiler
+        BHMAS_CompilerFlags
+        BHMAS_MPIIncludeGlobalPath
     )
 }
 

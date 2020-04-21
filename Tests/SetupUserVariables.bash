@@ -33,6 +33,11 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_excludeNodesGlobalPath="${BHMAS_submitDiskGlobalPath}/ExcludeNodes_TEST"
     readonly BHMAS_projectSubpath="StaggeredFakeProject"
     readonly BHMAS_productionExecutableGlobalPath="${BHMAS_submitDiskGlobalPath}/AuxiliaryFiles/fakeExecutable"
+    readonly BHMAS_productionCodebaseGlobalPath=''
+    readonly BHMAS_productionMakefileTarget=''
+    readonly BHMAS_Compiler=''
+    readonly BHMAS_CompilerFlags=''
+    readonly BHMAS_MPIIncludeGlobalPath=''
     readonly BHMAS_inputFilename="fakeInput"
     readonly BHMAS_jobScriptPrefix="fakePrefix"
     readonly BHMAS_outputFilename="fakeOutput"

@@ -51,6 +51,11 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_excludeNodesGlobalPath=""
     readonly BHMAS_projectSubpath=""
     readonly BHMAS_productionExecutableGlobalPath=""
+    readonly BHMAS_productionCodebaseGlobalPath=""
+    readonly BHMAS_productionMakefileTarget=""
+    readonly BHMAS_Compiler="$(which mpicc)"
+    readonly BHMAS_CompilerFlags=""
+    readonly BHMAS_MPIIncludeGlobalPath="${BHMAS_Compiler/%bin\/mpicc/include}"
     readonly BHMAS_inputFilename=""
     readonly BHMAS_outputFilename=""
     readonly BHMAS_plaquetteColumn=
