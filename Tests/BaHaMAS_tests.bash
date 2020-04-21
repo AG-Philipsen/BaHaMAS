@@ -66,10 +66,11 @@ declare -A availableTests=()
 declare -a testsToBeRun=() #To keep tests in order and make user decide which to run
 readonly testFolder="${BHMAS_testsFolder}/StaggeredFakeProject"
 readonly logFile="${BHMAS_testsFolder}/Tests.log"
+readonly userVariablesFile="${BHMAS_testsFolder}/SetupUserVariables.bash"
 readonly testParametersString='Nf2_mui0_mass0050_nt6_ns18'
 readonly testParametersPath="/${testParametersString//_/\/}"
 readonly betaFolder='b5.1111_s3333_continueWithNewChain'
-readonly listOfAuxiliaryFilesAndFolders=( "${testFolder}" "${logFile}" )
+readonly listOfAuxiliaryFilesAndFolders=( "${testFolder}" "${logFile}" "${userVariablesFile}" )
 
 
 #Possible Tests

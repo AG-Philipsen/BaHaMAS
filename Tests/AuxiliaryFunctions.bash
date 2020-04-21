@@ -92,7 +92,21 @@ function __static__CreateThermalizedConfiguration()
 
 function MakeTestPreliminaryOperations()
 {
-    local trashFolderName file folder
+    local software trashFolderName file folder
+    #Link user variable file depending on test case
+    if [[ "$1" =~ ^OpenQCD-FASTSUM ]]; then
+        software='OpenQCD-FASTSUM'
+    else
+        software='CL2QCD'
+    fi
+    if [[ -f "${userVariablesFile}" ]]; then
+        if [[ ! -L "${userVariablesFile}" ]]; then
+            Fatal ${BHMAS_fatalLogicError} 'File ' file "${userVariablesFile}" ' existing and not a symlink!'
+        else
+            rm "${userVariablesFile}"
+        fi
+    fi
+    ln -s "${BHMAS_testsFolder}/UserVariables_${software}.bash" "${userVariablesFile}"
     #Always create params folders and go at betafolder level
     __static__CreateParametersFolders
     cd "${testFolder}${testParametersPath}" || exit ${BHMAS_fatalBuiltin}
@@ -312,6 +326,8 @@ function DeleteAuxiliaryFilesAndFolders()
     for name in "${listOfAuxiliaryFilesAndFolders[@]}"; do
         if [[ -d "${name}" ]]; then
             [[ ${reportLevel} -eq 3 ]] && cecho p " - Removing " dir "${name}"
+        elif [[ -L "${name}" ]]; then
+            [[ ${reportLevel} -eq 3 ]] && cecho p " - Removing " emph "${name}"
         elif [[ -f "${name}" ]]; then
             [[ ${reportLevel} -eq 3 ]] && cecho p " - Removing " file "${name}"
         elif ls "${name}" 1>/dev/null 2>&1; then
