@@ -285,19 +285,29 @@ function CheckNumberOfFunctionArguments()
 }
 
 
-
 function MakeFunctionsDefinedInThisFileReadonly()
 {
     # Here we assume all BaHaMAS functions are defined with the same stile,
     # including empty parenteses and the braces on new lines! I.e.
     #    function nameOfTheFunction()
+    #
+    # Accepted symbols in function name: letters, '_', ':' and '-'
+    #
     # NOTE: The file from which this function is called is ${BASH_SOURCE[1]}
     local declaredFunctions functionName
-    declaredFunctions=(
-        $(grep -E '^[[:space:]]*function[[:space:]]+[[:alnum:]_]+\(\)[[:space:]]*$' "${BASH_SOURCE[1]}" |\
+    declaredFunctions=( # Here word splitting can split names, no space allowed in function name!
+        $(grep -E '^[[:space:]]*function[[:space:]]+[-[:alnum:]_:]+\(\)[[:space:]]*$' "${BASH_SOURCE[1]}" |\
            sed -E 's/^[[:space:]]*function[[:space:]]+([^(]+)\(\)[[:space:]]*$/\1/')
     )
-    readonly -f "${declaredFunctions[@]}"
+    if [[ ${#declaredFunctions[@]} -eq 0 ]]; then
+        if [[ ! ${BHMAS_coloredOutput-} =~ ^(TRUE|FALSE)$ ]]; then
+            BHMAS_coloredOutput='TRUE' #It might be unset whe error occurs!
+        fi
+        Internal 'Function ' emph "${FUNCNAME}" ' called, but no function found in file\n'\
+                 file "${BASH_SOURCE[1]}" '.'
+    else
+        readonly -f "${declaredFunctions[@]}"
+    fi
 }
 
 
