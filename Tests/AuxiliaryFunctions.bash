@@ -154,12 +154,12 @@ function MakeTestPreliminaryOperations()
             __static__CreateBetaFolder
             __static__CopyAuxiliaryFilesToBetaFolder "fakeExecutable.123456.out" "fakeInput" "fakeOutput"
             ;;
-        accRateReport* )
+        CL2QCD-accRateReport* )
             __static__CreateBetaFolder
             __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata" ".BaHaMAS_metadata"
             __static__CopyAuxiliaryFilesToBetaFolder "fakeOutput"
             ;;
-        cleanOutputFiles* )
+        CL2QCD-cleanOutputFiles* )
             __static__CreateBetaFolder
             __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata" ".BaHaMAS_metadata"
             __static__CopyAuxiliaryFilesToBetaFolder "fakeOutput" "fakeOutput_pbp.dat"
