@@ -18,7 +18,7 @@
 #
 
 # This function will be called rather at the beginnin of the function
-# CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase
+# CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnExecutionMode
 # which will then finish to populate the "variablesThatMustBeNotEmpty"
 # array depending on the execution mode.
 #

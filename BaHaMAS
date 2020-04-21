@@ -71,7 +71,7 @@ fi
 ParseRemainingCommandLineOptions
 
 if [[ ${BHMAS_executionMode} != 'mode:job-status' ]]; then
-    CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase
+    CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnExecutionMode
 fi
 
 if [[ ${BHMAS_executionMode} != 'mode:database' ]] && [[ ${BHMAS_executionMode} != 'mode:job-status' ]]; then

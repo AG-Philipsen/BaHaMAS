@@ -185,7 +185,7 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
 # Make logical checks on variables that must be necessarily set only in some cases and therefore not always used
 # EXAMPLE: If user wants only to produce confs, BHMAS_measurementExecutableFilename can be unset
 # Checks also existence directories/files depending on what BaHaMAS should do
-function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
+function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnExecutionMode()
 {
     local index variable variablesThatMustBeNotEmpty productionJobsNeededVariables schedulerVariables\
           neededFolders neededFiles rationalApproxFolder rationalApproxFiles listOfVariablesAsString
