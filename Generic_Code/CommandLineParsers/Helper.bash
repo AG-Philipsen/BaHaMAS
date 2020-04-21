@@ -107,7 +107,7 @@ function __static__PrintHelperHeaderAndUsage()
 
 function __static__PrintModesDescription()
 {
-    CheckIfVariablesAreSet sectionHeaders "${!sectionHeaders[@]}"
+    CheckIfVariablesAreDeclared sectionHeaders "${!sectionHeaders[@]}"
     local section mode reference
     cecho bb '\n  Here in the following you find an overview of the existing execution modes.'
     for section in "${!sectionHeaders[@]}"; do

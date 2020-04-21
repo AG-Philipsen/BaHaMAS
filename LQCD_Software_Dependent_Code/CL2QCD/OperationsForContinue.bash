@@ -27,7 +27,7 @@
 function HandleEnvironmentForContinueForGivenSimulation_CL2QCD()
 {
     local runId; runId="$1"
-    CheckIfVariablesAreSet nameOfLastConfiguration nameOfLastPRNG runBetaDirectory
+    CheckIfVariablesAreDeclared nameOfLastConfiguration nameOfLastPRNG runBetaDirectory
 
     #If the option resumefrom is given in the betasfile we have to clean the ${runBetaDirectory}, otherwise just set the name of conf and prng
     if KeyInArray ${runId} BHMAS_trajectoriesToBeResumedFrom; then
@@ -105,7 +105,7 @@ function HandleEnvironmentForContinueForGivenSimulation_CL2QCD()
 function HandleOutputFilesForContinueForGivenSimulation_CL2QCD()
 {
     local runId; runId="$1"
-    CheckIfVariablesAreSet runBetaDirectory outputFileGlobalPath outputPbpFileGlobalPath
+    CheckIfVariablesAreDeclared runBetaDirectory outputFileGlobalPath outputPbpFileGlobalPath
 
     #If the option resumefrom is given in the betasfile we have to clean the ${runBetaDirectory}, otherwise just set the name of conf and prng
     if KeyInArray ${runId} BHMAS_trajectoriesToBeResumedFrom; then
@@ -178,7 +178,7 @@ function HandleOutputFilesForContinueForGivenSimulation_CL2QCD()
 function HandleInputFileForContinueForGivenSimulation_CL2QCD()
 {
     local runId; runId="$1"
-    CheckIfVariablesAreSet inputFileGlobalPath outputFileGlobalPath runBetaDirectory
+    CheckIfVariablesAreDeclared inputFileGlobalPath outputFileGlobalPath runBetaDirectory
 
     __static__HandleMeasurementsInInputFile            || return 1
     __static__HandlePbpInInputFile                     || return 1

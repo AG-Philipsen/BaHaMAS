@@ -107,7 +107,7 @@ function __static__CalculateWalltimeForInverter()
 
 function __static__SetExcludedNodesString()
 {
-    CheckIfVariablesAreSet excludeNodesString
+    CheckIfVariablesAreDeclared excludeNodesString
     #Trying to retrieve information about the list of nodes to be excluded if user gave file
     if [[ "${BHMAS_excludeNodesGlobalPath}" != '' ]]; then
         set +e #Here we want to "allow" grep or ssh to fail, since there could e.g. be connection problems. Afterwards we check excludeString.

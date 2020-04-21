@@ -266,12 +266,11 @@ function ConvertFromBytesToHumanReadable()
         {print human($1)}' <<< "${BYTES}"
 }
 
-function CheckIfVariablesAreSet()
+function CheckIfVariablesAreDeclared()
 {
     local variableName
     for variableName in "$@"; do
-        variableName+='[@]' #Try also if it is a sparse or associative array
-        if [[ ! -v "${variableName}" ]]; then
+        if ! declare -p "${variableName}" >/dev/null 2>&1; then
             Internal "Variable " emph "${variableName/%\[@\]/}" " not set but needed to be set in function " emph "${FUNCNAME[1]}" "."
         fi
     done
