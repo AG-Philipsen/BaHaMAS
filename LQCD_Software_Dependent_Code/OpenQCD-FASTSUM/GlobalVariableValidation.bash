@@ -36,30 +36,14 @@
 #  - neededFiles
 #  - neededFolders
 #
-function PrepareSoftwareSpecificGlobalVariableValidation_CL2QCD()
+function PrepareSoftwareSpecificGlobalVariableValidation_OpenQCD-FASTSUM()
 {
     CheckIfVariablesAreDeclared productionJobsNeededVariables schedulerVariables\
                                 neededFiles neededFolders
-    # CL2QCD does not get compiled by BaHaMAS, hence the executable
-    # must be available somewhere and BaHaMAS just copies it
+    # OpenQCD-FASTSUM requires to compile the production executable for
+    # each job and hence BaHaMAS has to know what to do
     productionJobsNeededVariables+=(
-        BHMAS_productionExecutableGlobalPath
     )
-    # If user wants to read the rational approximation from file check relative variables
-    if [[ ${BHMAS_useRationalApproxFiles} = 'TRUE' ]]; then
-        productionJobsNeededVariables+=(
-            BHMAS_rationalApproxGlobalPath
-            BHMAS_approxHeatbathFilename
-            BHMAS_approxMDFilename
-            BHMAS_approxMetropolisFilename
-        )
-        rationalApproxFolder+=( "${BHMAS_rationalApproxGlobalPath}" )
-        rationalApproxFiles+=(
-            "${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}*${BHMAS_approxHeatbathFilename}"
-            "${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}*${BHMAS_approxMDFilename}"
-            "${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}*${BHMAS_approxMetropolisFilename}"
-        )
-    fi
 }
 
 
