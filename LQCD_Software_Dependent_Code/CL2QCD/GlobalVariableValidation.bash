@@ -38,7 +38,26 @@
 #
 function PrepareSoftwareSpecificGlobalVariableValidation_CL2QCD()
 {
-    :
+    # CL2QCD does not get compiled by BaHaMAS, hence the executable
+    # must be available somewhere and BaHaMAS just copies it
+    productionJobsNeededVariables+=(
+        BHMAS_productionExecutableGlobalPath
+    )
+    # If user wants to read the rational approximation from file check relative variables
+    if [[ ${BHMAS_useRationalApproxFiles} = 'TRUE' ]]; then
+        productionJobsNeededVariables+=(
+            BHMAS_rationalApproxGlobalPath
+            BHMAS_approxHeatbathFilename
+            BHMAS_approxMDFilename
+            BHMAS_approxMetropolisFilename
+        )
+        rationalApproxFolder+=( "${BHMAS_rationalApproxGlobalPath}" )
+        rationalApproxFiles+=(
+            "${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}*${BHMAS_approxHeatbathFilename}"
+            "${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}*${BHMAS_approxMDFilename}"
+            "${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}*${BHMAS_approxMetropolisFilename}"
+        )
+    fi
 }
 
 

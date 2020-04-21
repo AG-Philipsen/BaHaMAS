@@ -193,7 +193,6 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
     productionJobsNeededVariables=(
         BHMAS_inputFilename
         BHMAS_outputFilename
-        BHMAS_productionExecutableGlobalPath
         BHMAS_jobScriptPrefix
         BHMAS_jobScriptFolderName
     )
@@ -220,22 +219,6 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
     neededFiles=()
     rationalApproxFolder=()
     rationalApproxFiles=()
-
-    #If user wants to read the rational approximation from file check relative variables
-    if [[ ${BHMAS_useRationalApproxFiles} = 'TRUE' ]]; then
-        productionJobsNeededVariables+=(
-            BHMAS_rationalApproxGlobalPath
-            BHMAS_approxHeatbathFilename
-            BHMAS_approxMDFilename
-            BHMAS_approxMetropolisFilename
-        )
-        rationalApproxFolder+=( "${BHMAS_rationalApproxGlobalPath}" )
-        rationalApproxFiles+=(
-            "${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}*${BHMAS_approxHeatbathFilename}"
-            "${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}*${BHMAS_approxMDFilename}"
-            "${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}*${BHMAS_approxMetropolisFilename}"
-        )
-    fi
 
     #Populate further arrays depending on LQCD software
     PrepareSoftwareSpecificGlobalVariableValidation
