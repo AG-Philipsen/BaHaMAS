@@ -184,18 +184,18 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
 # Checks also existence directories/files depending on what BaHaMAS should do
 function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
 {
-    local index variable variablesThatMustBeNotEmpty jobsNeededVariables schedulerVariables\
+    local index variable variablesThatMustBeNotEmpty productionJobsNeededVariables schedulerVariables\
           neededFolders neededFiles rationalApproxFolder rationalApproxFiles listOfVariablesAsString
     mustReturn='TRUE'
-    jobsNeededVariables=(
+    productionJobsNeededVariables=(
         BHMAS_inputFilename
         BHMAS_outputFilename
         BHMAS_productionExecutableGlobalPath
         BHMAS_jobScriptPrefix
         BHMAS_jobScriptFolderName
     )
-    schedulerVariables=( #BHMAS_walltime can be empty here, we check later if user gave time in betas file!
-        BHMAS_GPUsPerNode
+    schedulerVariables=(  #BHMAS_walltime can be empty here, we check later if user gave time in betas file!
+        BHMAS_GPUsPerNode #This is here and not in the array above because it is needed also in measure mode!
         BHMAS_maximumWalltime
         BHMAS_userEmail
     )
@@ -220,7 +220,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
 
     #If user wants to read the rational approximation from file check relative variables
     if [[ ${BHMAS_useRationalApproxFiles} = 'TRUE' ]]; then
-        jobsNeededVariables+=(
+        productionJobsNeededVariables+=(
             BHMAS_rationalApproxGlobalPath
             BHMAS_approxHeatbathFilename
             BHMAS_approxMDFilename
@@ -234,12 +234,15 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
         )
     fi
 
+    #Populate further arrays depending on LQCD software
+    PrepareSoftwareSpecificGlobalVariableValidation
+
     #Check variables depending on BaHaMAS execution mode
     case ${BHMAS_executionMode} in
 
         mode:new-chain )
             variablesThatMustBeNotEmpty+=(
-                ${jobsNeededVariables[@]}
+                ${productionJobsNeededVariables[@]}
                 ${schedulerVariables[@]}
                 BHMAS_thermConfsGlobalPath
             )
@@ -250,7 +253,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
 
         mode:prepare-only )
             variablesThatMustBeNotEmpty+=(
-                ${jobsNeededVariables[@]}
+                ${productionJobsNeededVariables[@]}
                 ${schedulerVariables[@]}
                 BHMAS_thermConfsGlobalPath
             )
@@ -271,7 +274,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
 
         mode:thermalize )
             variablesThatMustBeNotEmpty+=(
-                ${jobsNeededVariables[@]}
+                ${productionJobsNeededVariables[@]}
                 ${schedulerVariables[@]}
                 BHMAS_thermConfsGlobalPath
             )
@@ -282,7 +285,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
 
         mode:continue )
             variablesThatMustBeNotEmpty+=(
-                ${jobsNeededVariables[@]}
+                ${productionJobsNeededVariables[@]}
                 ${schedulerVariables[@]}
             )
             neededFolders+=( "${rationalApproxFolder[@]:-}" )
@@ -292,7 +295,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase()
 
         mode:continue-thermalization )
             variablesThatMustBeNotEmpty+=(
-                ${jobsNeededVariables[@]}
+                ${productionJobsNeededVariables[@]}
                 ${schedulerVariables[@]}
                 BHMAS_thermConfsGlobalPath
             )

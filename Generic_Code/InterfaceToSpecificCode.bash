@@ -89,6 +89,11 @@ function GatherJobsInformationForContinueMode()
 
 #-------------------------------------------------------------------------------------------------------------------------#
 
+function PrepareSoftwareSpecificGlobalVariableValidation()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
+}
+
 function ProduceInputFile()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
