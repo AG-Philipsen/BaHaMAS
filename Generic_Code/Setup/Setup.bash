@@ -24,16 +24,25 @@ done && unset -v 'fileToBeSourced'
 
 function __static__ReadVariablesFromTemplateFile()
 {
-    local variable variableName variableValue
-    for variable in $(awk '/^($|[#]+)/{next}{print $0}' "${filenameTemplate}" | grep -o "BHMAS_.*"); do
-        variableName=${variable%%=*}
+    local line variableName variableValue
+    while read -r line; do
+        if [[ ! ${line} =~ ^[[:space:]]*(readonly )?BHMAS_ ]]; then
+            continue
+        else
+            line=$(grep -o "BHMAS_.*" <<< "${line}")
+        fi
+        variableName=${line%%=*}
         if [[ ${variableName} = 'BHMAS_coloredOutput' ]]; then #Treat it separately to use here cecho
             continue
         fi
-        variableValue="$(sed "s/['\"]//g" <<< "${variable##*=}")"
+        variableValue="$(sed "s/['\"]//g" <<< "${line##*=}")"
+        #Perform command substitution at setup time
+        if [[ ${variableValue} =~ ^\$\((.*)\)$ ]]; then
+            variableValue="$(${BASH_REMATCH[1]})"
+        fi
         variableNames+=( ${variableName} ) #To be used later to keep names in order
         userVariables[${variableName}]="${variableValue}"
-    done
+    done < "${filenameTemplate}"
 }
 
 function __static__FillInVariablesFromMaybeExistentUserSetup()
