@@ -27,8 +27,9 @@
 #-------------------------------------------------------------------#
 
 #Use extglob to facilitate some operations
-#NOTE: To be done here and not where used (see http://mywiki.wooledge.org/glob)
-shopt -s extglob
+shopt -s extglob # <- To be done here and not where used (see http://mywiki.wooledge.org/glob)
+shopt -s nullglob
+shopt -s dotglob
 
 #This is to have cecho functionality active here
 readonly BHMAS_coloredOutput='TRUE'
@@ -64,12 +65,14 @@ testsFailed=0
 whichFailed=()
 declare -A availableTests=()
 declare -a testsToBeRun=() #To keep tests in order and make user decide which to run
-readonly testFolder="${BHMAS_testsFolder}/StaggeredFakeProject"
+readonly testFolder="${BHMAS_testsFolder}/RunTestFolder"
+readonly submitTestFolder="${testFolder}/SubmitDisk"
+readonly runTestFolder="${testFolder}/RunDisk"
 readonly logFile="${BHMAS_testsFolder}/Tests.log"
 readonly userVariablesFile="${BHMAS_testsFolder}/SetupUserVariables.bash"
-readonly testParametersString='Nf2_mui0_mass0050_nt6_ns18'
-readonly testParametersPath="/${testParametersString//_/\/}"
-readonly betaFolder='b5.1111_s3333_continueWithNewChain'
+testParametersString='' # Global but to be filled in each
+testParametersPath=''   # test to change formulation
+betaFolder='b5.1111_s3333_continueWithNewChain' # To be changed in thermalization
 readonly listOfAuxiliaryFilesAndFolders=( "${testFolder}" "${logFile}" "${userVariablesFile}" )
 
 
