@@ -47,9 +47,9 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
         BHMAS_productionExecutableGlobalPath
         BHMAS_productionCodebaseGlobalPath
         BHMAS_productionMakefileTarget
-        BHMAS_Compiler
-        BHMAS_CompilerFlags
-        BHMAS_MPIIncludeGlobalPath
+        BHMAS_compiler
+        BHMAS_compilerFlags
+        BHMAS_folderWithMPIHeaderGlobalPath
         BHMAS_measurementExecutableGlobalPath
         BHMAS_excludeNodesGlobalPath
         BHMAS_useRationalApproxFiles

@@ -53,9 +53,9 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_productionExecutableGlobalPath=""
     readonly BHMAS_productionCodebaseGlobalPath=""
     readonly BHMAS_productionMakefileTarget=""
-    readonly BHMAS_Compiler="$(which mpicc)"
-    readonly BHMAS_CompilerFlags=""
-    readonly BHMAS_MPIIncludeGlobalPath="${BHMAS_Compiler/%bin\/mpicc/include}"
+    readonly BHMAS_compiler="$(which mpicc)"
+    readonly BHMAS_compilerFlags=""
+    readonly BHMAS_folderWithMPIHeaderGlobalPath="${BHMAS_compiler/%bin\/mpicc/include}"
     readonly BHMAS_inputFilename=""
     readonly BHMAS_outputFilename=""
     readonly BHMAS_plaquetteColumn=
@@ -97,6 +97,11 @@ MakeFunctionsDefinedInThisFileReadonly
 #     BHMAS_excludeNodesGlobalPath           -->  local or remote global path to file containing the directive to exclude nodes
 #     BHMAS_projectSubpath                   -->  path from HOME and WORK to the folder containing the parameters folders structure (see further informations below)
 #     BHMAS_productionExecutableGlobalPath   -->  production executable global path
+#     BHMAS_productionCodebaseGlobalPath     -->  production codebase (if it has to be compiled)
+#     BHMAS_productionMakefileTarget         -->  production Makefile (if it has to be compiled)
+#     BHMAS_compiler                         -->  compiler maybe needed for Makefile (if it has to be compiled)
+#     BHMAS_compilerFlags                    -->  flags to be given to the compiler (if it has to be compiled)
+#     BHMAS_folderWithMPIHeaderGlobalPath    -->  folder where mpi.h is located (if it has to be compiled)
 #     BHMAS_inputFilename                    -->  name of the inputfile
 #     BHMAS_jobScriptPrefix                  -->  prefix of the jobscript name
 #     BHMAS_outputFilename                   -->  name of the outputfile

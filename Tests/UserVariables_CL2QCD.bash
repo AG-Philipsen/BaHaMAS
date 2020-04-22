@@ -35,9 +35,9 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_productionExecutableGlobalPath="${BHMAS_repositoryTopLevelPath}/Tests/AuxiliaryFiles/fakeExecutable"
     readonly BHMAS_productionCodebaseGlobalPath=''
     readonly BHMAS_productionMakefileTarget=''
-    readonly BHMAS_Compiler=''
-    readonly BHMAS_CompilerFlags=''
-    readonly BHMAS_MPIIncludeGlobalPath=''
+    readonly BHMAS_compiler=''
+    readonly BHMAS_compilerFlags=''
+    readonly BHMAS_folderWithMPIHeaderGlobalPath=''
     readonly BHMAS_inputFilename="fakeInput"
     readonly BHMAS_jobScriptPrefix="fakePrefix"
     readonly BHMAS_outputFilename="fakeOutput"

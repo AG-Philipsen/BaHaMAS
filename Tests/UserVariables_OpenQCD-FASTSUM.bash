@@ -35,9 +35,9 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_productionExecutableGlobalPath=''
     readonly BHMAS_productionCodebaseGlobalPath="${BHMAS_submitDiskGlobalPath}/fakeOpenQCD-FASTSUM"
     readonly BHMAS_productionMakefileTarget="${BHMAS_productionCodebaseGlobalPath}/build/Makefile"
-    readonly BHMAS_Compiler="$(which mpicc)"
-    readonly BHMAS_CompilerFlags='-std=c99 -O2 -DAVX -DFMA3 -Werror -Wall'
-    readonly BHMAS_MPIIncludeGlobalPath="${BHMAS_Compiler/%bin\/mpicc/include}"
+    readonly BHMAS_compiler="$(which mpicc)"
+    readonly BHMAS_compilerFlags='-std=c99 -O2 -DAVX -DFMA3 -Werror -Wall'
+    readonly BHMAS_folderWithMPIHeaderGlobalPath="${BHMAS_compiler/%bin\/mpicc/include}"
     readonly BHMAS_inputFilename="fakeInput"
     readonly BHMAS_jobScriptPrefix="fakePrefix"
     readonly BHMAS_outputFilename="fakeOutput"

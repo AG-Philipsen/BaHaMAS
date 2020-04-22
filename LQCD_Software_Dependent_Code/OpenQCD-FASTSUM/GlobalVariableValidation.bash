@@ -45,9 +45,9 @@ function PrepareSoftwareSpecificGlobalVariableValidation_OpenQCD-FASTSUM()
     productionJobsNeededVariables+=(
         BHMAS_productionCodebaseGlobalPath
         BHMAS_productionMakefileTarget
-        BHMAS_Compiler
-        BHMAS_CompilerFlags
-        BHMAS_MPIIncludeGlobalPath
+        BHMAS_compiler
+        BHMAS_compilerFlags
+        BHMAS_folderWithMPIHeaderGlobalPath
     )
 }
 
