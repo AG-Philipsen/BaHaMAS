@@ -191,7 +191,7 @@ function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
                 BHMAS_betaValuesToBeSubmitted+=( "${betasString}" )
                 cecho "  - ${betasString}"
             else
-                cecho lr "\n Jobscript " file "${jobScriptFilename}" " not found! Option " emph "--submitonly" " cannot be applied! Skipping this job submission!\n"
+                cecho lr "\n Jobscript " file "${jobScriptFilename}" " not found! Mode " emph "submit-only" " cannot conclude! Skipping this job submission!\n"
                 BHMAS_problematicBetaValues+=( "${betasString}" )
                 continue
             fi
