@@ -49,6 +49,16 @@ function PrepareSoftwareSpecificGlobalVariableValidation_OpenQCD-FASTSUM()
         BHMAS_compilerFlags
         BHMAS_folderWithMPIHeaderGlobalPath
     )
+
+    case ${BHMAS_executionMode} in
+        mode:*-only | mode:new-chain | mode:thermalize | mode:continue* )
+            neededFolders+=( "${BHMAS_productionCodebaseGlobalPath}" "${BHMAS_folderWithMPIHeaderGlobalPath}" )
+            neededFiles+=( "${BHMAS_compiler}" )
+            ;;
+        *)
+            ;;
+    esac
+
 }
 
 
