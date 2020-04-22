@@ -98,6 +98,8 @@ case ${BHMAS_executionMode} in
         ValidateParsedBetaValues
         FindConfigurationGlobalPathFromWhichToStartTheSimulation
         ProduceInputFileAndJobScriptForEachBeta
+        ProduceExecutableFileForEachBeta
+        EnsureThatNeededFilesAreOnRunDiskForEachBeta
         ;;
 
     mode:submit-only )
@@ -114,6 +116,8 @@ case ${BHMAS_executionMode} in
         ValidateParsedBetaValues
         FindConfigurationGlobalPathFromWhichToStartTheSimulation
         ProduceInputFileAndJobScriptForEachBeta
+        ProduceExecutableFileForEachBeta
+        EnsureThatNeededFilesAreOnRunDiskForEachBeta
         SubmitJobsForValidBetaValues
         ;;
 
@@ -122,6 +126,7 @@ case ${BHMAS_executionMode} in
         ParseBetasFile
         ValidateParsedBetaValues
         ProcessBetaValuesForContinue
+        EnsureThatNeededFilesAreOnRunDiskForEachBeta
         SubmitJobsForValidBetaValues
         ;;
 
@@ -151,6 +156,8 @@ case ${BHMAS_executionMode} in
         if [[ ${BHMAS_executionMode} = 'mode:thermalize' ]]; then
             FindConfigurationGlobalPathFromWhichToStartTheSimulation
             ProduceInputFileAndJobScriptForEachBeta
+            ProduceExecutableFileForEachBeta
+            EnsureThatNeededFilesAreOnRunDiskForEachBeta
             AskUser "Check if everything is fine. Would you like to submit the jobs?"
             if UserSaidNo; then
                 cecho lr "\n No job will be submitted!\n"
@@ -158,6 +165,7 @@ case ${BHMAS_executionMode} in
             fi
         elif [[ ${BHMAS_executionMode} = 'mode:continue-thermalization' ]]; then
             ProcessBetaValuesForContinue
+            EnsureThatNeededFilesAreOnRunDiskForEachBeta
         fi
         SubmitJobsForValidBetaValues
         ;;
@@ -214,6 +222,8 @@ case ${BHMAS_executionMode} in
         ParseBetasFile
         ValidateParsedBetaValues
         ProcessBetaValuesForInversion
+        ProduceExecutableFileForEachBeta
+        EnsureThatNeededFilesAreOnRunDiskForEachBeta
         SubmitJobsForValidBetaValues
         ;;
 

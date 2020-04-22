@@ -157,7 +157,8 @@ function MakeTestPreliminaryOperations()
             __static__CreateThermalizedConfiguration "fromConf4000"
             __static__CreateBetaFolder
             __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata" ".BaHaMAS_metadata"
-            __static__CopyAuxiliaryFilesToSubmitBetaFolder "fakeInput"
+            __static__CopyAuxiliaryFilesToSubmitBetaFolder "fakeInput" "fakeExecutable"
+            __static__CopyAuxiliaryFilesToRunBetaFolder "fakeInput" "fakeExecutable"
             mkdir "Jobscripts_TEST" || exit ${BHMAS_fatalBuiltin}
             printf "NOT EMPTY\n" > "${submitDirWithBetaFolders}/Jobscripts_TEST/fakePrefix_${testParametersString}__${betaFolder%_*}"
             ;;
@@ -176,7 +177,7 @@ function MakeTestPreliminaryOperations()
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateBetaFolder
             __static__CopyAuxiliaryFilesToSubmitBetaFolder "fakeInput"
-            __static__CopyAuxiliaryFilesToRunBetaFolder "fakeOutput" "fakeOutput_pbp.dat"
+            __static__CopyAuxiliaryFilesToRunBetaFolder "fakeExecutable" "fakeOutput" "fakeOutput_pbp.dat"
             __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata" ".BaHaMAS_metadata"
             __static__CompleteInputFileWithCorrectPaths
             __static__CreateFilesInRunBetaFolder "conf.save" "prng.save"

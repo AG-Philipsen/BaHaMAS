@@ -68,23 +68,6 @@ function AddSoftwareSpecificPartToProductionJobScript_CL2QCD()
         "echo \${SLURM_JOB_NODELIST} > ${BHMAS_productionExecutableFilename}.${betasString:1}.\${SLURM_JOB_ID}.nodelist"\
         ""
 
-    #Copying executable file(s) and if working on different disks also input file
-    __static__AddToJobscriptFile\
-        "# TODO: this is necessary because the log file is produced in the directoy"\
-        "#       of the exec. Copying it later does not guarantee that it is still the same..."\
-        "echo \"Copy executable to beta directories in ${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}x.xxxx...\""
-    for index in "${!betaValues[@]}"; do
-        __static__AddToJobscriptFile "rm -f \${dir${index}}/${BHMAS_productionExecutableFilename} && cp -a ${BHMAS_productionExecutableGlobalPath} \${dir${index}} || exit ${BHMAS_fatalBuiltin}"
-    done
-    __static__AddToJobscriptFile "echo \"...done!\"" ""
-    if [[ "${BHMAS_submitDiskGlobalPath}" != "${BHMAS_runDiskGlobalPath}" ]]; then
-        __static__AddToJobscriptFile "#Copy inputfile from home to work directories..."
-        for index in "${!betaValues[@]}"; do
-            __static__AddToJobscriptFile "mkdir -p \${workdir${index}} && cp \${dir${index}}/${BHMAS_inputFilename} \${workdir${index}}/${BHMAS_inputFilename}.\${SLURM_JOB_ID} || exit ${BHMAS_fatalBuiltin}"
-        done
-        __static__AddToJobscriptFile "echo \"...done!\""
-    fi
-
     #Some more output information and run command(s)
     __static__AddToJobscriptFile\
         ""\

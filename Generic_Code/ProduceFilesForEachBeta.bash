@@ -56,5 +56,71 @@ function ProduceInputFileAndJobScriptForEachBeta()
     PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles "${betaValuesCopy[@]}"
 }
 
+function ProduceExecutableFileForEachBeta()
+{
+    local index beta submitBetaDirectory
+    for index in "${!BHMAS_betaValues[@]}"; do
+        submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${BHMAS_betaValues[${index}]}"
+        if [[ ! -d "${submitBetaDirectory}" ]]; then
+            Internal 'The directory ' dir "${submitBetaDirectory}"\
+                     '\ndoes not exist but it should in function ' emph "${FUNCNAME}" '!'
+        fi
+    done
+    for beta in "${BHMAS_betaValues[@]}"; do
+        submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${beta}"
+        ProduceExecutableFileInGivenBetaDirectory "${submitBetaDirectory}"
+    done
+}
+
+function EnsureThatNeededFilesAreOnRunDiskForEachBeta()
+{
+    if [[ "${BHMAS_submitDiskGlobalPath}" != "${BHMAS_runDiskGlobalPath}" ]]; then
+        local submitBetaDirectory runBetaDirectory inputFileGlobalPath\
+              executableGlobalPath beta file
+        for beta in "${BHMAS_betaValues[@]}"; do
+            submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${beta}"
+            runBetaDirectory="${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${beta}"
+            inputFileGlobalPath="${submitBetaDirectory}/${BHMAS_inputFilename}"
+            if [[ ${BHMAS_executionMode} != 'mode:measure' ]]; then
+                executableGlobalPath="${submitBetaDirectory}/${BHMAS_productionExecutableFilename}"
+            else
+                executableGlobalPath="${submitBetaDirectory}/${BHMAS_measurementExecutableFilename}"
+            fi
+            if [[ ! -d "${runBetaDirectory}" ]]; then
+                cecho -n b ' Creating directory ' dir "${runBetaDirectory}" '...'
+                mkdir -p "${runBetaDirectory}" || exit ${BHMAS_fatalBuiltin}
+                cecho lg ' done!'
+            fi
+            if [[ ${BHMAS_executionMode} != 'mode:measure' ]]; then
+                __static__CheckExistenceOfFileAndCopyIt 'input' "${inputFileGlobalPath}" "${runBetaDirectory}"
+            fi
+            if [[ ${BHMAS_executionMode} != mode:continue* ]]; then
+                __static__CheckExistenceOfFileAndCopyIt 'executable' "${executableGlobalPath}" "${runBetaDirectory}"
+            else
+                executableGlobalPath="${runBetaDirectory}/${BHMAS_productionExecutableFilename}"
+                if [[ ! -f "${executableGlobalPath}" ]]; then
+                    Fatal ${BHMAS_fatalFileNotFound} 'Executable file\n' file "${executableGlobalPath}"\
+                          '\nwas not found but it is suppose to exist in ' emph "${BHMAS_executionMode#mode:}"\
+                          ' execution mode!'
+                fi
+            fi
+        done
+    fi
+}
+
+function __static__CheckExistenceOfFileAndCopyIt()
+{
+    local label file destination
+    label="$1"; file="$2"; destination="$3"
+    if [[ ! -f "${file}" ]]; then
+        Internal 'File ' file "${file}"\
+                 '\ndoes not exist but it should in function ' emph "${FUNCNAME}" '!'
+    fi
+    cecho -n b ' Copying ' emph "${label}" ' file to ' dir "${destination}" "..."
+    cp "${file}" "${destination}" || exit ${BHMAS_fatalBuiltin}
+    cecho lg " done!"
+}
+
+
 
 MakeFunctionsDefinedInThisFileReadonly
