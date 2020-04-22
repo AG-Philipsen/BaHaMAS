@@ -92,9 +92,12 @@ fi
 
 case ${BHMAS_executionMode} in
 
-    mode:database )
+    mode:prepare-only )
 
-        projectStatisticsDatabase ${BHMAS_optionsToBePassedToDatabase[@]+"${BHMAS_optionsToBePassedToDatabase[@]}"}
+        ParseBetasFile
+        ValidateParsedBetaValues
+        FindConfigurationGlobalPathFromWhichToStartTheSimulation
+        ProduceInputFileAndJobScriptForEachBeta
         ;;
 
     mode:submit-only )
@@ -111,6 +114,14 @@ case ${BHMAS_executionMode} in
         ValidateParsedBetaValues
         FindConfigurationGlobalPathFromWhichToStartTheSimulation
         ProduceInputFileAndJobScriptForEachBeta
+        SubmitJobsForValidBetaValues
+        ;;
+
+    mode:continue )
+
+        ParseBetasFile
+        ValidateParsedBetaValues
+        ProcessBetaValuesForContinue
         SubmitJobsForValidBetaValues
         ;;
 
@@ -148,14 +159,6 @@ case ${BHMAS_executionMode} in
         elif [[ ${BHMAS_executionMode} = 'mode:continue-thermalization' ]]; then
             ProcessBetaValuesForContinue
         fi
-        SubmitJobsForValidBetaValues
-        ;;
-
-    mode:continue )
-
-        ParseBetasFile
-        ValidateParsedBetaValues
-        ProcessBetaValuesForContinue
         SubmitJobsForValidBetaValues
         ;;
 
@@ -214,12 +217,9 @@ case ${BHMAS_executionMode} in
         SubmitJobsForValidBetaValues
         ;;
 
-    mode:prepare-only )
+    mode:database )
 
-        ParseBetasFile
-        ValidateParsedBetaValues
-        FindConfigurationGlobalPathFromWhichToStartTheSimulation
-        ProduceInputFileAndJobScriptForEachBeta
+        projectStatisticsDatabase ${BHMAS_optionsToBePassedToDatabase[@]+"${BHMAS_optionsToBePassedToDatabase[@]}"}
         ;;
 
     * )
