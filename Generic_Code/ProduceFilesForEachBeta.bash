@@ -19,13 +19,16 @@
 
 function ProduceInputFileAndJobScriptForEachBeta()
 {
-    local betaValuesCopy index beta submitBetaDirectory temporaryNumberOfTrajectories
+    trap "$(shopt -p)" RETURN
+    local betaValuesCopy index beta submitBetaDirectory existingFiles temporaryNumberOfTrajectories
     betaValuesCopy=(${BHMAS_betaValues[@]})
     for index in "${!betaValuesCopy[@]}"; do
-        local submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${betaValuesCopy[${index}]}"
+        submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${betaValuesCopy[${index}]}"
         if [[ -d "${submitBetaDirectory}" ]]; then
-            if [[ $(ls ${submitBetaDirectory} | wc -l) -gt 0 ]]; then
-                cecho lr "\n There are already files in " dir "${submitBetaDirectory}" ".\n The value " emph "beta = ${betaValuesCopy[${index}]}" " will be skipped!\n"
+            shopt -s dotglob nullglob;  existingFiles=( "${submitBetaDirectory}"/* )
+            if [[ ${#existingFiles[@]} -gt 0 ]]; then
+                Error 'There are already files in\n' dir "${submitBetaDirectory}"\
+                      '.\nThe value ' emph "beta = ${betaValuesCopy[${index}]}" ' will be skipped!'
                 BHMAS_problematicBetaValues+=( ${betaValuesCopy[${index}]} )
                 unset -v 'betaValuesCopy[${index}]' #Here betaValuesCopy becomes sparse
                 continue
@@ -35,12 +38,11 @@ function ProduceInputFileAndJobScriptForEachBeta()
     if [[ ${#betaValuesCopy[@]} -eq 0 ]]; then
         return
     fi
-    #Make betaValuesCopy not sparse
-    betaValuesCopy=(${betaValuesCopy[@]})
+    betaValuesCopy=(${betaValuesCopy[@]}) #Make betaValuesCopy not sparse
     for beta in "${betaValuesCopy[@]}"; do
         submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${beta}"
         cecho -n b " Creating directory " dir "${submitBetaDirectory}" "..."
-        mkdir -p ${submitBetaDirectory} || exit ${BHMAS_fatalBuiltin}
+        mkdir -p "${submitBetaDirectory}" || exit ${BHMAS_fatalBuiltin}
         cecho lg " done!"
         cecho lc "   Configuration used: " file "${BHMAS_startConfigurationGlobalPath[${beta}]}"
         if KeyInArray "${beta}" BHMAS_goalStatistics; then

@@ -27,7 +27,8 @@ function ProcessBetaValuesForSubmitOnly()
         submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${betaValuesCopy[${index}]}"
         inputFileGlobalPath="${submitBetaDirectory}/${BHMAS_inputFilename}"
         if [[ ! -d ${submitBetaDirectory} ]]; then
-            cecho lr "\n The directory " dir "${submitBetaDirectory}" " does not exist! \n The value " emph "beta = ${betaValuesCopy[${index}]}" " will be skipped!\n"
+            Error "The directory\n" dir "${submitBetaDirectory}" '\ndoes not exist! '\
+                  'The value ' emph "beta = ${betaValuesCopy[${index}]}" ' will be skipped!'
             BHMAS_problematicBetaValues+=( ${betaValuesCopy[${index}]} )
             unset -v 'betaValuesCopy[${index}]'
             continue
@@ -36,14 +37,17 @@ function ProcessBetaValuesForSubmitOnly()
             if [[ -f "${inputFileGlobalPath}" ]]; then
                 # In the 'submitBetaDirectory' there should be ONLY the inputfile
                 if [[ ${#existingFiles[@]} -gt 1 ]]; then
-                    cecho lr "\n There are already files in " dir "${submitBetaDirectory}" " beyond the input file.\n"\
-                          " The value " emph "beta = ${betaValuesCopy[${index}]}" " will be skipped!\n"
+                    Error 'There are already files in\n' dir "${submitBetaDirectory}"\
+                          '\nbeyond the input file. The value ' emph\
+                          "beta = ${betaValuesCopy[${index}]}" ' will be skipped!'
                     BHMAS_problematicBetaValues+=( ${betaValuesCopy[${index}]} )
                     unset -v 'betaValuesCopy[${index}]'
                     continue
                 fi
             else
-                cecho lr "\n The file " file "${inputFileGlobalPath}" " does not exist!\n The value " emph "beta = ${betaValuesCopy[${index}]}" " will be skipped!\n"
+                Error 'The file ' file "${inputFileGlobalPath}"\
+                      '\ndoes not exist! The value ' emph\
+                      "beta = ${betaValuesCopy[${index}]}" ' will be skipped!'
                 BHMAS_problematicBetaValues+=( ${betaValuesCopy[${index}]} )
                 unset -v 'betaValuesCopy[${index}]'
                 continue
