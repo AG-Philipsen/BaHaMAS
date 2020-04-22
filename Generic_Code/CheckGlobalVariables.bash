@@ -239,8 +239,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnExecutionM
                 ${schedulerVariables[@]}
                 BHMAS_thermConfsGlobalPath
             )
-            neededFolders+=( "${BHMAS_thermConfsGlobalPath}" "${rationalApproxFolder[@]:-}" )
-            neededFiles+=( "${BHMAS_productionExecutableGlobalPath}" "${rationalApproxFiles[@]:-}" )
+            neededFolders+=( "${BHMAS_thermConfsGlobalPath}" )
             readonly BHMAS_walltimeIsNeeded='TRUE'
             ;;
 
@@ -250,8 +249,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnExecutionM
                 ${schedulerVariables[@]}
                 BHMAS_thermConfsGlobalPath
             )
-            neededFolders+=( "${BHMAS_thermConfsGlobalPath}" "${rationalApproxFolder[@]:-}" )
-            neededFiles+=( "${BHMAS_productionExecutableGlobalPath}" "${rationalApproxFiles[@]:-}" )
+            neededFolders+=( "${BHMAS_thermConfsGlobalPath}" )
             readonly BHMAS_walltimeIsNeeded='TRUE'
             ;;
 
@@ -261,8 +259,6 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnExecutionM
                 BHMAS_jobScriptPrefix
                 BHMAS_jobScriptFolderName
             )
-            neededFolders+=( "${rationalApproxFolder[@]:-}" )
-            neededFiles+=( "${BHMAS_productionExecutableGlobalPath}" "${rationalApproxFiles[@]:-}" )
             ;;
 
         mode:thermalize )
@@ -271,8 +267,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnExecutionM
                 ${schedulerVariables[@]}
                 BHMAS_thermConfsGlobalPath
             )
-            neededFolders+=( "${BHMAS_thermConfsGlobalPath}" "${rationalApproxFolder[@]:-}" )
-            neededFiles+=( "${BHMAS_productionExecutableGlobalPath}" "${rationalApproxFiles[@]:-}" )
+            neededFolders+=( "${BHMAS_thermConfsGlobalPath}" )
             readonly BHMAS_walltimeIsNeeded='TRUE'
             ;;
 
@@ -281,8 +276,6 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnExecutionM
                 ${productionJobsNeededVariables[@]}
                 ${schedulerVariables[@]}
             )
-            neededFolders+=( "${rationalApproxFolder[@]:-}" )
-            neededFiles+=( "${BHMAS_productionExecutableGlobalPath}" "${rationalApproxFiles[@]:-}" )
             readonly BHMAS_walltimeIsNeeded='TRUE'
             ;;
 
@@ -292,8 +285,7 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnExecutionM
                 ${schedulerVariables[@]}
                 BHMAS_thermConfsGlobalPath
             )
-            neededFolders+=( "${BHMAS_thermConfsGlobalPath}" "${rationalApproxFolder[@]:-}" )
-            neededFiles+=( "${BHMAS_productionExecutableGlobalPath}" "${rationalApproxFiles[@]:-}" )
+            neededFolders+=( "${BHMAS_thermConfsGlobalPath}" )
             readonly BHMAS_walltimeIsNeeded='TRUE'
             ;;
 

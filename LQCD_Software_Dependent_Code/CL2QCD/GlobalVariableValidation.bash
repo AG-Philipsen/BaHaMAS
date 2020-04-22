@@ -60,6 +60,15 @@ function PrepareSoftwareSpecificGlobalVariableValidation_CL2QCD()
             "${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}*${BHMAS_approxMetropolisFilename}"
         )
     fi
+
+    case ${BHMAS_executionMode} in
+        mode:*-only | mode:new-chain | mode:thermalize | mode:continue* )
+            neededFolders+=( "${rationalApproxFolder[@]}" )
+            neededFiles+=( "${BHMAS_productionExecutableGlobalPath}" "${rationalApproxFiles[@]}" )
+            ;;
+        *)
+            ;;
+    esac
 }
 
 
