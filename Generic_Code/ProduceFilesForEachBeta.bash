@@ -87,7 +87,7 @@ function EnsureThatNeededFilesAreOnRunDiskForEachBeta()
                 executableGlobalPath="${submitBetaDirectory}/${BHMAS_measurementExecutableFilename}"
             fi
             if [[ ! -d "${runBetaDirectory}" ]]; then
-                cecho -n b ' Creating directory ' dir "${runBetaDirectory}" '...'
+                cecho -n lg ' Creating directory ' dir "${runBetaDirectory}" '...'
                 mkdir -p "${runBetaDirectory}" || exit ${BHMAS_fatalBuiltin}
                 cecho lg ' done!'
             fi
@@ -116,7 +116,7 @@ function __static__CheckExistenceOfFileAndCopyIt()
         Internal 'File ' file "${file}"\
                  '\ndoes not exist but it should in function ' emph "${FUNCNAME}" '!'
     fi
-    cecho -n b ' Copying ' emph "${label}" ' file to ' dir "${destination}" "..."
+    cecho -n lg ' Copying ' emph "${label}" ' file to ' dir "${destination}" "..."
     cp "${file}" "${destination}" || exit ${BHMAS_fatalBuiltin}
     cecho lg " done!"
 }

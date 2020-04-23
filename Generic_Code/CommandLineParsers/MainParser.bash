@@ -97,7 +97,8 @@ function ParseCommandLineOptionsTillMode()
             shift $(( $# - 1 )) #The shift after esac
             ;;
         * )
-            Fatal ${BHMAS_fatalCommandLine} "No valid mode specified! Run " emph "BaHaMAS --help" " to get further information."
+            Fatal ${BHMAS_fatalCommandLine}\
+                  'Specified mode ' emph "$1" ' not valid! Run ' emph 'BaHaMAS --help' ' to get further information.'
     esac
     shift
     #Update the global array with remaining options to be parsed
