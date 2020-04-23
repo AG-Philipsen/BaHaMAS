@@ -169,7 +169,6 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
         mustReturn='FALSE'
     fi
 
-
     #Define dependent additional variables
     if [[ "${BHMAS_productionExecutableGlobalPath:-}" != '' ]]; then
         readonly BHMAS_productionExecutableFilename="${BHMAS_productionExecutableGlobalPath##*/}"
@@ -178,6 +177,11 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
     fi
     if [[ "${BHMAS_measurementExecutableGlobalPath:-}" != '' ]]; then
         readonly BHMAS_measurementExecutableFilename="${BHMAS_measurementExecutableGlobalPath##*/}"
+    fi
+    if [[ "${BHMAS_GPUsPerNode}" != '' ]]; then
+        readonly BHMAS_simulationsPerJob="${BHMAS_GPUsPerNode}"
+    else
+        readonly BHMAS_simulationsPerJob=1
     fi
 
     #Decide whether to return or to exit
@@ -204,7 +208,6 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnExecutionM
         BHMAS_jobScriptFolderName
     )
     schedulerVariables=(  #BHMAS_walltime can be empty here, we check later if user gave time in betas file!
-        BHMAS_GPUsPerNode #This is here and not in the array above because it is needed also in measure mode!
         BHMAS_maximumWalltime
         BHMAS_userEmail
     )

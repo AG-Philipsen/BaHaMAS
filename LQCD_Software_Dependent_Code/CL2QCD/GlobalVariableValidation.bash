@@ -45,6 +45,10 @@ function PrepareSoftwareSpecificGlobalVariableValidation_CL2QCD()
     productionJobsNeededVariables+=(
         BHMAS_productionExecutableGlobalPath
     )
+    schedulerVariables+=(
+        BHMAS_GPUsPerNode #This is here and not in the array above because it is needed also in measure mode!
+    )
+
     # If user wants to read the rational approximation from file check relative variables
     if [[ ${BHMAS_useRationalApproxFiles} = 'TRUE' ]]; then
         productionJobsNeededVariables+=(

@@ -56,7 +56,7 @@ function AddSchedulerSpecificPartToJobScript_SLURM()
 #SBATCH --output=${outputAndErrorFilename}.%j.out
 #SBATCH --error=${outputAndErrorFilename}.%j.err
 #SBATCH --no-requeue
-#SBATCH --ntasks=${BHMAS_GPUsPerNode}
+#SBATCH --ntasks=${BHMAS_simulationsPerJob}
 ${excludeNodesString}
 ${partitionDirective:-}
 ${nodelistDirective:-}

@@ -163,8 +163,8 @@ function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
     cecho lc "\n================================================================================="
     cecho bb " The following beta values have been grouped (together with the seed if used):"
     while [[ "${!betaValuesToBeSplit[@]}" != "" ]]; do
-        betasForJobScript=(${betaValuesToBeSplit[@]:0:${BHMAS_GPUsPerNode}})
-        betaValuesToBeSplit=(${betaValuesToBeSplit[@]:${BHMAS_GPUsPerNode}})
+        betasForJobScript=(${betaValuesToBeSplit[@]:0:${BHMAS_simulationsPerJob}})
+        betaValuesToBeSplit=(${betaValuesToBeSplit[@]:${BHMAS_simulationsPerJob}})
         betasString="$(__static__GetJobBetasStringUsing ${betasForJobScript[@]})"
         jobScriptFilename="$(GetJobScriptFilename ${betasString})"
         jobScriptGlobalPath="${BHMAS_submitDirWithBetaFolders}/${BHMAS_jobScriptFolderName}/${jobScriptFilename}"

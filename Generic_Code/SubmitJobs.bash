@@ -32,8 +32,8 @@ function SubmitJobsForValidBetaValues()
             else
                 stringToBeGreppedFor="${BHMAS_seedPrefix}${BHMAS_seedRegex}"
             fi
-            if [[ $(grep -o "${stringToBeGreppedFor}" <<< "${betaString}" | wc -l) -ne ${BHMAS_GPUsPerNode} ]]; then
-                cecho -n ly B "\n " U "WARNING" uU ":" uB " At least one job is being submitted with less than " emph "${BHMAS_GPUsPerNode}" " runs inside."
+            if [[ $(grep -o "${stringToBeGreppedFor}" <<< "${betaString}" | wc -l) -ne ${BHMAS_simulationsPerJob} ]]; then
+                cecho -n ly B "\n " U "WARNING" uU ":" uB " At least one job is being submitted with less than " emph "${BHMAS_simulationsPerJob}" " runs inside."
                 AskUser "         Would you like to submit in any case?"
                 if UserSaidNo; then
                     cecho lr B "\n No jobs will be submitted."
