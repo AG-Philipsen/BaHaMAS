@@ -140,6 +140,7 @@ function DeclareBaHaMASGlobalVariables()
 
     #Metadata variables
     readonly BHMAS_metadataFilename='.BaHaMAS_metadata'
+    readonly BHMAS_compilationFolderName='CodebaseCompilationFolder'
 
     #Execution mode variable
     BHMAS_executionMode='mode:_unset_'
