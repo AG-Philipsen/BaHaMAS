@@ -151,6 +151,7 @@ function MakeTestPreliminaryOperations()
                 __static__AddStringToFirstLineBetasFile "g15000"
             fi
             ;;
+
         CL2QCD-submit-only )
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateThermalizedConfigurationFolder
@@ -162,6 +163,7 @@ function MakeTestPreliminaryOperations()
             mkdir "Jobscripts_TEST" || exit ${BHMAS_fatalBuiltin}
             printf "NOT EMPTY\n" > "${submitDirWithBetaFolders}/Jobscripts_TEST/fakePrefix_${testParametersString}__${betaFolder%_*}"
             ;;
+
         CL2QCD-thermalize* )
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateThermalizedConfigurationFolder
@@ -169,6 +171,7 @@ function MakeTestPreliminaryOperations()
                 __static__CreateThermalizedConfiguration "fromHot1000"
             fi
             ;;
+
         CL2QCD-continue-* )
             if [[ $1 =~ therm ]]; then
                 betaFolder="${betaFolder/continueWithNewChain/thermalizeFromHot}"
@@ -200,27 +203,25 @@ function MakeTestPreliminaryOperations()
                 betaFolder="${betaFolder/thermalizeFromHot/continueWithNewChain}"
             fi
             ;;
+
         CL2QCD-simulation-status* )
             __static__CreateBetaFolder
             __static__CopyAuxiliaryFilesToSubmitBetaFolder "fakeExecutable.123456.out" "fakeInput"
             __static__CopyAuxiliaryFilesToRunBetaFolder "fakeOutput"
             ;;
+
         CL2QCD-accRateReport* )
             __static__CreateBetaFolder
             __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata" ".BaHaMAS_metadata"
             __static__CopyAuxiliaryFilesToRunBetaFolder "fakeOutput"
             ;;
+
         CL2QCD-cleanOutputFiles* )
             __static__CreateBetaFolder
             __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata" ".BaHaMAS_metadata"
             __static__CopyAuxiliaryFilesToRunBetaFolder "fakeOutput" "fakeOutput_pbp.dat"
             ;;
-        completeBetasFile* )
-            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeBetasToBeCompleted" "betas"
-            ;;
-        commentBetas* | uncommentBetas* )
-            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeBetasToBeCommented" "betas"
-            ;;
+
         CL2QCD-measure* )
             __static__CreateBetaFolder
             __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata" ".BaHaMAS_metadata"
@@ -229,6 +230,23 @@ function MakeTestPreliminaryOperations()
                 __static__CreateFilesInRunBetaFolder "conf.00100_2_3_7_1_corr" "conf.00100_1_2_3_1_corr"
             fi
             ;;
+
+        openQCD-FASTSUM-prepare-only  )
+            __static__CreateThermalizedConfigurationFolder
+            __static__CreateThermalizedConfiguration "fromConf4000"
+            if [[ $1 =~ goal ]]; then
+                __static__AddStringToFirstLineBetasFile "g15000"
+            fi
+            ;;
+
+        completeBetasFile* )
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeBetasToBeCompleted" "betas"
+            ;;
+
+        commentBetas* | uncommentBetas* )
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeBetasToBeCommented" "betas"
+            ;;
+
         database* )
             local databaseFolder; databaseFolder="${submitTestFolder}/${projectFolder}/SimulationsOverview"
             mkdir -p "${databaseFolder}"
@@ -240,6 +258,7 @@ function MakeTestPreliminaryOperations()
                 cecho -d "${submitDirWithBetaFolders}" > "fakeDatabasePath"
             fi
             ;;
+
         * )
             ;;
     esac
@@ -247,14 +266,15 @@ function MakeTestPreliminaryOperations()
 
 function InhibitBaHaMASCommands()
 {
-    function less(){ cecho -d "less $@"; }
-    function sbatch(){ cecho -d "sbatch $@"; }
+    function less(){ cecho -d "less $*"; }
+    function sbatch(){ cecho -d "sbatch $*"; }
+    function make(){ cecho -d "make $*"; touch "${@: -1}"; }
     #To make liststatus find running job and then test measure time
     if [[ $1 =~ ^(liststatus|database) ]]; then
         export jobnameForSqueue="${testParametersString}__${betaFolder%_*}@RUNNING"
     fi
     function squeue(){ cecho -d -n "${jobnameForSqueue:-}"; }
-    export -f less sbatch squeue
+    export -f less sbatch make squeue
 }
 
 function RunBaHaMASInTestMode()

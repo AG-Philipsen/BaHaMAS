@@ -24,7 +24,7 @@ function DeclareOutputRelatedGlobalVariables()
 
 function DeclareUserDefinedGlobalVariables()
 {
-    BHMAS_lqcdSoftware="OpenQCD-FASTSUM"
+    BHMAS_lqcdSoftware="openQCD-FASTSUM"
     readonly BHMAS_userEmail="user@test.com"
     readonly BHMAS_submitDiskGlobalPath="${BHMAS_repositoryTopLevelPath}/Tests/RunTestFolder/SubmitDisk"
     readonly BHMAS_runDiskGlobalPath="${BHMAS_repositoryTopLevelPath}/Tests/RunTestFolder/RunDisk"
@@ -33,8 +33,8 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_excludeNodesGlobalPath="${BHMAS_submitDiskGlobalPath}/ExcludeNodes_TEST"
     readonly BHMAS_projectSubpath="WilsonFakeProject"
     readonly BHMAS_productionExecutableGlobalPath=''
-    readonly BHMAS_productionCodebaseGlobalPath="${BHMAS_submitDiskGlobalPath}/fakeOpenQCD-FASTSUM"
-    readonly BHMAS_productionMakefileTarget="${BHMAS_productionCodebaseGlobalPath}/build/Makefile"
+    readonly BHMAS_productionCodebaseGlobalPath="${BHMAS_repositoryTopLevelPath}/Tests/AuxiliaryFiles/fakeOpenQCD-FASTSUM"
+    readonly BHMAS_productionMakefileTarget="qcd1"
     readonly BHMAS_compiler="$(which mpicc)"
     readonly BHMAS_compilerFlags='-std=c99 -O2 -DAVX -DFMA3 -Werror -Wall'
     readonly BHMAS_folderWithMPIHeaderGlobalPath="${BHMAS_compiler/%bin\/mpicc/include}"
@@ -52,7 +52,7 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_approxMetropolisFilename=''
     readonly BHMAS_databaseFilename="OverviewDatabase"
     readonly BHMAS_databaseGlobalPath="${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath}/SimulationsOverview"
-    readonly BHMAS_measurementExecutableGlobalPath="${BHMAS_submitDiskGlobalPath}/AuxiliaryFiles/fakeExecutable"
+    readonly BHMAS_measurementExecutableGlobalPath=''
     readonly BHMAS_thermConfsGlobalPath="${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath}/Thermalized_Configurations"
 
     #Possible default value for options which can then not be given via command line
