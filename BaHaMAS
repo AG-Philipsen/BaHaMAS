@@ -221,8 +221,8 @@ case ${BHMAS_executionMode} in
 
         ParseBetasFile
         ValidateParsedBetaValues
-        ProcessBetaValuesForInversion
         ProduceExecutableFileForEachBeta
+        ProcessBetaValuesForInversion
         EnsureThatNeededFilesAreOnRunDiskForEachBeta
         SubmitJobsForValidBetaValues
         ;;
