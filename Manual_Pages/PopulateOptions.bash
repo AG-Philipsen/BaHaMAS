@@ -64,8 +64,8 @@ function GetAllowedOptionsAndPutThemInManualSection()
             CL2QCD )
                 extractedOptions+=$'# CL2QCD OPTIONS\n\n'
                 ;;
-            OpenQCD-FASTSUM )
-                extractedOptions+=$'# OpenQCD-FASTSUM OPTIONS\n\n'
+            openQCD-FASTSUM )
+                extractedOptions+=$'# openQCD-FASTSUM OPTIONS\n\n'
                 ;;
             mode:* )
                 ;;
@@ -192,7 +192,7 @@ fi
 BHMAS_backupFile="${BHMAS_manualFile}_backup"
 cp "${BHMAS_manualFile}" "${BHMAS_backupFile}"
 
-GetAllowedOptionsAndPutThemInManualSection "${BHMAS_executionMode}" 'CL2QCD' 'OpenQCD-FASTSUM'
+GetAllowedOptionsAndPutThemInManualSection "${BHMAS_executionMode}" 'CL2QCD' 'openQCD-FASTSUM'
 
 if [[ $? -eq 0 ]]; then
     rm "${BHMAS_backupFile}"

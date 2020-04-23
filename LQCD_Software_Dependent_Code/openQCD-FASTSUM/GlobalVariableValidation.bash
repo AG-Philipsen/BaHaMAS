@@ -36,11 +36,11 @@
 #  - neededFiles
 #  - neededFolders
 #
-function PrepareSoftwareSpecificGlobalVariableValidation_OpenQCD-FASTSUM()
+function PrepareSoftwareSpecificGlobalVariableValidation_openQCD-FASTSUM()
 {
     CheckIfVariablesAreDeclared productionJobsNeededVariables schedulerVariables\
                                 neededFiles neededFolders
-    # OpenQCD-FASTSUM requires to compile the production executable for
+    # openQCD-FASTSUM requires to compile the production executable for
     # each job and hence BaHaMAS has to know what to do
     productionJobsNeededVariables+=(
         BHMAS_productionCodebaseGlobalPath

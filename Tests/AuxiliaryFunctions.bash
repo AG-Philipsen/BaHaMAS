@@ -118,8 +118,8 @@ function MakeTestPreliminaryOperations()
     local software projectFolder trashFolderName file folder\
           submitDirWithBetaFolders runDirWithBetaFolders
     #Link user variable file depending on test case
-    if [[ "$1" =~ ^OpenQCD-FASTSUM ]]; then
-        readonly software='OpenQCD-FASTSUM'
+    if [[ "$1" =~ ^openQCD-FASTSUM ]]; then
+        readonly software='openQCD-FASTSUM'
         readonly projectFolder='WilsonFakeProject'
         testParametersString='Nf2_mui0_k1150_nt8_ns48'
         testParametersPath="/${testParametersString//_/\/}"

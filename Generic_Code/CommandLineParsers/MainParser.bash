@@ -31,7 +31,7 @@ function ParseCommandLineOptionsTillMode()
     #Locally set function arguments to take advantage of shift
     set -- "${BHMAS_commandLineOptionsToBeParsed[@]}"
     #The first option can be a LQCD software
-    if [[ $1 =~ ^(CL2QCD|OpenQCD-FASTSUM)$ ]]; then
+    if [[ $1 =~ ^(CL2QCD|openQCD-FASTSUM)$ ]]; then
         BHMAS_lqcdSoftware="$1"
         shift
     fi
@@ -171,7 +171,7 @@ function DeclareAllowedOptionsPerModeOrSoftware()
         #-------------------------------------------------------------------------------
         # All-modes, specific-software options
         ['CL2QCD']+=''
-        ['OpenQCD-FASTSUM']+=''
+        ['openQCD-FASTSUM']+=''
     )
 }
 
