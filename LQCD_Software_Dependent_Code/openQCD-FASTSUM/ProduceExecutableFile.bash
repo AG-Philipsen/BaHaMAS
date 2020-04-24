@@ -55,13 +55,9 @@ function ProduceExecutableFileInGivenBetaDirectory_openQCD-FASTSUM()
                 fi
             )
             fi
-
     else
-        Error 'BaHaMAS does not support the ' emph "${BHMAS_executionMode}"\
-              ' mode with ' emph "${BHMAS_lqcdSoftware}" '.'
-        exit ${BHMAS_successExitCode} # To let test pass
+        Internal 'Function ' emph "${FUNCNAME}" ' called in ' emph "${BHMAS_executionMode#mode:}" ' execution mode!'
     fi
-
 }
 
 function __static__CreateAuxiliaryCompilationFile()

@@ -109,6 +109,12 @@ function ParseCommandLineOptionsTillMode()
             BHMAS_executionMode+='-help'
         fi
     fi
+    #Deactivate measure mode for openQCD-FASTSUM
+    if [[ ${BHMAS_executionMode} = 'mode:measure' && ${BHMAS_lqcdSoftware} = 'openQCD-FASTSUM' ]]; then
+        Error 'BaHaMAS does not support the ' emph "${BHMAS_executionMode}"\
+              ' mode with ' emph "${BHMAS_lqcdSoftware}" '.'
+        exit ${BHMAS_successExitCode} # To let test pass
+    fi
 }
 
 # This function will be reused in manual composition
