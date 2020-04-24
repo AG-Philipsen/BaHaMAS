@@ -49,6 +49,9 @@ function PrepareSoftwareSpecificGlobalVariableValidation_openQCD-FASTSUM()
         BHMAS_compilerFlags
         BHMAS_folderWithMPIHeaderGlobalPath
     )
+    schedulerVariables+=(
+        BHMAS_coresPerNode #This is here and not in the array above because it is needed for all jobs!
+    )
 
     case ${BHMAS_executionMode} in
         mode:*-only | mode:new-chain | mode:thermalize | mode:continue* )

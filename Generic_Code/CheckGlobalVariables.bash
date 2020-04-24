@@ -32,6 +32,7 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
     variablesThatMustBeDeclared=(
         BHMAS_userEmail
         BHMAS_GPUsPerNode
+        BHMAS_coresPerNode
         BHMAS_jobScriptFolderName
         BHMAS_projectSubpath
         BHMAS_inputFilename
@@ -125,6 +126,10 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
     done
     if [[ "${BHMAS_GPUsPerNode:-}" != '' ]] && [[ ! ${BHMAS_GPUsPerNode} =~ ^[1-9][0-9]*$ ]]; then
         Error -n B emph "BHMAS_GPUsPerNode" uB " variable format invalid. It has to be a " emph "positive integer" " number."
+        mustReturn='FALSE'
+    fi
+    if [[ "${BHMAS_coresPerNode:-}" != '' ]] && [[ ! ${BHMAS_coresPerNode} =~ ^[1-9][0-9]*$ ]]; then
+        Error -n B emph "BHMAS_coresPerNode" uB " variable format invalid. It has to be a " emph "positive integer" " number."
         mustReturn='FALSE'
     fi
     if [[ "${BHMAS_plaquetteColumn:-}" != '' ]] && [[ ! ${BHMAS_plaquetteColumn} =~ ^[1-9][0-9]*$ ]]; then

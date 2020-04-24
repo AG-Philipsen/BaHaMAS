@@ -47,6 +47,7 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_submitDiskGlobalPath=""
     readonly BHMAS_runDiskGlobalPath=""
     readonly BHMAS_GPUsPerNode=
+    readonly BHMAS_coresPerNode=
     readonly BHMAS_jobScriptFolderName=""
     readonly BHMAS_excludeNodesGlobalPath=""
     readonly BHMAS_projectSubpath=""
@@ -93,6 +94,7 @@ MakeFunctionsDefinedInThisFileReadonly
 #     BHMAS_submitDiskGlobalPath             -->  global path to the disk from which the jobs are submitted (see further informations below)
 #     BHMAS_runDiskGlobalPath                -->  global path to the disk from which the jobs are run (see further informations below)
 #     BHMAS_GPUsPerNode                      -->  number of GPUs per node
+#     BHMAS_coresPerNode                     -->  number of physical CPU cores per node
 #     BHMAS_jobScriptFolderName              -->  name of the folder where the job scripts are collected
 #     BHMAS_excludeNodesGlobalPath           -->  local or remote global path to file containing the directive to exclude nodes
 #     BHMAS_projectSubpath                   -->  path from HOME and WORK to the folder containing the parameters folders structure (see further informations below)
