@@ -108,7 +108,7 @@ availableTests=(
     ['CL2QCD-accRateReport-num']='CL2QCD acceptance-rate-report --interval 300'
     ['CL2QCD-cleanOutputFiles']='CL2QCD clean-output-files'
     ['CL2QCD-cleanOutputFiles-all']='CL2QCD clean-output-files --all'
-    ['openQCD-FASTSUM-prepare-only']='openQCD-FASTSUM prepare-only -w=1d'
+    ['openQCD-FASTSUM-prepare-only']='openQCD-FASTSUM prepare-only -w=1d --processorsGrid 1 2 4 6'
     ['commentBetas']='comment-betas'
     ['commentBetas-num']='comment-betas --betas 6.1111'
     ['commentBetas-nums']='comment-betas --betas 6.1111 7.1111'

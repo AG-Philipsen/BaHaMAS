@@ -148,6 +148,7 @@ function DeclareAllowedOptionsPerModeOrSoftware()
     local productionOptions productionOptionsCL2QCD clusterOptions
     productionOptions='--measurements --checkpointEvery --pf'
     productionOptionsCL2QCD='--confSaveEvery --cgbs'
+    productionOptionsOpenQCD='--processorsGrid'
     clusterOptions='--walltime  --partition  --node  --constraint  --resource'
     allowedOptionsPerModeOrSoftware+=(
         #-------------------------------------------------------------------------------
@@ -174,6 +175,11 @@ function DeclareAllowedOptionsPerModeOrSoftware()
         ["mode:thermalize_CL2QCD"]+="${productionOptionsCL2QCD}"
         ["mode:continue_CL2QCD"]+="${productionOptionsCL2QCD}"
         ["mode:continue-thermalization_CL2QCD"]+="${productionOptionsCL2QCD}"
+        ["mode:prepare-only_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"
+        ["mode:new-chain_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"
+        ["mode:thermalize_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"
+        ["mode:continue_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"
+        ["mode:continue-thermalization_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"
         #-------------------------------------------------------------------------------
         # All-modes, specific-software options
         ['CL2QCD']+=''
@@ -369,6 +375,18 @@ function __static__ParseRemainingGeneralOptions()
                     BHMAS_clusterGenericResource="$2"
                 fi
                 shift 2
+                ;;
+            --processorsGrid )
+                local specifiedOption="$1"
+                BHMAS_processorsGrid=()
+                while [[ ${2:-} =~ ^[1-9][0-9]*$ ]]; do
+                    BHMAS_processorsGrid+=( $2 )
+                    shift
+                done
+                if [[ ${#BHMAS_processorsGrid[@]} -ne 4 ]]; then
+                     PrintOptionSpecificationErrorAndExit "${specifiedOption}"
+                fi
+                shift
                 ;;
             * )
                 PrintInvalidOptionErrorAndExit "$1" ;;

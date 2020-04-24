@@ -58,6 +58,12 @@ If successfully run, the user can have a look at the files created and submit th
 \--cgbs *number*
 :   Specify the conjugate gradient block-size and namely every how many iterations on the device the residuum is checked for convergence on the host (default: 50).
 
+# openQCD-FASTSUM OPTIONS
+
+\--processorsGrid
+:   Specify 4 integers which refer to how many processors have to be used to split the lattice in every direction (default: 1 1 1 1).
+    The first entry refer to the temporal lattice direction and the other three to the spatial ones.
+
 # FILES
 
 ./betas

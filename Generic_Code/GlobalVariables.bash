@@ -129,6 +129,9 @@ function DeclareBaHaMASGlobalVariables()
     BHMAS_savepointFrequency=20
     BHMAS_inverterBlockSize=50
 
+    #openQCD-FASTSUM specific
+    BHMAS_processorsGrid=( 1 1 1 1 )
+
     #Internal BaHaMAS variables
     BHMAS_betaValues=()
     BHMAS_betaValuesToBeSubmitted=()
