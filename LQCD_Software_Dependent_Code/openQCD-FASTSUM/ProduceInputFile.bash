@@ -19,17 +19,156 @@
 
 function ProduceInputFile_openQCD-FASTSUM()
 {
-    Warning "Function $FUNCNAME not yet implemented!"
-    local betaValue inputFileGlobalPath numberOfTrajectoriesToBeDone massAsNumber
-    betaValue="$1"
+    local runId inputFileGlobalPath numberOfTrajectoriesToBeDone\
+          betaValue seedValue massAsNumber solverToBeUsed sapArrayToBeUsed
+    runId="$1"
     inputFileGlobalPath="$2"
     numberOfTrajectoriesToBeDone=$3
-    rm -f ${inputFileGlobalPath} || exit ${BHMAS_fatalBuiltin}
-    touch ${inputFileGlobalPath} || exit ${BHMAS_fatalBuiltin}
+    if [[ ! ${runId} =~ ^(${BHMAS_betaRegex//\\/})_${BHMAS_seedPrefix}(${BHMAS_seedRegex//\\/})${BHMAS_betaPostfix}$ ]]; then
+        Internal 'Run ID ' emph "${runId}" ' in ' emph "${FUNCNAME}" ' does not match expected format!'
+    else
+        betaValue=${BASH_REMATCH[1]}
+        seedValue=${BASH_REMATCH[2]}
+    fi
     if [[ $(grep -c "[.]" <<< "${BHMAS_mass}") -eq 0 ]]; then
         massAsNumber="0.${BHMAS_mass}"
     else
         massAsNumber="${BHMAS_mass}"
     fi
 
+    # This check has to be done here because the number of
+    # trjectories can be different from beta to beta.
+    if (( numberOfTrajectoriesToBeDone % BHMAS_checkpointFrequency != 0 )); then
+        Fatal ${BHMAS_fatalCommandLine} \
+            'openQCD-FASTSUM requires the number of to-be-done trajectories\n'\
+            ' to be multiple of the gap between checkpoints. The choosen vales\n'\
+            emph "    trajectoriesToBeDone=${numberOfTrajectoriesToBeDone}\n"\
+            emph "         checkpointEvery=${BHMAS_checkpointFrequency}\n"\
+            'are not valid. Please adjust them and run the script again.'
+    fi
+
+    if [[ ${#BHMAS_sapBlockSize[@]} -eq 0 ]]; then
+        solverToBeUsed=(0 1)
+        sapArrayToBeUsed=(1 1 1 1) #placeholder in input file, not used
+    else
+        solverToBeUsed=(2 3)
+        sapArrayToBeUsed=( ${BHMAS_sapBlockSize[@]} )
+    fi
+
+    exec 5>&1 1> "${inputFileGlobalPath}"
+
+    cat <<END_OF_INPUTFILE
+[Run name]
+name         ${BHMAS_outputFilename}
+
+[Directories]
+log_dir      ${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${beta}
+dat_dir      ${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${beta}
+loc_dir      ${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${beta}
+cnfg_dir     ${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${beta}
+
+[Random number generator]
+level        0
+seed         ${seedValue}
+
+[Lattice parameters]
+beta         ${betaValue}
+c0           1
+kappa        ${massAsNumber}
+csw          0
+
+[Boundary conditions]
+type         3
+theta        0.0 0.0 0.0
+
+[HMC parameters]
+actions      0 1
+npf          1
+mu           0.0
+nlv          2
+tau          1
+
+[MD trajectories]
+nth          0
+ntr          ${numberOfTrajectoriesToBeDone}
+dtr_log      1
+dtr_ms       10000000 # i.e. never measure
+dtr_cnfg     ${BHMAS_checkpointFrequency}
+
+[Level 0]
+integrator   OMF2
+lambda       0.1931833275037836
+nstep        ${BHMAS_scaleZeroIntegrationSteps[${runId}]}
+forces       0
+
+[Level 1]
+integrator   OMF2
+lambda       0.1931833275037836
+nstep        ${BHMAS_scaleOneIntegrationSteps[${runId}]}
+forces       1
+
+[Action 0]
+action       ACG
+
+[Action 1]
+action       ACF_TM1
+ipf          0
+im0          0
+imu          0
+isp          ${solverToBeUsed[1]}
+
+[Action 2]
+action       ACF_TM1_EO_SDET
+ipf          0
+im0          0
+imu          0
+isp          ${solverToBeUsed[1]}
+
+[Force 0]
+force        FRG
+
+[Force 1]
+force        FRF_TM1
+isp          ${solverToBeUsed[0]}
+ncr          0
+
+[Force 2]
+force        FRF_TM1_EO_SDET
+isp          ${solverToBeUsed[0]}
+ncr          0
+
+[Solver 0]
+solver       CGNE
+nmx          ${BHMAS_inverterMaxIterations}
+res          1.0e-6
+
+[Solver 1]
+solver       CGNE
+nmx          ${BHMAS_inverterMaxIterations}
+res          1.0e-12
+
+[SAP]
+bs ${sapArrayToBeUsed[@]}
+
+[Solver 2]
+solver SAP_GCR
+nkv 16
+isolv 1
+nmr 4
+ncy 5
+nmx 24
+res 1.0e-6
+
+[Solver 3]
+solver SAP_GCR
+nkv 16
+isolv 1
+nmr 4
+ncy 5
+nmx 24
+res 1.0e-12
+
+END_OF_INPUTFILE
+
+    exec 1>&5-
 }
