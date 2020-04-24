@@ -84,6 +84,7 @@ if [[ ${BHMAS_executionMode} != 'mode:database' ]] && [[ ${BHMAS_executionMode} 
     ReadParametersFromPathAndSetRelatedVariables $(pwd)
     DeclareBetaFoldersPathsAsGlobalVariables
     CheckBetaFoldersPathsVariables
+    PerformParametersSanityChecks
 fi
 
 #-----------------------------------------------------------------------------------------------------------------#

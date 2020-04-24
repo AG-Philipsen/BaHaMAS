@@ -131,6 +131,7 @@ function DeclareBaHaMASGlobalVariables()
 
     #openQCD-FASTSUM specific
     BHMAS_processorsGrid=( 1 1 1 1 )
+    BHMAS_sapBlockSize=()
 
     #Internal BaHaMAS variables
     BHMAS_betaValues=()

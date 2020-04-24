@@ -266,6 +266,16 @@ function ConvertFromBytesToHumanReadable()
         {print human($1)}' <<< "${BYTES}"
 }
 
+function CalculateProductOfIntegers()
+{
+    local result number
+    result=1
+    for number in "$@"; do
+        (( result *= number ))
+    done
+    printf '%d' ${result}
+}
+
 function CheckIfVariablesAreDeclared()
 {
     local variableName
