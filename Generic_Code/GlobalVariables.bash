@@ -120,11 +120,14 @@ function DeclareBaHaMASGlobalVariables()
     BHMAS_betasFilename='betas'
     BHMAS_numberOfTrajectories=1000
     BHMAS_checkpointFrequency=100
-    BHMAS_savepointFrequency=20
-    BHMAS_inverterBlockSize=50
     BHMAS_useMultipleChains='TRUE'
     BHMAS_measurePbp='TRUE'
     BHMAS_numberOfPseudofermions=1
+    BHMAS_inverterMaxIterations=15000
+
+    #CL2QCD specific
+    BHMAS_savepointFrequency=20
+    BHMAS_inverterBlockSize=50
 
     #Internal BaHaMAS variables
     BHMAS_betaValues=()
