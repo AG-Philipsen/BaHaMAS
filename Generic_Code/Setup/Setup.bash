@@ -59,11 +59,12 @@ function __static__FillInVariablesFromMaybeExistentUserSetup()
             BHMAS_coloredOutput='FALSE'
         fi
         unableToRecover=()
+        #TODO: What about several formulations?!
         for variable in ${!userVariables[@]}; do
-            #TODO: What about several formulations?!
-            occurences=( $(sed -n "s/^[^#].*\(${variable}=.*\)/\1/p" ${BHMAS_userSetupFile} | sed "s/['\"]//g") )
+            #To consider spaces in variable value, use readarray here and split only on endline
+            readarray -t occurences < <(sed -n "s/^[^#].*\(${variable}=.*\)/\1/p" ${BHMAS_userSetupFile} | sed "s/['\"]//g")
             if [[ ${#occurences[@]} -eq 1 ]]; then
-                userVariables[${variable}]=${occurences[0]##*=}
+                userVariables[${variable}]=${occurences[0]#*=}
             else
                 unableToRecover+=( ${variable} )
             fi
