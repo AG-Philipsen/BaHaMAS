@@ -19,13 +19,24 @@
 
 function AddSchedulerSpecificPartToJobScript_SLURM()
 {
-    local jobScriptGlobalPath walltime excludeNodesString jobScriptFilename\
-          partitionDirective nodelistDirective gresDirective constraintDirective\
-          outputAndErrorFilename
-    jobScriptGlobalPath="$1"; walltime="$2"; excludeNodesString="$3"; shift 3
+    local jobScriptGlobalPath walltime jobScriptFilename excludeNodesDirective\
+          hardwareDirective partitionDirective nodelistDirective gresDirective\
+          constraintDirective outputAndErrorFilename
+    jobScriptGlobalPath="$1"; walltime="$2"; excludeNodesDirective="$3"; shift 3
     jobScriptFilename="$(basename "${jobScriptGlobalPath}")"
-    if [[ "${excludeNodesString}" != '' ]]; then
-        excludeNodesString="$SBATCH ${excludeNodesString}"
+    if [[ ${BHMAS_GPUsPerNode} != '' ]]; then
+        hardwareDirective="#SBATCH --ntasks=${BHMAS_simulationsPerJob}"
+    else
+        local numberOfNodes numberOfProcessors
+        numberOfProcessors=$(CalculateProductOfIntegers ${BHMAS_processorsGrid[@]})
+        numberOfNodes=$(( numberOfProcessors / BHMAS_coresPerNode ))
+        hardwareDirective="#SBATCH --nodes=${numberOfNodes}
+#SBATCH --ntasks=${numberOfProcessors}
+#SBATCH --ntasks-per-node=${BHMAS_coresPerNode}
+#SBATCH --cpus-per-task=1"
+    fi
+    if [[ "${excludeNodesDirective}" != '' ]]; then
+        excludeNodesDirective="$SBATCH ${excludeNodesDirective}"
     fi
     if [[ "${BHMAS_clusterPartition}" != '' ]]; then
         partitionDirective="#SBATCH --partition=${BHMAS_clusterPartition}"
@@ -49,15 +60,15 @@ function AddSchedulerSpecificPartToJobScript_SLURM()
     cat <<END_OF_INPUTFILE
 #!/bin/bash
 
-#SBATCH --job-name=${jobScriptFilename#${BHMAS_jobScriptPrefix}_*}
+#SBATCH --job-name=${jobScriptFilename#${BHMAS_jobScriptPrefix}_}
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=${BHMAS_userEmail}
 #SBATCH --time=${walltime}
 #SBATCH --output=${outputAndErrorFilename}.%j.out
 #SBATCH --error=${outputAndErrorFilename}.%j.err
 #SBATCH --no-requeue
-#SBATCH --ntasks=${BHMAS_simulationsPerJob}
-${excludeNodesString}
+${hardwareDirective}
+${excludeNodesDirective}
 ${partitionDirective:-}
 ${nodelistDirective:-}
 ${gresDirective:-}
