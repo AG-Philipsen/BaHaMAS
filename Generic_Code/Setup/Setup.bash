@@ -39,7 +39,7 @@ function __static__ReadVariablesFromTemplateFile()
         #Perform command substitution at setup time
         if [[ ${variableValue} =~ ^\$\((.*)\)$ ]]; then
             set +e
-            variableValue="$(${BASH_REMATCH[1]} 1>/dev/null 2>&1)"
+            variableValue="$(${BASH_REMATCH[1]} 2>&1)"
             if [[ $? -ne 0 ]]; then
                 variableValue="\$(${BASH_REMATCH[1]})"
             fi
@@ -93,10 +93,11 @@ function __static__ProduceUserVariableFile()
     sed -i '/^[[:space:]]*[#]/d' ${BHMAS_userSetupFile}
     #Set variables
     for variable in ${!userVariables[@]}; do
+        #Here we need to transform '\' into '\\' in sed since sed then has to print '\'.
         if [[ $(grep -o '\$' <<< "${userVariables[${variable}]}" | wc -l) -eq 0 ]]; then
-            sed -i "s#\(^.*${variable}=\).*#\1'${userVariables[${variable}]}'#g" ${BHMAS_userSetupFile}
+            sed -i "s#\(^.*${variable}=\).*#\1'${userVariables[${variable}]//\\/\\\\}'#g" ${BHMAS_userSetupFile}
         else
-            sed -i "s#\(^.*${variable}=\).*#\1\"${userVariables[${variable}]}\"#g" ${BHMAS_userSetupFile}
+            sed -i "s#\(^.*${variable}=\).*#\1\"${userVariables[${variable}]//\\/\\\\}\"#g" ${BHMAS_userSetupFile}
         fi
     done
     rm -f ${backupFile}
