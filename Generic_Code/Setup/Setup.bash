@@ -38,7 +38,12 @@ function __static__ReadVariablesFromTemplateFile()
         variableValue="$(sed "s/['\"]//g" <<< "${line##*=}")"
         #Perform command substitution at setup time
         if [[ ${variableValue} =~ ^\$\((.*)\)$ ]]; then
-            variableValue="$(${BASH_REMATCH[1]})"
+            set +e
+            variableValue="$(${BASH_REMATCH[1]} 1>/dev/null 2>&1)"
+            if [[ $? -ne 0 ]]; then
+                variableValue="\$(${BASH_REMATCH[1]})"
+            fi
+            set -e
         fi
         variableNames+=( ${variableName} ) #To be used later to keep names in order
         userVariables[${variableName}]="${variableValue}"
