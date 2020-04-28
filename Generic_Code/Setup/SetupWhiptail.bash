@@ -31,7 +31,7 @@ function __static__DisplayMenuBoxWithPresentVariablesAndActOnInput()
                                   --backtitle 'BaHaMAS setup'
                                   --title 'BaHaMAS configuration'
                                   --menu '${menuHeader}'
-                         $((lines-6)) $((columns-10)) $((lines-22))"
+                         $((lines-6)) $((columns-10)) $((lines-22)) --"
     #Complete dialog box command
     index=1
     for variable in ${variableNames[@]}; do

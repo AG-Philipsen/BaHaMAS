@@ -58,7 +58,7 @@ function MakeInteractiveSetupUsingDialog()
                                 --title 'BaHaMAS configuration'
                                 --separator '|'
                                 --form '${formHeader}'
-                         ${dialogHeight} ${dialogWidth} ${formHeight}"
+                         ${dialogHeight} ${dialogWidth} ${formHeight} --"
     #Complete dialog box command
     index=1
     for variable in ${variableNames[@]}; do
