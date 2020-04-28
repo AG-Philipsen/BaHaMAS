@@ -76,10 +76,11 @@ function EnsureThatNeededFilesAreOnRunDiskForEachBeta()
 {
     if [[ "${BHMAS_submitDiskGlobalPath}" != "${BHMAS_runDiskGlobalPath}" ]]; then
         local submitBetaDirectory runBetaDirectory inputFileGlobalPath\
-              executableGlobalPath beta file
-        for beta in "${BHMAS_betaValues[@]}"; do
-            submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${beta}"
-            runBetaDirectory="${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${beta}"
+              executableGlobalPath startConfiguration betaFolder file
+        for betaFolder in "${BHMAS_betaValuesToBeSubmitted[@]}"; do
+            betaFolder+="${BHMAS_betaPostfix}"
+            submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${betaFolder}"
+            runBetaDirectory="${BHMAS_runDirWithBetaFolders}/${betaFolder}"
             inputFileGlobalPath="${submitBetaDirectory}/${BHMAS_inputFilename}"
             if [[ ${BHMAS_executionMode} != 'mode:measure' ]]; then
                 executableGlobalPath="${submitBetaDirectory}/${BHMAS_productionExecutableFilename}"
@@ -106,6 +107,22 @@ function EnsureThatNeededFilesAreOnRunDiskForEachBeta()
             fi
         done
     fi
+    # When starting a new run, create a symbolic link in the betaFolderfolder on the run disk
+    # to the starting configuration in the pool. This is needed for some software
+    # e.g. openQCD, but it helps in general also if not required by the software!
+    if [[ ${BHMAS_executionMode} =~ ^mode:(prepare-only|thermalize|new-chain)$ ]]; then
+        for betaFolder in "${BHMAS_betaValuesToBeSubmitted[@]}"; do
+            betaFolder+="${BHMAS_betaPostfix}"
+            runBetaDirectory="${BHMAS_runDirWithBetaFolders}/${betaFolder}"
+            startConfiguration="${BHMAS_startConfigurationGlobalPath[${betaFolder#${BHMAS_betaPrefix}}]}"
+            if [[ "${startConfiguration}" != 'notFoundHenceStartFromHot' ]]; then
+                cecho -n lg ' Symlinking ' emph "starting configuration" ' to ' dir "${runBetaDirectory}" '...'
+                ln -s "${startConfiguration}"\
+                   "${runBetaDirectory}/$(basename ${startConfiguration})" || exit ${BHMAS_fatalBuiltin}
+                cecho lg " done!"
+            fi
+        done
+    fi
 }
 
 function __static__CheckExistenceOfFileAndCopyIt()
@@ -116,7 +133,7 @@ function __static__CheckExistenceOfFileAndCopyIt()
         Internal 'File ' file "${file}"\
                  '\ndoes not exist but it should in function ' emph "${FUNCNAME}" '!'
     fi
-    cecho -n lg ' Copying ' emph "${label}" ' file to ' dir "${destination}" "..."
+    cecho -n lg ' Copying ' emph "${label}" ' file to ' dir "${destination}" '...'
     cp "${file}" "${destination}" || exit ${BHMAS_fatalBuiltin}
     cecho lg " done!"
 }
