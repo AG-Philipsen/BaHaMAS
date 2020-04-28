@@ -21,7 +21,8 @@ function ProcessBetaValuesForSubmitOnly()
 {
     trap "$(shopt -p)" RETURN
     local betaValuesCopy index submitBetaDirectory runBetaDirectory\
-          foldersThatMustExist filesThatMustExist object existingFiles
+          foldersThatMustExist filesThatMustExist object existingFiles\
+          symbolicLinkName
     betaValuesCopy=(${BHMAS_betaValues[@]})
     for index in "${!betaValuesCopy[@]}"; do
         submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${betaValuesCopy[${index}]}"
@@ -61,20 +62,42 @@ function ProcessBetaValuesForSubmitOnly()
         if [[ "${BHMAS_submitDiskGlobalPath}" != "${BHMAS_runDiskGlobalPath}" ]]; then
             existingFiles+=( "${runBetaDirectory}"/* )
         fi
+        symbolicLinkName=''
         for object in "${existingFiles[@]}"; do
             if ! ElementInArray "${object}" "${filesThatMustExist[@]}"; then
+                if [[ -L "${object}" ]]; then
+                    # We accept one symlink only (we do not know its name here!)
+                    if [[ "${symbolicLinkName}" = '' ]]; then
+                        symbolicLinkName="${object}"
+                        if [[ "$(dirname "$(realpath "${symbolicLinkName}")")" != "${BHMAS_thermConfsGlobalPath}" ]]; then
+                            Error 'Found wrong symlink ' emph "${symbolicLinkName}" '.\n'\
+                                  emph "beta = ${betaValuesCopy[${index}]}" ' will be skipped!'
+                            BHMAS_problematicBetaValues+=( ${betaValuesCopy[${index}]} )
+                            unset -v 'betaValuesCopy[${index}]'
+                            continue 2
+                        fi
+                        continue
+                    fi
+                fi
                 Error -N 'There are files or folders in the following folder(s)\n'\
                       dir "${submitBetaDirectory}"
                 if [[ "${BHMAS_submitDiskGlobalPath}" != "${BHMAS_runDiskGlobalPath}" ]]; then
                     Error -n -N -e dir "${runBetaDirectory}"
                 fi
-                Error -n -e 'beyond the input and executable files. The value ' emph\
+                Error -n -e 'beyond the needed files. The value ' emph\
                       "beta = ${betaValuesCopy[${index}]}" ' will be skipped!'
                 BHMAS_problematicBetaValues+=( ${betaValuesCopy[${index}]} )
                 unset -v 'betaValuesCopy[${index}]'
                 continue 2
             fi
         done
+        if [[ "${symbolicLinkName}" = '' ]]; then
+            Error 'No symlink to start configuration found. '\
+                  emph "beta = ${betaValuesCopy[${index}]}" ' will be skipped!'
+            BHMAS_problematicBetaValues+=( ${betaValuesCopy[${index}]} )
+            unset -v 'betaValuesCopy[${index}]'
+            continue
+        fi
     done
     if [[ ${#betaValuesCopy[@]} -gt 0 ]]; then
         PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles "${betaValuesCopy[@]}"

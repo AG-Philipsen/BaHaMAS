@@ -162,6 +162,8 @@ function MakeTestPreliminaryOperations()
             __static__CopyAuxiliaryFilesToRunBetaFolder "fakeInput" "fakeExecutable"
             mkdir "Jobscripts_TEST" || exit ${BHMAS_fatalBuiltin}
             printf "NOT EMPTY\n" > "${submitDirWithBetaFolders}/Jobscripts_TEST/fakePrefix_${testParametersString}__${betaFolder%_*}"
+            ln -s "${submitTestFolder}/${projectFolder}/Thermalized_Configurations/conf.${testParametersString}_${betaFolder%_*}_fromConf4000"\
+               "${runDirWithBetaFolders}/${betaFolder}/conf.${testParametersString}_${betaFolder%_*}_fromConf4000" || exit ${BHMAS_fatalBuiltin}
             ;;
 
         CL2QCD-thermalize* )
