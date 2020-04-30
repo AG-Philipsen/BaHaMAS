@@ -58,16 +58,14 @@ function ProduceInputFileAndJobScriptForEachBeta()
 
 function ProduceExecutableFileForEachBeta()
 {
-    local index beta submitBetaDirectory
-    for index in "${!BHMAS_betaValues[@]}"; do
-        submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${BHMAS_betaValues[${index}]}"
+    local betaFolder submitBetaDirectory
+    for betaFolder in "${BHMAS_betaValuesToBeSubmitted[@]}"; do
+        betaFolder+="${BHMAS_betaPostfix}"
+        submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${betaFolder}"
         if [[ ! -d "${submitBetaDirectory}" ]]; then
             Internal 'The directory ' dir "${submitBetaDirectory}"\
                      '\ndoes not exist but it should in function ' emph "${FUNCNAME}" '!'
         fi
-    done
-    for beta in "${BHMAS_betaValues[@]}"; do
-        submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${beta}"
         ProduceExecutableFileInGivenBetaDirectory "${submitBetaDirectory}"
     done
 }
