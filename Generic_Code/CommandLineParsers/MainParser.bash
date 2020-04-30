@@ -178,8 +178,6 @@ function DeclareAllowedOptionsPerModeOrSoftware()
         ["mode:prepare-only_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"
         ["mode:new-chain_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"
         ["mode:thermalize_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"
-        ["mode:continue_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"
-        ["mode:continue-thermalization_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"
         #-------------------------------------------------------------------------------
         # All-modes, specific-software options
         ['CL2QCD']+=''
