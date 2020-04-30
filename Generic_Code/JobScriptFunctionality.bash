@@ -98,14 +98,14 @@ function __static__SetExcludedNodesString()
     CheckIfVariablesAreDeclared excludeNodesString
     #Trying to retrieve information about the list of nodes to be excluded if user gave file
     if [[ "${BHMAS_excludeNodesGlobalPath}" != '' ]]; then
-        set +e #Here we want to "allow" grep or ssh to fail, since there could e.g. be connection problems. Afterwards we check excludeString.
+        set +e #Here we want to "allow" grep or ssh to fail, since there could e.g. be connection problems. Afterwards we check excludeNodesString.
         if [[ -f "${BHMAS_excludeNodesGlobalPath}" ]]; then
-            excludeString=$(grep -oE '\-\-exclude=.*\[.*\]' ${BHMAS_excludeNodesGlobalPath} 2>/dev/null)
+            excludeNodesString=$(grep -oE '\-\-exclude=.*' ${BHMAS_excludeNodesGlobalPath} 2>/dev/null)
             if [[ $? -eq 2 ]]; then
                 Error "It was not possible to recover the exclude nodes list from " file "${BHMAS_excludeNodesGlobalPath}" " file!"
             fi
         elif [[ ${BHMAS_excludeNodesGlobalPath} =~ : ]]; then
-            excludeString=$(ssh ${BHMAS_excludeNodesGlobalPath%%:*} "grep -oE '\-\-exclude=.*\[.*\]' ${BHMAS_excludeNodesGlobalPath#*:} 2>/dev/null")
+            excludeNodesString=$(ssh ${BHMAS_excludeNodesGlobalPath%%:*} "grep -oE '\-\-exclude=.*' ${BHMAS_excludeNodesGlobalPath#*:} 2>/dev/null")
             if [[ $? -eq 2 ]]; then
                 Error "It was not possible to recover the exclude nodes list over ssh connection!"
             fi
@@ -116,8 +116,7 @@ function __static__SetExcludedNodesString()
         Warning -n "No string to exclude nodes in jobscript is available!"
         AskUser -n "         Do you still want to continue the jobscript creation?"
         if UserSaidNo; then
-            cecho "\n" B lr "No job will be created. Exiting...\n"
-            exit ${BHMAS_failureExitCode}
+            Fatal ${BHMAS_fatalGeneric} 'No job will be created. Exiting...'
         fi
     fi
 }
