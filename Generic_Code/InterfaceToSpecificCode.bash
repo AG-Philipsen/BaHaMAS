@@ -119,6 +119,11 @@ function ProduceExecutableFileInGivenBetaDirectory()
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
 
+function ExtractNumberOfTrajectoriesToBeDoneFromInputFile()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
+}
+
 function AddSoftwareSpecificPartToProductionJobScript()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"

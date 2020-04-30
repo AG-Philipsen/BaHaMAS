@@ -59,18 +59,6 @@ function __static__GetJobBetasStringUsing()
     printf "${betasStringToBeReturned:2}" #I cut here the two initial underscores
 }
 
-function __static__ExtractNumberOfTrajectoriesToBeDoneFromFile()
-{
-    local filename numberOfTrajectories
-    filename="$1"
-    numberOfTrajectories=$(sed -n 's/^n\(H\|Rh\)mcSteps=\([0-9]\+\)/\2/p' "${filename}") #Option is either nHmcSteps or nRhmcSteps
-    if [[ "${numberOfTrajectories}" = '' ]]; then
-        Fatal ${BHMAS_fatalLogicError} "Number of trajectories to be done not present in input file " file "${filename}" "!"
-    else
-        printf "${numberOfTrajectories}"
-    fi
-}
-
 function __static__CalculateWalltimeExtractingNumberOfTrajectoriesPerBetaAndUsingTimesPerTrajectoryIfGiven()
 {
     #This function is called in a subshell and we want to be sure that exit on failure is valid also for one level further down
@@ -87,7 +75,7 @@ function __static__CalculateWalltimeExtractingNumberOfTrajectoriesPerBetaAndUsin
     else
         for beta in "${betaValues[@]}"; do
             inputFileGlobalPath="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${beta}/${BHMAS_inputFilename}"
-            trajectoriesToBeDone["${beta}"]=$(__static__ExtractNumberOfTrajectoriesToBeDoneFromFile "${inputFileGlobalPath}")
+            trajectoriesToBeDone["${beta}"]=$(ExtractNumberOfTrajectoriesToBeDoneFromInputFile "${inputFileGlobalPath}")
             walltimesInSeconds+=( $(awk '{print $1*$2}' <<< "${trajectoriesToBeDone[${beta}]} ${BHMAS_timesPerTrajectory[${beta}]}") )
         done
         finalWalltime="$(SecondsToTimeStringWithDays $(MaximumOfArray ${walltimesInSeconds[@]}) )"
