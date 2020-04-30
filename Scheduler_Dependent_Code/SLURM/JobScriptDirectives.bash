@@ -35,8 +35,10 @@ function AddSchedulerSpecificPartToJobScript_SLURM()
 #SBATCH --ntasks-per-node=${BHMAS_coresPerNode}
 #SBATCH --cpus-per-task=1"
     fi
-    if [[ "${excludeNodesDirective}" != '' ]]; then
-        excludeNodesDirective="$SBATCH ${excludeNodesDirective}"
+    if [[ "${excludeNodesDirective}" =~ ^(|--exclude=)$ ]]; then
+        excludeNodesDirective=''
+    else
+        excludeNodesDirective="#SBATCH ${excludeNodesDirective}"
     fi
     if [[ "${BHMAS_clusterPartition}" != '' ]]; then
         partitionDirective="#SBATCH --partition=${BHMAS_clusterPartition}"
