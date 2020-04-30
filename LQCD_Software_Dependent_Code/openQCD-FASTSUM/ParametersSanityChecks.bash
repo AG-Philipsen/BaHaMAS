@@ -55,6 +55,10 @@ function __static__CheckIfProcessorCombinationIsAllowed()
             Error "The total number of used cores (${usedCores})\n"\
                   "must be multiple of those per node (${BHMAS_coresPerNode}).\n"\
                   "$((BHMAS_coresPerNode - usedCores % BHMAS_coresPerNode)) will be left unused wasting time!"
+            AskUser 'Do you want to continue?'
+            if UserSaidNo; then
+                Fatal ${BHMAS_fatalCommandLine} 'Specified processors grid would lead to waste of resources.'
+            fi
             ;;
         2)
             Fatal ${BHMAS_fatalCommandLine} "Number of processors in each dimension must be 1 or even!"
