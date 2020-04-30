@@ -78,10 +78,6 @@ function ValidateParsedBetaValues()
             idToBeAdded=()
             if [[ ${occurencesInFile} -eq 0 ]]; then
                 idToBeAdded+=( "${runId}" )
-                printf "%-40s%-25s# %s\n"\
-                       "${runId}"\
-                       "${BHMAS_lqcdSoftware}"\
-                       "$(date +'%d.%m.%Y at %H:%M:%S')" >> "${BHMAS_metadataFilename}"
             else
                 idNotAbsent+=( "${runId}" )
             fi
