@@ -80,15 +80,15 @@ MPI_INCLUDE ${BHMAS_folderWithMPIHeaderGlobalPath}
 CFLAGS ${BHMAS_compilerFlags}
 LDFLAGS
 
-NPROC0_TOT 1
-NPROC1_TOT 1
-NPROC2_TOT 1
-NPROC3_TOT 1
+NPROC0_TOT ${BHMAS_processorsGrid[0]}
+NPROC1_TOT ${BHMAS_processorsGrid[1]}
+NPROC2_TOT ${BHMAS_processorsGrid[2]}
+NPROC3_TOT ${BHMAS_processorsGrid[3]}
 
-L0 $(( BHMAS_ntime  / 1 ))
-L1 $(( BHMAS_nspace / 1 ))
-L2 $(( BHMAS_nspace / 1 ))
-L3 $(( BHMAS_nspace / 1 ))
+L0 $(( BHMAS_ntime  / BHMAS_processorsGrid[0] ))
+L1 $(( BHMAS_nspace / BHMAS_processorsGrid[1] ))
+L2 $(( BHMAS_nspace / BHMAS_processorsGrid[2] ))
+L3 $(( BHMAS_nspace / BHMAS_processorsGrid[3] ))
 
 NPROC0_BLK 1
 NPROC1_BLK 1
