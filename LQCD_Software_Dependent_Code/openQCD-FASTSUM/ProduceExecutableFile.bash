@@ -48,7 +48,7 @@ function ProduceExecutableFileInGivenBetaDirectory_openQCD-FASTSUM()
                     __static__MoveCompilationInputFileToOwnFolder "${betaDirectoryGlobalPath}"
                     # Move cursor bottom left due to openQCD-FASTSUM makefile output
                     #  LINES and COLUMNS not necessarily set -> https://stackoverflow.com/a/48016366
-                    if [[ ${BHMAS_TESTMODE} != 'TRUE' ]]; then
+                    if [[ "${BHMAS_TESTMODE:-}" != 'TRUE' ]]; then
                         cecho -d "\e[$(tput lines);0H"
                     fi
                     cecho lg ' ...compilation completed successfully!'
