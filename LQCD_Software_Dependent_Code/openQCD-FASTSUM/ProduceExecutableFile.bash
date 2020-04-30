@@ -17,10 +17,10 @@
 #  along with BaHaMAS. If not, see <http://www.gnu.org/licenses/>.
 #
 
-function ProduceExecutableFileInGivenBetaDirectory_openQCD-FASTSUM()
+function ProduceExecutableFileInGivenBetaDirectories_openQCD-FASTSUM()
 {
-    local betaDirectoryGlobalPath auxiliaryCompilationFilename makefileGlobalpath
-    betaDirectoryGlobalPath="$1"
+    local betaDirectoryGlobalPath auxiliaryCompilationFilename makefileGlobalpath\
+          compilationFolderGlobalpath
     auxiliaryCompilationFilename='compile_settings.txt'
     makefileGlobalpath="${BHMAS_productionCodebaseGlobalPath}/build/Makefile"
     if [[ ${BHMAS_executionMode} != 'mode:measure' ]]; then
@@ -31,7 +31,9 @@ function ProduceExecutableFileInGivenBetaDirectory_openQCD-FASTSUM()
                 "Be sure you specify the correct position in the BaHaMAS setup."
         else
             (
-                cd "${betaDirectoryGlobalPath}"
+                compilationFolderGlobalpath="${BHMAS_submitDirWithBetaFolders}/${BHMAS_compilationFolderName}/$(date +'%Y-%m-%d_%H%M%S')"
+                mkdir -p "${compilationFolderGlobalpath}" || exit ${BHMAS_fatalBuiltin}
+                cd "${compilationFolderGlobalpath}" || exit ${BHMAS_fatalBuiltin}
                 __static__CreateAuxiliaryCompilationFile
                 cecho lg '\n Compiling openQCD-FASTSUM...'
                 set +e #Manual error handling
@@ -45,7 +47,6 @@ function ProduceExecutableFileInGivenBetaDirectory_openQCD-FASTSUM()
                         'or analogous are loaded correctly and the environment is correctly set.\n'\
                         'The mpicc used was ' emph "${BHMAS_compiler}" '.'
                 else
-                    __static__MoveCompilationInputFileToOwnFolder "${betaDirectoryGlobalPath}"
                     # Move cursor bottom left due to openQCD-FASTSUM makefile output
                     #  LINES and COLUMNS not necessarily set -> https://stackoverflow.com/a/48016366
                     if [[ "${BHMAS_TESTMODE:-}" != 'TRUE' ]]; then
@@ -53,8 +54,13 @@ function ProduceExecutableFileInGivenBetaDirectory_openQCD-FASTSUM()
                     fi
                     cecho lg ' ...compilation completed successfully!'
                 fi
+                # The executable is the same for all betas, copy it
+                for betaDirectoryGlobalPath in "$@"; do
+                    cp "${BHMAS_productionMakefileTarget}"\
+                       "${betaDirectoryGlobalPath}/${BHMAS_productionExecutableFilename}" || exit ${BHMAS_fatalBuiltin}
+                done
             )
-            fi
+        fi
     else
         Internal 'Function ' emph "${FUNCNAME}" ' called in ' emph "${BHMAS_executionMode#mode:}" ' execution mode!'
     fi
@@ -92,24 +98,6 @@ NPROC3_BLK 1
 END_OF_COMPILATION_FILE
 
     exec 1>&5-
-}
-
-function __static__MoveCompilationInputFileToOwnFolder()
-{
-    CheckIfVariablesAreDeclared auxiliaryCompilationFilename
-    local betaDirectoryGlobalPath compilationFolderGlobalpath destinationFilename
-    betaDirectoryGlobalPath="$1"
-    compilationFolderGlobalpath="${BHMAS_submitDirWithBetaFolders}/${BHMAS_compilationFolderName}"
-    destinationFilename="${auxiliaryCompilationFilename/.txt/_$(basename "${betaDirectoryGlobalPath}")_$(date +'%Y-%m-%d_%H%M%S').txt}"
-    if [[ -f "${destinationFilename}" ]]; then
-        Internal 'Auxiliary compilation file ' file "${destinationFilename}"\
-                 '\nseems to exist already in folder ' dir "${compilationFolderGlobalpath}"\
-                 '\nwhich should not be the case in ' emph "${FUNCNAME}" '.'
-    else
-        mkdir -p "${compilationFolderGlobalpath}" || exit ${BHMAS_fatalBuiltin}
-        mv "${betaDirectoryGlobalPath}/${auxiliaryCompilationFilename}"\
-           "${compilationFolderGlobalpath}/${destinationFilename}" || exit ${BHMAS_fatalBuiltin}
-    fi
 }
 
 

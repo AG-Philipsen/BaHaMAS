@@ -17,25 +17,26 @@
 #  along with BaHaMAS. If not, see <http://www.gnu.org/licenses/>.
 #
 
-function ProduceExecutableFileInGivenBetaDirectory_CL2QCD()
+function ProduceExecutableFileInGivenBetaDirectories_CL2QCD()
 {
-    local betaDirectoryGlobalPath executableGlobalPath
-    betaDirectoryGlobalPath="$1"
-    if [[ ${BHMAS_executionMode} != 'mode:measure' ]]; then
-        executableGlobalPath="${betaDirectoryGlobalPath}/${BHMAS_productionExecutableFilename}"
-        #In production the executable must not be there
-        if [[ -f "${executableGlobalPath}" ]]; then
-            Internal 'Production executable file\n' file "${executableGlobalPath}"\
-                     '\nis already present in the directory\n' dir "${betaDirectoryGlobalPath}"\
-                     'but it should not be the case in the function ' emph "${FUNCNAME}" '.'
+    local betaDirectoryGlobalPath destinationGlobalPath
+    for betaDirectoryGlobalPath in "$@"; do
+        if [[ ${BHMAS_executionMode} != 'mode:measure' ]]; then
+            destinationGlobalPath="${betaDirectoryGlobalPath}/${BHMAS_productionExecutableFilename}"
+            #In production the executable must not be there
+            if [[ -f "${destinationGlobalPath}" ]]; then
+                Internal 'Production executable file\n' file "${destinationGlobalPath}"\
+                         '\nis already present in the directory\n' dir "${betaDirectoryGlobalPath}"\
+                         'but it should not be the case in the function ' emph "${FUNCNAME}" '.'
+            else
+                cp "${BHMAS_productionExecutableGlobalPath}" "${destinationGlobalPath}" || exit ${BHMAS_fatalBuiltin}
+            fi
         else
-            cp "${BHMAS_productionExecutableGlobalPath}" "${executableGlobalPath}" || exit ${BHMAS_fatalBuiltin}
+            destinationGlobalPath="${betaDirectoryGlobalPath}/${BHMAS_measurementExecutableFilename}"
+            #In measurement the executable can be there because of possible job continuation
+            cp "${BHMAS_measurementExecutableGlobalPath}" "${destinationGlobalPath}" || exit ${BHMAS_fatalBuiltin}
         fi
-    else
-        executableGlobalPath="${betaDirectoryGlobalPath}/${BHMAS_measurementExecutableFilename}"
-        #In measurement the executable can be there because of possible job continuation
-        cp "${BHMAS_measurementExecutableGlobalPath}" "${executableGlobalPath}" || exit ${BHMAS_fatalBuiltin}
-    fi
+    done
 }
 
 

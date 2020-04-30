@@ -114,7 +114,7 @@ function ProduceInputFile()
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
 
-function ProduceExecutableFileInGivenBetaDirectory()
+function ProduceExecutableFileInGivenBetaDirectories()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }

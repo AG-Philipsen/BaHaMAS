@@ -25,9 +25,13 @@ function PerformParametersSanityChecks_openQCD-FASTSUM()
             __static__CheckIfProcessorCombinationIsAllowed
             if [[ ${BHMAS_executionMode} != 'mode:measure' ]]; then
                 __static__CheckIfSAPBlockSizeIsAllowed
+                for index in "${BHMAS_processorsGrid[@]}"; do
+                    BHMAS_productionExecutableFilename+="_${index}"
+                done
             fi
             ;;
     esac
+    readonly BHMAS_productionExecutableFilename
 }
 
 function __static__CheckIfProcessorCombinationIsAllowed()

@@ -19,8 +19,8 @@
 
 function PerformParametersSanityChecks_CL2QCD()
 {
-    #Nothing to be done
-    :
+    #In principle not needed, but just in case
+    readonly BHMAS_productionExecutableGlobalPath
 }
 
 

@@ -178,7 +178,8 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
     if [[ "${BHMAS_productionExecutableGlobalPath:-}" != '' ]]; then
         readonly BHMAS_productionExecutableFilename="${BHMAS_productionExecutableGlobalPath##*/}"
     else
-        readonly BHMAS_productionExecutableFilename="${BHMAS_productionMakefileTarget}"
+        #Make this variable readonly in PerformParametersSanityChecks function
+        BHMAS_productionExecutableFilename="${BHMAS_productionMakefileTarget}"
     fi
     if [[ "${BHMAS_measurementExecutableGlobalPath:-}" != '' ]]; then
         readonly BHMAS_measurementExecutableFilename="${BHMAS_measurementExecutableGlobalPath##*/}"
