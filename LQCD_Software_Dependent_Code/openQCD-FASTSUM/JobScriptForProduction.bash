@@ -75,9 +75,9 @@ runDir="${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}"
 cd \${runDir}
 
 echo "Running openQCD-FASTSUM from '\$(pwd)':"
-echo '  srun \${submitDir}/${BHMAS_productionExecutableFilename} -i \${submitDir}/${BHMAS_inputFilename} -noms -noloc ${srunCommandOptions}'
+echo '  mpirun \${submitDir}/${BHMAS_productionExecutableFilename} -i \${submitDir}/${BHMAS_inputFilename} -noms -noloc ${srunCommandOptions}'
 
-srun \${submitDir}/${BHMAS_productionExecutableFilename} -i \${submitDir}/${BHMAS_inputFilename} -noms -noloc ${srunCommandOptions}
+mpirun \${submitDir}/${BHMAS_productionExecutableFilename} -i \${submitDir}/${BHMAS_inputFilename} -noms -noloc ${srunCommandOptions}
 ERROR_CODE=\$?
 
 if [ \${ERROR_CODE} -ne 0 ]; then
