@@ -130,7 +130,7 @@ function DeclareBaHaMASGlobalVariables()
     BHMAS_inverterBlockSize=50
 
     #openQCD-FASTSUM specific
-    BHMAS_processorsGrid=( 1 1 1 1 )
+    BHMAS_processorsGrid=()
     BHMAS_sapBlockSize=()
 
     #Internal BaHaMAS variables

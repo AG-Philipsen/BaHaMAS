@@ -21,10 +21,13 @@ function PerformParametersSanityChecks_openQCD-FASTSUM()
 {
     local index
     case ${BHMAS_executionMode} in
-        mode:new-chain | mode:prepare-only | mode:thermalize | mode:continue* | mode:measure )
-            __static__CheckIfProcessorCombinationIsAllowed
-            if [[ ${BHMAS_executionMode} != 'mode:measure' ]]; then
-                __static__CheckIfSAPBlockSizeIsAllowed
+        mode:new-chain | mode:prepare-only | mode:thermalize | mode:continue* )
+            if [[ ${BHMAS_executionMode} != mode:continue* ]]; then
+                __static__WarnIfProcessorCombinationIsUnset
+                __static__CheckIfProcessorCombinationIsAllowed
+            fi
+            __static__CheckIfSAPBlockSizeIsAllowed
+            if [[ ${BHMAS_executionMode} != mode:continue* ]]; then
                 for index in "${BHMAS_processorsGrid[@]}"; do
                     BHMAS_productionExecutableFilename+="_${index}"
                 done
@@ -32,6 +35,14 @@ function PerformParametersSanityChecks_openQCD-FASTSUM()
             ;;
     esac
     readonly BHMAS_productionExecutableFilename
+}
+
+function __static__WarnIfProcessorCombinationIsUnset()
+{
+    if [[ ${#BHMAS_processorsGrid[@]} -ne 4 ]]; then
+        Warning 'The processor grid was not specified, using (1 1 1 1).'
+        BHMAS_processorsGrid=( 1 1 1 1 )
+    fi
 }
 
 function __static__CheckIfProcessorCombinationIsAllowed()

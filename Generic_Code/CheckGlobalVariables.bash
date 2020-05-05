@@ -174,11 +174,19 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
         mustReturn='FALSE'
     fi
 
-    #Define dependent additional variables
+    #Define dependent additional variables (here the code is already chosen)
+    case ${BHMAS_lqcdSoftware} in
+        CL2QCD )
+            readonly BHMAS_requireProcessorGrid='FALSE'
+            ;;
+        openQCD-FASTSUM )
+            readonly BHMAS_requireProcessorGrid='TRUE'
+            ;;
+    esac
     if [[ "${BHMAS_productionExecutableGlobalPath:-}" != '' ]]; then
         readonly BHMAS_productionExecutableFilename="${BHMAS_productionExecutableGlobalPath##*/}"
     else
-        #Make this variable readonly in PerformParametersSanityChecks function
+        #Make this variable readonly in PerformParametersSanityChecks function to append processor grid
         BHMAS_productionExecutableFilename="${BHMAS_productionMakefileTarget}"
     fi
     if [[ "${BHMAS_measurementExecutableGlobalPath:-}" != '' ]]; then

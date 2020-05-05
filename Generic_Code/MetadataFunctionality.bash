@@ -19,6 +19,19 @@
 
 function ValidateParsedBetaValues()
 {
+    __static__ValidateMetadata
+    if [[ ${BHMAS_requireProcessorGrid} = 'TRUE' && ${#BHMAS_processorsGrid[@]} -ne 4 ]]; then
+        if [[ ${BHMAS_executionMode} = mode:continue* ]]; then
+            __static__SetProcessorGridFromExecutableName
+        else
+            Internal 'A processor grid is required, but not available and not in continue* mode.'
+        fi
+    fi
+    readonly BHMAS_processorsGrid #From here on it should not be changed anymore!
+}
+
+function __static__ValidateMetadata()
+{
     local modesThatRequireEntryInMetadataFile\
           modesThatRequireNoEntryInMetadata\
           runId software occurencesInFile\
@@ -128,3 +141,31 @@ function ValidateParsedBetaValues()
         done
     fi
 }
+
+function __static__SetProcessorGridFromExecutableName()
+{
+    trap "$(shopt -p)" RETURN
+    local runId listOfGrids submitBetaDirectory executableGlobalPath grid
+    listOfGrids=()
+    shopt -s dotglob nullglob
+    for runId in "${BHMAS_betaValues[@]}"; do
+        submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}"
+        executableGlobalPath=( "${submitBetaDirectory}/${BHMAS_productionExecutableFilename}"* )
+        if [[ ${#executableGlobalPath[@]} -ne 1 ]]; then
+            Fatal ${BHMAS_fatalLogicError} 'Zero or more executable files were found in\n' dir "${submitBetaDirectory}"
+        fi
+        listOfGrids+=( "${executableGlobalPath/${submitBetaDirectory}\/${BHMAS_productionExecutableFilename}/}" )
+    done
+    for grid in "${listOfGrids[@]}"; do
+        if [[ "${grid}" != "${listOfGrids[0]}" ]]; then
+            Fatal 'Executable with different processors grid in executable names found\n'\
+                  'in the betas folders that were selected. Impossible to continue.'
+        fi
+    done
+    echo ${#listOfGrids[@]}
+    echo ${listOfGrids[@]}
+    BHMAS_processorsGrid=( ${listOfGrids[0]//_/ } ) #Word splitting splits here the eleemnts
+}
+
+
+MakeFunctionsDefinedInThisFileReadonly
