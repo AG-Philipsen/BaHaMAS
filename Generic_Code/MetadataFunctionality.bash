@@ -20,14 +20,24 @@
 function ValidateParsedBetaValues()
 {
     __static__ValidateMetadata
-    if [[ ${BHMAS_requireProcessorGrid} = 'TRUE' && ${#BHMAS_processorsGrid[@]} -ne 4 ]]; then
-        if [[ ${BHMAS_executionMode} = mode:continue* ]]; then
-            __static__SetProcessorGridFromExecutableName
-        else
-            Internal 'A processor grid is required, but not available and not in continue* mode.'
+    if [[ ${BHMAS_useMPI} = 'TRUE' ]]; then
+        if [[ ${#BHMAS_processorsGrid[@]} -ne 4 ]]; then
+            case ${BHMAS_executionMode} in
+                mode:continue* | mode:submit-only )
+                    __static__SetProcessorGridFromExecutableName
+                    ;;
+                mode:new-chain | mode:prepare-only | mode:thermalize )
+                    Internal 'A processor grid is required, but not available and not in continue* mode.'
+                    ;;
+            esac
         fi
+        # Now we are sure the processor grid is set, we can complete executable name
+        for index in "${BHMAS_processorsGrid[@]}"; do
+            BHMAS_productionExecutableFilename+="_${index}"
+        done
+        readonly BHMAS_productionExecutableFilename
+        readonly BHMAS_processorsGrid
     fi
-    readonly BHMAS_processorsGrid #From here on it should not be changed anymore!
 }
 
 function __static__ValidateMetadata()
@@ -162,8 +172,6 @@ function __static__SetProcessorGridFromExecutableName()
                   'in the betas folders that were selected. Impossible to continue.'
         fi
     done
-    echo ${#listOfGrids[@]}
-    echo ${listOfGrids[@]}
     BHMAS_processorsGrid=( ${listOfGrids[0]//_/ } ) #Word splitting splits here the eleemnts
 }
 
