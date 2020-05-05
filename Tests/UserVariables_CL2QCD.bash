@@ -33,7 +33,7 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_jobScriptFolderName="Jobscripts_TEST"
     readonly BHMAS_excludeNodesGlobalPath="${BHMAS_submitDiskGlobalPath}/ExcludeNodes_TEST"
     readonly BHMAS_projectSubpath="StaggeredFakeProject"
-    readonly BHMAS_productionExecutableGlobalPath="${BHMAS_repositoryTopLevelPath}/Tests/AuxiliaryFiles/fakeExecutable"
+    readonly BHMAS_productionExecutableGlobalPath="${BHMAS_repositoryTopLevelPath}/Tests/AuxiliaryFiles/CL2QCD/fakeExecutable"
     readonly BHMAS_productionCodebaseGlobalPath=''
     readonly BHMAS_productionMakefileTarget=''
     readonly BHMAS_compiler=''
@@ -53,7 +53,7 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_approxMetropolisFilename="Approx_Metropolis"
     readonly BHMAS_databaseFilename="OverviewDatabase"
     readonly BHMAS_databaseGlobalPath="${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath}/SimulationsOverview"
-    readonly BHMAS_measurementExecutableGlobalPath="${BHMAS_repositoryTopLevelPath}/Tests/AuxiliaryFiles/fakeExecutable"
+    readonly BHMAS_measurementExecutableGlobalPath="${BHMAS_repositoryTopLevelPath}/Tests/AuxiliaryFiles/CL2QCD/fakeExecutable"
     readonly BHMAS_thermConfsGlobalPath="${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath}/Thermalized_Configurations"
 
     #Possible default value for options which can then not be given via command line

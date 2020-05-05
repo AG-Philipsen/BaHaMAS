@@ -34,7 +34,7 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_excludeNodesGlobalPath="${BHMAS_submitDiskGlobalPath}/ExcludeNodes_TEST"
     readonly BHMAS_projectSubpath="WilsonFakeProject"
     readonly BHMAS_productionExecutableGlobalPath=''
-    readonly BHMAS_productionCodebaseGlobalPath="${BHMAS_repositoryTopLevelPath}/Tests/AuxiliaryFiles/fakeOpenQCD-FASTSUM"
+    readonly BHMAS_productionCodebaseGlobalPath="${BHMAS_repositoryTopLevelPath}/Tests/AuxiliaryFiles/openQCD-FASTSUM/fakeCodebase"
     readonly BHMAS_productionMakefileTarget="qcd1"
     readonly BHMAS_compiler="$(which mpicc)"
     readonly BHMAS_compilerFlags='-std=c99 -O2 -DAVX -DFMA3 -Werror -Wall'

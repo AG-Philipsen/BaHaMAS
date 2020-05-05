@@ -46,7 +46,7 @@ function __static__CreateRationalApproxFolderWithFiles()
     approxFolder="${submitTestFolder}/${projectFolder}/Rational_Approximations"
     mkdir -p "${approxFolder}"
     for filename in 'Approx_Heatbath' 'Approx_MD' 'Approx_Metropolis'; do
-        cp "${BHMAS_testsFolderAuxFiles}/fakeApprox" "${approxFolder}/Nf2_${filename}"
+        cp "${BHMAS_testsFolderAuxFiles}/${software}/fakeApprox" "${approxFolder}/Nf2_${filename}"
     done
 }
 
@@ -54,6 +54,14 @@ function __static__CreateBetaFolder()
 {
     mkdir "${submitDirWithBetaFolders}/${betaFolder}" || exit ${BHMAS_fatalBuiltin}
     mkdir "${runDirWithBetaFolders}/${betaFolder}" || exit ${BHMAS_fatalBuiltin}
+}
+
+function __static__CreateFilesInSubmitBetaFolder()
+{
+    local file
+    for file in "$@"; do
+        touch "${submitDirWithBetaFolders}/${betaFolder}/${file}" || exit ${BHMAS_fatalBuiltin}
+    done
 }
 
 function __static__CreateFilesInRunBetaFolder()
@@ -80,7 +88,7 @@ function __static__CopyAuxiliaryFilesToSubmitBetaFolder()
 {
     local file
     for file in "$@"; do
-        cp "${BHMAS_testsFolderAuxFiles}/${file}" "${submitDirWithBetaFolders}/${betaFolder}" || exit ${BHMAS_fatalBuiltin}
+        cp "${BHMAS_testsFolderAuxFiles}/${software}/${file}" "${submitDirWithBetaFolders}/${betaFolder}" || exit ${BHMAS_fatalBuiltin}
     done
 }
 
@@ -88,7 +96,7 @@ function __static__CopyAuxiliaryFilesToRunBetaFolder()
 {
     local file
     for file in "$@"; do
-        cp "${BHMAS_testsFolderAuxFiles}/${file}" "${runDirWithBetaFolders}/${betaFolder}" || exit ${BHMAS_fatalBuiltin}
+        cp "${BHMAS_testsFolderAuxFiles}/${software}/${file}" "${runDirWithBetaFolders}/${betaFolder}" || exit ${BHMAS_fatalBuiltin}
     done
 }
 
@@ -140,7 +148,7 @@ function MakeTestPreliminaryOperations()
     __static__CreateParametersFolders
     cd "${submitDirWithBetaFolders}" || exit ${BHMAS_fatalBuiltin}
     #Always use completed file and then in case overwrite
-    cp "${BHMAS_testsFolderAuxFiles}/fakeBetas" "${submitDirWithBetaFolders}/betas"
+    cp "${BHMAS_testsFolderAuxFiles}/${software}/fakeBetas" "${submitDirWithBetaFolders}/betas"
 
     case "$1" in
         CL2QCD-prepare-only | CL2QCD-new-chain | CL2QCD-new-chain-goal )
@@ -157,7 +165,7 @@ function MakeTestPreliminaryOperations()
             __static__CreateThermalizedConfigurationFolder
             __static__CreateThermalizedConfiguration "fromConf4000"
             __static__CreateBetaFolder
-            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata_CL2QCD" ".BaHaMAS_metadata"
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
             __static__CopyAuxiliaryFilesToSubmitBetaFolder "fakeInput" "fakeExecutable"
             __static__CopyAuxiliaryFilesToRunBetaFolder "fakeInput" "fakeExecutable"
             mkdir "Jobscripts_TEST" || exit ${BHMAS_fatalBuiltin}
@@ -183,7 +191,7 @@ function MakeTestPreliminaryOperations()
             __static__CreateBetaFolder
             __static__CopyAuxiliaryFilesToSubmitBetaFolder "fakeInput"
             __static__CopyAuxiliaryFilesToRunBetaFolder "fakeExecutable" "fakeOutput" "fakeOutput_pbp.dat"
-            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata_CL2QCD" ".BaHaMAS_metadata"
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
             __static__CompleteInputFileWithCorrectPaths
             __static__CreateFilesInRunBetaFolder "conf.save" "prng.save"
             case "${1##*-}" in
@@ -214,19 +222,19 @@ function MakeTestPreliminaryOperations()
 
         CL2QCD-accRateReport* )
             __static__CreateBetaFolder
-            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata_CL2QCD" ".BaHaMAS_metadata"
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
             __static__CopyAuxiliaryFilesToRunBetaFolder "fakeOutput"
             ;;
 
         CL2QCD-cleanOutputFiles* )
             __static__CreateBetaFolder
-            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata_CL2QCD" ".BaHaMAS_metadata"
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
             __static__CopyAuxiliaryFilesToRunBetaFolder "fakeOutput" "fakeOutput_pbp.dat"
             ;;
 
         CL2QCD-measure* )
             __static__CreateBetaFolder
-            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata_CL2QCD" ".BaHaMAS_metadata"
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
             __static__CreateFilesInRunBetaFolder "conf.00100" "conf.00200" "conf.00300" "conf.00400"
             if [[ $1 =~ some$ ]]; then
                 __static__CreateFilesInRunBetaFolder "conf.00100_2_3_7_1_corr" "conf.00100_1_2_3_1_corr"
@@ -239,6 +247,21 @@ function MakeTestPreliminaryOperations()
             if [[ $1 =~ goal ]]; then
                 __static__AddStringToFirstLineBetasFile "g15000"
             fi
+            ;;
+
+        openQCD-FASTSUM-submit-only )
+            __static__CreateThermalizedConfigurationFolder
+            __static__CreateThermalizedConfiguration "fromConf4000"
+            __static__CreateBetaFolder
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
+            __static__CopyAuxiliaryFilesToSubmitBetaFolder "fakeInput"
+            __static__CopyAuxiliaryFilesToRunBetaFolder "fakeInput"
+            __static__CreateFilesInSubmitBetaFolder "qcd1_1_2_4_6"
+            __static__CreateFilesInRunBetaFolder "qcd1_1_2_4_6"
+            mkdir "Jobscripts_TEST" || exit ${BHMAS_fatalBuiltin}
+            printf "NOT EMPTY\n" > "${submitDirWithBetaFolders}/Jobscripts_TEST/fakePrefix_${testParametersString}__${betaFolder%_*}"
+            ln -s "${submitTestFolder}/${projectFolder}/Thermalized_Configurations/conf.${testParametersString}_${betaFolder%_*}_fromConf4000"\
+               "${runDirWithBetaFolders}/${betaFolder}/conf.${testParametersString}_${betaFolder%_*}_fromConf4000" || exit ${BHMAS_fatalBuiltin}
             ;;
 
         completeBetasFile* )
