@@ -151,7 +151,7 @@ function MakeTestPreliminaryOperations()
     cp "${BHMAS_testsFolderAuxFiles}/${software}/fakeBetas" "${submitDirWithBetaFolders}/betas"
 
     case "$1" in
-        CL2QCD-prepare-only | CL2QCD-new-chain | CL2QCD-new-chain-goal )
+        CL2QCD-prepare-only | CL2QCD-new-chain* )
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateThermalizedConfigurationFolder
             __static__CreateThermalizedConfiguration "fromConf4000"
@@ -241,7 +241,7 @@ function MakeTestPreliminaryOperations()
             fi
             ;;
 
-        openQCD-FASTSUM-prepare-only  )
+        openQCD-FASTSUM-prepare-only | openQCD-FASTSUM-new-chain* )
             __static__CreateThermalizedConfigurationFolder
             __static__CreateThermalizedConfiguration "fromConf4000"
             if [[ $1 =~ goal ]]; then
