@@ -157,7 +157,7 @@ function MakeTestPreliminaryOperations()
             __static__CreateThermalizedConfigurationFolder
             __static__CreateThermalizedConfiguration "fromConf4000"
             __static__CreateBetaFolder
-            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata" ".BaHaMAS_metadata"
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata_CL2QCD" ".BaHaMAS_metadata"
             __static__CopyAuxiliaryFilesToSubmitBetaFolder "fakeInput" "fakeExecutable"
             __static__CopyAuxiliaryFilesToRunBetaFolder "fakeInput" "fakeExecutable"
             mkdir "Jobscripts_TEST" || exit ${BHMAS_fatalBuiltin}
@@ -183,7 +183,7 @@ function MakeTestPreliminaryOperations()
             __static__CreateBetaFolder
             __static__CopyAuxiliaryFilesToSubmitBetaFolder "fakeInput"
             __static__CopyAuxiliaryFilesToRunBetaFolder "fakeExecutable" "fakeOutput" "fakeOutput_pbp.dat"
-            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata" ".BaHaMAS_metadata"
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata_CL2QCD" ".BaHaMAS_metadata"
             __static__CompleteInputFileWithCorrectPaths
             __static__CreateFilesInRunBetaFolder "conf.save" "prng.save"
             case "${1##*-}" in
@@ -214,19 +214,19 @@ function MakeTestPreliminaryOperations()
 
         CL2QCD-accRateReport* )
             __static__CreateBetaFolder
-            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata" ".BaHaMAS_metadata"
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata_CL2QCD" ".BaHaMAS_metadata"
             __static__CopyAuxiliaryFilesToRunBetaFolder "fakeOutput"
             ;;
 
         CL2QCD-cleanOutputFiles* )
             __static__CreateBetaFolder
-            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata" ".BaHaMAS_metadata"
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata_CL2QCD" ".BaHaMAS_metadata"
             __static__CopyAuxiliaryFilesToRunBetaFolder "fakeOutput" "fakeOutput_pbp.dat"
             ;;
 
         CL2QCD-measure* )
             __static__CreateBetaFolder
-            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata" ".BaHaMAS_metadata"
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata_CL2QCD" ".BaHaMAS_metadata"
             __static__CreateFilesInRunBetaFolder "conf.00100" "conf.00200" "conf.00300" "conf.00400"
             if [[ $1 =~ some$ ]]; then
                 __static__CreateFilesInRunBetaFolder "conf.00100_2_3_7_1_corr" "conf.00100_1_2_3_1_corr"
