@@ -22,5 +22,13 @@ function SubmitJob_SLURM()
     sbatch "$1"
 }
 
+function ExtractWalltimeFromJobScript_SLURM()
+{
+    local jobScriptGlobalPath walltime
+    jobScriptGlobalPath="$1"
+    walltime=$(grep -E -e '^#SBATCH --time=([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$' "${jobScriptGlobalPath}")
+    printf "%s" "${walltime#*=}"
+}
+
 
 MakeFunctionsDefinedInThisFileReadonly

@@ -27,7 +27,7 @@ function SubmitJobsForValidBetaValues()
                 exit ${BHMAS_successExitCode}
             fi
         fi
-        local betaString stringToBeGreppedFor submittingDirectory jobScriptFilename
+        local betaString stringToBeGreppedFor submittingDirectory jobScriptFilename usedCoresHours
         cecho lc "\n==================================================================================="
         cecho bb " Jobs will be submitted for the following beta values:"
         for betaString in ${BHMAS_betaValuesToBeSubmitted[@]}; do
@@ -53,7 +53,12 @@ function SubmitJobsForValidBetaValues()
             jobScriptFilename="$(GetJobScriptFilename ${betaString})"
             cd ${submittingDirectory}
             if [[ -f "${jobScriptFilename}" ]]; then
-                cecho bb "\n Actual location: " dir "$(pwd)"\
+                cecho ''
+                if [[ ${BHMAS_useMPI} = 'TRUE' ]]; then
+                    cecho wg ' To-be-used cores-h: '\
+                          emph "$(__static__CalculateUsedCoreH "${submittingDirectory}/${jobScriptFilename}")"
+                fi
+                cecho bb '    Actual location: ' dir "$(pwd)"\
                       B '\n     Submitting job: ' uB emph "${jobScriptFilename}"
                 SubmitJob "${jobScriptFilename}"
             else
@@ -65,6 +70,30 @@ function SubmitJobsForValidBetaValues()
     else
         cecho lr B "\n No jobs will be submitted.\n"
     fi
+}
+
+function __static__CalculateUsedCoreH()
+{
+    local jobScriptGlobalPath walltime usedNodes coreH unit index
+    jobScriptGlobalPath="$1"
+    walltime=$(ExtractWalltimeFromJobScript "${jobScriptGlobalPath}")
+    if [[ "${walltime}" = '' ]]; then
+        Internal 'Error extracting walltime in ' emph "${FUNCNAME}"
+    fi
+    usedNodes=$(CalculateProductOfIntegers ${BHMAS_processorsGrid[@]})
+    if(( usedNodes % BHMAS_coresPerNode != 0 )); then
+        (( usedNodes = (usedNodes + BHMAS_coresPerNode) / BHMAS_coresPerNode ))
+    fi
+    walltime=$(ConvertWalltimeToSeconds "${walltime}")
+    coreH=$((  BHMAS_coresPerNode * walltime ))
+    unit=( '' 'k' 'M' 'G' 'P' 'T')
+    index=0
+    while [[ $(bc -l <<< "${coreH}>999") -eq 1 ]]; do
+        coreH=$(awk '{printf "%.3f", $1/1000}' <<< "${coreH}")
+        (( index++ ))
+        [[ ${index} -eq 5 ]] && break
+    done
+    printf "%s ${unit[index]}core-h" ${coreH}
 }
 
 

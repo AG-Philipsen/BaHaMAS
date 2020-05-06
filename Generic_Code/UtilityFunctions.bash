@@ -70,6 +70,24 @@ function SecondsToTimeStringWithDays()
     printf "%d-%02d:%02d:%02d" "${days}" "${hours}" "${minutes}" "${seconds}"
 }
 
+function ConvertWalltimeToSeconds()
+{
+    local walltime walltimeSplit result
+    walltime="$1"
+    if [[ ! ${walltime} =~ ^([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]]; then
+        Internal "Walltime in wrong format passed to ${FUNCNAME}."
+    elif [[ ${walltime} != *-* ]]; then
+        walltime="0-${walltime}"
+    fi
+    walltimeSplit=( ${walltime//[-:]/ } )
+    result=0
+    (( result += 86400*${walltimeSplit[0]} ))
+    (( result +=  3600*${walltimeSplit[1]} ))
+    (( result +=    60*${walltimeSplit[2]} ))
+    (( result +=       ${walltimeSplit[3]} ))
+    printf '%d' ${result}
+}
+
 function GetLargestWalltimeBetweenTwo()
 {
     [[ ! $1 =~ ^([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]] && return 1
