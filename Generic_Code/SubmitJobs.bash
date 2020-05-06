@@ -54,8 +54,8 @@ function SubmitJobsForValidBetaValues()
             cd ${submittingDirectory}
             if [[ -f "${jobScriptFilename}" ]]; then
                 cecho bb "\n Actual location: " dir "$(pwd)"\
-                      B "\n      Submitting: " uB emph "sbatch ${jobScriptFilename}"
-                sbatch "${jobScriptFilename}"
+                      B '\n     Submitting job: ' uB emph "${jobScriptFilename}"
+                SubmitJob "${jobScriptFilename}"
             else
                 Internal "Jobscript " file "${jobScriptFilename}" " not found in\n"\
                          dir "${submittingDirectory}" " folder, but it should be there!"
