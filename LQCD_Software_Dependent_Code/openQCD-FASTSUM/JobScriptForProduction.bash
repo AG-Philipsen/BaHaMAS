@@ -122,8 +122,8 @@ submitDir="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}"
 runDir="${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}"
 cd \${runDir}
 
-echo "Running openQCD-FASTSUM from '\$(pwd)':"
-echo '  mpirun \${submitDir}/${BHMAS_productionExecutableFilename} -i \${submitDir}/${BHMAS_inputFilename} -noms -noloc ${srunCommandOptions}'
+printf "Running openQCD-FASTSUM from '\$(pwd)':\n"
+printf '  mpirun \${submitDir}/${BHMAS_productionExecutableFilename} -i \${submitDir}/${BHMAS_inputFilename} -noms -noloc ${srunCommandOptions}\n\n'
 
 mpirun \${submitDir}/${BHMAS_productionExecutableFilename} -i \${submitDir}/${BHMAS_inputFilename} -noms -noloc ${srunCommandOptions} &
 pidRun=\${!}
