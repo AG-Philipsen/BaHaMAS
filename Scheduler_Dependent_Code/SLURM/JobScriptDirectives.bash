@@ -60,7 +60,7 @@ function AddSchedulerSpecificPartToJobScript_SLURM()
 
     exec 5>&1 1> "${jobScriptGlobalPath}"
     cat <<END_OF_INPUTFILE
-#!/bin/bash
+#!/usr/bin/env bash
 
 #SBATCH --job-name=${jobScriptFilename#${BHMAS_jobScriptPrefix}_}
 #SBATCH --mail-type=FAIL
