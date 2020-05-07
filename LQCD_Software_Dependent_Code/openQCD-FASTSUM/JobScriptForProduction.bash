@@ -75,9 +75,30 @@ function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
               "${inputFileGlobalPath}" '\nin job script preparation for run ID ' emph "${runId}" '.'
     fi
 
+    # If in thermalization mode we want to add a function to copy the
+    # last configuration to the pool together with its call
+    local thermalizeFunction thermalizeFunctionCall thermalizeType
+    if [[ ${BHMAS_executionMode} = 'mode:thermalize' ]]; then
+        if [[ ${BHMAS_betaPostfix} == "_thermalizeFromHot" ]]; then
+            thermalizeType='fromHot'
+        elif [[ ${BHMAS_betaPostfix} == "_thermalizeFromConf" ]]; then
+            thermalizeType='fromConf'
+        fi
+        thermalizeFunction="function $(declare -f __static__BackupLastConfiguration)"
+        thermalizeFunctionCall="__static__BackupLastConfiguration"
+        thermalizeFunctionCall+=" \${runDir}"
+        thermalizeFunctionCall+=" \"${BHMAS_thermConfsGlobalPath}\""
+        thermalizeFunctionCall+=" \"${BHMAS_configurationPrefix//\\/}\""
+        thermalizeFunctionCall+=" \"${BHMAS_configurationPrefix//\\/}${BHMAS_parametersString}_${BHMAS_betaPrefix}${runId}_${thermalizeType}_trNr\""
+    else
+        thermalizeFunction=''
+        thermalizeFunctionCall=''
+    fi
+
     exec 5>&1 1>> "${jobScriptGlobalPath}"
     cat <<END_OF_JOBSCRIPT_FILE
-
+#------------------------------------------------------------------------
+shopt -s extglob nullglob
 #------------------------------------------------------------------------
 function $(declare -f __static__RenameCheckpointFiles)
 
@@ -93,7 +114,8 @@ function $(declare -f __static__RenameCheckpointFiles)
 # and changes the last two to adjust the monitoring times!
 function $(declare -f __static__MonitorAndRenameCheckpointFiles)
 #------------------------------------------------------------------------
-
+${thermalizeFunction}
+#------------------------------------------------------------------------
 export OMP_NUM_THREADS=\${SLURM_CPUS_PER_TASK}
 
 submitDir="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}"
@@ -112,7 +134,10 @@ pidRename=\${!}
 wait -n #Wait for the first process to finish
 errorCodeFirst=\${?}
 
-if kill -0 "\${pidRun}" 2>/dev/null; then
+if kill -0 "\${pidRun}" 2>/dev/null && kill -0 "\${pidRename}" 2>/dev/null; then
+    printf 'FATAL: Some child process finished, but neither openQCD-FASTSUM nor renaming mechanism!\n'
+    exit 1
+elif kill -0 "\${pidRun}" 2>/dev/null; then
     printf '\nFATAL: Renaming mechanism failed, terminating openQCD-FASTSUM and exiting job...\n'
     kill "\${pidRun}"
     exit 113
@@ -122,10 +147,10 @@ elif kill -0 "\${pidRename}" 2>/dev/null; then
     errorCodeSecond=\${?}
     printf "Renaming exit code: \${errorCodeSecond}\n"
     printf "open-QCD exit code: \${errorCodeFirst}\n"
-    exit \$(( errorCodeFirst + errorCodeSecond ))
-else
-    printf 'FATAL: Some child process finished, but neither openQCD-FASTSUM nor renaming mechanism!\n'
-    exit 1
+    if [[ \${errorCodeFirst} -ne 0 ]] || [[ \${errorCodeSecond} -ne 0 ]]; then
+        exit \$(( errorCodeFirst + errorCodeSecond ))
+    fi
+    ${thermalizeFunctionCall}
 fi
 
 END_OF_JOBSCRIPT_FILE
@@ -144,7 +169,6 @@ function __static__MonitorAndRenameCheckpointFiles()
     prngPrefix="$6"
     digitsInCheckpoint="$7"
     timeLastCheckpoint="$(date +'%s')"
-    shopt -s nullglob # Needed in __static__RenameCheckpointFiles
     while kill -0 "${processPid}" 2>/dev/null; do
         date +'%s.%N'
         echo "sleep ${sleepTime}"
@@ -190,6 +214,25 @@ function __static__RenameCheckpointFiles()
             exit 113
             ;;
     esac
+}
+
+function __static__BackupLastConfiguration()
+{
+    local sourceFolderGlobalPath destinationFolderGlobalPath\
+          sourcePrefix destinationPrefix confName\
+          sourceGlobalPath destinationGlobalPath
+    sourceFolderGlobalPath="$1"
+    destinationFolderGlobalPath="$2"
+    sourcePrefix="$3"
+    destinationPrefix="$4"
+    sourceGlobalPath=$(printf '%s\n' "${sourceFolderGlobalPath}/${sourcePrefix}"+([0-9]) | sort -V | tail -n1)
+    if [[ ! -f "${sourceGlobalPath}" ]]; then
+        printf 'ERROR [${FUNCNAME}]: No configuration to be copied found!\n'
+        exit 111
+    fi
+    confName=$(basename "${sourceGlobalPath}")
+    destinationGlobalPath="${destinationFolderGlobalPath}/${destinationPrefix}${confName#${sourcePrefix}}"
+    cp "${sourceGlobalPath}" "${destinationGlobalPath}" || exit 111
 }
 
 

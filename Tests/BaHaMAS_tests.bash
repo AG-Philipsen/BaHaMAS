@@ -112,6 +112,8 @@ availableTests=(
     ['openQCD-FASTSUM-submit-only']='openQCD-FASTSUM submit-only --betasfile betas'
     ['openQCD-FASTSUM-new-chain']='openQCD-FASTSUM new-chain --walltime = 1d --processorsGrid 1 2 4 6'
     ['openQCD-FASTSUM-new-chain-goal']='openQCD-FASTSUM new-chain --walltime= 1d --processorsGrid 1 2 4 6'
+    ['openQCD-FASTSUM-thermalize-hot']='openQCD-FASTSUM thermalize --walltime 1d --processorsGrid 1 2 4 6'
+    ['openQCD-FASTSUM-thermalize-conf']='openQCD-FASTSUM thermalize --walltime 1d --processorsGrid 1 2 4 6'
     ['commentBetas']='comment-betas'
     ['commentBetas-num']='comment-betas --betas 6.1111'
     ['commentBetas-nums']='comment-betas --betas 6.1111 7.1111'

@@ -264,6 +264,13 @@ function MakeTestPreliminaryOperations()
                "${runDirWithBetaFolders}/${betaFolder}/conf.${testParametersString}_${betaFolder%_*}_fromConf4000" || exit ${BHMAS_fatalBuiltin}
             ;;
 
+        openQCD-FASTSUM-thermalize* )
+            __static__CreateThermalizedConfigurationFolder
+            if [[ $1 =~ conf$ ]]; then
+                __static__CreateThermalizedConfiguration "fromHot1000"
+            fi
+            ;;
+
         completeBetasFile* )
             __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeBetasToBeCompleted" "betas"
             ;;
