@@ -64,9 +64,35 @@ function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
             ;;
     esac
 
-    exec 5>&1 1>> "${jobScriptGlobalPath}"
+    # Determine needed information for checkpoint renaming mechanism
+    # To be on the safe side, extract it from the input file
+    local inputFileGlobalPath deltaConfs
+    inputFileGlobalPath="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}/${BHMAS_inputFilename}"
+    deltaConfs=( $(sed -rn 's/^dtr_cnfg[[:space:]]+([1-9][0-9]*)/\1/p' "${inputFileGlobalPath}") )
+    if [[ ${#deltaConfs[@]} -ne 1 && ! ${deltaConfs[0]} =~ ^[1-9][0-9]*$ ]]; then
+        Fatal ${BHMAS_fatalLogicError}\
+              'Unable to extract gap between checkpoints from\n' file\
+              "${inputFileGlobalPath}" '\nin job script preparation for run ID ' emph "${runId}" '.'
+    fi
 
+    exec 5>&1 1>> "${jobScriptGlobalPath}"
     cat <<END_OF_JOBSCRIPT_FILE
+
+#------------------------------------------------------------------------
+function $(declare -f __static__RenameCheckpointFiles)
+
+# This function makes use of variables from the caller
+#   - runPrefix
+#   - checkpointGap
+#   - processPid
+#   - confPrefix
+#   - prngPrefix
+#   - digitsInCheckpoint
+#   - timeLastCheckpoint
+#   - sleepTime
+# and changes the last two to adjust the monitoring times!
+function $(declare -f __static__MonitorAndRenameCheckpointFiles)
+#------------------------------------------------------------------------
 
 export OMP_NUM_THREADS=\${SLURM_CPUS_PER_TASK}
 
@@ -77,15 +103,94 @@ cd \${runDir}
 echo "Running openQCD-FASTSUM from '\$(pwd)':"
 echo '  mpirun \${submitDir}/${BHMAS_productionExecutableFilename} -i \${submitDir}/${BHMAS_inputFilename} -noms -noloc ${srunCommandOptions}'
 
-mpirun \${submitDir}/${BHMAS_productionExecutableFilename} -i \${submitDir}/${BHMAS_inputFilename} -noms -noloc ${srunCommandOptions}
-ERROR_CODE=\$?
+mpirun \${submitDir}/${BHMAS_productionExecutableFilename} -i \${submitDir}/${BHMAS_inputFilename} -noms -noloc ${srunCommandOptions} &
+pidRun=\${!}
 
-if [ \${ERROR_CODE} -ne 0 ]; then
-  echo "openQCD-FASTSUM failed with error code \${ERROR_CODE}. Exiting!"
-  exit 112
+__static__MonitorAndRenameCheckpointFiles "\${pidRun}" 10 "${BHMAS_outputFilename}" ${deltaConfs} "${BHMAS_configurationPrefix//\\/}" "${BHMAS_prngPrefix//\\/}" ${BHMAS_checkpointMinimumNumberOfDigits} &
+pidRename=\${!}
+
+wait -n #Wait for the first process to finish
+errorCodeFirst=\${?}
+
+if kill -0 "\${pidRun}" 2>/dev/null; then
+    printf '\nFATAL: Renaming mechanism failed, terminating openQCD-FASTSUM and exiting job...\n'
+    kill "\${pidRun}"
+    exit 113
+elif kill -0 "\${pidRename}" 2>/dev/null; then
+    printf 'openQCD-FASTSUM exited, wait for renaming mechanism to finish...\n\n'
+    wait "\${pidRename}"
+    errorCodeSecond=\${?}
+    printf "Renaming exit code: \${errorCodeSecond}\n"
+    printf "open-QCD exit code: \${errorCodeFirst}\n"
+    exit \$(( errorCodeFirst + errorCodeSecond ))
+else
+    printf 'FATAL: Some child process finished, but neither openQCD-FASTSUM nor renaming mechanism!\n'
+    exit 1
 fi
 
 END_OF_JOBSCRIPT_FILE
-
     exec 1>&5-
 }
+
+function __static__MonitorAndRenameCheckpointFiles()
+{
+    local processPid sleepTime runPrefix checkpointGap timeLastCheckpoint\
+          confPrefix prngPrefix digitsInCheckpoint
+    processPid="$1"
+    sleepTime="$2"
+    runPrefix="$3"
+    checkpointGap="$4"
+    confPrefix="$5"
+    prngPrefix="$6"
+    digitsInCheckpoint="$7"
+    timeLastCheckpoint="$(date +'%s')"
+    shopt -s nullglob # Needed in __static__RenameCheckpointFiles
+    while kill -0 "${processPid}" 2>/dev/null; do
+        date +'%s.%N'
+        echo "sleep ${sleepTime}"
+        sleep ${sleepTime}
+        __static__RenameCheckpointFiles "${runPrefix}" "${checkpointGap}"
+    done
+    __static__RenameCheckpointFiles "${runPrefix}" "${checkpointGap}"
+}
+
+# This function makes use of variables from the caller
+#   - runPrefix
+#   - checkpointGap
+#   - processPid
+#   - confPrefix
+#   - prngPrefix
+#   - digitsInCheckpoint
+#   - timeLastCheckpoint
+#   - sleepTime
+# and changes the last two to adjust the monitoring times!
+function __static__RenameCheckpointFiles()
+{
+    local prngFile arrayOfConfs trajectoryNumber
+    prngFile="${runPrefix}.rng~"
+    arrayOfConfs=( "${runPrefix}n"* )
+    case ${#arrayOfConfs[@]} in
+        0)
+            return 0 ;;
+        1)
+            if [[ ! -f "${prngFile}" ]]; then
+                printf "WARNING [${FUNCNAME}]: Found new configuration \"${arrayOfConfs[0]}\" but not the RNG state.\n"
+                return 0
+            fi
+            echo 'Renaming and adjusting sleeping time...'
+            sleepTime=$(( ($(date +'%s') - timeLastCheckpoint) / 5 ))
+            [[ ${sleepTime} -eq 0 ]] && sleepTime=1
+            timeLastCheckpoint=$(date +'%s')
+            trajectoryNumber=$(printf "%0${digitsInCheckpoint}d" $(( checkpointGap * ${arrayOfConfs[0]#${runPrefix}n} )) )
+            mv "${prngFile}"         "${prngPrefix}${trajectoryNumber}"
+            mv "${arrayOfConfs[0]}"  "${confPrefix}${trajectoryNumber}"
+            ;;
+        *)
+            printf "ERROR [${FUNCNAME}]: Too many configurations created from the last check!\n"
+            exit 113
+            ;;
+    esac
+}
+
+
+MakeFunctionsDefinedInThisFileReadonly
