@@ -89,7 +89,7 @@ function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
         thermalizeFunctionCall+=" \${runDir}"
         thermalizeFunctionCall+=" \"${BHMAS_thermConfsGlobalPath}\""
         thermalizeFunctionCall+=" \"${BHMAS_configurationPrefix//\\/}\""
-        thermalizeFunctionCall+=" \"${BHMAS_configurationPrefix//\\/}${BHMAS_parametersString}_${BHMAS_betaPrefix}${runId}_${thermalizeType}_trNr\""
+        thermalizeFunctionCall+=" \"${BHMAS_configurationPrefix//\\/}${BHMAS_parametersString}_${BHMAS_betaPrefix}${runId%_*}_${thermalizeType}_trNr\""
     else
         thermalizeFunction=''
         thermalizeFunctionCall=''
