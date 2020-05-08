@@ -78,7 +78,7 @@ function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
     # If in thermalization mode we want to add a function to copy the
     # last configuration to the pool together with its call
     local thermalizeFunction thermalizeFunctionCall thermalizeType
-    if [[ ${BHMAS_executionMode} = 'mode:thermalize' ]]; then
+    if [[ ${BHMAS_executionMode} = 'mode:thermalize' ]] || [[ ${BHMAS_executionMode} = "mode:continue-thermalization" ]]; then
         if [[ ${BHMAS_betaPostfix} == "_thermalizeFromHot" ]]; then
             thermalizeType='fromHot'
         elif [[ ${BHMAS_betaPostfix} == "_thermalizeFromConf" ]]; then
