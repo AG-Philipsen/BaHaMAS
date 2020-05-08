@@ -84,17 +84,17 @@ function GatherAndPrintJobsInformation()
             cecho "$(printf "${tableFormat}\e[0m\n"   "${jobId[${index}]}" "" "  ${jobName[${index}]}" "" "${jobStatus[${index}]}" "" "${jobStartTime[${index}]}" "" "${jobWalltime[${index}]}" "" "${jobSubmissionFolder[${index}]} on ${jobSubmissionTime[${index}]}")"
         fi
 
-        unset jobId[${index}];               jobId=(               ${jobId[@]+"${jobId[@]}"} )
-        unset jobName[${index}];             jobName=(             ${jobName[@]+"${jobName[@]}"} )
-        unset jobStatus[${index}];           jobStatus=(           ${jobStatus[@]+"${jobStatus[@]}"} )
-        unset jobStartTime[${index}];        jobStartTime=(        ${jobStartTime[@]+"${jobStartTime[@]}"} )
-        unset jobEndTime[${index}];          jobEndTime=(          ${jobEndTime[@]+"${jobEndTime[@]}"} )
-        unset jobSubmissionTime[${index}];   jobSubmissionTime=(   ${jobSubmissionTime[@]+"${jobSubmissionTime[@]}"} )
-        unset jobSubmissionFolder[${index}]; jobSubmissionFolder=( ${jobSubmissionFolder[@]+"${jobSubmissionFolder[@]}"} )
-        unset jobNumberOfNodes[${index}];    jobNumberOfNodes=(    ${jobNumberOfNodes[@]+"${jobNumberOfNodes[@]}"} )
-        unset jobNodeList[${index}];         jobNodeList=(         ${jobNodeList[@]+"${jobNodeList[@]}"} )
-        unset jobWalltime[${index}];         jobWalltime=(         ${jobWalltime[@]+"${jobWalltime[@]}"} )
-        unset jobRunTime[${index}];          jobRunTime=(          ${jobRunTime[@]+"${jobRunTime[@]}"} )
+        unset -v 'jobId[${index}]';               jobId=(               ${jobId[@]+"${jobId[@]}"} )
+        unset -v 'jobName[${index}]';             jobName=(             ${jobName[@]+"${jobName[@]}"} )
+        unset -v 'jobStatus[${index}]';           jobStatus=(           ${jobStatus[@]+"${jobStatus[@]}"} )
+        unset -v 'jobStartTime[${index}]';        jobStartTime=(        ${jobStartTime[@]+"${jobStartTime[@]}"} )
+        unset -v 'jobEndTime[${index}]';          jobEndTime=(          ${jobEndTime[@]+"${jobEndTime[@]}"} )
+        unset -v 'jobSubmissionTime[${index}]';   jobSubmissionTime=(   ${jobSubmissionTime[@]+"${jobSubmissionTime[@]}"} )
+        unset -v 'jobSubmissionFolder[${index}]'; jobSubmissionFolder=( ${jobSubmissionFolder[@]+"${jobSubmissionFolder[@]}"} )
+        unset -v 'jobNumberOfNodes[${index}]';    jobNumberOfNodes=(    ${jobNumberOfNodes[@]+"${jobNumberOfNodes[@]}"} )
+        unset -v 'jobNodeList[${index}]';         jobNodeList=(         ${jobNodeList[@]+"${jobNodeList[@]}"} )
+        unset -v 'jobWalltime[${index}]';         jobWalltime=(         ${jobWalltime[@]+"${jobWalltime[@]}"} )
+        unset -v 'jobRunTime[${index}]';          jobRunTime=(          ${jobRunTime[@]+"${jobRunTime[@]}"} )
     done
     cecho o "\n  Total number of submitted jobs: " B "${numberOfJobs}" uB " (" B lg "Running: ${numberOfRunningJobs}" ly "     Pending: ${numberOfPendingJobs}" lm "     Others: ${numberOfOtherJobs}" uB o ")"
     cecho lc B "${lineOfEquals}\n"

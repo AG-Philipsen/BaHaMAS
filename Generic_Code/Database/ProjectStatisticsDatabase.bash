@@ -142,7 +142,7 @@ function projectStatisticsDatabase()
     # Then it has to be initialized accordingly!
     if [[ "${UPDATE}" = "FALSE" ]]; then
         if [[ "${FILENAME_GIVEN_AS_INPUT}" = "" ]]; then
-            LATEST_DATABASE_FILE=$(ls ${BHMAS_databaseGlobalPath} | grep -E [0-9]{2}_[0-9]{2}_[0-9]{2}_${BHMAS_databaseFilename} | sort -t "_" -k 1,1 -k 2,2 -k 3,3 | tail -n1)
+            LATEST_DATABASE_FILE=$(ls ${BHMAS_databaseGlobalPath} | grep -E "[0-9]{2}_[0-9]{2}_[0-9]{2}_${BHMAS_databaseFilename}" | sort -t "_" -k 1,1 -k 2,2 -k 3,3 | tail -n1)
             if [[ "${LATEST_DATABASE_FILE}" = "" ]]; then
                 Fatal ${BHMAS_fatalFileNotFound} "No older database versions found!"
             fi
@@ -218,21 +218,21 @@ function projectStatisticsDatabase()
         NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING="${NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING%|}"
         NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING="${NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING%|}"
 
-        awk --posix -v filterNf=${FILTER_NF} -v filterMu=${FILTER_MU} -v filterKappa=${FILTER_MASS} -v filterNt=${FILTER_NT} -v filterNs=${FILTER_NS} \
-            -v filterBeta=${FILTER_BETA} -v filterType=${FILTER_TYPE} \
-            -v filterTrajNo=${FILTER_TRAJNO} -v filterAccRate=${FILTER_ACCRATE} -v filterAccRateLast1K=${FILTER_ACCRATE_LAST1K} \
-            -v filterStatus=${FILTER_STATUS} -v filterLastTrajTime=${FILTER_LASTTRAJ} -v statisticsSummary=${STATISTICS_SUMMARY} \
+        awk --posix -v filterNf="${FILTER_NF}" -v filterMu="${FILTER_MU}" -v filterKappa="${FILTER_MASS}" -v filterNt="${FILTER_NT}" -v filterNs="${FILTER_NS}" \
+            -v filterBeta="${FILTER_BETA}" -v filterType="${FILTER_TYPE}" \
+            -v filterTrajNo="${FILTER_TRAJNO}" -v filterAccRate="${FILTER_ACCRATE}" -v filterAccRateLast1K="${FILTER_ACCRATE_LAST1K}" \
+            -v filterStatus="${FILTER_STATUS}" -v filterLastTrajTime="${FILTER_LASTTRAJ}" -v statisticsSummary="${STATISTICS_SUMMARY}" \
             -v nfString="${NF_STRING}" -v muString="${MU_STRING}" -v kappaString="${MASS_STRING}" -v nsString="${NS_STRING}" -v ntString="${NT_STRING}" -v betaString="${BETA_STRING}" \
-            -v typeString=${TYPE_STRING} -v statusString="${STATUS_STRING}" \
-            -v trajLowValue=${TRAJ_LOW_VALUE} -v trajHighValue=${TRAJ_HIGH_VALUE} -v accRateLowValue=${ACCRATE_LOW_VALUE} -v accRateHighValue=${ACCRATE_HIGH_VALUE} \
-            -v accRateLast1KLowValue=${ACCRATE_LAST1K_LOW_VALUE} -v accRateLast1KHighValue=${ACCRATE_LAST1K_HIGH_VALUE} -v lastTrajTime=${LAST_TRAJ_TIME} \
-            -v nameOfColumnsAndNumberOfColumnsString=${NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL} \
-            -v nameOfDisplayedColumnsAndnrOfDisplayedColumnsString=${NAME_OF_COLUMN_NR_OF_COLUMN_STRING} \
-            -v nameOfDisplayedColumnsAndSpecOfColumnsString=${NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING} \
-            -v nameOfColumnsAndHeaderOfColumnsString=${NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING} \
-            -v nameOfColumnsAndHeaderSpecOfColumnsString=${NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING} \
-            -v statisticsFormatSpecString=${STATISTICS_PRINTF_FORMAT_SPECIFIER_STRING} \
-            -v lengthOfHeaderSeperator=${LENGTH_OF_HEADER_SEPERATOR} '
+            -v typeString="${TYPE_STRING}" -v statusString="${STATUS_STRING}" \
+            -v trajLowValue="${TRAJ_LOW_VALUE}" -v trajHighValue="${TRAJ_HIGH_VALUE}" -v accRateLowValue="${ACCRATE_LOW_VALUE}" -v accRateHighValue="${ACCRATE_HIGH_VALUE}" \
+            -v accRateLast1KLowValue="${ACCRATE_LAST1K_LOW_VALUE}" -v accRateLast1KHighValue="${ACCRATE_LAST1K_HIGH_VALUE}" -v lastTrajTime="${LAST_TRAJ_TIME}" \
+            -v nameOfColumnsAndNumberOfColumnsString="${NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL}" \
+            -v nameOfDisplayedColumnsAndnrOfDisplayedColumnsString="${NAME_OF_COLUMN_NR_OF_COLUMN_STRING}" \
+            -v nameOfDisplayedColumnsAndSpecOfColumnsString="${NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING}" \
+            -v nameOfColumnsAndHeaderOfColumnsString="${NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING}" \
+            -v nameOfColumnsAndHeaderSpecOfColumnsString="${NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING}" \
+            -v statisticsFormatSpecString="${STATISTICS_PRINTF_FORMAT_SPECIFIER_STRING}" \
+            -v lengthOfHeaderSeperator="${LENGTH_OF_HEADER_SEPERATOR}" '
 
                      BEGIN{
                          nrOfTotalColumns=split(nameOfColumnsAndNumberOfColumnsString,columnNamesAndNumbersArray,"|");
@@ -452,7 +452,7 @@ function projectStatisticsDatabase()
                     sed -r 's/(\x1B\[[0-9]{1,2};[0-9]{0,2};[0-9]{0,3}m)(.)/\1 \2/g' | \
                     sed -r 's/(.)(\x1B\[.{1,2};.{1,2}m)/\1 \2/g' | \
                     sed -r 's/(\x1B\[.{1,2};.{1,2}m)(.)/\1 \2/g' |
-                    awk --posix -v nf=${PARAMS[0]#${BHMAS_nflavourPrefix}*} -v mu=${PARAMS[1]#${BHMAS_chempotPrefix}*} -v k=${PARAMS[2]#${BHMAS_massPrefix}*} -v nt=${PARAMS[3]#${BHMAS_ntimePrefix}*} -v ns=${PARAMS[4]#*${BHMAS_nspacePrefix}} '
+                    awk --posix -v nf="${PARAMS[0]#${BHMAS_nflavourPrefix}*}" -v mu="${PARAMS[1]#${BHMAS_chempotPrefix}*}" -v k="${PARAMS[2]#${BHMAS_massPrefix}*}" -v nt="${PARAMS[3]#${BHMAS_ntimePrefix}*}" -v ns="${PARAMS[4]#*${BHMAS_nspacePrefix}}" '
                             $3 ~ /^[0-9]\.[0-9]{4}/{
                             print "\033[36m " nf " \033[36m " mu " \033[36m " k " \033[36m " nt " \033[36m " ns " " $(3-1) " " $3 " " $(5-1) " " $5 " " $(8-1) " " $8 " " $(11-1) " " $(11) " " $(18-1) " " $(18) " " $(23-1) " " $(23) " " $(15-1) " " $(15) " " $(26-1) " " $(26) " \033[36m " $(32) " \033[0m"
                             }
@@ -761,12 +761,12 @@ function __static__DisplayDatabaseFile()
     NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING="${NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING%|}"
     NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING="${NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING%|}"
 
-    awk --posix -v nameOfColumnsAndNumberOfColumnsString=${NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL} \
-        -v nameOfDisplayedColumnsAndnrOfDisplayedColumnsString=${NAME_OF_COLUMN_NR_OF_COLUMN_STRING} \
-        -v nameOfDisplayedColumnsAndSpecOfColumnsString=${NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING} \
-        -v nameOfColumnsAndHeaderOfColumnsString=${NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING} \
-        -v nameOfColumnsAndHeaderSpecOfColumnsString=${NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING} \
-        -v lengthOfHeaderSeperator=${LENGTH_OF_HEADER_SEPERATOR} '
+    awk --posix -v nameOfColumnsAndNumberOfColumnsString="${NAME_OF_COLUMN_NR_OF_COLUMN_STRING__ALL}" \
+        -v nameOfDisplayedColumnsAndnrOfDisplayedColumnsString="${NAME_OF_COLUMN_NR_OF_COLUMN_STRING}" \
+        -v nameOfDisplayedColumnsAndSpecOfColumnsString="${NAME_OF_COLUMN_SPEC_OF_COLUMN_STRING}" \
+        -v nameOfColumnsAndHeaderOfColumnsString="${NAME_OF_COLUMN_HEADER_OF_COLUMN_STRING}" \
+        -v nameOfColumnsAndHeaderSpecOfColumnsString="${NAME_OF_COLUMN_HEADER_SPEC_OF_COLUMN_STRING}" \
+        -v lengthOfHeaderSeperator="${LENGTH_OF_HEADER_SEPERATOR}" '
                      BEGIN{
                          nrOfTotalColumns=split(nameOfColumnsAndNumberOfColumnsString,columnNamesAndNumbersArray,"|");
 

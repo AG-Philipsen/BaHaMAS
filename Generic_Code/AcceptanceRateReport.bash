@@ -47,7 +47,7 @@ function AcceptanceRateReport()
         NRLINES_ARRAY+=( $(awk '{if(NR%'${BHMAS_accRateReportInterval}'==0){counter++;}}END{print counter}' ${OUTPUTFILE_GLOBALPATH}) )
         POSITION_BETA_STRING_IN_DATA_ARRAY+=( ${#DATA_ARRAY[@]} )
         DATA_ARRAY+=( "b${BETA%_*}" )
-        DATA_ARRAY+=( $(awk '{if(NR%'${BHMAS_accRateReportInterval}'==0){printf("%.2f \n", sum/'${BHMAS_accRateReportInterval}*100');sum=0}}{sum+=$'${BHMAS_acceptanceColumn}'}' ${OUTPUTFILE_GLOBALPATH}) )
+        DATA_ARRAY+=( $(awk '{if(NR%'${BHMAS_accRateReportInterval}'==0){printf("%.2f \n", sum/'${BHMAS_accRateReportInterval}'*100);sum=0}}{sum+=$'${BHMAS_acceptanceColumn}'}' ${OUTPUTFILE_GLOBALPATH}) )
     done
     #Find largest number of intervals to print table properly
     local LENGTH_LONGEST_COLUMN=0

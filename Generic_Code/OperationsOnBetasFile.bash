@@ -296,7 +296,7 @@ function CompleteBetasFile()
                 #NOTE: since if user had more seeds on the same line, only the last
                 #      would be used in BaHaMAS, here we consistently behave with this
                 #      rule and we replace only the last seed given (sed is very greedy)
-                line=$(sed 's/\(.*\)'s${BHMAS_seedRegex}'/\1'${seed}'/g' <<< "${line}")
+                line=$(sed 's/\(.*\)'"s${BHMAS_seedRegex}"'/\1'${seed}'/g' <<< "${line}")
                 #Print new line to file
                 cecho -d "${line}" >> ${BHMAS_betasFilename}
                 (( betaCounter[${beta}]++ )) || true  #'|| true' because of set -e option

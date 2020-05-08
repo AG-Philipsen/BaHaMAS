@@ -19,13 +19,12 @@
 
 function ProduceInputFileAndJobScriptForEachBeta()
 {
-    trap "$(shopt -p)" RETURN
     local betaValuesCopy index beta submitBetaDirectory existingFiles temporaryNumberOfTrajectories
     betaValuesCopy=(${BHMAS_betaValues[@]})
     for index in "${!betaValuesCopy[@]}"; do
         submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${betaValuesCopy[${index}]}"
         if [[ -d "${submitBetaDirectory}" ]]; then
-            shopt -s dotglob nullglob;  existingFiles=( "${submitBetaDirectory}"/* )
+            existingFiles=( "${submitBetaDirectory}"/* )
             if [[ ${#existingFiles[@]} -gt 0 ]]; then
                 Error 'There are already files in\n' dir "${submitBetaDirectory}"\
                       '.\nThe value ' emph "beta = ${betaValuesCopy[${index}]}" ' will be skipped!'

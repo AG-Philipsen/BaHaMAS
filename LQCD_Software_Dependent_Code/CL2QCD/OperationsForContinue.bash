@@ -35,8 +35,8 @@ function HandleEnvironmentForContinueForGivenSimulation_CL2QCD()
         #      the "last" valid one. Valid means that both the conf and the prng file are present with the same number
         if [[ ${BHMAS_trajectoriesToBeResumedFrom[${runId}]} = "last" ]]; then
             #comm expects alphabetically sorted input, then we sort numerically the output and we take the last number
-            BHMAS_trajectoriesToBeResumedFrom[${runId}]=$(comm -12  <(ls -1 ${runBetaDirectory} | sed -n 's/^'${BHMAS_configurationPrefix}'0*\([1-9][0-9]*\)$/\1/p' | sort)\
-                                                               <(ls -1 ${runBetaDirectory} | sed -n 's/^'${BHMAS_prngPrefix}'0*\([1-9][0-9]*\)$/\1/p' | sort) | sort -n | tail -n1)
+            BHMAS_trajectoriesToBeResumedFrom[${runId}]=$(comm -12  <(ls -1 ${runBetaDirectory} | sed -n 's/^'"${BHMAS_configurationPrefix}"'0*\([1-9][0-9]*\)$/\1/p' | sort)\
+                                                               <(ls -1 ${runBetaDirectory} | sed -n 's/^'"${BHMAS_prngPrefix}"'0*\([1-9][0-9]*\)$/\1/p' | sort) | sort -n | tail -n1)
             if [[ ! ${BHMAS_trajectoriesToBeResumedFrom[${runId}]} =~ ^[0-9]+$ ]]; then
                 Error "Unable to find " emph "last valid checkpoint" " to resume from!\n" "The value " emph "beta = ${runId}" " will be skipped!"
                 BHMAS_problematicBetaValues+=( ${runId} )
@@ -69,8 +69,8 @@ function HandleEnvironmentForContinueForGivenSimulation_CL2QCD()
             nameOfLastPRNG=""
         fi
     else
-        nameOfLastConfiguration=$(ls -1 ${runBetaDirectory} | sed -n '/^'${BHMAS_configurationRegex}'$/p' | sort -V | tail -n1)
-        nameOfLastPRNG=$(ls -1 ${runBetaDirectory} | sed -n '/^'${BHMAS_prngRegex}'$/p' | sort -V | tail -n1)
+        nameOfLastConfiguration=$(ls -1 ${runBetaDirectory} | sed -n '/^'"${BHMAS_configurationRegex}"'$/p' | sort -V | tail -n1)
+        nameOfLastPRNG=$(ls -1 ${runBetaDirectory} | sed -n '/^'"${BHMAS_prngRegex}"'$/p' | sort -V | tail -n1)
     fi
     #The variable nameOfLastConfiguration should be set here, if not it means no conf was available!
     if [[ "${nameOfLastConfiguration}" == "" ]]; then
@@ -120,9 +120,9 @@ function HandleOutputFilesForContinueForGivenSimulation_CL2QCD()
         local trashFolderName filename numberFromFile prefix
         trashFolderName="${runBetaDirectory}/Trash_$(date +'%F_%H%M%S')"
         mkdir ${trashFolderName} || exit ${BHMAS_fatalBuiltin}
-        for filename in $(ls -1 ${runBetaDirectory} | sed -n -e '/^'${BHMAS_configurationRegex}'.*$/p' -e '/^'${BHMAS_prngRegex}'.*$/p'); do
+        for filename in $(ls -1 ${runBetaDirectory} | sed -n -e '/^'"${BHMAS_configurationRegex}"'.*$/p' -e '/^'"${BHMAS_prngRegex}"'.*$/p'); do
             #Move to trash only 'conf.xxxxx(whatever)' or 'prng.xxxxx(whatever)' files with xxxxx larger than the resume from trajectory
-            numberFromFile=$(sed -n 's/^\('${BHMAS_configurationPrefix}'\|'${BHMAS_prngPrefix}'\)0*\([1-9][0-9]*\).*$/\2/p' <<< "${filename}")
+            numberFromFile=$(sed -n 's/^\('"${BHMAS_configurationPrefix}"'\|'"${BHMAS_prngPrefix}"'\)0*\([1-9][0-9]*\).*$/\2/p' <<< "${filename}")
             if [[ ${numberFromFile} -gt ${BHMAS_trajectoriesToBeResumedFrom[${runId}]} ]]; then
                 mv ${runBetaDirectory}/${filename} ${trashFolderName}
             fi

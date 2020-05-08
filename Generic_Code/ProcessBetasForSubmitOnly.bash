@@ -19,7 +19,6 @@
 
 function ProcessBetaValuesForSubmitOnly()
 {
-    trap "$(shopt -p)" RETURN
     local betaValuesCopy index submitBetaDirectory runBetaDirectory\
           foldersThatMustExist filesThatMustExist object existingFiles\
           symbolicLinkName
@@ -58,7 +57,7 @@ function ProcessBetaValuesForSubmitOnly()
             fi
         done
         #Now that we are sure that needed files and folders exist, look for extra files!
-        shopt -s dotglob nullglob;  existingFiles=( "${submitBetaDirectory}"/* )
+        existingFiles=( "${submitBetaDirectory}"/* )
         if [[ "${BHMAS_submitDiskGlobalPath}" != "${BHMAS_runDiskGlobalPath}" ]]; then
             existingFiles+=( "${runBetaDirectory}"/* )
         fi

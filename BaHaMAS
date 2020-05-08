@@ -34,6 +34,9 @@
 # but it is worth so. Good reference http://redsymbol.net/articles/unofficial-bash-strict-mode  #
 set -euo pipefail                                                                               #
 #-----------------------------------------------------------------------------------------------#
+# Enable more globbing functionality (extglob must be global, http://mywiki.wooledge.org/glob)  #
+shopt -s extglob nullglob dotglob                                                               #
+#-----------------------------------------------------------------------------------------------#
 
 #Load auxiliary bash files that will be used
 readonly BHMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"

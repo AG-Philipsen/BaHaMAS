@@ -42,9 +42,7 @@ function SourceLqcdSoftwareSpecificCode()
 # is really needed, though).
 function __static__SourceFollowingFiles()
 {
-    trap "$(shopt -p)" RETURN
     local fileToBeSourced
-    shopt -s nullglob
     for fileToBeSourced in "$@"; do
         set +e
         source "${fileToBeSourced}"

@@ -154,10 +154,8 @@ function __static__ValidateMetadata()
 
 function __static__SetProcessorGridFromExecutableName()
 {
-    trap "$(shopt -p)" RETURN
     local runId listOfGrids submitBetaDirectory executableGlobalPath grid
     listOfGrids=()
-    shopt -s dotglob nullglob
     for runId in "${BHMAS_betaValues[@]}"; do
         submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}"
         executableGlobalPath=( "${submitBetaDirectory}/${BHMAS_productionExecutableFilename}"* )
