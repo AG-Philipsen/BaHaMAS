@@ -96,13 +96,14 @@ function DeclarePathRelatedGlobalVariables()
     BHMAS_parametersPath=''     # --> e.g. /Nf2/muiPiT/k1550/nt6/ns12    or   /Nf2/mui0/mass0250/nt4/ns8
     BHMAS_parametersString=''   # --> e.g.  Nf2_muiPiT_k1550_nt6_ns12    or    Nf2_mui0_mass0250_nt4_ns8
     #Beta and seed information (intentionally not in arrays of prefixes, regexes, etc.)
-    #(here not readonly since they can be changed by user -> set as readonly in command line parser!)
     readonly BHMAS_betaPosition=5
     readonly BHMAS_betaPrefix='b'
     BHMAS_betaPostfix='_continueWithNewChain' #Here we set it supposing it is not a thermalization. If indeed it is, the postfix will be overwritten!
     readonly BHMAS_betaRegex='[0-9][.][0-9]\{4\}'
+    readonly BHMAS_betaGlob='[0-9].[0-9][0-9][0-9][0-9]'
     readonly BHMAS_seedPrefix='s'
     readonly BHMAS_seedRegex='[0-9]\{4\}'
+    readonly BHMAS_seedGlob='[0-9][0-9][0-9][0-9]'
     BHMAS_betaFolderShortRegex=${BHMAS_betaRegex}'_'${BHMAS_seedPrefix}'[0-9]\{4\}_[[:alpha:]]\+'
     BHMAS_betaFolderRegex=${BHMAS_betaPrefix}${BHMAS_betaFolderShortRegex}
 }

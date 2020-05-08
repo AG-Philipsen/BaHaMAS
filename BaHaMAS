@@ -140,17 +140,7 @@ case ${BHMAS_executionMode} in
             Fatal ${BHMAS_fatalCommandLine} "Options " emph "--thermalize" " and " emph "--continueThermalization"\
                   " implemented " emph "only not" " combined not with " emph "--doNotUseMultipleChains" " option!"
         fi
-        #Here we fix the beta postfix just looking for thermalized conf from hot at the actual parameters (no matter at which beta);
-        #if at least one configuration thermalized from hot is present, it means the thermalization has to be done from conf (the
-        #correct beta to be used is selected then later in the script ---> see where the array BHMAS_startConfigurationGlobalPath is filled
-        #
-        # TODO: If a thermalization from hot is finished but one other crashed and one wishes to resume it, the postfix should be
-        #       from Hot but it is from conf since in ${BHMAS_thermConfsGlobalPath} a conf from hot is found. Think about how to fix this.
-        if [[ $(ls ${BHMAS_thermConfsGlobalPath} | grep "${BHMAS_configurationPrefix}${BHMAS_parametersString}_${BHMAS_betaPrefix}${BHMAS_betaRegex}_${BHMAS_seedPrefix}${BHMAS_seedRegex}_fromHot[[:digit:]]\+.*" | wc -l) -eq 0 ]]; then
-            BHMAS_betaPostfix="_thermalizeFromHot"
-        else
-            BHMAS_betaPostfix="_thermalizeFromConf"
-        fi
+        SetBetaPostfixDependingOnExistingThermalizedConfigurations
         if [[ ${BHMAS_measurePbp} = 'TRUE' ]]; then
             cecho ly B "\n Measurement of PBP switched off during thermalization!"
             BHMAS_measurePbp='FALSE'

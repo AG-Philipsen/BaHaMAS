@@ -154,7 +154,7 @@ function MakeTestPreliminaryOperations()
         CL2QCD-prepare-only | CL2QCD-new-chain* )
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateThermalizedConfigurationFolder
-            __static__CreateThermalizedConfiguration "fromConf4000"
+            __static__CreateThermalizedConfiguration "fromConf_trNr5000"
             if [[ $1 =~ goal ]]; then
                 __static__AddStringToFirstLineBetasFile "g15000"
             fi
@@ -163,7 +163,7 @@ function MakeTestPreliminaryOperations()
         CL2QCD-submit-only )
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateThermalizedConfigurationFolder
-            __static__CreateThermalizedConfiguration "fromConf4000"
+            __static__CreateThermalizedConfiguration "fromConf_trNr5000"
             __static__CreateBetaFolder
             __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
             __static__CopyAuxiliaryFilesToSubmitBetaFolder "fakeInput" "fakeExecutable"
@@ -178,7 +178,7 @@ function MakeTestPreliminaryOperations()
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateThermalizedConfigurationFolder
             if [[ $1 =~ conf$ ]]; then
-                __static__CreateThermalizedConfiguration "fromHot1000"
+                __static__CreateThermalizedConfiguration "fromHot_trNr1000"
             fi
             ;;
 
@@ -243,7 +243,7 @@ function MakeTestPreliminaryOperations()
 
         openQCD-FASTSUM-prepare-only | openQCD-FASTSUM-new-chain* )
             __static__CreateThermalizedConfigurationFolder
-            __static__CreateThermalizedConfiguration "fromConf4000"
+            __static__CreateThermalizedConfiguration "fromConf_trNr5000"
             if [[ $1 =~ goal ]]; then
                 __static__AddStringToFirstLineBetasFile "g15000"
             fi
@@ -251,7 +251,7 @@ function MakeTestPreliminaryOperations()
 
         openQCD-FASTSUM-submit-only )
             __static__CreateThermalizedConfigurationFolder
-            __static__CreateThermalizedConfiguration "fromConf4000"
+            __static__CreateThermalizedConfiguration "fromConf_trNr5000"
             __static__CreateBetaFolder
             __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
             __static__CopyAuxiliaryFilesToSubmitBetaFolder "fakeInput"
@@ -267,7 +267,7 @@ function MakeTestPreliminaryOperations()
         openQCD-FASTSUM-thermalize* )
             __static__CreateThermalizedConfigurationFolder
             if [[ $1 =~ conf$ ]]; then
-                __static__CreateThermalizedConfiguration "fromHot1000"
+                __static__CreateThermalizedConfiguration "fromHot_trNr1000"
             fi
             ;;
 
