@@ -33,6 +33,7 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 ## [Unreleased](https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/compare/BaHaMAS-0.1.0...develop)
 
 * :boom: Name convention for thermalised configurations was changed to include in their names the trajectory number they refer to.
+* :new: Execution modes to start production jobs have been implemented for openQCD-FASTSUM software.
 * :new: Compilation of openQCD-FASTSUM codebase for production added together with some setup variables.
 * :new: Add a hidden metadata file mechanism to check LQCD software consistency.
 * :white_check_mark: The setup suggests and optionally helps the user to improve the environment for a better BaHaMAS usage.
