@@ -251,7 +251,8 @@ function PrintArray()
 {
     local NAME_OF_THE_ARRAY="$1[@]"
     local ARRAY_CONTENT=( "${!NAME_OF_THE_ARRAY+x}" )
-    [[ ${#ARRAY_CONTENT[@]} -eq 0 ]] && printf "Array $1 is empty or undeclared!\n" && return 1
+    [[ ${#ARRAY_CONTENT[@]} -eq 0 ]] && printf "Array $1 is empty or undeclared!\n" && return 0
+    ARRAY_CONTENT=( "${!NAME_OF_THE_ARRAY}" )
     local ARRAY_DECLARATION=$(declare -p "$1")
     if [[ ${ARRAY_DECLARATION} =~ ^declare\ -a ]]; then # normal array
         for INDEX in "${!ARRAY_CONTENT[@]}"; do
