@@ -36,18 +36,7 @@ function FindConfigurationGlobalPathFromWhichToStartTheSimulation()
 {
     local FOUND_CONFIGURATIONS
     for BETA in "${BHMAS_betaValues[@]}"; do
-        if [[ "${BHMAS_betaPostfix}" == "" ]]; then #Single chain case: nomenclature with no beta postfix!
-            FOUND_CONFIGURATIONS=( $(find ${BHMAS_thermConfsGlobalPath} -regextype posix-extended -regex ".*/conf[.]${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA}.*") )
-            if [[ ${#FOUND_CONFIGURATIONS[@]} -eq 0 ]]; then
-                BHMAS_startConfigurationGlobalPath[${BETA}]="notFoundHenceStartFromHot"
-            elif [[ ${#FOUND_CONFIGURATIONS[@]} -eq 1 ]]; then
-                BHMAS_startConfigurationGlobalPath[${BETA}]="${FOUND_CONFIGURATIONS[0]}"
-            else
-                cecho -d ly B "\n " U "WARNING" uU ":" uB " More than one valid starting configuration found for " emph "beta = ${BETA%%_*}" " in \n"\
-                      dir "          ${BHMAS_thermConfsGlobalPath}" ".\n          Which should be used?\n" lp
-                __static__PickUpStartingConfigurationAmongAvailableOnes
-            fi
-        elif [[ ${BHMAS_betaPostfix} == "_continueWithNewChain" ]]; then
+        if [[ ${BHMAS_betaPostfix} == "_continueWithNewChain" ]]; then
             FOUND_CONFIGURATIONS=( $(find ${BHMAS_thermConfsGlobalPath} -regextype posix-extended -regex ".*/conf[.]${BHMAS_parametersString}_${BHMAS_betaPrefix}${BETA%_*}_fromConf[0-9]+.*") )
             if [[ ${#FOUND_CONFIGURATIONS[@]} -eq 0 ]]; then
                 Warning "No valid starting configuration found for " emph "beta = ${BETA%_*}" "\n"\
