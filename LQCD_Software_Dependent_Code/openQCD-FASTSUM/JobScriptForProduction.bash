@@ -169,9 +169,8 @@ function __static__MonitorAndRenameCheckpointFiles()
     prngPrefix="$6"
     digitsInCheckpoint="$7"
     timeLastCheckpoint="$(date +'%s')"
+    printf "Starting monitoring and rename mechanism ($(date +'%d.%m.%Y %H:%M:%S')), sleep time = ${sleepTime}s\n"
     while kill -0 "${processPid}" 2>/dev/null; do
-        date +'%s.%N'
-        echo "sleep ${sleepTime}"
         sleep ${sleepTime}
         __static__RenameCheckpointFiles "${runPrefix}" "${checkpointGap}"
     done
@@ -201,10 +200,10 @@ function __static__RenameCheckpointFiles()
                 printf "WARNING [${FUNCNAME}]: Found new configuration \"${arrayOfConfs[0]}\" but not the RNG state.\n"
                 return 0
             fi
-            echo 'Renaming and adjusting sleeping time...'
             sleepTime=$(( ($(date +'%s') - timeLastCheckpoint) / 5 ))
             [[ ${sleepTime} -eq 0 ]] && sleepTime=1
             timeLastCheckpoint=$(date +'%s')
+            printf "Found new checkpoint to rename ($(date +'%d.%m.%Y %H:%M:%S')), new sleep time = ${sleepTime}s\n"
             trajectoryNumber=$(printf "%0${digitsInCheckpoint}d" $(( checkpointGap * ${arrayOfConfs[0]#${runPrefix}n} )) )
             mv "${prngFile}"         "${prngPrefix}${trajectoryNumber}"
             mv "${arrayOfConfs[0]}"  "${confPrefix}${trajectoryNumber}"
@@ -219,7 +218,7 @@ function __static__RenameCheckpointFiles()
 function __static__BackupLastConfiguration()
 {
     local sourceFolderGlobalPath destinationFolderGlobalPath\
-          sourcePrefix destinationPrefix confName\
+          sourcePrefix destinationPrefix trNumber\
           sourceGlobalPath destinationGlobalPath
     sourceFolderGlobalPath="$1"
     destinationFolderGlobalPath="$2"
@@ -230,9 +229,14 @@ function __static__BackupLastConfiguration()
         printf 'ERROR [${FUNCNAME}]: No configuration to be copied found!\n'
         exit 111
     fi
-    confName=$(basename "${sourceGlobalPath}")
-    destinationGlobalPath="${destinationFolderGlobalPath}/${destinationPrefix}${confName#${sourcePrefix}}"
-    cp "${sourceGlobalPath}" "${destinationGlobalPath}" || exit 111
+    trNumber="$(grep -o '[1-9][0-9]*$' <<< ${sourceGlobalPath})"
+    destinationGlobalPath="${destinationFolderGlobalPath}/${destinationPrefix}${trNumber}"
+    if [[ -f "${destinationGlobalPath}" ]]; then
+        printf "ERROR [${FUNCNAME}]: Destination thermalized configuration already existing!\n"
+        exit 111
+    else
+        cp "${sourceGlobalPath}" "${destinationGlobalPath}" || exit 111
+    fi
 }
 
 
