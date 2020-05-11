@@ -98,7 +98,7 @@ function FindConfigurationGlobalPathFromWhichToStartTheSimulation()
                             betaValue="${betaValue%%_*}"
                             foundConfigurationsWithBetaAsKey["${betaValue}"]="${confName}"
                         done
-                        local closestBeta=$(FindValueOfClosestElementInArrayToGivenValue ${runId%%_*} "${!foundConfigurationsWithBetaAsKey[@]}")
+                        closestBeta=$(FindValueOfClosestElementInArrayToGivenValue ${runId%%_*} "${!foundConfigurationsWithBetaAsKey[@]}")
                         if [[ "${closestBeta}" = "" ]]; then
                             Internal "Something went wrong determinig the closest beta value\n"\
                                      "to the actual one to pick up the correct thermalized configuration from hot!"
