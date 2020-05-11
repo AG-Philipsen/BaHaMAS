@@ -211,11 +211,11 @@ function __static__HandleMeasurementsInInputFile()
         optionsToBeAddedOrModified="measurements=${BHMAS_numberOfTrajectories}"
     elif [[ ${BHMAS_trajectoryNumberUpToWhichToContinue} -ne 0 ]]; then
         __static__FindAndSetNumberOfTrajectoriesAlreadyProduced || return 1
-        __static__IsSimulationFinished ${numberOfTrajectoriesAlreadyProduced} ${BHMAS_trajectoryNumberUpToWhichToContinue} || return 1
+        __static__IsSimulationNotFinished ${numberOfTrajectoriesAlreadyProduced} ${BHMAS_trajectoryNumberUpToWhichToContinue} || return 1
         optionsToBeAddedOrModified="measurements=$(( BHMAS_trajectoryNumberUpToWhichToContinue - numberOfTrajectoriesAlreadyProduced ))"
     elif KeyInArray ${runId} BHMAS_goalStatistics; then
         __static__FindAndSetNumberOfTrajectoriesAlreadyProduced || return 1
-        __static__IsSimulationFinished ${numberOfTrajectoriesAlreadyProduced} ${BHMAS_goalStatistics[${runId}]} || return 1
+        __static__IsSimulationNotFinished ${numberOfTrajectoriesAlreadyProduced} ${BHMAS_goalStatistics[${runId}]} || return 1
         optionsToBeAddedOrModified="measurements=$(( BHMAS_goalStatistics[${runId}] - numberOfTrajectoriesAlreadyProduced ))"
     else
         return 0
@@ -442,7 +442,7 @@ function __static__FindAndSetNumberOfTrajectoriesAlreadyProduced()
     fi
 }
 
-function __static__IsSimulationFinished()
+function __static__IsSimulationNotFinished()
 {
     local startingStatistics goalStatistics
     startingStatistics=$1; goalStatistics=$2
