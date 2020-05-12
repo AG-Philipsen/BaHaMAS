@@ -33,6 +33,7 @@ function __static__SourceCodebaseGeneralFiles()
         'FindSchedulerInUse.bash'
         'FindStartingConfiguration.bash'
         'JobScriptFunctionality.bash'
+        'GenericFunctionality.bash'
         'GlobalVariables.bash'
         'InterfaceToSpecificCode.bash'
         'MetadataFunctionality.bash'

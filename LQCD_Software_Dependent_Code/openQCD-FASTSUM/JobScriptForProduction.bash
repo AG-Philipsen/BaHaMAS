@@ -89,19 +89,11 @@ function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
             ;;
         mode:continue* )
             # Here we must use the symbolic link that must exist
-            initialConf=( "${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}/conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${runId%_*}"* )
-            for index in "${#initialConf[@]}"; do
-                if [[ ! -L "${initialConf[index]:-}" ]]; then
-                    unset -v 'initialConf[index]'
-                fi
-            done
-            if [[ ${#initialConf[@]} -ne 1 ]]; then
+            if ! shiftConfs=$(ExtractTrajectoryNumberFromConfigurationSymlink "${runId}"); then
                 Fatal ${BHMAS_fatalLogicError}\
                       'Unable to find unique symbolic link to starting configuration in'\
                       dir "${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}"\
                       '\nto extract initial number for rename mechanism of checkpoints.'
-            else
-                shiftConfs=${initialConf[0]##*_trNr}
             fi
             ;;
     esac

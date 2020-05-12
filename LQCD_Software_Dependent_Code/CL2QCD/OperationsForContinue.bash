@@ -429,15 +429,7 @@ function __static__FindAndSetNumberOfTrajectoriesAlreadyProduced()
     #   4) print an error and skip beta.
     local initialConfiguration index initialTrNumber lastTrNumber
     initialTrNumber=''; lastTrNumber=''
-    initialConfiguration=( "${runBetaDirectory}/conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${runId%_*}"* )
-    for index in "${#initialConfiguration[@]}"; do
-        if [[ ! -L "${initialConfiguration[index]:-}" ]]; then
-            unset -v 'initialConfiguration[index]'
-        fi
-    done
-    PrintArray initialConfiguration
-    if [[ ${#initialConfiguration[@]} -eq 1 ]]; then
-        initialTrNumber=${initialConfiguration[0]##*_trNr}
+    if ! initialTrNumber=$(ExtractTrajectoryNumberFromConfigurationSymlink "${runId}"); then
         lastTrNumber="${nameOfLastConfiguration#${BHMAS_configurationPrefix//\\/}*(0)}" #extract number from the end without leading zeros
         if [[ ! "${lastTrNumber}" =~ ^[1-9][0-9]*$ ]]; then
             lastTrNumber="$(sed -n "s/^trajectory nr = \([1-9][0-9]*\)$/\1/p" ${runBetaDirectory}/${nameOfLastConfiguration} || true)"
