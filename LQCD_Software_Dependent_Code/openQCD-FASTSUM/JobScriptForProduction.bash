@@ -20,7 +20,7 @@
 
 function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
 {
-    local jobScriptGlobalPath runId srunCommandOptions startingConfigurationGlobalPath
+    local jobScriptGlobalPath runId srunCommandOptions startingConfigurationFilename
     jobScriptGlobalPath="$1"; shift
     betaValues=( "$@" )
 
@@ -43,20 +43,20 @@ function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
         # that the configuration file is in one of the specified paths in the input
         # file. BaHaMAS creates then a symlink in the folder where the executable is
         # and it should then be safe to use here just the basename.
-        startingConfigurationGlobalPath="$(basename "${BHMAS_startConfigurationGlobalPath[${runId}]}")"
+        startingConfigurationFilename="$(basename "${BHMAS_startConfigurationGlobalPath[${runId}]}")"
     fi
     srunCommandOptions=''
     case ${BHMAS_executionMode} in
         mode:thermalize | mode:new-chain | mode:prepare-only )
-            if [[ "${startingConfigurationGlobalPath}" != 'notFoundHenceStartFromHot' ]]; then
-                srunCommandOptions+="-c ${startingConfigurationGlobalPath}"
+            if [[ "${startingConfigurationFilename}" != 'notFoundHenceStartFromHot' ]]; then
+                srunCommandOptions+="-c ${startingConfigurationFilename}"
             fi
             ;;
         mode:continue* )
-            if [[ "${startingConfigurationGlobalPath}" == 'resumeFromLast' ]]; then
+            if [[ "${startingConfigurationFilename}" == 'resumeFromLast' ]]; then
                 srunCommandOptions+="-c -a" # openQCD-FASTSUM takes care of using the last checkpoint
             else
-                srunCommandOptions+="-c ${startingConfigurationGlobalPath} -a"
+                srunCommandOptions+="-c ${startingConfigurationFilename} -a"
             fi
             ;;
         * )
@@ -65,8 +65,8 @@ function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
     esac
 
     # Determine needed information for checkpoint renaming mechanism
-    # To be on the safe side, extract it from the input file
-    local inputFileGlobalPath deltaConfs
+    # To be on the safe side, extract delta from the input file
+    local inputFileGlobalPath deltaConfs initialConf index shiftConfs
     inputFileGlobalPath="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}/${BHMAS_inputFilename}"
     deltaConfs=( $(sed -rn 's/^dtr_cnfg[[:space:]]+([1-9][0-9]*)/\1/p' "${inputFileGlobalPath}") )
     if [[ ${#deltaConfs[@]} -ne 1 && ! ${deltaConfs[0]} =~ ^[1-9][0-9]*$ ]]; then
@@ -74,6 +74,37 @@ function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
               'Unable to extract gap between checkpoints from\n' file\
               "${inputFileGlobalPath}" '\nin job script preparation for run ID ' emph "${runId}" '.'
     fi
+    # Extract initial tr. number either from initial configuration file
+    # or from symbolic link to it. Note that the symbolic link is created
+    # AFTER the job script and it cannot be always used.
+    case ${BHMAS_executionMode} in
+        mode:thermalize | mode:prepare-only | mode:new-chain )
+            # Here the startingConfigurationFilename variable set above contains
+            # a configuration filename from the thermalized pool -> use it
+            if [[ "${startingConfigurationFilename}" = 'notFoundHenceStartFromHot' ]]; then
+                shiftConfs=0
+            else
+                shiftConfs=${startingConfigurationFilename[0]##*_trNr}
+            fi
+            ;;
+        mode:continue* )
+            # Here we must use the symbolic link that must exist
+            initialConf=( "${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}/conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${runId%_*}"* )
+            for index in "${#initialConf[@]}"; do
+                if [[ ! -L "${initialConf[index]:-}" ]]; then
+                    unset -v 'initialConf[index]'
+                fi
+            done
+            if [[ ${#initialConf[@]} -ne 1 ]]; then
+                Fatal ${BHMAS_fatalLogicError}\
+                      'Unable to find unique symbolic link to starting configuration in'\
+                      dir "${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}"\
+                      '\nto extract initial number for rename mechanism of checkpoints.'
+            else
+                shiftConfs=${initialConf[0]##*_trNr}
+            fi
+            ;;
+    esac
 
     # If in thermalization mode we want to add a function to copy the
     # last configuration to the pool together with its call
@@ -100,11 +131,12 @@ function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
 #------------------------------------------------------------------------
 shopt -s extglob nullglob
 #------------------------------------------------------------------------
-function $(declare -f __static__RenameCheckpointFiles)
+function $(declare -f __static__MonitorAndRenameCheckpointFiles)
 
 # This function makes use of variables from the caller
 #   - runPrefix
 #   - checkpointGap
+#   - checkpointShift
 #   - processPid
 #   - confPrefix
 #   - prngPrefix
@@ -112,7 +144,7 @@ function $(declare -f __static__RenameCheckpointFiles)
 #   - timeLastCheckpoint
 #   - sleepTime
 # and changes the last two to adjust the monitoring times!
-function $(declare -f __static__MonitorAndRenameCheckpointFiles)
+function $(declare -f __static__RenameCheckpointFiles)
 #------------------------------------------------------------------------
 ${thermalizeFunction}
 #------------------------------------------------------------------------
@@ -128,7 +160,7 @@ printf '  mpirun \${submitDir}/${BHMAS_productionExecutableFilename} -i \${submi
 mpirun \${submitDir}/${BHMAS_productionExecutableFilename} -i \${submitDir}/${BHMAS_inputFilename} -noms -noloc ${srunCommandOptions} &
 pidRun=\${!}
 
-__static__MonitorAndRenameCheckpointFiles "\${pidRun}" 10 "${BHMAS_outputFilename}" ${deltaConfs} "${BHMAS_configurationPrefix//\\/}" "${BHMAS_prngPrefix//\\/}" ${BHMAS_checkpointMinimumNumberOfDigits} &
+__static__MonitorAndRenameCheckpointFiles "\${pidRun}" 10 "${BHMAS_outputFilename}" ${deltaConfs} ${shiftConfs} "${BHMAS_configurationPrefix//\\/}" "${BHMAS_prngPrefix//\\/}" ${BHMAS_checkpointMinimumNumberOfDigits} &
 pidRename=\${!}
 
 wait -n #Wait for the first process to finish
@@ -159,27 +191,29 @@ END_OF_JOBSCRIPT_FILE
 
 function __static__MonitorAndRenameCheckpointFiles()
 {
-    local processPid sleepTime runPrefix checkpointGap timeLastCheckpoint\
-          confPrefix prngPrefix digitsInCheckpoint
+    local processPid sleepTime runPrefix checkpointGap checkpointShift\
+          timeLastCheckpoint confPrefix prngPrefix digitsInCheckpoint
     processPid="$1"
     sleepTime="$2"
     runPrefix="$3"
     checkpointGap="$4"
-    confPrefix="$5"
-    prngPrefix="$6"
-    digitsInCheckpoint="$7"
+    checkpointShift="$5"
+    confPrefix="$6"
+    prngPrefix="$7"
+    digitsInCheckpoint="$8"
     timeLastCheckpoint="$(date +'%s')"
     printf "Starting monitoring and rename mechanism ($(date +'%d.%m.%Y %H:%M:%S')), sleep time = ${sleepTime}s\n"
     while kill -0 "${processPid}" 2>/dev/null; do
         sleep ${sleepTime}
-        __static__RenameCheckpointFiles "${runPrefix}" "${checkpointGap}"
+        __static__RenameCheckpointFiles
     done
-    __static__RenameCheckpointFiles "${runPrefix}" "${checkpointGap}"
+    __static__RenameCheckpointFiles
 }
 
 # This function makes use of variables from the caller
 #   - runPrefix
 #   - checkpointGap
+#   - checkpointShift
 #   - processPid
 #   - confPrefix
 #   - prngPrefix
@@ -204,7 +238,7 @@ function __static__RenameCheckpointFiles()
             [[ ${sleepTime} -eq 0 ]] && sleepTime=1
             timeLastCheckpoint=$(date +'%s')
             printf "Found new checkpoint to rename ($(date +'%d.%m.%Y %H:%M:%S')), new sleep time = ${sleepTime}s\n"
-            trajectoryNumber=$(printf "%0${digitsInCheckpoint}d" $(( checkpointGap * ${arrayOfConfs[0]#${runPrefix}n} )) )
+            trajectoryNumber=$(printf "%0${digitsInCheckpoint}d" $(( checkpointShift + checkpointGap * ${arrayOfConfs[0]#${runPrefix}n} )) )
             mv "${prngFile}"         "${prngPrefix}${trajectoryNumber}"
             mv "${arrayOfConfs[0]}"  "${confPrefix}${trajectoryNumber}"
             ;;
