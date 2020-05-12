@@ -72,6 +72,13 @@ function __static__CreateFilesInRunBetaFolder()
     done
 }
 
+function __static__CreateSymlinkInRunBetaFolder()
+{
+    #Fake symlink, betas file alway existing
+    ln -s "${submitDirWithBetaFolders}/betas"\
+       "${runDirWithBetaFolders}/${betaFolder}/conf.${testParametersString}_${betaFolder%_*}_$1" || exit ${BHMAS_fatalBuiltin}
+}
+
 function __static__AddStringToFirstLineBetasFile()
 {
     local line
@@ -194,6 +201,9 @@ function MakeTestPreliminaryOperations()
             __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
             __static__CompleteInputFileWithCorrectPaths
             __static__CreateFilesInRunBetaFolder "conf.save" "prng.save"
+            if [[ ! $1 =~ therm ]]; then
+                __static__CreateSymlinkInRunBetaFolder "fromConf_trNr5000"
+            fi
             case "${1##*-}" in
                 last )
                     __static__CreateFilesInRunBetaFolder "conf.00800" "prng.00800"

@@ -419,27 +419,47 @@ function __static__HandleFurtherOptionsInInputFile()
 
 function __static__FindAndSetNumberOfTrajectoriesAlreadyProduced()
 {
-    # Strategy to recover the number of done measurement:
-    #   1) if nameOfLastConfiguration contains the number of the conf, use it. Otherwise,
-    #   2) try to extract from within the configuration file (specific CL2QCD). Otherwise,
-    #   3) if the output file exists, use it. Otherwise,
+    # Strategy to recover the number of done trajectories in THIS coninueWithNewChain run (net of thermalization):
+    #   1) Use the name of the last configuration to deduce the number of the last trajectory
+    #      and use the symbolic link to the starting configuration to read off the number of the
+    #      trajectories done in previous thermalization run(s). Otherwise,
+    #   2) Try to extract the last trajectory number from within the configuration file
+    #      (specific CL2QCD) and always the symbolic link for the starting trajectory. Otherwise,
+    #   3) if the output file exists, use it (consider that it might be to be cleaned). Otherwise,
     #   4) print an error and skip beta.
-    numberOfTrajectoriesAlreadyProduced="$(sed -n 's/^[^1-9]*\([0-9]\+\)[^0-9]*$/\1/p' <<< "${nameOfLastConfiguration}")" #extract number without leading zeros (only if exactly one number is in conf name)
-    if [[ "${numberOfTrajectoriesAlreadyProduced}" = '' ]]; then
-        numberOfTrajectoriesAlreadyProduced="$(sed -n "s/^trajectory nr = \([1-9][0-9]*\)$/\1/p" ${runBetaDirectory}/${nameOfLastConfiguration} || true)"
-    fi
-    if [[ "${numberOfTrajectoriesAlreadyProduced}" = '' ]]; then
-        if [[ -f ${outputFileGlobalPath} ]]; then
-            numberOfTrajectoriesAlreadyProduced=$(awk 'END{print $1 + 1}' ${outputFileGlobalPath}) #The +1 is here necessary because the first tr. is supposed to be the number 0.
+    local initialConfiguration index initialTrNumber lastTrNumber
+    initialTrNumber=''; lastTrNumber=''
+    initialConfiguration=( "${runBetaDirectory}/conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${runId%_*}"* )
+    for index in "${#initialConfiguration[@]}"; do
+        if [[ ! -L "${initialConfiguration[index]:-}" ]]; then
+            unset -v 'initialConfiguration[index]'
+        fi
+    done
+    PrintArray initialConfiguration
+    if [[ ${#initialConfiguration[@]} -eq 1 ]]; then
+        initialTrNumber=${initialConfiguration[0]##*_trNr}
+        lastTrNumber="${nameOfLastConfiguration#${BHMAS_configurationPrefix//\\/}*(0)}" #extract number from the end without leading zeros
+        if [[ ! "${lastTrNumber}" =~ ^[1-9][0-9]*$ ]]; then
+            lastTrNumber="$(sed -n "s/^trajectory nr = \([1-9][0-9]*\)$/\1/p" ${runBetaDirectory}/${nameOfLastConfiguration} || true)"
         fi
     fi
-    if [[ "${numberOfTrajectoriesAlreadyProduced}" = '' ]]; then
-        Error "It was not possible to deduce the number of already produced trajectories!\n" "The value " emph "beta = ${runId}" " will be skipped!"
-        BHMAS_problematicBetaValues+=( ${runId} )
-        return 1
-    else
+    if [[ "${initialTrNumber}" =~ ^(0|[1-9][0-9]*)$ ]] && [[ "${lastTrNumber}" =~ ^[1-9][0-9]*$ ]]; then
+        numberOfTrajectoriesAlreadyProduced=$(( lastTrNumber - initialTrNumber ))
         return 0
     fi
+    # Fall back to case 3)
+    if [[ -f ${outputFileGlobalPath} ]]; then
+        initialTrNumber=$(awk 'NR==1{print $1; exit}' ${outputFileGlobalPath})
+        lastTrNumber=$(awk 'END{print $1 + 1}' ${outputFileGlobalPath}) #The +1 is here necessary because the first tr. is supposed to be the number 0.
+    fi
+    if [[ "${initialTrNumber}" =~ ^(0|[1-9][0-9]*)$ ]] && [[ "${lastTrNumber}" =~ ^[1-9][0-9]*$ ]]; then
+        numberOfTrajectoriesAlreadyProduced=$(( lastTrNumber - initialTrNumber ))
+        return 0
+    fi
+    # Fall back to case 4)
+    Error "It was not possible to deduce the number of already produced trajectories!\n" "The value " emph "beta = ${runId}" " will be skipped!"
+    BHMAS_problematicBetaValues+=( ${runId} )
+    return 1
 }
 
 function __static__IsSimulationNotFinished()
