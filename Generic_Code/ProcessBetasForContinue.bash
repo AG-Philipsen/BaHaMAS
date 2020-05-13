@@ -46,8 +46,9 @@ function __static__CheckWhetherAnySimulationForGivenBetaValuesIsAlreadyEnqueued(
 
 function __static__SetBetaRelatedPathVariables()
 {
-    runBetaDirectory="${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${betaValue}"
-    submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${betaValue}"
+    local runId; runId="$1"
+    runBetaDirectory="${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}"
+    submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}"
     inputFileGlobalPath="${submitBetaDirectory}/${BHMAS_inputFilename}"
     outputFileGlobalPath="${runBetaDirectory}/${BHMAS_outputFilename}"
     outputPbpFileGlobalPath="${outputFileGlobalPath}_pbp.dat"
@@ -56,17 +57,19 @@ function __static__SetBetaRelatedPathVariables()
 
 function __static__CheckWhetherAnyRequiredFileOrFolderIsMissing()
 {
+    CheckIfVariablesAreDeclared runBetaDirectory submitBetaDirectory inputFileGlobalPath
+    local runId; runId="$1"
     if [[ ! -d ${runBetaDirectory} ]]; then
-        Error "The directory " dir "${runBetaDirectory}" " does not exist!\n" "The value " emph "beta = ${betaValue}" " will be skipped!"
-        BHMAS_problematicBetaValues+=( ${betaValue} )
+        Error "The directory " dir "${runBetaDirectory}" " does not exist!\n" "The value " emph "beta = ${runId}" " will be skipped!"
+        BHMAS_problematicBetaValues+=( ${runId} )
         return 1
     elif [[ ! -d ${submitBetaDirectory} ]]; then
-        Error "The directory " dir "${submitBetaDirectory}" " does not exist!\n" "The value " emph "beta = ${betaValue}" " will be skipped!"
-        BHMAS_problematicBetaValues+=( ${betaValue} )
+        Error "The directory " dir "${submitBetaDirectory}" " does not exist!\n" "The value " emph "beta = ${runId}" " will be skipped!"
+        BHMAS_problematicBetaValues+=( ${runId} )
         return 1
     elif [[ ! -f ${inputFileGlobalPath} ]]; then
-        Error "The file " file "${inputFileGlobalPath}" " does not exist!\n" "The value " emph "beta = ${betaValue}" " will be skipped!"
-        BHMAS_problematicBetaValues+=( ${betaValue} )
+        Error "The file " file "${inputFileGlobalPath}" " does not exist!\n" "The value " emph "beta = ${runId}" " will be skipped!"
+        BHMAS_problematicBetaValues+=( ${runId} )
         return 1
     fi
     return 0
@@ -94,27 +97,27 @@ function __static__RemoveOriginalInputFile()
 
 function ProcessBetaValuesForContinue()
 {
-    local betaValue runBetaDirectory submitBetaDirectory inputFileGlobalPath outputFileGlobalPath outputPbpFileGlobalPath\
+    local runId runBetaDirectory submitBetaDirectory inputFileGlobalPath outputFileGlobalPath outputPbpFileGlobalPath\
           betaValuesToBeSubmitted nameOfLastConfiguration nameOfLastPRNG originalInputFileGlobalPath
     betaValuesToBeSubmitted=()
     nameOfLastConfiguration=''
     nameOfLastPRNG=''
     __static__CheckWhetherAnySimulationForGivenBetaValuesIsAlreadyEnqueued
-    for betaValue in ${BHMAS_betaValues[@]}; do
+    for runId in ${BHMAS_betaValues[@]}; do
         cecho ''
         # Preliminary general checks
-        __static__SetBetaRelatedPathVariables                                  || continue
-        __static__CheckWhetherAnyRequiredFileOrFolderIsMissing                 || continue
+        __static__SetBetaRelatedPathVariables                  ${runId} || continue
+        __static__CheckWhetherAnyRequiredFileOrFolderIsMissing ${runId} || continue
         # LQCD software specific operations
-        HandleEnvironmentForContinueForGivenSimulation ${betaValue} || continue
-        HandleOutputFilesForContinueForGivenSimulation ${betaValue} || continue
+        HandleEnvironmentForContinueForGivenSimulation ${runId} || continue
+        HandleOutputFilesForContinueForGivenSimulation ${runId} || continue
         __static__MakeTemporaryCopyOfOriginalInputFile
-        if ! HandleInputFileForContinueForGivenSimulation ${betaValue}; then
+        if ! HandleInputFileForContinueForGivenSimulation ${runId}; then
             __static__RestoreOriginalInputFile
             continue
         fi
         __static__RemoveOriginalInputFile
-        betaValuesToBeSubmitted+=( ${betaValue} )
+        betaValuesToBeSubmitted+=( ${runId} )
     done
     if [[ ${#betaValuesToBeSubmitted[@]} -ne 0 ]]; then
        mkdir -p ${BHMAS_submitDirWithBetaFolders}/${BHMAS_jobScriptFolderName} || exit ${BHMAS_fatalBuiltin}
