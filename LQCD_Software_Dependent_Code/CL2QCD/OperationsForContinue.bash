@@ -29,7 +29,6 @@ function HandleEnvironmentForContinueForGivenSimulation_CL2QCD()
     local runId; runId="$1"
     CheckIfVariablesAreDeclared nameOfLastConfiguration nameOfLastPRNG runBetaDirectory
 
-    #If the option resumefrom is given in the betasfile we have to clean the ${runBetaDirectory}, otherwise just set the name of conf and prng
     if KeyInArray ${runId} BHMAS_trajectoriesToBeResumedFrom; then
         #NOTE: If the user wishes to resume from the last avialable checkpoint, then we have to find here which is
         #      the "last" valid one. Valid means that both the conf and the prng file are present with the same number
@@ -607,3 +606,6 @@ function __static__FindAndReplaceSingleOccurenceInFile()
     fi
     sed -i "s@${stringToBeFound}@${replaceString}@g" ${filename} #function's return code is that of sed
 }
+
+
+MakeFunctionsDefinedInThisFileReadonly
