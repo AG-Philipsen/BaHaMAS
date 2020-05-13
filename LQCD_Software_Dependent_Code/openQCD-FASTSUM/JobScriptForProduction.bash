@@ -215,8 +215,10 @@ function __static__MonitorAndRenameCheckpointFiles()
 # and changes the last two to adjust the monitoring times!
 function __static__RenameCheckpointFiles()
 {
-    local prngFile arrayOfConfs trajectoryNumber
+    local prngFile dataFile dataPrefix arrayOfConfs trajectoryNumber
     prngFile="${runPrefix}.rng~"
+    dataFile="${runPrefix}.dat~"
+    dataPrefix='data.'
     arrayOfConfs=( "${runPrefix}n"* )
     case ${#arrayOfConfs[@]} in
         0)
@@ -226,13 +228,18 @@ function __static__RenameCheckpointFiles()
                 printf "WARNING [${FUNCNAME}]: Found new configuration \"${arrayOfConfs[0]}\" but not the RNG state.\n"
                 return 0
             fi
+            if [[ ! -f "${dataFile}" ]]; then
+                printf "WARNING [${FUNCNAME}]: Found new configuration \"${arrayOfConfs[0]}\" and correspondent RNG state but not the data file.\n"
+                return 0
+            fi
             sleepTime=$(( ($(date +'%s') - timeLastCheckpoint) / 5 ))
             [[ ${sleepTime} -eq 0 ]] && sleepTime=1
             timeLastCheckpoint=$(date +'%s')
             printf "Found new checkpoint to rename ($(date +'%d.%m.%Y %H:%M:%S')), new sleep time = ${sleepTime}s\n"
             trajectoryNumber=$(printf "%0${digitsInCheckpoint}d" $(( checkpointShift + checkpointGap * ${arrayOfConfs[0]#${runPrefix}n} )) )
-            mv "${prngFile}"         "${prngPrefix}${trajectoryNumber}"
-            mv "${arrayOfConfs[0]}"  "${confPrefix}${trajectoryNumber}"
+            mv "${prngFile}"         "${prngPrefix}${trajectoryNumber}"  ||  exit 112
+            mv "${dataFile}"         "${dataPrefix}${trajectoryNumber}"  ||  exit 112
+            mv "${arrayOfConfs[0]}"  "${confPrefix}${trajectoryNumber}"  ||  exit 112
             ;;
         *)
             printf "ERROR [${FUNCNAME}]: Too many configurations created from the last check!\n"
