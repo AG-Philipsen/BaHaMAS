@@ -146,9 +146,9 @@ function DeclareAllowedOptionsPerModeOrSoftware()
     #
     # NOTE: The associative array must be declared in the caller
     local productionOptions productionOptionsCL2QCD clusterOptions
-    productionOptions='--measurements --checkpointEvery --pf'
-    productionOptionsCL2QCD='--confSaveEvery --cgbs'
-    productionOptionsOpenQCD='--processorsGrid'
+    productionOptions='--measurements --pf --checkpointEvery'
+    productionOptionsCL2QCD=' --measurements --pf --checkpointEvery --confSaveEvery --cgbs'
+    productionOptionsOpenQCD='--measurements --pf --processorsGrid'
     clusterOptions='--walltime  --partition  --node  --constraint  --resource'
     allowedOptionsPerModeOrSoftware+=(
         #-------------------------------------------------------------------------------
@@ -157,8 +157,8 @@ function DeclareAllowedOptionsPerModeOrSoftware()
         ['mode:submit-only']+='--betasfile --jobscript_prefix'
         ['mode:new-chain']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
         ['mode:thermalize']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
-        ['mode:continue']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
-        ['mode:continue-thermalization']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
+        ['mode:continue']+="--betasfile --jobscript_prefix ${clusterOptions}"
+        ['mode:continue-thermalization']+="--betasfile --jobscript_prefix ${clusterOptions}"
         ['mode:job-status']+='--partition'
         ['mode:simulation-status']+=''
         ['mode:acceptance-rate-report']+='--betasfile'
@@ -178,6 +178,8 @@ function DeclareAllowedOptionsPerModeOrSoftware()
         ["mode:prepare-only_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"
         ["mode:new-chain_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"
         ["mode:thermalize_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"
+        ["mode:continue_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"
+        ["mode:continue-thermalization_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"
         #-------------------------------------------------------------------------------
         # All-modes, specific-software options
         ['CL2QCD']+=''
