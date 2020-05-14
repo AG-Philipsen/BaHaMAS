@@ -138,6 +138,8 @@ function $(declare -f __static__MonitorAndRenameCheckpointFiles)
 # and changes the last two to adjust the monitoring times!
 function $(declare -f __static__RenameCheckpointFiles)
 #------------------------------------------------------------------------
+function $(declare -f __static__BackupFile)
+#------------------------------------------------------------------------
 ${thermalizeFunction}
 #------------------------------------------------------------------------
 export OMP_NUM_THREADS=\${SLURM_CPUS_PER_TASK}
@@ -174,6 +176,7 @@ elif kill -0 "\${pidRename}" 2>/dev/null; then
     if [[ \${errorCodeFirst} -ne 0 ]] || [[ \${errorCodeSecond} -ne 0 ]]; then
         exit \$(( errorCodeFirst + errorCodeSecond ))
     fi
+    __static__BackupFile "\${runDir}/${BHMAS_outputFilename}.log" "\${submitDir}"
     ${thermalizeFunctionCall}
 fi
 
@@ -248,6 +251,18 @@ function __static__RenameCheckpointFiles()
     esac
 }
 
+function __static__BackupFile()
+{
+    local sourceGlobalPath destinationFolderGlobalPath
+    sourceGlobalPath="$1"
+    destinationFolderGlobalPath="$2"
+    if [[ ! -f "${sourceGlobalPath}" ]]; then
+        printf 'ERROR [${FUNCNAME}]: No output file to be copied found!\n'
+        exit 111
+    fi
+    cp "${sourceGlobalPath}" "${destinationFolderGlobalPath}/." || exit 111
+}
+
 function __static__BackupLastConfiguration()
 {
     local sourceFolderGlobalPath destinationFolderGlobalPath\
@@ -260,13 +275,13 @@ function __static__BackupLastConfiguration()
     sourceGlobalPath=$(printf '%s\n' "${sourceFolderGlobalPath}/${sourcePrefix}"+([0-9]) | sort -V | tail -n1)
     if [[ ! -f "${sourceGlobalPath}" ]]; then
         printf 'ERROR [${FUNCNAME}]: No configuration to be copied found!\n'
-        exit 111
+        exit 110
     fi
     trNumber="$(grep -o '[1-9][0-9]*$' <<< ${sourceGlobalPath})"
     destinationGlobalPath="${destinationFolderGlobalPath}/${destinationPrefix}${trNumber}"
     if [[ -f "${destinationGlobalPath}" ]]; then
         printf "ERROR [${FUNCNAME}]: Destination thermalized configuration already existing!\n"
-        exit 111
+        exit 110
     else
         cp "${sourceGlobalPath}" "${destinationGlobalPath}" || exit 111
     fi

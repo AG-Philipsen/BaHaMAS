@@ -62,7 +62,7 @@ function ProduceInputFile_openQCD-FASTSUM()
 name         ${BHMAS_outputFilename}
 
 [Directories]
-log_dir      ${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${beta}
+log_dir      ${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${beta}
 dat_dir      ${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${beta}
 loc_dir      ${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${beta}
 cnfg_dir     ${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${beta}
