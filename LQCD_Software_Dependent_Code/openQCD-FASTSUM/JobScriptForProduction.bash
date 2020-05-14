@@ -66,14 +66,8 @@ function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
 
     # Determine needed information for checkpoint renaming mechanism
     # To be on the safe side, extract delta from the input file
-    local inputFileGlobalPath deltaConfs initialConf index shiftConfs
-    inputFileGlobalPath="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}/${BHMAS_inputFilename}"
-    deltaConfs=( $(sed -rn 's/^dtr_cnfg[[:space:]]+([1-9][0-9]*)/\1/p' "${inputFileGlobalPath}") )
-    if [[ ${#deltaConfs[@]} -ne 1 && ! ${deltaConfs[0]} =~ ^[1-9][0-9]*$ ]]; then
-        Fatal ${BHMAS_fatalLogicError}\
-              'Unable to extract gap between checkpoints from\n' file\
-              "${inputFileGlobalPath}" '\nin job script preparation for run ID ' emph "${runId}" '.'
-    fi
+    local deltaConfs initialConf index shiftConfs
+    deltaConfs=$(ExtractGapBetweenCheckpointsFromInputFile "${runId}")
     # Extract initial tr. number either from initial configuration file
     # or from symbolic link to it. Note that the symbolic link is created
     # AFTER the job script and it cannot be always used.
@@ -91,7 +85,7 @@ function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
             # Here we must use the symbolic link that must exist
             if ! shiftConfs=$(ExtractTrajectoryNumberFromConfigurationSymlink "${runId}"); then
                 Fatal ${BHMAS_fatalLogicError}\
-                      'Unable to find unique symbolic link to starting configuration in'\
+                      'Unable to find unique symbolic link to starting configuration in\n'\
                       dir "${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}"\
                       '\nto extract initial number for rename mechanism of checkpoints.'
             fi
