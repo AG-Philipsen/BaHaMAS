@@ -126,6 +126,7 @@ function $(declare -f __static__MonitorAndRenameCheckpointFiles)
 #   - processPid
 #   - confPrefix
 #   - prngPrefix
+#   - dataPrefix
 #   - digitsInCheckpoint
 #   - timeLastCheckpoint
 #   - sleepTime
@@ -148,7 +149,7 @@ printf '  mpirun \${submitDir}/${BHMAS_productionExecutableFilename} -i \${submi
 mpirun \${submitDir}/${BHMAS_productionExecutableFilename} -i \${submitDir}/${BHMAS_inputFilename} -noms -noloc ${srunCommandOptions} &
 pidRun=\${!}
 
-__static__MonitorAndRenameCheckpointFiles "\${pidRun}" 10 "${BHMAS_outputFilename}" ${deltaConfs} ${shiftConfs} "${BHMAS_configurationPrefix//\\/}" "${BHMAS_prngPrefix//\\/}" ${BHMAS_checkpointMinimumNumberOfDigits} &
+__static__MonitorAndRenameCheckpointFiles "\${pidRun}" 10 "${BHMAS_outputFilename}" ${deltaConfs} ${shiftConfs} "${BHMAS_configurationPrefix//\\/}" "${BHMAS_prngPrefix//\\/}" "${BHMAS_dataPrefix//\\/}" ${BHMAS_checkpointMinimumNumberOfDigits} &
 pidRename=\${!}
 
 wait -n #Wait for the first process to finish
@@ -181,7 +182,7 @@ END_OF_JOBSCRIPT_FILE
 function __static__MonitorAndRenameCheckpointFiles()
 {
     local processPid sleepTime runPrefix checkpointGap checkpointShift\
-          timeLastCheckpoint confPrefix prngPrefix digitsInCheckpoint
+          timeLastCheckpoint confPrefix prngPrefix dataPrefix digitsInCheckpoint
     processPid="$1"
     sleepTime="$2"
     runPrefix="$3"
@@ -189,7 +190,8 @@ function __static__MonitorAndRenameCheckpointFiles()
     checkpointShift="$5"
     confPrefix="$6"
     prngPrefix="$7"
-    digitsInCheckpoint="$8"
+    dataPrefix="$8"
+    digitsInCheckpoint="$9"
     timeLastCheckpoint="$(date +'%s')"
     printf "Starting monitoring and rename mechanism ($(date +'%d.%m.%Y %H:%M:%S')), sleep time = ${sleepTime}s\n"
     while kill -0 "${processPid}" 2>/dev/null; do
@@ -206,16 +208,16 @@ function __static__MonitorAndRenameCheckpointFiles()
 #   - processPid
 #   - confPrefix
 #   - prngPrefix
+#   - dataPrefix
 #   - digitsInCheckpoint
 #   - timeLastCheckpoint
 #   - sleepTime
 # and changes the last two to adjust the monitoring times!
 function __static__RenameCheckpointFiles()
 {
-    local prngFile dataFile dataPrefix arrayOfConfs trajectoryNumber
+    local prngFile dataFile arrayOfConfs trajectoryNumber
     prngFile="${runPrefix}.rng~"
     dataFile="${runPrefix}.dat~"
-    dataPrefix='data.'
     arrayOfConfs=( "${runPrefix}n"* )
     case ${#arrayOfConfs[@]} in
         0)
