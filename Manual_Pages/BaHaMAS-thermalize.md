@@ -33,9 +33,6 @@ Most of the information for the simulation input file(s) is retrieved from the *
 \--checkpointEvery *number*
 :   Specify every how many trajectories a check-point should be stored to disk (default: 100).
 
-\--pf *number*
-:   Specify how many pseudofermions should be used (default: 1).
-
 \--jobscript_prefix *string*
 :   Specify the prefix of the jobscript file (default: own setup).
 
@@ -65,6 +62,9 @@ Most of the information for the simulation input file(s) is retrieved from the *
     For instance, for SLURM, this will use the **\--constraint** sbatch directive.
 
 # CL2QCD OPTIONS
+
+\--pf *number*
+:   Specify how many pseudofermions should be used (default: 1).
 
 \--confSaveEvery
 :   Specify every how many trajectories the **.save** checkpoint is overwritten (default: 20).

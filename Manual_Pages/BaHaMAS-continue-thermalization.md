@@ -46,12 +46,6 @@ If possible, based on the provided information, it is checked if each simulation
 \--measurements *number*
 :   Specify the number of trajectories that should be done (default: 1000).
 
-\--checkpointEvery *number*
-:   Specify every how many trajectories a check-point should be stored to disk (default: 100).
-
-\--pf *number*
-:   Specify how many pseudofermions should be used (default: 1).
-
 \--jobscript_prefix *string*
 :   Specify the prefix of the jobscript file (default: own setup).
 
@@ -82,11 +76,17 @@ If possible, based on the provided information, it is checked if each simulation
 
 # CL2QCD OPTIONS
 
+\--pf *number*
+:   Specify how many pseudofermions should be used (default: 1).
+
 \--confSaveEvery
 :   Specify every how many trajectories the **.save** checkpoint is overwritten (default: 20).
 
 \--cgbs *number*
 :   Specify the conjugate gradient block-size and namely every how many iterations on the device the residuum is checked for convergence on the host (default: 50).
+
+\--checkpointEvery *number*
+:   Specify every how many trajectories a check-point should be stored to disk (default: 100).
 
 # openQCD-FASTSUM OPTIONS
 

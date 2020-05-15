@@ -146,18 +146,19 @@ function DeclareAllowedOptionsPerModeOrSoftware()
     #
     # NOTE: The associative array must be declared in the caller
     local productionOptionsCL2QCD clusterOptions
-    productionOptionsCL2QCD=' --measurements --pf --checkpointEvery --confSaveEvery --cgbs'
-    productionOptionsOpenQCD='--measurements --processorsGrid'
+    productionOptions='--measurements --checkpointEvery'
+    productionOptionsCL2QCD='--pf --confSaveEvery --cgbs'
+    productionOptionsOpenQCD='--processorsGrid'
     clusterOptions='--walltime  --partition  --node  --constraint  --resource'
     allowedOptionsPerModeOrSoftware+=(
         #-------------------------------------------------------------------------------
         # Specific-mode, all-software options
-        ['mode:prepare-only']+="--betasfile --jobscript_prefix ${clusterOptions}"
+        ['mode:prepare-only']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
         ['mode:submit-only']+='--betasfile --jobscript_prefix'
-        ['mode:new-chain']+="--betasfile --jobscript_prefix ${clusterOptions}"
-        ['mode:thermalize']+="--betasfile --jobscript_prefix ${clusterOptions}"
-        ['mode:continue']+="--betasfile --jobscript_prefix ${clusterOptions}"
-        ['mode:continue-thermalization']+="--betasfile --jobscript_prefix ${clusterOptions}"
+        ['mode:new-chain']+="--betasfile  ${productionOptions} --jobscript_prefix ${clusterOptions}"
+        ['mode:thermalize']+="--betasfile  ${productionOptions} --jobscript_prefix ${clusterOptions}"
+        ['mode:continue']+="--betasfile --measurements --jobscript_prefix ${clusterOptions}"
+        ['mode:continue-thermalization']+="--betasfile --measurements --jobscript_prefix ${clusterOptions}"
         ['mode:job-status']+='--partition'
         ['mode:simulation-status']+=''
         ['mode:acceptance-rate-report']+='--betasfile'
@@ -172,8 +173,8 @@ function DeclareAllowedOptionsPerModeOrSoftware()
         ["mode:prepare-only_CL2QCD"]+="${productionOptionsCL2QCD}"
         ["mode:new-chain_CL2QCD"]+="${productionOptionsCL2QCD}"
         ["mode:thermalize_CL2QCD"]+="${productionOptionsCL2QCD}"
-        ["mode:continue_CL2QCD"]+="${productionOptionsCL2QCD}"
-        ["mode:continue-thermalization_CL2QCD"]+="${productionOptionsCL2QCD}"
+        ["mode:continue_CL2QCD"]+="${productionOptionsCL2QCD} --checkpointEvery"
+        ["mode:continue-thermalization_CL2QCD"]+="${productionOptionsCL2QCD} --checkpointEvery"
         ["mode:prepare-only_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"
         ["mode:new-chain_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"
         ["mode:thermalize_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"

@@ -22,6 +22,12 @@ If successfully run, the user can have a look at the files created and submit th
 \--betasfile *filename*
 :   Use *filename* instead of **betas** file.
 
+\--measurements *number*
+:   Specify the number of trajectories that should be done (default: 1000).
+
+\--checkpointEvery *number*
+:   Specify every how many trajectories a check-point should be stored to disk (default: 100).
+
 \--jobscript_prefix *string*
 :   Specify the prefix of the jobscript file (default: own setup).
 
@@ -51,6 +57,9 @@ If successfully run, the user can have a look at the files created and submit th
     For instance, for SLURM, this will use the **\--constraint** sbatch directive.
 
 # CL2QCD OPTIONS
+
+\--pf *number*
+:   Specify how many pseudofermions should be used (default: 1).
 
 \--confSaveEvery
 :   Specify every how many trajectories the **.save** checkpoint is overwritten (default: 20).

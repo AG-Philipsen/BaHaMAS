@@ -41,9 +41,6 @@ Specify the number of trajectories that should be done (default: 1000).
 Specify every how many trajectories a check-point should be stored to
 disk (default: 100).
 .TP
-.B --pf \f[I]number\f[R]
-Specify how many pseudofermions should be used (default: 1).
-.TP
 .B --jobscript_prefix \f[I]string\f[R]
 Specify the prefix of the jobscript file (default: own setup).
 .TP
@@ -82,6 +79,9 @@ The \f[I]string\f[R] has to comply with the cluster specifications.
 For instance, for SLURM, this will use the \f[B]--constraint\f[R] sbatch
 directive.
 .SH CL2QCD OPTIONS
+.TP
+.B --pf \f[I]number\f[R]
+Specify how many pseudofermions should be used (default: 1).
 .TP
 .B --confSaveEvery
 Specify every how many trajectories the \f[B].save\f[R] checkpoint is
