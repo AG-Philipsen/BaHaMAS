@@ -145,18 +145,17 @@ function DeclareAllowedOptionsPerModeOrSoftware()
     # that are allowed. We will use then two entries of it later to validate.
     #
     # NOTE: The associative array must be declared in the caller
-    local productionOptions productionOptionsCL2QCD clusterOptions
-    productionOptions='--measurements --pf --checkpointEvery'
+    local productionOptionsCL2QCD clusterOptions
     productionOptionsCL2QCD=' --measurements --pf --checkpointEvery --confSaveEvery --cgbs'
-    productionOptionsOpenQCD='--measurements --pf --processorsGrid'
+    productionOptionsOpenQCD='--measurements --processorsGrid'
     clusterOptions='--walltime  --partition  --node  --constraint  --resource'
     allowedOptionsPerModeOrSoftware+=(
         #-------------------------------------------------------------------------------
         # Specific-mode, all-software options
         ['mode:prepare-only']+="--betasfile --jobscript_prefix ${clusterOptions}"
         ['mode:submit-only']+='--betasfile --jobscript_prefix'
-        ['mode:new-chain']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
-        ['mode:thermalize']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
+        ['mode:new-chain']+="--betasfile --jobscript_prefix ${clusterOptions}"
+        ['mode:thermalize']+="--betasfile --jobscript_prefix ${clusterOptions}"
         ['mode:continue']+="--betasfile --jobscript_prefix ${clusterOptions}"
         ['mode:continue-thermalization']+="--betasfile --jobscript_prefix ${clusterOptions}"
         ['mode:job-status']+='--partition'
