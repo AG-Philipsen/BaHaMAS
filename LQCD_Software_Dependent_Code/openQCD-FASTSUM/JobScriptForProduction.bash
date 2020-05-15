@@ -20,7 +20,7 @@
 
 function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
 {
-    local jobScriptGlobalPath runId srunCommandOptions startingConfigurationFilename
+    local jobScriptGlobalPath runId mpirunCommandOptions startingConfigurationFilename
     jobScriptGlobalPath="$1"; shift
     betaValues=( "$@" )
 
@@ -30,34 +30,30 @@ function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
     else
         runId="${betaValues[0]}"
     fi
-    # NOTE: Here we rely on the fact that the associative array BHMAS_startConfigurationGlobalPath
-    #       has been filled at some stage before, either looking in the pool of configurations or
-    #       handling the environment in case of being in continue mode -> check to be sure anyway!
-    if ! KeyInArray ${runId} BHMAS_startConfigurationGlobalPath; then
-        Internal\
-            'Start configuration information was found unset for run ID\n'\
-            emph "${runId}" ' but needs to be specified to prepare the job\n'\
-            'script! Failure in function ' emph "${FUNCNAME}"
-    else
-        # openQCD does not accept a global path as configuration filename and requires
-        # that the configuration file is in one of the specified paths in the input
-        # file. BaHaMAS creates then a symlink in the folder where the executable is
-        # and it should then be safe to use here just the basename.
-        startingConfigurationFilename="$(basename "${BHMAS_startConfigurationGlobalPath[${runId}]}")"
-    fi
-    srunCommandOptions=''
+
+    #Set additional command line options for openQCD executable
+    mpirunCommandOptions=''
     case ${BHMAS_executionMode} in
         mode:thermalize | mode:new-chain | mode:prepare-only )
+            # openQCD does not accept a global path as configuration filename and requires
+            # that the configuration file is in one of the specified paths in the input
+            # file. BaHaMAS creates then a symlink in the folder where the executable is
+            # and it should then be safe to use here just the basename.
+            if KeyInArray ${runId} BHMAS_startConfigurationGlobalPath; then
+                startingConfigurationFilename="$(basename "${BHMAS_startConfigurationGlobalPath[${runId}]}")"
+            else
+                Internal 'Start configuration information was found unset for run ID\n'\
+                         emph "${runId}" ' but needs to be specified to prepare the job\n'\
+                         'script! Failure in function ' emph "${FUNCNAME}"
+            fi
             if [[ "${startingConfigurationFilename}" != 'notFoundHenceStartFromHot' ]]; then
-                srunCommandOptions+="-c ${startingConfigurationFilename}"
+                mpirunCommandOptions+="-c ${startingConfigurationFilename}"
             fi
             ;;
         mode:continue* )
-            if [[ "${startingConfigurationFilename}" == 'resumeFromLast' ]]; then
-                srunCommandOptions+="-c -a" # openQCD-FASTSUM takes care of using the last checkpoint
-            else
-                srunCommandOptions+="-c ${startingConfigurationFilename} -a"
-            fi
+            # openQCD-FASTSUM takes care of using the last checkpoint which has
+            # previously been prepared in the processing operations for continue
+            mpirunCommandOptions+="-c -a"
             ;;
         * )
             Internal 'Unexpected execution mode in ' emph "${FUNCNAME}" '.'
@@ -144,9 +140,9 @@ runDir="${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}"
 cd \${runDir}
 
 printf "Running openQCD-FASTSUM from '\$(pwd)':\n"
-printf '  mpirun \${submitDir}/${BHMAS_productionExecutableFilename} -i \${submitDir}/${BHMAS_inputFilename} -noms -noloc ${srunCommandOptions}\n\n'
+printf '  mpirun \${submitDir}/${BHMAS_productionExecutableFilename} -i \${submitDir}/${BHMAS_inputFilename} -noms -noloc ${mpirunCommandOptions}\n\n'
 
-mpirun \${submitDir}/${BHMAS_productionExecutableFilename} -i \${submitDir}/${BHMAS_inputFilename} -noms -noloc ${srunCommandOptions} &
+mpirun \${submitDir}/${BHMAS_productionExecutableFilename} -i \${submitDir}/${BHMAS_inputFilename} -noms -noloc ${mpirunCommandOptions} &
 pidRun=\${!}
 
 __static__MonitorAndRenameCheckpointFiles "\${pidRun}" 10 "${BHMAS_outputFilename}" ${deltaConfs} ${shiftConfs} "${BHMAS_configurationPrefix//\\/}" "${BHMAS_prngPrefix//\\/}" "${BHMAS_dataPrefix//\\/}" ${BHMAS_checkpointMinimumNumberOfDigits} &
@@ -232,7 +228,7 @@ function __static__RenameCheckpointFiles()
                 return 0
             fi
             sleepTime=$(( ($(date +'%s') - timeLastCheckpoint) / 5 ))
-            [[ ${sleepTime} -eq 0 ]] && sleepTime=1
+            [[ ${sleepTime} -lt 10 ]] && sleepTime=10 #Avoid to short sleep (e.g. in continue where a checkpoint is immediately there)
             timeLastCheckpoint=$(date +'%s')
             printf "Found new checkpoint to rename ($(date +'%d.%m.%Y %H:%M:%S')), new sleep time = ${sleepTime}s\n"
             trajectoryNumber=$(printf "%0${digitsInCheckpoint}d" $(( checkpointShift + checkpointGap * ${arrayOfConfs[0]#${runPrefix}n} )) )

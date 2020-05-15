@@ -30,10 +30,10 @@ tau          1
 
 [MD trajectories]
 nth          0
-ntr          100
+ntr          200
 dtr_log      1
 dtr_ms       10000000 # i.e. never measure
-dtr_cnfg     100
+dtr_cnfg     20
 
 [Level 0]
 integrator   OMF2

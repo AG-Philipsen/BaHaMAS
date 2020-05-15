@@ -249,5 +249,51 @@ function FindAndReplaceSingleOccurenceInInputFile()
     sed -i "s@${stringToBeFound}@${replaceString}@g" "${filename}" #function's return code is that of sed
 }
 
+function FindAndReplaceFirstOccurenceInInputFileAfterLabel()
+{
+    if [[ $# -ne 3 ]]; then
+        Internal "The function " emph "${FUNCNAME}" " has been wrongly called (" emph "3 arguments needed" ")!"
+    fi
+    local label stringToBeFound replaceString filename
+    label="$1"; stringToBeFound="$2"; replaceString="$3"
+    filename="${inputFileGlobalPath}"
+    if [[ $(grep -cE "${stringToBeFound}" "${filename}") -eq 0 ]]; then
+        Error 'The string ' emph "${stringToBeFound}" ' has ' emph 'not been found' ' in the input file.\n'\
+              'The value ' emph "beta = ${runId}" ' will be skipped!'
+        BHMAS_problematicBetaValues+=( ${runId} )
+        return 1
+    elif [[ $(grep -cE "${label}" "${filename}") -ne 1 ]]; then
+        Error 'The label ' emph "${label}" ' has ' emph 'not been found exactly once' ' in the input file.\n'\
+              'The value ' emph "beta = ${runId}" ' will be skipped!'
+        BHMAS_problematicBetaValues+=( ${runId} )
+        return 1
+    fi
+    awk -i inplace\
+        -v sectionRegex="${label}"\
+        -v oldRegex="${stringToBeFound}"\
+        -v newString="${replaceString}"\
+        'BEGIN{sectionFound=0; replaced=0}
+        {
+            if(sectionFound==0)
+            {
+                print $0;
+                if($0 ~ sectionRegex){sectionFound=1};
+                next
+            }
+        }
+        {
+            if(sectionFound==1 && replaced==0)
+            {
+                if($0 ~ oldRegex)
+                {
+                    replaced=1;
+                    printf "%s\n", newString
+                } else {print $0};
+                next
+            }
+        }
+        replaced==1 {print $0}' "${inputFileGlobalPath}" #function's return code is that of awk
+}
+
 
 MakeFunctionsDefinedInThisFileReadonly

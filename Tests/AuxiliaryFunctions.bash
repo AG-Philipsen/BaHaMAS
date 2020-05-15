@@ -202,6 +202,7 @@ function MakeTestPreliminaryOperations()
             __static__CompleteInputFileWithCorrectPaths
             __static__CreateFilesInRunBetaFolder "conf.save" "prng.save"
             if [[ ! $1 =~ therm ]]; then
+                # This is not needed for thermalization from hot
                 __static__CreateSymlinkInRunBetaFolder "fromConf_trNr5000"
             fi
             case "${1##*-}" in
@@ -279,6 +280,31 @@ function MakeTestPreliminaryOperations()
             if [[ $1 =~ conf$ ]]; then
                 __static__CreateThermalizedConfiguration "fromHot_trNr1000"
             fi
+            ;;
+
+        openQCD-FASTSUM-continue* )
+            __static__CreateBetaFolder
+            __static__CopyAuxiliaryFilesToSubmitBetaFolder "fakeInput"
+            __static__CopyAuxiliaryFilesToRunBetaFolder "fakeOutput.log"
+            __static__CreateFilesInSubmitBetaFolder "qcd1_1_2_4_6"
+            __static__CreateFilesInRunBetaFolder "qcd1_1_2_4_6"
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
+            __static__CreateFilesInRunBetaFolder {conf,prng,data}.050{2..8..2}0 {conf,prng}.06020 conf.07040
+            if [[ ! $1 =~ therm ]]; then
+                # This is not needed for thermalization from hot
+                __static__CreateSymlinkInRunBetaFolder "fromConf_trNr5000"
+            fi
+            case "${1##*-}" in
+                last )
+                    __static__AddStringToFirstLineBetasFile "rlast"
+                    ;;
+                resume )
+                    __static__AddStringToFirstLineBetasFile "r5060"
+                    ;;
+                goal )
+                    __static__AddStringToFirstLineBetasFile "g15000"
+                    ;;
+            esac
             ;;
 
         completeBetasFile* )

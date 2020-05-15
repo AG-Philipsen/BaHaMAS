@@ -1,0 +1,2523 @@
+
+Simulation of QCD with Wilson quarks
+------------------------------------
+
+New run, start from configuration conf.Nf2_mui0_k1250_nt10_ns40_b6.1660_s1660_fromConf_trNr300
+
+Using the HMC algorithm
+Program major version: openQCD-FASTSUM v1.0 (based on openQCD-1.6)
+Program build date: 13-05-2020 12:31:24
+Program git SHA: v1.0-50-gac126c46
+Program user CFLAGS: -std=c99 -O2 -DAVX -DFMA3 -Werror -Wall
+The machine is little endian
+The local disks are not used
+
+10x40x40x40 lattice, 10x20x20x4 local lattice
+1x2x2x10 process grid, 1x1x1x1 process block size
+
+Lattice parameters:
+beta = 6.166
+c0 = 1.0, c1 = 0.0
+kappa[0] = 0.125000
+csw = 0.0
+
+Anisotropy parameters:
+use tts = true
+nu = 1.0
+xi = 1.0
+cR = 1.0
+cT = 1.0
+ut_gauge = 1.0
+us_gauge = 1.0
+us_fermion = 1.0
+ut_fermion = 1.0
+
+Smearing parameters:
+n_smear = 0
+rho_t = 0.0
+rho_s = 0.0
+gauge = false
+fermion = false
+
+Periodic boundary conditions
+theta = 0.0,0.0,0.0
+
+Random number generator:
+level = 0, seed = 2222
+
+HMC parameters:
+actions = 0 1
+npf = 1
+mu = 0.0
+nlv = 2
+tau = 1.0
+
+Trajectories:
+nth = 0, ntr = 200
+dtr_log = 1, dtr_cnfg = 20
+
+Wilson flow observables are not measured
+
+Action 0:
+ACG action
+smear = 0
+
+Action 1:
+ACF_TM1 action
+ipf = 0
+im0 = 0
+imu = 0
+isp = 1
+smear = 0
+
+Level 0:
+2nd order OMF integrator with lambda = 0.1931833275037836
+Number of steps = 4
+Forces = 0
+
+Level 1:
+2nd order OMF integrator with lambda = 0.1931833275037836
+Number of steps = 10
+Forces = 1
+
+Force 0:
+FRG force
+
+Force 1:
+FRF_TM1 force
+isp = 0
+ncr = 0
+
+Solver 0:
+CGNE solver
+nmx = 15000
+res = 1.0e-06
+
+Solver 1:
+CGNE solver
+nmx = 15000
+res = 1.0e-12
+
+Trajectory no 1
+dH = -1.41e-01, iac = 1
+Average plaquette = 1.845343669524329
+Average temporal link = 0.000584164653657
+Average spatial link = -0.000950639442905
+Average link = -0.000566938418764
+Polyakov loop = 0.001260366756469 -0.005135370418429
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 1.00
+Time per trajectory = 3.64e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 2
+dH = -5.69e-01, iac = 1
+Average plaquette = 1.845424750621063
+Average temporal link = 0.001205777495066
+Average spatial link = -0.000311229357181
+Average link = 0.000068022355881
+Polyakov loop = 0.000983771751635 -0.001155087957159
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 1.00
+Time per trajectory = 3.67e+01 sec (average = 3.66e+01 sec)
+
+Trajectory no 3
+dH = +1.02e+00, iac = 0
+Average plaquette = 1.845424750621063
+Average temporal link = 0.001205777495066
+Average spatial link = -0.000311229357181
+Average link = 0.000068022355881
+Polyakov loop = 0.000983771751635 -0.001155087957159
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.67
+Time per trajectory = 3.62e+01 sec (average = 3.65e+01 sec)
+
+Trajectory no 4
+dH = -9.57e-02, iac = 1
+Average plaquette = 1.844822463915535
+Average temporal link = 0.001171560041609
+Average spatial link = -0.000183186016730
+Average link = 0.000155500497855
+Polyakov loop = -0.000910019909497 -0.006087788846344
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.66e+01 sec (average = 3.65e+01 sec)
+
+Trajectory no 5
+dH = -8.33e-03, iac = 1
+Average plaquette = 1.844878532812519
+Average temporal link = 0.000946094785800
+Average spatial link = 0.000219912350734
+Average link = 0.000401457959501
+Polyakov loop = -0.003465521847829 -0.000195333617739
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.80
+Time per trajectory = 3.63e+01 sec (average = 3.65e+01 sec)
+
+Trajectory no 6
+dH = -2.21e-01, iac = 1
+Average plaquette = 1.845262624699942
+Average temporal link = 0.000207418161578
+Average spatial link = -0.000829373825368
+Average link = -0.000570175828631
+Polyakov loop = 0.001730339252390 0.001950460486114
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.83
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 7
+dH = -1.89e-01, iac = 1
+Average plaquette = 1.845640984146050
+Average temporal link = 0.000957027335951
+Average spatial link = -0.000210427184132
+Average link = 0.000081436445888
+Polyakov loop = -0.002816522261128 -0.006355253513902
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.86
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 8
+dH = +1.00e+00, iac = 0
+Average plaquette = 1.845640984146050
+Average temporal link = 0.000957027335951
+Average spatial link = -0.000210427184132
+Average link = 0.000081436445888
+Polyakov loop = -0.002816522261128 -0.006355253513902
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.61e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 9
+dH = -2.50e-01, iac = 1
+Average plaquette = 1.845937863098543
+Average temporal link = 0.001127883282826
+Average spatial link = -0.000004494318765
+Average link = 0.000278600081633
+Polyakov loop = -0.001277852337807 0.005384203977883
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.78
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 10
+dH = -1.14e+00, iac = 1
+Average plaquette = 1.845667626955610
+Average temporal link = 0.000717185371949
+Average spatial link = -0.000494068197329
+Average link = -0.000191254805009
+Polyakov loop = -0.006543885450810 -0.001281187986024
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.80
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 11
+dH = +5.55e-01, iac = 0
+Average plaquette = 1.845667626955610
+Average temporal link = 0.000717185371949
+Average spatial link = -0.000494068197329
+Average link = -0.000191254805009
+Polyakov loop = -0.006543885450810 -0.001281187986024
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.73
+Time per trajectory = 3.62e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 12
+dH = +4.35e-01, iac = 1
+Average plaquette = 1.845692715633092
+Average temporal link = 0.000586179928258
+Average spatial link = -0.000250375113934
+Average link = -0.000041236353386
+Polyakov loop = 0.004666550550610 -0.001274269190617
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 13
+dH = +4.09e-01, iac = 1
+Average plaquette = 1.845194495898367
+Average temporal link = 0.001122612424914
+Average spatial link = -0.000124220890657
+Average link = 0.000187487438236
+Polyakov loop = 0.003073175670579 -0.008070851676166
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.77
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 14
+dH = +7.17e-01, iac = 0
+Average plaquette = 1.845194495898367
+Average temporal link = 0.001122612424914
+Average spatial link = -0.000124220890657
+Average link = 0.000187487438236
+Polyakov loop = 0.003073175670579 -0.008070851676166
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.71
+Time per trajectory = 3.64e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 15
+dH = +7.02e-01, iac = 1
+Average plaquette = 1.845615581406832
+Average temporal link = 0.000141798058256
+Average spatial link = -0.000696131686477
+Average link = -0.000486649250294
+Polyakov loop = 0.005320713389665 -0.006810173392296
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.73
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 16
+dH = +4.30e-01, iac = 1
+Average plaquette = 1.845281223644734
+Average temporal link = 0.000574282718937
+Average spatial link = -0.000196940901984
+Average link = -0.000004134996754
+Polyakov loop = 0.000049751339247 -0.011037711985409
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.61e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 17
+dH = +7.11e-01, iac = 0
+Average plaquette = 1.845281223644734
+Average temporal link = 0.000574282718937
+Average spatial link = -0.000196940901984
+Average link = -0.000004134996754
+Polyakov loop = 0.000049751339247 -0.011037711985409
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.71
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 18
+dH = +1.51e+00, iac = 1
+Average plaquette = 1.845067784252737
+Average temporal link = 0.001096364667660
+Average spatial link = -0.000221405258994
+Average link = 0.000108037222669
+Polyakov loop = -0.003962216898799 -0.002268036128953
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.72
+Time per trajectory = 3.64e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 19
+dH = -3.14e-01, iac = 1
+Average plaquette = 1.845388421554404
+Average temporal link = 0.000685666621184
+Average spatial link = -0.000429117503999
+Average link = -0.000150421472703
+Polyakov loop = -0.000255218619714 -0.007877618074417
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 20
+dH = +2.30e-01, iac = 1
+Average plaquette = 1.845428715911000
+Average temporal link = 0.000484559851269
+Average spatial link = -0.000209193554224
+Average link = -0.000035755202850
+Polyakov loop = 0.000688250933308 -0.007820058614016
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.64e+01 sec (average = 3.63e+01 sec)
+
+Configuration no 1 exported
+
+Trajectory no 21
+dH = +3.62e-01, iac = 1
+Average plaquette = 1.845193224964457
+Average temporal link = -0.000460853748339
+Average spatial link = -0.000076102612894
+Average link = -0.000172290396755
+Polyakov loop = -0.007125745527446 -0.004870790056884
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.61e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 22
+dH = +6.66e-02, iac = 1
+Average plaquette = 1.844777529460305
+Average temporal link = -0.000049954941929
+Average spatial link = -0.000119089818197
+Average link = -0.000101806099130
+Polyakov loop = -0.004932485986501 -0.001362415379845
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.77
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 23
+dH = +4.94e-01, iac = 0
+Average plaquette = 1.844777529460305
+Average temporal link = -0.000049954941929
+Average spatial link = -0.000119089818197
+Average link = -0.000101806099130
+Polyakov loop = -0.004932485986501 -0.001362415379845
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.61e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 24
+dH = +1.06e+00, iac = 1
+Average plaquette = 1.844403952320755
+Average temporal link = 0.000317200264604
+Average spatial link = -0.000008583659630
+Average link = 0.000072862321428
+Polyakov loop = 0.003491338575259 -0.002681348938495
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 25
+dH = +1.43e+00, iac = 0
+Average plaquette = 1.844403952320755
+Average temporal link = 0.000317200264604
+Average spatial link = -0.000008583659630
+Average link = 0.000072862321428
+Polyakov loop = 0.003491338575259 -0.002681348938495
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.72
+Time per trajectory = 3.64e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 26
+dH = +1.12e+00, iac = 0
+Average plaquette = 1.844403952320755
+Average temporal link = 0.000317200264604
+Average spatial link = -0.000008583659630
+Average link = 0.000072862321428
+Polyakov loop = 0.003491338575259 -0.002681348938495
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.69
+Time per trajectory = 3.62e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 27
+dH = +1.63e-01, iac = 1
+Average plaquette = 1.844430196443363
+Average temporal link = 0.000395933485124
+Average spatial link = 0.000570109206613
+Average link = 0.000526565276241
+Polyakov loop = 0.005606523714960 -0.000453073531389
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.70
+Time per trajectory = 3.64e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 28
+dH = +3.96e-02, iac = 1
+Average plaquette = 1.844452577365473
+Average temporal link = 0.001807766727350
+Average spatial link = -0.000282069748424
+Average link = 0.000240389370520
+Polyakov loop = 0.001899306080304 -0.002385381143540
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.71
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 29
+dH = +1.22e+00, iac = 1
+Average plaquette = 1.844239085512755
+Average temporal link = 0.001167895253596
+Average spatial link = -0.000362566021574
+Average link = 0.000020049297218
+Polyakov loop = 0.000573598139454 0.005138489883393
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.72
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 30
+dH = +3.13e-01, iac = 1
+Average plaquette = 1.844232304514403
+Average temporal link = 0.000952472387339
+Average spatial link = -0.000686548172062
+Average link = -0.000276793032211
+Polyakov loop = 0.002941035199910 -0.007254403084517
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.73
+Time per trajectory = 3.64e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 31
+dH = -3.82e-01, iac = 1
+Average plaquette = 1.844687211937541
+Average temporal link = 0.000517772664573
+Average spatial link = -0.000417145988294
+Average link = -0.000183416325077
+Polyakov loop = -0.006564950104803 -0.000833234866150
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.62e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 32
+dH = +1.09e-01, iac = 0
+Average plaquette = 1.844687211937541
+Average temporal link = 0.000517772664573
+Average spatial link = -0.000417145988294
+Average link = -0.000183416325077
+Polyakov loop = -0.006564950104803 -0.000833234866150
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.72
+Time per trajectory = 3.64e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 33
+dH = +2.47e-01, iac = 1
+Average plaquette = 1.844325799352184
+Average temporal link = 0.000916994470571
+Average spatial link = 0.000301853959923
+Average link = 0.000455639087585
+Polyakov loop = -0.004890482407063 -0.006544732954353
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.73
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 34
+dH = +2.53e-01, iac = 1
+Average plaquette = 1.844590705617017
+Average temporal link = 0.001011369964671
+Average spatial link = 0.000281656212768
+Average link = 0.000464084650744
+Polyakov loop = -0.002386131091043 -0.001372700207867
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.64e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 35
+dH = -1.83e-01, iac = 1
+Average plaquette = 1.844857538731651
+Average temporal link = 0.000783516538258
+Average spatial link = 0.000180141764980
+Average link = 0.000330985458299
+Polyakov loop = -0.000970089866314 -0.003305486403406
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.69e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 36
+dH = +8.21e-01, iac = 1
+Average plaquette = 1.844415244847577
+Average temporal link = 0.001010591724971
+Average spatial link = -0.000104968434358
+Average link = 0.000173921605474
+Polyakov loop = -0.007736981380731 -0.000516823085491
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.64e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 37
+dH = -1.48e-01, iac = 1
+Average plaquette = 1.844154958048785
+Average temporal link = 0.001246924103165
+Average spatial link = 0.000117884668298
+Average link = 0.000400144527015
+Polyakov loop = -0.001418208586983 -0.002965626306832
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.64e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 38
+dH = +3.73e-01, iac = 0
+Average plaquette = 1.844154958048785
+Average temporal link = 0.001246924103165
+Average spatial link = 0.000117884668298
+Average link = 0.000400144527015
+Polyakov loop = -0.001418208586983 -0.002965626306832
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.70e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 39
+dH = -5.30e-01, iac = 1
+Average plaquette = 1.844954823532432
+Average temporal link = 0.001594264950210
+Average spatial link = 0.000105044373129
+Average link = 0.000477349517399
+Polyakov loop = 0.000921182392631 0.002873252844438
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.62e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 40
+dH = -6.20e-01, iac = 1
+Average plaquette = 1.844504634459558
+Average temporal link = 0.001192890467440
+Average spatial link = -0.000000278703209
+Average link = 0.000298013589453
+Polyakov loop = -0.001534002250992 0.001760708051734
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.66e+01 sec (average = 3.64e+01 sec)
+
+Configuration no 2 exported
+
+Trajectory no 41
+dH = +3.91e-02, iac = 1
+Average plaquette = 1.845024995130373
+Average temporal link = 0.000750523744847
+Average spatial link = 0.000475625693804
+Average link = 0.000544350206565
+Polyakov loop = -0.000718904484529 -0.003287350293249
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.68e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 42
+dH = +3.23e-01, iac = 1
+Average plaquette = 1.844821430759464
+Average temporal link = 0.001249850809833
+Average spatial link = -0.000042640721171
+Average link = 0.000280482161580
+Polyakov loop = 0.004909959156066 -0.001637718640268
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.65e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 43
+dH = +3.20e-01, iac = 0
+Average plaquette = 1.844821430759464
+Average temporal link = 0.001249850809833
+Average spatial link = -0.000042640721171
+Average link = 0.000280482161580
+Polyakov loop = 0.004909959156066 -0.001637718640268
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.65e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 44
+dH = -8.85e-01, iac = 1
+Average plaquette = 1.844562721247861
+Average temporal link = -0.000370142700439
+Average spatial link = 0.000018495737100
+Average link = -0.000078663872285
+Polyakov loop = 0.001113309641369 -0.001685185590759
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.70e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 45
+dH = +1.44e-01, iac = 1
+Average plaquette = 1.845221797120288
+Average temporal link = -0.000034432667185
+Average spatial link = 0.000318533524375
+Average link = 0.000230291976485
+Polyakov loop = -0.000695480615832 -0.001216865028255
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.64e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 46
+dH = -1.35e-01, iac = 1
+Average plaquette = 1.845251810823919
+Average temporal link = 0.000138941851629
+Average spatial link = 0.000423643496984
+Average link = 0.000352468085645
+Polyakov loop = 0.006796746514738 -0.004675114527345
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.64e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 47
+dH = -3.32e-02, iac = 1
+Average plaquette = 1.845162346400003
+Average temporal link = -0.000499743187215
+Average spatial link = 0.000598326400516
+Average link = 0.000323809003584
+Polyakov loop = 0.002898910781369 0.001008845400065
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.77
+Time per trajectory = 3.66e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 48
+dH = -4.72e-01, iac = 1
+Average plaquette = 1.844989411137447
+Average temporal link = -0.001895769314189
+Average spatial link = 0.000039292086614
+Average link = -0.000444473263587
+Polyakov loop = 0.002871216274798 -0.004955830052495
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.77
+Time per trajectory = 3.64e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 49
+dH = +5.01e-01, iac = 1
+Average plaquette = 1.844685877244096
+Average temporal link = 0.000178902780987
+Average spatial link = -0.000415065262923
+Average link = -0.000266573251946
+Polyakov loop = -0.001859904266894 -0.002388029824942
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.78
+Time per trajectory = 3.68e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 50
+dH = -1.89e-01, iac = 1
+Average plaquette = 1.844605682575458
+Average temporal link = 0.000045448183636
+Average spatial link = 0.000348414540797
+Average link = 0.000272672951507
+Polyakov loop = 0.006528638768941 -0.007310299202800
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.78
+Time per trajectory = 3.65e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 51
+dH = -4.44e-02, iac = 1
+Average plaquette = 1.844902207213467
+Average temporal link = -0.000648324983923
+Average spatial link = -0.000135471833547
+Average link = -0.000263685121141
+Polyakov loop = -0.000433921260992 -0.002803387818858
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.78
+Time per trajectory = 3.64e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 52
+dH = +7.26e-01, iac = 1
+Average plaquette = 1.844494738917514
+Average temporal link = -0.001073396586720
+Average spatial link = 0.000140971901847
+Average link = -0.000162620220295
+Polyakov loop = 0.003645300166681 0.000782625691500
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.79
+Time per trajectory = 3.64e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 53
+dH = -1.86e-02, iac = 1
+Average plaquette = 1.844629074478969
+Average temporal link = -0.001098274700839
+Average spatial link = -0.000006181951785
+Average link = -0.000279205139049
+Polyakov loop = 0.003021115902811 0.002970251487568
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.79
+Time per trajectory = 3.67e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 54
+dH = +7.15e-02, iac = 1
+Average plaquette = 1.845033127076661
+Average temporal link = -0.001645952636434
+Average spatial link = -0.000004615460042
+Average link = -0.000414949754140
+Polyakov loop = 0.001141414977610 -0.000584771099966
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.80
+Time per trajectory = 3.64e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 55
+dH = +4.83e-01, iac = 0
+Average plaquette = 1.845033127076661
+Average temporal link = -0.001645952636434
+Average spatial link = -0.000004615460042
+Average link = -0.000414949754140
+Polyakov loop = 0.001141414977610 -0.000584771099966
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.78
+Time per trajectory = 3.64e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 56
+dH = -1.38e+00, iac = 1
+Average plaquette = 1.844377214432473
+Average temporal link = -0.001338738282487
+Average spatial link = 0.000128866307962
+Average link = -0.000238034839650
+Polyakov loop = -0.000172459083842 -0.003716371720657
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.79
+Time per trajectory = 3.70e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 57
+dH = +3.22e-01, iac = 1
+Average plaquette = 1.844162806276556
+Average temporal link = -0.001869444563546
+Average spatial link = -0.000743222568888
+Average link = -0.001024778067552
+Polyakov loop = -0.002664107596502 -0.002824582625180
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.79
+Time per trajectory = 3.64e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 58
+dH = -1.65e-01, iac = 1
+Average plaquette = 1.844461941379004
+Average temporal link = -0.001251631586854
+Average spatial link = 0.000229035298793
+Average link = -0.000141131422619
+Polyakov loop = 0.005286067258567 -0.000521085807122
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.79
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 59
+dH = +3.75e-01, iac = 1
+Average plaquette = 1.843996463643652
+Average temporal link = 0.000181979029082
+Average spatial link = 0.000128189315645
+Average link = 0.000141636744004
+Polyakov loop = -0.002178576076403 -0.001401165500283
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.80
+Time per trajectory = 3.62e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 60
+dH = -8.80e-01, iac = 1
+Average plaquette = 1.845265627798078
+Average temporal link = -0.000606270954207
+Average spatial link = -0.000033560615547
+Average link = -0.000176738200212
+Polyakov loop = 0.000387831678381 -0.012096278369427
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.80
+Time per trajectory = 3.64e+01 sec (average = 3.64e+01 sec)
+
+Configuration no 3 exported
+
+Trajectory no 61
+dH = -5.65e-01, iac = 1
+Average plaquette = 1.844970452117441
+Average temporal link = 0.000315642814039
+Average spatial link = 0.000201635893919
+Average link = 0.000230137623949
+Polyakov loop = -0.001844115904532 -0.004625474102795
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.80
+Time per trajectory = 3.68e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 62
+dH = +2.57e-01, iac = 1
+Average plaquette = 1.844826317119783
+Average temporal link = 0.000390521451224
+Average spatial link = -0.000082632248960
+Average link = 0.000035656176086
+Polyakov loop = -0.000415300077293 -0.003279045457020
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.81
+Time per trajectory = 3.62e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 63
+dH = +1.17e-01, iac = 1
+Average plaquette = 1.844875283773489
+Average temporal link = 0.000086841088025
+Average spatial link = 0.000532593594008
+Average link = 0.000421155467513
+Polyakov loop = -0.001380981877446 0.000565273570828
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.81
+Time per trajectory = 3.65e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 64
+dH = +9.78e-01, iac = 1
+Average plaquette = 1.844450082330365
+Average temporal link = 0.000887924936923
+Average spatial link = 0.000215042293216
+Average link = 0.000383262954143
+Polyakov loop = 0.001659813453443 0.000895767763723
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.81
+Time per trajectory = 3.67e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 65
+dH = +2.58e-01, iac = 1
+Average plaquette = 1.844672455881603
+Average temporal link = 0.000714447852456
+Average spatial link = 0.000798131358042
+Average link = 0.000777210481645
+Polyakov loop = 0.002066165907308 -0.006606945302337
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.82
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 66
+dH = +6.29e-01, iac = 1
+Average plaquette = 1.845219173605882
+Average temporal link = 0.000129281365197
+Average spatial link = 0.000145256310683
+Average link = 0.000141262574311
+Polyakov loop = -0.001352713676170 -0.003974460065365
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.82
+Time per trajectory = 3.64e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 67
+dH = -7.85e-01, iac = 1
+Average plaquette = 1.845149887171371
+Average temporal link = -0.001017087725359
+Average spatial link = 0.000041915692896
+Average link = -0.000222835161667
+Polyakov loop = -0.000423043238698 0.000502151029650
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.82
+Time per trajectory = 3.62e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 68
+dH = +1.50e+00, iac = 0
+Average plaquette = 1.845149887171371
+Average temporal link = -0.001017087725359
+Average spatial link = 0.000041915692896
+Average link = -0.000222835161667
+Polyakov loop = -0.000423043238698 0.000502151029650
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.81
+Time per trajectory = 3.67e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 69
+dH = +8.17e-01, iac = 1
+Average plaquette = 1.844544262785064
+Average temporal link = -0.000782214828734
+Average spatial link = -0.000353730282378
+Average link = -0.000460851418967
+Polyakov loop = -0.003464533248916 0.001263105194084
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.81
+Time per trajectory = 3.65e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 70
+dH = -1.74e-01, iac = 1
+Average plaquette = 1.845388488804326
+Average temporal link = -0.000217764897342
+Average spatial link = -0.000314032306411
+Average link = -0.000289965454144
+Polyakov loop = 0.002498447662219 -0.000048759437050
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.81
+Time per trajectory = 3.62e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 71
+dH = +9.75e-01, iac = 1
+Average plaquette = 1.845373294167940
+Average temporal link = 0.000920997564545
+Average spatial link = -0.000081295312504
+Average link = 0.000169277906758
+Polyakov loop = -0.007775858044624 -0.001163198729046
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.82
+Time per trajectory = 3.64e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 72
+dH = +1.44e+00, iac = 0
+Average plaquette = 1.845373294167940
+Average temporal link = 0.000920997564545
+Average spatial link = -0.000081295312504
+Average link = 0.000169277906758
+Polyakov loop = -0.007775858044624 -0.001163198729046
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.81
+Time per trajectory = 3.62e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 73
+dH = +8.81e-01, iac = 0
+Average plaquette = 1.845373294167940
+Average temporal link = 0.000920997564545
+Average spatial link = -0.000081295312504
+Average link = 0.000169277906758
+Polyakov loop = -0.007775858044624 -0.001163198729046
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.79
+Time per trajectory = 3.66e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 74
+dH = -4.99e-01, iac = 1
+Average plaquette = 1.845102702169483
+Average temporal link = -0.000552240023168
+Average spatial link = -0.000291481380890
+Average link = -0.000356671041460
+Polyakov loop = -0.001890752580948 -0.006145996972919
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.80
+Time per trajectory = 3.64e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 75
+dH = +7.40e-01, iac = 0
+Average plaquette = 1.845102702169483
+Average temporal link = -0.000552240023168
+Average spatial link = -0.000291481380890
+Average link = -0.000356671041460
+Polyakov loop = -0.001890752580948 -0.006145996972919
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.79
+Time per trajectory = 3.62e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 76
+dH = -1.57e-03, iac = 1
+Average plaquette = 1.844533100091652
+Average temporal link = 0.000272346160600
+Average spatial link = -0.000007286104250
+Average link = 0.000062621961963
+Polyakov loop = -0.003506646258757 -0.009090037085116
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.79
+Time per trajectory = 3.68e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 77
+dH = +3.84e-01, iac = 1
+Average plaquette = 1.844990744693800
+Average temporal link = 0.000928956586778
+Average spatial link = 0.000314694063202
+Average link = 0.000468259694096
+Polyakov loop = -0.004718837793916 -0.007939386181533
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.79
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 78
+dH = +1.67e-01, iac = 1
+Average plaquette = 1.845222251929008
+Average temporal link = 0.000919555641815
+Average spatial link = 0.000562723972578
+Average link = 0.000651931889887
+Polyakov loop = -0.002202572301030 0.000047268760682
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.79
+Time per trajectory = 3.64e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 79
+dH = -6.86e-01, iac = 1
+Average plaquette = 1.844981337354858
+Average temporal link = -0.000605223131229
+Average spatial link = 0.000599175052159
+Average link = 0.000298075506312
+Polyakov loop = -0.002434087451547 -0.000459671573481
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.80
+Time per trajectory = 3.64e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 80
+dH = +1.48e-01, iac = 1
+Average plaquette = 1.844466260130227
+Average temporal link = -0.000450919517979
+Average spatial link = 0.000505752136133
+Average link = 0.000266584222605
+Polyakov loop = -0.000348261120962 0.001097804866731
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.80
+Time per trajectory = 3.61e+01 sec (average = 3.64e+01 sec)
+
+Configuration no 4 exported
+
+Trajectory no 81
+dH = -3.41e-01, iac = 1
+Average plaquette = 1.844690511082633
+Average temporal link = -0.001172506753897
+Average spatial link = 0.000714870003313
+Average link = 0.000243025814011
+Polyakov loop = -0.004818560089916 -0.008614405058324
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.80
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 82
+dH = +6.89e-03, iac = 1
+Average plaquette = 1.844840975188441
+Average temporal link = -0.000528117459597
+Average spatial link = -0.000238212136807
+Average link = -0.000310688467504
+Polyakov loop = -0.006419771350920 0.001153415418230
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.80
+Time per trajectory = 3.62e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 83
+dH = +1.31e+00, iac = 0
+Average plaquette = 1.844840975188441
+Average temporal link = -0.000528117459597
+Average spatial link = -0.000238212136807
+Average link = -0.000310688467504
+Polyakov loop = -0.006419771350920 0.001153415418230
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.80
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 84
+dH = -5.17e-01, iac = 1
+Average plaquette = 1.844947482719041
+Average temporal link = -0.001345151299403
+Average spatial link = -0.000076176937476
+Average link = -0.000393420527958
+Polyakov loop = -0.004295198246837 -0.002413450973108
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.80
+Time per trajectory = 3.64e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 85
+dH = +3.23e-01, iac = 1
+Average plaquette = 1.845512063071363
+Average temporal link = -0.000977794478264
+Average spatial link = -0.001377046922814
+Average link = -0.001277233811676
+Polyakov loop = -0.009397290647030 -0.004714582581073
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.80
+Time per trajectory = 3.65e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 86
+dH = -7.21e-02, iac = 1
+Average plaquette = 1.845064744847113
+Average temporal link = -0.000755425465107
+Average spatial link = -0.000235648282416
+Average link = -0.000365592578089
+Polyakov loop = -0.008699530735612 0.002732891822234
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.80
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 87
+dH = -9.40e-02, iac = 1
+Average plaquette = 1.845229542038314
+Average temporal link = -0.000393462162209
+Average spatial link = -0.000241351146222
+Average link = -0.000279378900219
+Polyakov loop = -0.006512899417430 0.000763389340136
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.80
+Time per trajectory = 3.61e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 88
+dH = +1.42e+00, iac = 1
+Average plaquette = 1.845398278174018
+Average temporal link = -0.000962706387374
+Average spatial link = 0.000395040308144
+Average link = 0.000055603634264
+Polyakov loop = -0.006797834299505 0.001219489378855
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.81
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 89
+dH = +1.35e+00, iac = 0
+Average plaquette = 1.845398278174018
+Average temporal link = -0.000962706387374
+Average spatial link = 0.000395040308144
+Average link = 0.000055603634264
+Polyakov loop = -0.006797834299505 0.001219489378855
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.80
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 90
+dH = -4.28e-01, iac = 1
+Average plaquette = 1.845675938409334
+Average temporal link = -0.001111070282763
+Average spatial link = -0.000536394924340
+Average link = -0.000680063763946
+Polyakov loop = -0.005372190847993 -0.002098336117342
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.80
+Time per trajectory = 3.61e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 91
+dH = +4.64e-01, iac = 0
+Average plaquette = 1.845675938409334
+Average temporal link = -0.001111070282763
+Average spatial link = -0.000536394924340
+Average link = -0.000680063763946
+Polyakov loop = -0.005372190847993 -0.002098336117342
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.79
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 92
+dH = +7.27e-01, iac = 1
+Average plaquette = 1.845384866948159
+Average temporal link = -0.000064247130520
+Average spatial link = 0.000366538349302
+Average link = 0.000258841979346
+Polyakov loop = -0.002606703666970 -0.007413338869810
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.79
+Time per trajectory = 3.61e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 93
+dH = +5.99e-01, iac = 0
+Average plaquette = 1.845384866948159
+Average temporal link = -0.000064247130520
+Average spatial link = 0.000366538349302
+Average link = 0.000258841979346
+Polyakov loop = -0.002606703666970 -0.007413338869810
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.78
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 94
+dH = +2.25e-01, iac = 1
+Average plaquette = 1.844954310603117
+Average temporal link = 0.000473596230897
+Average spatial link = 0.000987641854652
+Average link = 0.000859130448713
+Polyakov loop = -0.003561004763469 -0.005614459048957
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.79
+Time per trajectory = 3.65e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 95
+dH = +3.42e-01, iac = 1
+Average plaquette = 1.845255381720681
+Average temporal link = 0.000010799228804
+Average spatial link = 0.000500198008465
+Average link = 0.000377848313550
+Polyakov loop = -0.001550234039314 -0.005245717242360
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.79
+Time per trajectory = 3.61e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 96
+dH = +4.84e-01, iac = 0
+Average plaquette = 1.845255381720681
+Average temporal link = 0.000010799228804
+Average spatial link = 0.000500198008465
+Average link = 0.000377848313550
+Polyakov loop = -0.001550234039314 -0.005245717242360
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.78
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 97
+dH = +2.80e-01, iac = 1
+Average plaquette = 1.845692916759722
+Average temporal link = 0.000874961441851
+Average spatial link = 0.000127969975389
+Average link = 0.000314717842004
+Polyakov loop = -0.002748389728367 -0.005759872961789
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.78
+Time per trajectory = 3.62e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 98
+dH = +4.30e-01, iac = 1
+Average plaquette = 1.845956978505058
+Average temporal link = -0.000179970993380
+Average spatial link = 0.000552594330969
+Average link = 0.000369452999882
+Polyakov loop = -0.002607754664496 -0.004977012053132
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.79
+Time per trajectory = 3.62e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 99
+dH = -7.19e-02, iac = 1
+Average plaquette = 1.845274122067060
+Average temporal link = 0.000443386968449
+Average spatial link = 0.000359696623200
+Average link = 0.000380619209512
+Polyakov loop = -0.002366000087932 -0.010988359339535
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.79
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 100
+dH = -4.95e-01, iac = 1
+Average plaquette = 1.845340160957229
+Average temporal link = 0.000054846970070
+Average spatial link = -0.000107194806841
+Average link = -0.000066684362613
+Polyakov loop = -0.000688793079462 -0.002962397877127
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.79
+Time per trajectory = 3.65e+01 sec (average = 3.64e+01 sec)
+
+Configuration no 5 exported
+
+Trajectory no 101
+dH = +7.51e-02, iac = 1
+Average plaquette = 1.845280113471771
+Average temporal link = 0.000198639649573
+Average spatial link = -0.000035340819339
+Average link = 0.000023154297889
+Polyakov loop = -0.006059405859560 -0.004188045859337
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.79
+Time per trajectory = 3.64e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 102
+dH = -5.04e-02, iac = 1
+Average plaquette = 1.844645127216543
+Average temporal link = -0.000198839468403
+Average spatial link = -0.000383887989973
+Average link = -0.000337625859581
+Polyakov loop = -0.000143942088471 -0.004974837880582
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.79
+Time per trajectory = 3.66e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 103
+dH = -6.41e-01, iac = 1
+Average plaquette = 1.844923413098384
+Average temporal link = 0.001066189053648
+Average spatial link = 0.000828596089318
+Average link = 0.000887994330401
+Polyakov loop = -0.003976640291512 -0.006429719273001
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.80
+Time per trajectory = 3.62e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 104
+dH = +4.04e-01, iac = 1
+Average plaquette = 1.845347377385060
+Average temporal link = 0.001303660142176
+Average spatial link = -0.000263729161443
+Average link = 0.000128118164462
+Polyakov loop = -0.003901181742549 0.002074843505397
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.80
+Time per trajectory = 3.64e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 105
+dH = +7.28e-01, iac = 1
+Average plaquette = 1.844455975050560
+Average temporal link = 0.001746807789261
+Average spatial link = -0.000414580372965
+Average link = 0.000125766667592
+Polyakov loop = -0.003561750985682 -0.004409700632095
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.80
+Time per trajectory = 3.62e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 106
+dH = +1.46e-01, iac = 1
+Average plaquette = 1.845586501121787
+Average temporal link = 0.001041323164995
+Average spatial link = -0.000863361916069
+Average link = -0.000387190645803
+Polyakov loop = -0.006101781968027 -0.001230993191712
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.80
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 107
+dH = -4.63e-02, iac = 1
+Average plaquette = 1.844861197338913
+Average temporal link = 0.001384843658888
+Average spatial link = 0.000000123817616
+Average link = 0.000346303777934
+Polyakov loop = 0.000737293157727 -0.003283558413386
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.80
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 108
+dH = +7.21e-01, iac = 1
+Average plaquette = 1.845416525712608
+Average temporal link = 0.001829685370903
+Average spatial link = -0.000924150047755
+Average link = -0.000235691193090
+Polyakov loop = -0.004237371496856 -0.010233382694423
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.81
+Time per trajectory = 3.61e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 109
+dH = -1.40e-01, iac = 1
+Average plaquette = 1.845334443710275
+Average temporal link = 0.001854492456020
+Average spatial link = 0.000027881662738
+Average link = 0.000484534361058
+Polyakov loop = -0.004379856400192 -0.006643215194345
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.81
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 110
+dH = +8.83e-01, iac = 0
+Average plaquette = 1.845334443710275
+Average temporal link = 0.001854492456020
+Average spatial link = 0.000027881662738
+Average link = 0.000484534361058
+Polyakov loop = -0.004379856400192 -0.006643215194345
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.80
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 111
+dH = +4.91e-02, iac = 1
+Average plaquette = 1.845630103776137
+Average temporal link = 0.001992576403466
+Average spatial link = -0.000290847773820
+Average link = 0.000280008270502
+Polyakov loop = 0.002420134842396 -0.005213169846684
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.80
+Time per trajectory = 3.64e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 112
+dH = +7.36e-01, iac = 0
+Average plaquette = 1.845630103776137
+Average temporal link = 0.001992576403466
+Average spatial link = -0.000290847773820
+Average link = 0.000280008270502
+Polyakov loop = 0.002420134842396 -0.005213169846684
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.79
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 113
+dH = -2.38e-01, iac = 1
+Average plaquette = 1.845250117649676
+Average temporal link = 0.001402516756368
+Average spatial link = -0.000001041298212
+Average link = 0.000349848215433
+Polyakov loop = -0.000446701596957 -0.009624621830881
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.80
+Time per trajectory = 3.61e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 114
+dH = +5.71e-01, iac = 0
+Average plaquette = 1.845250117649676
+Average temporal link = 0.001402516756368
+Average spatial link = -0.000001041298212
+Average link = 0.000349848215433
+Polyakov loop = -0.000446701596957 -0.009624621830881
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.79
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 115
+dH = +1.52e-01, iac = 0
+Average plaquette = 1.845250117649676
+Average temporal link = 0.001402516756368
+Average spatial link = -0.000001041298212
+Average link = 0.000349848215433
+Polyakov loop = -0.000446701596957 -0.009624621830881
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.78
+Time per trajectory = 3.62e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 116
+dH = -2.30e-01, iac = 1
+Average plaquette = 1.845323266977323
+Average temporal link = 0.000996522764701
+Average spatial link = 0.000724211930010
+Average link = 0.000792289638683
+Polyakov loop = -0.000607229128946 -0.003801625454798
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.78
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 117
+dH = +1.92e+00, iac = 0
+Average plaquette = 1.845323266977323
+Average temporal link = 0.000996522764701
+Average spatial link = 0.000724211930010
+Average link = 0.000792289638683
+Polyakov loop = -0.000607229128946 -0.003801625454798
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.78
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 118
+dH = +4.84e-01, iac = 1
+Average plaquette = 1.845449199877426
+Average temporal link = 0.001241144585934
+Average spatial link = -0.000208190719892
+Average link = 0.000154143106564
+Polyakov loop = 0.000238621621975 -0.006665262859315
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.78
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 119
+dH = -7.47e-02, iac = 1
+Average plaquette = 1.845159196593404
+Average temporal link = 0.001978186064424
+Average spatial link = 0.000063255693207
+Average link = 0.000541988286011
+Polyakov loop = -0.002824160037562 -0.008296621963382
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.78
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 120
+dH = -3.04e-01, iac = 1
+Average plaquette = 1.844894632379385
+Average temporal link = 0.001248527235274
+Average spatial link = -0.000071271855129
+Average link = 0.000258677917472
+Polyakov loop = -0.002499466994777 -0.006787343416363
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.78
+Time per trajectory = 3.61e+01 sec (average = 3.64e+01 sec)
+
+Configuration no 6 exported
+
+Trajectory no 121
+dH = +6.80e-01, iac = 0
+Average plaquette = 1.844894632379385
+Average temporal link = 0.001248527235274
+Average spatial link = -0.000071271855129
+Average link = 0.000258677917472
+Polyakov loop = -0.002499466994777 -0.006787343416363
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.78
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 122
+dH = -3.06e-01, iac = 1
+Average plaquette = 1.845717204003852
+Average temporal link = 0.000890750675574
+Average spatial link = 0.000757305610002
+Average link = 0.000790666876395
+Polyakov loop = -0.003371974453330 -0.007940556854010
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.78
+Time per trajectory = 3.64e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 123
+dH = +1.37e+00, iac = 0
+Average plaquette = 1.845717204003852
+Average temporal link = 0.000890750675574
+Average spatial link = 0.000757305610002
+Average link = 0.000790666876395
+Polyakov loop = -0.003371974453330 -0.007940556854010
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.77
+Time per trajectory = 3.62e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 124
+dH = +1.68e+00, iac = 0
+Average plaquette = 1.845717204003852
+Average temporal link = 0.000890750675574
+Average spatial link = 0.000757305610002
+Average link = 0.000790666876395
+Polyakov loop = -0.003371974453330 -0.007940556854010
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.77
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 125
+dH = +4.60e-01, iac = 0
+Average plaquette = 1.845717204003852
+Average temporal link = 0.000890750675574
+Average spatial link = 0.000757305610002
+Average link = 0.000790666876395
+Polyakov loop = -0.003371974453330 -0.007940556854010
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 126
+dH = +2.02e+00, iac = 0
+Average plaquette = 1.845717204003852
+Average temporal link = 0.000890750675574
+Average spatial link = 0.000757305610002
+Average link = 0.000790666876395
+Polyakov loop = -0.003371974453330 -0.007940556854010
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.62e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 127
+dH = -3.45e-03, iac = 1
+Average plaquette = 1.844472183813836
+Average temporal link = 0.001174350785276
+Average spatial link = -0.000030854024275
+Average link = 0.000270447178112
+Polyakov loop = 0.004835349973291 -0.008355833590031
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.65e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 128
+dH = +2.05e-01, iac = 1
+Average plaquette = 1.845298158153766
+Average temporal link = 0.000513855014599
+Average spatial link = 0.000409853165986
+Average link = 0.000435853628140
+Polyakov loop = -0.004821664188057 -0.003314168192446
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.61e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 129
+dH = -2.10e-01, iac = 1
+Average plaquette = 1.845299177814970
+Average temporal link = 0.000707145767429
+Average spatial link = 0.000367250482496
+Average link = 0.000452224303729
+Polyakov loop = -0.006826629396528 -0.006875359918922
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 130
+dH = -7.55e-01, iac = 1
+Average plaquette = 1.845276222409361
+Average temporal link = 0.001219186442205
+Average spatial link = 0.000270466127784
+Average link = 0.000507646206389
+Polyakov loop = -0.003105187322944 -0.009733452461660
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.62e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 131
+dH = +7.49e-01, iac = 0
+Average plaquette = 1.845276222409361
+Average temporal link = 0.001219186442205
+Average spatial link = 0.000270466127784
+Average link = 0.000507646206389
+Polyakov loop = -0.003105187322944 -0.009733452461660
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 132
+dH = -5.86e-02, iac = 1
+Average plaquette = 1.844635915354711
+Average temporal link = -0.001076502484818
+Average spatial link = 0.000833423384963
+Average link = 0.000355941917518
+Polyakov loop = 0.004243126139045 -0.008749294094741
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 133
+dH = -2.24e-01, iac = 1
+Average plaquette = 1.844972179946848
+Average temporal link = 0.000386124685606
+Average spatial link = 0.000549723254172
+Average link = 0.000508823612030
+Polyakov loop = 0.000646247644909 -0.005952099803835
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.62e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 134
+dH = -4.71e-01, iac = 1
+Average plaquette = 1.845151424678862
+Average temporal link = -0.000174896560229
+Average spatial link = 0.000789057400990
+Average link = 0.000548068910685
+Polyakov loop = -0.003310380037874 -0.002599357860163
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.65e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 135
+dH = +1.88e-02, iac = 1
+Average plaquette = 1.845116336389125
+Average temporal link = -0.000354185641368
+Average spatial link = -0.000143612589228
+Average link = -0.000196255852263
+Polyakov loop = -0.002933518262580 -0.011253296397626
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.64e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 136
+dH = +7.19e-01, iac = 1
+Average plaquette = 1.845172678696331
+Average temporal link = -0.000204506397179
+Average spatial link = -0.000033043407325
+Average link = -0.000075909154789
+Polyakov loop = -0.000964454200584 -0.004976900760084
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.61e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 137
+dH = -1.18e-01, iac = 1
+Average plaquette = 1.844608787074280
+Average temporal link = 0.000231426334574
+Average spatial link = -0.000290842348345
+Average link = -0.000160275177616
+Polyakov loop = -0.001833256566897 -0.006575539242476
+Action  1: <status> = 154
+Force   1: <status> = 69
+Acceptance rate = 0.77
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 138
+dH = +4.38e-01, iac = 0
+Average plaquette = 1.844608787074280
+Average temporal link = 0.000231426334574
+Average spatial link = -0.000290842348345
+Average link = -0.000160275177616
+Polyakov loop = -0.001833256566897 -0.006575539242476
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.61e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 139
+dH = -8.80e-01, iac = 1
+Average plaquette = 1.845548453360936
+Average temporal link = -0.001387597950929
+Average spatial link = 0.000885669835378
+Average link = 0.000317352888801
+Polyakov loop = -0.001179709332064 -0.006678707432002
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 140
+dH = +2.65e-01, iac = 1
+Average plaquette = 1.845198061615315
+Average temporal link = -0.000301790362395
+Average spatial link = 0.000628289186288
+Average link = 0.000395769299117
+Polyakov loop = 0.000820826680865 -0.004626759793609
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Configuration no 7 exported
+
+Trajectory no 141
+dH = +8.96e-01, iac = 0
+Average plaquette = 1.845198061615315
+Average temporal link = -0.000301790362395
+Average spatial link = 0.000628289186288
+Average link = 0.000395769299117
+Polyakov loop = 0.000820826680865 -0.004626759793609
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.61e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 142
+dH = +5.81e-01, iac = 0
+Average plaquette = 1.845198061615315
+Average temporal link = -0.000301790362395
+Average spatial link = 0.000628289186288
+Average link = 0.000395769299117
+Polyakov loop = 0.000820826680865 -0.004626759793609
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 143
+dH = +1.86e+00, iac = 0
+Average plaquette = 1.845198061615315
+Average temporal link = -0.000301790362395
+Average spatial link = 0.000628289186288
+Average link = 0.000395769299117
+Polyakov loop = 0.000820826680865 -0.004626759793609
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 144
+dH = +9.97e-02, iac = 1
+Average plaquette = 1.845356055331230
+Average temporal link = -0.000116912446592
+Average spatial link = 0.000263043261913
+Average link = 0.000168054334787
+Polyakov loop = -0.002394907874987 -0.006712558679283
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.65e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 145
+dH = +7.47e-01, iac = 1
+Average plaquette = 1.845280749065734
+Average temporal link = 0.000089184351057
+Average spatial link = -0.000284428744260
+Average link = -0.000191025470431
+Polyakov loop = -0.001788057270460 -0.002609031042084
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.65e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 146
+dH = +7.89e-01, iac = 0
+Average plaquette = 1.845280749065734
+Average temporal link = 0.000089184351057
+Average spatial link = -0.000284428744260
+Average link = -0.000191025470431
+Polyakov loop = -0.001788057270460 -0.002609031042084
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.61e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 147
+dH = -9.67e-01, iac = 1
+Average plaquette = 1.845039783331339
+Average temporal link = -0.000989902946161
+Average spatial link = -0.000237189903257
+Average link = -0.000425368163983
+Polyakov loop = 0.000506755197421 -0.007931698113680
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 148
+dH = +5.90e-01, iac = 1
+Average plaquette = 1.844768910609253
+Average temporal link = -0.000433612796431
+Average spatial link = -0.000720065622068
+Average link = -0.000648452415659
+Polyakov loop = 0.002660126192495 -0.002178914379328
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.61e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 149
+dH = -2.16e-01, iac = 1
+Average plaquette = 1.845136664707566
+Average temporal link = 0.000826392142585
+Average spatial link = 0.000218156166440
+Average link = 0.000370215160477
+Polyakov loop = -0.002851936966181 0.002869489369914
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 150
+dH = +1.75e+00, iac = 0
+Average plaquette = 1.845136664707566
+Average temporal link = 0.000826392142585
+Average spatial link = 0.000218156166440
+Average link = 0.000370215160477
+Polyakov loop = -0.002851936966181 0.002869489369914
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 151
+dH = -5.38e-01, iac = 1
+Average plaquette = 1.845512720333148
+Average temporal link = 0.000035640444861
+Average spatial link = -0.000086439240372
+Average link = -0.000055919319064
+Polyakov loop = -0.001690531382337 -0.002953171962872
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 152
+dH = +4.87e-01, iac = 1
+Average plaquette = 1.844859148563506
+Average temporal link = 0.000484731798966
+Average spatial link = 0.000639852860815
+Average link = 0.000601072595352
+Polyakov loop = -0.002083114348352 -0.003186793765053
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 153
+dH = +1.16e-01, iac = 1
+Average plaquette = 1.844731426601708
+Average temporal link = 0.001227747503603
+Average spatial link = 0.000298730546087
+Average link = 0.000530984785466
+Polyakov loop = -0.004918587859720 0.002831205492839
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.61e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 154
+dH = -9.79e-02, iac = 1
+Average plaquette = 1.844594692705850
+Average temporal link = 0.001564695733955
+Average spatial link = 0.000205857541665
+Average link = 0.000545567089738
+Polyakov loop = 0.000706054794136 -0.000178651942406
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 155
+dH = +5.89e-01, iac = 1
+Average plaquette = 1.844904580503904
+Average temporal link = 0.000163283174605
+Average spatial link = 0.000202377232980
+Average link = 0.000192603718386
+Polyakov loop = 0.003772701136768 -0.003135234583169
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.63e+01 sec (average = 3.64e+01 sec)
+
+Trajectory no 156
+dH = +3.53e-01, iac = 1
+Average plaquette = 1.845010822737640
+Average temporal link = -0.000797059302412
+Average spatial link = -0.000334310974878
+Average link = -0.000449998056761
+Polyakov loop = 0.001522537437268 -0.009565535932779
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.61e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 157
+dH = +9.05e-02, iac = 1
+Average plaquette = 1.844971441310919
+Average temporal link = -0.001211577133980
+Average spatial link = 0.000211014280975
+Average link = -0.000144633572763
+Polyakov loop = 0.001461798907258 0.005106574855745
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 158
+dH = -5.99e-01, iac = 1
+Average plaquette = 1.845866152420446
+Average temporal link = -0.000291609358845
+Average spatial link = -0.000226018682329
+Average link = -0.000242416351458
+Polyakov loop = 0.004749843850732 -0.003327592276037
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.61e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 159
+dH = +6.15e-01, iac = 1
+Average plaquette = 1.845943881124348
+Average temporal link = -0.000598012731357
+Average spatial link = 0.000051966679182
+Average link = -0.000110528173453
+Polyakov loop = -0.001940508722328 -0.003842555219308
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 160
+dH = +1.06e+00, iac = 0
+Average plaquette = 1.845943881124348
+Average temporal link = -0.000598012731357
+Average spatial link = 0.000051966679182
+Average link = -0.000110528173453
+Polyakov loop = -0.001940508722328 -0.003842555219308
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.64e+01 sec (average = 3.63e+01 sec)
+
+Configuration no 8 exported
+
+Trajectory no 161
+dH = -3.44e-01, iac = 1
+Average plaquette = 1.846318674749925
+Average temporal link = 0.000016868409557
+Average spatial link = 0.000202798706828
+Average link = 0.000156316132510
+Polyakov loop = -0.001791053568013 -0.004004186019301
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.62e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 162
+dH = +4.11e-01, iac = 1
+Average plaquette = 1.845116189696241
+Average temporal link = -0.001582700186451
+Average spatial link = 0.000209470280082
+Average link = -0.000238572336551
+Polyakov loop = -0.005140949040651 -0.003082450944930
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.76
+Time per trajectory = 3.65e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 163
+dH = +1.53e-01, iac = 0
+Average plaquette = 1.845116189696241
+Average temporal link = -0.001582700186451
+Average spatial link = 0.000209470280082
+Average link = -0.000238572336551
+Polyakov loop = -0.005140949040651 -0.003082450944930
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 164
+dH = +2.09e+00, iac = 0
+Average plaquette = 1.845116189696241
+Average temporal link = -0.001582700186451
+Average spatial link = 0.000209470280082
+Average link = -0.000238572336551
+Polyakov loop = -0.005140949040651 -0.003082450944930
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.61e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 165
+dH = +5.00e-01, iac = 1
+Average plaquette = 1.845291948779004
+Average temporal link = -0.001461445716016
+Average spatial link = 0.000840557212162
+Average link = 0.000265056480117
+Polyakov loop = -0.004483581986278 -0.004400699865073
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 166
+dH = +6.84e-02, iac = 0
+Average plaquette = 1.845291948779004
+Average temporal link = -0.001461445716016
+Average spatial link = 0.000840557212162
+Average link = 0.000265056480117
+Polyakov loop = -0.004483581986278 -0.004400699865073
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.62e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 167
+dH = -3.56e-01, iac = 1
+Average plaquette = 1.844701280376575
+Average temporal link = -0.001153371877253
+Average spatial link = 0.000302505770099
+Average link = -0.000061463641739
+Polyakov loop = -0.000788413453847 -0.009109328500926
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 168
+dH = +1.23e+00, iac = 0
+Average plaquette = 1.844701280376575
+Average temporal link = -0.001153371877253
+Average spatial link = 0.000302505770099
+Average link = -0.000061463641739
+Polyakov loop = -0.000788413453847 -0.009109328500926
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.65e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 169
+dH = +1.63e+00, iac = 0
+Average plaquette = 1.844701280376575
+Average temporal link = -0.001153371877253
+Average spatial link = 0.000302505770099
+Average link = -0.000061463641739
+Polyakov loop = -0.000788413453847 -0.009109328500926
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.61e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 170
+dH = +5.88e-01, iac = 1
+Average plaquette = 1.844842472811633
+Average temporal link = -0.000751809918663
+Average spatial link = 0.000402708660731
+Average link = 0.000114079015883
+Polyakov loop = -0.005905853118747 -0.001753156189807
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 171
+dH = +2.57e-02, iac = 1
+Average plaquette = 1.844763514303287
+Average temporal link = -0.000246669871950
+Average spatial link = 0.000391934762632
+Average link = 0.000232283603986
+Polyakov loop = -0.000964041217230 -0.005217949859798
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.61e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 172
+dH = -1.48e+00, iac = 1
+Average plaquette = 1.845651364030190
+Average temporal link = 0.000455041840590
+Average spatial link = -0.000351944929387
+Average link = -0.000150198236893
+Polyakov loop = -0.002504284726456 -0.002524374518543
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 173
+dH = +5.87e-01, iac = 1
+Average plaquette = 1.845259775441541
+Average temporal link = -0.000073255417544
+Average spatial link = 0.000050155381635
+Average link = 0.000019302681840
+Polyakov loop = -0.005220342893153 -0.002747187158093
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.75
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 174
+dH = +1.10e+00, iac = 0
+Average plaquette = 1.845259775441541
+Average temporal link = -0.000073255417544
+Average spatial link = 0.000050155381635
+Average link = 0.000019302681840
+Polyakov loop = -0.005220342893153 -0.002747187158093
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.61e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 175
+dH = -2.55e-01, iac = 1
+Average plaquette = 1.845200812694369
+Average temporal link = 0.000678455499873
+Average spatial link = 0.000431898312011
+Average link = 0.000493537608976
+Polyakov loop = -0.002976978896186 -0.009814810007811
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 176
+dH = +7.74e-01, iac = 0
+Average plaquette = 1.845200812694369
+Average temporal link = 0.000678455499873
+Average spatial link = 0.000431898312011
+Average link = 0.000493537608976
+Polyakov loop = -0.002976978896186 -0.009814810007811
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 177
+dH = +8.48e-01, iac = 0
+Average plaquette = 1.845200812694369
+Average temporal link = 0.000678455499873
+Average spatial link = 0.000431898312011
+Average link = 0.000493537608976
+Polyakov loop = -0.002976978896186 -0.009814810007811
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.73
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 178
+dH = -3.50e-02, iac = 1
+Average plaquette = 1.844938488587313
+Average temporal link = 0.000346599029825
+Average spatial link = 0.000213181327586
+Average link = 0.000246535753145
+Polyakov loop = -0.003481162246317 -0.003268045373261
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.66e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 179
+dH = -4.29e-01, iac = 1
+Average plaquette = 1.845072697472730
+Average temporal link = 0.000913606217083
+Average spatial link = 0.000161821507163
+Average link = 0.000349767684643
+Polyakov loop = -0.003227266948670 0.000660123594571
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.61e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 180
+dH = +6.02e-01, iac = 1
+Average plaquette = 1.844277866893593
+Average temporal link = 0.000346247347269
+Average spatial link = 0.000727531456806
+Average link = 0.000632210429422
+Polyakov loop = -0.007003765553236 -0.002135663060471
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Configuration no 9 exported
+
+Trajectory no 181
+dH = -2.02e-01, iac = 1
+Average plaquette = 1.844509145346700
+Average temporal link = -0.000209722105442
+Average spatial link = 0.000500181591391
+Average link = 0.000322705667183
+Polyakov loop = -0.005812870338559 -0.000004306090887
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.61e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 182
+dH = +7.40e-02, iac = 1
+Average plaquette = 1.843991925584420
+Average temporal link = 0.000502499996938
+Average spatial link = 0.000557727609329
+Average link = 0.000543920706231
+Polyakov loop = -0.001604190445505 -0.002047017216682
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.64e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 183
+dH = +1.16e+00, iac = 0
+Average plaquette = 1.843991925584420
+Average temporal link = 0.000502499996938
+Average spatial link = 0.000557727609329
+Average link = 0.000543920706231
+Polyakov loop = -0.001604190445505 -0.002047017216682
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 184
+dH = +2.49e-01, iac = 1
+Average plaquette = 1.844427046074868
+Average temporal link = 0.001406202564577
+Average spatial link = 0.000492184446259
+Average link = 0.000720688975839
+Polyakov loop = -0.008155854418874 -0.004808687139302
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 185
+dH = +1.94e-01, iac = 1
+Average plaquette = 1.844452538720664
+Average temporal link = 0.000568447569996
+Average spatial link = 0.000207172957387
+Average link = 0.000297491610540
+Polyakov loop = 0.001162791508250 0.000192234569113
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.67e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 186
+dH = -1.18e+00, iac = 1
+Average plaquette = 1.844868687252227
+Average temporal link = 0.001595505143170
+Average spatial link = -0.000331872407420
+Average link = 0.000149971980227
+Polyakov loop = -0.004981116857380 -0.007760451175272
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 187
+dH = -3.29e-01, iac = 1
+Average plaquette = 1.845295505946211
+Average temporal link = 0.002583832849517
+Average spatial link = 0.000134262067311
+Average link = 0.000746654762862
+Polyakov loop = -0.006585660856217 -0.001329127117060
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 188
+dH = +1.30e+00, iac = 0
+Average plaquette = 1.845295505946211
+Average temporal link = 0.002583832849517
+Average spatial link = 0.000134262067311
+Average link = 0.000746654762862
+Polyakov loop = -0.006585660856217 -0.001329127117060
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 189
+dH = +9.03e-01, iac = 0
+Average plaquette = 1.845295505946211
+Average temporal link = 0.002583832849517
+Average spatial link = 0.000134262067311
+Average link = 0.000746654762862
+Polyakov loop = -0.006585660856217 -0.001329127117060
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.61e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 190
+dH = +3.86e-01, iac = 1
+Average plaquette = 1.845035163351517
+Average temporal link = 0.001466984037241
+Average spatial link = -0.000027025323301
+Average link = 0.000346477016834
+Polyakov loop = -0.004497917369008 -0.003009724430740
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 191
+dH = -1.53e-01, iac = 1
+Average plaquette = 1.845031699939691
+Average temporal link = 0.001623209202346
+Average spatial link = -0.000331302436940
+Average link = 0.000157325472882
+Polyakov loop = -0.003136707004160 -0.009669535793364
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.61e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 192
+dH = +2.68e-01, iac = 1
+Average plaquette = 1.844484488797859
+Average temporal link = 0.002533334911117
+Average spatial link = 0.000162818423149
+Average link = 0.000755447545141
+Polyakov loop = -0.003819669829682 0.000858880055603
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 193
+dH = +1.98e+00, iac = 0
+Average plaquette = 1.844484488797859
+Average temporal link = 0.002533334911117
+Average spatial link = 0.000162818423149
+Average link = 0.000755447545141
+Polyakov loop = -0.003819669829682 0.000858880055603
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.64e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 194
+dH = +7.18e-01, iac = 1
+Average plaquette = 1.845054222567105
+Average temporal link = 0.001496109887198
+Average spatial link = -0.000101321398555
+Average link = 0.000298036422884
+Polyakov loop = -0.002253410173580 -0.002043813234195
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.62e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 195
+dH = +2.60e-01, iac = 1
+Average plaquette = 1.844652018688920
+Average temporal link = 0.001623473472901
+Average spatial link = 0.000430084434381
+Average link = 0.000728431694011
+Polyakov loop = -0.006818176247180 -0.005573914386332
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 196
+dH = -6.03e-01, iac = 1
+Average plaquette = 1.844688508488760
+Average temporal link = 0.001977631651614
+Average spatial link = -0.000264671056044
+Average link = 0.000295904620871
+Polyakov loop = 0.003466679947451 -0.002995321294293
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 197
+dH = +5.86e-01, iac = 1
+Average plaquette = 1.845235207354617
+Average temporal link = 0.000296328191577
+Average spatial link = 0.000071755875990
+Average link = 0.000127898954887
+Polyakov loop = -0.004591685719788 -0.006141656544060
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 198
+dH = +4.67e-01, iac = 0
+Average plaquette = 1.845235207354617
+Average temporal link = 0.000296328191577
+Average spatial link = 0.000071755875990
+Average link = 0.000127898954887
+Polyakov loop = -0.004591685719788 -0.006141656544060
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 199
+dH = +1.68e-01, iac = 1
+Average plaquette = 1.845253913581804
+Average temporal link = 0.000869998370892
+Average spatial link = -0.000021025174573
+Average link = 0.000201730711793
+Polyakov loop = -0.004008207004517 -0.002137291943654
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.61e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 200
+dH = +4.76e-01, iac = 1
+Average plaquette = 1.844271244034593
+Average temporal link = 0.000218771865260
+Average spatial link = 0.000340197722742
+Average link = 0.000309841258371
+Polyakov loop = -0.002335115801543 -0.010058476589620
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Configuration no 10 exported
+
+Memory footprint at program end:
+   Current memory usage per proc:  121.328 MB
+   Maximal memory usage per proc:  121.547 MB

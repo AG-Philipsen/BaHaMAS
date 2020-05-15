@@ -201,10 +201,14 @@ function DeclareBaHaMASGlobalVariables()
     readonly BHMAS_prngPrefix='prng\.' #tell user about BRE http://en.wikipedia.org/wiki/Regular_expression#POSIX_basic_and_extended
     readonly BHMAS_configurationRegex="${BHMAS_configurationPrefix}[0-9]\+"
     readonly BHMAS_prngRegex="${BHMAS_prngPrefix}[0-9]\+"
+    readonly BHMAS_configurationGlob="${BHMAS_configurationPrefix//\\/}+([0-9])"
+    readonly BHMAS_prngGlob="${BHMAS_prngPrefix//\\/}+([0-9])"
     #For CL2QCD only
     readonly BHMAS_standardCheckpointPostfix='save'
     #For openQCD only
     readonly BHMAS_dataPrefix='data\.'
+    readonly BHMAS_dataRegex="${BHMAS_dataPrefix}[0-9]\+"
+    readonly BHMAS_dataGlob="${BHMAS_dataPrefix//\\/}+([0-9])"
 }
 
 # The following variables cannot be declared at the
