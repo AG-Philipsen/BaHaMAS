@@ -90,7 +90,7 @@ availableTests=(
     ['CL2QCD-thermalize-hot']='CL2QCD thermalize --walltime 1d'
     ['CL2QCD-thermalize-conf']='CL2QCD thermalize --walltime 1d'
     ['CL2QCD-continue-save']='CL2QCD continue --walltime 1d -F 80 -f 140 -m=1234'
-    ['CL2QCD-continue-last']='CL2QCD continue --walltime 1d'
+    ['CL2QCD-continue-last']='CL2QCD continue --walltime 1d --pf 3'
     ['CL2QCD-continue-resume']='CL2QCD continue --walltime 1d'
     ['CL2QCD-continue-num']='CL2QCD continue --till 10000 --walltime 1d'
     ['CL2QCD-continue-goal']='CL2QCD continue --walltime 1d'

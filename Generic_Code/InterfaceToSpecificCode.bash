@@ -147,12 +147,22 @@ function HandleEnvironmentForContinueForGivenSimulation()
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
 
+function HandleOutputFilesForContinueForGivenSimulation()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
+}
+
 function HandleInputFileForContinueForGivenSimulation()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
 
-function HandleOutputFilesForContinueForGivenSimulation()
+function ModifyOptionsInInputFile()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
+}
+
+function FindAndSetNumberOfTrajectoriesAlreadyProduced()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
