@@ -17,6 +17,20 @@
 #  along with BaHaMAS. If not, see <http://www.gnu.org/licenses/>.
 #
 
+function ExtractNumberOfTrajectoriesToBeDoneFromInputFile_openQCD-FASTSUM()
+{
+    local filename numberOfTrajectories
+    filename="$1"
+    numberOfTrajectories=$(sed -n 's/^ntr[[:space:]]\+\([1-9][0-9]\+\)/\1/p' "${filename}") #Option is either nHmcSteps or nRhmcSteps
+    if [[ "${numberOfTrajectories}" = '' ]]; then
+        Error 'Error occurred extracting number of trajectories from the input file\n'\
+              file "${filename}"
+        Fatal ${BHMAS_fatalLogicError} 'Unable to determine job walltime.'
+    else
+        printf "${numberOfTrajectories}"
+    fi
+}
+
 function ExtractGapBetweenCheckpointsFromInputFile()
 {
     local runId inputFileGlobalPath deltaConfs
