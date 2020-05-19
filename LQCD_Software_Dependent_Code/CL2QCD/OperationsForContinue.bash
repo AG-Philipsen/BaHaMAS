@@ -371,18 +371,16 @@ function __static__HandleIntegrationStepsInInputFile_CL2QCD()
 
 function __static__HandleFurtherOptionsInInputFile_CL2QCD()
 {
-    local commandLineOptionsToBeConsidered index option optionsToBeAddedOrModified
-    commandLineOptionsToBeConsidered=( "-f" "--checkpointEvery" "-F" "--confSaveEvery" )
+    local commandLineOptionsToBeConsidered option optionsToBeAddedOrModified
     optionsToBeAddedOrModified=()
-    #Here it is fine to assume option value follows option name after a space
-    # -> see Generic_Code/CommandLineParsers/CommonFunctionality.bash file
-    for index in ${!BHMAS_specifiedCommandLineOptions[@]}; do
-        option=${BHMAS_specifiedCommandLineOptions[${index}]}
-        if ! ElementInArray ${option} ${commandLineOptionsToBeConsidered[@]}; then
-            continue
-        fi
-        optionsToBeAddedOrModified+=("${option##*-}=${BHMAS_specifiedCommandLineOptions[$((index+1))]}")
-    done
+    #Here it is fine to assume option is the long one since short ones have been replaced
+    # -> see Generic_Code/CommandLineParsers/ParserUtilities.bash file
+    if ElementInArray '--checkpointEvery' "${BHMAS_specifiedCommandLineOptions[@]}"; then
+        optionsToBeAddedOrModified+=( "checkpointEvery=${BHMAS_checkpointFrequency}" )
+    fi
+    if ElementInArray '--confSaveEvery' "${BHMAS_specifiedCommandLineOptions[@]}"; then
+        optionsToBeAddedOrModified+=( "confSaveEvery=${BHMAS_savepointFrequency}" )
+    fi
     if [[ ${#optionsToBeAddedOrModified[@]} -ne 0 ]]; then
         ModifyOptionsInInputFile_CL2QCD ${optionsToBeAddedOrModified[@]} || return 1
         PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}

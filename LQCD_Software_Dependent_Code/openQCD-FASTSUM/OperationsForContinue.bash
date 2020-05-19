@@ -227,7 +227,7 @@ function HandleInputFileForContinueForGivenSimulation_openQCD-FASTSUM()
     HandleMeasurementsInInputFile                                      || return 1
     #__static__HandleMultiplePseudofermionsInInputFile_openQCD-FASTSUM  || return 1
     __static__HandleIntegrationStepsInInputFile_openQCD-FASTSUM        || return 1
-    #__static__HandleFurtherOptionsInInputFile_openQCD-FASTSUM          || return 1
+    __static__HandleFurtherOptionsInInputFile_openQCD-FASTSUM          || return 1
 }
 
 #---------------------------------------------------------------------------------#
@@ -298,6 +298,17 @@ function __static__HandleIntegrationStepsInInputFile_openQCD-FASTSUM()
     PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
 }
 
+function __static__HandleFurtherOptionsInInputFile_openQCD-FASTSUM()
+{
+    local commandLineOptionsToBeConsidered optionsToBeAddedOrModified
+    optionsToBeAddedOrModified=()
+    # No options should be handled at the moment!
+    if [[ ${#optionsToBeAddedOrModified[@]} -ne 0 ]]; then
+        ModifyOptionsInInputFile_openQCD-FASTSUM ${optionsToBeAddedOrModified[@]} || return 1
+        PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
+    fi
+    return 0
+}
 
 function ModifyOptionsInInputFile_openQCD-FASTSUM()
 {
