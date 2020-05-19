@@ -53,7 +53,7 @@ function __static__CheckAboutProgram()
             foundVersion="$(sed 's/ /./g' <<< "${BASH_VERSINFO[@]:0:3}")"
             ;;
         awk )
-            requiredVersion='3.1.7'
+            requiredVersion='4.1.0' # The first supporting '-i inplace'
             if awk --version >/dev/null 2>&1; then
                 foundVersion=$(awk --version | head -n1 | grep -o "^GNU Awk [0-9.]\+" | grep -o "[0-9.]\+")
             fi
