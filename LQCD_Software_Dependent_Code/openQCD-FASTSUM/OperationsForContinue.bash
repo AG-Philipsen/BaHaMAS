@@ -133,6 +133,11 @@ function HandleEnvironmentForContinueForGivenSimulation_openQCD-FASTSUM()
     if [[ ! -f "${runBetaDirectory}/${nameOfLastPRNG}" ]]; then
         Warning "No valid PRNG file for configuration " file "${BHMAS_betaPrefix}${runId}/${nameOfLastConfiguration}" " was found! Using a random seed."
         nameOfLastPRNG="" #If the prng.xxxxx is not found, use random seed in input file
+    elif [[ ! -s "${runBetaDirectory}/${nameOfLastPRNG}" ]]; then
+        Error 'Last PRNG file ' emph "${nameOfLastPRNG}" ' found in\n'\
+              dir "${runBetaDirectory}" '\nfolder is empty! The value ' emph "beta = ${runId}" ' will be skipped!'
+        BHMAS_problematicBetaValues+=( ${runId} )
+        return 1
     fi
 
     cecho lm B U "\nATTENTION" uU ":" uB " The simulation for " emph "beta = ${runId%_*}"\
@@ -140,12 +145,18 @@ function HandleEnvironmentForContinueForGivenSimulation_openQCD-FASTSUM()
     numberOfCheckpoint=$(__static__GetNumberOfCheckpointCorrespondingToTrajectoryToResumeFrom) || return 1
     #Restore original openQCD filenames
     mv "${runBetaDirectory}/${nameOfLastConfiguration}" "${outputFileGlobalPath}n${numberOfCheckpoint}" || exit ${BHMAS_fatalBuiltin}
-    mv "${runBetaDirectory}/${nameOfLastPRNG}"          "${outputFileGlobalPath}.rng"                   || exit ${BHMAS_fatalBuiltin}
+    if [[ "${nameOfLastPRNG}" != '' ]]; then
+        mv "${runBetaDirectory}/${nameOfLastPRNG}"      "${outputFileGlobalPath}.rng"                   || exit ${BHMAS_fatalBuiltin}
+    fi
     mv "${runBetaDirectory}/${nameOfLastData}"          "${outputFileGlobalPath}.dat"                   || exit ${BHMAS_fatalBuiltin}
-    # It is important to create also the '~' files so that the rename mechanism can immediately
+    # It is crucial to create also the '~' files so that the rename mechanism can immediately
     # find this checkpoint and rename it to the standard naming scheme. Otherwise an error would occur!
-    cp "${runBetaDirectory}/${BHMAS_outputFilename}.rng"  "${runBetaDirectory}/${BHMAS_outputFilename}.rng~"  || exit ${BHMAS_fatalBuiltin}
-    cp "${runBetaDirectory}/${BHMAS_outputFilename}.dat"  "${runBetaDirectory}/${BHMAS_outputFilename}.dat~"  || exit ${BHMAS_fatalBuiltin}
+    if [[ "${nameOfLastPRNG}" != '' ]]; then
+        cp "${runBetaDirectory}/${BHMAS_outputFilename}.rng"  "${runBetaDirectory}/${BHMAS_outputFilename}.rng~" || exit ${BHMAS_fatalBuiltin}
+    else
+        touch  "${runBetaDirectory}/${BHMAS_outputFilename}.rng~"                                                || exit ${BHMAS_fatalBuiltin}
+    fi
+    cp "${runBetaDirectory}/${BHMAS_outputFilename}.dat"  "${runBetaDirectory}/${BHMAS_outputFilename}.dat~"     || exit ${BHMAS_fatalBuiltin}
 }
 
 # This function should clean the simulation measurement files, depending on the
