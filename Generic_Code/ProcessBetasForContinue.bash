@@ -98,10 +98,11 @@ function __static__RemoveOriginalInputFile()
 function ProcessBetaValuesForContinue()
 {
     local runId runBetaDirectory submitBetaDirectory inputFileGlobalPath outputFileGlobalPath outputPbpFileGlobalPath\
-          betaValuesToBeSubmitted nameOfLastConfiguration nameOfLastPRNG originalInputFileGlobalPath
+          betaValuesToBeSubmitted nameOfLastConfiguration nameOfLastPRNG nameOfLastData originalInputFileGlobalPath
     betaValuesToBeSubmitted=()
     nameOfLastConfiguration=''
     nameOfLastPRNG=''
+    nameOfLastData='' # This is not set/used by all software but it is just a local variable more
     __static__CheckWhetherAnySimulationForGivenBetaValuesIsAlreadyEnqueued
     for runId in ${BHMAS_betaValues[@]}; do
         cecho ''
@@ -110,9 +111,13 @@ function ProcessBetaValuesForContinue()
         __static__CheckWhetherAnyRequiredFileOrFolderIsMissing ${runId} || continue
         # LQCD software specific operations
         HandleEnvironmentForContinueForGivenSimulation ${runId} || continue
-        HandleOutputFilesForContinueForGivenSimulation ${runId} || continue
+        if ! HandleOutputFilesForContinueForGivenSimulation ${runId}; then
+            RestoreEnvironmentBeforeSkippingBeta
+            continue
+        fi
         __static__MakeTemporaryCopyOfOriginalInputFile
         if ! HandleInputFileForContinueForGivenSimulation ${runId}; then
+            RestoreEnvironmentBeforeSkippingBeta
             __static__RestoreOriginalInputFile
             continue
         fi
@@ -187,7 +192,8 @@ function IsSimulationNotFinished()
     elif [[ ${startingStatistics} -eq ${goalStatistics} ]]; then
         if KeyInArray ${runId} BHMAS_trajectoriesToBeResumedFrom; then
             #If we resume from and simulation is finished, delete from std output the 'ATTENTION' line
-            cecho -d -n "\e[1A\e[K"
+            #which is 3 lines above the last (delete all the three lines)
+            cecho -d -n "\e[1A\e[K\e[1A\e[K\e[1A\e[K"
         fi
         cecho lg " The simulation for " lo "beta = ${runId}" lg " seems to be finished, it will not be continued!"
         return 1

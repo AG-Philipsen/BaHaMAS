@@ -93,6 +93,15 @@ function HandleEnvironmentForContinueForGivenSimulation_CL2QCD()
     return 0
 }
 
+# This function should do needed operations to restore the beta folder state
+# for a following run of BaHaMAS so that no artificial error is later triggered
+#
+# NOTE: Nothing needed for CL2QCD
+function RestoreEnvironmentBeforeSkippingBeta_CL2QCD()
+{
+    :
+}
+
 # This function should clean the simulation measurement files, depending on the
 # checkpoint required by the user in the betas file
 #  INPUT: simulation ID
@@ -165,7 +174,6 @@ function HandleOutputFilesForContinueForGivenSimulation_CL2QCD()
     fi
     return 0
 }
-
 
 # This function should make the needed adjustments to the input file
 #  INPUT: simulation ID

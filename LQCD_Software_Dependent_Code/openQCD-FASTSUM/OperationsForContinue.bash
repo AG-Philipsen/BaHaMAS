@@ -19,7 +19,7 @@
 
 # This function should find and validate the checkpoint required by the user in the betas file
 #  INPUT: simulation ID
-#  OUTPUT: set variables nameOfLastConfiguration, nameOfLastPRNG
+#  OUTPUT: set variables nameOfLastConfiguration, nameOfLastPRNG, nameOfLastData
 #  Local variables from the caller used: runBetaDirectory outputFileGlobalPath
 #
 # Exit codes: 0 if fine
@@ -45,11 +45,12 @@
 #       beta folder and give -seed $RANDOM option if not.
 function HandleEnvironmentForContinueForGivenSimulation_openQCD-FASTSUM()
 {
-    local runId listOfFiles nameOfLastData deltaConfs shiftConfs\
-          numberOfCheckpoint listConf listPrng listData indexC indexP indexD
+    local runId listOfFiles deltaConfs shiftConfs numberOfCheckpoint\
+          listConf listPrng listData indexC indexP indexD
     runId="$1"
-    CheckIfVariablesAreDeclared nameOfLastConfiguration nameOfLastPRNG\
-                                runBetaDirectory outputFileGlobalPath
+    CheckIfVariablesAreDeclared runBetaDirectory outputFileGlobalPath\
+                                nameOfLastConfiguration nameOfLastPRNG\
+                                nameOfLastData
 
     #Check if checkpoints were all renamed in previous run
     listOfFiles=()
@@ -140,7 +141,7 @@ function HandleEnvironmentForContinueForGivenSimulation_openQCD-FASTSUM()
         return 1
     fi
 
-    cecho lm B U "\nATTENTION" uU ":" uB " The simulation for " emph "beta = ${runId%_*}"\
+    cecho lm B U "ATTENTION" uU ":" uB " The simulation for " emph "beta = ${runId%_*}"\
           " will be resumed from trajectory " B emph "${BHMAS_trajectoriesToBeResumedFrom[${runId}]}" uB "."
     numberOfCheckpoint=$(__static__GetNumberOfCheckpointCorrespondingToTrajectoryToResumeFrom) || return 1
     #Restore original openQCD filenames
@@ -157,6 +158,30 @@ function HandleEnvironmentForContinueForGivenSimulation_openQCD-FASTSUM()
         touch  "${runBetaDirectory}/${BHMAS_outputFilename}.rng~"                                                || exit ${BHMAS_fatalBuiltin}
     fi
     cp "${runBetaDirectory}/${BHMAS_outputFilename}.dat"  "${runBetaDirectory}/${BHMAS_outputFilename}.dat~"     || exit ${BHMAS_fatalBuiltin}
+}
+
+# This function should do needed operations to restore the beta folder state
+# for a followiung run of BaHaMAS so that no artificial error is later triggered
+#  INPUT: -
+#  OUTPUT: -
+#  Local variables from the caller used: runBetaDirectory outputFileGlobalPath
+#                                        nameOfLastConfiguration nameOfLastPRNG nameOfLastData
+#
+# Exit codes: 0 if fine
+#             1 if runId is problematic -> Added to BHMAS_problematicBetaValues array
+function RestoreEnvironmentBeforeSkippingBeta_openQCD-FASTSUM()
+{
+    CheckIfVariablesAreDeclared runBetaDirectory outputFileGlobalPath\
+                                nameOfLastConfiguration nameOfLastPRNG\
+                                nameOfLastData
+    # Use glob instead of deducing number, it should be safe, since only one conf should exist!
+    mv "${outputFileGlobalPath}n"* "${runBetaDirectory}/${nameOfLastConfiguration}" || exit ${BHMAS_fatalBuiltin}
+    if [[ "${nameOfLastPRNG}" != '' ]]; then
+        mv "${outputFileGlobalPath}.rng"               "${runBetaDirectory}/${nameOfLastPRNG}"          || exit ${BHMAS_fatalBuiltin}
+    fi
+    mv "${outputFileGlobalPath}.dat"                   "${runBetaDirectory}/${nameOfLastData}"          || exit ${BHMAS_fatalBuiltin}
+    rm "${runBetaDirectory}/${BHMAS_outputFilename}.rng~" || exit ${BHMAS_fatalBuiltin}
+    rm "${runBetaDirectory}/${BHMAS_outputFilename}.dat~" || exit ${BHMAS_fatalBuiltin}
 }
 
 # This function should clean the simulation measurement files, depending on the
