@@ -97,27 +97,26 @@ function __static__RemoveOriginalInputFile()
 
 function ProcessBetaValuesForContinue()
 {
-    local runId runBetaDirectory submitBetaDirectory inputFileGlobalPath outputFileGlobalPath outputPbpFileGlobalPath\
-          betaValuesToBeSubmitted nameOfLastConfiguration nameOfLastPRNG nameOfLastData originalInputFileGlobalPath
+    local runId runBetaDirectory submitBetaDirectory inputFileGlobalPath outputFileGlobalPath\
+          outputPbpFileGlobalPath betaValuesToBeSubmitted nameOfLastConfiguration nameOfLastPRNG\
+          nameOfLastData trashFolderGlobalPath originalInputFileGlobalPath
     betaValuesToBeSubmitted=()
-    nameOfLastConfiguration=''
-    nameOfLastPRNG=''
-    nameOfLastData='' # This is not set/used by all software but it is just a local variable more
     __static__CheckWhetherAnySimulationForGivenBetaValuesIsAlreadyEnqueued
     for runId in ${BHMAS_betaValues[@]}; do
         cecho ''
-        # Preliminary general checks
+        # Preliminary general checks and variable initialization
         __static__SetBetaRelatedPathVariables                  ${runId} || continue
         __static__CheckWhetherAnyRequiredFileOrFolderIsMissing ${runId} || continue
+        nameOfLastConfiguration=''
+        nameOfLastPRNG=''
+        nameOfLastData='' # This is not set/used by all software but it is just a local variable more
+        trashFolderGlobalPath="${runBetaDirectory}/Trash_$(date +'%F_%H%M%S')"
         # LQCD software specific operations
         HandleEnvironmentForContinueForGivenSimulation ${runId} || continue
-        if ! HandleOutputFilesForContinueForGivenSimulation ${runId}; then
-            RestoreEnvironmentBeforeSkippingBeta
-            continue
-        fi
+        HandleOutputFilesForContinueForGivenSimulation ${runId} || continue
         __static__MakeTemporaryCopyOfOriginalInputFile
         if ! HandleInputFileForContinueForGivenSimulation ${runId}; then
-            RestoreEnvironmentBeforeSkippingBeta
+            RestoreRunBetaDirectoryBeforeSkippingBeta
             __static__RestoreOriginalInputFile
             continue
         fi

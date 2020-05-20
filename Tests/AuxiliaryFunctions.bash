@@ -68,7 +68,7 @@ function __static__CreateFilesInRunBetaFolder()
 {
     local file
     for file in "$@"; do
-        touch "${runDirWithBetaFolders}/${betaFolder}/${file}" || exit ${BHMAS_fatalBuiltin}
+        printf "Not empty\n" > "${runDirWithBetaFolders}/${betaFolder}/${file}" || exit ${BHMAS_fatalBuiltin}
     done
 }
 

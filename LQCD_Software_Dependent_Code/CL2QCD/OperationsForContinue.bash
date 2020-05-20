@@ -93,27 +93,19 @@ function HandleEnvironmentForContinueForGivenSimulation_CL2QCD()
     return 0
 }
 
-# This function should do needed operations to restore the beta folder state
-# for a following run of BaHaMAS so that no artificial error is later triggered
-#
-# NOTE: Nothing needed for CL2QCD
-function RestoreEnvironmentBeforeSkippingBeta_CL2QCD()
-{
-    :
-}
-
 # This function should clean the simulation measurement files, depending on the
 # checkpoint required by the user in the betas file
 #  INPUT: simulation ID
 #  OUTPUT: -
-#  Local variables from the caller: runBetaDirectory outputFileGlobalPath outputPbpFileGlobalPath
+#  Local variables from the caller: runBetaDirectory outputFileGlobalPath
+#                                   outputPbpFileGlobalPath trashFolderGlobalPath
 #
 # Exit codes: 0 if fine
 #             1 if runId is problematic -> Added to BHMAS_problematicBetaValues array
 function HandleOutputFilesForContinueForGivenSimulation_CL2QCD()
 {
     local runId; runId="$1"
-    CheckIfVariablesAreDeclared runBetaDirectory outputFileGlobalPath outputPbpFileGlobalPath
+    CheckIfVariablesAreDeclared runBetaDirectory outputFileGlobalPath outputPbpFileGlobalPath trashFolderGlobalPath
 
     #If the option resumefrom is given in the betasfile we have to clean the ${runBetaDirectory}, otherwise just set the name of conf and prng
     if KeyInArray ${runId} BHMAS_trajectoriesToBeResumedFrom; then
@@ -124,45 +116,43 @@ function HandleOutputFilesForContinueForGivenSimulation_CL2QCD()
             return 1
         fi
         #Now it should be feasable to resume simulation ---> clean runBetaDirectory
-        #Create in runBetaDirectory a folder named Trash_$(date) where to mv all the file produced after the traj. ${BHMAS_trajectoriesToBeResumedFrom[${runId}]}
-        local trashFolderName filename numberFromFile prefix
-        trashFolderName="${runBetaDirectory}/Trash_$(date +'%F_%H%M%S')"
-        mkdir ${trashFolderName} || exit ${BHMAS_fatalBuiltin}
+        #Create in runBetaDirectory a folder named Trash_$(date) where to mv all
+        #the file produced after the traj. ${BHMAS_trajectoriesToBeResumedFrom[${runId}]}
+        local filename numberFromFile prefix
+        mkdir ${trashFolderGlobalPath} || exit ${BHMAS_fatalBuiltin}
         for filename in $(ls -1 ${runBetaDirectory} | sed -n -e '/^'"${BHMAS_configurationRegex}"'.*$/p' -e '/^'"${BHMAS_prngRegex}"'.*$/p'); do
             #Move to trash only 'conf.xxxxx(whatever)' or 'prng.xxxxx(whatever)' files with xxxxx larger than the resume from trajectory
             numberFromFile=$(sed -n 's/^\('"${BHMAS_configurationPrefix}"'\|'"${BHMAS_prngPrefix}"'\)0*\([1-9][0-9]*\).*$/\2/p' <<< "${filename}")
             if [[ ${numberFromFile} -gt ${BHMAS_trajectoriesToBeResumedFrom[${runId}]} ]]; then
-                mv ${runBetaDirectory}/${filename} ${trashFolderName}
+                mv ${runBetaDirectory}/${filename} ${trashFolderGlobalPath}
             fi
         done
         #Move to trash conf.save(whatever) and prng.save(whatever) files if existing
         for prefix in ${BHMAS_configurationPrefix} ${BHMAS_prngPrefix}; do
             for filename in $(compgen -G "${runBetaDirectory}/${prefix}${BHMAS_standardCheckpointPostfix}*"); do
-                mv ${filename} ${trashFolderName}
+                mv ${filename} ${trashFolderGlobalPath}
             done
         done
         #Move the output file to Trash, and duplicate it parsing it in awk deleting all the trajectories after the resume-from one, included (if found)
-        mv ${outputFileGlobalPath} ${trashFolderName} || exit ${BHMAS_fatalBuiltin}
+        mv ${outputFileGlobalPath} ${trashFolderGlobalPath} || exit ${BHMAS_fatalBuiltin}
         if ! awk -v tr="${BHMAS_trajectoriesToBeResumedFrom[${runId}]}"\
              'BEGIN{found=1} $1<tr{print $0} $1==(tr-1){found=0} END{exit found}'\
-             ${trashFolderName}/$(basename ${outputFileGlobalPath}) > ${outputFileGlobalPath}; then
+             ${trashFolderGlobalPath}/$(basename ${outputFileGlobalPath}) > ${outputFileGlobalPath}; then
             Error "Measurement for trajectory " emph "$(( BHMAS_trajectoriesToBeResumedFrom[${runId}] - 1 ))" " not found in outputfile "\
                   emph "${outputFileGlobalPath}\n" "The value " emph "beta = ${runId}" " will be skipped!"
-            mv ${trashFolderName}/* ${runBetaDirectory} || exit ${BHMAS_fatalBuiltin}
-            rmdir ${trashFolderName} || exit ${BHMAS_fatalBuiltin}
+            RestoreRunBetaDirectoryBeforeSkippingBeta_CL2QCD
             BHMAS_problematicBetaValues+=( ${runId} )
             return 1
         fi
         #Make same operations on pbp file, if existing
         if [[ -f ${outputPbpFileGlobalPath} ]]; then
-            mv ${outputPbpFileGlobalPath} ${trashFolderName} || exit ${BHMAS_fatalBuiltin}
+            mv ${outputPbpFileGlobalPath} ${trashFolderGlobalPath} || exit ${BHMAS_fatalBuiltin}
             if ! awk -v tr="${BHMAS_trajectoriesToBeResumedFrom[${runId}]}"\
                  'BEGIN{found=1} $1<tr{print $0} $1==(tr-1){found=0} END{exit found}'\
-                 ${trashFolderName}/$(basename ${outputPbpFileGlobalPath}) > ${outputPbpFileGlobalPath}; then
+                 ${trashFolderGlobalPath}/$(basename ${outputPbpFileGlobalPath}) > ${outputPbpFileGlobalPath}; then
                 Error "Measurement for trajectory " emph "$(( BHMAS_trajectoriesToBeResumedFrom[${runId}] - 1 ))" " not found in pbp outputfile "\
                       emph "${outputPbpFileGlobalPath}\n" "The value " emph "beta = ${runId}" " will be skipped!"
-                mv ${trashFolderName}/* ${runBetaDirectory} || exit ${BHMAS_fatalBuiltin}
-                rmdir ${trashFolderName} || exit ${BHMAS_fatalBuiltin}
+                RestoreRunBetaDirectoryBeforeSkippingBeta_CL2QCD
                 BHMAS_problematicBetaValues+=( ${runId} )
                 return 1
             fi
@@ -173,6 +163,26 @@ function HandleOutputFilesForContinueForGivenSimulation_CL2QCD()
         fi
     fi
     return 0
+}
+
+# This function should do needed operations to restore the beta folder state
+# for a followiung run of BaHaMAS so that no artificial error is later triggered
+#
+#  INPUT: runId
+#  OUTPUT: -
+#  Local variables from the caller used: runBetaDirectory trashFolderGlobalPath
+#
+# Exit codes: 0 if fine
+#             1 if runId is problematic -> Added to BHMAS_problematicBetaValues array
+function RestoreRunBetaDirectoryBeforeSkippingBeta_CL2QCD()
+{
+    local runId; runId="$1"
+    CheckIfVariablesAreDeclared runBetaDirectory trashFolderGlobalPath
+    # Not always the trash folder is created, only in case of 'r' in betas file
+    if KeyInArray "${runId}" BHMAS_trajectoriesToBeResumedFrom; then
+        mv "${trashFolderGlobalPath}/"* "${runBetaDirectory}" || exit ${BHMAS_fatalBuiltin}
+        rmdir "${trashFolderGlobalPath}"                      || exit ${BHMAS_fatalBuiltin}
+    fi
 }
 
 # This function should make the needed adjustments to the input file

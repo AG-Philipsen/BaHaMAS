@@ -147,7 +147,7 @@ function HandleEnvironmentForContinueForGivenSimulation()
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
 
-function RestoreEnvironmentBeforeSkippingBeta()
+function RestoreRunBetaDirectoryBeforeSkippingBeta()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
