@@ -54,6 +54,9 @@ function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
             # openQCD-FASTSUM takes care of using the last checkpoint which has
             # previously been prepared in the processing operations for continue
             mpirunCommandOptions+="-c -a"
+            if [[ ! -f "${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}/${BHMAS_outputFilename}.rng" ]]; then
+                mpirunCommandOptions+=" -seed ${RANDOM}"
+            fi
             ;;
         * )
             Internal 'Unexpected execution mode in ' emph "${FUNCNAME}" '.'

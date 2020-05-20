@@ -133,7 +133,6 @@ function HandleEnvironmentForContinueForGivenSimulation_openQCD-FASTSUM()
     if [[ ! -f "${runBetaDirectory}/${nameOfLastPRNG}" ]]; then
         Warning "No valid PRNG file for configuration " file "${BHMAS_betaPrefix}${runId}/${nameOfLastConfiguration}" " was found! Using a random seed."
         nameOfLastPRNG="" #If the prng.xxxxx is not found, use random seed in input file
-        BHMAS_startConfigurationGlobalPath[${runId}]+='NoRNG'
     fi
 
     cecho lm B U "\nATTENTION" uU ":" uB " The simulation for " emph "beta = ${runId%_*}"\
