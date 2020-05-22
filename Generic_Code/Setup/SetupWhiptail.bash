@@ -26,12 +26,12 @@ function __static__DisplayMenuBoxWithPresentVariablesAndActOnInput()
     Please, provide the following information (the content of a previous filled out variable can be accessed with the ${nameOfTheVariable} syntax).\n\n
     Consider that NOT all values of the variables must be provided and, in general, only some of them are needed to run BaHaMAS with a particular option.\n
     If a needed variable is left unset, you will be notified when you run BaHaMAS and you can rerun the setup to give the missing values.\n\n'
-    commandToBeExecuted="whiptail --ok-button 'Modify variable'
-                                  --cancel-button 'Abort setup'
-                                  --backtitle 'BaHaMAS setup'
-                                  --title 'BaHaMAS configuration'
-                                  --menu '${menuHeader}'
-                         $((lines-6)) $((columns-10)) $((lines-22)) --"
+    commandToBeExecuted="whiptail --ok-button 'Modify variable'"
+    commandToBeExecuted+=" --cancel-button 'Abort setup'"
+    commandToBeExecuted+=" --backtitle 'BaHaMAS setup'"
+    commandToBeExecuted+=" --title 'BaHaMAS configuration'"
+    commandToBeExecuted+=" --menu '${menuHeader}'"
+    commandToBeExecuted+=" $((lines-6)) $((columns-10)) $((lines-22)) --"
     #Complete dialog box command
     index=1
     for variable in ${variableNames[@]}; do
@@ -71,10 +71,10 @@ function __static__DisplayFreeInputBoxAndSetGivenInputValue()
         done
         [[ "${inputHeader}" != '' ]] && inputHeader="\n Possible variables to be used:\n\n${inputHeader}"
         inputHeader+='\n\n Enter the value for the variable:'
-        commandToBeExecuted="whiptail --title '${variableInputBox%?}'
-                                      --backtitle 'BaHaMAS setup'
-                                      --inputbox '${inputHeader}'
-                             $((inputBoxLines+5)) 78 ${userVariables[${variableInputBox%?}]//\$/\\\$}" #Escape $ sign to avoid evaluation of variable
+        commandToBeExecuted="whiptail --title '${variableInputBox%?}'"
+        commandToBeExecuted+=" --backtitle 'BaHaMAS setup'"
+        commandToBeExecuted+=" --inputbox '${inputHeader}'"
+        commandToBeExecuted+=" $((inputBoxLines+5)) 78 ${userVariables[${variableInputBox%?}]//\$/\\\$}" #Escape $ sign to avoid evaluation of variable
         FireUpTheDialogBoxStoringResultAndActingAccordingly\
             __static__SetValueOfVariableObtainedFromUser\
             ""
@@ -87,9 +87,9 @@ function MakeInteractiveSetupUsingWhiptail()
 {
     local commandToBeExecuted resultOfBox
     #Start setting up colored output
-    commandToBeExecuted="whiptail --backtitle 'BaHaMAS setup'
-                                  --title 'BaHaMAS output'
-                                  --yesno '\n Would you like to activate colored output?' 8 50"
+    commandToBeExecuted="whiptail --backtitle 'BaHaMAS setup'"
+    commandToBeExecuted+=" --title 'BaHaMAS output'"
+    commandToBeExecuted+=" --yesno '\n Would you like to activate colored output?' 8 50"
     FireUpTheDialogBoxStoringResultAndActingAccordingly\
         "SetColoredOutput TRUE"\
         "SetColoredOutput FALSE"

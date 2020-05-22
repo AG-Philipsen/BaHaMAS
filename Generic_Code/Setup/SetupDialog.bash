@@ -33,10 +33,10 @@ function MakeInteractiveSetupUsingDialog()
           dialogHeight dialogWidth formHeight variableNameFieldLength\
           variableValueFieldLength formHeader index
     #Start setting up colored output
-    commandToBeExecuted="dialog --keep-tite --colors
-                                --backtitle 'BaHaMAS setup'
-                                --title 'BaHaMAS output'
-                                --yesno '\nWould you like to activate \Zb\Z4co\Z5lo\Z1red\Zn output?' 6 60"
+    commandToBeExecuted="dialog --keep-tite --colors"
+    commandToBeExecuted+=" --backtitle 'BaHaMAS setup'"
+    commandToBeExecuted+=" --title 'BaHaMAS output'"
+    commandToBeExecuted+=" --yesno '\nWould you like to activate \Zb\Z4co\Z5lo\Z1red\Zn output?' 6 60"
     FireUpTheDialogBoxStoringResultAndActingAccordingly\
         "SetColoredOutput TRUE"\
         "SetColoredOutput FALSE"
@@ -52,13 +52,13 @@ function MakeInteractiveSetupUsingDialog()
     \ZbPlease, provide the following information (the content of a previous filled out variable can be accessed with the \Z5${nameOfTheVariable}\Z0 syntax).\Zn\n\n
     Consider that \Z4NOT\Z0 all values of the variables must be provided and, in general, only some of them are needed to run BaHaMAS with a particular option.\n
     If a needed variable is left unset, you will be notified when you run BaHaMAS and you can rerun the setup to give the missing values.\n\n'
-    commandToBeExecuted="dialog --keep-tite --colors --ok-label 'Configure BaHaMAS'
-                                --cancel-label 'Abort setup'
-                                --backtitle 'BaHaMAS setup'
-                                --title 'BaHaMAS configuration'
-                                --separator '|'
-                                --form '${formHeader}'
-                         ${dialogHeight} ${dialogWidth} ${formHeight} --"
+    commandToBeExecuted="dialog --keep-tite --colors --ok-label 'Configure BaHaMAS'"
+    commandToBeExecuted+=" --cancel-label 'Abort setup'"
+    commandToBeExecuted+=" --backtitle 'BaHaMAS setup'"
+    commandToBeExecuted+=" --title 'BaHaMAS configuration'"
+    commandToBeExecuted+=" --separator '|'"
+    commandToBeExecuted+=" --form '${formHeader}'"
+    commandToBeExecuted+=" ${dialogHeight} ${dialogWidth} ${formHeight} --"
     #Complete dialog box command
     index=1
     for variable in ${variableNames[@]}; do
