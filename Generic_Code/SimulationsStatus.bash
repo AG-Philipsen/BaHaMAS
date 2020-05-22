@@ -17,27 +17,6 @@
 #  along with BaHaMAS. If not, see <http://www.gnu.org/licenses/>.
 #
 
-function CheckVariablesToBeSetInSimulationStatusFromSpecificCode()
-{
-    local variablesToBeSet variableName
-    variablesToBeSet=(
-        outputFileGlobalPath inputFileGlobalPath
-        toBeCleaned trajectoriesDone numberLastTrajectory
-        acceptanceAllRun acceptanceLastBunchOfTrajectories
-        meanPlaquetteLastBunchOfTrajectories
-        maxSpikeToMeanAsNSigma maxSpikePlaquetteAsNSigma
-        deltaMaxPlaquette timeFromLastTrajectory
-        averageTimePerTrajectory timeLastTrajectory
-        integrationSteps0 integrationSteps1 integrationSteps2
-        kappaMassPreconditioning
-    )
-    for variableName in "${variablesToBeSet[@]}"; do
-        if [[ ! -v "${variableName}" ]]; then
-            Internal "Variable " emph "${variableName}" " not set but needed to be set in function " emph "${FUNCNAME[1]}" "."
-        fi
-    done
-}
-
 # This function can be called by the JobHandler either in mode:job-status or in mode:database.
 # The crucial difference is that in the first case the BHMAS_parametersString and BHMAS_parametersPath variable
 # must be the global ones, otherwise they have to be built on the basis of some given information.
@@ -47,7 +26,7 @@ function CheckVariablesToBeSetInSimulationStatusFromSpecificCode()
 # In the DATABASE setup the BHMAS_parametersString is built using the argument given.
 function ListSimulationsStatus()
 {
-    local localParametersPath localParametersString jobsMetainformationArray beta\
+    local localParametersPath localParametersString jobsMetainformationArray runId betaFolderName\
           postfixFromFolder jobStatus outputFileGlobalPath inputFileGlobalPath\
           averageTimePerTrajectory timeLastTrajectory toBeCleaned trajectoriesDone\
           numberLastTrajectory acceptanceAllRun acceptanceLastBunchOfTrajectories\
@@ -65,125 +44,215 @@ function ListSimulationsStatus()
     fi
 
     __static__PrintSimulationStatusHeader
-
-    jobsMetainformationArray=( $(__static__ExtractMetaInformationFromQueuedJobs) )
-
-    for beta in ${BHMAS_betaPrefix}[[:digit:]]*; do
-        #Select only folders with old or new names
-        beta=${beta#${BHMAS_betaPrefix}}
-        if [[ ! ${beta} =~ ^[[:digit:]][.][[:digit:]]{4}$ ]] &&
-               [[ ! ${beta} =~ ^[[:digit:]][.][[:digit:]]{4}_"${BHMAS_seedPrefix}"[[:alnum:]]{4}_continueWithNewChain$ ]] &&
-               [[ ! ${beta} =~ ^[[:digit:]][.][[:digit:]]{4}_"${BHMAS_seedPrefix}"[[:alnum:]]{4}_thermalizeFromHot$ ]] &&
-               [[ ! ${beta} =~ ^[[:digit:]][.][[:digit:]]{4}_"${BHMAS_seedPrefix}"[[:alnum:]]{4}_thermalizeFromCold$ ]] &&
-               [[ ! ${beta} =~ ^[[:digit:]][.][[:digit:]]{4}_"${BHMAS_seedPrefix}"[[:alnum:]]{4}_thermalizeFromConf$ ]]; then continue; fi
-
-        postfixFromFolder=$(grep -o "[[:alpha:]]\+\$" <<< "${beta##*_}")
-
-        set +e #Here grep could find no matching job in the queued ones
-        jobStatus=( $(sed 's/ /\n/g' <<< "${jobsMetainformationArray[@]:-}" | grep "${localParametersString}" | grep "${BHMAS_betaPrefix}${beta%_*}" | grep "postfix=${postfixFromFolder}|" | cut -d'|' -f4) )
-        set -e
-
-        if [[ ${#jobStatus[@]} -eq 0 ]]; then
-            [[ ${BHMAS_liststatusShowOnlyQueuedOption} = "TRUE" ]] && continue
-            jobStatus="notQueued"
-        elif [[ ${#jobStatus[@]} -eq 1 ]]; then
-            jobStatus=${jobStatus[0]}
-        else
-            Fatal ${BHMAS_fatalLogicError} "There are more than one job with " emph "${localParametersString}" " and " emph "beta = ${beta}" " as parameters! This should not happen!"
+    GatherJobsInformationForSimulationStatusMode
+    jobsInformation=(
+        "${BHMAS_parametersString}_b5.1234_s1234_NC@RUNNING"
+        "${BHMAS_parametersString}_b5.1234_s1234_TC@PENDING"
+    )
+    for betaFolderName in "${BHMAS_betaPrefix}"${BHMAS_betaGlob}"_${BHMAS_seedPrefix}"${BHMAS_seedGlob}'_'{continueWithNewChain,thermalizeFrom{Hot,Cold,Conf}}; do
+        runId=${betaFolderName#${BHMAS_betaPrefix}}
+        postfixFromFolder=$(grep -o "[[:alpha:]]\+\$" <<< "${runId##*_}")
+        jobStatus=$(__static__GetJobStatus "${runId}" "${localParametersString}")
+        if [[ "${jobStatus}" = 'notQueued' ]] && [[ ${BHMAS_liststatusShowOnlyQueuedOption} = "TRUE" ]]; then
+            continue
         fi
-
-        outputFileGlobalPath="${BHMAS_runDiskGlobalPath}/${BHMAS_projectSubpath}${localParametersPath}/${BHMAS_betaPrefix}${beta}/${BHMAS_outputFilename}"
-        inputFileGlobalPath="${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath}${localParametersPath}/${BHMAS_betaPrefix}${beta}/${BHMAS_inputFilename}"
+        outputFileGlobalPath="${BHMAS_runDiskGlobalPath}/${BHMAS_projectSubpath}${localParametersPath}/${BHMAS_betaPrefix}${runId}/${BHMAS_outputFilename}"
         toBeCleaned=0
-        trajectoriesDone="-----"
-        numberLastTrajectory="----"
-        acceptanceAllRun=" ----"
-        acceptanceLastBunchOfTrajectories=" ----"
-        meanPlaquetteLastBunchOfTrajectories="---"
-        maxSpikeToMeanAsNSigma=" ----"
-        maxSpikePlaquetteAsNSigma="----"
-        deltaMaxPlaquette="---"
-        timeFromLastTrajectory="------"
-        averageTimePerTrajectory="----"
-        timeLastTrajectory="----"
-        integrationSteps0="--"
-        integrationSteps1="--"
-        integrationSteps2="--"
-        kappaMassPreconditioning="-----"
-        ExtractSimulationInformationFromFiles
-        __static__PrintSimulationStatusLine
+        trajectoriesDone='-----'
+        numberLastTrajectory='----'
+        acceptanceAllRun=' ----'
+        acceptanceLastBunchOfTrajectories=' ----'
+        meanPlaquetteLastBunchOfTrajectories='---'
+        maxSpikeToMeanAsNSigma=' ----'
+        maxSpikePlaquetteAsNSigma='----'
+        deltaMaxPlaquette='---'
+        timeFromLastTrajectory='------'
+        averageTimePerTrajectory='----'
+        timeLastTrajectory='----'
+        if [[ -s "${outputFileGlobalPath}" ]]; then
+            __static__CheckIfOutputFileShouldBeCleaned
+            __static__ExtractTrajectoryNumbers
+            __static__ExtractAcceptanceInformation
+            __static__ExtractActionAndPlaquetteInformation
+            if [[ ${jobStatus} = 'RUNNING' ]]; then
+                __static__ExtractTimeFromLastTrajectory
+            fi
+            if [[ ${BHMAS_liststatusMeasureTimeOption} = 'TRUE' ]]; then
+                __static__ExtractTrajectoryTimes
+            fi
+        fi
+        inputFileGlobalPath="${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath}${localParametersPath}/${BHMAS_betaPrefix}${runId}/${BHMAS_inputFilename}"
+        integrationSteps0='--'
+        integrationSteps1='--'
+        integrationSteps2='--'
+        kappaMassPreconditioning='-----'
+        if [[ -f "${inputFileGlobalPath}" ]]; then
+            ExtractSimulationInformationFromInputFile
+        fi
+        __static__PrintSimulationStatusLine "${runId}"
     done #Loop on BETA
-
     __static__PrintSimulationStatusFooter
 }
 
-function __static__ExtractBetasFrom()
+#----------------------------------------------------------------------------------#
+# The following functions implement the extraction of information of the runs      #
+# in order to print then a new line to the report. They have the responsibility    #
+# of setting on or more variables defined in the caller. The outputFileGlobalPath  #
+# is set in the caller and it is assumed both to exist and to be in the standard   #
+# format used by BaHaMAS, which for historical reasons matches CL2QCD format. For  #
+# other software this file should be produced before extracting information.       #
+#----------------------------------------------------------------------------------#
+
+function __static__GetJobStatus()
 {
-    local jobName betasString temporaryArray betaValuesArray element betaValue seedsArray seed
-    jobName="$1"
-    #Here it is supposed that the name of the job is ${BHMAS_parametersString}_(...)
-    #The goal of this function is to get an array whose elements are bx.xxxx_syyyy and since we use involved bash lines it is better to say that:
-    #  1) from jobName we take everything after the BHMAS_betaPrefix
-    betasString=$(awk -v pref="${BHMAS_betaPrefix}" '{print substr($0, index($0, pref))}' <<< "${jobName}")
-    #  2) we split on the BHMAS_betaPrefix in order to get all the seeds referred to the same beta
-    temporaryArray=( $(awk -v pref="${BHMAS_betaPrefix}" '{split($1, res, pref); for (i in res) print res[i]}' <<< "${betasString}") )
-    #  3) we take the value of the beta and of the seeds building up the final array
-    betaValuesArray=()
-    for element in "${temporaryArray[@]}"; do
-        betaValue=${element%%_*}
-        seedsArray=( $(grep -o "${BHMAS_seedPrefix}[[:alnum:]]\{4\}" <<< "${element#*_}") )
-        if [[ ${#seedsArray[@]} -gt 0 ]]; then
-            for seed in "${seedsArray[@]}"; do
-                betaValuesArray+=( "${BHMAS_betaPrefix}${betaValue}_${seed}" )
-            done
-        else
-            betaValuesArray+=( "${BHMAS_betaPrefix}${betaValue}" )
+    local runId parametersString betaValue seedPart postfix jobNameRegex value counter jobStatus
+    runId="$1"
+    parametersString="$2"
+    #Assume runId format is fixed, as often done
+    betaValue=( ${runId//_/ } ) #Let word splitting act
+    seedPart="${betaValue[1]}"
+    postfix="${betaValue[2]}"
+    betaValue="${betaValue[0]}"
+    case "${postfix}" in
+        continueWithNewChain )
+            postfix="NC"
+            ;;
+        thermalizeFromConf )
+            postfix="TC"
+            ;;
+       thermalizeFromHot )
+            postfix="TH"
+            ;;
+    esac
+    jobNameRegex="${parametersString}_${BHMAS_betaPrefix}${betaValue}(_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/})*_${seedPart}(_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/})*_${postfix}"
+    CheckIfVariablesAreDeclared jobsInformation
+    #Assume each element of jobsInformation is of the form "jobName@jobStatus"
+    counter=0
+    for value in "${jobsInformation[@]}"; do
+        if [[ ${value} =~ ^${jobNameRegex}@ ]]; then
+            (( counter++ )) || true
+            jobStatus="${value#*@}"
         fi
     done
-    printf "%s " "${betaValuesArray[@]}"
+    case ${counter} in
+        0)
+            jobStatus='notQueued'
+            ;;
+        1)
+            ;;
+        *)
+            Fatal ${BHMAS_fatalLogicError}\
+                  'There are more than one job with ' emph "${localParametersString}" ' and '\
+                  emph "runId = ${runId}" ' as parameters! This should not happen!'
+            ;;
+    esac
+    printf "%s" "${jobStatus}"
 }
 
-function __static__ExtractPostfixFrom()
+# OUTPUT: toBeCleaned
+function __static__CheckIfOutputFileShouldBeCleaned()
 {
-    local jobName postfix
-    jobName="$1"
-    postfix=${jobName##*_}
-    if [[ "${postfix}" == "TC" ]]; then
-        printf "thermalizeFromConf"
-    elif [[ "${postfix}" == "TH" ]]; then
-        printf "thermalizeFromHot"
-    elif [[ "${postfix}" == "Thermalize" ]]; then
-        printf "thermalize_old"
-    elif [[ "${postfix}" == "Tuning" ]]; then
-        printf "tuning"
-        #Also in the "TC" and "TH" cases we have seeds in the name, but such a cases are exluded from the elif
-    elif [[ $(grep -o "_${BHMAS_seedPrefix}[[:alnum:]]\{4\}" <<< "${jobName}" | wc -l) -ne 0 ]]; then
-        printf "continueWithNewChain"
-    else
-        printf ""
+    toBeCleaned=$(awk 'BEGIN{tr=-1; to_be_cleaned=0}{if($1>tr){tr=$1}else{to_be_cleaned=1; exit;}}END{print to_be_cleaned}' "${outputFileGlobalPath}")
+}
+
+# OUTPUT: trajectoriesDone, numberLastTrajectory
+function __static__ExtractTrajectoryNumbers()
+{
+    trajectoriesDone=$(awk 'NR==1{startTr=$1}END{print $1 - startTr + 1}' "${outputFileGlobalPath}")
+    numberLastTrajectory=$(awk 'END{print $1}' "${outputFileGlobalPath}")
+}
+
+# OUTPUT: acceptanceAllRun, acceptanceLastBunchOfTrajectories
+function __static__ExtractAcceptanceInformation()
+{
+    acceptanceAllRun=$(awk '{ sum+=$'${BHMAS_acceptanceColumn}'} END {printf "%5.2f", 100*sum/(NR)}' "${outputFileGlobalPath}")
+    if [[ ${trajectoriesDone} =~ ^[1-9][0-9]*$ ]] && [[ ${trajectoriesDone} -ge 1000 ]]; then
+        acceptanceLastBunchOfTrajectories=$(tail -n1000 "${outputFileGlobalPath}" | awk '{ sum+=$'${BHMAS_acceptanceColumn}'} END {printf "%5.2f", 100*sum/(NR)}')
     fi
 }
 
-function __static__ExtractMetaInformationFromQueuedJobs()
+#OUTPUT: meanPlaquetteLastBunchOfTrajectories, maxSpikeToMeanAsNSigma,
+#        maxSpikePlaquetteAsNSigma deltaMaxPlaquette
+function __static__ExtractActionAndPlaquetteInformation()
 {
-    local jobName metaInformationArray jobsInformation value jobStatus jobNameBetas jobNamePostfix jobParametersString
-    metaInformationArray=()
-    GatherJobsInformationForSimulationStatusMode
-    #Assume each element of jobsInformation is of the form "jobName@jobStatus"
-    for value in "${jobsInformation[@]}"; do
-        jobName=${value%@*}
-        jobStatus=${value#*@}
-        jobNameBetas=( $(__static__ExtractBetasFrom ${jobName}) )
-        jobNamePostfix=$(__static__ExtractPostfixFrom ${jobName})
-        jobParametersString="${jobName%%__*}"
-        #If jobParametersString is not at the beginning of the jobname, skip job
-        [[ $(grep "^${jobParametersString}" <<< "${jobName}" | wc -l) -eq 0 ]] && continue
-        #If the status is COMPLETING, skip job
-        [[ ${jobStatus} == "COMPLETING" ]] && continue
-        metaInformationArray+=( $(sed 's/ //g' <<< "${jobParametersString} | $(sed 's/ /_/g' <<< "${jobNameBetas[@]}") | postfix=${jobNamePostfix} | ${jobStatus}") )
-    done
-    printf "%s " "${metaInformationArray[@]:-}"
+    local temporaryArray
+    if [[ ${trajectoriesDone} =~ ^[1-9][0-9]*$ ]] && [[ ${trajectoriesDone} -ge 1000 ]]; then
+        meanPlaquetteLastBunchOfTrajectories=$(tail -n1000 "${outputFileGlobalPath}" | awk '{ sum+=$'${BHMAS_plaquetteColumn}'} END {printf "%.6f", sum/(NR)}')
+    fi
+    temporaryArray=(
+        $(awk '
+              BEGIN{
+                  meanS=0; sigmaS=0; maxSpikeS=0; meanP=0; sigmaP=0; maxSpikeP=0; firstFile=1; secondFile=1
+              }
+              NR==1{
+                  plaqMin=$'${BHMAS_plaquetteColumn}'
+                  plaqMax=$'${BHMAS_plaquetteColumn}'
+              }
+              NR==FNR{
+                  meanS+=$'${BHMAS_deltaHColumn}'
+                  meanP+=$'${BHMAS_plaquetteColumn}'
+                  plaqValue=$'${BHMAS_plaquetteColumn}'
+                  if(plaqValue<plaqMin){plaqMin=plaqValue}
+                  if(plaqValue>plaqMax){plaqMax=plaqValue}
+                  next
+              }
+              firstFile==1{
+                  nDat=NR-1
+                  meanS/=nDat
+                  meanP/=nDat
+                  firstFile=0
+              }
+              NR-nDat==FNR{
+                  deltaS=($'${BHMAS_deltaHColumn}'-meanS)
+                  sigmaS+=deltaS^2
+                  if(sqrt(deltaS^2)>maxSpikeS){maxSpikeS=sqrt(deltaS^2)}
+                  deltaP=($'${BHMAS_plaquetteColumn}'-meanP)
+                  sigmaP+=deltaP^2
+                  if(sqrt(deltaP^2)>maxSpikeP){maxSpikeP=sqrt(deltaP^2)}
+                  next
+              }
+              END{
+                  sigmaS=sqrt(sigmaS/nDat)
+                  sigmaP=sqrt(sigmaP/nDat)
+                  secondFile=0
+                  if(sigmaS!=0) {printf "%.3f ", maxSpikeS/sigmaS} else {print "---- "}
+                  if(sigmaP!=0) {printf "%.3f",  maxSpikeP/sigmaP} else {print "---- "};
+                  printf "% .6f", plaqMax-plaqMin
+              }
+              ' "${outputFileGlobalPath}" "${outputFileGlobalPath}" )
+    )
+    maxSpikeToMeanAsNSigma=${temporaryArray[0]}
+    maxSpikePlaquetteAsNSigma=${temporaryArray[1]}
+    deltaMaxPlaquette=${temporaryArray[2]}
 }
+
+# OUTPUT: timeFromLastTrajectory
+function __static__ExtractTimeFromLastTrajectory()
+{
+    timeFromLastTrajectory=$(( $(date +%s) - $(stat -c %Y "${outputFileGlobalPath}") ))
+}
+
+# OUTPUT: averageTimePerTrajectory timeLastTrajectory
+function __static__ExtractTrajectoryTimes()
+{
+    averageTimePerTrajectory=$(awk '{
+                                        time=$'${BHMAS_trajectoryTimeColumn}'
+                                        if(time!=0){sum+=time; counter+=1}
+                                    }
+                                    END{
+                                        if(counter!=0){printf "%d", sum/counter}else{printf "%d", 0}
+                                    }' "${outputFileGlobalPath}"
+                            )
+    timeLastTrajectory=$(awk 'END{printf "%d", $'${BHMAS_trajectoryTimeColumn}'}' "${outputFileGlobalPath}")
+}
+
+
+#----------------------------------------------------------------------------------#
+# The following functions deal with the report printing to the screen. Many are    #
+# simply deducing the color to use based on some information which is passed as    #
+# input. Their task is then to simply print a color code.                          #
+#----------------------------------------------------------------------------------#
+
 
 function __static__PrintSimulationStatusHeader()
 {
@@ -193,11 +262,12 @@ function __static__PrintSimulationStatusHeader()
 
 function __static__PrintSimulationStatusLine()
 {
+    local runId; runId="$1"
     printf \
         "$(__static__ColorBeta)%-15s\t  \
 $(__static__ColorClean ${toBeCleaned})%8s${BHMAS_defaultListstatusColor} \
 ($(GoodAcc ${acceptanceAllRun})%s %%${BHMAS_defaultListstatusColor}) \
-[$(GoodAcc ${acceptanceLastBunchOfTrajectories})%s %%${BHMAS_defaultListstatusColor}] \
+[$(GoodAcc ${acceptanceLastBunchOfTrajectories})%s %%${BHMAS_defaultListstatusColor}]  \
 %s-%s%s%s\t\
 $(__static__ColorStatus ${jobStatus})%9s${BHMAS_defaultListstatusColor}\t\
 $(__static__ColorDelta S ${maxSpikeToMeanAsNSigma})%7s${BHMAS_defaultListstatusColor}\t\
@@ -206,7 +276,7 @@ $(__static__ColorTime ${timeFromLastTrajectory})%s${BHMAS_defaultListstatusColor
 %10s \
 ( %s ) \
 \n\e[0m" \
-            "$(__static__GetShortenedBetaString)" \
+            "$(__static__GetShortenedBetaString "${runId}")" \
             "${trajectoriesDone}" \
             "${acceptanceAllRun}" \
             "${acceptanceLastBunchOfTrajectories}" \
@@ -219,22 +289,18 @@ $(__static__ColorTime ${timeFromLastTrajectory})%s${BHMAS_defaultListstatusColor
 
 function __static__PrintSimulationStatusFooter()
 {
-    cecho -d "${BHMAS_defaultListstatusColor}================================================================================================================================================================================================="
+    cecho -d "${BHMAS_defaultListstatusColor}=============================================================================================================================================================================================="
 }
-
-
 
 function __static__GetShortenedBetaString()
 {
-    if [[ "${postfixFromFolder}" == "continueWithNewChain" ]]; then
-        printf "${beta%_*}_NC"
-    elif [[ "${postfixFromFolder}" == "thermalizeFromHot" ]]; then
-        printf "${beta%_*}_fH"
-    elif [[ "${postfixFromFolder}" == "thermalizeFromConf" ]]; then
-        printf "${beta%_*}_fC"
-    else
-        printf "${beta%_*}"
-    fi
+    local runId; runId="$1"
+    declare -A shortPostfix=(
+        ['continueWithNewChain']='NC'
+        ['thermalizeFromHot']='fH'
+        ['thermalizeFromConf']='fC'
+    )
+    printf "${runId%_*}_${shortPostfix[${runId##*_}]}"
 }
 
 function GoodAcc()

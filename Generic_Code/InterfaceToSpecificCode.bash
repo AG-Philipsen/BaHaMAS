@@ -172,7 +172,7 @@ function FindAndSetNumberOfTrajectoriesAlreadyProduced()
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
 
-function ExtractSimulationInformationFromFiles()
+function ExtractSimulationInformationFromInputFile()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
