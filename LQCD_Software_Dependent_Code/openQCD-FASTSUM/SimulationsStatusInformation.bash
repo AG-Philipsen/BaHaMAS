@@ -31,7 +31,7 @@ function CreateOutputFileInTheStandardFormat_openQCD-FASTSUM()
               '\nwas not found but expected.'
         return
     fi
-    if ! trShift=$(ExtractTrajectoryNumberFromConfigurationSymlink "${runId}"); then
+    if ! trShift=$(ExtractTrajectoryNumberFromConfigurationSymlink "$(dirname "${softwareOutputFileGlobalPath}")"); then
         Error 'Unable to extract initial trajectory number from configuration symlink\n'\
               'for run ID ' emph "${runId}" ' and hence not able to create standardized output.'
         return

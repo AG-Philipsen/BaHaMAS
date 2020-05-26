@@ -421,7 +421,7 @@ function FindAndSetNumberOfTrajectoriesAlreadyProduced_CL2QCD()
     #   4) print an error and skip beta.
     local initialConfiguration index initialTrNumber lastTrNumber
     initialTrNumber=''; lastTrNumber=''
-    if initialTrNumber=$(ExtractTrajectoryNumberFromConfigurationSymlink "${runId}"); then
+    if initialTrNumber=$(ExtractTrajectoryNumberFromConfigurationSymlink "${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}"); then
         lastTrNumber="${nameOfLastConfiguration#${BHMAS_configurationPrefix//\\/}*(0)}" #extract number from the end without leading zeros
         if [[ ! "${lastTrNumber}" =~ ^[1-9][0-9]*$ ]]; then
             lastTrNumber="$(sed -n "s/^trajectory nr = \([1-9][0-9]*\)$/\1/p" ${runBetaDirectory}/${nameOfLastConfiguration} || true)"

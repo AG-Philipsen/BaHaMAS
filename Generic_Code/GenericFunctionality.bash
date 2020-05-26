@@ -27,10 +27,15 @@
 
 function ExtractTrajectoryNumberFromConfigurationSymlink()
 {
-    local runId initialConfiguration index trNumber
-    runId="$1"
-    # NOTE: Leave glob match the seed, since it might be different in continue mode
-    initialConfiguration=( "${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}/conf.${BHMAS_parametersString}_${BHMAS_betaPrefix}${runId%%_*}"* )
+    local betaFolderGlobalPath folderName parametersGlob initialConfiguration index trNumber
+    betaFolderGlobalPath="$1"
+    folderName="$(basename "${betaFolderGlobalPath}")"
+    # NOTE: Leave glob match the seed (since it might be different in continue mode)
+    #       and the parameters which might be different when this function is
+    #       called in database mode through the ListSimulationsStatus function.
+    IFS='*'; parametersGlob="${BHMAS_parameterPrefixes[*]}"; unset -v 'IFS'
+    parametersGlob="${parametersGlob[@]//[*]/*_}*"
+    initialConfiguration=( "${betaFolderGlobalPath}/conf."${parametersGlob}"_${folderName%%_*}"* )
     for index in "${#initialConfiguration[@]}"; do
         if [[ ! -L "${initialConfiguration[index]:-}" ]]; then
             unset -v 'initialConfiguration[index]'

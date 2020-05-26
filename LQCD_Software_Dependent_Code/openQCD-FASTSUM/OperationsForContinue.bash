@@ -283,7 +283,7 @@ function __static__GetNumberOfCheckpointCorrespondingToTrajectoryToResumeFrom()
     local trNumber deltaConfs shiftConfs
     trNumber=${BHMAS_trajectoriesToBeResumedFrom[${runId}]}
     deltaConfs=$(ExtractGapBetweenCheckpointsFromInputFile "${runId}")
-    if ! shiftConfs=$(ExtractTrajectoryNumberFromConfigurationSymlink "${runId}"); then
+    if ! shiftConfs=$(ExtractTrajectoryNumberFromConfigurationSymlink "${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}"); then
         Error 'Unable to find unique symbolic link to starting configuration in\n'\
               dir "${runBetaDirectory}"\
               '\nto extract initial number for rename mechanism of checkpoints.\n'\
@@ -307,7 +307,7 @@ function FindAndSetNumberOfTrajectoriesAlreadyProduced_openQCD-FASTSUM()
     #   3) print an error and skip beta.
     local initialConfiguration index initialTrNumber lastTrNumber
     initialTrNumber=''; lastTrNumber=''
-    if initialTrNumber=$(ExtractTrajectoryNumberFromConfigurationSymlink "${runId}"); then
+    if initialTrNumber=$(ExtractTrajectoryNumberFromConfigurationSymlink "${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}"); then
         lastTrNumber="${nameOfLastConfiguration##${BHMAS_configurationPrefix//\\/}*(0)}" #extract number from the end without leading zeros
     fi
     if [[ "${initialTrNumber}" =~ ^(0|[1-9][0-9]*)$ ]] && [[ "${lastTrNumber}" =~ ^[1-9][0-9]*$ ]]; then

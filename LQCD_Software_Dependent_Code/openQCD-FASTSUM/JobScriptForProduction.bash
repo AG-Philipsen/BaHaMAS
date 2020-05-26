@@ -82,7 +82,7 @@ function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
             ;;
         mode:continue* )
             # Here we must use the symbolic link that must exist
-            if ! shiftConfs=$(ExtractTrajectoryNumberFromConfigurationSymlink "${runId}"); then
+            if ! shiftConfs=$(ExtractTrajectoryNumberFromConfigurationSymlink "${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}"); then
                 Fatal ${BHMAS_fatalLogicError}\
                       'Unable to find unique symbolic link to starting configuration in\n'\
                       dir "${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}"\
