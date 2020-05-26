@@ -145,6 +145,10 @@ function DeclareBaHaMASGlobalVariables()
     declare -gA BHMAS_timesPerTrajectory=()
     declare -gA BHMAS_goalStatistics=()
     declare -gA BHMAS_startConfigurationGlobalPath=()
+    readonly BHMAS_plaquetteColumn=2
+    readonly BHMAS_deltaHColumn=8
+    readonly BHMAS_acceptanceColumn=9
+    readonly BHMAS_trajectoryTimeColumn=10
 
     #Metadata variables
     readonly BHMAS_metadataFilename='.BaHaMAS_metadata'

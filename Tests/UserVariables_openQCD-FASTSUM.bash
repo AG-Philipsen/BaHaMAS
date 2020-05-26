@@ -42,10 +42,6 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_inputFilename="fakeInput"
     readonly BHMAS_jobScriptPrefix="fakePrefix"
     readonly BHMAS_outputFilename="fakeOutput"
-    readonly BHMAS_plaquetteColumn=
-    readonly BHMAS_deltaHColumn=
-    readonly BHMAS_acceptanceColumn=
-    readonly BHMAS_trajectoryTimeColumn=
     readonly BHMAS_useRationalApproxFiles=''
     readonly BHMAS_rationalApproxGlobalPath=''
     readonly BHMAS_approxHeatbathFilename=''

@@ -38,10 +38,6 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
         BHMAS_inputFilename
         BHMAS_jobScriptPrefix
         BHMAS_outputFilename
-        BHMAS_plaquetteColumn
-        BHMAS_deltaHColumn
-        BHMAS_acceptanceColumn
-        BHMAS_trajectoryTimeColumn
         BHMAS_databaseFilename
         BHMAS_databaseGlobalPath
         BHMAS_thermConfsGlobalPath
@@ -130,22 +126,6 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
     fi
     if [[ "${BHMAS_coresPerNode:-}" != '' ]] && [[ ! ${BHMAS_coresPerNode} =~ ^[1-9][0-9]*$ ]]; then
         Error -n B emph "BHMAS_coresPerNode" uB " variable format invalid. It has to be a " emph "positive integer" " number."
-        mustReturn='FALSE'
-    fi
-    if [[ "${BHMAS_plaquetteColumn:-}" != '' ]] && [[ ! ${BHMAS_plaquetteColumn} =~ ^[1-9][0-9]*$ ]]; then
-        Error -n B emph "BHMAS_plaquetteColumn" uB " variable format invalid. It has to be a " emph "positive integer" " number."
-        mustReturn='FALSE'
-    fi
-    if [[ "${BHMAS_deltaHColumn:-}" != '' ]] && [[ ! ${BHMAS_deltaHColumn} =~ ^[1-9][0-9]*$ ]]; then
-        Error -n B emph "BHMAS_deltaHColumn" uB " variable format invalid. It has to be a " emph "positive integer" " number."
-        mustReturn='FALSE'
-    fi
-    if [[ "${BHMAS_acceptanceColumn:-}" != '' ]] && [[ ! ${BHMAS_acceptanceColumn} =~ ^[1-9][0-9]*$ ]]; then
-        Error -n B emph "BHMAS_acceptanceColumn" uB " variable format invalid. It has to be a " emph "positive integer" " number."
-        mustReturn='FALSE'
-    fi
-    if [[ "${BHMAS_trajectoryTimeColumn:-}" != '' ]] && [[ ! ${BHMAS_trajectoryTimeColumn} =~ ^[1-9][0-9]*$ ]]; then
-        Error -n B emph "BHMAS_trajectoryTimeColumn" uB " variable format invalid. It has to be a " emph "positive integer" " number."
         mustReturn='FALSE'
     fi
 
@@ -310,16 +290,11 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnExecutionM
             variablesThatMustBeNotEmpty+=(
                 BHMAS_inputFilename
                 BHMAS_outputFilename
-                BHMAS_plaquetteColumn
-                BHMAS_deltaHColumn
-                BHMAS_acceptanceColumn
-                BHMAS_trajectoryTimeColumn
             )
             ;;
 
         mode:acceptance-rate-report )
             variablesThatMustBeNotEmpty+=(
-                BHMAS_acceptanceColumn
                 BHMAS_outputFilename
             )
             ;;
@@ -351,10 +326,6 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnExecutionM
             variablesThatMustBeNotEmpty+=(
                 BHMAS_inputFilename
                 BHMAS_outputFilename
-                BHMAS_plaquetteColumn
-                BHMAS_deltaHColumn
-                BHMAS_acceptanceColumn
-                BHMAS_trajectoryTimeColumn
                 BHMAS_databaseGlobalPath
                 BHMAS_databaseFilename
             )
