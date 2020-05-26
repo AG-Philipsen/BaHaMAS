@@ -29,6 +29,9 @@
 :   Limit the simulation status report to simulations for which a job is enqueued.
     This option can be useful when many simulations are run in the same folder.
 
+\--verbose
+:   Explicitly print errors instead of ignoring folders or simply do not extract information.
+
 \--chains *number*
 :   The number of chains that must exist per beta value in the **betas** file (default: 4).
 

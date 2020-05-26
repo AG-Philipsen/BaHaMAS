@@ -49,13 +49,15 @@ function ListSimulationsStatus()
     for betaFolderName in "${BHMAS_betaPrefix}"${BHMAS_betaGlob}"_${BHMAS_seedPrefix}"${BHMAS_seedGlob}'_'{continueWithNewChain,thermalizeFrom{Hot,Cold,Conf}}; do
         runId=${betaFolderName#${BHMAS_betaPrefix}}
         if ! SetLqcdSoftwareFromMetadata "${runId}"; then
-            Error -N 'Unable to find the LQCD software in the metadata file\n'\
-                  file "${BHMAS_metadataFilename}" ' for ' emph "run ID = ${runId}" '.'
+            if [[ ${BHMAS_simulationStatusVerbose} = 'TRUE' ]]; then
+                Error -N 'Unable to find the LQCD software in the metadata file\n'\
+                      file "${BHMAS_metadataFilename}" ' for ' emph "run ID = ${runId}" '.'
+            fi
             continue
         fi
         postfixFromFolder=$(grep -o "[[:alpha:]]\+\$" <<< "${runId##*_}")
         jobStatus=$(__static__GetJobStatus "${runId}" "${localParametersString}")
-        if [[ "${jobStatus}" = 'notQueued' ]] && [[ ${BHMAS_liststatusShowOnlyQueuedOption} = "TRUE" ]]; then
+        if [[ "${jobStatus}" = 'notQueued' ]] && [[ ${BHMAS_simulationStatusShowOnlyQueuedOption} = "TRUE" ]]; then
             continue
         fi
         # NOTE: Do not use BHMAS_runDirWithBetaFolders because it would break database
@@ -82,7 +84,7 @@ function ListSimulationsStatus()
             if [[ ${jobStatus} = 'RUNNING' ]]; then
                 __static__ExtractTimeFromLastTrajectory
             fi
-            if [[ ${BHMAS_liststatusMeasureTimeOption} = 'TRUE' ]]; then
+            if [[ ${BHMAS_simulationStatusMeasureTimeOption} = 'TRUE' ]]; then
                 __static__ExtractTrajectoryTimes
             fi
         fi

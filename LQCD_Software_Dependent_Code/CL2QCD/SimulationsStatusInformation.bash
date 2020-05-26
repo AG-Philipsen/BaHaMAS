@@ -27,8 +27,10 @@ function CreateOutputFileInTheStandardFormat_CL2QCD()
     local softwareOutputFileGlobalPath
     softwareOutputFileGlobalPath="$(dirname "${outputFileGlobalPath}")/${BHMAS_outputFilename}"
     if [[ ! -f "${softwareOutputFileGlobalPath}" ]]; then
-        Error 'CL2QCD output file ' file "${softwareOutputFileGlobalPath}"\
-              '\nwas not found but expected.'
+        if [[ ${BHMAS_simulationStatusVerbose} = 'TRUE' ]]; then
+            Error 'CL2QCD output file ' file "${softwareOutputFileGlobalPath}"\
+                  '\nwas not found but expected.'
+        fi
         return
     fi
     (

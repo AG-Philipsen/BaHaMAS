@@ -31,6 +31,9 @@ The functionality provided here is internally used by the **database** mode, but
 :   Limit the simulation status report to simulations for which a job is enqueued.
     This option can be useful when many simulations are run in the same folder.
 
+\--verbose
+:   Explicitly print errors instead of ignoring folders or simply do not extract information.
+
 # SEE ALSO
 
 **BaHaMAS**(1), **BaHaMAS-database**(1), **BaHaMAS-comment-betas**(1), **BaHaMAS-uncomment-betas**(1), [Wiki pages](https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/-/wikis/home)

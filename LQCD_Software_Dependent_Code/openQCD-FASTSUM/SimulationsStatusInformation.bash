@@ -27,13 +27,17 @@ function CreateOutputFileInTheStandardFormat_openQCD-FASTSUM()
     runId="$1"
     softwareOutputFileGlobalPath="$(dirname "${outputFileGlobalPath}")/${BHMAS_outputFilename}.log"
     if [[ ! -f "${softwareOutputFileGlobalPath}" ]]; then
-        Error 'openQCD-FASTSUM output file ' file "${softwareOutputFileGlobalPath}"\
-              '\nwas not found but expected.'
+        if [[ ${BHMAS_simulationStatusVerbose} = 'TRUE' ]]; then
+            Error 'openQCD-FASTSUM output file ' file "${softwareOutputFileGlobalPath}"\
+                  '\nwas not found but expected.'
+        fi
         return
     fi
     if ! trShift=$(ExtractTrajectoryNumberFromConfigurationSymlink "$(dirname "${softwareOutputFileGlobalPath}")"); then
-        Error 'Unable to extract initial trajectory number from configuration symlink\n'\
-              'for run ID ' emph "${runId}" ' and hence not able to create standardized output.'
+        if [[ ${BHMAS_simulationStatusVerbose} = 'TRUE' ]]; then
+            Error 'Unable to extract initial trajectory number from configuration symlink\n'\
+                  'for run ID ' emph "${runId}" ' and hence not able to create standardized output.'
+        fi
         return
     fi
     # NOTE: "N.A." is printed for information that openQCD does not give

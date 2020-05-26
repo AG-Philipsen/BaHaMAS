@@ -131,7 +131,7 @@ function DeclareAllowedOptionsPerModeOrSoftware()
             ['mode:continue']='--till '
             ['mode:continue-thermalization']='--till '
             ['mode:job-status']='--user --local --all '
-            ['mode:simulation-status']='--doNotMeasureTime --showOnlyQueued '
+            ['mode:simulation-status']='--doNotMeasureTime --showOnlyQueued --verbose '
             ['mode:acceptance-rate-report']='--interval '
             ['mode:clean-output-files']='--all '
             ['mode:complete-betas-file']='--chains '

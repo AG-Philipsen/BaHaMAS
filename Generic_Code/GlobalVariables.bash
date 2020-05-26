@@ -162,8 +162,9 @@ function DeclareBaHaMASGlobalVariables()
     BHMAS_jobstatusUser="$(whoami)"
     BHMAS_jobstatusAll='FALSE'
     BHMAS_jobstatusLocal='FALSE'
-    BHMAS_liststatusMeasureTimeOption='TRUE'
-    BHMAS_liststatusShowOnlyQueuedOption='FALSE'
+    BHMAS_simulationStatusMeasureTimeOption='TRUE'
+    BHMAS_simulationStatusShowOnlyQueuedOption='FALSE'
+    BHMAS_simulationStatusVerbose='FALSE'
     BHMAS_accRateReportInterval=1000
     BHMAS_cleanAllOutputFiles='FALSE'
     BHMAS_numberOfChainsToBeInTheBetasFile=4
