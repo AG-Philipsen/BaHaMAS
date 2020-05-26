@@ -45,12 +45,14 @@ function ListSimulationsStatus()
 
     __static__PrintSimulationStatusHeader
     GatherJobsInformationForSimulationStatusMode
-    jobsInformation=(
-        "${BHMAS_parametersString}_b5.1234_s1234_NC@RUNNING"
-        "${BHMAS_parametersString}_b5.1234_s1234_TC@PENDING"
-    )
+
     for betaFolderName in "${BHMAS_betaPrefix}"${BHMAS_betaGlob}"_${BHMAS_seedPrefix}"${BHMAS_seedGlob}'_'{continueWithNewChain,thermalizeFrom{Hot,Cold,Conf}}; do
         runId=${betaFolderName#${BHMAS_betaPrefix}}
+        if ! SetLqcdSoftwareFromMetadata "${runId}"; then
+            Error -N 'Unable to find the LQCD software in the metadata file\n'\
+                  file "${BHMAS_metadataFilename}" ' for ' emph "run ID = ${runId}" '.'
+            continue
+        fi
         postfixFromFolder=$(grep -o "[[:alpha:]]\+\$" <<< "${runId##*_}")
         jobStatus=$(__static__GetJobStatus "${runId}" "${localParametersString}")
         if [[ "${jobStatus}" = 'notQueued' ]] && [[ ${BHMAS_liststatusShowOnlyQueuedOption} = "TRUE" ]]; then

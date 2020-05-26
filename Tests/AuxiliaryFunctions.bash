@@ -227,6 +227,7 @@ function MakeTestPreliminaryOperations()
 
         CL2QCD-simulation-status* )
             __static__CreateBetaFolder
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
             __static__CopyAuxiliaryFilesToSubmitBetaFolder "fakeExecutable.123456.out" "fakeInput"
             __static__CopyAuxiliaryFilesToRunBetaFolder "fakeOutput"
             ;;
@@ -309,6 +310,7 @@ function MakeTestPreliminaryOperations()
 
         openQCD-FASTSUM-simulation-status* )
             __static__CreateBetaFolder
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
             __static__CopyAuxiliaryFilesToSubmitBetaFolder "fakeInput"
             __static__CopyAuxiliaryFilesToRunBetaFolder "fakeOutput.log"
             __static__CreateSymlinkInRunBetaFolder "fromConf_trNr5000"
@@ -328,6 +330,7 @@ function MakeTestPreliminaryOperations()
             cp "${BHMAS_testsFolderAuxFiles}/fakeOverviewDatabase" "${databaseFolder}/2022_01_01_OverviewDatabase"
             if [[ $1 =~ update ]]; then
                 __static__CreateBetaFolder
+                __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
                 __static__CopyAuxiliaryFilesToSubmitBetaFolder "fakeExecutable.123456.out" "fakeInput"
                 __static__CopyAuxiliaryFilesToRunBetaFolder "fakeOutput"
                 cecho -d "${submitDirWithBetaFolders}" > "fakeDatabasePath"

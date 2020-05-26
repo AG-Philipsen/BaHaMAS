@@ -40,6 +40,22 @@ function ValidateParsedBetaValues()
     fi
 }
 
+function SetLqcdSoftwareFromMetadata()
+{
+    local runId occurencesInFile
+    runId="$1"
+    if [[ ! -f "${BHMAS_metadataFilename}" ]]; then
+        return 1
+    else
+        occurencesInFile=$(grep -c "^${runId}" "${BHMAS_metadataFilename}" || true)
+    fi
+    if [[ ${occurencesInFile} -ne 1 ]]; then
+        return 1
+    else
+        BHMAS_lqcdSoftware=$(awk -v id="${runId}" '$1 == id {print $2}' "${BHMAS_metadataFilename}")
+    fi
+}
+
 function __static__ValidateMetadata()
 {
     local modesThatRequireEntryInMetadataFile\

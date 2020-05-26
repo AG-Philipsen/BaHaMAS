@@ -35,7 +35,6 @@ function ParseCommandLineOptionsTillMode()
         BHMAS_lqcdSoftware="$1"
         shift
     fi
-    readonly BHMAS_lqcdSoftware
     case "$1" in
         help | --help )
             BHMAS_executionMode='mode:help'
@@ -103,6 +102,11 @@ function ParseCommandLineOptionsTillMode()
     shift
     #Update the global array with remaining options to be parsed
     BHMAS_commandLineOptionsToBeParsed=( "$@" )
+
+    # Make software variable readonly but not in simulation-status related modes
+    if [[ ! ${BHMAS_executionMode} =~ ^mode:(simulation-status|database)$ ]]; then
+        readonly BHMAS_lqcdSoftware
+    fi
     #If user specified --help in a given mode, act accrdingly
     if [[ ! ${BHMAS_executionMode} =~ ^mode:(help|version|setup)$ ]]; then
         if  ElementInArray '--help' "${BHMAS_commandLineOptionsToBeParsed[@]}" "${BHMAS_optionsToBePassedToDatabase[@]}"; then
