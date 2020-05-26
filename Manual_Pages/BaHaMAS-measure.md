@@ -19,6 +19,8 @@ This mode operates exclusively on new-chains folders.
 Running this mode e.g. on an unfinished beta folder will result in an attempt to complete the calculation.
 Said differently, already existing correlators will not be evaluated agian.
 
+**openQCD-FASTSUM** does not support this mode.
+
 # OPTIONS
 
 \--betasfile *filename*
