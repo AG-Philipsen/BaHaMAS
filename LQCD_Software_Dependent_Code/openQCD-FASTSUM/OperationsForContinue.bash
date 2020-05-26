@@ -379,10 +379,6 @@ function ModifyOptionsInInputFile_openQCD-FASTSUM()
                 oldString="nstep[[:space:]]+[0-9]+"
                 newString="$(printf "%-13s%s" "nstep" "${1#*=}")"
                 ;;
-            #f=* | checkpointEvery=* )
-            #    oldString="createCheckpointEvery=[0-9]\+"
-            #    newString="createCheckpointEvery=${1#*=}"
-            #    ;;
             #nPseudoFermions=* )
             #    oldString="nPseudoFermions=[0-9]\+"
             #    newString="nPseudoFermions=${1#*=}"
