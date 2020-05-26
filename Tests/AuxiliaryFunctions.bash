@@ -388,7 +388,7 @@ function RunTest()
     testName=$1; shift
     (( testsRun++ ))
     if [[ ${reportLevel} -eq 3 ]]; then
-        printf -v stringTest "%-50s" "__${testName}$(cecho -d bb)_"
+        printf -v stringTest "%-60s" "__${testName}$(cecho -d bb)_"
         stringTest="${stringTest// /.}"
         cecho -n lp "  $(printf '%+2s' ${testsRun})/$(printf '%-2s' ${#testsToBeRun[@]})" lc "${stringTest//_/ }"
     fi

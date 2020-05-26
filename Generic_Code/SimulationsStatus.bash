@@ -261,40 +261,72 @@ function __static__ExtractTrajectoryTimes()
 
 function __static__PrintSimulationStatusHeader()
 {
-    cecho -d "\n${BHMAS_defaultListstatusColor}=============================================================================================================================================================================================="
-    cecho -n -d lm "$(printf "%s\t\t  %s\t   %s    %s    %s\t  %s\t     %s\n\e[0m"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "MaxSpikeDS/s"   "Plaq: <Last1000>  Pmax-Pmin  MaxSpikeDP/s"   "Last tr. finished" "Tr: # (time last|av.)")"
+    local terminalWidth separator index header1 header2
+    terminalWidth=$(tput cols)
+    separator=''
+    for((index=0; index<terminalWidth-1; index++)); do
+        separator+='='
+    done
+    printf -v header1 "%-18s%45s%12s%16s%38s%30s%20s\e[0m"\
+           "Run ID"\
+           "Trajectories done, acceptance, MD steps   "\
+           ""\
+           "Metropolis "\
+           "Plaquette average and monitoring "\
+           "Last trajectory information"\
+           "Time/trajectory"
+    printf -v header2 "%-18s%45s%12s%16s%38s%30s%20s\e[0m"\
+           "Beta_seed_type"\
+           "Statistics (Accept.) [Last 1000] int0-1-2-kmp"\
+           "Status"\
+           "MaxSpikeDH/s"\
+           "<Last1000>  Pmax-Pmin  MaxSpikeDP/s"\
+           "Number   Time from last"\
+           "Last    Mean"
+    cecho -d "\n${BHMAS_defaultListstatusColor}${separator}" wg "\n${header1}" lm "\n${header2}"
+    #cecho -n -d lm "${header}"
+    #cecho -n -d lm "$(printf "%s\t\t  %s\t   %s    %s    %s\t  %s\t     %s\n\e[0m"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "MaxSpikeDS/s"   "Plaq: <Last1000>  Pmax-Pmin  MaxSpikeDP/s"   "Last tr. finished" "Tr: # (time last|av.)")"
 }
 
 function __static__PrintSimulationStatusLine()
 {
-    local runId; runId="$1"
-    printf \
-        "$(__static__ColorBeta)%-15s\t  \
-$(__static__ColorClean ${toBeCleaned})%8s${BHMAS_defaultListstatusColor} \
-($(GoodAcc ${acceptanceAllRun})%s %%${BHMAS_defaultListstatusColor}) \
-[$(GoodAcc ${acceptanceLastBunchOfTrajectories})%s %%${BHMAS_defaultListstatusColor}]  \
-%s-%s%s%s\t\
-$(__static__ColorStatus ${jobStatus})%9s${BHMAS_defaultListstatusColor}\t\
-$(__static__ColorDelta S ${maxSpikeToMeanAsNSigma})%7s${BHMAS_defaultListstatusColor}\t\
-%20s  %10s  $(__static__ColorDelta P ${maxSpikePlaquetteAsNSigma})%9s${BHMAS_defaultListstatusColor}\t  \
-$(__static__ColorTime ${timeFromLastTrajectory})%s${BHMAS_defaultListstatusColor}\t\
-%10s \
-( %s ) \
-\n\e[0m" \
-            "$(__static__GetShortenedBetaString "${runId}")" \
-            "${trajectoriesDone}" \
-            "${acceptanceAllRun}" \
-            "${acceptanceLastBunchOfTrajectories}" \
-            "${integrationSteps0}" "${integrationSteps1}" "${integrationSteps2}" "${kappaMassPreconditioning}" \
-            "${jobStatus}"   "${maxSpikeToMeanAsNSigma}"   "${meanPlaquetteLastBunchOfTrajectories}"   "${deltaMaxPlaquette}"   "${maxSpikePlaquetteAsNSigma}"\
-            "$(awk '{if($1 ~ /^[[:digit:]]+$/){printf "%6d", $1}else{print $1}}' <<< "${timeFromLastTrajectory}") sec. ago" \
-            "${numberLastTrajectory}" \
-            "$(awk '{if($1 ~ /^[[:digit:]]+$/ && $2 ~ /^[[:digit:]]+$/){printf "%3ds | %3ds", $1, $2}else{print "notMeasured"}}' <<< "${timeLastTrajectory} ${averageTimePerTrajectory}")"
+    local runId formattingString
+    runId="$1"
+    formattingString="$(__static__ColorBeta)%-18s"
+    formattingString+="$(__static__ColorClean ${toBeCleaned})%10s${BHMAS_defaultListstatusColor} "
+    formattingString+="($(GoodAcc ${acceptanceAllRun})%s %%${BHMAS_defaultListstatusColor}) "
+    formattingString+="[$(GoodAcc ${acceptanceLastBunchOfTrajectories})%7s %%${BHMAS_defaultListstatusColor}] "
+    formattingString+="%s-%s%s%s"
+    formattingString+="$(__static__ColorStatus ${jobStatus})%12s${BHMAS_defaultListstatusColor}"
+    formattingString+="$(__static__ColorDelta S ${maxSpikeToMeanAsNSigma})%13s${BHMAS_defaultListstatusColor}   "
+    formattingString+="%12s%12s  $(__static__ColorDelta P ${maxSpikePlaquetteAsNSigma})%9s${BHMAS_defaultListstatusColor}   "
+    formattingString+="%13s$(__static__ColorTime ${timeFromLastTrajectory})%12s${BHMAS_defaultListstatusColor} sec."
+    formattingString+="%20s"
+    formattingString+="\e[0m\n"
+
+    printf "${formattingString}"\
+           "$(__static__GetShortenedBetaString "${runId}")" \
+           "${trajectoriesDone}" \
+           "${acceptanceAllRun}" \
+           "${acceptanceLastBunchOfTrajectories}" \
+           "${integrationSteps0}" "${integrationSteps1}" "${integrationSteps2}" "${kappaMassPreconditioning}" \
+           "${jobStatus}"\
+           "${maxSpikeToMeanAsNSigma}"\
+           "${meanPlaquetteLastBunchOfTrajectories}"   "${deltaMaxPlaquette}"   "${maxSpikePlaquetteAsNSigma}"\
+           "${numberLastTrajectory}" \
+           "${timeFromLastTrajectory}" \
+           "$(awk '{if($1 ~ /^[[:digit:]]+$/ && $2 ~ /^[[:digit:]]+$/){printf "%ds%7ds", $1, $2}else{print "notMeasured"}}' <<< "${timeLastTrajectory} ${averageTimePerTrajectory}")"
 }
 
 function __static__PrintSimulationStatusFooter()
 {
-    cecho -d "${BHMAS_defaultListstatusColor}=============================================================================================================================================================================================="
+    local terminalWidth separator index
+    terminalWidth=$(tput cols)
+    separator=''
+    for((index=0; index<terminalWidth-1; index++)); do
+        separator+='='
+    done
+    cecho "${BHMAS_defaultListstatusColor}${separator}"
 }
 
 function __static__GetShortenedBetaString()
