@@ -56,8 +56,10 @@ function ListSimulationsStatus()
         if [[ "${jobStatus}" = 'notQueued' ]] && [[ ${BHMAS_liststatusShowOnlyQueuedOption} = "TRUE" ]]; then
             continue
         fi
+        # NOTE: Do not use BHMAS_runDirWithBetaFolders because it would break database
+        #       which needs to change the ${localParametersPath} variable needed here.
         outputFileGlobalPath="${BHMAS_runDiskGlobalPath}/${BHMAS_projectSubpath}${localParametersPath}/${BHMAS_betaPrefix}${runId}/${BHMAS_outputFilename}.BaHaMAS"
-        CreateOutputFileInTheStandardFormat
+        CreateOutputFileInTheStandardFormat "${runId}"
         toBeCleaned=0
         trajectoriesDone='-----'
         numberLastTrajectory='----'

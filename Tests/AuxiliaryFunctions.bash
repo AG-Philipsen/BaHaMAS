@@ -307,6 +307,13 @@ function MakeTestPreliminaryOperations()
             esac
             ;;
 
+        openQCD-FASTSUM-simulation-status* )
+            __static__CreateBetaFolder
+            __static__CopyAuxiliaryFilesToSubmitBetaFolder "fakeInput"
+            __static__CopyAuxiliaryFilesToRunBetaFolder "fakeOutput.log"
+            __static__CreateSymlinkInRunBetaFolder "fromConf_trNr5000"
+            ;;
+
         completeBetasFile* )
             __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeBetasToBeCompleted" "betas"
             ;;

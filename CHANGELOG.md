@@ -32,7 +32,8 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 ## [Unreleased](https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/compare/BaHaMAS-0.1.0...develop)
 
-* :new: Continue mode has been implemented for openQCD-FASTSUM software.
+* :new: `simulation-status` mode has been implemented for openQCD-FASTSUM software.
+* :new: `continue` mode has been implemented for openQCD-FASTSUM software.
 * :boom: The `g` field in the betas file has now always the meaning of **goal statistics**, i.e. how many trajectories *in the given run* should be produced.
 * :boom: Name convention for thermalised configurations was changed to include in their names the trajectory number they refer to.
 * :new: Execution modes to start production jobs have been implemented for openQCD-FASTSUM software.
