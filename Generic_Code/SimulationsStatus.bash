@@ -284,8 +284,6 @@ function __static__PrintSimulationStatusHeader()
            "Number   Time from last"\
            "Last    Mean"
     cecho -d "\n${BHMAS_defaultListstatusColor}${separator}" wg "\n${header1}" lm "\n${header2}"
-    #cecho -n -d lm "${header}"
-    #cecho -n -d lm "$(printf "%s\t\t  %s\t   %s    %s    %s\t  %s\t     %s\n\e[0m"   "Beta"   "Traj. Done (Acc.) [Last 1000] int0-1-2-kmp"   "Status"   "MaxSpikeDS/s"   "Plaq: <Last1000>  Pmax-Pmin  MaxSpikeDP/s"   "Last tr. finished" "Tr: # (time last|av.)")"
 }
 
 function __static__PrintSimulationStatusLine()
@@ -355,33 +353,41 @@ function GoodAcc()
 
 function __static__ColorStatus()
 {
-    if [[ $1 == "RUNNING" ]]; then
-        printf ${BHMAS_runningListstatusColor}
-    elif [[ $1 == "PENDING" ]]; then
-        printf ${BHMAS_pendingListstatusColor}
+    if [[ $1 = 'RUNNING' ]]; then
+        printf "${BHMAS_runningListstatusColor}"
+    elif [[ $1 = 'PENDING' ]]; then
+        printf "${BHMAS_pendingListstatusColor}"
     else
-        printf ${BHMAS_defaultListstatusColor}
+        printf "${BHMAS_defaultListstatusColor}"
     fi
 }
 
 function __static__ColorTime()
 {
     if [[ ! $1 =~ ^[[:digit:]]+$ ]]; then
-        printf ${BHMAS_defaultListstatusColor}
+        printf "${BHMAS_defaultListstatusColor}"
     else
-        [[ $1 -gt 450 ]] && printf ${BHMAS_stuckSimulationListstatusColor} || printf ${BHMAS_fineSimulationListstatusColor}
+        if [[ $1 -gt 450 ]]; then
+            printf "${BHMAS_stuckSimulationListstatusColor}"
+        else
+            printf "${BHMAS_fineSimulationListstatusColor}"
+        fi
     fi
 }
 
 function __static__ColorClean()
 {
-    [[ $1 -eq 0 ]] && printf ${BHMAS_defaultListstatusColor} || printf ${BHMAS_toBeCleanedListstatusColor}
+    if [[ $1 -eq 0 ]]; then
+        printf "${BHMAS_defaultListstatusColor}"
+    else
+        printf "${BHMAS_toBeCleanedListstatusColor}"
+    fi
 }
 
 function __static__ColorBeta()
 {
-    if [[ ! -f ${outputFileGlobalPath} ]]; then
-        printf ${BHMAS_defaultListstatusColor}
+    if [[ ! -f "${outputFileGlobalPath}" ]]; then
+        printf "${BHMAS_defaultListstatusColor}"
         return
     fi
     local errorCode
@@ -390,11 +396,11 @@ function __static__ColorBeta()
     errorCode=$?
     set -e
     if [[ ${errorCode} -eq ${BHMAS_successExitCode} ]]; then
-        printf ${BHMAS_defaultListstatusColor}
+        printf "${BHMAS_defaultListstatusColor}"
     elif [[ ${errorCode} -eq ${BHMAS_fatalLogicError} ]]; then
-        printf ${BHMAS_wrongBetaListstatusColor}
+        printf "${BHMAS_wrongBetaListstatusColor}"
     else
-        printf ${BHMAS_suspiciousBetaListstatusColor}
+        printf "${BHMAS_suspiciousBetaListstatusColor}"
     fi
 }
 
@@ -423,21 +429,21 @@ function __static__CheckCorrectnessOutputFile()
         -v wrongVariable="${BHMAS_fatalVariableUnset}" \
         -v success="${BHMAS_successExitCode}" \
         -v failure="${BHMAS_fatalLogicError}" \
-        -f ${BHMAS_repositoryTopLevelPath}/Generic_Code/CheckCorrectnessOutputFile.awk "$1"
+        -f "${BHMAS_repositoryTopLevelPath}/Generic_Code/CheckCorrectnessOutputFile.awk" "$1"
 }
 
 function __static__ColorDelta()
 {
     if [[ ! $1 =~ ^[PS]$ ]] || [[ ! $2 =~ [+-]?[[:digit:]]+[.]?[[:digit:]]* ]]; then
-        printf ${BHMAS_defaultListstatusColor}
+        printf "${BHMAS_defaultListstatusColor}"
     else
         local thresholdVariableName tooHighColorVariableName
         thresholdVariableName="BHMAS_delta${1}Threshold"
         tooHighColorVariableName="BHMAS_tooHighDelta${1}ListstatusColor"
-        if [[ "${postfixFromFolder}" == "continueWithNewChain" ]] && [[ $(awk -v threshold=${!thresholdVariableName} -v value=$2 'BEGIN{if(value >= threshold)print 1; else print 0;}') -eq 1 ]]; then
-            printf ${!tooHighColorVariableName}
+        if [[ "${postfixFromFolder}" = "continueWithNewChain" ]] && [[ $(awk -v threshold=${!thresholdVariableName} -v value=$2 'BEGIN{if(value >= threshold)print 1; else print 0;}') -eq 1 ]]; then
+            printf "${!tooHighColorVariableName}"
         else
-            printf ${BHMAS_defaultListstatusColor}
+            printf "${BHMAS_defaultListstatusColor}"
         fi
     fi
 }
