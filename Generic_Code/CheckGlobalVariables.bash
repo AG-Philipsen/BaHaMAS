@@ -60,6 +60,7 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
         BHMAS_clusterGenericResource
         BHMAS_walltime
         BHMAS_maximumWalltime
+        BHMAS_measurePbp
     )
     variablesThatIfNotEmptyMustNotEndWithSlash=(
         BHMAS_submitDiskGlobalPath
@@ -98,35 +99,41 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
 
     #Check variables values (those not checked have no requirement at this point)
     if [[ ! ${BHMAS_lqcdSoftware:-} =~ ^(CL2QCD|openQCD-FASTSUM)$ ]]; then
-        Error -n B emph "BHMAS_lqcdSoftware" uB " variable must be set either to " emph "CL2QCD" " or to " emph "openQCD-FASTSUM"
+        Error -n B emph 'BHMAS_lqcdSoftware' uB ' variable must be set either to ' emph 'CL2QCD' ' or to ' emph 'openQCD-FASTSUM'
         mustReturn='FALSE'
     fi
     if [[ "${BHMAS_coloredOutput:-}" != 'TRUE' ]] && [[ "${BHMAS_coloredOutput:-}" != 'FALSE' ]]; then
-        #Since in the following we use cecho which rely on the variable "BHMAS_coloredOutput",
+        #Since in the following we use cecho which rely on the variable 'BHMAS_coloredOutput',
         #if this was wrongly set, let us set it to 'FALSE' but still report on it
         BHMAS_coloredOutput='FALSE'
-        Error -n B emph "BHMAS_coloredOutput" uB " variable must be set either to " emph "TRUE" " or to " emph "FALSE"
+        Error -n B emph 'BHMAS_coloredOutput' uB ' variable must be set either to ' emph 'TRUE' ' or to ' emph 'FALSE'
         mustReturn='FALSE'
     fi
     if [[ "${BHMAS_useRationalApproxFiles:-}" != '' ]]; then
         if [[ "${BHMAS_useRationalApproxFiles}" != 'TRUE' ]] && [[ "${BHMAS_useRationalApproxFiles}" != 'FALSE' ]]; then
-            Error -n B emph "BHMAS_useRationalApproxFiles" uB " variable must be set either to " emph "TRUE" " or to " emph "FALSE"
+            Error -n B emph 'BHMAS_useRationalApproxFiles' uB ' variable must be set either to ' emph 'TRUE' ' or to ' emph 'FALSE'
             mustReturn='FALSE'
         fi
     fi
     for variable in BHMAS_walltime BHMAS_maximumWalltime; do
         if [[ "${!variable:-}" != '' ]] && [[ ! ${!variable} =~ ^([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]]; then
-            Error -n B emph "${variable}" uB " variable format invalid. Correct format: " emph "days-hours:min:sec" " or " emph "hours:min:sec"
+            Error -n B emph "${variable}" uB ' variable format invalid. Correct format: ' emph 'days-hours:min:sec' ' or ' emph 'hours:min:sec'
             mustReturn='FALSE'
         fi
     done
     if [[ "${BHMAS_GPUsPerNode:-}" != '' ]] && [[ ! ${BHMAS_GPUsPerNode} =~ ^[1-9][0-9]*$ ]]; then
-        Error -n B emph "BHMAS_GPUsPerNode" uB " variable format invalid. It has to be a " emph "positive integer" " number."
+        Error -n B emph 'BHMAS_GPUsPerNode' uB ' variable format invalid. It has to be a ' emph 'positive integer' ' number.'
         mustReturn='FALSE'
     fi
     if [[ "${BHMAS_coresPerNode:-}" != '' ]] && [[ ! ${BHMAS_coresPerNode} =~ ^[1-9][0-9]*$ ]]; then
-        Error -n B emph "BHMAS_coresPerNode" uB " variable format invalid. It has to be a " emph "positive integer" " number."
+        Error -n B emph 'BHMAS_coresPerNode' uB ' variable format invalid. It has to be a ' emph 'positive integer' ' number.'
         mustReturn='FALSE'
+    fi
+    if [[ "${BHMAS_measurePbp:-}" != '' ]]; then
+        if [[ "${BHMAS_measurePbp}" != 'TRUE' ]] && [[ "${BHMAS_measurePbp}" != 'FALSE' ]]; then
+        Error -n B emph 'BHMAS_measurePbp' uB ' variable must be set either to ' emph 'TRUE' ' or to ' emph 'FALSE'
+        mustReturn='FALSE'
+        fi
     fi
 
     #If variables remained in arrays, print error

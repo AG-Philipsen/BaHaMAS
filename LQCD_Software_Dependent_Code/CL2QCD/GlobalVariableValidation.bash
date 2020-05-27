@@ -44,6 +44,7 @@ function PrepareSoftwareSpecificGlobalVariableValidation_CL2QCD()
     # must be available somewhere and BaHaMAS just copies it
     productionJobsNeededVariables+=(
         BHMAS_productionExecutableGlobalPath
+        BHMAS_measurePbp
     )
     schedulerVariables+=(
         BHMAS_GPUsPerNode #This is here and not in the array above because it is needed also in measure mode!

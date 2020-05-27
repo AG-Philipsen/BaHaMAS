@@ -151,7 +151,7 @@ function DeclareAllowedOptionsPerModeOrSoftware()
     # NOTE: The associative array must be declared in the caller
     local productionOptionsCL2QCD clusterOptions
     productionOptions='--measurements --checkpointEvery'
-    productionOptionsCL2QCD='--pf --confSaveEvery --cgbs'
+    productionOptionsCL2QCD='--pf --confSaveEvery --cgbs --togglePbp'
     productionOptionsOpenQCD='--processorsGrid'
     clusterOptions='--walltime  --partition  --node  --constraint  --resource'
     allowedOptionsPerModeOrSoftware+=(
@@ -344,8 +344,14 @@ function __static__ParseRemainingGeneralOptions()
                 fi
                 shift 2
                 ;;
-            --doNotMeasurePbp )
-                BHMAS_measurePbp="FALSE"
+            --togglePbp )
+                if [[ BHMAS_measurePbp='FALSE' ]]; then
+                    BHMAS_measurePbp='TRUE'
+                    cecho lg ' Measurement of the ' B 'pbp' uB ' has been switched ' B 'ON'
+                else
+                    BHMAS_measurePbp='FALSE'
+                    cecho lg ' Measurement of the ' B 'pbp' uB ' has been switched ' B 'OFF'
+                fi
                 shift
                 ;;
             --partition )

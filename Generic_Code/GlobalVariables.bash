@@ -122,7 +122,6 @@ function DeclareBaHaMASGlobalVariables()
     BHMAS_numberOfTrajectories=1000
     BHMAS_checkpointFrequency=100
     BHMAS_useMultipleChains='TRUE'
-    BHMAS_measurePbp='TRUE'
     BHMAS_numberOfPseudofermions=1
     BHMAS_inverterMaxIterations=15000
 

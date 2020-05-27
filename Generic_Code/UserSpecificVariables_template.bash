@@ -71,6 +71,7 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_maximumWalltime=""
 
     #Possible default value for options which then may not be given via command line
+    BHMAS_measurePbp='FALSE'
     BHMAS_jobScriptPrefix=""
     BHMAS_walltime=""
     BHMAS_clusterPartition=""

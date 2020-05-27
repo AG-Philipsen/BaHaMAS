@@ -53,6 +53,7 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_thermConfsGlobalPath="${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath}/Thermalized_Configurations"
 
     #Possible default value for options which can then not be given via command line
+    BHMAS_measurePbp=""
     BHMAS_walltime=""
     BHMAS_clusterPartition=""
     BHMAS_clusterNode=""

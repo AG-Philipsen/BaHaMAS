@@ -141,8 +141,8 @@ case ${BHMAS_executionMode} in
                   " implemented " emph "only not" " combined not with " emph "--doNotUseMultipleChains" " option!"
         fi
         SetBetaPostfixDependingOnExistingThermalizedConfigurations
-        if [[ ${BHMAS_measurePbp} = 'TRUE' ]]; then
-            cecho ly B "\n Measurement of PBP switched off during thermalization!"
+        if [[ ${BHMAS_lqcdSoftware} != 'openQCD-FASTSUM' ]] && [[ ${BHMAS_measurePbp} = 'TRUE' ]]; then
+            Warning -N "Measurement of PBP switched off during thermalization!"
             BHMAS_measurePbp='FALSE'
         fi
         ParseBetasFile

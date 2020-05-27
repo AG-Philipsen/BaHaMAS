@@ -127,7 +127,7 @@ function __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray()
                            ['-F']='--confSaveEvery'
                            ['-l']='--local'
                            ['-m']='--measurements'
-                           ['-p']='--doNotMeasurePbp'
+                           ['-p']='--processorsGrid'
                            ['-t']='--till'
                            ['-u']='--user'
                            ['-w']='--walltime' )
