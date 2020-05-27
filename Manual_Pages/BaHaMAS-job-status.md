@@ -25,13 +25,13 @@ The report terminates with a numerical summary.
 
 # OPTIONS
 
-\--user
+\--user, \-u
 :   Only the jobs enqueued by the specified user are considered in the report (default: user that runs the command).
 
-\--local
+\--local, \-l
 :   Only jobs submitted from the present directory are considered in the report.
 
-\--all
+\--all, \-a
 :   All enqueued jobs are considered in the report.
 
 \--partition *string*

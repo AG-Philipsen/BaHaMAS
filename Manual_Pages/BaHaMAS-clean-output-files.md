@@ -22,7 +22,7 @@ For safety reason, a backup of the output file is done and it is left in the out
 
 # OPTIONS
 
-\--all
+\--all, \-a
 :   All existing new-chain folders are considered and the **betas** file is not parsed.
 
 \--betasfile *filename*
