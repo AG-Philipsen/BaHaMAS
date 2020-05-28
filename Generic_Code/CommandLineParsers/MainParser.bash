@@ -18,7 +18,7 @@
 #
 
 #Load needed files
-for fileToBeSourced in 'DatabaseHelper.bash' 'DatabaseParser.bash' 'Helper.bash' 'ParserUtilities.bash' 'SubParsers.bash'; do
+for fileToBeSourced in 'AllowedOptions.bash' 'DatabaseHelper.bash' 'DatabaseParser.bash' 'Helper.bash' 'ParserUtilities.bash' 'SubParsers.bash'; do
     source "${BHMAS_repositoryTopLevelPath}/Generic_Code/CommandLineParsers/${fileToBeSourced}" || exit ${BHMAS_fatalBuiltin}
 done && unset -v 'fileToBeSourced'
 
@@ -121,76 +121,6 @@ function ParseCommandLineOptionsTillMode()
     fi
 }
 
-# This function will be reused in manual composition
-# to populate the option sections of each manual page.
-function DeclareAllowedOptionsPerModeOrSoftware()
-{
-    # Sub-parser options
-    if [[ "${BHMAS_MANUALMODE-x}" = 'TRUE' ]]; then
-        allowedOptionsPerModeOrSoftware=(
-            ['mode:continue']='--till '
-            ['mode:continue-thermalization']='--till '
-            ['mode:job-status']='--user --local --all '
-            ['mode:simulation-status']='--doNotMeasureTime --showOnlyQueued --verbose '
-            ['mode:acceptance-rate-report']='--interval '
-            ['mode:clean-output-files']='--all '
-            ['mode:complete-betas-file']='--chains '
-            ['mode:comment-betas']='--betas '
-            ['mode:uncomment-betas']='--betas '
-        )
-    fi
-    # Each execution mode does not accept the same options and it makes
-    # sense to be stricter and to allow only the used ones instead of
-    # just ignoring them if not used. The same is valid for options which
-    # are restricted to some software only. Note that here we refer option
-    # which are either in common to multiple modes or in common to multiple
-    # software. An associative array allows to have here an overview. We use
-    # as key either a mode or a software to then put in the value those options
-    # that are allowed. We will use then two entries of it later to validate.
-    #
-    # NOTE: The associative array must be declared in the caller
-    local productionOptionsCL2QCD clusterOptions
-    productionOptions='--measurements --checkpointEvery'
-    productionOptionsCL2QCD='--pf --confSaveEvery --cgbs --togglePbp'
-    productionOptionsOpenQCD='--processorsGrid'
-    clusterOptions='--walltime  --partition  --node  --constraint  --resource'
-    allowedOptionsPerModeOrSoftware+=(
-        #-------------------------------------------------------------------------------
-        # Specific-mode, all-software options
-        ['mode:prepare-only']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
-        ['mode:submit-only']+='--betasfile --jobscript_prefix'
-        ['mode:new-chain']+="--betasfile  ${productionOptions} --jobscript_prefix ${clusterOptions}"
-        ['mode:thermalize']+="--betasfile  ${productionOptions} --jobscript_prefix ${clusterOptions}"
-        ['mode:continue']+="--betasfile --measurements --jobscript_prefix ${clusterOptions}"
-        ['mode:continue-thermalization']+="--betasfile --measurements --jobscript_prefix ${clusterOptions}"
-        ['mode:job-status']+='--partition'
-        ['mode:simulation-status']+=''
-        ['mode:acceptance-rate-report']+='--betasfile'
-        ['mode:clean-output-files']+='--betasfile'
-        ['mode:complete-betas-file']+='--betasfile'
-        ['mode:comment-betas']+='--betasfile'
-        ['mode:uncomment-betas']+='--betasfile'
-        ['mode:measure']+="--betasfile --jobscript_prefix ${clusterOptions}"
-        ['mode:database']+=''
-        #-------------------------------------------------------------------------------
-        # Multiple mode, specific/multiple-software options
-        ["mode:prepare-only_CL2QCD"]+="${productionOptionsCL2QCD}"
-        ["mode:new-chain_CL2QCD"]+="${productionOptionsCL2QCD}"
-        ["mode:thermalize_CL2QCD"]+="${productionOptionsCL2QCD}"
-        ["mode:continue_CL2QCD"]+="${productionOptionsCL2QCD} --checkpointEvery"
-        ["mode:continue-thermalization_CL2QCD"]+="${productionOptionsCL2QCD} --checkpointEvery"
-        ["mode:prepare-only_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"
-        ["mode:new-chain_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"
-        ["mode:thermalize_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"
-        ["mode:continue_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"
-        ["mode:continue-thermalization_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"
-        #-------------------------------------------------------------------------------
-        # All-modes, specific-software options
-        ['CL2QCD']+=''
-        ['openQCD-FASTSUM']+=''
-    )
-}
-
 function ParseRemainingCommandLineOptions()
 {
     # In general we have options that can be
@@ -235,7 +165,7 @@ function ParseRemainingCommandLineOptions()
     fi
 
     declare -A allowedOptionsPerModeOrSoftware
-    DeclareAllowedOptionsPerModeOrSoftware
+    _BaHaMAS_DeclareAllowedOptionsPerModeOrSoftware
     __static__CheckIfOnlyValidOptionsWereGiven\
         ${allowedOptionsPerModeOrSoftware["${BHMAS_executionMode}"]:-}\
         ${allowedOptionsPerModeOrSoftware["${BHMAS_executionMode}_${BHMAS_lqcdSoftware}"]:-}\

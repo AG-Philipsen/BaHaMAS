@@ -149,7 +149,7 @@ readonly BHMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") r
 readonly BHMAS_filesToBeSourced=(
     "${BHMAS_repositoryTopLevelPath}/Generic_Code/UtilityFunctions.bash"
     "${BHMAS_repositoryTopLevelPath}/Generic_Code/OutputFunctionality.bash"
-    "${BHMAS_repositoryTopLevelPath}/Generic_Code/CommandLineParsers/MainParser.bash"
+    "${BHMAS_repositoryTopLevelPath}/Generic_Code/CommandLineParsers/AllowedOptions.bash"
 )
 #Source error codes and fail with error hard coded since variable defined in file which is sourced!
 source ${BHMAS_repositoryTopLevelPath}/Generic_Code/ErrorCodes.bash || exit 64
@@ -160,7 +160,7 @@ done
 #Take from BaHaMAS all options per mode or software
 readonly BHMAS_MANUALMODE='TRUE'
 declare -A allowedOptionsPerModeOrSoftware
-DeclareAllowedOptionsPerModeOrSoftware
+_BaHaMAS_DeclareAllowedOptionsPerModeOrSoftware
 
 #Take from command line option the manual file and parse its name
 if [[ $# -ne 1 ]]; then
