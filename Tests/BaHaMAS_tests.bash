@@ -27,8 +27,9 @@
 #-------------------------------------------------------------------#
 
 #Use extglob to facilitate some operations
-#NOTE: To be done here and not where used (see http://mywiki.wooledge.org/glob)
-shopt -s extglob
+shopt -s extglob # <- To be done here and not where used (see http://mywiki.wooledge.org/glob)
+shopt -s nullglob
+shopt -s dotglob
 
 #This is to have cecho functionality active here
 readonly BHMAS_coloredOutput='TRUE'
@@ -64,12 +65,15 @@ testsFailed=0
 whichFailed=()
 declare -A availableTests=()
 declare -a testsToBeRun=() #To keep tests in order and make user decide which to run
-readonly testFolder="${BHMAS_testsFolder}/StaggeredFakeProject"
+readonly testFolder="${BHMAS_testsFolder}/RunTestFolder"
+readonly submitTestFolder="${testFolder}/SubmitDisk"
+readonly runTestFolder="${testFolder}/RunDisk"
 readonly logFile="${BHMAS_testsFolder}/Tests.log"
-readonly testParametersString='Nf2_mui0_mass0050_nt6_ns18'
-readonly testParametersPath="/${testParametersString//_/\/}"
-readonly betaFolder='b5.1111_s3333_continueWithNewChain'
-readonly listOfAuxiliaryFilesAndFolders=( "${testFolder}" "${logFile}" )
+readonly userVariablesFile="${BHMAS_testsFolder}/SetupUserVariables.bash"
+testParametersString='' # Global but to be filled in each
+testParametersPath=''   # test to change formulation
+betaFolder='b5.1111_s3333_continueWithNewChain' # To be changed in thermalization
+readonly listOfAuxiliaryFilesAndFolders=( "${testFolder}" "${logFile}" "${userVariablesFile}" )
 
 
 #Possible Tests
@@ -79,14 +83,14 @@ availableTests=(
     ['help-3']='--help'
     ['version-1']='--version'
     ['version-2']='version'
-    ['CL2QCD-prepare-only']='CL2QCD prepare-only -w=1d'
+    ['CL2QCD-prepare-only']='CL2QCD prepare-only -w=1d --togglePbp'
+    ['CL2QCD-submit-only']='CL2QCD submit-only --betasfile betas'
     ['CL2QCD-new-chain']='CL2QCD new-chain --walltime = 1d'
     ['CL2QCD-new-chain-goal']='CL2QCD new-chain --walltime= 1d'
-    ['CL2QCD-submit-only']='CL2QCD submit-only --betasfile betas'
     ['CL2QCD-thermalize-hot']='CL2QCD thermalize --walltime 1d'
     ['CL2QCD-thermalize-conf']='CL2QCD thermalize --walltime 1d'
     ['CL2QCD-continue-save']='CL2QCD continue --walltime 1d -F 80 -f 140 -m=1234'
-    ['CL2QCD-continue-last']='CL2QCD continue --walltime 1d'
+    ['CL2QCD-continue-last']='CL2QCD continue --walltime 1d --pf 3'
     ['CL2QCD-continue-resume']='CL2QCD continue --walltime 1d'
     ['CL2QCD-continue-num']='CL2QCD continue --till 10000 --walltime 1d'
     ['CL2QCD-continue-goal']='CL2QCD continue --walltime 1d'
@@ -95,17 +99,38 @@ availableTests=(
     ['CL2QCD-continue-therm-resume']='CL2QCD continue-thermalization --walltime 1d'
     ['CL2QCD-continue-therm-num']='CL2QCD continue-thermalization --till 5000 --walltime 1d'
     ['CL2QCD-continue-therm-goal']='CL2QCD continue-thermalization --walltime 1d'
-    ['CL2QCD-completeBetasFile']='complete-betas-file'
-    ['CL2QCD-completeBetasFile-num']='complete-betas-file --chains 3'
     ['CL2QCD-simulation-status']='CL2QCD simulation-status'
     ['CL2QCD-simulation-status-time']='CL2QCD simulation-status --doNotMeasureTime'
     ['CL2QCD-simulation-status-queued']='CL2QCD simulation-status --showOnlyQueued'
     ['CL2QCD-measure']='CL2QCD measure --walltime 1d'
     ['CL2QCD-measure-some']='CL2QCD measure --walltime 1d'
-    ['accRateReport']='acceptance-rate-report'
-    ['accRateReport-num']='acceptance-rate-report --interval 300'
-    ['cleanOutputFiles']='clean-output-files'
-    ['cleanOutputFiles-all']='clean-output-files --all'
+    ['CL2QCD-accRateReport']='CL2QCD acceptance-rate-report'
+    ['CL2QCD-accRateReport-num']='CL2QCD acceptance-rate-report --interval 300'
+    ['CL2QCD-cleanOutputFiles']='CL2QCD clean-output-files'
+    ['CL2QCD-cleanOutputFiles-all']='CL2QCD clean-output-files --all'
+    ['openQCD-FASTSUM-prepare-only']='openQCD-FASTSUM prepare-only -w=1d --processorsGrid 1 2 4 6'
+    ['openQCD-FASTSUM-submit-only']='openQCD-FASTSUM submit-only --betasfile betas'
+    ['openQCD-FASTSUM-new-chain']='openQCD-FASTSUM new-chain --walltime = 1d --processorsGrid 1 2 4 6'
+    ['openQCD-FASTSUM-new-chain-goal']='openQCD-FASTSUM new-chain --walltime= 1d --processorsGrid 1 2 4 6'
+    ['openQCD-FASTSUM-thermalize-hot']='openQCD-FASTSUM thermalize --walltime 1d --processorsGrid 1 2 4 6'
+    ['openQCD-FASTSUM-thermalize-conf']='openQCD-FASTSUM thermalize --walltime 1d --processorsGrid 1 2 4 6'
+    ['openQCD-FASTSUM-continue']='openQCD-FASTSUM continue --walltime 1d -m=1400'
+    ['openQCD-FASTSUM-continue-last']='openQCD-FASTSUM continue --walltime 1d'
+    ['openQCD-FASTSUM-continue-resume']='openQCD-FASTSUM continue --walltime 1d'
+    ['openQCD-FASTSUM-continue-num']='openQCD-FASTSUM continue --till 10000 --walltime 1d'
+    ['openQCD-FASTSUM-continue-goal']='openQCD-FASTSUM continue --walltime 1d'
+    ['openQCD-FASTSUM-continue-therm-save']='openQCD-FASTSUM continue-thermalization --walltime 1d -m=1234'
+    ['openQCD-FASTSUM-continue-therm-last']='openQCD-FASTSUM continue-thermalization --walltime 1d'
+    ['openQCD-FASTSUM-continue-therm-resume']='openQCD-FASTSUM continue-thermalization --walltime 1d'
+    ['openQCD-FASTSUM-continue-therm-num']='openQCD-FASTSUM continue-thermalization --till 5000 --walltime 1d'
+    ['openQCD-FASTSUM-continue-therm-goal']='openQCD-FASTSUM continue-thermalization --walltime 1d'
+    ['openQCD-FASTSUM-simulation-status']='openQCD-FASTSUM simulation-status'
+    ['openQCD-FASTSUM-simulation-status-time']='openQCD-FASTSUM simulation-status --doNotMeasureTime'
+    ['openQCD-FASTSUM-simulation-status-queued']='openQCD-FASTSUM simulation-status --showOnlyQueued'
+    ['openQCD-FASTSUM-accRateReport']='openQCD-FASTSUM acceptance-rate-report'
+    ['openQCD-FASTSUM-accRateReport-num']='openQCD-FASTSUM acceptance-rate-report --interval 30'
+    ['openQCD-FASTSUM-cleanOutputFiles']='openQCD-FASTSUM clean-output-files'
+    ['openQCD-FASTSUM-cleanOutputFiles-all']='openQCD-FASTSUM clean-output-files --all'
     ['commentBetas']='comment-betas'
     ['commentBetas-num']='comment-betas --betas 6.1111'
     ['commentBetas-nums']='comment-betas --betas 6.1111 7.1111'
@@ -114,14 +139,18 @@ availableTests=(
     ['uncommentBetas-num']='uncomment-betas --betas 5.1111'
     ['uncommentBetas-nums']='uncomment-betas --betas 5.1111 6.1111'
     ['uncommentBetas-num-seed']='uncomment-betas --betas 5.1111_s3333_NC'
+    ['completeBetasFile']='complete-betas-file'
+    ['completeBetasFile-num']='complete-betas-file --chains 3'
     ['database-help']='database --help'
     ['database-display']='database --sum'
     ['database-local']='database --local'
     ['database-filter1']='database --type NC --ns 18 --beta 5.4360'
     ['database-filter2']='database --status RUNNING --lastTraj 115'
     ['database-report']='database --report'
-    ['database-update']='database --update'
-    ['database-update-file']='database --update --file fakeDatabasePath'
+    ['database-update-CL2QCD']='database --update'
+    ['database-update-file-CL2QCD']='database --update --file fakeDatabasePath'
+    ['database-update-openQCD-FASTSUM']='database --update'
+    ['database-update-file-openQCD-FASTSUM']='database --update --file fakeDatabasePath'
 )
 
 #Declare array with indeces of availableTests array sorted

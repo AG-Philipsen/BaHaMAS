@@ -25,10 +25,17 @@ execution mode.
 .B --betasfile \f[I]filename\f[R]
 Use \f[I]filename\f[R] instead of \f[B]betas\f[R] file.
 .TP
+.B --measurements, -m \f[I]number\f[R]
+Specify the number of trajectories that should be done (default: 1000).
+.TP
+.B --checkpointEvery, -f \f[I]number\f[R]
+Specify every how many trajectories a check-point should be stored to
+disk (default: 100).
+.TP
 .B --jobscript_prefix \f[I]string\f[R]
 Specify the prefix of the jobscript file (default: own setup).
 .TP
-.B --walltime \f[I]dd-hh:mm:ss\f[R] | \f[I]human-string\f[R]
+.B --walltime, -w \f[I]dd-hh:mm:ss\f[R] | \f[I]human-string\f[R]
 Specify the simulation wall-time (default: own setup).
 To specify e.g.\ one day, you can either use the standard form
 \f[B]1-00:00:00\f[R] or a more handy \f[I]human-string\f[R], in the
@@ -64,7 +71,10 @@ For instance, for SLURM, this will use the \f[B]--constraint\f[R] sbatch
 directive.
 .SH CL2QCD OPTIONS
 .TP
-.B --confSaveEvery
+.B --pf \f[I]number\f[R]
+Specify how many pseudofermions should be used (default: 1).
+.TP
+.B --confSaveEvery, -F
 Specify every how many trajectories the \f[B].save\f[R] checkpoint is
 overwritten (default: 20).
 .TP
@@ -72,6 +82,17 @@ overwritten (default: 20).
 Specify the conjugate gradient block-size and namely every how many
 iterations on the device the residuum is checked for convergence on the
 host (default: 50).
+.TP
+.B --togglePbp
+Invert logic value about measurement of the pbp specified by the user in
+the setup.
+.SH openQCD-FASTSUM OPTIONS
+.TP
+.B --processorsGrid, -p
+Specify 4 integers which refer to how many processors have to be used to
+split the lattice in every direction (default: 1 1 1 1).
+The first entry refer to the temporal lattice direction and the other
+three to the spatial ones.
 .SH FILES
 .TP
 .B ./betas

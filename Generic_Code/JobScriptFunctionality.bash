@@ -59,18 +59,6 @@ function __static__GetJobBetasStringUsing()
     printf "${betasStringToBeReturned:2}" #I cut here the two initial underscores
 }
 
-function __static__ExtractNumberOfTrajectoriesToBeDoneFromFile()
-{
-    local filename numberOfTrajectories
-    filename="$1"
-    numberOfTrajectories=$(sed -n 's/^n\(H\|Rh\)mcSteps=\([0-9]\+\)/\2/p' "${filename}") #Option is either nHmcSteps or nRhmcSteps
-    if [[ "${numberOfTrajectories}" = '' ]]; then
-        Fatal ${BHMAS_fatalLogicError} "Number of trajectories to be done not present in input file " file "${filename}" "!"
-    else
-        printf "${numberOfTrajectories}"
-    fi
-}
-
 function __static__CalculateWalltimeExtractingNumberOfTrajectoriesPerBetaAndUsingTimesPerTrajectoryIfGiven()
 {
     #This function is called in a subshell and we want to be sure that exit on failure is valid also for one level further down
@@ -87,7 +75,7 @@ function __static__CalculateWalltimeExtractingNumberOfTrajectoriesPerBetaAndUsin
     else
         for beta in "${betaValues[@]}"; do
             inputFileGlobalPath="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${beta}/${BHMAS_inputFilename}"
-            trajectoriesToBeDone["${beta}"]=$(__static__ExtractNumberOfTrajectoriesToBeDoneFromFile "${inputFileGlobalPath}")
+            trajectoriesToBeDone["${beta}"]=$(ExtractNumberOfTrajectoriesToBeDoneFromInputFile "${inputFileGlobalPath}")
             walltimesInSeconds+=( $(awk '{print $1*$2}' <<< "${trajectoriesToBeDone[${beta}]} ${BHMAS_timesPerTrajectory[${beta}]}") )
         done
         finalWalltime="$(SecondsToTimeStringWithDays $(MaximumOfArray ${walltimesInSeconds[@]}) )"
@@ -107,17 +95,17 @@ function __static__CalculateWalltimeForInverter()
 
 function __static__SetExcludedNodesString()
 {
-    CheckIfVariablesAreSet excludeNodesString
+    CheckIfVariablesAreDeclared excludeNodesString
     #Trying to retrieve information about the list of nodes to be excluded if user gave file
     if [[ "${BHMAS_excludeNodesGlobalPath}" != '' ]]; then
-        set +e #Here we want to "allow" grep or ssh to fail, since there could e.g. be connection problems. Afterwards we check excludeString.
+        set +e #Here we want to "allow" grep or ssh to fail, since there could e.g. be connection problems. Afterwards we check excludeNodesString.
         if [[ -f "${BHMAS_excludeNodesGlobalPath}" ]]; then
-            excludeString=$(grep -oE '\-\-exclude=.*\[.*\]' ${BHMAS_excludeNodesGlobalPath} 2>/dev/null)
+            excludeNodesString=$(grep -oE '\-\-exclude=.*' ${BHMAS_excludeNodesGlobalPath} 2>/dev/null)
             if [[ $? -eq 2 ]]; then
                 Error "It was not possible to recover the exclude nodes list from " file "${BHMAS_excludeNodesGlobalPath}" " file!"
             fi
         elif [[ ${BHMAS_excludeNodesGlobalPath} =~ : ]]; then
-            excludeString=$(ssh ${BHMAS_excludeNodesGlobalPath%%:*} "grep -oE '\-\-exclude=.*\[.*\]' ${BHMAS_excludeNodesGlobalPath#*:} 2>/dev/null")
+            excludeNodesString=$(ssh ${BHMAS_excludeNodesGlobalPath%%:*} "grep -oE '\-\-exclude=.*' ${BHMAS_excludeNodesGlobalPath#*:} 2>/dev/null")
             if [[ $? -eq 2 ]]; then
                 Error "It was not possible to recover the exclude nodes list over ssh connection!"
             fi
@@ -128,8 +116,7 @@ function __static__SetExcludedNodesString()
         Warning -n "No string to exclude nodes in jobscript is available!"
         AskUser -n "         Do you still want to continue the jobscript creation?"
         if UserSaidNo; then
-            cecho "\n" B lr "No job will be created. Exiting...\n"
-            exit ${BHMAS_failureExitCode}
+            Fatal ${BHMAS_fatalGeneric} 'No job will be created. Exiting...'
         fi
     fi
 }
@@ -163,8 +150,8 @@ function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
     cecho lc "\n================================================================================="
     cecho bb " The following beta values have been grouped (together with the seed if used):"
     while [[ "${!betaValuesToBeSplit[@]}" != "" ]]; do
-        betasForJobScript=(${betaValuesToBeSplit[@]:0:${BHMAS_GPUsPerNode}})
-        betaValuesToBeSplit=(${betaValuesToBeSplit[@]:${BHMAS_GPUsPerNode}})
+        betasForJobScript=(${betaValuesToBeSplit[@]:0:${BHMAS_simulationsPerJob}})
+        betaValuesToBeSplit=(${betaValuesToBeSplit[@]:${BHMAS_simulationsPerJob}})
         betasString="$(__static__GetJobBetasStringUsing ${betasForJobScript[@]})"
         jobScriptFilename="$(GetJobScriptFilename ${betasString})"
         jobScriptGlobalPath="${BHMAS_submitDirWithBetaFolders}/${BHMAS_jobScriptFolderName}/${jobScriptFilename}"
@@ -191,7 +178,7 @@ function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
                 BHMAS_betaValuesToBeSubmitted+=( "${betasString}" )
                 cecho "  - ${betasString}"
             else
-                cecho lr "\n Jobscript " file "${jobScriptFilename}" " not found! Option " emph "--submitonly" " cannot be applied! Skipping this job submission!\n"
+                cecho lr "\n Jobscript " file "${jobScriptFilename}" " not found! Mode " emph "submit-only" " cannot conclude! Skipping this job submission!\n"
                 BHMAS_problematicBetaValues+=( "${betasString}" )
                 continue
             fi

@@ -127,7 +127,7 @@ function __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray()
                            ['-F']='--confSaveEvery'
                            ['-l']='--local'
                            ['-m']='--measurements'
-                           ['-p']='--doNotMeasurePbp'
+                           ['-p']='--processorsGrid'
                            ['-t']='--till'
                            ['-u']='--user'
                            ['-w']='--walltime' )
@@ -148,7 +148,7 @@ function __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray()
            fi
         fi
         BHMAS_specifiedCommandLineOptions[${#BHMAS_specifiedCommandLineOptions[@]}]="${option}"
-        if ElementInArray '--database' "${BHMAS_specifiedCommandLineOptions[@]}"; then
+        if ElementInArray 'database' "${BHMAS_specifiedCommandLineOptions[@]}"; then
             databaseOption='TRUE'
         fi
     done

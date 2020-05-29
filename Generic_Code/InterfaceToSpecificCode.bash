@@ -20,15 +20,10 @@
 function SourceClusterSpecificCode()
 {
     readonly BHMAS_clusterScheduler="$(SelectClusterSchedulerName)"
-    local fileToBeSourced
     # Source all files for the scheduler. It is better than giving a fixed list, because
     # then implementation for different scheduler might differ, e.g. a feature may be
     # implemented for one scheduler only.
-    for fileToBeSourced in "${BHMAS_repositoryTopLevelPath}"/Scheduler_Dependent_Code/"${BHMAS_clusterScheduler}"/*.bash; do
-        if [[ -f "${fileToBeSourced}" ]]; then
-            source "${fileToBeSourced}" # The if is due to avoid nullglob
-        fi
-    done
+    __static__SourceFollowingFiles "${BHMAS_repositoryTopLevelPath}"/Scheduler_Dependent_Code/"${BHMAS_clusterScheduler}"/*.bash
 }
 
 function SourceLqcdSoftwareSpecificCode()
@@ -37,11 +32,24 @@ function SourceLqcdSoftwareSpecificCode()
     # before declaring global variables, including those of the user setup, among
     # which BHMAS_lqcdSoftware is. Hence, source here all implementations. It should
     # not hurt since each function name has the LQCD software in the name.
+    __static__SourceFollowingFiles "${BHMAS_repositoryTopLevelPath}"/LQCD_Software_Dependent_Code/*/*.bash
+}
+
+# In this function we do manual error handling because the source
+# command might fail and we do not get its output in such a case
+# in case we let the -e shell option exit. Just to be on the safe
+# side we manually check the exit code, too (I am not sure that it
+# is really needed, though).
+function __static__SourceFollowingFiles()
+{
     local fileToBeSourced
-    for fileToBeSourced in "${BHMAS_repositoryTopLevelPath}"/LQCD_Software_Dependent_Code/*/*.bash; do
-        if [[ -f "${fileToBeSourced}" ]]; then
-            source "${fileToBeSourced}" # The if is due to avoid nullglob
+    for fileToBeSourced in "$@"; do
+        set +e
+        source "${fileToBeSourced}"
+        if [[ $? -ne 0 ]]; then
+            Internal 'Error sourcing\n' file "${fileToBeSourced}"
         fi
+        set -e
     done
 }
 
@@ -63,6 +71,11 @@ function __static__CheckExistenceOfFunctionAndCallIt()
 #-------------------------------------------------------------------------------------------------------------------------#
 
 function AddSchedulerSpecificPartToJobScript()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler} "$@"
+}
+
+function ExtractWalltimeFromJobScript()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler} "$@"
 }
@@ -89,7 +102,27 @@ function GatherJobsInformationForContinueMode()
 
 #-------------------------------------------------------------------------------------------------------------------------#
 
+function PrepareSoftwareSpecificGlobalVariableValidation()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
+}
+
+function PerformParametersSanityChecks()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
+}
+
 function ProduceInputFile()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
+}
+
+function ProduceExecutableFileInGivenBetaDirectories()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
+}
+
+function ExtractNumberOfTrajectoriesToBeDoneFromInputFile()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
@@ -114,7 +147,7 @@ function HandleEnvironmentForContinueForGivenSimulation()
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
 
-function HandleInputFileForContinueForGivenSimulation()
+function RestoreRunBetaDirectoryBeforeSkippingBeta()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
@@ -124,16 +157,37 @@ function HandleOutputFilesForContinueForGivenSimulation()
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
 
-function ExtractSimulationInformationFromFiles()
+function HandleInputFileForContinueForGivenSimulation()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
 
-function CheckCorrectnessOutputFile()
+function ModifyOptionsInInputFile()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
 
+function FindAndSetNumberOfTrajectoriesAlreadyProduced()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
+}
+
+function ExtractSimulationInformationFromInputFile()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
+}
+
+function CreateOutputFileInTheStandardFormat()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
+}
+
+function CleanOutputFilesForGivenSimulation()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
+}
+
+#-------------------------------------------------------------------------------------------------------------------------#
 
 
 MakeFunctionsDefinedInThisFileReadonly

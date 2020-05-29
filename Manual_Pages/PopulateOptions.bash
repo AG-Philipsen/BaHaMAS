@@ -64,8 +64,8 @@ function GetAllowedOptionsAndPutThemInManualSection()
             CL2QCD )
                 extractedOptions+=$'# CL2QCD OPTIONS\n\n'
                 ;;
-            OpenQCD-FASTSUM )
-                extractedOptions+=$'# OpenQCD-FASTSUM OPTIONS\n\n'
+            openQCD-FASTSUM )
+                extractedOptions+=$'# openQCD-FASTSUM OPTIONS\n\n'
                 ;;
             mode:* )
                 ;;
@@ -149,7 +149,7 @@ readonly BHMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") r
 readonly BHMAS_filesToBeSourced=(
     "${BHMAS_repositoryTopLevelPath}/Generic_Code/UtilityFunctions.bash"
     "${BHMAS_repositoryTopLevelPath}/Generic_Code/OutputFunctionality.bash"
-    "${BHMAS_repositoryTopLevelPath}/Generic_Code/CommandLineParsers/MainParser.bash"
+    "${BHMAS_repositoryTopLevelPath}/Generic_Code/CommandLineParsers/AllowedOptions.bash"
 )
 #Source error codes and fail with error hard coded since variable defined in file which is sourced!
 source ${BHMAS_repositoryTopLevelPath}/Generic_Code/ErrorCodes.bash || exit 64
@@ -160,7 +160,7 @@ done
 #Take from BaHaMAS all options per mode or software
 readonly BHMAS_MANUALMODE='TRUE'
 declare -A allowedOptionsPerModeOrSoftware
-DeclareAllowedOptionsPerModeOrSoftware
+_BaHaMAS_DeclareAllowedOptionsPerModeOrSoftware
 
 #Take from command line option the manual file and parse its name
 if [[ $# -ne 1 ]]; then
@@ -192,7 +192,7 @@ fi
 BHMAS_backupFile="${BHMAS_manualFile}_backup"
 cp "${BHMAS_manualFile}" "${BHMAS_backupFile}"
 
-GetAllowedOptionsAndPutThemInManualSection "${BHMAS_executionMode}" 'CL2QCD' 'OpenQCD-FASTSUM'
+GetAllowedOptionsAndPutThemInManualSection "${BHMAS_executionMode}" 'CL2QCD' 'openQCD-FASTSUM'
 
 if [[ $? -eq 0 ]]; then
     rm "${BHMAS_backupFile}"

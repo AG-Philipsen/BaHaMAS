@@ -70,6 +70,24 @@ function SecondsToTimeStringWithDays()
     printf "%d-%02d:%02d:%02d" "${days}" "${hours}" "${minutes}" "${seconds}"
 }
 
+function ConvertWalltimeToSeconds()
+{
+    local walltime walltimeSplit result
+    walltime="$1"
+    if [[ ! ${walltime} =~ ^([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]]; then
+        Internal "Walltime in wrong format passed to ${FUNCNAME}."
+    elif [[ ${walltime} != *-* ]]; then
+        walltime="0-${walltime}"
+    fi
+    walltimeSplit=( ${walltime//[-:]/ } )
+    result=0
+    (( result += 86400*${walltimeSplit[0]} ))
+    (( result +=  3600*${walltimeSplit[1]} ))
+    (( result +=    60*${walltimeSplit[2]} ))
+    (( result +=       ${walltimeSplit[3]} ))
+    printf '%d' ${result}
+}
+
 function GetLargestWalltimeBetweenTwo()
 {
     [[ ! $1 =~ ^([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]] && return 1
@@ -233,7 +251,8 @@ function PrintArray()
 {
     local NAME_OF_THE_ARRAY="$1[@]"
     local ARRAY_CONTENT=( "${!NAME_OF_THE_ARRAY+x}" )
-    [[ ${#ARRAY_CONTENT[@]} -eq 0 ]] && printf "Array $1 is empty or undeclared!\n" && return 1
+    [[ ${#ARRAY_CONTENT[@]} -eq 0 ]] && printf "Array $1 is empty or undeclared!\n" && return 0
+    ARRAY_CONTENT=( "${!NAME_OF_THE_ARRAY}" )
     local ARRAY_DECLARATION=$(declare -p "$1")
     if [[ ${ARRAY_DECLARATION} =~ ^declare\ -a ]]; then # normal array
         for INDEX in "${!ARRAY_CONTENT[@]}"; do
@@ -266,12 +285,21 @@ function ConvertFromBytesToHumanReadable()
         {print human($1)}' <<< "${BYTES}"
 }
 
-function CheckIfVariablesAreSet()
+function CalculateProductOfIntegers()
+{
+    local result number
+    result=1
+    for number in "$@"; do
+        (( result *= number ))
+    done
+    printf '%d' ${result}
+}
+
+function CheckIfVariablesAreDeclared()
 {
     local variableName
     for variableName in "$@"; do
-        variableName+='[@]' #Try also if it is a sparse or associative array
-        if [[ ! -v "${variableName}" ]]; then
+        if ! declare -p "${variableName}" >/dev/null 2>&1; then
             Internal "Variable " emph "${variableName/%\[@\]/}" " not set but needed to be set in function " emph "${FUNCNAME[1]}" "."
         fi
     done
@@ -285,19 +313,29 @@ function CheckNumberOfFunctionArguments()
 }
 
 
-
 function MakeFunctionsDefinedInThisFileReadonly()
 {
     # Here we assume all BaHaMAS functions are defined with the same stile,
     # including empty parenteses and the braces on new lines! I.e.
     #    function nameOfTheFunction()
+    #
+    # Accepted symbols in function name: letters, '_', ':' and '-'
+    #
     # NOTE: The file from which this function is called is ${BASH_SOURCE[1]}
     local declaredFunctions functionName
-    declaredFunctions=(
-        $(grep -E '^[[:space:]]*function[[:space:]]+[[:alnum:]_]+\(\)[[:space:]]*$' "${BASH_SOURCE[1]}" |\
+    declaredFunctions=( # Here word splitting can split names, no space allowed in function name!
+        $(grep -E '^[[:space:]]*function[[:space:]]+[-[:alnum:]_:]+\(\)[[:space:]]*$' "${BASH_SOURCE[1]}" |\
            sed -E 's/^[[:space:]]*function[[:space:]]+([^(]+)\(\)[[:space:]]*$/\1/')
     )
-    readonly -f "${declaredFunctions[@]}"
+    if [[ ${#declaredFunctions[@]} -eq 0 ]]; then
+        if [[ ! ${BHMAS_coloredOutput-} =~ ^(TRUE|FALSE)$ ]]; then
+            BHMAS_coloredOutput='TRUE' #It might be unset whe error occurs!
+        fi
+        Internal 'Function ' emph "${FUNCNAME}" ' called, but no function found in file\n'\
+                 file "${BASH_SOURCE[1]}" '.'
+    else
+        readonly -f "${declaredFunctions[@]}"
+    fi
 }
 
 

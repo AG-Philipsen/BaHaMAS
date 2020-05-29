@@ -86,7 +86,7 @@ function ProduceInputFile_CL2QCD()
         __static__AddToInputFile "solver=cg"
     fi
     __static__AddToInputFile \
-        "solverMaxIterations=15000"\
+        "solverMaxIterations=${BHMAS_inverterMaxIterations}"\
         "measureCorrelators=0"
     if [[ ${BHMAS_measurePbp} = "TRUE" ]]; then
         __static__AddToInputFile \

@@ -18,7 +18,7 @@
 #
 
 #Load needed files
-for fileToBeSourced in 'DatabaseHelper.bash' 'DatabaseParser.bash' 'Helper.bash' 'ParserUtilities.bash' 'SubParsers.bash'; do
+for fileToBeSourced in 'AllowedOptions.bash' 'DatabaseHelper.bash' 'DatabaseParser.bash' 'Helper.bash' 'ParserUtilities.bash' 'SubParsers.bash'; do
     source "${BHMAS_repositoryTopLevelPath}/Generic_Code/CommandLineParsers/${fileToBeSourced}" || exit ${BHMAS_fatalBuiltin}
 done && unset -v 'fileToBeSourced'
 
@@ -31,11 +31,10 @@ function ParseCommandLineOptionsTillMode()
     #Locally set function arguments to take advantage of shift
     set -- "${BHMAS_commandLineOptionsToBeParsed[@]}"
     #The first option can be a LQCD software
-    if [[ $1 =~ ^(CL2QCD|OpenQCD-FASTSUM)$ ]]; then
+    if [[ $1 =~ ^(CL2QCD|openQCD-FASTSUM)$ ]]; then
         BHMAS_lqcdSoftware="$1"
         shift
     fi
-    readonly BHMAS_lqcdSoftware
     case "$1" in
         help | --help )
             BHMAS_executionMode='mode:help'
@@ -97,81 +96,29 @@ function ParseCommandLineOptionsTillMode()
             shift $(( $# - 1 )) #The shift after esac
             ;;
         * )
-            Fatal ${BHMAS_fatalCommandLine} "No valid mode specified! Run " emph "BaHaMAS --help" " to get further information."
+            Fatal ${BHMAS_fatalCommandLine}\
+                  'Specified mode ' emph "$1" ' not valid! Run ' emph 'BaHaMAS --help' ' to get further information.'
     esac
     shift
     #Update the global array with remaining options to be parsed
     BHMAS_commandLineOptionsToBeParsed=( "$@" )
+
+    # Make software variable readonly but not in simulation-status related modes
+    if [[ ! ${BHMAS_executionMode} =~ ^mode:(simulation-status|database)$ ]]; then
+        readonly BHMAS_lqcdSoftware
+    fi
     #If user specified --help in a given mode, act accrdingly
     if [[ ! ${BHMAS_executionMode} =~ ^mode:(help|version|setup)$ ]]; then
         if  ElementInArray '--help' "${BHMAS_commandLineOptionsToBeParsed[@]}" "${BHMAS_optionsToBePassedToDatabase[@]}"; then
             BHMAS_executionMode+='-help'
         fi
     fi
-}
-
-# This function will be reused in manual composition
-# to populate the option sections of each manual page.
-function DeclareAllowedOptionsPerModeOrSoftware()
-{
-    # Sub-parser options
-    if [[ "${BHMAS_MANUALMODE-x}" = 'TRUE' ]]; then
-        allowedOptionsPerModeOrSoftware=(
-            ['mode:continue']='--till '
-            ['mode:continue-thermalization']='--till '
-            ['mode:job-status']='--user --local --all '
-            ['mode:simulation-status']='--doNotMeasureTime --showOnlyQueued '
-            ['mode:acceptance-rate-report']='--interval '
-            ['mode:clean-output-files']='--all '
-            ['mode:complete-betas-file']='--chains '
-            ['mode:comment-betas']='--betas '
-            ['mode:uncomment-betas']='--betas '
-        )
+    #Deactivate measure mode for openQCD-FASTSUM
+    if [[ ${BHMAS_executionMode} = 'mode:measure' && ${BHMAS_lqcdSoftware} = 'openQCD-FASTSUM' ]]; then
+        Error 'BaHaMAS does not support the ' emph "${BHMAS_executionMode}"\
+              ' mode with ' emph "${BHMAS_lqcdSoftware}" '.'
+        exit ${BHMAS_successExitCode} # To let test pass
     fi
-    # Each execution mode does not accept the same options and it makes
-    # sense to be stricter and to allow only the used ones instead of
-    # just ignoring them if not used. The same is valid for options which
-    # are restricted to some software only. Note that here we refer option
-    # which are either in common to multiple modes or in common to multiple
-    # software. An associative array allows to have here an overview. We use
-    # as key either a mode or a software to then put in the value those options
-    # that are allowed. We will use then two entries of it later to validate.
-    #
-    # NOTE: The associative array must be declared in the caller
-    local productionOptions productionOptionsCL2QCD clusterOptions
-    productionOptions='--measurements --checkpointEvery --pf'
-    productionOptionsCL2QCD='--confSaveEvery --cgbs'
-    clusterOptions='--walltime  --partition  --node  --constraint  --resource'
-    allowedOptionsPerModeOrSoftware+=(
-        #-------------------------------------------------------------------------------
-        # Specific-mode, all-software options
-        ['mode:prepare-only']+="--betasfile --jobscript_prefix ${clusterOptions}"
-        ['mode:submit-only']+='--betasfile --jobscript_prefix'
-        ['mode:new-chain']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
-        ['mode:thermalize']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
-        ['mode:continue']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
-        ['mode:continue-thermalization']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
-        ['mode:job-status']+='--partition'
-        ['mode:simulation-status']+=''
-        ['mode:acceptance-rate-report']+='--betasfile'
-        ['mode:clean-output-files']+='--betasfile'
-        ['mode:complete-betas-file']+='--betasfile'
-        ['mode:comment-betas']+='--betasfile'
-        ['mode:uncomment-betas']+='--betasfile'
-        ['mode:measure']+="--betasfile --jobscript_prefix ${clusterOptions}"
-        ['mode:database']+=''
-        #-------------------------------------------------------------------------------
-        # Multiple mode, specific/multiple-software options
-        ["mode:prepare-only_CL2QCD"]+="${productionOptionsCL2QCD}"
-        ["mode:new-chain_CL2QCD"]+="${productionOptionsCL2QCD}"
-        ["mode:thermalize_CL2QCD"]+="${productionOptionsCL2QCD}"
-        ["mode:continue_CL2QCD"]+="${productionOptionsCL2QCD}"
-        ["mode:continue-thermalization_CL2QCD"]+="${productionOptionsCL2QCD}"
-        #-------------------------------------------------------------------------------
-        # All-modes, specific-software options
-        ['CL2QCD']+=''
-        ['OpenQCD-FASTSUM']+=''
-    )
 }
 
 function ParseRemainingCommandLineOptions()
@@ -218,7 +165,7 @@ function ParseRemainingCommandLineOptions()
     fi
 
     declare -A allowedOptionsPerModeOrSoftware
-    DeclareAllowedOptionsPerModeOrSoftware
+    _BaHaMAS_DeclareAllowedOptionsPerModeOrSoftware
     __static__CheckIfOnlyValidOptionsWereGiven\
         ${allowedOptionsPerModeOrSoftware["${BHMAS_executionMode}"]:-}\
         ${allowedOptionsPerModeOrSoftware["${BHMAS_executionMode}_${BHMAS_lqcdSoftware}"]:-}\
@@ -327,8 +274,14 @@ function __static__ParseRemainingGeneralOptions()
                 fi
                 shift 2
                 ;;
-            --doNotMeasurePbp )
-                BHMAS_measurePbp="FALSE"
+            --togglePbp )
+                if [[ BHMAS_measurePbp='FALSE' ]]; then
+                    BHMAS_measurePbp='TRUE'
+                    cecho lg ' Measurement of the ' B 'pbp' uB ' has been switched ' B 'ON'
+                else
+                    BHMAS_measurePbp='FALSE'
+                    cecho lg ' Measurement of the ' B 'pbp' uB ' has been switched ' B 'OFF'
+                fi
                 shift
                 ;;
             --partition )
@@ -362,6 +315,18 @@ function __static__ParseRemainingGeneralOptions()
                     BHMAS_clusterGenericResource="$2"
                 fi
                 shift 2
+                ;;
+            --processorsGrid )
+                local specifiedOption="$1"
+                BHMAS_processorsGrid=()
+                while [[ ${2:-} =~ ^[1-9][0-9]*$ ]]; do
+                    BHMAS_processorsGrid+=( $2 )
+                    shift
+                done
+                if [[ ${#BHMAS_processorsGrid[@]} -ne 4 ]]; then
+                     PrintOptionSpecificationErrorAndExit "${specifiedOption}"
+                fi
+                shift
                 ;;
             * )
                 PrintInvalidOptionErrorAndExit "$1" ;;

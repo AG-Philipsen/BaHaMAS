@@ -74,7 +74,7 @@ function GatherJobsInformationForJobStatusMode_SLURM()
     #Get information via squeue and in case filter jobs -> ATTENTION: Double quoting here is CRUCIAL (to respect endlines)!!
     #NOTE: It seems that the sacct command can give a similar result, but at the moment there is no analog to the %Z field.
     if [[ "${BHMAS_clusterPartition}" != '' ]]; then
-        squeueAdditionalOptions+='-p ${BHMAS_clusterPartition} '
+        squeueAdditionalOptions+="-p ${BHMAS_clusterPartition} "
     fi
     if [[ ${BHMAS_jobstatusAll} = 'FALSE' ]]; then
         squeueAdditionalOptions+="-u ${BHMAS_jobstatusUser} "
@@ -88,7 +88,7 @@ function GatherJobsInformationForJobStatusMode_SLURM()
     while IFS= read -r line; do
         jobsInformation+=( "${line}" )
     done < <(squeue --noheader ${squeueAdditionalOptions} -o "${squeueFormatCodeString:1}" 2>/dev/null)
-    if [[ "${#jobsInformation[@]}" = '' ]]; then
+    if [[ "${#jobsInformation[@]}" -eq 0 ]]; then
         return 0
     fi
     #------------------------------------------------------------------------------------------------------------------------------#

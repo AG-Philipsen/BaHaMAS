@@ -1,0 +1,109 @@
+[Run name]
+name         hmc_
+
+[Directories]
+log_dir      /home/latticeqcd/sciarra/Wilson/Nf2/mui0/k1250/nt10/ns40/b6.1600_s1600_thermalizeFromHot
+dat_dir      /scratch/latticeqcd/sciarra/Wilson/Nf2/mui0/k1250/nt10/ns40/b6.1600_s1600_thermalizeFromHot
+loc_dir      /scratch/latticeqcd/sciarra/Wilson/Nf2/mui0/k1250/nt10/ns40/b6.1600_s1600_thermalizeFromHot
+cnfg_dir     /scratch/latticeqcd/sciarra/Wilson/Nf2/mui0/k1250/nt10/ns40/b6.1600_s1600_thermalizeFromHot
+
+[Random number generator]
+level        0
+seed         1600
+
+[Lattice parameters]
+beta         6.1600
+c0           1
+kappa        0.1250
+csw          0
+
+[Boundary conditions]
+type         3
+theta        0.0 0.0 0.0
+
+[HMC parameters]
+actions      0 1
+npf          1
+mu           0.0
+nlv          2
+tau          1
+
+[MD trajectories]
+nth          0
+ntr          200
+dtr_log      1
+dtr_ms       10000000 # i.e. never measure
+dtr_cnfg     20
+
+[Level 0]
+integrator   OMF2
+lambda       0.1931833275037836
+nstep        6
+forces       0
+
+[Level 1]
+integrator   OMF2
+lambda       0.1931833275037836
+nstep        16
+forces       1
+
+[Action 0]
+action       ACG
+
+[Action 1]
+action       ACF_TM1
+ipf          0
+im0          0
+imu          0
+isp          1
+
+[Action 2]
+action       ACF_TM1_EO_SDET
+ipf          0
+im0          0
+imu          0
+isp          1
+
+[Force 0]
+force        FRG
+
+[Force 1]
+force        FRF_TM1
+isp          0
+ncr          0
+
+[Force 2]
+force        FRF_TM1_EO_SDET
+isp          0
+ncr          0
+
+[Solver 0]
+solver       CGNE
+nmx          15000
+res          1.0e-6
+
+[Solver 1]
+solver       CGNE
+nmx          15000
+res          1.0e-12
+
+[SAP]
+bs 1 1 1 1
+
+[Solver 2]
+solver SAP_GCR
+nkv 16
+isolv 1
+nmr 4
+ncy 5
+nmx 24
+res 1.0e-6
+
+[Solver 3]
+solver SAP_GCR
+nkv 16
+isolv 1
+nmr 4
+ncy 5
+nmx 24
+res 1.0e-12

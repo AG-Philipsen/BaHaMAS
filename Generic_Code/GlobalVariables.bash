@@ -96,13 +96,14 @@ function DeclarePathRelatedGlobalVariables()
     BHMAS_parametersPath=''     # --> e.g. /Nf2/muiPiT/k1550/nt6/ns12    or   /Nf2/mui0/mass0250/nt4/ns8
     BHMAS_parametersString=''   # --> e.g.  Nf2_muiPiT_k1550_nt6_ns12    or    Nf2_mui0_mass0250_nt4_ns8
     #Beta and seed information (intentionally not in arrays of prefixes, regexes, etc.)
-    #(here not readonly since they can be changed by user -> set as readonly in command line parser!)
     readonly BHMAS_betaPosition=5
     readonly BHMAS_betaPrefix='b'
     BHMAS_betaPostfix='_continueWithNewChain' #Here we set it supposing it is not a thermalization. If indeed it is, the postfix will be overwritten!
     readonly BHMAS_betaRegex='[0-9][.][0-9]\{4\}'
+    readonly BHMAS_betaGlob='[0-9].[0-9][0-9][0-9][0-9]'
     readonly BHMAS_seedPrefix='s'
     readonly BHMAS_seedRegex='[0-9]\{4\}'
+    readonly BHMAS_seedGlob='[0-9][0-9][0-9][0-9]'
     BHMAS_betaFolderShortRegex=${BHMAS_betaRegex}'_'${BHMAS_seedPrefix}'[0-9]\{4\}_[[:alpha:]]\+'
     BHMAS_betaFolderRegex=${BHMAS_betaPrefix}${BHMAS_betaFolderShortRegex}
 }
@@ -120,11 +121,17 @@ function DeclareBaHaMASGlobalVariables()
     BHMAS_betasFilename='betas'
     BHMAS_numberOfTrajectories=1000
     BHMAS_checkpointFrequency=100
+    BHMAS_useMultipleChains='TRUE'
+    BHMAS_numberOfPseudofermions=1
+    BHMAS_inverterMaxIterations=15000
+
+    #CL2QCD specific
     BHMAS_savepointFrequency=20
     BHMAS_inverterBlockSize=50
-    BHMAS_useMultipleChains='TRUE'
-    BHMAS_measurePbp='TRUE'
-    BHMAS_numberOfPseudofermions=1
+
+    #openQCD-FASTSUM specific
+    BHMAS_processorsGrid=()
+    BHMAS_sapBlockSize=()
 
     #Internal BaHaMAS variables
     BHMAS_betaValues=()
@@ -137,9 +144,14 @@ function DeclareBaHaMASGlobalVariables()
     declare -gA BHMAS_timesPerTrajectory=()
     declare -gA BHMAS_goalStatistics=()
     declare -gA BHMAS_startConfigurationGlobalPath=()
+    readonly BHMAS_plaquetteColumn=2
+    readonly BHMAS_deltaHColumn=8
+    readonly BHMAS_acceptanceColumn=9
+    readonly BHMAS_trajectoryTimeColumn=10
 
     #Metadata variables
     readonly BHMAS_metadataFilename='.BaHaMAS_metadata'
+    readonly BHMAS_compilationFolderName='CodebaseCompilationFolder'
 
     #Execution mode variable
     BHMAS_executionMode='mode:_unset_'
@@ -149,8 +161,9 @@ function DeclareBaHaMASGlobalVariables()
     BHMAS_jobstatusUser="$(whoami)"
     BHMAS_jobstatusAll='FALSE'
     BHMAS_jobstatusLocal='FALSE'
-    BHMAS_liststatusMeasureTimeOption='TRUE'
-    BHMAS_liststatusShowOnlyQueuedOption='FALSE'
+    BHMAS_simulationStatusMeasureTimeOption='TRUE'
+    BHMAS_simulationStatusShowOnlyQueuedOption='FALSE'
+    BHMAS_simulationStatusVerbose='FALSE'
     BHMAS_accRateReportInterval=1000
     BHMAS_cleanAllOutputFiles='FALSE'
     BHMAS_numberOfChainsToBeInTheBetasFile=4
@@ -186,13 +199,20 @@ function DeclareBaHaMASGlobalVariables()
     readonly BHMAS_deltaSThreshold=6
     readonly BHMAS_deltaPThreshold=6
 
-    #Variables to make first step towards independence from software (NO SPACES in them assumed!)
+    #Variables to use standard naming, independent from software (NO SPACES in them assumed!)
+    readonly BHMAS_checkpointMinimumNumberOfDigits=5
     readonly BHMAS_configurationPrefix='conf\.'
     readonly BHMAS_prngPrefix='prng\.' #tell user about BRE http://en.wikipedia.org/wiki/Regular_expression#POSIX_basic_and_extended
-    readonly BHMAS_standardCheckpointPostfix='save'
-    readonly BHMAS_checkpointMinimumNumberOfDigits=5
     readonly BHMAS_configurationRegex="${BHMAS_configurationPrefix}[0-9]\+"
     readonly BHMAS_prngRegex="${BHMAS_prngPrefix}[0-9]\+"
+    readonly BHMAS_configurationGlob="${BHMAS_configurationPrefix//\\/}+([0-9])"
+    readonly BHMAS_prngGlob="${BHMAS_prngPrefix//\\/}+([0-9])"
+    #For CL2QCD only
+    readonly BHMAS_standardCheckpointPostfix='save'
+    #For openQCD only
+    readonly BHMAS_dataPrefix='data\.'
+    readonly BHMAS_dataRegex="${BHMAS_dataPrefix}[0-9]\+"
+    readonly BHMAS_dataGlob="${BHMAS_dataPrefix//\\/}+([0-9])"
 }
 
 # The following variables cannot be declared at the

@@ -2,6 +2,6 @@
 #*
 *#
 UserSpecificVariables.bash
-Tests/StaggeredFakeProject*
+Tests/RunTestFolder*
 Tests/Tests.log
-StaggeredProject/
+*Project/

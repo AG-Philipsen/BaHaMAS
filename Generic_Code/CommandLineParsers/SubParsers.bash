@@ -90,10 +90,13 @@ function ParseSpecificModeOptions_simulation-status()
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --doNotMeasureTime )
-                BHMAS_liststatusMeasureTimeOption="FALSE"
+                BHMAS_simulationStatusMeasureTimeOption="FALSE"
                 shift ;;
             --showOnlyQueued )
-                BHMAS_liststatusShowOnlyQueuedOption="TRUE"
+                BHMAS_simulationStatusShowOnlyQueuedOption="TRUE"
+                shift ;;
+            --verbose )
+                BHMAS_simulationStatusVerbose="TRUE"
                 shift ;;
             * )
                 BHMAS_commandLineOptionsToBeParsed+=( "$1" )

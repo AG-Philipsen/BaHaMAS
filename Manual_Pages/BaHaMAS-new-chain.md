@@ -28,19 +28,16 @@ Most of the information for the simulation input file(s) is retrieved from the *
 \--betasfile *filename*
 :   Use *filename* instead of **betas** file.
 
-\--measurements *number*
+\--measurements, \-m *number*
 :   Specify the number of trajectories that should be done (default: 1000).
 
-\--checkpointEvery *number*
+\--checkpointEvery, \-f *number*
 :   Specify every how many trajectories a check-point should be stored to disk (default: 100).
-
-\--pf *number*
-:   Specify how many pseudofermions should be used (default: 1).
 
 \--jobscript_prefix *string*
 :   Specify the prefix of the jobscript file (default: own setup).
 
-\--walltime *dd-hh:mm:ss* |  *human-string*
+\--walltime, \-w *dd-hh:mm:ss* |  *human-string*
 :   Specify the simulation wall-time (default: own setup).
     To specify e.g. one day, you can either use the standard form **1-00:00:00** or a more handy *human-string*, in the example **1d**.
     Supported postfixes are **d** for days, **h** for hours, **m** for minutes and **s** for seconds.
@@ -67,11 +64,23 @@ Most of the information for the simulation input file(s) is retrieved from the *
 
 # CL2QCD OPTIONS
 
-\--confSaveEvery
+\--pf *number*
+:   Specify how many pseudofermions should be used (default: 1).
+
+\--confSaveEvery, \-F
 :   Specify every how many trajectories the **.save** checkpoint is overwritten (default: 20).
 
 \--cgbs *number*
 :   Specify the conjugate gradient block-size and namely every how many iterations on the device the residuum is checked for convergence on the host (default: 50).
+
+\--togglePbp
+:   Invert logic value about measurement of the pbp specified by the user in the setup.
+
+# openQCD-FASTSUM OPTIONS
+
+\--processorsGrid, \-p
+:   Specify 4 integers which refer to how many processors have to be used to split the lattice in every direction (default: 1 1 1 1).
+    The first entry refer to the temporal lattice direction and the other three to the spatial ones.
 
 # FILES
 

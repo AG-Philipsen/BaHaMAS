@@ -19,7 +19,7 @@
 
 function ParseCommandLineOption()
 {
-    local commandLineOptions testsNumericList testsNameList number
+    local commandLineOptions testsNumericList testsNameList number testName
     while [[ "$1" != "" ]]; do
         case $1 in
             -h | --help )
@@ -46,6 +46,17 @@ function ParseCommandLineOption()
                             testsNameList+=( "${testsToBeRun[${number}]}" )
                         done
                         testsToBeRun=( "${testsNameList[@]}" )
+                    elif [[ $2 =~ ^[[:alpha:]*] ]]; then
+                        testsNameList=()
+                        for testName in "${testsToBeRun[@]}"; do
+                            if [[ ${testName} = $2 ]]; then
+                                testsNameList+=( "${testName}" )
+                            fi
+                        done
+                        testsToBeRun=( "${testsNameList[@]}" )
+                        if [[ ${#testsToBeRun[@]} -eq 0 ]]; then
+                            Fatal ${BHMAS_fatalCommandLine} 'No test name found matching ' emph "$2" ' globbing pattern!'
+                        fi
                     else
                         __static__PrintOptionSpecificationErrorAndExit $2
                     fi
@@ -79,7 +90,7 @@ function __static__AddOptionToHelper()
 function __static__PrintHelper()
 {
     local helperColor normalColor
-    helperColor='g'; normalColor='m'
+    helperColor='g'; normalColor='lc'
     cecho -d ${helperColor}
     cecho -d " Call " B "BaHaMAS tests" uB " with the following optional arguments:" "\n"
     __static__AddOptionToHelper "-h | --help"        "Print this help"
@@ -88,7 +99,9 @@ function __static__PrintHelper()
                                 "(default value 1)."
     __static__AddOptionToHelper "-t | --runTests"    "Specify which tests have to be run."\
                                 "Comma-separated numbers or intervals (e.g. 1,3-5)"\
-                                "have to be specified. If no number is specified,"\
+                                "or a string (e.g. CL2QCD*) have to be specified."\
+                                "The string is matched against test names using"\
+                                "shell regular globbing. If no value is specified"\
                                 "the available tests list is printed."
     __static__AddOptionToHelper "-l | --doNotCleanTestFolder" "Leave all the created folders and"\
                                 "files in the BaHaMAS test folder."

@@ -68,23 +68,6 @@ function AddSoftwareSpecificPartToProductionJobScript_CL2QCD()
         "echo \${SLURM_JOB_NODELIST} > ${BHMAS_productionExecutableFilename}.${betasString:1}.\${SLURM_JOB_ID}.nodelist"\
         ""
 
-    #Copying executable file(s) and if working on different disks also input file
-    __static__AddToJobscriptFile\
-        "# TODO: this is necessary because the log file is produced in the directoy"\
-        "#       of the exec. Copying it later does not guarantee that it is still the same..."\
-        "echo \"Copy executable to beta directories in ${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}x.xxxx...\""
-    for index in "${!betaValues[@]}"; do
-        __static__AddToJobscriptFile "rm -f \${dir${index}}/${BHMAS_productionExecutableFilename} && cp -a ${BHMAS_productionExecutableGlobalPath} \${dir${index}} || exit ${BHMAS_fatalBuiltin}"
-    done
-    __static__AddToJobscriptFile "echo \"...done!\"" ""
-    if [[ "${BHMAS_submitDiskGlobalPath}" != "${BHMAS_runDiskGlobalPath}" ]]; then
-        __static__AddToJobscriptFile "#Copy inputfile from home to work directories..."
-        for index in "${!betaValues[@]}"; do
-            __static__AddToJobscriptFile "mkdir -p \${workdir${index}} && cp \${dir${index}}/${BHMAS_inputFilename} \${workdir${index}}/${BHMAS_inputFilename}.\${SLURM_JOB_ID} || exit ${BHMAS_fatalBuiltin}"
-        done
-        __static__AddToJobscriptFile "echo \"...done!\""
-    fi
-
     #Some more output information and run command(s)
     __static__AddToJobscriptFile\
         ""\
@@ -151,22 +134,18 @@ function AddSoftwareSpecificPartToProductionJobScript_CL2QCD()
 
     #If a thermalization was done, copy produced thermalized configuration to pool
     if [[ ${BHMAS_executionMode} = 'mode:thermalize' ]] || [[ ${BHMAS_executionMode} = "mode:continue-thermalization" ]]; then
-        __static__AddToJobscriptFile "# Copy last configuration to Thermalized Configurations folder"
+        local thermalizeType
         if [[ ${BHMAS_betaPostfix} == "_thermalizeFromHot" ]]; then
-            for index in "${!betaValues[@]}"; do
-                __static__AddToJobscriptFile\
-                    "NUMBER_LAST_CONFIGURATION_IN_FOLDER=\$(ls \${workdir${index}} | grep '${BHMAS_configurationPrefix}[0-9]\+' | grep -o '[0-9]\+' | sort -V | tail -n1)" \
-                    "cp \${workdir${index}}/${BHMAS_configurationPrefix//\\/}\${NUMBER_LAST_CONFIGURATION_IN_FOLDER} ${BHMAS_thermConfsGlobalPath}/${BHMAS_configurationPrefix//\\/}${BHMAS_parametersString}_${BHMAS_betaPrefix}${betaValues[${index}]%_*}_fromHot\$(sed 's/^0*//' <<< \"\${NUMBER_LAST_CONFIGURATION_IN_FOLDER}\") || exit ${BHMAS_fatalBuiltin}"
-            done
+            thermalizeType='fromHot'
         elif [[ ${BHMAS_betaPostfix} == "_thermalizeFromConf" ]]; then
-            for index in "${!betaValues[@]}"; do
-                __static__AddToJobscriptFile "NUMBER_LAST_CONFIGURATION_IN_FOLDER=\$(ls \${workdir${index}} | grep '${BHMAS_configurationPrefix}[0-9]\+' | grep -o '[0-9]\+' | sort -V | tail -n1)"
-                #TODO: For the moment we assume 1000 tr. are done from hot. Better to avoid it
-                __static__AddToJobscriptFile\
-                    "TRAJECTORIES_DONE_FROM_CONF=\$(( \$(sed 's/^0*//' <<< \"\${NUMBER_LAST_CONFIGURATION_IN_FOLDER}\") - 1000 ))"\
-                    "cp \${workdir${index}}/${BHMAS_configurationPrefix//\\/}\${NUMBER_LAST_CONFIGURATION_IN_FOLDER} ${BHMAS_thermConfsGlobalPath}/${BHMAS_configurationPrefix//\\/}${BHMAS_parametersString}_${BHMAS_betaPrefix}${betaValues[${index}]%_*}_fromConf\${TRAJECTORIES_DONE_FROM_CONF} || exit ${BHMAS_fatalBuiltin}"
-            done
+            thermalizeType='fromConf'
         fi
+        __static__AddToJobscriptFile "# Copy last configuration to Thermalized Configurations folder"
+        for index in "${!betaValues[@]}"; do
+            __static__AddToJobscriptFile\
+                "NUMBER_LAST_CONFIGURATION_IN_FOLDER=\$(ls \${workdir${index}} | grep '${BHMAS_configurationPrefix}[0-9]\+' | grep -o '[0-9]\+' | sort -V | tail -n1)" \
+                "cp \${workdir${index}}/${BHMAS_configurationPrefix//\\/}\${NUMBER_LAST_CONFIGURATION_IN_FOLDER} ${BHMAS_thermConfsGlobalPath}/${BHMAS_configurationPrefix//\\/}${BHMAS_parametersString}_${BHMAS_betaPrefix}${betaValues[${index}]%_*}_${thermalizeType}_trNr\$(sed 's/^0*//' <<< \"\${NUMBER_LAST_CONFIGURATION_IN_FOLDER}\") || exit ${BHMAS_fatalBuiltin}"
+        done
     fi
 }
 

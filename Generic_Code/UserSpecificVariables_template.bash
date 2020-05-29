@@ -47,16 +47,18 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_submitDiskGlobalPath=""
     readonly BHMAS_runDiskGlobalPath=""
     readonly BHMAS_GPUsPerNode=
+    readonly BHMAS_coresPerNode=
     readonly BHMAS_jobScriptFolderName=""
     readonly BHMAS_excludeNodesGlobalPath=""
     readonly BHMAS_projectSubpath=""
     readonly BHMAS_productionExecutableGlobalPath=""
+    readonly BHMAS_productionCodebaseGlobalPath=""
+    readonly BHMAS_productionMakefileTarget=""
+    readonly BHMAS_compiler="$(which mpicc)"
+    readonly BHMAS_compilerFlags=""
+    readonly BHMAS_folderWithMPIHeaderGlobalPath="${BHMAS_compiler/%bin\/mpicc/include}"
     readonly BHMAS_inputFilename=""
     readonly BHMAS_outputFilename=""
-    readonly BHMAS_plaquetteColumn=
-    readonly BHMAS_deltaHColumn=
-    readonly BHMAS_acceptanceColumn=
-    readonly BHMAS_trajectoryTimeColumn=
     readonly BHMAS_useRationalApproxFiles='FALSE'
     readonly BHMAS_rationalApproxGlobalPath=""
     readonly BHMAS_approxHeatbathFilename=""
@@ -69,6 +71,7 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_maximumWalltime=""
 
     #Possible default value for options which then may not be given via command line
+    BHMAS_measurePbp='FALSE'
     BHMAS_jobScriptPrefix=""
     BHMAS_walltime=""
     BHMAS_clusterPartition=""
@@ -88,17 +91,19 @@ MakeFunctionsDefinedInThisFileReadonly
 #     BHMAS_submitDiskGlobalPath             -->  global path to the disk from which the jobs are submitted (see further informations below)
 #     BHMAS_runDiskGlobalPath                -->  global path to the disk from which the jobs are run (see further informations below)
 #     BHMAS_GPUsPerNode                      -->  number of GPUs per node
+#     BHMAS_coresPerNode                     -->  number of physical CPU cores per node
 #     BHMAS_jobScriptFolderName              -->  name of the folder where the job scripts are collected
 #     BHMAS_excludeNodesGlobalPath           -->  local or remote global path to file containing the directive to exclude nodes
 #     BHMAS_projectSubpath                   -->  path from HOME and WORK to the folder containing the parameters folders structure (see further informations below)
 #     BHMAS_productionExecutableGlobalPath   -->  production executable global path
+#     BHMAS_productionCodebaseGlobalPath     -->  production codebase (if it has to be compiled)
+#     BHMAS_productionMakefileTarget         -->  production Makefile (if it has to be compiled)
+#     BHMAS_compiler                         -->  compiler maybe needed for Makefile (if it has to be compiled)
+#     BHMAS_compilerFlags                    -->  flags to be given to the compiler (if it has to be compiled)
+#     BHMAS_folderWithMPIHeaderGlobalPath    -->  folder where mpi.h is located (if it has to be compiled)
 #     BHMAS_inputFilename                    -->  name of the inputfile
 #     BHMAS_jobScriptPrefix                  -->  prefix of the jobscript name
 #     BHMAS_outputFilename                   -->  name of the outputfile
-#     BHMAS_plaquetteColumn                  -->  number of column containing the plaquette value [first column is column number 1].
-#     BHMAS_deltaHColumn                     -->  number of column containing the dH value [first column is column number 1].
-#     BHMAS_acceptanceColumn                 -->  number of column containing outcomes (zeros or ones) of Metropolis test [first column is column number 1].
-#     BHMAS_trajectoryTimeColumn             -->  number of column containing the trajectory time in seconds [first column is column number 1].
 #     BHMAS_rationalApproxGlobalPath         -->  global path to the folder containing the rational approximations
 #     BHMAS_approxHeatbathFilename           -->  rational approximation used for the pseudofermion fields
 #     BHMAS_approxMDFilename                 -->  rational approximation used for the molecular dynamis

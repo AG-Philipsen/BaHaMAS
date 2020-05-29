@@ -21,172 +21,355 @@ function CheckTestEnvironment()
 {
     local name postfix
     postfix="$(date +%H%M%S)"
-    for name in "${listOfAuxiliaryFilesAndFolders[@]}"; do
-        if [[ "$(basename ${name})" = 'Tests.log' ]]; then
-            continue
+    if [[ -d "${testFolder}" ]]; then
+        Warning "Found " emph "${testFolder}" ", renaming it!"
+        mv "${testFolder}" "${testFolder}_${postfix}" || exit ${BHMAS_fatalBuiltin}
+    fi
+    if [[ -f "${userVariablesFile}" ]]; then
+        if [[ ! -L "${userVariablesFile}" ]]; then
+            Fatal ${BHMAS_fatalLogicError} 'File ' file "${userVariablesFile}" ' existing and not a symlink!'
+        else
+            rm "${userVariablesFile}"
         fi
-        if [[ "$(find $(pwd) -path "${name}")" = "${name}" ]]; then
-            cecho ly "\n " B U "WARNING" uU ": " uB "Found " emph "${name}" ", renaming it!"
-            mv "${name}" "${name}_${postfix}"
-        fi
-    done
+    fi
 }
-
 
 function __static__CreateParametersFolders()
 {
-    mkdir -p "${testFolder}${testParametersPath}" || exit ${BHMAS_fatalBuiltin}
+    mkdir -p "${submitDirWithBetaFolders}" || exit ${BHMAS_fatalBuiltin}
+    mkdir -p "${runDirWithBetaFolders}" || exit ${BHMAS_fatalBuiltin}
 }
+
 function __static__CreateRationalApproxFolderWithFiles()
 {
-    local filename
-    mkdir -p "${testFolder}/Rational_Approximations"
+    local filename approxFolder
+    approxFolder="${submitTestFolder}/${projectFolder}/Rational_Approximations"
+    mkdir -p "${approxFolder}"
     for filename in 'Approx_Heatbath' 'Approx_MD' 'Approx_Metropolis'; do
-        cp "${BHMAS_testsFolderAuxFiles}/fakeApprox" "${testFolder}/Rational_Approximations/Nf2_${filename}"
+        cp "${BHMAS_testsFolderAuxFiles}/${software}/fakeApprox" "${approxFolder}/Nf2_${filename}"
     done
 }
+
 function __static__CreateBetaFolder()
 {
-    mkdir "${testFolder}${testParametersPath}/${betaFolder}" || exit ${BHMAS_fatalBuiltin}
+    mkdir "${submitDirWithBetaFolders}/${betaFolder}" || exit ${BHMAS_fatalBuiltin}
+    mkdir "${runDirWithBetaFolders}/${betaFolder}" || exit ${BHMAS_fatalBuiltin}
 }
-function __static__CreateFilesInBetaFolder()
+
+function __static__CreateFilesInSubmitBetaFolder()
 {
     local file
     for file in "$@"; do
-        touch "${testFolder}${testParametersPath}/${betaFolder}/${file}" || exit ${BHMAS_fatalBuiltin}
+        touch "${submitDirWithBetaFolders}/${betaFolder}/${file}" || exit ${BHMAS_fatalBuiltin}
     done
 }
+
+function __static__CreateFilesInRunBetaFolder()
+{
+    local file
+    for file in "$@"; do
+        printf "Not empty\n" > "${runDirWithBetaFolders}/${betaFolder}/${file}" || exit ${BHMAS_fatalBuiltin}
+    done
+}
+
+function __static__CreateSymlinkInRunBetaFolder()
+{
+    #Fake symlink, betas file alway existing
+    ln -s "${submitDirWithBetaFolders}/betas"\
+       "${runDirWithBetaFolders}/${betaFolder}/conf.${testParametersString}_${betaFolder%_*}_$1" || exit ${BHMAS_fatalBuiltin}
+}
+
 function __static__AddStringToFirstLineBetasFile()
 {
     local line
-    line="$(head -n 1 "${testFolder}${testParametersPath}/betas")"
-    cecho -n -d "${line}   $1" > "${testFolder}${testParametersPath}/betas" || exit ${BHMAS_fatalBuiltin}
+    line="$(head -n 1 "${submitDirWithBetaFolders}/betas")"
+    cecho -n -d "${line}   $1" > "${submitDirWithBetaFolders}/betas" || exit ${BHMAS_fatalBuiltin}
 }
+
 function __static__CopyAuxiliaryFileAtBetaFolderLevel()
 {
-    cp "${BHMAS_testsFolderAuxFiles}/$1" "${testFolder}${testParametersPath}/$2" || exit ${BHMAS_fatalBuiltin}
+    cp "${BHMAS_testsFolderAuxFiles}/$1" "${submitDirWithBetaFolders}/$2" || exit ${BHMAS_fatalBuiltin}
 }
-function __static__CopyAuxiliaryFilesToBetaFolder()
+
+function __static__CopyAuxiliaryFilesToSubmitBetaFolder()
 {
     local file
     for file in "$@"; do
-        cp "${BHMAS_testsFolderAuxFiles}/${file}" "${testFolder}${testParametersPath}/${betaFolder}" || exit ${BHMAS_fatalBuiltin}
+        cp "${BHMAS_testsFolderAuxFiles}/${software}/${file}" "${submitDirWithBetaFolders}/${betaFolder}" || exit ${BHMAS_fatalBuiltin}
     done
 }
+
+function __static__CopyAuxiliaryFilesToRunBetaFolder()
+{
+    local file
+    for file in "$@"; do
+        cp "${BHMAS_testsFolderAuxFiles}/${software}/${file}" "${runDirWithBetaFolders}/${betaFolder}" || exit ${BHMAS_fatalBuiltin}
+    done
+}
+
 function __static__CompleteInputFileWithCorrectPaths()
 {
-    local filename
+    local filename approxFolder
+    approxFolder="${submitTestFolder}/${projectFolder}/Rational_Approximations"
     printf '%s\n'\
-           "rationalApproxFileHB=${testFolder}/Rational_Approximations/Nf2_Approx_Heatbath"\
-           "rationalApproxFileMD=${testFolder}/Rational_Approximations/Nf2_Approx_MD"\
-           "rationalApproxFileMetropolis=${testFolder}/Rational_Approximations/Nf2_Approx_Metropolis"  >> "${testFolder}${testParametersPath}/${betaFolder}/fakeInput" || exit ${BHMAS_fatalBuiltin}
+           "rationalApproxFileHB=${approxFolder}/Nf2_Approx_Heatbath"\
+           "rationalApproxFileMD=${approxFolder}/Nf2_Approx_MD"\
+           "rationalApproxFileMetropolis=${approxFolder}/Nf2_Approx_Metropolis"\
+           >> "${submitDirWithBetaFolders}/${betaFolder}/fakeInput" || exit ${BHMAS_fatalBuiltin}
 }
+
 function __static__CreateThermalizedConfigurationFolder()
 {
-    mkdir "${testFolder}/Thermalized_Configurations" || exit ${BHMAS_fatalBuiltin}
+    mkdir "${submitTestFolder}/${projectFolder}/Thermalized_Configurations" || exit ${BHMAS_fatalBuiltin}
 }
+
 function __static__CreateThermalizedConfiguration()
 {
-    touch "${testFolder}/Thermalized_Configurations/conf.${testParametersString}_${betaFolder%_*}_$1" || exit ${BHMAS_fatalBuiltin}
+    touch "${submitTestFolder}/${projectFolder}/Thermalized_Configurations/conf.${testParametersString}_${betaFolder%_*}_$1" || exit ${BHMAS_fatalBuiltin}
 }
 
 function MakeTestPreliminaryOperations()
 {
-    local trashFolderName file folder
+    local software projectFolder trashFolderName file folder\
+          submitDirWithBetaFolders runDirWithBetaFolders
+    #Link user variable file depending on test case
+    if [[ "$1" =~ (^|)openQCD-FASTSUM(|$) ]]; then
+        readonly software='openQCD-FASTSUM'
+        readonly projectFolder='WilsonFakeProject'
+        testParametersString='Nf2_mui0_k1150_nt8_ns48'
+        testParametersPath="/${testParametersString//_/\/}"
+    else
+        readonly software='CL2QCD'
+        readonly projectFolder='StaggeredFakeProject'
+        testParametersString='Nf2_mui0_mass0050_nt6_ns18'
+        testParametersPath="/${testParametersString//_/\/}"
+    fi
+    ln -s "${BHMAS_testsFolder}/UserVariables_${software}.bash" "${userVariablesFile}" 2>/dev/null
+    if [[ $? -ne 0 ]]; then
+        Fatal ${BHMAS_fatalBuiltin} 'Unable to create symlink for user variables file!'
+    fi
+
     #Always create params folders and go at betafolder level
+    readonly submitDirWithBetaFolders="${submitTestFolder}/${projectFolder}${testParametersPath}"
+    readonly runDirWithBetaFolders="${runTestFolder}/${projectFolder}${testParametersPath}"
     __static__CreateParametersFolders
-    cd "${testFolder}${testParametersPath}" || exit ${BHMAS_fatalBuiltin}
+    cd "${submitDirWithBetaFolders}" || exit ${BHMAS_fatalBuiltin}
     #Always use completed file and then in case overwrite
-    cp "${BHMAS_testsFolderAuxFiles}/fakeBetas" "${testFolder}${testParametersPath}/betas"
+    cp "${BHMAS_testsFolderAuxFiles}/${software}/fakeBetas" "${submitDirWithBetaFolders}/betas"
 
     case "$1" in
-        CL2QCD-prepare-only | CL2QCD-new-chain | CL2QCD-new-chain-goal )
+        CL2QCD-prepare-only | CL2QCD-new-chain* )
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateThermalizedConfigurationFolder
-            __static__CreateThermalizedConfiguration "fromConf4000"
+            __static__CreateThermalizedConfiguration "fromConf_trNr5000"
             if [[ $1 =~ goal ]]; then
                 __static__AddStringToFirstLineBetasFile "g15000"
             fi
             ;;
+
         CL2QCD-submit-only )
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateThermalizedConfigurationFolder
-            __static__CreateThermalizedConfiguration "fromConf4000"
+            __static__CreateThermalizedConfiguration "fromConf_trNr5000"
             __static__CreateBetaFolder
-            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata" ".BaHaMAS_metadata"
-            __static__CopyAuxiliaryFilesToBetaFolder "fakeInput"
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
+            __static__CopyAuxiliaryFilesToSubmitBetaFolder "fakeInput" "fakeExecutable"
+            __static__CopyAuxiliaryFilesToRunBetaFolder "fakeInput" "fakeExecutable"
             mkdir "Jobscripts_TEST" || exit ${BHMAS_fatalBuiltin}
-            printf "NOT EMPTY\n" > "${testFolder}${testParametersPath}/Jobscripts_TEST/fakePrefix_${testParametersString}__${betaFolder%_*}"
+            printf "#SBATCH --time=2:45:00\n" > "${submitDirWithBetaFolders}/Jobscripts_TEST/fakePrefix_${testParametersString}__${betaFolder%_*}"
+            ln -s "${submitTestFolder}/${projectFolder}/Thermalized_Configurations/conf.${testParametersString}_${betaFolder%_*}_fromConf4000"\
+               "${runDirWithBetaFolders}/${betaFolder}/conf.${testParametersString}_${betaFolder%_*}_fromConf4000" || exit ${BHMAS_fatalBuiltin}
             ;;
+
         CL2QCD-thermalize* )
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateThermalizedConfigurationFolder
             if [[ $1 =~ conf$ ]]; then
-                __static__CreateThermalizedConfiguration "fromHot1000"
+                __static__CreateThermalizedConfiguration "fromHot_trNr1000"
             fi
             ;;
+
         CL2QCD-continue-* )
+            if [[ $1 =~ therm ]]; then
+                betaFolder="${betaFolder/continueWithNewChain/thermalizeFromHot}"
+                __static__CreateThermalizedConfigurationFolder
+            fi
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateBetaFolder
-            __static__CopyAuxiliaryFilesToBetaFolder "fakeInput" "fakeOutput" "fakeOutput_pbp.dat"
-            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata" ".BaHaMAS_metadata"
+            __static__CopyAuxiliaryFilesToSubmitBetaFolder "fakeInput"
+            __static__CopyAuxiliaryFilesToRunBetaFolder "fakeExecutable" "fakeOutput" "fakeOutput_pbp.dat"
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
             __static__CompleteInputFileWithCorrectPaths
-            __static__CreateFilesInBetaFolder "conf.save" "prng.save"
+            __static__CreateFilesInRunBetaFolder "conf.save" "prng.save"
+            if [[ ! $1 =~ therm ]]; then
+                # This is not needed for thermalization from hot
+                __static__CreateSymlinkInRunBetaFolder "fromConf_trNr5000"
+            fi
             case "${1##*-}" in
                 last )
-                    __static__CreateFilesInBetaFolder "conf.00800" "prng.00800"
+                    __static__CreateFilesInRunBetaFolder "conf.00800" "prng.00800"
                     __static__AddStringToFirstLineBetasFile "rlast"
                     ;;
                 resume )
-                    __static__CreateFilesInBetaFolder "conf.00100" "prng.00100" "conf.00200" "prng.00200" "conf.00200_backup" "conf.save_backup" "prng.save_backup"
+                    __static__CreateFilesInRunBetaFolder "conf.00100" "prng.00100" "conf.00200" "prng.00200" "conf.00200_backup" "conf.save_backup" "prng.save_backup"
                     __static__AddStringToFirstLineBetasFile "r100"
                     ;;
                 goal )
                     __static__AddStringToFirstLineBetasFile "g15000"
                     ;;
             esac
+            #It is important to restore the betaFolder variable to continueWithNewChain
+            #postfix which is used for potential following tests (betaFolder is global)
             if [[ $1 =~ therm ]]; then
-                __static__CreateThermalizedConfigurationFolder
-                mv "${betaFolder}" "${betaFolder/continueWithNewChain/thermalizeFromHot}"
+                betaFolder="${betaFolder/thermalizeFromHot/continueWithNewChain}"
             fi
             ;;
+
         CL2QCD-simulation-status* )
             __static__CreateBetaFolder
-            __static__CopyAuxiliaryFilesToBetaFolder "fakeExecutable.123456.out" "fakeInput" "fakeOutput"
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
+            __static__CopyAuxiliaryFilesToSubmitBetaFolder "fakeExecutable.123456.out" "fakeInput"
+            __static__CopyAuxiliaryFilesToRunBetaFolder "fakeOutput"
             ;;
-        accRateReport* )
+
+        CL2QCD-accRateReport* )
             __static__CreateBetaFolder
-            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata" ".BaHaMAS_metadata"
-            __static__CopyAuxiliaryFilesToBetaFolder "fakeOutput"
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
+            __static__CopyAuxiliaryFilesToRunBetaFolder "fakeOutput"
             ;;
-        cleanOutputFiles* )
+
+        CL2QCD-cleanOutputFiles* )
             __static__CreateBetaFolder
-            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata" ".BaHaMAS_metadata"
-            __static__CopyAuxiliaryFilesToBetaFolder "fakeOutput" "fakeOutput_pbp.dat"
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
+            __static__CopyAuxiliaryFilesToRunBetaFolder "fakeOutput" "fakeOutput_pbp.dat"
             ;;
+
+        CL2QCD-measure* )
+            __static__CreateBetaFolder
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
+            __static__CreateFilesInRunBetaFolder "conf.00100" "conf.00200" "conf.00300" "conf.00400"
+            if [[ $1 =~ some$ ]]; then
+                __static__CreateFilesInRunBetaFolder "conf.00100_2_3_7_1_corr" "conf.00100_1_2_3_1_corr"
+            fi
+            ;;
+
+        openQCD-FASTSUM-prepare-only | openQCD-FASTSUM-new-chain* )
+            __static__CreateThermalizedConfigurationFolder
+            __static__CreateThermalizedConfiguration "fromConf_trNr5000"
+            if [[ $1 =~ goal ]]; then
+                __static__AddStringToFirstLineBetasFile "g15000"
+            fi
+            ;;
+
+        openQCD-FASTSUM-submit-only )
+            __static__CreateThermalizedConfigurationFolder
+            __static__CreateThermalizedConfiguration "fromConf_trNr5000"
+            __static__CreateBetaFolder
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
+            __static__CopyAuxiliaryFilesToSubmitBetaFolder "fakeInput"
+            __static__CopyAuxiliaryFilesToRunBetaFolder "fakeInput"
+            __static__CreateFilesInSubmitBetaFolder "qcd1_1_2_4_6"
+            __static__CreateFilesInRunBetaFolder "qcd1_1_2_4_6"
+            mkdir "Jobscripts_TEST" || exit ${BHMAS_fatalBuiltin}
+            printf "#SBATCH --time=2:45:00\n" > "${submitDirWithBetaFolders}/Jobscripts_TEST/fakePrefix_${testParametersString}__${betaFolder%_*}"
+            ln -s "${submitTestFolder}/${projectFolder}/Thermalized_Configurations/conf.${testParametersString}_${betaFolder%_*}_fromConf4000"\
+               "${runDirWithBetaFolders}/${betaFolder}/conf.${testParametersString}_${betaFolder%_*}_fromConf4000" || exit ${BHMAS_fatalBuiltin}
+            ;;
+
+        openQCD-FASTSUM-thermalize* )
+            __static__CreateThermalizedConfigurationFolder
+            if [[ $1 =~ conf$ ]]; then
+                __static__CreateThermalizedConfiguration "fromHot_trNr1000"
+            fi
+            ;;
+
+        openQCD-FASTSUM-continue* )
+            local digitConf resumeConf
+            if [[ $1 =~ therm ]]; then
+                betaFolder="${betaFolder/continueWithNewChain/thermalizeFromHot}"
+                __static__CreateThermalizedConfigurationFolder
+                digitConf=0
+                resumeConf=60
+            else
+                digitConf=5
+                resumeConf=5060
+            fi
+            __static__CreateBetaFolder
+            __static__CopyAuxiliaryFilesToSubmitBetaFolder "fakeInput"
+            __static__CopyAuxiliaryFilesToRunBetaFolder "fakeOutput.log"
+            __static__CreateFilesInSubmitBetaFolder "qcd1_1_2_4_6"
+            __static__CreateFilesInRunBetaFolder "qcd1_1_2_4_6"
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
+            __static__CreateFilesInRunBetaFolder {conf,prng,data}.0${digitConf}0{2..8..2}0 {conf,prng}.06020 conf.07040
+            if [[ ! $1 =~ therm ]]; then
+                # This is not needed for thermalization from hot
+                __static__CreateSymlinkInRunBetaFolder "fromConf_trNr5000"
+            fi
+            case "${1##*-}" in
+                last )
+                    __static__AddStringToFirstLineBetasFile "rlast"
+                    ;;
+                resume )
+                    __static__AddStringToFirstLineBetasFile "r${resumeConf}"
+                    ;;
+                goal )
+                    __static__AddStringToFirstLineBetasFile "g15000"
+                    ;;
+            esac
+            #It is important to restore the betaFolder variable to continueWithNewChain
+            #postfix which is used for potential following tests (betaFolder is global)
+            if [[ $1 =~ therm ]]; then
+                betaFolder="${betaFolder/thermalizeFromHot/continueWithNewChain}"
+            fi
+            ;;
+
+        openQCD-FASTSUM-simulation-status* )
+            __static__CreateBetaFolder
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
+            __static__CopyAuxiliaryFilesToSubmitBetaFolder "fakeInput"
+            __static__CopyAuxiliaryFilesToRunBetaFolder "fakeOutput.log"
+            __static__CreateSymlinkInRunBetaFolder "fromConf_trNr5000"
+            ;;
+
+        openQCD-FASTSUM-accRateReport* )
+            __static__CreateBetaFolder
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
+            __static__CopyAuxiliaryFilesToRunBetaFolder "fakeOutput.log"
+            __static__CreateSymlinkInRunBetaFolder "fromConf_trNr5000"
+            ;;
+
+        openQCD-FASTSUM-cleanOutputFiles* )
+            __static__CreateBetaFolder
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
+            __static__CopyAuxiliaryFilesToRunBetaFolder "fakeOutput.log"
+            ;;
+
         completeBetasFile* )
             __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeBetasToBeCompleted" "betas"
             ;;
+
         commentBetas* | uncommentBetas* )
             __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeBetasToBeCommented" "betas"
             ;;
-        CL2QCD-measure* )
-            __static__CreateBetaFolder
-            __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeMetadata" ".BaHaMAS_metadata"
-            __static__CreateFilesInBetaFolder "conf.00100" "conf.00200" "conf.00300" "conf.00400"
-            if [[ $1 =~ some$ ]]; then
-                __static__CreateFilesInBetaFolder "conf.00100_2_3_7_1_corr" "conf.00100_1_2_3_1_corr"
-            fi
-            ;;
+
         database* )
-            mkdir -p "${testFolder}/SimulationsOverview"
-            cp "${BHMAS_testsFolderAuxFiles}/fakeOverviewDatabase" "${testFolder}/SimulationsOverview/2222_01_01_OverviewDatabase"
+            local databaseFolder; databaseFolder="${submitTestFolder}/${projectFolder}/SimulationsOverview"
+            mkdir -p "${databaseFolder}"
+            cp "${BHMAS_testsFolderAuxFiles}/fakeOverviewDatabase" "${databaseFolder}/2022_01_01_OverviewDatabase"
             if [[ $1 =~ update ]]; then
                 __static__CreateBetaFolder
-                __static__CopyAuxiliaryFilesToBetaFolder "fakeExecutable.123456.out" "fakeInput" "fakeOutput"
-                cecho -d "${testFolder}${testParametersPath}" > "fakeDatabasePath"
+                __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
+                __static__CopyAuxiliaryFilesToSubmitBetaFolder "fakeInput"
+                if [[ ${software} = CL2QCD ]]; then
+                    __static__CopyAuxiliaryFilesToRunBetaFolder "fakeOutput"
+                else
+                    __static__CreateSymlinkInRunBetaFolder "fromConf_trNr5000"
+                    __static__CopyAuxiliaryFilesToRunBetaFolder "fakeOutput.log"
+                fi
+                cecho -d "${submitDirWithBetaFolders}" > "fakeDatabasePath"
             fi
             ;;
+
         * )
             ;;
     esac
@@ -194,14 +377,15 @@ function MakeTestPreliminaryOperations()
 
 function InhibitBaHaMASCommands()
 {
-    function less(){ cecho -d "less $@"; }
-    function sbatch(){ cecho -d "sbatch $@"; }
+    function less(){ cecho -d "less $*"; }
+    function sbatch(){ cecho -d "sbatch $*"; }
+    function make(){ cecho -d "make $*"; touch "${@: -1}"; }
     #To make liststatus find running job and then test measure time
     if [[ $1 =~ ^(liststatus|database) ]]; then
         export jobnameForSqueue="${testParametersString}__${betaFolder%_*}@RUNNING"
     fi
     function squeue(){ cecho -d -n "${jobnameForSqueue:-}"; }
-    export -f less sbatch squeue
+    export -f less sbatch make squeue
 }
 
 function RunBaHaMASInTestMode()
@@ -237,7 +421,7 @@ function RunTest()
     testName=$1; shift
     (( testsRun++ ))
     if [[ ${reportLevel} -eq 3 ]]; then
-        printf -v stringTest "%-50s" "__${testName}$(cecho -d bb)_"
+        printf -v stringTest "%-60s" "__${testName}$(cecho -d bb)_"
         stringTest="${stringTest// /.}"
         cecho -n lp "  $(printf '%+2s' ${testsRun})/$(printf '%-2s' ${#testsToBeRun[@]})" lc "${stringTest//_/ }"
     fi
@@ -258,18 +442,27 @@ function RunTest()
 
 function CleanTestsEnvironmentForFollowingTest()
 {
-    local bigTrash trashFolderName
+    local bigTrash trashFolderName listOfFiles
     bigTrash="Trash"
     #Always go to simulation path level and move everything inside a Trash folder
     #which contains in the name also the test name (easy debug in case of failure)
     cd "${testFolder}" || exit ${BHMAS_fatalBuiltin}
     mkdir -p "${bigTrash}" || exit ${BHMAS_fatalBuiltin}
-    if [[ "$(ls -A)" ]]; then
+    listOfFiles=( * )
+    if [[ ${#listOfFiles[@]} -eq 1 ]] && [[ "${listOfFiles[0]}" != "${bigTrash}" ]]; then
+        Internal 'Folder ' dir "$(pwd)"\
+                 '\ncontaining only ' emph "${bigTrash}" ' but it should not be the case!'
+    else
         trashFolderName="Trash_$(date +%H%M%S-%3N)_$1"
         mkdir "${bigTrash}/${trashFolderName}" || exit ${BHMAS_fatalBuiltin}
         mv !("${bigTrash}") "${bigTrash}/${trashFolderName}/." || exit ${BHMAS_fatalBuiltin}
-    else
-        Internal "Folder " dir "$(pwd)" " empty but it should not be the case!"
+    fi
+    if [[ -f "${userVariablesFile}" ]]; then
+        if [[ ! -L "${userVariablesFile}" ]]; then
+            Fatal ${BHMAS_fatalLogicError} 'File ' file "${userVariablesFile}" ' existing and not a symlink!'
+        else
+            rm "${userVariablesFile}"
+        fi
     fi
 }
 
@@ -312,6 +505,8 @@ function DeleteAuxiliaryFilesAndFolders()
     for name in "${listOfAuxiliaryFilesAndFolders[@]}"; do
         if [[ -d "${name}" ]]; then
             [[ ${reportLevel} -eq 3 ]] && cecho p " - Removing " dir "${name}"
+        elif [[ -L "${name}" ]]; then
+            [[ ${reportLevel} -eq 3 ]] && cecho p " - Removing " emph "${name}"
         elif [[ -f "${name}" ]]; then
             [[ ${reportLevel} -eq 3 ]] && cecho p " - Removing " file "${name}"
         elif ls "${name}" 1>/dev/null 2>&1; then

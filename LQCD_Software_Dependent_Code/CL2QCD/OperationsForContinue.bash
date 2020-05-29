@@ -27,16 +27,15 @@
 function HandleEnvironmentForContinueForGivenSimulation_CL2QCD()
 {
     local runId; runId="$1"
-    CheckIfVariablesAreSet nameOfLastConfiguration nameOfLastPRNG runBetaDirectory
+    CheckIfVariablesAreDeclared nameOfLastConfiguration nameOfLastPRNG runBetaDirectory
 
-    #If the option resumefrom is given in the betasfile we have to clean the ${runBetaDirectory}, otherwise just set the name of conf and prng
     if KeyInArray ${runId} BHMAS_trajectoriesToBeResumedFrom; then
         #NOTE: If the user wishes to resume from the last avialable checkpoint, then we have to find here which is
         #      the "last" valid one. Valid means that both the conf and the prng file are present with the same number
         if [[ ${BHMAS_trajectoriesToBeResumedFrom[${runId}]} = "last" ]]; then
             #comm expects alphabetically sorted input, then we sort numerically the output and we take the last number
-            BHMAS_trajectoriesToBeResumedFrom[${runId}]=$(comm -12  <(ls -1 ${runBetaDirectory} | sed -n 's/^'${BHMAS_configurationPrefix}'0*\([1-9][0-9]*\)$/\1/p' | sort)\
-                                                               <(ls -1 ${runBetaDirectory} | sed -n 's/^'${BHMAS_prngPrefix}'0*\([1-9][0-9]*\)$/\1/p' | sort) | sort -n | tail -n1)
+            BHMAS_trajectoriesToBeResumedFrom[${runId}]=$(comm -12  <(ls -1 ${runBetaDirectory} | sed -n 's/^'"${BHMAS_configurationPrefix}"'0*\([1-9][0-9]*\)$/\1/p' | sort)\
+                                                               <(ls -1 ${runBetaDirectory} | sed -n 's/^'"${BHMAS_prngPrefix}"'0*\([1-9][0-9]*\)$/\1/p' | sort) | sort -n | tail -n1)
             if [[ ! ${BHMAS_trajectoriesToBeResumedFrom[${runId}]} =~ ^[0-9]+$ ]]; then
                 Error "Unable to find " emph "last valid checkpoint" " to resume from!\n" "The value " emph "beta = ${runId}" " will be skipped!"
                 BHMAS_problematicBetaValues+=( ${runId} )
@@ -69,8 +68,8 @@ function HandleEnvironmentForContinueForGivenSimulation_CL2QCD()
             nameOfLastPRNG=""
         fi
     else
-        nameOfLastConfiguration=$(ls -1 ${runBetaDirectory} | sed -n '/^'${BHMAS_configurationRegex}'$/p' | sort -V | tail -n1)
-        nameOfLastPRNG=$(ls -1 ${runBetaDirectory} | sed -n '/^'${BHMAS_prngRegex}'$/p' | sort -V | tail -n1)
+        nameOfLastConfiguration=$(ls -1 ${runBetaDirectory} | sed -n '/^'"${BHMAS_configurationRegex}"'$/p' | sort -V | tail -n1)
+        nameOfLastPRNG=$(ls -1 ${runBetaDirectory} | sed -n '/^'"${BHMAS_prngRegex}"'$/p' | sort -V | tail -n1)
     fi
     #The variable nameOfLastConfiguration should be set here, if not it means no conf was available!
     if [[ "${nameOfLastConfiguration}" == "" ]]; then
@@ -98,14 +97,15 @@ function HandleEnvironmentForContinueForGivenSimulation_CL2QCD()
 # checkpoint required by the user in the betas file
 #  INPUT: simulation ID
 #  OUTPUT: -
-#  Local variables from the caller: runBetaDirectory outputFileGlobalPath outputPbpFileGlobalPath
+#  Local variables from the caller: runBetaDirectory outputFileGlobalPath
+#                                   outputPbpFileGlobalPath trashFolderGlobalPath
 #
 # Exit codes: 0 if fine
 #             1 if runId is problematic -> Added to BHMAS_problematicBetaValues array
 function HandleOutputFilesForContinueForGivenSimulation_CL2QCD()
 {
     local runId; runId="$1"
-    CheckIfVariablesAreSet runBetaDirectory outputFileGlobalPath outputPbpFileGlobalPath
+    CheckIfVariablesAreDeclared runBetaDirectory outputFileGlobalPath outputPbpFileGlobalPath trashFolderGlobalPath
 
     #If the option resumefrom is given in the betasfile we have to clean the ${runBetaDirectory}, otherwise just set the name of conf and prng
     if KeyInArray ${runId} BHMAS_trajectoriesToBeResumedFrom; then
@@ -116,45 +116,43 @@ function HandleOutputFilesForContinueForGivenSimulation_CL2QCD()
             return 1
         fi
         #Now it should be feasable to resume simulation ---> clean runBetaDirectory
-        #Create in runBetaDirectory a folder named Trash_$(date) where to mv all the file produced after the traj. ${BHMAS_trajectoriesToBeResumedFrom[${runId}]}
-        local trashFolderName filename numberFromFile prefix
-        trashFolderName="${runBetaDirectory}/Trash_$(date +'%F_%H%M%S')"
-        mkdir ${trashFolderName} || exit ${BHMAS_fatalBuiltin}
-        for filename in $(ls -1 ${runBetaDirectory} | sed -n -e '/^'${BHMAS_configurationRegex}'.*$/p' -e '/^'${BHMAS_prngRegex}'.*$/p'); do
+        #Create in runBetaDirectory a folder named Trash_$(date) where to mv all
+        #the file produced after the traj. ${BHMAS_trajectoriesToBeResumedFrom[${runId}]}
+        local filename numberFromFile prefix
+        mkdir ${trashFolderGlobalPath} || exit ${BHMAS_fatalBuiltin}
+        for filename in $(ls -1 ${runBetaDirectory} | sed -n -e '/^'"${BHMAS_configurationRegex}"'.*$/p' -e '/^'"${BHMAS_prngRegex}"'.*$/p'); do
             #Move to trash only 'conf.xxxxx(whatever)' or 'prng.xxxxx(whatever)' files with xxxxx larger than the resume from trajectory
-            numberFromFile=$(sed -n 's/^\('${BHMAS_configurationPrefix}'\|'${BHMAS_prngPrefix}'\)0*\([1-9][0-9]*\).*$/\2/p' <<< "${filename}")
+            numberFromFile=$(sed -n 's/^\('"${BHMAS_configurationPrefix}"'\|'"${BHMAS_prngPrefix}"'\)0*\([1-9][0-9]*\).*$/\2/p' <<< "${filename}")
             if [[ ${numberFromFile} -gt ${BHMAS_trajectoriesToBeResumedFrom[${runId}]} ]]; then
-                mv ${runBetaDirectory}/${filename} ${trashFolderName}
+                mv ${runBetaDirectory}/${filename} ${trashFolderGlobalPath}
             fi
         done
         #Move to trash conf.save(whatever) and prng.save(whatever) files if existing
         for prefix in ${BHMAS_configurationPrefix} ${BHMAS_prngPrefix}; do
             for filename in $(compgen -G "${runBetaDirectory}/${prefix}${BHMAS_standardCheckpointPostfix}*"); do
-                mv ${filename} ${trashFolderName}
+                mv ${filename} ${trashFolderGlobalPath}
             done
         done
         #Move the output file to Trash, and duplicate it parsing it in awk deleting all the trajectories after the resume-from one, included (if found)
-        mv ${outputFileGlobalPath} ${trashFolderName} || exit ${BHMAS_fatalBuiltin}
+        mv ${outputFileGlobalPath} ${trashFolderGlobalPath} || exit ${BHMAS_fatalBuiltin}
         if ! awk -v tr="${BHMAS_trajectoriesToBeResumedFrom[${runId}]}"\
              'BEGIN{found=1} $1<tr{print $0} $1==(tr-1){found=0} END{exit found}'\
-             ${trashFolderName}/$(basename ${outputFileGlobalPath}) > ${outputFileGlobalPath}; then
+             ${trashFolderGlobalPath}/$(basename ${outputFileGlobalPath}) > ${outputFileGlobalPath}; then
             Error "Measurement for trajectory " emph "$(( BHMAS_trajectoriesToBeResumedFrom[${runId}] - 1 ))" " not found in outputfile "\
                   emph "${outputFileGlobalPath}\n" "The value " emph "beta = ${runId}" " will be skipped!"
-            mv ${trashFolderName}/* ${runBetaDirectory} || exit ${BHMAS_fatalBuiltin}
-            rmdir ${trashFolderName} || exit ${BHMAS_fatalBuiltin}
+            RestoreRunBetaDirectoryBeforeSkippingBeta_CL2QCD
             BHMAS_problematicBetaValues+=( ${runId} )
             return 1
         fi
         #Make same operations on pbp file, if existing
         if [[ -f ${outputPbpFileGlobalPath} ]]; then
-            mv ${outputPbpFileGlobalPath} ${trashFolderName} || exit ${BHMAS_fatalBuiltin}
+            mv ${outputPbpFileGlobalPath} ${trashFolderGlobalPath} || exit ${BHMAS_fatalBuiltin}
             if ! awk -v tr="${BHMAS_trajectoriesToBeResumedFrom[${runId}]}"\
                  'BEGIN{found=1} $1<tr{print $0} $1==(tr-1){found=0} END{exit found}'\
-                 ${trashFolderName}/$(basename ${outputPbpFileGlobalPath}) > ${outputPbpFileGlobalPath}; then
+                 ${trashFolderGlobalPath}/$(basename ${outputPbpFileGlobalPath}) > ${outputPbpFileGlobalPath}; then
                 Error "Measurement for trajectory " emph "$(( BHMAS_trajectoriesToBeResumedFrom[${runId}] - 1 ))" " not found in pbp outputfile "\
                       emph "${outputPbpFileGlobalPath}\n" "The value " emph "beta = ${runId}" " will be skipped!"
-                mv ${trashFolderName}/* ${runBetaDirectory} || exit ${BHMAS_fatalBuiltin}
-                rmdir ${trashFolderName} || exit ${BHMAS_fatalBuiltin}
+                RestoreRunBetaDirectoryBeforeSkippingBeta_CL2QCD
                 BHMAS_problematicBetaValues+=( ${runId} )
                 return 1
             fi
@@ -167,6 +165,25 @@ function HandleOutputFilesForContinueForGivenSimulation_CL2QCD()
     return 0
 }
 
+# This function should do needed operations to restore the beta folder state
+# for a followiung run of BaHaMAS so that no artificial error is later triggered
+#
+#  INPUT: runId
+#  OUTPUT: -
+#  Local variables from the caller used: runBetaDirectory trashFolderGlobalPath
+#
+# Exit codes: 0 if fine
+#             1 if runId is problematic -> Added to BHMAS_problematicBetaValues array
+function RestoreRunBetaDirectoryBeforeSkippingBeta_CL2QCD()
+{
+    local runId; runId="$1"
+    CheckIfVariablesAreDeclared runBetaDirectory trashFolderGlobalPath
+    # Not always the trash folder is created, only in case of 'r' in betas file
+    if KeyInArray "${runId}" BHMAS_trajectoriesToBeResumedFrom; then
+        mv "${trashFolderGlobalPath}/"* "${runBetaDirectory}" || exit ${BHMAS_fatalBuiltin}
+        rmdir "${trashFolderGlobalPath}"                      || exit ${BHMAS_fatalBuiltin}
+    fi
+}
 
 # This function should make the needed adjustments to the input file
 #  INPUT: simulation ID
@@ -178,54 +195,28 @@ function HandleOutputFilesForContinueForGivenSimulation_CL2QCD()
 function HandleInputFileForContinueForGivenSimulation_CL2QCD()
 {
     local runId; runId="$1"
-    CheckIfVariablesAreSet inputFileGlobalPath outputFileGlobalPath runBetaDirectory
+    CheckIfVariablesAreDeclared inputFileGlobalPath outputFileGlobalPath runBetaDirectory
 
-    __static__HandleMeasurementsInInputFile            || return 1
-    __static__HandlePbpInInputFile                     || return 1
-    __static__HandleMultiplePseudofermionsInInputFile  || return 1
-    __static__HandleMassPreconditioningInInputFile     || return 1
-    __static__HandleStartConditionInInputFile          || return 1
-    __static__HandleStartConfigurationInInputFile      || return 1
-    __static__HandlePRNGStateInInputFile               || return 1
-    __static__HandleIntegrationStepsInInputFile        || return 1
-    __static__HandleFurtherOptionsInInputFile          || return 1
-
+    cecho lg '\n Adjusting input file ' emph "$(basename "${inputFileGlobalPath}")" ' for simulation at ' emph "beta = ${runId}" ':'
+    HandleMeasurementsInInputFile                             || return 1
+    __static__HandlePbpInInputFile_CL2QCD                     || return 1
+    __static__HandleMultiplePseudofermionsInInputFile_CL2QCD  || return 1
+    __static__HandleMassPreconditioningInInputFile_CL2QCD     || return 1
+    __static__HandleStartConditionInInputFile_CL2QCD          || return 1
+    __static__HandleStartConfigurationInInputFile_CL2QCD      || return 1
+    __static__HandlePRNGStateInInputFile_CL2QCD               || return 1
+    __static__HandleIntegrationStepsInInputFile_CL2QCD        || return 1
+    __static__HandleFurtherOptionsInInputFile_CL2QCD          || return 1
 }
 
 #---------------------------------------------------------------------------------#
 # All the following "static" funtions are supporting the above function. They use #
 # non global variables defined as local outside them, e.g. runId from the caller. #
+# Those that are not "static" are then in common to other software and called via #
+# the interface in some generic function in the ProcessBetasForContinue.bash file.#
 #---------------------------------------------------------------------------------#
 
-function __static__HandleMeasurementsInInputFile()
-{
-    # There are different possibilities to set the number of measurements in the input file
-    # and we have to decide a list of priorities:
-    #   1) if the '--measurements' option is given, then it will be used. Otherwise,
-    #   2) if the '--till=[number]' option is given, then it will be used. Otherwise,
-    #   3) if the 'g[number]' field is present in the betas file, then it will be used. Otherwise,
-    #   4) the measurement option in the input file is not modified!
-    #
-    local optionsToBeAddedOrModified numberOfTrajectoriesAlreadyProduced
-    if WasAnyOfTheseOptionsGivenToBaHaMAS '-m' '--measurements'; then
-        optionsToBeAddedOrModified="measurements=${BHMAS_numberOfTrajectories}"
-    elif [[ ${BHMAS_trajectoryNumberUpToWhichToContinue} -ne 0 ]]; then
-        __static__FindAndSetNumberOfTrajectoriesAlreadyProduced || return 1
-        __static__IsSimulationFinished ${numberOfTrajectoriesAlreadyProduced} ${BHMAS_trajectoryNumberUpToWhichToContinue} || return 1
-        optionsToBeAddedOrModified="measurements=$(( BHMAS_trajectoryNumberUpToWhichToContinue - numberOfTrajectoriesAlreadyProduced ))"
-    elif KeyInArray ${runId} BHMAS_goalStatistics; then
-        __static__FindAndSetNumberOfTrajectoriesAlreadyProduced || return 1
-        __static__IsSimulationFinished ${numberOfTrajectoriesAlreadyProduced} ${BHMAS_goalStatistics[${runId}]} || return 1
-        optionsToBeAddedOrModified="measurements=$(( BHMAS_goalStatistics[${runId}] - numberOfTrajectoriesAlreadyProduced ))"
-    else
-        return 0
-    fi
-    __static__ModifyOptionsInInputFile ${optionsToBeAddedOrModified} || return 1
-    __static__PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified}
-    return 0
-}
-
-function __static__HandlePbpInInputFile()
+function __static__HandlePbpInInputFile_CL2QCD()
 {
     local measurePbpValueForInputFile string pbpStrings optionsToBeAddedOrModified
     if [[ ${BHMAS_measurePbp} = "FALSE" ]]; then
@@ -250,49 +241,49 @@ function __static__HandlePbpInInputFile()
         elif [[ ${BHMAS_staggered} = "TRUE" ]]; then
             optionsToBeAddedOrModified+=( "nSources=1" "pbpMeasurements=8" "fermObsInSingleFile=1" "fermObsPbpPrefix=${BHMAS_outputFilename}" )
         fi
-        __static__AddOptionsToInputFile ${optionsToBeAddedOrModified[@]}
-        __static__PrintAddedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
+        AddOptionsToInputFile ${optionsToBeAddedOrModified[@]}
+        PrintAddedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
     else
         #If measurePbp is in input file we assume that relative options are there and fine
-        __static__ModifyOptionsInInputFile ${optionsToBeAddedOrModified[@]} || return 1
-        __static__PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
+        ModifyOptionsInInputFile_CL2QCD ${optionsToBeAddedOrModified[@]} || return 1
+        PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
     fi
     return 0
 }
 
-function __static__HandleMultiplePseudofermionsInInputFile()
+function __static__HandleMultiplePseudofermionsInInputFile_CL2QCD()
 {
     if [[ ${BHMAS_staggered} = "TRUE" ]]; then #Multiple pseudofermions simply ignored if not staggered
         local oldOption newOption optionsToBeAddedOrModified
         optionsToBeAddedOrModified=("nPseudoFermions=${BHMAS_numberOfPseudofermions}")
         if [[ $(grep -c "nPseudoFermions" ${inputFileGlobalPath}) -eq 0 ]]; then
-            __static__AddOptionsToInputFile ${optionsToBeAddedOrModified[@]}
-            __static__PrintAddedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
+            AddOptionsToInputFile ${optionsToBeAddedOrModified[@]}
+            PrintAddedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
         else
-            __static__ModifyOptionsInInputFile ${optionsToBeAddedOrModified[@]} || return 1
-            __static__PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
+            ModifyOptionsInInputFile_CL2QCD ${optionsToBeAddedOrModified[@]} || return 1
+            PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
         fi
         #Always replace approx files with correct ones (maybe unnecessary, but easy to be done always)
-        oldOption="rationalApproxFileHB=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_\(pf[1-9]\+_\)\?Approx_Heatbath"
-        newOption="${oldOption%/*}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Heatbath"
-        [[ ${BHMAS_numberOfPseudofermions} -gt 1 ]] && newOption="${newOption/Approx_Heatbath/pf${BHMAS_numberOfPseudofermions}_Approx_Heatbath}"
-        __static__FindAndReplaceSingleOccurenceInFile ${inputFileGlobalPath} "${oldOption}" "${newOption}" || return 1
-        __static__PrintModifiedOptionsToStandardOutput ${newOption}
-        oldOption="rationalApproxFileMD=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_\(pf[1-9]\+_\)\?Approx_MD"
-        newOption="${oldOption%/*}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_MD"
-        [[ ${BHMAS_numberOfPseudofermions} -gt 1 ]] && newOption="${newOption/Approx_MD/pf${BHMAS_numberOfPseudofermions}_Approx_MD}"
-        __static__FindAndReplaceSingleOccurenceInFile ${inputFileGlobalPath} "${oldOption}" "${newOption}" || return 1
-        __static__PrintModifiedOptionsToStandardOutput ${newOption}
-        oldOption="rationalApproxFileMetropolis=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_\(pf[1-9]\+_\)\?Approx_Metropolis"
-        newOption="${oldOption%/*}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Metropolis"
-        [[ ${BHMAS_numberOfPseudofermions} -gt 1 ]] && newOption="${newOption/Approx_Metropolis/pf${BHMAS_numberOfPseudofermions}_Approx_Metropolis}"
-        __static__FindAndReplaceSingleOccurenceInFile ${inputFileGlobalPath} "${oldOption}" "${newOption}" || return 1
-        __static__PrintModifiedOptionsToStandardOutput ${newOption}
+        if [[ ${BHMAS_numberOfPseudofermions} -eq 1 ]]; then
+            optionsToBeAddedOrModified=(
+                "rationalApproxFileHB=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Heatbath"
+                "rationalApproxFileMD=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_MD"
+                "rationalApproxFileMetropolis=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Metropolis"
+            )
+        else
+            optionsToBeAddedOrModified=(
+                "rationalApproxFileHB=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${BHMAS_numberOfPseudofermions}_Approx_Heatbath"
+                "rationalApproxFileMD=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${BHMAS_numberOfPseudofermions}_Approx_MD"
+                "rationalApproxFileMetropolis=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${BHMAS_numberOfPseudofermions}_Approx_Metropolis"
+            )
+        fi
+        ModifyOptionsInInputFile_CL2QCD ${optionsToBeAddedOrModified[@]}
+        PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
     fi
     return 0
 }
 
-function __static__HandleMassPreconditioningInInputFile()
+function __static__HandleMassPreconditioningInInputFile_CL2QCD()
 {
     if [[ ${BHMAS_wilson} = "TRUE" ]]; then #Mass preconditioning simply ignored if not Wilson
         local string massPreconditioningStrings optionsToBeAddedOrModified
@@ -310,54 +301,54 @@ function __static__HandleMassPreconditioningInInputFile()
                 done
                 optionsToBeAddedOrModified+=("solverMP=cg" "kappaMP=0.${BHMAS_massPreconditioningValues[${runId}]#*,}"
                                              "integrator2=twomn" "integrationSteps2=${BHMAS_massPreconditioningValues[${runId}]%,*}")
-                __static__AddOptionsToInputFile ${optionsToBeAddedOrModified[@]}
-                __static__PrintAddedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
+                AddOptionsToInputFile ${optionsToBeAddedOrModified[@]}
+                PrintAddedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
                 optionsToBeAddedOrModified=("nTimeScales=3" "solverResiduumCheckEvery=10")
-                __static__ModifyOptionsInInputFile ${optionsToBeAddedOrModified[@]} || return 1
-                __static__PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
+                ModifyOptionsInInputFile_CL2QCD ${optionsToBeAddedOrModified[@]} || return 1
+                PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
             else
                 #Here I assume that the specifications for mass preconditioning are already in the input file and I just modify them!
-                #In any case, the function '__static__ModifyOptionsInInputFile' will catch any missing option and the beta will be skipped
+                #In any case, the function 'ModifyOptionsInInputFile_CL2QCD' will catch any missing option and the beta will be skipped
                 optionsToBeAddedOrModified+=("kappaMP=0.${BHMAS_massPreconditioningValues[${runId}]#*,}" "nTimeScales=3"
                                              "intsteps2=${BHMAS_massPreconditioningValues[${runId}]%,*}" "solverResiduumCheckEvery=10")
-                __static__ModifyOptionsInInputFile ${optionsToBeAddedOrModified[@]} || return 1
-                __static__PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
+                ModifyOptionsInInputFile_CL2QCD ${optionsToBeAddedOrModified[@]} || return 1
+                PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
             fi
         else
             #Here check if mass preconditioning is in the input file and if so switch it off
             if [[ $(grep -c "useMP" ${inputFileGlobalPath}) -gt 0 ]]; then #Use '-gt 0' instead of '-eq 1' so that we also check multiple occurences
                 optionsToBeAddedOrModified=("useMP=0" "solverResiduumCheckEvery=50" "nTimeScales=2")
-                __static__ModifyOptionsInInputFile ${optionsToBeAddedOrModified[@]} || return 1
-                __static__PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
+                ModifyOptionsInInputFile_CL2QCD ${optionsToBeAddedOrModified[@]} || return 1
+                PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
             fi
         fi
     fi
     return 0
 }
 
-function __static__HandleStartConditionInInputFile()
+function __static__HandleStartConditionInInputFile_CL2QCD()
 {
     #Always convert startcondition in continue (and do not notify user, it is understood)
-    __static__ModifyOptionsInInputFile "startCondition=continue" || return 1
+    ModifyOptionsInInputFile_CL2QCD "startCondition=continue" || return 1
     return 0
 }
 
-function __static__HandleStartConfigurationInInputFile()
+function __static__HandleStartConfigurationInInputFile_CL2QCD()
 {
     local optionsToBeAddedOrModified
     optionsToBeAddedOrModified="initialConf=${runBetaDirectory}/${nameOfLastConfiguration}"
     if [[ $(grep -c "initialConf=[[:alnum:][:punct:]]*" ${inputFileGlobalPath}) -eq 0 ]]; then
-        __static__AddOptionsToInputFile ${optionsToBeAddedOrModified}
-        __static__PrintAddedOptionsToStandardOutput ${optionsToBeAddedOrModified}
+        AddOptionsToInputFile ${optionsToBeAddedOrModified}
+        PrintAddedOptionsToStandardOutput ${optionsToBeAddedOrModified}
     else
-        #In order to use __static__ModifyOptionsInInputFile I have to escape the slashes in the path (for sed)
-        __static__ModifyOptionsInInputFile ${optionsToBeAddedOrModified//\//\\\/} || return 1
-        __static__PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified}
+        #In order to use ModifyOptionsInInputFile_CL2QCD I have to escape the slashes in the path (for sed)
+        ModifyOptionsInInputFile_CL2QCD ${optionsToBeAddedOrModified//\//\\\/} || return 1
+        PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified}
     fi
     return 0
 }
 
-function __static__HandlePRNGStateInInputFile()
+function __static__HandlePRNGStateInInputFile_CL2QCD()
 {
     local optionsToBeAddedOrModified
     if [[ "${nameOfLastPRNG}" == "" ]]; then
@@ -365,141 +356,106 @@ function __static__HandlePRNGStateInInputFile()
         sed -i '/initialPRNG/d' ${inputFileGlobalPath}
         optionsToBeAddedOrModified="hostSeed=$(printf "%04d" $(( (RANDOM+1000)%10000 )) )"
         if [[ $(grep -c "hostSeed=[0-9]\{4\}" ${inputFileGlobalPath}) -eq 0 ]]; then
-            __static__AddOptionsToInputFile ${optionsToBeAddedOrModified}
-            __static__PrintAddedOptionsToStandardOutput ${optionsToBeAddedOrModified}
+            AddOptionsToInputFile ${optionsToBeAddedOrModified}
+            PrintAddedOptionsToStandardOutput ${optionsToBeAddedOrModified}
         else
-            __static__ModifyOptionsInInputFile ${optionsToBeAddedOrModified} || return 1
-            __static__PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified}
+            ModifyOptionsInInputFile_CL2QCD ${optionsToBeAddedOrModified} || return 1
+            PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified}
         fi
     else
         #Delete eventual line from input file with hostSeed (here we use an initialPRNG)
         sed -i '/hostSeed/d' ${inputFileGlobalPath}
         optionsToBeAddedOrModified="initialPRNG=${runBetaDirectory}/${nameOfLastPRNG}"
         if [[ $(grep -c "initialPRNG=[[:alnum:][:punct:]]*" ${inputFileGlobalPath}) -eq 0 ]]; then
-            __static__AddOptionsToInputFile ${optionsToBeAddedOrModified}
-            __static__PrintAddedOptionsToStandardOutput ${optionsToBeAddedOrModified}
+            AddOptionsToInputFile ${optionsToBeAddedOrModified}
+            PrintAddedOptionsToStandardOutput ${optionsToBeAddedOrModified}
         else
-            #In order to use __static__ModifyOptionsInInputFile I have to escape the slashes in the path (for sed)
-            __static__ModifyOptionsInInputFile ${optionsToBeAddedOrModified//\//\\\/} || return 1
-            __static__PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified}
+            #In order to use ModifyOptionsInInputFile_CL2QCD I have to escape the slashes in the path (for sed)
+            ModifyOptionsInInputFile_CL2QCD ${optionsToBeAddedOrModified//\//\\\/} || return 1
+            PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified}
         fi
     fi
     return 0
 }
 
-function __static__HandleIntegrationStepsInInputFile()
+function __static__HandleIntegrationStepsInInputFile_CL2QCD()
 {
     local optionsToBeAddedOrModified
     #Always set the integrator steps, that could have changed or not
     optionsToBeAddedOrModified=("intsteps0=${BHMAS_scaleZeroIntegrationSteps[${runId}]}" "intsteps1=${BHMAS_scaleOneIntegrationSteps[${runId}]}")
-    __static__ModifyOptionsInInputFile ${optionsToBeAddedOrModified[@]} || return 1
-    __static__PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
+    ModifyOptionsInInputFile_CL2QCD ${optionsToBeAddedOrModified[@]} || return 1
+    PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
 }
 
-function __static__HandleFurtherOptionsInInputFile()
+function __static__HandleFurtherOptionsInInputFile_CL2QCD()
 {
-    local commandLineOptionsToBeConsidered index option optionsToBeAddedOrModified
-    commandLineOptionsToBeConsidered=( "-f" "--checkpointEvery" "-F" "--confSaveEvery" )
+    local commandLineOptionsToBeConsidered option optionsToBeAddedOrModified
     optionsToBeAddedOrModified=()
-    #Here it is fine to assume option value follows option name after a space
-    # -> see Generic_Code/CommandLineParsers/CommonFunctionality.bash file
-    for index in ${!BHMAS_specifiedCommandLineOptions[@]}; do
-        option=${BHMAS_specifiedCommandLineOptions[${index}]}
-        if ! ElementInArray ${option} ${commandLineOptionsToBeConsidered[@]}; then
-            continue
-        fi
-        optionsToBeAddedOrModified+=("${option##*-}=${BHMAS_specifiedCommandLineOptions[$((index+1))]}")
-    done
+    #Here it is fine to assume option is the long one since short ones have been replaced
+    # -> see Generic_Code/CommandLineParsers/ParserUtilities.bash file
+    if ElementInArray '--checkpointEvery' "${BHMAS_specifiedCommandLineOptions[@]}"; then
+        optionsToBeAddedOrModified+=( "checkpointEvery=${BHMAS_checkpointFrequency}" )
+    fi
+    if ElementInArray '--confSaveEvery' "${BHMAS_specifiedCommandLineOptions[@]}"; then
+        optionsToBeAddedOrModified+=( "confSaveEvery=${BHMAS_savepointFrequency}" )
+    fi
     if [[ ${#optionsToBeAddedOrModified[@]} -ne 0 ]]; then
-        __static__ModifyOptionsInInputFile ${optionsToBeAddedOrModified[@]} || return 1
-        __static__PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
+        ModifyOptionsInInputFile_CL2QCD ${optionsToBeAddedOrModified[@]} || return 1
+        PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
     fi
     return 0
 }
 
-function __static__FindAndSetNumberOfTrajectoriesAlreadyProduced()
+function FindAndSetNumberOfTrajectoriesAlreadyProduced_CL2QCD()
 {
-    # Strategy to recover the number of done measurement:
-    #   1) if nameOfLastConfiguration contains the number of the conf, use it. Otherwise,
-    #   2) try to extract from within the configuration file (specific CL2QCD). Otherwise,
-    #   3) if the output file exists, use it. Otherwise,
+    CheckIfVariablesAreDeclared runId nameOfLastConfiguration
+    # OUTPUT: Set variable 'numberOfTrajectoriesAlreadyProduced'
+    #
+    # Strategy to recover the number of done trajectories in THIS coninueWithNewChain run (net of thermalization):
+    #   1) Use the name of the last configuration to deduce the number of the last trajectory
+    #      and use the symbolic link to the starting configuration to read off the number of the
+    #      trajectories done in previous thermalization run(s). Otherwise,
+    #   2) Try to extract the last trajectory number from within the configuration file
+    #      (specific CL2QCD) and always the symbolic link for the starting trajectory. Otherwise,
+    #   3) if the output file exists, use it (consider that it might be to be cleaned). Otherwise,
     #   4) print an error and skip beta.
-    numberOfTrajectoriesAlreadyProduced="$(sed -n 's/^[^1-9]*\([0-9]\+\)[^0-9]*$/\1/p' <<< "${nameOfLastConfiguration}")" #extract number without leading zeros (only if exactly one number is in conf name)
-    if [[ "${numberOfTrajectoriesAlreadyProduced}" = '' ]]; then
-        numberOfTrajectoriesAlreadyProduced="$(sed -n "s/^trajectory nr = \([1-9][0-9]*\)$/\1/p" ${runBetaDirectory}/${nameOfLastConfiguration} || true)"
-    fi
-    if [[ "${numberOfTrajectoriesAlreadyProduced}" = '' ]]; then
-        if [[ -f ${outputFileGlobalPath} ]]; then
-            numberOfTrajectoriesAlreadyProduced=$(awk 'END{print $1 + 1}' ${outputFileGlobalPath}) #The +1 is here necessary because the first tr. is supposed to be the number 0.
+    local initialConfiguration index initialTrNumber lastTrNumber
+    initialTrNumber=''; lastTrNumber=''
+    if initialTrNumber=$(ExtractTrajectoryNumberFromConfigurationSymlink "${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}"); then
+        lastTrNumber="${nameOfLastConfiguration#${BHMAS_configurationPrefix//\\/}*(0)}" #extract number from the end without leading zeros
+        if [[ ! "${lastTrNumber}" =~ ^[1-9][0-9]*$ ]]; then
+            lastTrNumber="$(sed -n "s/^trajectory nr = \([1-9][0-9]*\)$/\1/p" ${runBetaDirectory}/${nameOfLastConfiguration} || true)"
         fi
     fi
-    if [[ "${numberOfTrajectoriesAlreadyProduced}" = '' ]]; then
-        Error "It was not possible to deduce the number of already produced trajectories!\n" "The value " emph "beta = ${runId}" " will be skipped!"
-        BHMAS_problematicBetaValues+=( ${runId} )
-        return 1
-    else
+    if [[ "${initialTrNumber}" =~ ^(0|[1-9][0-9]*)$ ]] && [[ "${lastTrNumber}" =~ ^[1-9][0-9]*$ ]]; then
+        numberOfTrajectoriesAlreadyProduced=$(( lastTrNumber - initialTrNumber ))
         return 0
     fi
-}
-
-function __static__IsSimulationFinished()
-{
-    local startingStatistics goalStatistics
-    startingStatistics=$1; goalStatistics=$2
-    if [[ ${startingStatistics} -gt ${goalStatistics} ]]; then
-        Error "It was found that the number of done measurements is " emph "${startingStatistics} > ${goalStatistics} = goal trajectory" ".\n"\
-              "The simulation cannot be continued. The value " emph "beta = ${runId}" " will be skipped!"
-        BHMAS_problematicBetaValues+=( ${runId} )
-        return 1
-    elif [[ ${startingStatistics} -eq ${goalStatistics} ]]; then
-        if KeyInArray ${runId} BHMAS_trajectoriesToBeResumedFrom; then
-            #If we resume from and simulation is finished, delete from std output the 'ATTENTION' line
-            cecho -d -n "\e[1A\e[K"
-        fi
-        cecho lg " The simulation for " lo "beta = ${runId}" lg " seems to be finished, it will not be continued!"
-        return 1
+    # Fall back to case 3)
+    if [[ -f "${outputFileGlobalPath}" ]]; then
+        initialTrNumber=$(awk 'NR==1{print $1; exit}' "${outputFileGlobalPath}")
+        lastTrNumber=$(awk 'END{print $1 + 1}' "${outputFileGlobalPath}") #The +1 is here necessary because the first tr. is supposed to be the number 0.
     fi
-    return 0
-}
-
-function __static__AddOptionsToInputFile()
-{
-    printf "%s\n" $@ >> ${inputFileGlobalPath} #One per line!
-}
-
-function __static__PrintAddedOptionsToStandardOutput()
-{
-    __static__PrintAboutOptionsToStandardOutput "Added" "$@"
-}
-
-function __static__PrintModifiedOptionsToStandardOutput()
-{
-    __static__PrintAboutOptionsToStandardOutput "Set" "$@"
-}
-
-function __static__PrintAboutOptionsToStandardOutput()
-{
-    local addedOrSet toInto
-    addedOrSet="${1:?Argument not properly passed to function ${FUNCNAME}}"; shift
-    [[ ${addedOrSet} = 'Added' ]] && toInto='to' || toInto='into'
-    if [[ $# -eq 1 ]]; then
-        cecho wg " ${addedOrSet} option " emph "$1" " ${toInto} the " file "$(basename ${inputFileGlobalPath})" " file."
-    else
-        cecho wg " ${addedOrSet} options " emph "$1"; shift
-        while [[ $# -gt 1 ]]; do
-            cecho wg "             " emph "$1"; shift
-        done
-        cecho wg "             " emph "$1" " ${toInto} the " file "$(basename ${inputFileGlobalPath})" " file."
+    if [[ "${initialTrNumber}" =~ ^(0|[1-9][0-9]*)$ ]] && [[ "${lastTrNumber}" =~ ^[1-9][0-9]*$ ]]; then
+        numberOfTrajectoriesAlreadyProduced=$(( lastTrNumber - initialTrNumber ))
+        return 0
     fi
+    # Fall back to case 4)
+    Error "It was not possible to deduce the number of already produced trajectories!\n" "The value " emph "beta = ${runId}" " will be skipped!"
+    BHMAS_problematicBetaValues+=( ${runId} )
+    return 1
 }
 
-function __static__ModifyOptionsInInputFile()
+function ModifyOptionsInInputFile_CL2QCD()
 {
+    # ATTENTION: Use Extended Regular Expression (ERE) here
+    #            which are later enabled invoking grep/sed,
+    #            while awk uses them by default.
     local oldString newString
     while [[ $# -gt 0 ]]; do
         case $1 in
             startCondition=* )
-                oldString="startCondition=[[:alpha:]]\+"
+                oldString="startCondition=[[:alpha:]]+"
                 newString="startCondition=${1#*=}"
                 ;;
             initialConf=* )
@@ -511,87 +467,80 @@ function __static__ModifyOptionsInInputFile()
                 newString="initialPRNG=${1#*=}"
                 ;;
             hostSeed=* )
-                oldString="hostSeed=[0-9]\+"
+                oldString="hostSeed=[0-9]+"
                 newString="hostSeed=${1#*=}"
                 ;;
             intsteps0=* )
-                oldString="integrationSteps0=[0-9]\+"
+                oldString="integrationSteps0=[0-9]+"
                 newString="integrationSteps0=${1#*=}"
                 ;;
             intsteps1=* )
-                oldString="integrationSteps1=[0-9]\+"
+                oldString="integrationSteps1=[0-9]+"
                 newString="integrationSteps1=${1#*=}"
                 ;;
             f=* | checkpointEvery=* )
-                oldString="createCheckpointEvery=[0-9]\+"
+                oldString="createCheckpointEvery=[0-9]+"
                 newString="createCheckpointEvery=${1#*=}"
                 ;;
             F=* | confSaveEvery=* )
-                oldString="overwriteTemporaryCheckpointEvery=[0-9]\+"
+                oldString="overwriteTemporaryCheckpointEvery=[0-9]+"
                 newString="overwriteTemporaryCheckpointEvery=${1#*=}"
                 ;;
             m=* | measurements=* )
-                oldString="mcSteps=[0-9]\+"
+                oldString="mcSteps=[0-9]+"
                 newString="mcSteps=${1#*=}"
                 ;;  # This replacement works both with nHmcSteps and nRhmcSteps
             measurePbp=* )
-                oldString="measurePbp=[0-9]\+"
+                oldString="measurePbp=[0-9]+"
                 newString="measurePbp=${1#*=}"
                 ;;
             useMP=* )
-                oldString="useMP=[0-9]\+"
+                oldString="useMP=[0-9]+"
                 newString="useMP=${1#*=}"
                 ;;
             kappaMP=* )
-                oldString="kappaMP=[0-9]\+[.][0-9]\+"
+                oldString="kappaMP=[0-9]+[.][0-9]+"
                 newString="kappaMP=${1#*=}"
                 ;;
             intsteps2=* )
-                oldString="integrationSteps2=[0-9]\+"
+                oldString="integrationSteps2=[0-9]+"
                 newString="integrationSteps2=${1#*=}"
                 ;;
             solverResiduumCheckEvery=* )
-                oldString="solverResiduumCheckEvery=[0-9]\+"
+                oldString="solverResiduumCheckEvery=[0-9]+"
                 newString="solverResiduumCheckEvery=${1#*=}"
                 ;;
             nTimeScales=* )
-                oldString="nTimeScales=[0-9]\+"
+                oldString="nTimeScales=[0-9]+"
                 newString="nTimeScales=${1#*=}"
                 ;;
             nPseudoFermions=* )
-                oldString="nPseudoFermions=[0-9]\+"
+                oldString="nPseudoFermions=[0-9]+"
                 newString="nPseudoFermions=${1#*=}"
                 ;;
+            rationalApproxFileHB=* )
+                oldString="rationalApproxFileHB=[[:alnum:][:punct:]]*"
+                newString="rationalApproxFileHB=${1#*=}"
+                ;;
+            rationalApproxFileMD=* )
+                oldString="rationalApproxFileMD=[[:alnum:][:punct:]]*"
+                newString="rationalApproxFileMD=${1#*=}"
+                ;;
+            rationalApproxFileMetropolis=* )
+                oldString="rationalApproxFileMetropolis=[[:alnum:][:punct:]]*"
+                newString="rationalApproxFileMetropolis=${1#*=}"
+                ;;
             * )
-                Error "The option " emph "$1" " cannot be handled in the continue scenario.\n" "Simulation cannot be continued. The value " emph "beta = ${runId}" " will be skipped!"
+                Error 'An unknown string ' emph "${1%%=*}" ' was asked to be modified in the input file.\n'\
+                      "Simulation cannot be continued. The value " emph "beta = ${runId}" " will be skipped!"
                 BHMAS_problematicBetaValues+=( ${runId} )
                 return 1 ;;
         esac
-        __static__FindAndReplaceSingleOccurenceInFile ${inputFileGlobalPath} "${oldString}" "${newString}" || return 1
+        FindAndReplaceSingleOccurenceInInputFile "${oldString}" "${newString}" || return 1
         shift
     done
     return 0
 }
 
-function __static__FindAndReplaceSingleOccurenceInFile()
-{
-    if [[ $# -ne 3 ]]; then
-        Internal "The function " emph "${FUNCNAME}" " has been wrongly called (" emph "3 arguments needed" ")!"
-    fi
-    local filename stringToBeFound replaceString
-    filename="$1"; stringToBeFound="$2"; replaceString="$3"
-    if [[ ! -f "${filename}" ]]; then
-        Fatal ${BHMAS_fatalFileNotFound} "File " file "${filename}" " has not been found!"
-    elif [[ $(grep -c "${stringToBeFound}" ${filename}) -eq 0 ]]; then
-        Error "The string " emph "${stringToBeFound}" " has " emph "not been found" " in file "\
-              file "${filename##${BHMAS_runDirWithBetaFolders}/}" "!\n" "The value " emph "beta = ${runId}" " will be skipped!"
-        BHMAS_problematicBetaValues+=( ${runId} )
-        return 1
-    elif [[ $(grep -c "${stringToBeFound}" ${filename}) -gt 1 ]]; then
-        Error "The string " emph "${stringToBeFound}" " occurs " emph "more than once" " in file "\
-              file "${filename##${BHMAS_runDirWithBetaFolders}/}" "!\n" "The value " emph "beta = ${runId}" " will be skipped!"
-        BHMAS_problematicBetaValues+=( ${runId} )
-        return 1
-    fi
-    sed -i "s@${stringToBeFound}@${replaceString}@g" ${filename} #function's return code is that of sed
-}
+
+MakeFunctionsDefinedInThisFileReadonly

@@ -19,6 +19,8 @@ This mode operates exclusively on new-chains folders.
 Running this mode e.g. on an unfinished beta folder will result in an attempt to complete the calculation.
 Said differently, already existing correlators will not be evaluated agian.
 
+**openQCD-FASTSUM** does not support this mode.
+
 # OPTIONS
 
 \--betasfile *filename*
@@ -27,7 +29,7 @@ Said differently, already existing correlators will not be evaluated agian.
 \--jobscript_prefix *string*
 :   Specify the prefix of the jobscript file (default: own setup).
 
-\--walltime *dd-hh:mm:ss* |  *human-string*
+\--walltime, \-w *dd-hh:mm:ss* |  *human-string*
 :   Specify the simulation wall-time (default: own setup).
     To specify e.g. one day, you can either use the standard form **1-00:00:00** or a more handy *human-string*, in the example **1d**.
     Supported postfixes are **d** for days, **h** for hours, **m** for minutes and **s** for seconds.

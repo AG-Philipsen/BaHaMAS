@@ -40,7 +40,7 @@ function FireUpTheDialogBoxStoringResultAndActingAccordingly()
     #Use new file descriptor to get dialog output
     exec 3>&1
     set +e
-    resultOfBox=$(eval ${commandToBeExecuted} 2>&1 1>&3)
+    resultOfBox="$(eval "${commandToBeExecuted}" 2>&1 1>&3)"
     returnValue=$?
     set -e
     exec 3>&-

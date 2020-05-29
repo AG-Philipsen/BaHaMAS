@@ -19,6 +19,45 @@
 
 function ValidateParsedBetaValues()
 {
+    __static__ValidateMetadata
+    if [[ ${BHMAS_useMPI} = 'TRUE' ]]; then
+        if [[ ${#BHMAS_processorsGrid[@]} -ne 4 ]]; then
+            case ${BHMAS_executionMode} in
+                mode:continue* | mode:submit-only )
+                    __static__SetProcessorGridFromExecutableName
+                    ;;
+                mode:new-chain | mode:prepare-only | mode:thermalize )
+                    Internal 'A processor grid is required, but not available and not in continue* mode.'
+                    ;;
+            esac
+        fi
+        # Now we are sure the processor grid is set, we can complete executable name
+        for index in "${BHMAS_processorsGrid[@]}"; do
+            BHMAS_productionExecutableFilename+="_${index}"
+        done
+        readonly BHMAS_productionExecutableFilename
+        readonly BHMAS_processorsGrid
+    fi
+}
+
+function SetLqcdSoftwareFromMetadata()
+{
+    local runId occurencesInFile
+    runId="$1"
+    if [[ ! -f "${BHMAS_metadataFilename}" ]]; then
+        return 1
+    else
+        occurencesInFile=$(grep -c "^${runId}" "${BHMAS_metadataFilename}" || true)
+    fi
+    if [[ ${occurencesInFile} -ne 1 ]]; then
+        return 1
+    else
+        BHMAS_lqcdSoftware=$(awk -v id="${runId}" '$1 == id {print $2}' "${BHMAS_metadataFilename}")
+    fi
+}
+
+function __static__ValidateMetadata()
+{
     local modesThatRequireEntryInMetadataFile\
           modesThatRequireNoEntryInMetadata\
           runId software occurencesInFile\
@@ -78,10 +117,6 @@ function ValidateParsedBetaValues()
             idToBeAdded=()
             if [[ ${occurencesInFile} -eq 0 ]]; then
                 idToBeAdded+=( "${runId}" )
-                printf "%-40s%-25s# %s\n"\
-                       "${runId}"\
-                       "${BHMAS_lqcdSoftware}"\
-                       "$(date +'%d.%m.%Y at %H:%M:%S')" >> "${BHMAS_metadataFilename}"
             else
                 idNotAbsent+=( "${runId}" )
             fi
@@ -132,3 +167,27 @@ function ValidateParsedBetaValues()
         done
     fi
 }
+
+function __static__SetProcessorGridFromExecutableName()
+{
+    local runId listOfGrids submitBetaDirectory executableGlobalPath grid
+    listOfGrids=()
+    for runId in "${BHMAS_betaValues[@]}"; do
+        submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}"
+        executableGlobalPath=( "${submitBetaDirectory}/${BHMAS_productionExecutableFilename}"* )
+        if [[ ${#executableGlobalPath[@]} -ne 1 ]]; then
+            Fatal ${BHMAS_fatalLogicError} 'Zero or more executable files were found in\n' dir "${submitBetaDirectory}"
+        fi
+        listOfGrids+=( "${executableGlobalPath/${submitBetaDirectory}\/${BHMAS_productionExecutableFilename}/}" )
+    done
+    for grid in "${listOfGrids[@]}"; do
+        if [[ "${grid}" != "${listOfGrids[0]}" ]]; then
+            Fatal 'Executable with different processors grid in executable names found\n'\
+                  'in the betas folders that were selected. Impossible to continue.'
+        fi
+    done
+    BHMAS_processorsGrid=( ${listOfGrids[0]//_/ } ) #Word splitting splits here the eleemnts
+}
+
+
+MakeFunctionsDefinedInThisFileReadonly

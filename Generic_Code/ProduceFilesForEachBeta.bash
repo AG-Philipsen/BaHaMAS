@@ -19,13 +19,15 @@
 
 function ProduceInputFileAndJobScriptForEachBeta()
 {
-    local betaValuesCopy index beta submitBetaDirectory temporaryNumberOfTrajectories
+    local betaValuesCopy index beta submitBetaDirectory existingFiles temporaryNumberOfTrajectories
     betaValuesCopy=(${BHMAS_betaValues[@]})
     for index in "${!betaValuesCopy[@]}"; do
-        local submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${betaValuesCopy[${index}]}"
+        submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${betaValuesCopy[${index}]}"
         if [[ -d "${submitBetaDirectory}" ]]; then
-            if [[ $(ls ${submitBetaDirectory} | wc -l) -gt 0 ]]; then
-                cecho lr "\n There are already files in " dir "${submitBetaDirectory}" ".\n The value " emph "beta = ${betaValuesCopy[${index}]}" " will be skipped!\n"
+            existingFiles=( "${submitBetaDirectory}"/* )
+            if [[ ${#existingFiles[@]} -gt 0 ]]; then
+                Error 'There are already files in\n' dir "${submitBetaDirectory}"\
+                      '.\nThe value ' emph "beta = ${betaValuesCopy[${index}]}" ' will be skipped!'
                 BHMAS_problematicBetaValues+=( ${betaValuesCopy[${index}]} )
                 unset -v 'betaValuesCopy[${index}]' #Here betaValuesCopy becomes sparse
                 continue
@@ -35,12 +37,11 @@ function ProduceInputFileAndJobScriptForEachBeta()
     if [[ ${#betaValuesCopy[@]} -eq 0 ]]; then
         return
     fi
-    #Make betaValuesCopy not sparse
-    betaValuesCopy=(${betaValuesCopy[@]})
+    betaValuesCopy=(${betaValuesCopy[@]}) #Make betaValuesCopy not sparse
     for beta in "${betaValuesCopy[@]}"; do
         submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${beta}"
         cecho -n b " Creating directory " dir "${submitBetaDirectory}" "..."
-        mkdir -p ${submitBetaDirectory} || exit ${BHMAS_fatalBuiltin}
+        mkdir -p "${submitBetaDirectory}" || exit ${BHMAS_fatalBuiltin}
         cecho lg " done!"
         cecho lc "   Configuration used: " file "${BHMAS_startConfigurationGlobalPath[${beta}]}"
         if KeyInArray "${beta}" BHMAS_goalStatistics; then
@@ -53,6 +54,90 @@ function ProduceInputFileAndJobScriptForEachBeta()
     mkdir -p ${BHMAS_submitDirWithBetaFolders}/${BHMAS_jobScriptFolderName} || exit ${BHMAS_fatalBuiltin}
     PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles "${betaValuesCopy[@]}"
 }
+
+function ProduceExecutableFileForEachBeta()
+{
+    local betaFolder submitBetaDirectory listOfFolders
+    listOfFolders=()
+    for betaFolder in "${BHMAS_betaValuesToBeSubmitted[@]}"; do
+        betaFolder+="${BHMAS_betaPostfix}"
+        submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${betaFolder}"
+        if [[ ! -d "${submitBetaDirectory}" ]]; then
+            Internal 'The directory ' dir "${submitBetaDirectory}"\
+                     '\ndoes not exist but it should in function ' emph "${FUNCNAME}" '!'
+        else
+            listOfFolders+=( "${submitBetaDirectory}" )
+        fi
+    done
+    ProduceExecutableFileInGivenBetaDirectories "${listOfFolders[@]}"
+}
+
+function EnsureThatNeededFilesAreOnRunDiskForEachBeta()
+{
+    if [[ "${BHMAS_submitDiskGlobalPath}" != "${BHMAS_runDiskGlobalPath}" ]]; then
+        local submitBetaDirectory runBetaDirectory inputFileGlobalPath\
+              executableGlobalPath startConfiguration betaFolder file
+        for betaFolder in "${BHMAS_betaValuesToBeSubmitted[@]}"; do
+            betaFolder+="${BHMAS_betaPostfix}"
+            submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${betaFolder}"
+            runBetaDirectory="${BHMAS_runDirWithBetaFolders}/${betaFolder}"
+            inputFileGlobalPath="${submitBetaDirectory}/${BHMAS_inputFilename}"
+            if [[ ${BHMAS_executionMode} != 'mode:measure' ]]; then
+                executableGlobalPath="${submitBetaDirectory}/${BHMAS_productionExecutableFilename}"
+            else
+                executableGlobalPath="${submitBetaDirectory}/${BHMAS_measurementExecutableFilename}"
+            fi
+            if [[ ! -d "${runBetaDirectory}" ]]; then
+                cecho -n lg ' Creating directory ' dir "${runBetaDirectory}" '...'
+                mkdir -p "${runBetaDirectory}" || exit ${BHMAS_fatalBuiltin}
+                cecho lg ' done!'
+            fi
+            if [[ ${BHMAS_executionMode} != 'mode:measure' ]]; then
+                __static__CheckExistenceOfFileAndCopyIt 'input' "${inputFileGlobalPath}" "${runBetaDirectory}"
+            fi
+            if [[ ${BHMAS_executionMode} != mode:continue* ]]; then
+                __static__CheckExistenceOfFileAndCopyIt 'executable' "${executableGlobalPath}" "${runBetaDirectory}"
+            else
+                executableGlobalPath="${runBetaDirectory}/${BHMAS_productionExecutableFilename}"
+                if [[ ! -f "${executableGlobalPath}" ]]; then
+                    Fatal ${BHMAS_fatalFileNotFound} 'Executable file\n' file "${executableGlobalPath}"\
+                          '\nwas not found but it is suppose to exist in ' emph "${BHMAS_executionMode#mode:}"\
+                          ' execution mode!'
+                fi
+            fi
+        done
+    fi
+    # When starting a new run, create a symbolic link in the betaFolderfolder on the run disk
+    # to the starting configuration in the pool. This is needed for some software
+    # e.g. openQCD, but it helps in general also if not required by the software!
+    if [[ ${BHMAS_executionMode} =~ ^mode:(prepare-only|thermalize|new-chain)$ ]]; then
+        for betaFolder in "${BHMAS_betaValuesToBeSubmitted[@]}"; do
+            betaFolder+="${BHMAS_betaPostfix}"
+            runBetaDirectory="${BHMAS_runDirWithBetaFolders}/${betaFolder}"
+            startConfiguration="${BHMAS_startConfigurationGlobalPath[${betaFolder#${BHMAS_betaPrefix}}]}"
+            if [[ "${startConfiguration}" != 'notFoundHenceStartFromHot' ]]; then
+                cecho -n lg ' Symlinking ' emph "starting configuration" ' to ' dir "${runBetaDirectory}" '...'
+                ln -s "${startConfiguration}"\
+                   "${runBetaDirectory}/$(basename ${startConfiguration})" || exit ${BHMAS_fatalBuiltin}
+                cecho lg " done!"
+            fi
+        done
+    fi
+}
+
+function __static__CheckExistenceOfFileAndCopyIt()
+{
+    local label file destination
+    label="$1"; file="$2"; destination="$3"
+    if [[ ! -f "${file}" ]]; then
+        Internal 'File ' file "${file}"\
+                 '\ndoes not exist but it should in function ' emph "${FUNCNAME}" '!'
+    fi
+    cecho -n lg ' Copying ' emph "${label}" ' file to ' dir "${destination}" '...'
+    cp "${file}" "${destination}" || exit ${BHMAS_fatalBuiltin}
+    cecho lg " done!"
+}
+
 
 
 MakeFunctionsDefinedInThisFileReadonly

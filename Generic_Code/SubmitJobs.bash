@@ -20,7 +20,14 @@
 function SubmitJobsForValidBetaValues()
 {
     if [[ ${#BHMAS_betaValuesToBeSubmitted[@]} -gt 0 ]]; then
-        local betaString stringToBeGreppedFor submittingDirectory jobScriptFilename
+        if [[ ${BHMAS_executionMode} = 'mode:thermalize' ]]; then
+            AskUser "Check if everything is fine. Would you like to submit the jobs?"
+            if UserSaidNo; then
+                cecho lr "\n No job will be submitted!\n"
+                exit ${BHMAS_successExitCode}
+            fi
+        fi
+        local betaString stringToBeGreppedFor submittingDirectory jobScriptFilename usedCoresHours
         cecho lc "\n==================================================================================="
         cecho bb " Jobs will be submitted for the following beta values:"
         for betaString in ${BHMAS_betaValuesToBeSubmitted[@]}; do
@@ -32,8 +39,8 @@ function SubmitJobsForValidBetaValues()
             else
                 stringToBeGreppedFor="${BHMAS_seedPrefix}${BHMAS_seedRegex}"
             fi
-            if [[ $(grep -o "${stringToBeGreppedFor}" <<< "${betaString}" | wc -l) -ne ${BHMAS_GPUsPerNode} ]]; then
-                cecho -n ly B "\n " U "WARNING" uU ":" uB " At least one job is being submitted with less than " emph "${BHMAS_GPUsPerNode}" " runs inside."
+            if [[ $(grep -o "${stringToBeGreppedFor}" <<< "${betaString}" | wc -l) -ne ${BHMAS_simulationsPerJob} ]]; then
+                cecho -n ly B "\n " U "WARNING" uU ":" uB " At least one job is being submitted with less than " emph "${BHMAS_simulationsPerJob}" " runs inside."
                 AskUser "         Would you like to submit in any case?"
                 if UserSaidNo; then
                     cecho lr B "\n No jobs will be submitted."
@@ -46,9 +53,14 @@ function SubmitJobsForValidBetaValues()
             jobScriptFilename="$(GetJobScriptFilename ${betaString})"
             cd ${submittingDirectory}
             if [[ -f "${jobScriptFilename}" ]]; then
-                cecho bb "\n Actual location: " dir "$(pwd)"\
-                      B "\n      Submitting: " uB emph "sbatch ${jobScriptFilename}"
-                sbatch "${jobScriptFilename}"
+                cecho ''
+                if [[ ${BHMAS_useMPI} = 'TRUE' ]]; then
+                    cecho wg ' To-be-used cores-h: '\
+                          emph "$(__static__CalculateUsedCoreH "${submittingDirectory}/${jobScriptFilename}")"
+                fi
+                cecho bb '    Actual location: ' dir "$(pwd)"\
+                      B '\n     Submitting job: ' uB emph "${jobScriptFilename}"
+                SubmitJob "${jobScriptFilename}"
             else
                 Internal "Jobscript " file "${jobScriptFilename}" " not found in\n"\
                          dir "${submittingDirectory}" " folder, but it should be there!"
@@ -58,6 +70,30 @@ function SubmitJobsForValidBetaValues()
     else
         cecho lr B "\n No jobs will be submitted.\n"
     fi
+}
+
+function __static__CalculateUsedCoreH()
+{
+    local jobScriptGlobalPath walltime usedNodes coreH unit index
+    jobScriptGlobalPath="$1"
+    walltime=$(ExtractWalltimeFromJobScript "${jobScriptGlobalPath}")
+    if [[ "${walltime}" = '' ]]; then
+        Internal 'Error extracting walltime in ' emph "${FUNCNAME}"
+    fi
+    usedNodes=$(CalculateProductOfIntegers ${BHMAS_processorsGrid[@]})
+    if(( usedNodes % BHMAS_coresPerNode != 0 )); then
+        (( usedNodes = (usedNodes + BHMAS_coresPerNode) / BHMAS_coresPerNode ))
+    fi
+    walltime=$(ConvertWalltimeToSeconds "${walltime}")
+    coreH=$((  BHMAS_coresPerNode * walltime ))
+    unit=( '' 'k' 'M' 'G' 'P' 'T')
+    index=0
+    while [[ $(bc -l <<< "${coreH}>999") -eq 1 ]]; do
+        coreH=$(awk '{printf "%.3f", $1/1000}' <<< "${coreH}")
+        (( index++ ))
+        [[ ${index} -eq 5 ]] && break
+    done
+    printf "%s ${unit[index]}core-h" ${coreH}
 }
 
 

@@ -146,6 +146,7 @@ function ReadParametersFromPathAndSetRelatedVariables()
     if [[ -z "${BHMAS_parametersString:+x}" ]] || [[ -z "${BHMAS_parametersPath:+x}" ]]; then
         Internal "Either " emph "BHMAS_parametersString" " or " emph "BHMAS_parametersPath" " unset or empty!"
     fi
+    declare -rga BHMAS_latticeSize=( ${BHMAS_ntime} ${BHMAS_nspace} ${BHMAS_nspace} ${BHMAS_nspace} )
 }
 
 function CheckSingleOccurrenceInPath()

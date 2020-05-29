@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 #  Copyright (c) 2014-2016 Christopher Czaban
 #  Copyright (c) 2014-2017,2020 Alessandro Sciarra
@@ -33,6 +33,9 @@
 # Set stricter shell mode. This implies for the developer to be aware of what is going on,      #
 # but it is worth so. Good reference http://redsymbol.net/articles/unofficial-bash-strict-mode  #
 set -euo pipefail                                                                               #
+#-----------------------------------------------------------------------------------------------#
+# Enable more globbing functionality (extglob must be global, http://mywiki.wooledge.org/glob)  #
+shopt -s extglob nullglob dotglob                                                               #
 #-----------------------------------------------------------------------------------------------#
 
 #Load auxiliary bash files that will be used
@@ -71,7 +74,7 @@ fi
 ParseRemainingCommandLineOptions
 
 if [[ ${BHMAS_executionMode} != 'mode:job-status' ]]; then
-    CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnUserCase
+    CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnExecutionMode
 fi
 
 if [[ ${BHMAS_executionMode} != 'mode:database' ]] && [[ ${BHMAS_executionMode} != 'mode:job-status' ]]; then
@@ -84,6 +87,7 @@ if [[ ${BHMAS_executionMode} != 'mode:database' ]] && [[ ${BHMAS_executionMode} 
     ReadParametersFromPathAndSetRelatedVariables $(pwd)
     DeclareBetaFoldersPathsAsGlobalVariables
     CheckBetaFoldersPathsVariables
+    PerformParametersSanityChecks
 fi
 
 #-----------------------------------------------------------------------------------------------------------------#
@@ -92,9 +96,14 @@ fi
 
 case ${BHMAS_executionMode} in
 
-    mode:database )
+    mode:prepare-only )
 
-        projectStatisticsDatabase ${BHMAS_optionsToBePassedToDatabase[@]+"${BHMAS_optionsToBePassedToDatabase[@]}"}
+        ParseBetasFile
+        ValidateParsedBetaValues
+        FindConfigurationGlobalPathFromWhichToStartTheSimulation
+        ProduceInputFileAndJobScriptForEachBeta
+        ProduceExecutableFileForEachBeta
+        EnsureThatNeededFilesAreOnRunDiskForEachBeta
         ;;
 
     mode:submit-only )
@@ -111,6 +120,17 @@ case ${BHMAS_executionMode} in
         ValidateParsedBetaValues
         FindConfigurationGlobalPathFromWhichToStartTheSimulation
         ProduceInputFileAndJobScriptForEachBeta
+        ProduceExecutableFileForEachBeta
+        EnsureThatNeededFilesAreOnRunDiskForEachBeta
+        SubmitJobsForValidBetaValues
+        ;;
+
+    mode:continue )
+
+        ParseBetasFile
+        ValidateParsedBetaValues
+        ProcessBetaValuesForContinue
+        EnsureThatNeededFilesAreOnRunDiskForEachBeta
         SubmitJobsForValidBetaValues
         ;;
 
@@ -120,19 +140,9 @@ case ${BHMAS_executionMode} in
             Fatal ${BHMAS_fatalCommandLine} "Options " emph "--thermalize" " and " emph "--continueThermalization"\
                   " implemented " emph "only not" " combined not with " emph "--doNotUseMultipleChains" " option!"
         fi
-        #Here we fix the beta postfix just looking for thermalized conf from hot at the actual parameters (no matter at which beta);
-        #if at least one configuration thermalized from hot is present, it means the thermalization has to be done from conf (the
-        #correct beta to be used is selected then later in the script ---> see where the array BHMAS_startConfigurationGlobalPath is filled
-        #
-        # TODO: If a thermalization from hot is finished but one other crashed and one wishes to resume it, the postfix should be
-        #       from Hot but it is from conf since in ${BHMAS_thermConfsGlobalPath} a conf from hot is found. Think about how to fix this.
-        if [[ $(ls ${BHMAS_thermConfsGlobalPath} | grep "${BHMAS_configurationPrefix}${BHMAS_parametersString}_${BHMAS_betaPrefix}${BHMAS_betaRegex}_${BHMAS_seedPrefix}${BHMAS_seedRegex}_fromHot[[:digit:]]\+.*" | wc -l) -eq 0 ]]; then
-            BHMAS_betaPostfix="_thermalizeFromHot"
-        else
-            BHMAS_betaPostfix="_thermalizeFromConf"
-        fi
-        if [[ ${BHMAS_measurePbp} = 'TRUE' ]]; then
-            cecho ly B "\n Measurement of PBP switched off during thermalization!"
+        SetBetaPostfixDependingOnExistingThermalizedConfigurations
+        if [[ ${BHMAS_lqcdSoftware} != 'openQCD-FASTSUM' ]] && [[ ${BHMAS_measurePbp} = 'TRUE' ]]; then
+            Warning -N "Measurement of PBP switched off during thermalization!"
             BHMAS_measurePbp='FALSE'
         fi
         ParseBetasFile
@@ -140,22 +150,11 @@ case ${BHMAS_executionMode} in
         if [[ ${BHMAS_executionMode} = 'mode:thermalize' ]]; then
             FindConfigurationGlobalPathFromWhichToStartTheSimulation
             ProduceInputFileAndJobScriptForEachBeta
-            AskUser "Check if everything is fine. Would you like to submit the jobs?"
-            if UserSaidNo; then
-                cecho lr "\n No job will be submitted!\n"
-                exit ${BHMAS_successExitCode}
-            fi
+            ProduceExecutableFileForEachBeta
         elif [[ ${BHMAS_executionMode} = 'mode:continue-thermalization' ]]; then
             ProcessBetaValuesForContinue
         fi
-        SubmitJobsForValidBetaValues
-        ;;
-
-    mode:continue )
-
-        ParseBetasFile
-        ValidateParsedBetaValues
-        ProcessBetaValuesForContinue
+        EnsureThatNeededFilesAreOnRunDiskForEachBeta
         SubmitJobsForValidBetaValues
         ;;
 
@@ -211,15 +210,14 @@ case ${BHMAS_executionMode} in
         ParseBetasFile
         ValidateParsedBetaValues
         ProcessBetaValuesForInversion
+        ProduceExecutableFileForEachBeta
+        EnsureThatNeededFilesAreOnRunDiskForEachBeta
         SubmitJobsForValidBetaValues
         ;;
 
-    mode:prepare-only )
+    mode:database )
 
-        ParseBetasFile
-        ValidateParsedBetaValues
-        FindConfigurationGlobalPathFromWhichToStartTheSimulation
-        ProduceInputFileAndJobScriptForEachBeta
+        projectStatisticsDatabase ${BHMAS_optionsToBePassedToDatabase[@]+"${BHMAS_optionsToBePassedToDatabase[@]}"}
         ;;
 
     * )
