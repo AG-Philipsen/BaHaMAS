@@ -45,51 +45,55 @@ function CreateOutputFileInTheStandardFormat_openQCD-FASTSUM()
     #       "nan" are printed for not found numbers -> https://stackoverflow.com/a/23622339
     awk -v offset="${trShift}"\
         '
+        function PrintLineToFile(tr, plaq, L_re, L_im, L_norm, dH, acc, time)
+        {
+            if(plaq == ""){plaq="nan"}
+            if(L_re == ""){L_re="nan"}
+            if(L_im == ""){L_im="nan"}
+            if(L_norm == ""){L_norm="nan"}
+            if(dH == ""){dH="nan"}
+            if(acc == ""){acc="nan"}
+            if(time == ""){time="nan"}
+            printf "%8d%25s%10s%10s%25s%25s%25.15f%15s%6d%10.1f\n", tr, plaq, "N.A.", "N.A.", L_re, L_im, L_norm, dH, acc, time
+        }
         {
             if( $0 ~ /^Trajectory no [1-9][0-9]*$/ )
             {
-                tr=offset+$3
-                trajectories[tr]=tr
+                if(trajectory != "")
+                {
+                    PrintLineToFile(trajectory, plaquette, polyRe, polyIm, polyNorm, deltaH, accepted, trTime)
+                }
+                trajectory=offset+$3
                 next
             }
             if( $0 ~ /^dH =/ )
             {
                 split($0, result, "(,| = )");
-                deltaH[tr]=result[2]
-                accepted[tr]=result[4]
+                deltaH=result[2]
+                accepted=result[4]
                 next
             }
             if( $0 ~ /^Average plaquette =/ )
             {
-                plaq[tr]=$4
+                plaquette=$4
                 next
             }
             if( $0 ~ /^Polyakov loop =/ )
             {
-                polyRe[tr]=$4
-                polyIm[tr]=$5
-                polySq[tr]=sqrt($4**2+$5**2)
+                polyRe=$4
+                polyIm=$5
+                polyNorm=sqrt($4**2+$5**2)
                 next
             }
             if( $0 ~ /^Time per trajectory =/ )
             {
-                trTime[tr]=$5
+                trTime=$5
                 next
             }
-
         }
         END{
-            for(tr in trajectories)
-            {
-                if(deltaH[tr] == ""){deltaH[tr]="nan"}
-                if(accepted[tr] == ""){accepted[tr]="nan"}
-                if(plaq[tr] == ""){plaq[tr]="nan"}
-                if(polyRe[tr] == ""){polyRe[tr]="nan"}
-                if(polyIm[tr] == ""){polyIm[tr]="nan"}
-                if(polySq[tr] == ""){polySq[tr]="nan"}
-                printf "%8d%25s%10s%10s%25s%25s%25.15f%15s%6d%10.1f\n", tr, plaq[tr], "N.A.", "N.A.", polyRe[tr], polyIm[tr], polySq[tr], deltaH[tr], accepted[tr], trTime[tr]
-            }
-        }' "${softwareOutputFileGlobalPath}" > "${outputFileGlobalPath}"
+            PrintLineToFile(trajectory, plaquette, polyRe, polyIm, polyNorm, deltaH, accepted, trTime)
+        } ' "${softwareOutputFileGlobalPath}" > "${outputFileGlobalPath}"
 }
 
 # This function has to extract from the ${inputFileGlobalPath} file
