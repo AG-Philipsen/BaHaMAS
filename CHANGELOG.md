@@ -32,6 +32,7 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 ## [Unreleased](https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/compare/BaHaMAS-0.1.0...develop)
 
+* :new: All execution modes except from `measure` one are now supported for openQCD-FASTSUM software. The measure mode will not be implemented in the next future.
 * :new: Autocompletion for command line execution modes and options has been added together with an automatic setup for the user.
 * :new: `simulation-status` mode has been implemented for openQCD-FASTSUM software.
 * :new: `continue` mode has been implemented for openQCD-FASTSUM software.

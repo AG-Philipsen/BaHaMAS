@@ -2521,3 +2521,142 @@ Configuration no 10 exported
 Memory footprint at program end:
    Current memory usage per proc:  121.328 MB
    Maximal memory usage per proc:  121.547 MB
+
+
+Trajectory no 190
+dH = +3.86e-01, iac = 1
+Average plaquette = 1.845035163351517
+Average temporal link = 0.001466984037241
+Average spatial link = -0.000027025323301
+Average link = 0.000346477016834
+Polyakov loop = -0.004497917369008 -0.003009724430740
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 191
+dH = -1.53e-01, iac = 1
+Average plaquette = 1.845031699939691
+Average temporal link = 0.001623209202346
+Average spatial link = -0.000331302436940
+Average link = 0.000157325472882
+Polyakov loop = -0.003136707004160 -0.009669535793364
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.61e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 192
+dH = +2.68e-01, iac = 1
+Average plaquette = 1.844484488797859
+Average temporal link = 0.002533334911117
+Average spatial link = 0.000162818423149
+Average link = 0.000755447545141
+Polyakov loop = -0.003819669829682 0.000858880055603
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 193
+dH = +1.98e+00, iac = 0
+Average plaquette = 1.844484488797859
+Average temporal link = 0.002533334911117
+Average spatial link = 0.000162818423149
+Average link = 0.000755447545141
+Polyakov loop = -0.003819669829682 0.000858880055603
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.64e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 194
+dH = +7.18e-01, iac = 1
+Average plaquette = 1.845054222567105
+Average temporal link = 0.001496109887198
+Average spatial link = -0.000101321398555
+Average link = 0.000298036422884
+Polyakov loop = -0.002253410173580 -0.002043813234195
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.62e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 195
+dH = +2.60e-01, iac = 1
+Average plaquette = 1.844652018688920
+Average temporal link = 0.001623473472901
+Average spatial link = 0.000430084434381
+Average link = 0.000728431694011
+Polyakov loop = -0.006818176247180 -0.005573914386332
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 196
+dH = -6.03e-01, iac = 1
+Average plaquette = 1.844688508488760
+Average temporal link = 0.001977631651614
+Average spatial link = -0.000264671056044
+Average link = 0.000295904620871
+Polyakov loop = 0.003466679947451 -0.002995321294293
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 197
+dH = +5.86e-01, iac = 1
+Average plaquette = 1.845235207354617
+Average temporal link = 0.000296328191577
+Average spatial link = 0.000071755875990
+Average link = 0.000127898954887
+Polyakov loop = -0.004591685719788 -0.006141656544060
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 198
+dH = +4.67e-01, iac = 0
+Average plaquette = 1.845235207354617
+Average temporal link = 0.000296328191577
+Average spatial link = 0.000071755875990
+Average link = 0.000127898954887
+Polyakov loop = -0.004591685719788 -0.006141656544060
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 199
+dH = +1.68e-01, iac = 1
+Average plaquette = 1.845253913581804
+Average temporal link = 0.000869998370892
+Average spatial link = -0.000021025174573
+Average link = 0.000201730711793
+Polyakov loop = -0.004008207004517 -0.002137291943654
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.61e+01 sec (average = 3.63e+01 sec)
+
+Trajectory no 200
+dH = +4.76e-01, iac = 1
+Average plaquette = 1.844271244034593
+Average temporal link = 0.000218771865260
+Average spatial link = 0.000340197722742
+Average link = 0.000309841258371
+Polyakov loop = -0.002335115801543 -0.010058476589620
+Action  1: <status> = 155
+Force   1: <status> = 69
+Acceptance rate = 0.74
+Time per trajectory = 3.63e+01 sec (average = 3.63e+01 sec)
+
+Configuration no 10 exported
+
+Memory footprint at program end:
+   Current memory usage per proc:  121.328 MB
+   Maximal memory usage per proc:  121.547 MB

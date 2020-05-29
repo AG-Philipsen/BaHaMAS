@@ -47,7 +47,7 @@ function CleanOutputFilesForGivenSimulation_CL2QCD()
     fi
 }
 
-function __static__CleanFile()
+function __static__CleanFile_CL2QCD()
 {
     local runId fileToBeCleaned checkForSuspiciousTrajectories backupGlobalPath
     runId="$1"

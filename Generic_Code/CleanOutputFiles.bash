@@ -22,7 +22,7 @@ function CleanOutputFiles()
     local runId
     cecho lc B "\n " U "Cleaning" uU ":"
     for runId in "${BHMAS_betaValues[@]}"; do
-        CleanOutputFilesForGivenSimulation "${runId}"
+        CleanOutputFilesForGivenSimulation "${runId}" || continue
     done
 }
 
