@@ -39,6 +39,7 @@ function ListSimulationsStatus()
         localParametersPath="$1"
         localParametersString=${localParametersPath//\//_}
         localParametersString=${localParametersString:1}
+        BHMAS_simulationStatusVerbose='TRUE' # Patch to activate verbose output in database mode
     else
         Internal "Wrong invocation of " emph "${FUNCNAME}" ", invalid number of arguments!"
     fi

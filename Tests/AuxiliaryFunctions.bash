@@ -133,7 +133,7 @@ function MakeTestPreliminaryOperations()
     local software projectFolder trashFolderName file folder\
           submitDirWithBetaFolders runDirWithBetaFolders
     #Link user variable file depending on test case
-    if [[ "$1" =~ ^openQCD-FASTSUM ]]; then
+    if [[ "$1" =~ (^|)openQCD-FASTSUM(|$) ]]; then
         readonly software='openQCD-FASTSUM'
         readonly projectFolder='WilsonFakeProject'
         testParametersString='Nf2_mui0_k1150_nt8_ns48'
@@ -353,8 +353,13 @@ function MakeTestPreliminaryOperations()
             if [[ $1 =~ update ]]; then
                 __static__CreateBetaFolder
                 __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
-                __static__CopyAuxiliaryFilesToSubmitBetaFolder "fakeExecutable.123456.out" "fakeInput"
-                __static__CopyAuxiliaryFilesToRunBetaFolder "fakeOutput"
+                __static__CopyAuxiliaryFilesToSubmitBetaFolder "fakeInput"
+                if [[ ${software} = CL2QCD ]]; then
+                    __static__CopyAuxiliaryFilesToRunBetaFolder "fakeOutput"
+                else
+                    __static__CreateSymlinkInRunBetaFolder "fromConf_trNr5000"
+                    __static__CopyAuxiliaryFilesToRunBetaFolder "fakeOutput.log"
+                fi
                 cecho -d "${submitDirWithBetaFolders}" > "fakeDatabasePath"
             fi
             ;;

@@ -145,8 +145,10 @@ availableTests=(
     ['database-filter1']='database --type NC --ns 18 --beta 5.4360'
     ['database-filter2']='database --status RUNNING --lastTraj 115'
     ['database-report']='database --report'
-    ['database-update']='database --update'
-    ['database-update-file']='database --update --file fakeDatabasePath'
+    ['database-update-CL2QCD']='database --update'
+    ['database-update-file-CL2QCD']='database --update --file fakeDatabasePath'
+    ['database-update-openQCD-FASTSUM']='database --update'
+    ['database-update-file-openQCD-FASTSUM']='database --update --file fakeDatabasePath'
 )
 
 #Declare array with indeces of availableTests array sorted
