@@ -284,13 +284,23 @@ function MakeTestPreliminaryOperations()
             ;;
 
         openQCD-FASTSUM-continue* )
+            local digitConf resumeConf
+            if [[ $1 =~ therm ]]; then
+                betaFolder="${betaFolder/continueWithNewChain/thermalizeFromHot}"
+                __static__CreateThermalizedConfigurationFolder
+                digitConf=0
+                resumeConf=60
+            else
+                digitConf=5
+                resumeConf=5060
+            fi
             __static__CreateBetaFolder
             __static__CopyAuxiliaryFilesToSubmitBetaFolder "fakeInput"
             __static__CopyAuxiliaryFilesToRunBetaFolder "fakeOutput.log"
             __static__CreateFilesInSubmitBetaFolder "qcd1_1_2_4_6"
             __static__CreateFilesInRunBetaFolder "qcd1_1_2_4_6"
             __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
-            __static__CreateFilesInRunBetaFolder {conf,prng,data}.050{2..8..2}0 {conf,prng}.06020 conf.07040
+            __static__CreateFilesInRunBetaFolder {conf,prng,data}.0${digitConf}0{2..8..2}0 {conf,prng}.06020 conf.07040
             if [[ ! $1 =~ therm ]]; then
                 # This is not needed for thermalization from hot
                 __static__CreateSymlinkInRunBetaFolder "fromConf_trNr5000"
@@ -300,12 +310,17 @@ function MakeTestPreliminaryOperations()
                     __static__AddStringToFirstLineBetasFile "rlast"
                     ;;
                 resume )
-                    __static__AddStringToFirstLineBetasFile "r5060"
+                    __static__AddStringToFirstLineBetasFile "r${resumeConf}"
                     ;;
                 goal )
                     __static__AddStringToFirstLineBetasFile "g15000"
                     ;;
             esac
+            #It is important to restore the betaFolder variable to continueWithNewChain
+            #postfix which is used for potential following tests (betaFolder is global)
+            if [[ $1 =~ therm ]]; then
+                betaFolder="${betaFolder/thermalizeFromHot/continueWithNewChain}"
+            fi
             ;;
 
         openQCD-FASTSUM-simulation-status* )
