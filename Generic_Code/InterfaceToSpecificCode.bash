@@ -182,6 +182,11 @@ function CreateOutputFileInTheStandardFormat()
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
 }
 
+function CleanOutputFilesForGivenSimulation()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_lqcdSoftware} "$@"
+}
+
 #-------------------------------------------------------------------------------------------------------------------------#
 
 
