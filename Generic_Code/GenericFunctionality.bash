@@ -30,21 +30,25 @@ function ExtractTrajectoryNumberFromConfigurationSymlink()
     local betaFolderGlobalPath folderName parametersGlob initialConfiguration index trNumber
     betaFolderGlobalPath="$1"
     folderName="$(basename "${betaFolderGlobalPath}")"
-    # NOTE: Leave glob match the seed (since it might be different in continue mode)
-    #       and the parameters which might be different when this function is
-    #       called in database mode through the ListSimulationsStatus function.
-    IFS='*'; parametersGlob="${BHMAS_parameterPrefixes[*]}"; unset -v 'IFS'
-    parametersGlob="${parametersGlob[@]//[*]/*_}*"
-    initialConfiguration=( "${betaFolderGlobalPath}/conf."${parametersGlob}"_${folderName%%_*}"* )
-    for index in "${#initialConfiguration[@]}"; do
-        if [[ ! -L "${initialConfiguration[index]:-}" ]]; then
-            unset -v 'initialConfiguration[index]'
-        fi
-    done
-    if [[ ${#initialConfiguration[@]} -ne 1 ]]; then
-        return 1
+    if [[ ${folderName} =~ _thermalizeFromHot$ ]]; then
+        trNumber=0
     else
-        trNumber=${initialConfiguration[0]##*_trNr}
+        # NOTE: Leave glob match the seed (since it might be different in continue mode)
+        #       and the parameters which might be different when this function is
+        #       called in database mode through the ListSimulationsStatus function.
+        IFS='*'; parametersGlob="${BHMAS_parameterPrefixes[*]}"; unset -v 'IFS'
+        parametersGlob="${parametersGlob[@]//[*]/*_}*"
+        initialConfiguration=( "${betaFolderGlobalPath}/conf."${parametersGlob}"_${folderName%%_*}"* )
+        for index in "${#initialConfiguration[@]}"; do
+            if [[ ! -L "${initialConfiguration[index]:-}" ]]; then
+                unset -v 'initialConfiguration[index]'
+            fi
+        done
+        if [[ ${#initialConfiguration[@]} -ne 1 ]]; then
+            return 1
+        else
+            trNumber=${initialConfiguration[0]##*_trNr}
+        fi
     fi
     printf '%d' ${trNumber}
 }
