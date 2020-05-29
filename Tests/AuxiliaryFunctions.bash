@@ -316,6 +316,13 @@ function MakeTestPreliminaryOperations()
             __static__CreateSymlinkInRunBetaFolder "fromConf_trNr5000"
             ;;
 
+        openQCD-FASTSUM-accRateReport* )
+            __static__CreateBetaFolder
+            __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
+            __static__CopyAuxiliaryFilesToRunBetaFolder "fakeOutput.log"
+            __static__CreateSymlinkInRunBetaFolder "fromConf_trNr5000"
+            ;;
+
         completeBetasFile* )
             __static__CopyAuxiliaryFileAtBetaFolderLevel "fakeBetasToBeCompleted" "betas"
             ;;
