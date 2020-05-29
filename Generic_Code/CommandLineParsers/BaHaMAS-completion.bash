@@ -79,7 +79,7 @@ function _BaHaMAS_completions()
         _BaHaMAS_DeclareAllowedOptionsPerModeOrSoftware
     fi
 
-    # If a mode with or without a software has been given, we need
+    # If a mode (with or without a software) has been given, we need
     # to handle options in a way that the user can continue using
     # autocompletion on new ones, getting only the unused ones proposed
     #
@@ -106,19 +106,24 @@ function _BaHaMAS_completions()
                 break
             fi
         done
-    else
-        case "$3" in
-            BaHaMAS )
-                listOfOptionsToProposeAsString="${availableLqcdSoftware[*]} ${generalOptions[*]} ${availableModes[*]}"
-                ;;
-            ${softwareCaseString} )
-                listOfOptionsToProposeAsString="${availableModes[*]}"
-                ;;
-            * )
-                # Here either the user gave an unknown option or
-                ;;
-        esac
     fi
+
+    # The following case construct handles the remaining cases and "corrects" when the if above was
+    # entered but the last option actually requires a file
+    case "$3" in
+        BaHaMAS )
+            listOfOptionsToProposeAsString="${availableLqcdSoftware[*]} ${generalOptions[*]} ${availableModes[*]}"
+            ;;
+        ${softwareCaseString} )
+            listOfOptionsToProposeAsString="${availableModes[*]}"
+            ;;
+        --betasfile )
+            listOfOptionsToProposeAsString="$(compgen -f -- "$2")"
+            ;;
+        * )
+            # Simply leave the listOfOptionsToProposeAsString as it is
+            ;;
+    esac
     COMPREPLY=( $(compgen -W "${listOfOptionsToProposeAsString}" -- "$2") )
 }
 
