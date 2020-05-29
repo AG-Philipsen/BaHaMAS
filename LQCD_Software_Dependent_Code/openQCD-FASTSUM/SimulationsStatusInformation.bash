@@ -23,7 +23,8 @@
 # openQCD it has to be build from the log file.
 function CreateOutputFileInTheStandardFormat_openQCD-FASTSUM()
 {
-    local runId  softwareOutputFileGlobalPath trShift
+    CheckIfVariablesAreDeclared outputFileGlobalPath
+    local runId softwareOutputFileGlobalPath trShift
     runId="$1"
     softwareOutputFileGlobalPath="$(dirname "${outputFileGlobalPath}")/${BHMAS_outputFilename}.log"
     if [[ ! -f "${softwareOutputFileGlobalPath}" ]]; then
@@ -31,14 +32,14 @@ function CreateOutputFileInTheStandardFormat_openQCD-FASTSUM()
             Error 'openQCD-FASTSUM output file ' file "${softwareOutputFileGlobalPath}"\
                   '\nwas not found but expected.'
         fi
-        return
+        return 1
     fi
     if ! trShift=$(ExtractTrajectoryNumberFromConfigurationSymlink "$(dirname "${softwareOutputFileGlobalPath}")"); then
         if [[ ${BHMAS_simulationStatusVerbose} = 'TRUE' ]]; then
             Error 'Unable to extract initial trajectory number from configuration symlink\n'\
                   'for run ID ' emph "${runId}" ' and hence not able to create standardized output.'
         fi
-        return
+        return 1
     fi
     # NOTE: "N.A." is printed for information that openQCD does not give
     #       "nan" are printed for not found numbers -> https://stackoverflow.com/a/23622339

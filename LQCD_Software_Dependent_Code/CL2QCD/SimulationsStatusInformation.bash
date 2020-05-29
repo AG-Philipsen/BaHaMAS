@@ -24,6 +24,7 @@
 # standrard BaHaMAS format. Still a symbolic link needs to be created.
 function CreateOutputFileInTheStandardFormat_CL2QCD()
 {
+    CheckIfVariablesAreDeclared outputFileGlobalPath
     local softwareOutputFileGlobalPath
     softwareOutputFileGlobalPath="$(dirname "${outputFileGlobalPath}")/${BHMAS_outputFilename}"
     if [[ ! -f "${softwareOutputFileGlobalPath}" ]]; then
@@ -31,7 +32,7 @@ function CreateOutputFileInTheStandardFormat_CL2QCD()
             Error 'CL2QCD output file ' file "${softwareOutputFileGlobalPath}"\
                   '\nwas not found but expected.'
         fi
-        return
+        return 1
     fi
     (
         cd "$(dirname "${outputFileGlobalPath}")"
