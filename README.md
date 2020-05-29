@@ -6,10 +6,18 @@
 
 ### Origin of the code as disclaimer
 
-`BaHaMAS` has been developed to run LQCD simulations with the [CL<sup>2</sup>QCD] software on clusters provided with the [slurm] job scheduler. Therefore, if you are using a different scheduler or a different software, the implementation of some functionality could be potentially missing.
-However, reading the documentation, it should be clear that the structure of the code allows for easy generalisations<sup>1</sup> and it should not be difficult to provide an implementation for a different job scheduler and/or for a different software.
+`BaHaMAS` has been initially developed to run LQCD simulations with the [CL<sup>2</sup>QCD] software on clusters provided with the [slurm] job scheduler.
+Although this could sound quite limitating, a remarkable effort has been done to give modularity to the codebase and, by now, scheduler and LQCD-software dependent code has been isolated.
+Therefore, the structure of the code allows for easy generalisations and it should not be difficult to provide an implementation for a different job scheduler and/or for a different software.
 
-<sup>1</sup> <sub>_This statement could be at the moment not true. `BaHaMAS` is in an intense development phase and a lot of work is being done to provide a more solid structure, which will allow easier extensions in future. For example, some features are [CL<sup>2</sup>QCD] specific and they are still hard coded._</sub>
+### Supported LQCD software and job scheduler
+
+Any (software,scheduler) combination among the supported ones is allowed.
+
+|     **LQCD software**      |   **Scheduler**   |
+|     :---------------:      |   :-----------:   |
+| [CL<sup>2</sup>QCD]        | [slurm]           | 
+| [openQCD-FASTSUM]          |                   |
 
 ## Main Features
 
@@ -27,14 +35,11 @@ However, reading the documentation, it should be clear that the structure of the
 
 ## Quick Start
 
-Being written in bash, `BaHaMAS` does not need to be compiled or installed. Once cloned the repository, it can be run straight away. Nevertheless, to be able to properly work, it needs to be configured with some information. Run it with the `-h` option to get a compact _getting started_ (or refer to the documentation to have a complete overview).
-
-## Coming soon
-
-  - [ ] Online documentation for user and developer
-  - [ ] Refactoring of the code to more easily include new software and/or new job schedulers
-  - [ ] Progress percentage and remaining time per simulation in `--liststatus` option
-
+Being written in bash, `BaHaMAS` does not need to be compiled or installed.
+Once cloned the repository, it can be run straight away.
+Nevertheless, to be able to properly work, it needs to be configured with some information.
+Its usage on the command line is `git`-inspired and you can explore the funcitonality yourself running the `BaHaMAS` command at first and then following the compact _getting started_ you will obtain.
+To have a complete overview, you can refer to the Wiki, where also a more general description of how `BaHaMAS` works is offered.
 
 ## Authors
 
@@ -55,5 +60,6 @@ The logo of `BaHaMAS` as well as the Wiki cover picture have been drawn by Auror
 
    [slurm]: <https://slurm.schedmd.com/>
    [CL<sup>2</sup>QCD]: <https://github.com/AG-Philipsen/cl2qcd>
+   [openQCD-FASTSUM]: <https://gitlab.com/fastsum/openqcd-fastsum>
    [git]: <https://git-scm.com>
    [logo]: <https://github.com/AG-Philipsen/BaHaMAS/blob/master/Logo.png>

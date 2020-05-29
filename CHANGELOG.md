@@ -30,7 +30,10 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 ---
 
-## [Unreleased](https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/compare/BaHaMAS-0.1.0...develop)
+## [Unreleased]
+
+
+## [Version 0.2.0] &ensp;<sub><sup>29 May 2020</sup></sub>
 
 * :new: All execution modes except from `measure` one are now supported for openQCD-FASTSUM software. The measure mode will not be implemented in the next future.
 * :new: Autocompletion for command line execution modes and options has been added together with an automatic setup for the user.
@@ -46,9 +49,14 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 * :recycle: LQCD software specific code and scheduler specific code has been moved to own directory and an interface to the generic code has been added.
 * :boom: BaHaMAS execution modes have been added and mutually exclusive options removed.
 
-## Version 0.1.0 &ensp;<sub><sup>17 February 2020</sup></sub>
+## [Version 0.1.0] &ensp;<sub><sup>17 February 2020</sup></sub>
 
 * :sos: BaHaMAS requested the setup to be done before the help could be displayed. This condition was relaxed.
 * :x: The **Hooks** folder has been removed from the repository since the [GitHooks](https://github.com/AxelKrypton/GitHooks) shall be used.
 * :new: Add **CONTRIBUTING.md** and **CHANGELOG.md** files to repository.
 * :sos: Fix tests failures due to hard-coded path in tests setup.
+
+
+[Unreleased]: https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/compare/BaHaMAS-0.2.0...develop
+[Version 0.2.0]: https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/-/releases/BaHaMAS-0.2.0
+[Version 0.1.0]: https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/-/releases/BaHaMAS-0.1.0
