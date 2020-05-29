@@ -105,11 +105,14 @@ function __static__ProduceUserVariableFile()
 
 function __static__GiveMessageToUserAboutEnvironmentVariables()
 {
-    local commandString manualPath grepString pathAlreadyAdded manpathAlreadyAdded
+    local commandString manualPath grepString\
+          pathAlreadyAdded manpathAlreadyAdded
     manualPath="${BHMAS_repositoryTopLevelPath}/Manual_Pages"
+
+    # Check/work on PATH
     if [[ ! ${PATH} =~ (^|:)${BHMAS_repositoryTopLevelPath// /\\ }(:|$) ]]; then
         grepString='# To use BaHaMAS from any position'
-        if [[ $(grep -c "${grepString}" ~/.bashrc) -eq 0 ]]; then
+        if [[ $(grep -c "${grepString}" "${HOME}/.bashrc") -eq 0 ]]; then
             cecho wg '\n'\
                   'If you would like to be able to use ' emph 'BaHaMAS' ' as command from any position,\n'\
                   'you can add the following snippet to your shell login file (e.g. ~/.bashrc):'\
@@ -132,13 +135,15 @@ function __static__GiveMessageToUserAboutEnvironmentVariables()
         else
             pathAlreadyAdded='TRUE'
             cecho lo '\n'\
-                  'It seems that the snippet to use the ' emph 'BaHaMAS' ' command was already added to\n'\
-                  'your ' emph '~/.bashrc' ' file. You need source it in order to use the ' emph 'BaHaMAS' ' command.'
+                  'It seems that the snippet to use the ' emph 'BaHaMAS' ' command was already added to your ' emph '~/.bashrc\n'\
+                  'file, but it was not sourced. You need source it in order to use the ' emph 'BaHaMAS' ' command.'
         fi
     fi
+
+    # Check/work on MANPATH
     if [[ ! ${MANPATH:-} =~ (^|:)${manualPath// /\\ }(:|$) ]]; then
         grepString='# To have access to BaHaMAS manuals'
-        if [[ $(grep -c "${grepString}" ~/.bashrc) -eq 0 ]]; then
+        if [[ $(grep -c "${grepString}" "${HOME}/.bashrc") -eq 0 ]]; then
             cecho wg '\n'\
                   'If you would like to be able to use the ' emph 'man' ' command to get information\n'\
                   'about BaHaMAS and its execution modes, you can add the following snippet\n'\
@@ -162,8 +167,29 @@ function __static__GiveMessageToUserAboutEnvironmentVariables()
         else
             manpathAlreadyAdded='TRUE'
             cecho lo '\n'\
-                  'It seems that the snippet to use the ' emph 'man' ' command combined with BaHaMAS was already added\n'\
-                  'to your ' emph '~/.bashrc' ' file. You need source it in order to use commands like ' emph 'man BaHaMAS' '.'
+                  'It seems that the snippet to use the ' emph 'man' ' command combined with BaHaMAS was already added to your\n'\
+                  emph '~/.bashrc' ' file, but it was not sourced. You need source it in order to use commands like ' emph 'man BaHaMAS' '.'
+        fi
+    fi
+
+    # Check/work on autocompletion
+    grepString='# To activate BaHaMAS command-line autocompletion'
+    if [[ $(grep -c "${grepString}" "${HOME}/.bashrc") -eq 0 ]]; then
+        cecho wg '\n'\
+              'If you would like to be able to use ' emph 'autocompletion' ' on the command line\n'\
+              'of BaHaMAS, you can add the following snippet to your shell login file (e.g. ~/.bashrc):'\
+              ''
+        cecho -d '\033[48;5;16m'
+        cecho -d lr "${grepString}"
+        cecho -d bb 'source ' lg "\"${BHMAS_repositoryTopLevelPath}/Generic_Code/CommandLineParsers/BaHaMAS-completion.bash\""
+        cecho ''
+        cecho wg 'Adapt the above lines accordingly if you use a different shell than bash.\n'
+        AskUser -n "\e[1DWould you like to add the snippet above to your $(cecho -d ly '~/.bashrc' lc) file?"
+        if UserSaidYes; then
+            cecho -d "\n${grepString}\n"\
+                  "source \"${BHMAS_repositoryTopLevelPath}/Generic_Code/CommandLineParsers/BaHaMAS-completion.bash\""\
+                  >> "${HOME}/.bashrc"
+            cecho lo '\nDo not forget to source the ' emph '~/.bashrc' ' file in order to let the changes take effect.\n'
         fi
     fi
     if [[ ${pathAlreadyAdded:-}${manpathAlreadyAdded:-} = *TRUE* ]]; then
