@@ -62,7 +62,7 @@ function ListSimulationsStatus()
         fi
         # NOTE: Do not use BHMAS_runDirWithBetaFolders because it would break database
         #       which needs to change the ${localParametersPath} variable needed here.
-        outputFileGlobalPath="${BHMAS_runDiskGlobalPath}/${BHMAS_projectSubpath}${localParametersPath}/${BHMAS_betaPrefix}${runId}/${BHMAS_outputFilename}.BaHaMAS"
+        outputFileGlobalPath="${BHMAS_runDiskGlobalPath}/${BHMAS_projectSubpath}${localParametersPath}/${BHMAS_betaPrefix}${runId}/${BHMAS_outputStandardizedFilename}"
         CreateOutputFileInTheStandardFormat "${runId}"
         toBeCleaned=0
         trajectoriesDone='-----'

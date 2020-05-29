@@ -184,6 +184,7 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
     else
         readonly BHMAS_simulationsPerJob=1
     fi
+    readonly BHMAS_outputStandardizedFilename="${BHMAS_outputFilename}.BaHaMAS"
 
     #Decide whether to return or to exit
     if [[ ${mustReturn} = 'TRUE' ]]; then
