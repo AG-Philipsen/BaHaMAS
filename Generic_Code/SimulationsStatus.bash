@@ -223,9 +223,9 @@ function __static__ExtractActionAndPlaquetteInformation()
                   sigmaS=sqrt(sigmaS/nDat)
                   sigmaP=sqrt(sigmaP/nDat)
                   secondFile=0
-                  if(sigmaS!=0) {printf "%.3f ", maxSpikeS/sigmaS} else {print "---- "}
-                  if(sigmaP!=0) {printf "%.3f",  maxSpikeP/sigmaP} else {print "---- "};
-                  printf "% .6f", plaqMax-plaqMin
+                  if(sigmaS!=0) {printf "%.3f", maxSpikeS/sigmaS} else {print "----"}
+                  if(sigmaP!=0) {printf " %.3f",  maxSpikeP/sigmaP} else {print " ----"};
+                  printf " %.6f", plaqMax-plaqMin
               }
               ' "${outputFileGlobalPath}" "${outputFileGlobalPath}" )
     )
@@ -408,12 +408,15 @@ function __static__ColorBeta()
 }
 
 # This function has to invoke correctly the awk script to check the correctness of the output file
-# and return 0 if it is fine and 1 if not. The arguments in input are the following:
+# and return 0 if it is fine and !0 if not. The arguments in input are the following:
 #
 #  $1 -> outputFileGlobalPath
 #
 function __static__CheckCorrectnessOutputFile()
 {
+    if [[ $(grep -c 'nan' "${outputFileGlobalPath}") -ne 0 ]]; then
+       return ${BHMAS_fatalLogicError}
+    fi
     #Columns here below ranges from 1 on, since they are used in awk
     declare -A observablesColumns=( ["TrajectoryNr"]=1
                                     ["Plaquette"]=${BHMAS_plaquetteColumn}
