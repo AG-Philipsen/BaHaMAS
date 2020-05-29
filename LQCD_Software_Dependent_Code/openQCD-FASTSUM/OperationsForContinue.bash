@@ -355,14 +355,18 @@ function __static__HandleFurtherOptionsInInputFile_openQCD-FASTSUM()
 
 function ModifyOptionsInInputFile_openQCD-FASTSUM()
 {
-    local label oldString newString
+    # ATTENTION: Use Extended Regular Expression (ERE) here
+    #            which are later enabled invoking grep/sed,
+    #            while awk uses them by default.
+    #
     # NOTE: The printf is just aesthetics to keep inputfile layout
-    #       where the options are in a 13 characters width
+    #       where the options are in a 13-characters wide field
+    local label oldString newString
     while [[ $# -gt 0 ]]; do
         label=''
         case $1 in
             measurements=* )
-                oldString="ntr[[:space:]]\+[0-9]\+"
+                oldString="ntr[[:space:]]+[0-9]+"
                 newString="$(printf "%-13s%s" "ntr" "${1#*=}")"
                 ;;
             intsteps0=* )
@@ -380,7 +384,7 @@ function ModifyOptionsInInputFile_openQCD-FASTSUM()
                 newString="$(printf "%-13s%s" "nstep" "${1#*=}")"
                 ;;
             #nPseudoFermions=* )
-            #    oldString="nPseudoFermions=[0-9]\+"
+            #    oldString="nPseudoFermions=[0-9]+"
             #    newString="nPseudoFermions=${1#*=}"
             #    ;;
             * )

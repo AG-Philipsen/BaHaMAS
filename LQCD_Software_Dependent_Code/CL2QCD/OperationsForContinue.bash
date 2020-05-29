@@ -448,11 +448,14 @@ function FindAndSetNumberOfTrajectoriesAlreadyProduced_CL2QCD()
 
 function ModifyOptionsInInputFile_CL2QCD()
 {
+    # ATTENTION: Use Extended Regular Expression (ERE) here
+    #            which are later enabled invoking grep/sed,
+    #            while awk uses them by default.
     local oldString newString
     while [[ $# -gt 0 ]]; do
         case $1 in
             startCondition=* )
-                oldString="startCondition=[[:alpha:]]\+"
+                oldString="startCondition=[[:alpha:]]+"
                 newString="startCondition=${1#*=}"
                 ;;
             initialConf=* )
@@ -464,55 +467,55 @@ function ModifyOptionsInInputFile_CL2QCD()
                 newString="initialPRNG=${1#*=}"
                 ;;
             hostSeed=* )
-                oldString="hostSeed=[0-9]\+"
+                oldString="hostSeed=[0-9]+"
                 newString="hostSeed=${1#*=}"
                 ;;
             intsteps0=* )
-                oldString="integrationSteps0=[0-9]\+"
+                oldString="integrationSteps0=[0-9]+"
                 newString="integrationSteps0=${1#*=}"
                 ;;
             intsteps1=* )
-                oldString="integrationSteps1=[0-9]\+"
+                oldString="integrationSteps1=[0-9]+"
                 newString="integrationSteps1=${1#*=}"
                 ;;
             f=* | checkpointEvery=* )
-                oldString="createCheckpointEvery=[0-9]\+"
+                oldString="createCheckpointEvery=[0-9]+"
                 newString="createCheckpointEvery=${1#*=}"
                 ;;
             F=* | confSaveEvery=* )
-                oldString="overwriteTemporaryCheckpointEvery=[0-9]\+"
+                oldString="overwriteTemporaryCheckpointEvery=[0-9]+"
                 newString="overwriteTemporaryCheckpointEvery=${1#*=}"
                 ;;
             m=* | measurements=* )
-                oldString="mcSteps=[0-9]\+"
+                oldString="mcSteps=[0-9]+"
                 newString="mcSteps=${1#*=}"
                 ;;  # This replacement works both with nHmcSteps and nRhmcSteps
             measurePbp=* )
-                oldString="measurePbp=[0-9]\+"
+                oldString="measurePbp=[0-9]+"
                 newString="measurePbp=${1#*=}"
                 ;;
             useMP=* )
-                oldString="useMP=[0-9]\+"
+                oldString="useMP=[0-9]+"
                 newString="useMP=${1#*=}"
                 ;;
             kappaMP=* )
-                oldString="kappaMP=[0-9]\+[.][0-9]\+"
+                oldString="kappaMP=[0-9]+[.][0-9]+"
                 newString="kappaMP=${1#*=}"
                 ;;
             intsteps2=* )
-                oldString="integrationSteps2=[0-9]\+"
+                oldString="integrationSteps2=[0-9]+"
                 newString="integrationSteps2=${1#*=}"
                 ;;
             solverResiduumCheckEvery=* )
-                oldString="solverResiduumCheckEvery=[0-9]\+"
+                oldString="solverResiduumCheckEvery=[0-9]+"
                 newString="solverResiduumCheckEvery=${1#*=}"
                 ;;
             nTimeScales=* )
-                oldString="nTimeScales=[0-9]\+"
+                oldString="nTimeScales=[0-9]+"
                 newString="nTimeScales=${1#*=}"
                 ;;
             nPseudoFermions=* )
-                oldString="nPseudoFermions=[0-9]\+"
+                oldString="nPseudoFermions=[0-9]+"
                 newString="nPseudoFermions=${1#*=}"
                 ;;
             rationalApproxFileHB=* )

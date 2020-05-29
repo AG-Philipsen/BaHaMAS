@@ -240,18 +240,18 @@ function FindAndReplaceSingleOccurenceInInputFile()
     local stringToBeFound replaceString filename
     stringToBeFound="$1"; replaceString="$2"
     filename="${inputFileGlobalPath}"
-    if [[ $(grep -c "${stringToBeFound}" "${filename}") -eq 0 ]]; then
+    if [[ $(grep -cE "${stringToBeFound}" "${filename}") -eq 0 ]]; then
         Error 'The string ' emph "${stringToBeFound}" ' has ' emph 'not been found' ' in the input file.\n'\
               'The value ' emph "beta = ${runId}" ' will be skipped!'
         BHMAS_problematicBetaValues+=( ${runId} )
         return 1
-    elif [[ $(grep -c "${stringToBeFound}" ${filename}) -gt 1 ]]; then
+    elif [[ $(grep -cE "${stringToBeFound}" ${filename}) -gt 1 ]]; then
         Error 'The string ' emph "${stringToBeFound}" ' occurs ' emph 'more than once' ' in the input file.\n'\
               'The value ' emph "beta = ${runId}" ' will be skipped!'
         BHMAS_problematicBetaValues+=( ${runId} )
         return 1
     fi
-    sed -i "s@${stringToBeFound}@${replaceString}@g" "${filename}" #function's return code is that of sed
+    sed -E -i "s@${stringToBeFound}@${replaceString}@g" "${filename}" #function's return code is that of sed
 }
 
 function FindAndReplaceFirstOccurenceInInputFileAfterLabel()
