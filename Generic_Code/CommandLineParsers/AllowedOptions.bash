@@ -32,7 +32,7 @@
 function _BaHaMAS_DeclareAllowedOptionsPerModeOrSoftware()
 {
     # Sub-parser options
-    if [[ "${BHMAS_MANUALMODE-x}" = 'TRUE' ]]; then
+    if [[ "${BHMAS_MANUALMODE-x}" = 'TRUE' ]] || [[ "${BHMAS_AUTOCOMPLETION-x}" = 'TRUE' ]]; then
         allowedOptionsPerModeOrSoftware=(
             ['mode:continue']='--till '
             ['mode:continue-thermalization']='--till '
