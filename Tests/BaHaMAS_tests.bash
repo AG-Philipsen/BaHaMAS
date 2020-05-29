@@ -18,38 +18,37 @@
 #  along with BaHaMAS. If not, see <http://www.gnu.org/licenses/>.
 #
 
-
-
-#---------------------------------------------------------------------------#
-# This files contains a set of tests for the main code.                     #
-#                                                                           #
-# The only aim is to run BaHaMAS with all its possible mutually exclusive   #
-# options and check that no unexpected failure occures. Clearly, these      #
-# are not exhaustive tests, but they help refactoring the code.             #
-#---------------------------------------------------------------------------#
+#-------------------------------------------------------------------#
+# This files contains a set of functional tests for the main code.  #
+#                                                                   #
+# The only aim is to run BaHaMAS with in all its possible modes and #
+# check that no unexpected failure occures. Clearly, these are not  #
+# exhaustive tests, but they help refactoring the code.             #
+#-------------------------------------------------------------------#
 
 #Use extglob to facilitate some operations
-#NOTE: To be done here and not where used (see http://mywiki.wooledge.org/glob)
-shopt -s extglob
+shopt -s extglob # <- To be done here and not where used (see http://mywiki.wooledge.org/glob)
+shopt -s nullglob
+shopt -s dotglob
 
 #This is to have cecho functionality active here
 readonly BHMAS_coloredOutput='TRUE'
 
 #Retrieve information from git
 readonly BHMAS_repositoryTopLevelPath="$(git -C $(dirname "${BASH_SOURCE[0]}") rev-parse --show-toplevel)"
-readonly BHMAS_command=${BHMAS_repositoryTopLevelPath}/BaHaMAS.bash
+readonly BHMAS_command=${BHMAS_repositoryTopLevelPath}/BaHaMAS
 readonly BHMAS_testsFolder=${BHMAS_repositoryTopLevelPath}/Tests
 readonly BHMAS_testsFolderAuxFiles=${BHMAS_testsFolder}/AuxiliaryFiles
 
 #Load needed files
-readonly BHMAS_filesToBeSourced=( "${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/OutputFunctionality.bash"
-                                  "${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/UtilityFunctions.bash"
+readonly BHMAS_filesToBeSourced=( "${BHMAS_repositoryTopLevelPath}/Generic_Code/UtilityFunctions.bash"
+                                  "${BHMAS_repositoryTopLevelPath}/Generic_Code/OutputFunctionality.bash"
                                   "${BHMAS_testsFolder}/AuxiliaryFunctions.bash"
                                   "${BHMAS_testsFolder}/CommandLineParser.bash" )
 #Source error codes and fail with error hard coded since variable defined in file which is sourced!
-source ${BHMAS_repositoryTopLevelPath}/ClusterIndependentCode/ErrorCodes.bash || exit 64
+source ${BHMAS_repositoryTopLevelPath}/Generic_Code/ErrorCodes.bash || exit 64
 for fileToBeSourced in "${BHMAS_filesToBeSourced[@]}"; do
-    source "${fileToBeSourced}" || exit $BHMAS_fatalBuiltin
+    source "${fileToBeSourced}" || exit ${BHMAS_fatalBuiltin}
 done
 
 #Helper has priority
@@ -66,75 +65,96 @@ testsFailed=0
 whichFailed=()
 declare -A availableTests=()
 declare -a testsToBeRun=() #To keep tests in order and make user decide which to run
-readonly testFolder="${BHMAS_testsFolder}/StaggeredFakeProject"
+readonly testFolder="${BHMAS_testsFolder}/RunTestFolder"
+readonly submitTestFolder="${testFolder}/SubmitDisk"
+readonly runTestFolder="${testFolder}/RunDisk"
 readonly logFile="${BHMAS_testsFolder}/Tests.log"
-readonly testParametersString='Nf2_mui0_mass0050_nt6_ns18'
-readonly testParametersPath="/${testParametersString//_/\/}"
-readonly betaFolder='b5.1111_s3333_continueWithNewChain'
-readonly listOfAuxiliaryFilesAndFolders=( "$testFolder" "$logFile" )
+readonly userVariablesFile="${BHMAS_testsFolder}/SetupUserVariables.bash"
+testParametersString='' # Global but to be filled in each
+testParametersPath=''   # test to change formulation
+betaFolder='b5.1111_s3333_continueWithNewChain' # To be changed in thermalization
+readonly listOfAuxiliaryFilesAndFolders=( "${testFolder}" "${logFile}" "${userVariablesFile}" )
 
 
 #Possible Tests
-availableTests['help']='--help'
-availableTests['default']='-w=1d'
-availableTests['submit']='--submit --walltime 1d'
-availableTests['submit-goal']='--submit --walltime 1d'
-availableTests['submitonly']='--submitonly'
-availableTests['thermalize-hot']='--thermalize --walltime 1d'
-availableTests['thermalize-conf']='--thermalize --walltime 1d'
-availableTests['continue-save']='--continue --walltime 1d -F 80 -f 140 -m=1234'
-availableTests['continue-last']='--continue --walltime 1d'
-availableTests['continue-resume']='--continue --walltime 1d'
-availableTests['continue-num']='--continue 10000 --walltime 1d'
-availableTests['continue-goal']='--continue --walltime 1d'
-availableTests['continue-therm-save']='--continueThermalization --walltime 1d -F 80 -f 140 -m=1234'
-availableTests['continue-therm-last']='--continueThermalization --walltime 1d'
-availableTests['continue-therm-resume']='--continueThermalization --walltime 1d'
-availableTests['continue-therm-num']='--continueThermalization 5000 --walltime 1d'
-availableTests['continue-therm-goal']='--continueThermalization --walltime 1d'
-availableTests['completeBetasFile']='--completeBetasFile'
-availableTests['completeBetasFile-num']='--completeBetasFile=3'
-availableTests['commentBetas']='--commentBetas'
-availableTests['liststatus']='--liststatus'
-availableTests['liststatus-time']='--liststatus --doNotMeasureTime'
-availableTests['liststatus-queued']='--liststatus --showOnlyQueued'
-availableTests['accRateReport']='--accRateReport'
-availableTests['accRateReport-num']='--accRateReport 300'
-availableTests['cleanOutputFiles']='--cleanOutputFiles'
-availableTests['cleanOutputFiles-all']='--cleanOutputFiles --all'
-availableTests['commentBetas-num']='--commentBetas 6.1111'
-availableTests['commentBetas-nums']='--commentBetas 6.1111 7.1111'
-availableTests['commentBetas-num-seed']='--commentBetas 6.1111_s2222_fH'
-availableTests['uncommentBetas']='--uncommentBetas'
-availableTests['uncommentBetas-num']='--uncommentBetas 5.1111'
-availableTests['uncommentBetas-nums']='--uncommentBetas 5.1111 6.1111'
-availableTests['uncommentBetas-num-seed']='--uncommentBetas 5.1111_s3333_NC'
-availableTests['invertConfs']='--invertConfigurations --walltime 1d'
-availableTests['invertConfs-some']='--invertConfigurations --walltime 1d'
-availableTests['database-help']='--helpDatabase'
-availableTests['database-display']='--database --sum'
-availableTests['database-local']='--database --local'
-availableTests['database-filter1']='--database --type NC --ns 18 --beta 5.4360'
-availableTests['database-filter2']='--database --status RUNNING --lastTraj 115'
-availableTests['database-report']='--database --report'
-availableTests['database-update']='--database --update'
-availableTests['database-update-file']='--database --update --file fakeDatabasePath'
-testsToBeRun=( 'help' 'default'
-               'submit' 'submit-goal' 'submitonly'
-               'thermalize-hot' 'thermalize-conf'
-               'continue-save' 'continue-last' 'continue-resume' 'continue-num' 'continue-goal'
-               'continue-therm-save' 'continue-therm-last' 'continue-therm-resume' 'continue-therm-num' 'continue-therm-goal'
-               'liststatus' 'liststatus-time' 'liststatus-queued'
-               'accRateReport' 'accRateReport-num'
-               'cleanOutputFiles' 'cleanOutputFiles-all'
-               'completeBetasFile' 'completeBetasFile-num'
-               'commentBetas' 'commentBetas-num' 'commentBetas-nums' 'commentBetas-num-seed'
-               'uncommentBetas' 'uncommentBetas-num' 'uncommentBetas-nums' 'uncommentBetas-num-seed'
-               'invertConfs' 'invertConfs-some'
-               'database-help' 'database-display' 'database-local'
-               'database-filter1' 'database-filter2' 'database-report'
-               'database-update' 'database-update-file'
-             )
+availableTests=(
+    ['help-1']=''
+    ['help-2']='help'
+    ['help-3']='--help'
+    ['version-1']='--version'
+    ['version-2']='version'
+    ['CL2QCD-prepare-only']='CL2QCD prepare-only -w=1d --togglePbp'
+    ['CL2QCD-submit-only']='CL2QCD submit-only --betasfile betas'
+    ['CL2QCD-new-chain']='CL2QCD new-chain --walltime = 1d'
+    ['CL2QCD-new-chain-goal']='CL2QCD new-chain --walltime= 1d'
+    ['CL2QCD-thermalize-hot']='CL2QCD thermalize --walltime 1d'
+    ['CL2QCD-thermalize-conf']='CL2QCD thermalize --walltime 1d'
+    ['CL2QCD-continue-save']='CL2QCD continue --walltime 1d -F 80 -f 140 -m=1234'
+    ['CL2QCD-continue-last']='CL2QCD continue --walltime 1d --pf 3'
+    ['CL2QCD-continue-resume']='CL2QCD continue --walltime 1d'
+    ['CL2QCD-continue-num']='CL2QCD continue --till 10000 --walltime 1d'
+    ['CL2QCD-continue-goal']='CL2QCD continue --walltime 1d'
+    ['CL2QCD-continue-therm-save']='CL2QCD continue-thermalization --walltime 1d -F 80 -f 140 -m=1234'
+    ['CL2QCD-continue-therm-last']='CL2QCD continue-thermalization --walltime 1d'
+    ['CL2QCD-continue-therm-resume']='CL2QCD continue-thermalization --walltime 1d'
+    ['CL2QCD-continue-therm-num']='CL2QCD continue-thermalization --till 5000 --walltime 1d'
+    ['CL2QCD-continue-therm-goal']='CL2QCD continue-thermalization --walltime 1d'
+    ['CL2QCD-simulation-status']='CL2QCD simulation-status'
+    ['CL2QCD-simulation-status-time']='CL2QCD simulation-status --doNotMeasureTime'
+    ['CL2QCD-simulation-status-queued']='CL2QCD simulation-status --showOnlyQueued'
+    ['CL2QCD-measure']='CL2QCD measure --walltime 1d'
+    ['CL2QCD-measure-some']='CL2QCD measure --walltime 1d'
+    ['CL2QCD-accRateReport']='CL2QCD acceptance-rate-report'
+    ['CL2QCD-accRateReport-num']='CL2QCD acceptance-rate-report --interval 300'
+    ['CL2QCD-cleanOutputFiles']='CL2QCD clean-output-files'
+    ['CL2QCD-cleanOutputFiles-all']='CL2QCD clean-output-files --all'
+    ['openQCD-FASTSUM-prepare-only']='openQCD-FASTSUM prepare-only -w=1d --processorsGrid 1 2 4 6'
+    ['openQCD-FASTSUM-submit-only']='openQCD-FASTSUM submit-only --betasfile betas'
+    ['openQCD-FASTSUM-new-chain']='openQCD-FASTSUM new-chain --walltime = 1d --processorsGrid 1 2 4 6'
+    ['openQCD-FASTSUM-new-chain-goal']='openQCD-FASTSUM new-chain --walltime= 1d --processorsGrid 1 2 4 6'
+    ['openQCD-FASTSUM-thermalize-hot']='openQCD-FASTSUM thermalize --walltime 1d --processorsGrid 1 2 4 6'
+    ['openQCD-FASTSUM-thermalize-conf']='openQCD-FASTSUM thermalize --walltime 1d --processorsGrid 1 2 4 6'
+    ['openQCD-FASTSUM-continue']='openQCD-FASTSUM continue --walltime 1d -m=1400'
+    ['openQCD-FASTSUM-continue-last']='openQCD-FASTSUM continue --walltime 1d'
+    ['openQCD-FASTSUM-continue-resume']='openQCD-FASTSUM continue --walltime 1d'
+    ['openQCD-FASTSUM-continue-num']='openQCD-FASTSUM continue --till 10000 --walltime 1d'
+    ['openQCD-FASTSUM-continue-goal']='openQCD-FASTSUM continue --walltime 1d'
+    ['openQCD-FASTSUM-continue-therm-save']='openQCD-FASTSUM continue-thermalization --walltime 1d -m=1234'
+    ['openQCD-FASTSUM-continue-therm-last']='openQCD-FASTSUM continue-thermalization --walltime 1d'
+    ['openQCD-FASTSUM-continue-therm-resume']='openQCD-FASTSUM continue-thermalization --walltime 1d'
+    ['openQCD-FASTSUM-continue-therm-num']='openQCD-FASTSUM continue-thermalization --till 5000 --walltime 1d'
+    ['openQCD-FASTSUM-continue-therm-goal']='openQCD-FASTSUM continue-thermalization --walltime 1d'
+    ['openQCD-FASTSUM-simulation-status']='openQCD-FASTSUM simulation-status'
+    ['openQCD-FASTSUM-simulation-status-time']='openQCD-FASTSUM simulation-status --doNotMeasureTime'
+    ['openQCD-FASTSUM-simulation-status-queued']='openQCD-FASTSUM simulation-status --showOnlyQueued'
+    ['openQCD-FASTSUM-accRateReport']='openQCD-FASTSUM acceptance-rate-report'
+    ['openQCD-FASTSUM-accRateReport-num']='openQCD-FASTSUM acceptance-rate-report --interval 30'
+    ['openQCD-FASTSUM-cleanOutputFiles']='openQCD-FASTSUM clean-output-files'
+    ['openQCD-FASTSUM-cleanOutputFiles-all']='openQCD-FASTSUM clean-output-files --all'
+    ['commentBetas']='comment-betas'
+    ['commentBetas-num']='comment-betas --betas 6.1111'
+    ['commentBetas-nums']='comment-betas --betas 6.1111 7.1111'
+    ['commentBetas-num-seed']='comment-betas --betas 6.1111_s2222_fH'
+    ['uncommentBetas']='uncomment-betas'
+    ['uncommentBetas-num']='uncomment-betas --betas 5.1111'
+    ['uncommentBetas-nums']='uncomment-betas --betas 5.1111 6.1111'
+    ['uncommentBetas-num-seed']='uncomment-betas --betas 5.1111_s3333_NC'
+    ['completeBetasFile']='complete-betas-file'
+    ['completeBetasFile-num']='complete-betas-file --chains 3'
+    ['database-help']='database --help'
+    ['database-display']='database --sum'
+    ['database-local']='database --local'
+    ['database-filter1']='database --type NC --ns 18 --beta 5.4360'
+    ['database-filter2']='database --status RUNNING --lastTraj 115'
+    ['database-report']='database --report'
+    ['database-update-CL2QCD']='database --update'
+    ['database-update-file-CL2QCD']='database --update --file fakeDatabasePath'
+    ['database-update-openQCD-FASTSUM']='database --update'
+    ['database-update-file-openQCD-FASTSUM']='database --update --file fakeDatabasePath'
+)
+
+#Declare array with indeces of availableTests array sorted
+readarray -d $'\0' -t testsToBeRun < <(printf '%s\0' "${!availableTests[@]}" | sort -z)
 
 #Get user setup
 ParseCommandLineOption "$@"
@@ -143,21 +163,23 @@ ParseCommandLineOption "$@"
 CheckTestEnvironment
 
 #Run tests
-if [ $reportLevel -eq 3 ]; then
+if [[ ${reportLevel} -eq 3 ]]; then
     cecho wg "\n " U "Running " emph "${#testsToBeRun[@]}" " test(s)" uU ":\n"
 fi
 for testName in "${testsToBeRun[@]}"; do
-    if [ -n "${availableTests[$testName]:+x}" ]; then
-        MakeTestPreliminaryOperations "$testName"
-        RunTest "$testName" "${availableTests[$testName]}"
+    if [[ -n "${availableTests[${testName}]+x}" ]]; then
+        MakeTestPreliminaryOperations "${testName}"
+        RunTest "${testName}" "${availableTests[${testName}]}"
     else
-        Fatal $BHMAS_fatalLogicError "Test " emph "$testName" " not found among availableTests!"
+        Fatal ${BHMAS_fatalLogicError} "Test " emph "${testName}" " not found among availableTests!"
     fi
-    CleanTestsEnvironmentForFollowingTest "$testName"
+    CleanTestsEnvironmentForFollowingTest "${testName}"
 done && unset -v 'testName'
 
 #Print report and clean test folder
 PrintTestsReport
-if [ $cleanTestFolder = 'TRUE' ] && [ $testsFailed -eq 0 ]; then
+if [[ ${cleanTestFolder} = 'TRUE' ]] && [[ ${testsFailed} -eq 0 ]]; then
     DeleteAuxiliaryFilesAndFolders
 fi
+
+exit ${testsFailed}
