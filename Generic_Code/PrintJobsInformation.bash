@@ -22,7 +22,7 @@ function GatherAndPrintJobsInformation()
     local jobsInformation string\
           jobId jobName jobStatus jobNodeList jobSubmissionTime jobWalltime\
           jobStartTime jobRunTime jobEndTime jobSubmissionFolder jobNumberOfNodes\
-          lengthOfLongestEntry\
+          lengthOfLongestJobName lengthOfLongestJobId\
           numberOfJobs numberOfRunningJobs numberOfPendingJobs numberOfOtherJobs\
           lineOfEquals tableFormat index\
           nodesString startEndTime runWallTime submissionTimeString
@@ -52,35 +52,26 @@ function GatherAndPrintJobsInformation()
     jobSubmissionFolder=( ${jobSubmissionFolder[@]/${BHMAS_submitDiskGlobalPath}/SUBMIT} )
     jobSubmissionFolder=( ${jobSubmissionFolder[@]/${BHMAS_runDiskGlobalPath}/WORK} )
     #Some counting for the table
-    lengthOfLongestEntry=$(LengthOfLongestEntryInArray ${jobName[@]})
     numberOfJobs=${#jobId[@]}
     set +e
     numberOfRunningJobs=$(grep -o "RUNNING" <<< "${jobStatus[@]}" | wc -l)
     numberOfPendingJobs=$(grep -o "PENDING" <<< "${jobStatus[@]}" | wc -l)
     set -e
     numberOfOtherJobs=$(( numberOfJobs - numberOfRunningJobs - numberOfPendingJobs ))
-    #------------------------------------------------------------------------------------------------------------------------------#
+
     #Table header
     printf -v lineOfEquals '%*s' $(( $(tput cols) - 3 )) ''
     lineOfEquals=${lineOfEquals// /=}
-    tableFormat="%-8s%-5s%-$((2+${lengthOfLongestEntry}))s%-5s%-25s%-5s%-19s%-5s%+14s%-5s%-s"
+    lengthOfLongestJobId=$(LengthOfLongestEntryInArray "${jobId[@]}")
+    lengthOfLongestJobName=$(LengthOfLongestEntryInArray "${jobName[@]}")
+    tableFormat="%-$((5+lengthOfLongestJobId))s%-$((5+lengthOfLongestJobName))s%-26s%-24s%+12s     %-s"
     cecho lc "\n" B "${lineOfEquals}\n"\
-          o "$(printf "${tableFormat}" "jobId:" ""   "  JOB NAME:" ""   "STATUS:" ""   "START/END TIME:" ""   "WALL/RUNTIME:" ""   "SUBMITTED FROM:")"
+          bb "$(printf "${tableFormat}" "JOB ID" "JOB NAME" "STATUS" "START/END TIME" "WALL/RUNTIME" "SUBMITTED FROM")"
+
     #Print table sorting according jobname
     while [[ ${#jobName[@]} -gt 0 ]]; do
         index=$(FindPositionOfFirstMinimumOfArray "${jobName[@]}")
-
-        if [[ ${jobStatus[${index}]} = "RUNNING" ]]; then
-            cecho -d -n lg
-        elif [[ ${jobStatus[${index}]} == "PENDING" ]]; then
-            if [[ ${jobStartTime[${index}]} != "N/A" ]]; then
-                cecho -d -n  ly
-            else
-                cecho -d -n lo
-            fi
-        else
-            cecho -d -n lm
-        fi
+        __static__ChangeOutputColor "${jobStatus[${index}]}" "${jobStartTime[${index}]}"
 
         if [[ ${jobStatus[${index}]} == "RUNNING" ]]; then
             if [[ ${jobNumberOfNodes[${index}]} -eq 1 ]]; then
@@ -99,11 +90,11 @@ function GatherAndPrintJobsInformation()
         fi
 
         printf "${tableFormat}\e[0m\n"\
-               "${jobId[${index}]}" ""\
-               "  ${jobName[${index}]}" ""\
-               "${jobStatus[${index}]}${nodesString}" ""\
-               "${jobEndTime[${index}]}" ""\
-               "${jobRunTime[${index}]}" ""\
+               "${jobId[${index}]}"\
+               "${jobName[${index}]}"\
+               "${jobStatus[${index}]}${nodesString}"\
+               "${startEndTime}"\
+               "${runWallTime}"\
                "${jobSubmissionFolder[${index}]}${submissionTimeString}"
 
         unset -v 'jobId[${index}]';               jobId=(               ${jobId[@]+"${jobId[@]}"} )
@@ -119,7 +110,27 @@ function GatherAndPrintJobsInformation()
         unset -v 'jobRunTime[${index}]';          jobRunTime=(          ${jobRunTime[@]+"${jobRunTime[@]}"} )
     done
     cecho o "\n  Total number of submitted jobs: " B "${numberOfJobs}" uB " (" B lg "Running: ${numberOfRunningJobs}" ly "     Pending: ${numberOfPendingJobs}" lm "     Others: ${numberOfOtherJobs}" uB o ")"
-    cecho lc B "${lineOfEquals}\n"
+    cecho lc B "${lineOfEquals}"
+}
+
+
+function __static__ChangeOutputColor()
+{
+    local status startingTime color
+    status="$1"
+    startingTime="$2"
+    if [[ "${status}" = 'RUNNING' ]]; then
+        color='lg'
+    elif [[ "${status}" = 'PENDING' ]]; then
+        if [[ "${startingTime}" != 'N/A' ]]; then
+            color='ly'
+        else
+            color='lo'
+        fi
+    else
+        color='lm'
+    fi
+    cecho -d -n "${color}"
 }
 
 
