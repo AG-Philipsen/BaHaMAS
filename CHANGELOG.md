@@ -32,6 +32,7 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 ## [Unreleased]
 
+* :sos: Fix bug in job-status mode due to node information interpreted as glob pattern.
 
 ## [Version 0.2.0] &ensp;<sub><sup>29 May 2020</sup></sub>
 
