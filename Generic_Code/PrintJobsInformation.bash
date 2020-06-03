@@ -19,12 +19,13 @@
 
 function GatherAndPrintJobsInformation()
 {
-    local jobsInformation\
+    local jobsInformation string\
           jobId jobName jobStatus jobNodeList jobSubmissionTime jobWalltime\
           jobStartTime jobRunTime jobEndTime jobSubmissionFolder jobNumberOfNodes\
           lengthOfLongestEntry\
           numberOfJobs numberOfRunningJobs numberOfPendingJobs numberOfOtherJobs\
-          lineOfEquals tableFormat index
+          lineOfEquals tableFormat index\
+          nodesString startEndTime runWallTime submissionTimeString
     #Call function scheduler specific: It will fill jobsInformation
     GatherJobsInformationForJobStatusMode
     if [[ "${#jobsInformation[@]}" -eq 0 ]]; then
@@ -32,18 +33,21 @@ function GatherAndPrintJobsInformation()
         return 0
     fi
     #Split job information in different arrays using '@' as separator
-    # NOTE: it might be done with builtins only, but less compact and less readable!
-    jobId=(               $(cut -d'@' -f1  <<< "$(printf '%s\n' ${jobsInformation[@]})") )
-    jobName=(             $(cut -d'@' -f2  <<< "$(printf '%s\n' ${jobsInformation[@]})") )
-    jobStatus=(           $(cut -d'@' -f3  <<< "$(printf '%s\n' ${jobsInformation[@]})") )
-    jobNodeList=(         $(cut -d'@' -f4  <<< "$(printf '%s\n' ${jobsInformation[@]})") )
-    jobSubmissionTime=(   $(cut -d'@' -f5  <<< "$(printf '%s\n' ${jobsInformation[@]})") )
-    jobWalltime=(         $(cut -d'@' -f6  <<< "$(printf '%s\n' ${jobsInformation[@]})") )
-    jobStartTime=(        $(cut -d'@' -f7  <<< "$(printf '%s\n' ${jobsInformation[@]})") )
-    jobRunTime=(          $(cut -d'@' -f8  <<< "$(printf '%s\n' ${jobsInformation[@]})") )
-    jobEndTime=(          $(cut -d'@' -f9  <<< "$(printf '%s\n' ${jobsInformation[@]})") )
-    jobSubmissionFolder=( $(cut -d'@' -f10 <<< "$(printf '%s\n' ${jobsInformation[@]})") )
-    jobNumberOfNodes=(    $(cut -d'@' -f11 <<< "$(printf '%s\n' ${jobsInformation[@]})") )
+    #NOTE: Here the strings could contain glob patterns (e.g. NodeList)
+    #      and it is important to quote them, since nullglob is set.
+    for string in "${jobsInformation[@]}"; do
+        jobId+=(               "${string%%@*}" ); string="${string#*@}"
+        jobName+=(             "${string%%@*}" ); string="${string#*@}"
+        jobStatus+=(           "${string%%@*}" ); string="${string#*@}"
+        jobNodeList+=(         "${string%%@*}" ); string="${string#*@}"
+        jobSubmissionTime+=(   "${string%%@*}" ); string="${string#*@}"
+        jobWalltime+=(         "${string%%@*}" ); string="${string#*@}"
+        jobStartTime+=(        "${string%%@*}" ); string="${string#*@}"
+        jobRunTime+=(          "${string%%@*}" ); string="${string#*@}"
+        jobEndTime+=(          "${string%%@*}" ); string="${string#*@}"
+        jobSubmissionFolder+=( "${string%%@*}" ); string="${string#*@}"
+        jobNumberOfNodes+=(    "${string%%@*}" )
+    done
     #Shorten path (it works only if the user is 'whoami'
     jobSubmissionFolder=( ${jobSubmissionFolder[@]/${BHMAS_submitDiskGlobalPath}/SUBMIT} )
     jobSubmissionFolder=( ${jobSubmissionFolder[@]/${BHMAS_runDiskGlobalPath}/WORK} )
@@ -79,10 +83,28 @@ function GatherAndPrintJobsInformation()
         fi
 
         if [[ ${jobStatus[${index}]} == "RUNNING" ]]; then
-            cecho "$(printf "${tableFormat}\e[0m\n"   "${jobId[${index}]}" "" "  ${jobName[${index}]}" "" "${jobStatus[${index}]} on ${jobNodeList[${index}]}" "" "${jobEndTime[${index}]}" "" "${jobRunTime[${index}]}" "" "${jobSubmissionFolder[${index}]}")"
+            if [[ ${jobNumberOfNodes[${index}]} -eq 1 ]]; then
+                nodesString=" on ${jobNodeList[${index}]}"
+            else
+                nodesString=" on ${jobNumberOfNodes[${index}]} nodes"
+            fi
+            startEndTime="${jobEndTime[${index}]}"
+            runWallTime="${jobRunTime[${index}]}"
+            submissionTimeString=''
         else
-            cecho "$(printf "${tableFormat}\e[0m\n"   "${jobId[${index}]}" "" "  ${jobName[${index}]}" "" "${jobStatus[${index}]}" "" "${jobStartTime[${index}]}" "" "${jobWalltime[${index}]}" "" "${jobSubmissionFolder[${index}]} on ${jobSubmissionTime[${index}]}")"
+            nodesString=''
+            startEndTime="${jobStartTime[${index}]}"
+            runWallTime="${jobWalltime[${index}]}"
+            submissionTimeString=" on ${jobSubmissionTime[${index}]}"
         fi
+
+        printf "${tableFormat}\e[0m\n"\
+               "${jobId[${index}]}" ""\
+               "  ${jobName[${index}]}" ""\
+               "${jobStatus[${index}]}${nodesString}" ""\
+               "${jobEndTime[${index}]}" ""\
+               "${jobRunTime[${index}]}" ""\
+               "${jobSubmissionFolder[${index}]}${submissionTimeString}"
 
         unset -v 'jobId[${index}]';               jobId=(               ${jobId[@]+"${jobId[@]}"} )
         unset -v 'jobName[${index}]';             jobName=(             ${jobName[@]+"${jobName[@]}"} )
