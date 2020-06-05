@@ -27,12 +27,26 @@ function SubmitJobsForValidBetaValues()
                 exit ${BHMAS_successExitCode}
             fi
         fi
-        local betaString stringToBeGreppedFor submittingDirectory jobScriptFilename usedCoresHours
+        local index betaString stringToBeGreppedFor submittingDirectory jobScriptFilename usedCoresHours
         cecho lc "\n==================================================================================="
         cecho bb " Jobs will be submitted for the following beta values:"
-        for betaString in ${BHMAS_betaValuesToBeSubmitted[@]}; do
-            cecho "  - ${betaString}"
+        for index in ${!BHMAS_betaValuesToBeSubmitted[@]}; do
+            betaString="${BHMAS_betaValuesToBeSubmitted[index]}"
+            cecho "  Job $((index+1)): ${betaString}"
         done
+        if [[ ${BHMAS_useMPI} = 'TRUE' ]]; then
+            cecho lc "==================================================================================="
+            cecho wg " To-be-used core-h (assuming ${BHMAS_coresPerNode} cores per node):"
+            for index in ${!BHMAS_betaValuesToBeSubmitted[@]}; do
+                betaString="${BHMAS_betaValuesToBeSubmitted[index]}"
+                submittingDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_jobScriptFolderName}"
+                jobScriptFilename="$(GetJobScriptFilename ${betaString})"
+                if [[ ! -f "${jobScriptFilename}" ]]; then
+                    cecho "  Job $((index+1)): "\
+                          lc "$(__static__CalculateUsedCoreH "${submittingDirectory}/${jobScriptFilename}")"
+                fi
+            done
+        fi
         for betaString in ${BHMAS_betaValuesToBeSubmitted[@]}; do
             if [[ ${BHMAS_useMultipleChains} == "FALSE" ]]; then
                 stringToBeGreppedFor="${BHMAS_betaPrefix}${BHMAS_betaRegex}"
@@ -40,24 +54,24 @@ function SubmitJobsForValidBetaValues()
                 stringToBeGreppedFor="${BHMAS_seedPrefix}${BHMAS_seedRegex}"
             fi
             if [[ $(grep -o "${stringToBeGreppedFor}" <<< "${betaString}" | wc -l) -ne ${BHMAS_simulationsPerJob} ]]; then
-                cecho -n ly B "\n " U "WARNING" uU ":" uB " At least one job is being submitted with less than " emph "${BHMAS_simulationsPerJob}" " runs inside."
-                AskUser "         Would you like to submit in any case?"
-                if UserSaidNo; then
-                    cecho lr B "\n No jobs will be submitted."
-                    return
-                fi
+                Warning 'At least one job is being submitted with less than ' emph "${BHMAS_simulationsPerJob}" ' runs inside.'
             fi
         done
-        for betaString in ${BHMAS_betaValuesToBeSubmitted[@]}; do
+        cecho lc "==================================================================================="
+        AskUser -n " Would you like to submit the jobs?"
+        if UserSaidNo; then
+            cecho lr B "\n No jobs will be submitted."
+            return
+        fi
+        cecho lc "==================================================================================="
+        cecho bb " Jobs submission:"
+        for index in ${!BHMAS_betaValuesToBeSubmitted[@]}; do
+            betaString="${BHMAS_betaValuesToBeSubmitted[index]}"
             submittingDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_jobScriptFolderName}"
             jobScriptFilename="$(GetJobScriptFilename ${betaString})"
             cd ${submittingDirectory}
             if [[ -f "${jobScriptFilename}" ]]; then
-                cecho ''
-                if [[ ${BHMAS_useMPI} = 'TRUE' ]]; then
-                    cecho wg ' To-be-used cores-h: '\
-                          emph "$(__static__CalculateUsedCoreH "${submittingDirectory}/${jobScriptFilename}")"
-                fi
+                cecho "\n  Job $((index+1)):"
                 cecho bb '    Actual location: ' dir "$(pwd)"\
                       B '\n     Submitting job: ' uB emph "${jobScriptFilename}"
                 SubmitJob "${jobScriptFilename}"
