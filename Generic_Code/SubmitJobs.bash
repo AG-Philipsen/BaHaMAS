@@ -85,7 +85,7 @@ function __static__CalculateUsedCoreH()
         (( usedNodes = (usedNodes + BHMAS_coresPerNode) / BHMAS_coresPerNode ))
     fi
     walltime=$(ConvertWalltimeToSeconds "${walltime}")
-    coreH=$((  BHMAS_coresPerNode * walltime ))
+    coreH=$((  BHMAS_coresPerNode * usedNodes * walltime / 3600 ))
     unit=( '' 'k' 'M' 'G' 'P' 'T')
     index=0
     while [[ $(bc -l <<< "${coreH}>999") -eq 1 ]]; do
