@@ -43,6 +43,7 @@ readonly BHMAS_testsFolderAuxFiles=${BHMAS_testsFolder}/AuxiliaryFiles
 #Load needed files
 readonly BHMAS_filesToBeSourced=( "${BHMAS_repositoryTopLevelPath}/Generic_Code/UtilityFunctions.bash"
                                   "${BHMAS_repositoryTopLevelPath}/Generic_Code/OutputFunctionality.bash"
+                                  "${BHMAS_repositoryTopLevelPath}/Generic_Code/SystemRequirements.bash"
                                   "${BHMAS_testsFolder}/AuxiliaryFunctions.bash"
                                   "${BHMAS_testsFolder}/CommandLineParser.bash" )
 #Source error codes and fail with error hard coded since variable defined in file which is sourced!
@@ -55,6 +56,9 @@ done
 if ElementInArray '-h' "$@" || ElementInArray '--help' "$@"; then
     ParseCommandLineOption '--help'
 fi
+
+#Ensure system can run BaHaMAS
+CheckSystemRequirements
 
 #BaHaMAS tests global variables
 cleanTestFolder='TRUE'
