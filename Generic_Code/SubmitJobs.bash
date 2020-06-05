@@ -20,13 +20,6 @@
 function SubmitJobsForValidBetaValues()
 {
     if [[ ${#BHMAS_betaValuesToBeSubmitted[@]} -gt 0 ]]; then
-        if [[ ${BHMAS_executionMode} = 'mode:thermalize' ]]; then
-            AskUser "Check if everything is fine. Would you like to submit the jobs?"
-            if UserSaidNo; then
-                cecho lr "\n No job will be submitted!\n"
-                exit ${BHMAS_successExitCode}
-            fi
-        fi
         local index betaString stringToBeGreppedFor submittingDirectory jobScriptFilename usedCoresHours
         cecho lc "\n==================================================================================="
         cecho bb " Jobs will be submitted for the following beta values:"
