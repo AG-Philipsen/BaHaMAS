@@ -76,6 +76,9 @@ If successfully run, the user can have a look at the files created and submit th
 :   Specify 4 integers which refer to how many processors have to be used to split the lattice in every direction (default: 1 1 1 1).
     The first entry refer to the temporal lattice direction and the other three to the spatial ones.
 
+\--coresPerNode
+:   Specify how many nodes should be used per node (default: own setup).
+
 # FILES
 
 ./betas

@@ -108,7 +108,7 @@ availableTests=(
     ['CL2QCD-accRateReport-num']='CL2QCD acceptance-rate-report --interval 300'
     ['CL2QCD-cleanOutputFiles']='CL2QCD clean-output-files'
     ['CL2QCD-cleanOutputFiles-all']='CL2QCD clean-output-files --all'
-    ['openQCD-FASTSUM-prepare-only']='openQCD-FASTSUM prepare-only -w=1d --processorsGrid 1 2 4 6'
+    ['openQCD-FASTSUM-prepare-only']='openQCD-FASTSUM prepare-only -w=1d --processorsGrid 1 2 4 4 --coresPerNode 32'
     ['openQCD-FASTSUM-submit-only']='openQCD-FASTSUM submit-only --betasfile betas'
     ['openQCD-FASTSUM-new-chain']='openQCD-FASTSUM new-chain --walltime = 1d --processorsGrid 1 2 4 6'
     ['openQCD-FASTSUM-new-chain-goal']='openQCD-FASTSUM new-chain --walltime= 1d --processorsGrid 1 2 4 6'

@@ -29,7 +29,6 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_submitDiskGlobalPath="${BHMAS_repositoryTopLevelPath}/Tests/RunTestFolder/SubmitDisk"
     readonly BHMAS_runDiskGlobalPath="${BHMAS_repositoryTopLevelPath}/Tests/RunTestFolder/RunDisk"
     readonly BHMAS_GPUsPerNode=999
-    readonly BHMAS_coresPerNode=
     readonly BHMAS_jobScriptFolderName="Jobscripts_TEST"
     readonly BHMAS_excludeNodesGlobalPath="${BHMAS_submitDiskGlobalPath}/ExcludeNodes_TEST"
     readonly BHMAS_projectSubpath="StaggeredFakeProject"
@@ -53,6 +52,7 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_thermConfsGlobalPath="${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath}/Thermalized_Configurations"
 
     #Possible default value for options which can then not be given via command line
+    BHMAS_coresPerNode=
     BHMAS_measurePbp='TRUE'
     BHMAS_walltime=""
     BHMAS_clusterPartition=""

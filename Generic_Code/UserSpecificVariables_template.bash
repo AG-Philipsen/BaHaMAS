@@ -47,7 +47,6 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_submitDiskGlobalPath=""
     readonly BHMAS_runDiskGlobalPath=""
     readonly BHMAS_GPUsPerNode=
-    readonly BHMAS_coresPerNode=
     readonly BHMAS_jobScriptFolderName=""
     readonly BHMAS_excludeNodesGlobalPath=""
     readonly BHMAS_projectSubpath=""
@@ -71,6 +70,7 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_maximumWalltime=""
 
     #Possible default value for options which then may not be given via command line
+    BHMAS_coresPerNode=
     BHMAS_measurePbp='FALSE'
     BHMAS_jobScriptPrefix=""
     BHMAS_walltime=""

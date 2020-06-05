@@ -328,6 +328,14 @@ function __static__ParseRemainingGeneralOptions()
                 fi
                 shift
                 ;;
+            --coresPerNode )
+                if [[ ! ${2:-} =~ ^[1-9][0-9]*$ ]]; then
+                    PrintOptionSpecificationErrorAndExit "$1"
+                else
+                    BHMAS_coresPerNode=$2
+                fi
+                shift 2
+                ;;
             * )
                 PrintInvalidOptionErrorAndExit "$1" ;;
         esac

@@ -32,6 +32,7 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 ## [Unreleased]
 
+* :white_check_mark: Add command line option to change number of cores per node to be used.
 * :sos: Fix minor bug in command line autocompletion of software specific options.
 * :sos: Fix bug in job-status mode due to node information interpreted as glob pattern.
 

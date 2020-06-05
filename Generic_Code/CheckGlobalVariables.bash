@@ -361,9 +361,11 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnExecutionM
         for variable in "${variablesThatMustBeNotEmpty[@]}"; do
             listOfVariablesAsString+="\n$(cecho -d ly " " B) ${variable}"
         done
-        Error "To run " B "BaHaMAS" uB " in " emph "${BHMAS_executionMode#mode:}"\
-              " execution mode, the following " emph "variable(s)" " must be " emph "set" " and " emph "not empty" ": ${listOfVariablesAsString}"
-        Fatal ${BHMAS_fatalVariableUnset} -n "Please set the above variables properly using the " emph "setup" " mode and run " B "BaHaMAS" uB " again."
+        Error 'To run ' B 'BaHaMAS' uB ' in ' emph "${BHMAS_executionMode#mode:}"\
+              ' execution mode with ' emph "${BHMAS_lqcdSoftware}" ',\nthe following '\
+              emph 'variable(s)' ' must be ' emph 'set' ' and ' emph 'not empty' ": ${listOfVariablesAsString}"
+        Fatal ${BHMAS_fatalVariableUnset} -n 'Please set the above variables properly using the '\
+              emph 'setup' ' mode and run ' B 'BaHaMAS' uB ' again.'
     else
         for index in "${!neededFolders[@]}"; do
             if [[ -d "${neededFolders[${index}]}" ]]; then
@@ -387,9 +389,11 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnExecutionM
         for variable in ${neededFiles[@]+"${neededFiles[@]}"}; do
             listOfVariablesAsString+="\n$(cecho -d file " ") ${variable}"
         done
-        Error "To run " B "BaHaMAS" uB " in " emph "${BHMAS_executionMode}"\
-              " execution mode, the following specified " B dir "folder(s)" uB " or " file "file(s)" " must " emph "exist" ": ${listOfVariablesAsString}"
-        Fatal ${BHMAS_fatalFileNotFound} -n "Please check the path variables in the " B "BaHaMAS" uB " setup and run the program again."
+        Error 'To run ' B 'BaHaMAS' uB ' in ' emph "${BHMAS_executionMode}"\
+              ' execution mode with ' emph "{BHMAS_lqcdSoftware}" ',\nthe following specified '\
+              B dir 'folder(s)' uB ' or ' file 'file(s)' ' must ' emph 'exist' ": ${listOfVariablesAsString}"
+        Fatal ${BHMAS_fatalFileNotFound} -n 'Please check the path variables in the '\
+              B 'BaHaMAS' uB ' setup and run the program again.'
     fi
 }
 
