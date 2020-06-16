@@ -248,14 +248,16 @@ function __static__RenameCheckpointFiles()
 
 function __static__BackupFile()
 {
-    local sourceGlobalPath destinationFolderGlobalPath
+    local sourceGlobalPath destinationGlobalPath
     sourceGlobalPath="$1"
-    destinationFolderGlobalPath="$2"
+    destinationGlobalPath="${2}/$(basename "${sourceGlobalPath}")"
     if [[ ! -f "${sourceGlobalPath}" ]]; then
         printf 'ERROR [${FUNCNAME}]: No output file to be copied found!\n'
         exit 111
     fi
-    cp "${sourceGlobalPath}" "${destinationFolderGlobalPath}/." || exit 111
+    if [[ "${sourceGlobalPath}" != "${destinationGlobalPath}" ]]; then
+        cp "${sourceGlobalPath}" "${destinationGlobalPath}" || exit 111
+    fi
 }
 
 function __static__BackupLastConfiguration()
