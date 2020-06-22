@@ -152,7 +152,7 @@ function ReadParametersFromPathAndSetRelatedVariables()
 function CheckSingleOccurrenceInPath()
 {
     local variable
-    for variable in $@; do
+    for variable in "$@"; do
         if [[ $(grep -o "${variable}" <<< "$(pwd)" | wc -l) -ne 1 ]] ; then
             Fatal ${BHMAS_fatalPathError} "The string " emph "${variable}" " must occur " B "once and only once" uB " in the path!"
         fi

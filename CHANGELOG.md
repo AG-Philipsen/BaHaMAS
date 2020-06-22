@@ -32,6 +32,7 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 ## [Unreleased]
 
+* :sos: Fix bug in checking prefixes in invocation path.
 * :sos: Fix a bug in `simulation-status` mode which was not correctly determining the status of jobs.
 * :sos: Require `bash 4.4` as minimum version since BaHaMAS uses the `-d` option of `readarray`.
 * :white_check_mark: Add command line option to change number of cores per node to be used.
