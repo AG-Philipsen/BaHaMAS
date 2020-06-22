@@ -25,7 +25,7 @@ function GatherAndPrintJobsInformation()
           lengthOfLongestJobName lengthOfLongestJobId\
           numberOfJobs numberOfRunningJobs numberOfPendingJobs numberOfOtherJobs\
           lineOfEquals tableFormat index\
-          nodesString startEndTime runWallTime submissionTimeString
+          nodesPendingTimeString startEndTime runWallTime submissionTimeString
     #Call function scheduler specific: It will fill jobsInformation
     GatherJobsInformationForJobStatusMode
     if [[ "${#jobsInformation[@]}" -eq 0 ]]; then
@@ -75,15 +75,19 @@ function GatherAndPrintJobsInformation()
 
         if [[ ${jobStatus[${index}]} == "RUNNING" ]]; then
             if [[ ${jobNumberOfNodes[${index}]} -eq 1 ]]; then
-                nodesString=" on ${jobNodeList[${index}]}"
+                nodesPendingTimeString=" on ${jobNodeList[${index}]}"
             else
-                nodesString=" on ${jobNumberOfNodes[${index}]} nodes"
+                nodesPendingTimeString=" on ${jobNumberOfNodes[${index}]} nodes"
             fi
             startEndTime="${jobEndTime[${index}]}"
             runWallTime="${jobRunTime[${index}]}"
             submissionTimeString=''
         else
-            nodesString=''
+            if [[ ${jobStatus[${index}]} == "PENDING" ]]; then
+                nodesPendingTimeString=" for $(__static__GetQueuingTime ${jobSubmissionTime[${index}]})"
+            else
+                nodesPendingTimeString=''
+            fi
             startEndTime="${jobStartTime[${index}]}"
             runWallTime="${jobWalltime[${index}]}"
             submissionTimeString=" on ${jobSubmissionTime[${index}]}"
@@ -92,7 +96,7 @@ function GatherAndPrintJobsInformation()
         printf "${tableFormat}\e[0m\n"\
                "${jobId[${index}]}"\
                "${jobName[${index}]}"\
-               "${jobStatus[${index}]}${nodesString}"\
+               "${jobStatus[${index}]}${nodesPendingTimeString}"\
                "${startEndTime}"\
                "${runWallTime}"\
                "${jobSubmissionFolder[${index}]}${submissionTimeString}"
@@ -131,6 +135,14 @@ function __static__ChangeOutputColor()
         color='lm'
     fi
     cecho -d -n "${color}"
+}
+
+function __static__GetQueuingTime()
+{
+    local submissionTime queuingTime
+    submissionTime="$1"
+    queuingTime=$(( $(date +'%s') - $(date -d "${submissionTime}" +'%s') ))
+    printf "%d-%s" $((queuingTime/86400)) $(date -d@${queuingTime} -u +'%H:%M:%S')
 }
 
 

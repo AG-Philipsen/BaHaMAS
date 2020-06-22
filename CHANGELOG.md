@@ -32,6 +32,7 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 ## [Unreleased]
 
+* :white_check_mark: Add pending time information (up to present) to `job-status` mode for pending jobs.
 * :sos: Fix bug in checking prefixes in invocation path.
 * :sos: Fix a bug in `simulation-status` mode which was not correctly determining the status of jobs.
 * :sos: Require `bash 4.4` as minimum version since BaHaMAS uses the `-d` option of `readarray`.
