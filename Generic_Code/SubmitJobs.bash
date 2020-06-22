@@ -90,6 +90,8 @@ function __static__CalculateUsedCoreH()
     usedNodes=$(CalculateProductOfIntegers ${BHMAS_processorsGrid[@]})
     if(( usedNodes % BHMAS_coresPerNode != 0 )); then
         (( usedNodes = (usedNodes + BHMAS_coresPerNode) / BHMAS_coresPerNode ))
+    else
+        (( usedNodes /= BHMAS_coresPerNode ))
     fi
     walltime=$(ConvertWalltimeToSeconds "${walltime}")
     coreH=$((  BHMAS_coresPerNode * usedNodes * walltime / 3600 ))
