@@ -32,10 +32,11 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 ## [Unreleased]
 
+* :sos: Fix a bug in `simulation-status` mode which was not correctly determining the status of jobs.
 * :sos: Require `bash 4.4` as minimum version since BaHaMAS uses the `-d` option of `readarray`.
 * :white_check_mark: Add command line option to change number of cores per node to be used.
 * :sos: Fix minor bug in command line autocompletion of software specific options.
-* :sos: Fix bug in job-status mode due to node information interpreted as glob pattern.
+* :sos: Fix bug in `job-status` mode due to node information interpreted as glob pattern.
 
 ## [Version 0.2.0] &ensp;<sub><sup>29 May 2020</sup></sub>
 

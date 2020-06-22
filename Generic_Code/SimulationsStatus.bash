@@ -113,7 +113,8 @@ function ListSimulationsStatus()
 
 function __static__GetJobStatus()
 {
-    local runId parametersString betaValue seedPart postfix jobNameRegex value counter jobStatus
+    local runId parametersString betaValue seedPart postfix jobNameRegex\
+          jobsInformation value counter jobStatus
     runId="$1"
     parametersString="$2"
     #Assume runId format is fixed, as often done
@@ -132,8 +133,8 @@ function __static__GetJobStatus()
             postfix="TH"
             ;;
     esac
-    jobNameRegex="${parametersString}_${BHMAS_betaPrefix}${betaValue}(_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/})*_${seedPart}(_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/})*_${postfix}"
-    CheckIfVariablesAreDeclared jobsInformation
+    jobNameRegex="${parametersString}__${BHMAS_betaPrefix}${betaValue}(_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/})*_${seedPart}(_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/})*_${postfix}"
+    GatherJobsInformationForSimulationStatusMode
     #Assume each element of jobsInformation is of the form "jobName@jobStatus"
     counter=0
     for value in "${jobsInformation[@]}"; do
