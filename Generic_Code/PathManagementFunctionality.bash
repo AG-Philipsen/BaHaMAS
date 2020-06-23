@@ -91,18 +91,23 @@ function __static__SetParametersPathAndString()
     readonly BHMAS_parametersPath="$(__static__GetParametersPath "${BHMAS_parameterPrefixes[@]}")"
 }
 
-#This function takes the path to be used as first argument and the prefix of the parameters to be extracted as second argument
-#NOTE: The prefix must appear after a slash in the path!
-function __static__ReadSingleParameterFromPath()
+#This function takes the path to be used as first argument,
+#the prefix of the parameters to be extracted as second argument
+#and the parameter regular expression as third argument
+#
+#NOTE: The prefix must appear after a slash in the path
+#      and the regex must be matched followed by a slash
+function __static__ReadSingleParameterFromPathMatchingPrefixAndRegex()
 {
-    if [[ $# -ne 2 ]]; then
+    if [[ $# -ne 3 ]]; then
         Internal "Function " emph "${FUNCNAME}" " called with wrong number of parameters!"
     fi
-    local pathToBeSearchedIn prefixToBeUsed pieceOfPathWithParameter
+    local pathToBeSearchedIn prefixToBeUsed regexToBeUsed pieceOfPathWithParameter
     pathToBeSearchedIn="/$1/" #Add in front and back a "/" just to be general in the search
     prefixToBeUsed="$2"
+    regexToBeUsed="$3"
     __static__CheckPrefixExistence "${prefixToBeUsed}"
-    case $(grep -o "/${prefixToBeUsed}" <<< "${pathToBeSearchedIn}" | wc -l) in
+    case $(grep -o "/${prefixToBeUsed}${regexToBeUsed}" <<< "${pathToBeSearchedIn}" | wc -l) in
         0)
             Fatal ${BHMAS_fatalPathError} "Unable to recover " emph "${prefixToBeUsed}" " from the path " dir "$1" "." ;;
         1)
@@ -114,34 +119,15 @@ function __static__ReadSingleParameterFromPath()
     esac
 }
 
-# This function get a bunch of prefixes and checks that the corresponding variable has a value that makes sense
-# NOTE: Here we check any variable content as if it could contain several values. This should not hurt, since
-#       ${var[@]} should coincide with ${var} in case of a simple variable.
-function __static__CheckParametersExtractedFromPath()
-{
-    __static__CheckNoArguments "${FUNCNAME}" $#
-    __static__CheckUnsetParameters "${FUNCNAME}" "$@"
-    local prefix value variableName variableRegex
-    for prefix in "$@"; do
-        variableName="${BHMAS_parameterVariableNames[${prefix}]}"
-        variableRegex="${variableName}Regex"
-        variableName+="[@]" #See NOTE above
-        for value in ${!variableName}; do
-            if [[ ! ${value} =~ ^${!variableRegex//\\/}$ ]]; then
-                Fatal ${BHMAS_fatalPathError} "Parameter " emph "${prefix}" " extracted from the path not matching "\
-                      emph "${!variableRegex//\\/}" "!"
-            fi
-        done
-    done
-}
-
 function ReadParametersFromPathAndSetRelatedVariables()
 {
     __static__CheckNoArguments "${FUNCNAME}" $#
+    local variableName variableRegex
     for prefix in "${BHMAS_parameterPrefixes[@]}"; do
-        __static__ReadSingleParameterFromPath "$1" "${prefix}"
+        variableName="${BHMAS_parameterVariableNames[${prefix}]}"
+        variableRegex="${variableName}Regex"
+        __static__ReadSingleParameterFromPathMatchingPrefixAndRegex "$1" "${prefix}" "${!variableRegex}"
     done
-    __static__CheckParametersExtractedFromPath "${BHMAS_parameterPrefixes[@]}"
     __static__SetParametersPathAndString
     if [[ -z "${BHMAS_parametersString:+x}" ]] || [[ -z "${BHMAS_parametersPath:+x}" ]]; then
         Internal "Either " emph "BHMAS_parametersString" " or " emph "BHMAS_parametersPath" " unset or empty!"
