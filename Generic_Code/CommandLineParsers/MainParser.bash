@@ -192,7 +192,7 @@ function __static__CheckIfOnlyValidOptionsWereGiven()
     for option in "${BHMAS_commandLineOptionsToBeParsed[@]}"; do
         [[ ! ${option} =~ ^- ]] && continue
         if ! ElementInArray "${option}" "${validOptions[@]}"; then
-            Fatal ${BHMAS_fatalCommandLine} 'Option ' emph "${option}" ' non accepted in ' emph "${BHMAS_executionMode#mode:}" ' mode.'
+            Fatal ${BHMAS_fatalCommandLine} 'Option ' emph "${option}" ' not accepted in ' emph "${BHMAS_executionMode#mode:}" ' mode.'
         fi
     done
 }
