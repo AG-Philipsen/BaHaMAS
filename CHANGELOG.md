@@ -32,6 +32,7 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 ## [Unreleased]
 
+* :white_check_mark: Require minimum version (`1.8.5`) for `git` and adjust `--version` mode accordingly.
 * :sos: Fix bug in checking prefixes in invocation path and make path handling stricter to avoid ambiguities.
 * :white_check_mark: Add pending time information (up to present) to `job-status` mode for pending jobs.
 * :sos: Fix a bug in `simulation-status` mode which was not correctly determining the status of jobs.

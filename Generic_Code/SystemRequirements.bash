@@ -64,6 +64,12 @@ function __static__CheckAboutProgram()
                 foundVersion=$(sed --version | head -n1 | grep -o "[0-9.]\+")
             fi
             ;;
+        git )
+            requiredVersion='1.8.5'
+            if sed --version >/dev/null 2>&1; then
+                foundVersion=$(git --version | head -n1 | grep -o "[0-9.]\+")
+            fi
+            ;;
         *)
             Internal "Function " B "${FUNCNAME}" uB " called with unexpected program!" ;;
     esac
@@ -83,7 +89,7 @@ function CheckSystemRequirements()
 {
     local programsToBeChecked program returnValue
     returnValue=0
-    programsToBeChecked=(bash awk sed)
+    programsToBeChecked=( 'bash' 'awk' 'sed' 'git' )
     for program in ${programsToBeChecked[@]}; do
         __static__CheckAboutProgram ${program}
         (( returnValue+=$? )) || true #'|| true' because of set -e option
