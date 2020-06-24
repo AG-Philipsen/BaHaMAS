@@ -66,7 +66,7 @@ function __static__SourceCodebaseGeneralFiles()
     else
         if [[ ! -f "${BHMAS_userSetupFile}" ]]; then
             declare -g BHMAS_coloredOutput='FALSE' #This is needed in cecho but is a user variable! Declare it here manually
-            if ! WasAnyOfTheseOptionsGivenToBaHaMAS '-h' '--help'; then
+            if ! WasAnyOfTheseOptionsGivenToBaHaMAS '-h' '--help' 'help' '--version' 'version'; then
                 Fatal ${BHMAS_fatalFileNotFound} "BaHaMAS has not been configured, yet! Please, run BaHaMAS with the --setup option to configure it!"
             fi
         else
@@ -78,6 +78,9 @@ function __static__SourceCodebaseGeneralFiles()
 #Call the function above and source the codebase files when this script is sourced
 if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
     BHMAS_specifiedCommandLineOptions=( "$@" )
+    if [[ "${#BHMAS_specifiedCommandLineOptions[@]}" -eq 0 ]]; then
+        BHMAS_specifiedCommandLineOptions=( '--help' )
+    fi
     __static__SourceCodebaseGeneralFiles
 fi
 

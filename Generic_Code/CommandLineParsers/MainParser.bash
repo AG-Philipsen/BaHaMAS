@@ -24,10 +24,6 @@ done && unset -v 'fileToBeSourced'
 
 function ParseCommandLineOptionsTillMode()
 {
-    if [[ ${#BHMAS_commandLineOptionsToBeParsed[@]} -eq 0 ]]; then
-        BHMAS_executionMode='mode:help'
-        return 0
-    fi
     #Locally set function arguments to take advantage of shift
     set -- "${BHMAS_commandLineOptionsToBeParsed[@]}"
     #The first option can be a LQCD software
