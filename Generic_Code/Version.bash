@@ -27,7 +27,7 @@ function PrintCodeVersion(){
     if ! gitTagShort=$(git -C "${BHMAS_repositoryTopLevelPath}" describe --tags --abbr=0 2>/dev/null); then
         Internal "Unexpected error in \"${FUNCNAME}\" trying to obtain the closest git tag."
     fi
-    tagDate=$(date -d "$(git -C "${BHMAS_repositoryTopLevelPath}" tag -l "${gitTagShort}" --format='%(creatordate:short)')" +'%d %B %Y')
+    tagDate=$(date -d "$(git -C "${BHMAS_repositoryTopLevelPath}" log -1 --format=%ai "${gitTagShort}")" +'%d %B %Y')
     if [[ "${gitTagShort}" != "${gitTagLong}" ]]; then
         gitTagLong=$(git -C "${BHMAS_repositoryTopLevelPath}" describe --tags --dirty --broken 2>/dev/null)
         Warning "You are not using an official release of the BaHaMAS.\n"\
@@ -37,6 +37,6 @@ function PrintCodeVersion(){
                 lo "The repository state is " emph "${gitTagLong}"\
                 "\n(see git-describe documentation for more information)."
     else
-        cecho bb "This is " emph "${gitTagShort}" " released on " emph "${tagDate}"
+        cecho bb "\n This is " emph "${gitTagShort}" " released on " emph "${tagDate}\n"
     fi
 }
