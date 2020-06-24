@@ -39,7 +39,6 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_compilerFlags=''
     readonly BHMAS_folderWithMPIHeaderGlobalPath=''
     readonly BHMAS_inputFilename="fakeInput"
-    readonly BHMAS_jobScriptPrefix="fakePrefix"
     readonly BHMAS_outputFilename="fakeOutput"
     readonly BHMAS_useRationalApproxFiles='TRUE'
     readonly BHMAS_rationalApproxGlobalPath="${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath}/Rational_Approximations"
@@ -50,16 +49,18 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_databaseGlobalPath="${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath}/SimulationsOverview"
     readonly BHMAS_measurementExecutableGlobalPath="${BHMAS_repositoryTopLevelPath}/Tests/AuxiliaryFiles/CL2QCD/fakeExecutable"
     readonly BHMAS_thermConfsGlobalPath="${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath}/Thermalized_Configurations"
+    readonly BHMAS_maximumWalltime="1-00:00:00"
 
     #Possible default value for options which can then not be given via command line
     BHMAS_coresPerNode=
     BHMAS_measurePbp='TRUE'
+    BHMAS_jobScriptPrefix="fakePrefix"
+    BHMAS_jobRunCommand=""
     BHMAS_walltime=""
     BHMAS_clusterPartition=""
     BHMAS_clusterNode=""
     BHMAS_clusterConstraint=""
     BHMAS_clusterGenericResource=""
-    BHMAS_maximumWalltime="1-00:00:00"
 }
 
 

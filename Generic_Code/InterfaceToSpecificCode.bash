@@ -70,6 +70,11 @@ function __static__CheckExistenceOfFunctionAndCallIt()
 
 #-------------------------------------------------------------------------------------------------------------------------#
 
+function GetDefaultCommandToRunSoftware()
+{
+    __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler} "$@"
+}
+
 function AddSchedulerSpecificPartToJobScript()
 {
     __static__CheckExistenceOfFunctionAndCallIt   ${FUNCNAME}_${BHMAS_clusterScheduler} "$@"

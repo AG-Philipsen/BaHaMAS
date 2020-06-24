@@ -88,7 +88,7 @@ function AddSoftwareSpecificPartToProductionJobScript_CL2QCD()
             "if hash mbuffer 2>/dev/null; then"\
             "    time \${dir${index}}/${BHMAS_productionExecutableFilename} --inputFile=\${dir${index}}/${BHMAS_inputFilename} --deviceId=${index} --beta=${betaValues[${index}]%%_*} 2> \${dir${index}}/\${errFile} | mbuffer -q -m2M > \${dir${index}}/\${outFile} &"\
             "else"\
-            "    time srun -n 1 \${dir${index}}/${BHMAS_productionExecutableFilename} --inputFile=\${dir${index}}/${BHMAS_inputFilename} --deviceId=${index} --beta=${betaValues[${index}]%%_*} > \${dir${index}}/\${outFile} 2> \${dir${index}}/\${errFile} &"\
+            "    time ${BHMAS_jobRunCommand} -n 1 \${dir${index}}/${BHMAS_productionExecutableFilename} --inputFile=\${dir${index}}/${BHMAS_inputFilename} --deviceId=${index} --beta=${betaValues[${index}]%%_*} > \${dir${index}}/\${outFile} 2> \${dir${index}}/\${errFile} &"\
             "fi"\
             "PID_SRUN_${index}=\${!}"\
             ""

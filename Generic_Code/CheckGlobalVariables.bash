@@ -54,6 +54,7 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
         BHMAS_approxHeatbathFilename
         BHMAS_approxMDFilename
         BHMAS_approxMetropolisFilename
+        BHMAS_jobRunCommand
         BHMAS_clusterPartition
         BHMAS_clusterNode
         BHMAS_clusterConstraint
@@ -131,9 +132,19 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
     fi
     if [[ "${BHMAS_measurePbp:-}" != '' ]]; then
         if [[ "${BHMAS_measurePbp}" != 'TRUE' ]] && [[ "${BHMAS_measurePbp}" != 'FALSE' ]]; then
-        Error -n B emph 'BHMAS_measurePbp' uB ' variable must be set either to ' emph 'TRUE' ' or to ' emph 'FALSE'
-        mustReturn='FALSE'
+            Error -n B emph 'BHMAS_measurePbp' uB ' variable must be set either to ' emph 'TRUE' ' or to ' emph 'FALSE' '.'
+            mustReturn='FALSE'
         fi
+    fi
+    if [[ "${BHMAS_jobRunCommand:-}" != '' ]]; then
+        if ! hash "${BHMAS_jobRunCommand}" 2>/dev/null; then
+            Error -n 'Program ' B emph "${BHMAS_jobRunCommand}" uB ' was not found, but it was specified in the setup as ' emph 'BHMAS_jobRunCommand' uB '.'
+            mustReturn='FALSE'
+        else
+            readonly BHMAS_jobRunCommand
+        fi
+    else
+        readonly BHMAS_jobRunCommand="$(GetDefaultCommandToRunSoftware)"
     fi
 
     #If variables remained in arrays, print error

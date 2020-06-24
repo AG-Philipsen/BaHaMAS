@@ -20,7 +20,7 @@
 
 function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
 {
-    local jobScriptGlobalPath runId mpirunCommandOptions startingConfigurationFilename
+    local jobScriptGlobalPath runId runCommandOptions startingConfigurationFilename
     jobScriptGlobalPath="$1"; shift
     betaValues=( "$@" )
 
@@ -32,7 +32,7 @@ function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
     fi
 
     #Set additional command line options for openQCD executable
-    mpirunCommandOptions=''
+    runCommandOptions=''
     case ${BHMAS_executionMode} in
         mode:thermalize | mode:new-chain | mode:prepare-only )
             # openQCD does not accept a global path as configuration filename and requires
@@ -47,15 +47,15 @@ function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
                          'script! Failure in function ' emph "${FUNCNAME}"
             fi
             if [[ "${startingConfigurationFilename}" != 'notFoundHenceStartFromHot' ]]; then
-                mpirunCommandOptions+="-c ${startingConfigurationFilename}"
+                runCommandOptions+="-c ${startingConfigurationFilename}"
             fi
             ;;
         mode:continue* )
             # openQCD-FASTSUM takes care of using the last checkpoint which has
             # previously been prepared in the processing operations for continue
-            mpirunCommandOptions+="-c -a"
+            runCommandOptions+="-c -a"
             if [[ ! -f "${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}/${BHMAS_outputFilename}.rng" ]]; then
-                mpirunCommandOptions+=" -seed ${RANDOM}"
+                runCommandOptions+=" -seed ${RANDOM}"
             fi
             ;;
         * )
@@ -143,9 +143,9 @@ runDir="${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}"
 cd \${runDir}
 
 printf "Running openQCD-FASTSUM from '\$(pwd)':\n"
-printf '  mpirun \${submitDir}/${BHMAS_productionExecutableFilename} -i \${submitDir}/${BHMAS_inputFilename} -noms -noloc ${mpirunCommandOptions}\n\n'
+printf '  ${BHMAS_jobRunCommand} \${submitDir}/${BHMAS_productionExecutableFilename} -i \${submitDir}/${BHMAS_inputFilename} -noms -noloc ${runCommandOptions}\n\n'
 
-mpirun \${submitDir}/${BHMAS_productionExecutableFilename} -i \${submitDir}/${BHMAS_inputFilename} -noms -noloc ${mpirunCommandOptions} &
+${BHMAS_jobRunCommand} \${submitDir}/${BHMAS_productionExecutableFilename} -i \${submitDir}/${BHMAS_inputFilename} -noms -noloc ${runCommandOptions} &
 pidRun=\${!}
 
 __static__MonitorAndRenameCheckpointFiles "\${pidRun}" 10 "${BHMAS_outputFilename}" ${deltaConfs} ${shiftConfs} "${BHMAS_configurationPrefix//\\/}" "${BHMAS_prngPrefix//\\/}" "${BHMAS_dataPrefix//\\/}" ${BHMAS_checkpointMinimumNumberOfDigits} &

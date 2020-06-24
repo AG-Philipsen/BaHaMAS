@@ -69,10 +69,11 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_thermConfsGlobalPath=""
     readonly BHMAS_maximumWalltime=""
 
-    #Possible default value for options which then may not be given via command line
+    #Possible default value for variables that might change later
     BHMAS_coresPerNode=
     BHMAS_measurePbp='FALSE'
     BHMAS_jobScriptPrefix=""
+    BHMAS_jobRunCommand=""
     BHMAS_walltime=""
     BHMAS_clusterPartition=""
     BHMAS_clusterNode=""
@@ -113,6 +114,7 @@ MakeFunctionsDefinedInThisFileReadonly
 #     BHMAS_databaseGlobalPath               -->  directory where the the simulation status files are stored (it MUST be a GLOBALPATH)
 #     BHMAS_databaseFilename                 -->  name of the file containing the database
 #     BHMAS_maximumWalltime                  -->  maximum walltime accepted by the scheduler in the format 'days-hours:min:sec'
+#     BHMAS_jobRunCommand                    -->  command to be used by the scheduler to run the software
 #     BHMAS_walltime                         -->  jobs walltime in the format 'days-hours:min:sec'
 #     BHMAS_clusterPartition                 -->  name of the partition of the cluster that has to be used
 #     BHMAS_clusterNode                      -->  list of nodes that have to be used
