@@ -114,7 +114,6 @@ function __static__ValidateMetadata()
                 idAbsent+=( "${runId}" )
             fi
         else # here no occurence should be in file
-            idToBeAdded=()
             if [[ ${occurencesInFile} -eq 0 ]]; then
                 idToBeAdded+=( "${runId}" )
             else
