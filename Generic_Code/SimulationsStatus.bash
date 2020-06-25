@@ -26,7 +26,7 @@
 # In the DATABASE setup the BHMAS_parametersString is built using the argument given.
 function ListSimulationsStatus()
 {
-    local localParametersPath localParametersString jobsMetainformationArray runId betaFolderName\
+    local localParametersPath localParametersString jobsInformation runId betaFolderName\
           postfixFromFolder jobStatus outputFileGlobalPath inputFileGlobalPath\
           averageTimePerTrajectory timeLastTrajectory toBeCleaned trajectoriesDone\
           numberLastTrajectory acceptanceAllRun acceptanceLastBunchOfTrajectories\
@@ -114,7 +114,7 @@ function ListSimulationsStatus()
 function __static__GetJobStatus()
 {
     local runId parametersString betaValue seedPart postfix jobNameRegex\
-          jobsInformation value counter jobStatus
+          value counter jobStatus
     runId="$1"
     parametersString="$2"
     #Assume runId format is fixed, as often done
@@ -124,17 +124,17 @@ function __static__GetJobStatus()
     betaValue="${betaValue[0]}"
     case "${postfix}" in
         continueWithNewChain )
-            postfix="NC"
+            postfix=''
             ;;
         thermalizeFromConf )
-            postfix="TC"
+            postfix='_TC'
             ;;
        thermalizeFromHot )
-            postfix="TH"
+            postfix='_TH'
             ;;
     esac
-    jobNameRegex="${parametersString}__${BHMAS_betaPrefix}${betaValue}(_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/})*_${seedPart}(_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/})*_${postfix}"
-    GatherJobsInformationForSimulationStatusMode
+    jobNameRegex="${parametersString}__${BHMAS_betaPrefix}${betaValue}(_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/})*_${seedPart}(_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/})*${postfix}"
+    CheckIfVariablesAreDeclared jobsInformation
     #Assume each element of jobsInformation is of the form "jobName@jobStatus"
     counter=0
     for value in "${jobsInformation[@]}"; do
