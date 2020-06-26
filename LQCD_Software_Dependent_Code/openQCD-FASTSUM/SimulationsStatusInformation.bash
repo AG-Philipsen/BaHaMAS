@@ -21,6 +21,10 @@
 # BaHaMAS format from the software output file(s). This file global
 # path is is given in the variable ${outputFileGlobalPath} and for
 # openQCD it has to be build from the log file.
+#
+# ATTENTION: To retrieve later the time from last trajectories, it
+#            is important to set the last modification date of the
+#            standardized file to that of the output file.
 function CreateOutputFileInTheStandardFormat_openQCD-FASTSUM()
 {
     CheckIfVariablesAreDeclared outputFileGlobalPath
@@ -94,6 +98,9 @@ function CreateOutputFileInTheStandardFormat_openQCD-FASTSUM()
         END{
             PrintLineToFile(trajectory, plaquette, polyRe, polyIm, polyNorm, deltaH, accepted, trTime)
         } ' "${softwareOutputFileGlobalPath}" > "${outputFileGlobalPath}"
+
+    #Adjust timestamp of standardized file
+    touch -d "$(stat -c %y "${softwareOutputFileGlobalPath}")" "${outputFileGlobalPath}" || exit ${BHMAS_fatalBuiltin}
 }
 
 # This function has to extract from the ${inputFileGlobalPath} file

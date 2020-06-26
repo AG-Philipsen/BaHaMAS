@@ -22,11 +22,16 @@
 # path is is given in the variable ${outputFileGlobalPath} and for
 # CL2QCD nothing has to be done, since CL2QCD format is also the
 # standrard BaHaMAS format. Still a symbolic link needs to be created.
+#
+# ATTENTION: To retrieve later the time from last trajectories, it
+#            is important to set the last modification date of the
+#            standardized file to that of the output file.
 function CreateOutputFileInTheStandardFormat_CL2QCD()
 {
     CheckIfVariablesAreDeclared outputFileGlobalPath
-    local softwareOutputFileGlobalPath
+    local softwareOutputFileGlobalPath symlinkName
     softwareOutputFileGlobalPath="$(dirname "${outputFileGlobalPath}")/${BHMAS_outputFilename}"
+    symlinkName="$(basename "${outputFileGlobalPath}")"
     if [[ ! -f "${softwareOutputFileGlobalPath}" ]]; then
         if [[ ${BHMAS_simulationStatusVerbose} = 'TRUE' ]]; then
             Error 'CL2QCD output file ' file "${softwareOutputFileGlobalPath}"\
@@ -36,7 +41,9 @@ function CreateOutputFileInTheStandardFormat_CL2QCD()
     fi
     (
         cd "$(dirname "${outputFileGlobalPath}")"
-        ln -s -f "${BHMAS_outputFilename}" "$(basename "${outputFileGlobalPath}")" || exit ${BHMAS_fatalBuiltin}
+        ln -s -f "${BHMAS_outputFilename}" "${symlinkName}" || exit ${BHMAS_fatalBuiltin}
+        #Adjust timestamp of symbolic link
+        touch -d "$(stat -c %y "${BHMAS_outputFilename}")" -h "${symlinkName}" || exit ${BHMAS_fatalBuiltin}
     )
 }
 
