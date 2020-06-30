@@ -20,7 +20,10 @@
 
 function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
 {
-    local jobScriptGlobalPath runId runCommandOptions startingConfigurationFilename
+    local jobScriptGlobalPath runId runCommandOptions startingConfigurationFilename\
+          deltaConfs initialConf index shiftConfs\
+          thermalizeFunction thermalizeFunctionCall thermalizeType\
+          logFileGlobalpath timeTr initialSleepTime
     jobScriptGlobalPath="$1"; shift
     betaValues=( "$@" )
 
@@ -65,7 +68,6 @@ function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
 
     # Determine needed information for checkpoint renaming mechanism
     # To be on the safe side, extract delta from the input file
-    local deltaConfs initialConf index shiftConfs
     deltaConfs=$(ExtractGapBetweenCheckpointsFromInputFile "${runId}")
     # Extract initial tr. number either from initial configuration file
     # or from symbolic link to it. Note that the symbolic link is created
@@ -93,7 +95,6 @@ function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
 
     # If in thermalization mode we want to add a function to copy the
     # last configuration to the pool together with its call
-    local thermalizeFunction thermalizeFunctionCall thermalizeType
     if [[ ${BHMAS_executionMode} = 'mode:thermalize' ]] || [[ ${BHMAS_executionMode} = "mode:continue-thermalization" ]]; then
         if [[ ${BHMAS_betaPostfix} == "_thermalizeFromHot" ]]; then
             thermalizeType='fromHot'
@@ -110,6 +111,38 @@ function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
         thermalizeFunction=''
         thermalizeFunctionCall=''
     fi
+
+    # For the renaming mechanism it is important to give a sensible starting
+    # sleeping time because the startup of openQCD and the reading of the
+    # first checkpoint in case of a continue could take a while. In continue
+    # mode, then, it is crucial to not rename the resume checkpoint before
+    # it has been read. The idea here is to use the log file to deduce the
+    # time per trajectory and set the initial sleeping time to 50% of the
+    # time between two checkpoints. In different modes this problem does not
+    # occur and and hard-coded value is then chosen.
+    case ${BHMAS_executionMode} in
+        mode:continue* )
+            logFileGlobalpath="${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}/${BHMAS_outputFilename}.log"
+            if [[ ! -f "${logFileGlobalpath}" ]]; then
+                Fatal ${BHMAS_fatalLogicError}\
+                      'Unable to find opneQCD log file\n' file "${logFileGlobalpath}" '\nin job script creation process.'
+            fi
+            timeTr=$(awk '$0 ~ /^Time per trajectory = /{sum+=$5; count++}END{printf "%d", count==0 ? 0 : sum/count}' "${logFileGlobalpath}")
+            initialSleepTime=$(( timeTr * deltaConfs / 2 ))
+            if [[ ${initialSleepTime} -eq 0 ]]; then
+                Fatal ${BHMAS_fatalLogicError}\
+                      'Initial sleep time for first renaming deduced to be 0s, invalid!\n'\
+                      'Please, check how often you store checkpoints and how fast is your run.\n'\
+                      'Simulation cannot be resumed.'
+            elif [[ ${initialSleepTime} -le 60 ]]; then
+                Warning 'Initial sleep time for first renaming deduced to be ' emph "${initialSleepTime}s"\
+                        '.\nIf the resuming checkpoint gets renamed before openQCD reads it, the simulation will fail.'
+            fi
+            ;;
+        * )
+            initialSleepTime=10
+            ;;
+    esac
 
     exec 5>&1 1>> "${jobScriptGlobalPath}"
     cat <<END_OF_JOBSCRIPT_FILE
@@ -148,7 +181,7 @@ printf '  ${BHMAS_jobRunCommand} \${submitDir}/${BHMAS_productionExecutableFilen
 ${BHMAS_jobRunCommand} \${submitDir}/${BHMAS_productionExecutableFilename} -i \${submitDir}/${BHMAS_inputFilename} -noms -noloc ${runCommandOptions} &
 pidRun=\${!}
 
-__static__MonitorAndRenameCheckpointFiles "\${pidRun}" 10 "${BHMAS_outputFilename}" ${deltaConfs} ${shiftConfs} "${BHMAS_configurationPrefix//\\/}" "${BHMAS_prngPrefix//\\/}" "${BHMAS_dataPrefix//\\/}" ${BHMAS_checkpointMinimumNumberOfDigits} &
+__static__MonitorAndRenameCheckpointFiles "\${pidRun}" ${initialSleepTime} "${BHMAS_outputFilename}" ${deltaConfs} ${shiftConfs} "${BHMAS_configurationPrefix//\\/}" "${BHMAS_prngPrefix//\\/}" "${BHMAS_dataPrefix//\\/}" ${BHMAS_checkpointMinimumNumberOfDigits} &
 pidRename=\${!}
 
 wait -n #Wait for the first process to finish

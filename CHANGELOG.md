@@ -32,6 +32,7 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 ## [Unreleased]
 
+* :white_check_mark: Improve run-time checkpoints renaming mechanism of openQCD-FASTSUM in `continue` mode.
 * :sos: Fix bug in adding information to metadata file (only the last run ID was considered).
 * :white_check_mark: Require minimum version (`1.8.5`) for `git` and adjust `--version` mode accordingly.
 * :sos: Fix bug in checking prefixes in invocation path and make path handling stricter to avoid ambiguities.
