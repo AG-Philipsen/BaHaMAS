@@ -97,7 +97,7 @@ function AddSoftwareSpecificPartToProductionJobScript_CL2QCD()
     #Waiting for job(s) and handling exit code
     __static__AddToJobscriptFile "#Execute wait \${PID} job after job"
     for index in "${!betaValues[@]}"; do
-        __static__AddToJobscriptFile "wait \${PID_SRUN_}${index} || { printf \"\nError occurred in simulation at b${betaValues[${index}]%_*}. Please check (process id \${PID_SRUN_${index}})...\n\" && ERROR_OCCURRED=\"TRUE\"; }"
+        __static__AddToJobscriptFile "wait \${PID_SRUN_${index}} || { printf \"\nError occurred in simulation at b${betaValues[${index}]%_*}. Please check (process id \${PID_SRUN_${index}})...\n\" && ERROR_OCCURRED=\"TRUE\"; }"
     done
     __static__AddToJobscriptFile\
         ""\
