@@ -365,4 +365,13 @@ function IsBaHaMASRunInSetupMode()
     fi
 }
 
+function IsBaHaMASRunInHelpOrVersionMode()
+{
+    if WasAnyOfTheseOptionsGivenToBaHaMAS '-h' '--help' 'help' '--version' 'version'; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 MakeFunctionsDefinedInThisFileReadonly

@@ -240,15 +240,11 @@ function DeclareAllGlobalVariables()
 {
     if IsBaHaMASRunInSetupMode; then
         return 0
-    else
-        if ! IsTestModeOn && [[ ! -f "${BHMAS_userSetupFile}" ]]; then
-            if WasAnyOfTheseOptionsGivenToBaHaMAS '-h' '--help' 'help' '--version' 'version'; then
-                #Make a fake BaHaMAS setup here to treat this corner case
-                function DeclareOutputRelatedGlobalVariables() { BHMAS_coloredOutput='FALSE'; }
-                function DeclareUserDefinedGlobalVariables() { :; }
-            else
-                Internal "Global variable declaration mechanism should not be hit in this scenario!"
-            fi
+    elif IsBaHaMASRunInHelpOrVersionMode; then
+        if [[ ! -f "${BHMAS_userSetupFile}" ]]; then
+            #Make a fake BaHaMAS setup here to treat this corner case
+            function DeclareOutputRelatedGlobalVariables() { BHMAS_coloredOutput='FALSE'; }
+            function DeclareUserDefinedGlobalVariables() { :; }
         fi
     fi
     DeclareOutputRelatedGlobalVariables
