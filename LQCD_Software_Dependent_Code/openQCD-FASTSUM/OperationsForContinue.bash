@@ -337,8 +337,8 @@ function __static__HandleIntegrationStepsInInputFile_openQCD-FASTSUM()
         "intsteps0=${BHMAS_scaleZeroIntegrationSteps[${runId}]}"
         "intsteps1=${BHMAS_scaleOneIntegrationSteps[${runId}]}"
     )
-    ModifyOptionsInInputFile_openQCD-FASTSUM ${optionsToBeAddedOrModified[@]} || return 1
-    PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
+    ModifyOptionsInInputFile_openQCD-FASTSUM "${optionsToBeAddedOrModified[@]}" || return 1
+    PrintModifiedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
 }
 
 function __static__HandleFurtherOptionsInInputFile_openQCD-FASTSUM()
@@ -347,8 +347,8 @@ function __static__HandleFurtherOptionsInInputFile_openQCD-FASTSUM()
     optionsToBeAddedOrModified=()
     # No options should be handled at the moment!
     if [[ ${#optionsToBeAddedOrModified[@]} -ne 0 ]]; then
-        ModifyOptionsInInputFile_openQCD-FASTSUM ${optionsToBeAddedOrModified[@]} || return 1
-        PrintModifiedOptionsToStandardOutput ${optionsToBeAddedOrModified[@]}
+        ModifyOptionsInInputFile_openQCD-FASTSUM "${optionsToBeAddedOrModified[@]}" || return 1
+        PrintModifiedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
     fi
     return 0
 }

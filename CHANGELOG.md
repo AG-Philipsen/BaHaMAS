@@ -32,6 +32,7 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 ## [Unreleased]
 
+* :white_check_mark: Improve quoting expansions in `continue` mode which was hitting a [`bash-5.0` bug](https://unix.stackexchange.com/a/596526/370049).
 * :sos: Fix minor bug in sourcing order to let `help`, `version` and `setup` mode work also when no scheduler is available.
 * :sos: Fix typo in job script for production for CL2QCD which was causing immediate simulation crash.
 * :white_check_mark: Improve run-time checkpoints renaming mechanism of openQCD-FASTSUM in `continue` mode.
