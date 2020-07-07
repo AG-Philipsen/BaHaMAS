@@ -97,33 +97,13 @@ function GetLargestWalltimeBetweenTwo()
 {
     [[ ! $1 =~ ^([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]] && return 1
     [[ ! $2 =~ ^([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]] && return 1
-    local first second
-    first="$1"; second="$2"
-    [[ ! ${first} =~ ^[0-9]+- ]] && first="0-${first}"
-    [[ ! ${second} =~ ^[0-9]+- ]] && second="0-${second}"
-    if [[ ${first%%-*} -gt ${second%%-*} ]]; then
-        printf "$1"; return 0
-    elif [[ ${first%%-*} -lt ${second%%-*} ]]; then
+    local firstInSeconds secondInSeconds
+    firstInSeconds=$(ConvertWalltimeToSeconds "$1")
+    secondInSeconds=$(ConvertWalltimeToSeconds "$2")
+    if [[ ${firstInSeconds} -lt ${secondInSeconds} ]]; then
         printf "$2"; return 0
     else
-        first=${first##*-}; second=${second##*-}
-        if [[ $(cut -d':' -f1 <<< "${first}") -gt $(cut -d':' -f1 <<< "${second}") ]]; then
-            printf "$1"; return 0
-        elif [[ $(cut -d':' -f1 <<< "${first}") -lt $(cut -d':' -f1 <<< "${second}") ]]; then
-            printf "$2"; return 0
-        else
-            if [[ $(cut -d':' -f2 <<< "${first}") -gt $(cut -d':' -f2 <<< "${second}") ]]; then
-                printf "$1"; return 0
-            elif [[ $(cut -d':' -f2 <<< "${first}") -lt $(cut -d':' -f2 <<< "${second}") ]]; then
-                printf "$2"; return 0
-            else
-                if [[ $(cut -d':' -f3 <<< "${first}") -gt $(cut -d':' -f3 <<< "${second}") ]]; then
-                    printf "$1"; return 0
-                else
-                    printf "$2"; return 0
-                fi
-            fi
-        fi
+        printf "$1"; return 0
     fi
 }
 

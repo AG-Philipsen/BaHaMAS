@@ -162,6 +162,7 @@ function MakeTestPreliminaryOperations()
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateThermalizedConfigurationFolder
             __static__CreateThermalizedConfiguration "fromConf_trNr5000"
+            __static__AddStringToFirstLineBetasFile "t120"
             if [[ $1 =~ goal ]]; then
                 __static__AddStringToFirstLineBetasFile "g15000"
             fi
