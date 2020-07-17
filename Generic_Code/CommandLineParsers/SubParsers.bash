@@ -150,11 +150,11 @@ function ParseSpecificModeOptions_complete-betas-file()
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --chains )
-                if [[ ! ${1:-} =~ ^(-|$) ]]; then
-                    if [[ ! $1 =~ ^[0-9]+$ ]];then
+                if [[ ! ${2:-} =~ ^(-|$) ]]; then
+                    if [[ ! $2 =~ ^[0-9]+$ ]];then
                         PrintOptionSpecificationErrorAndExit "complete-betas-file"
                     else
-                        BHMAS_numberOfChainsToBeInTheBetasFile=$1
+                        BHMAS_numberOfChainsToBeInTheBetasFile=$2
                     fi
                 fi
                 shift 2 ;;
