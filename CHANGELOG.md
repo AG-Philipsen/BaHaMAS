@@ -32,6 +32,7 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 ## [Unreleased]
 
+* :sos: The `simulation-status` execution mode now correctly handles freshly submitted simulations.
 * :sos: Fix bug in `complete-betas-file` execution mode.
 * :white_check_mark: Improve quoting expansions in `continue` mode which was hitting a [`bash-5.0` bug](https://unix.stackexchange.com/a/596526/370049).
 * :sos: Fix minor bug in sourcing order to let `help`, `version` and `setup` mode work also when no scheduler is available.

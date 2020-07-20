@@ -64,7 +64,11 @@ function ListSimulationsStatus()
         # NOTE: Do not use BHMAS_runDirWithBetaFolders because it would break database
         #       which needs to change the ${localParametersPath} variable needed here.
         outputFileGlobalPath="${BHMAS_runDiskGlobalPath}/${BHMAS_projectSubpath}${localParametersPath}/${BHMAS_betaPrefix}${runId}/${BHMAS_outputStandardizedFilename}"
-        CreateOutputFileInTheStandardFormat "${runId}"
+        inputFileGlobalPath="${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath}${localParametersPath}/${BHMAS_betaPrefix}${runId}/${BHMAS_inputFilename}"
+        integrationSteps0='--'
+        integrationSteps1='--'
+        integrationSteps2='--'
+        kappaMassPreconditioning='-----'
         toBeCleaned=0
         trajectoriesDone='-----'
         numberLastTrajectory='----'
@@ -77,23 +81,20 @@ function ListSimulationsStatus()
         timeFromLastTrajectory='------'
         averageTimePerTrajectory='----'
         timeLastTrajectory='----'
-        if [[ -s "${outputFileGlobalPath}" ]]; then
-            __static__CheckIfOutputFileShouldBeCleaned
-            __static__ExtractTrajectoryNumbers
-            __static__ExtractAcceptanceInformation
-            __static__ExtractActionAndPlaquetteInformation
-            if [[ ${jobStatus} = 'RUNNING' ]]; then
-                __static__ExtractTimeFromLastTrajectory
-            fi
-            if [[ ${BHMAS_simulationStatusMeasureTimeOption} = 'TRUE' ]]; then
-                __static__ExtractTrajectoryTimes
+        if CreateOutputFileInTheStandardFormat "${runId}"; then
+            if [[ -s "${outputFileGlobalPath}" ]]; then
+                __static__CheckIfOutputFileShouldBeCleaned
+                __static__ExtractTrajectoryNumbers
+                __static__ExtractAcceptanceInformation
+                __static__ExtractActionAndPlaquetteInformation
+                if [[ ${jobStatus} = 'RUNNING' ]]; then
+                    __static__ExtractTimeFromLastTrajectory
+                fi
+                if [[ ${BHMAS_simulationStatusMeasureTimeOption} = 'TRUE' ]]; then
+                    __static__ExtractTrajectoryTimes
+                fi
             fi
         fi
-        inputFileGlobalPath="${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath}${localParametersPath}/${BHMAS_betaPrefix}${runId}/${BHMAS_inputFilename}"
-        integrationSteps0='--'
-        integrationSteps1='--'
-        integrationSteps2='--'
-        kappaMassPreconditioning='-----'
         if [[ -f "${inputFileGlobalPath}" ]]; then
             ExtractSimulationInformationFromInputFile
         fi
