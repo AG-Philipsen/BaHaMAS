@@ -47,7 +47,7 @@ function ListSimulationsStatus()
     __static__PrintSimulationStatusHeader
     GatherJobsInformationForSimulationStatusMode
 
-    for betaFolderName in "${BHMAS_betaPrefix}"${BHMAS_betaGlob}"_${BHMAS_seedPrefix}"${BHMAS_seedGlob}'_'{continueWithNewChain,thermalizeFrom{Hot,Cold,Conf}}; do
+    for betaFolderName in "${BHMAS_betaPrefix}"${BHMAS_betaGlob}"_${BHMAS_seedPrefix}"${BHMAS_seedGlob}'_'{thermalizeFrom{Hot,Cold,Conf},continueWithNewChain}; do
         runId=${betaFolderName#${BHMAS_betaPrefix}}
         if ! SetLqcdSoftwareFromMetadata "${runId}"; then
             if [[ ${BHMAS_simulationStatusVerbose} = 'TRUE' ]]; then
