@@ -32,6 +32,7 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 ## [Unreleased]
 
+* :boom: Gauge observables of openQCD-FASTSUM have been divided by the number of colours, i.e. by 3, in the standardized output file.
 * :sos: The `simulation-status` execution mode now correctly handles freshly submitted simulations.
 * :sos: Fix bug in `complete-betas-file` execution mode.
 * :white_check_mark: Improve quoting expansions in `continue` mode which was hitting a [`bash-5.0` bug](https://unix.stackexchange.com/a/596526/370049).
