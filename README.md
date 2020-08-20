@@ -37,13 +37,16 @@ Any (software,scheduler) combination among the supported ones is allowed.
 
 Being written in bash, `BaHaMAS` does not need to be compiled or installed.
 Once cloned the repository, it can be run straight away.
-Nevertheless, to be able to properly work, it needs to be configured with some information.
-Its usage on the command line is `git`-inspired and you can explore the funcitonality yourself running the `BaHaMAS` command at first and then following the compact _getting started_ you will obtain.
-To have a complete overview, you can refer to the Wiki, where also a more general description of how `BaHaMAS` works is offered.
+Nevertheless, to be able to properly work, it needs to be configured with some information, running an intuitive and interactive setup.
+Its usage on the command line is `git`-inspired and you can explore the funcitonality yourself running `BaHaMAS` without arguments and then following the compact _getting started_ you will obtain.
+Each `BaHaMAS` execution mode has a dedicated manual that you can read directly in the terminal.
+To have a more complete and descriptive overview, you can refer to the Wiki, where also a more abstract description of how `BaHaMAS` works is offered.
 
 ## Authors
 
-`BaHaMAS` was born in 2014 and it has been developed in a very small team. Use [git] functionalities like, for example, `git shortlog -sne` if you are interested in getting an overview of contributions by different authors. Feel free to contact us if you have suggestions, feedbacks, bug reports or anything else about the software.
+`BaHaMAS` was born in 2014 and it has been developed in a very small team.
+Use [git] functionalities like, for example, `git shortlog -sne` if you are interested in getting an overview of contributions by different authors.
+Feel free to contact us if you have suggestions, feedbacks, bug reports or anything else about the software.
 
 
 License
