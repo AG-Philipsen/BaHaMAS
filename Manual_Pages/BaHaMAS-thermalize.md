@@ -17,8 +17,8 @@ This mode operates exclusively on thermalization jobs.
 After having prepared everything that is needed (e.g. input file. job script), jobs for the selected betas are submitted.
 
 The starting configuration for the thermalization is automatically searched in the thermalized configurations folder and information about it is given to the user.
-If no configuration with the same parameters of the actual position is found, a thermalization "from hot" will be started.
-If at least one thermalized configuration "from hot" exists, then a thermalization "from conf" will be started.
+If no configuration with the same parameters of the actual position is found or if the **\--fromHot** option is given, a thermalization "from hot" will be started.
+If at least one thermalized configuration "from hot" exists and if the **\--fromHot** option is not given, then a thermalization "from conf" will be started.
 
 Most of the information for the simulation input file(s) is retrieved from the **betas** file, but the user can also tune some input via the command line options.
 

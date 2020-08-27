@@ -148,6 +148,7 @@ function DeclareBaHaMASGlobalVariables()
     readonly BHMAS_deltaHColumn=8
     readonly BHMAS_acceptanceColumn=9
     readonly BHMAS_trajectoryTimeColumn=10
+    readonly BHMAS_labelToStartFromHot='toBeStartedFromHot'
 
     #Metadata variables
     readonly BHMAS_metadataFilename='.BaHaMAS_metadata'

@@ -148,7 +148,7 @@ function ProduceInputFile_CL2QCD()
     __static__AddToInputFile \
         "createCheckpointEvery=${BHMAS_checkpointFrequency}"\
         "overwriteTemporaryCheckpointEvery=${BHMAS_savepointFrequency}"
-    if [[ ${BHMAS_startConfigurationGlobalPath[${betaValue}]} == "notFoundHenceStartFromHot" ]]; then
+    if [[ ${BHMAS_startConfigurationGlobalPath[${betaValue}]} == "${BHMAS_labelToStartFromHot}" ]]; then
         __static__AddToInputFile "startCondition=hot"
     else
         __static__AddToInputFile \

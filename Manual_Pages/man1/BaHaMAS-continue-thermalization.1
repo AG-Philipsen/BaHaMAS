@@ -22,17 +22,12 @@ Whether a thermalization \[lq]from hot\[rq] or a thermalization
 existence of an already thermalized configuration from hot in the folder
 of thermalized configurations.
 \f[B]If at least one exists, then it is assumed that a thermalization
-\[lq]from conf\[rq] is being done.\f[R] This might not be ideal for the
-user, though.
-If a thermalization \[lq]from hot\[rq] is finished but one other crashed
-and the user wishes to resume it, the at-the-moment implemented logic
-will not allow it.
-Some work is planned to improve this aspect.
-For the time being the work-around would be to temporarily move out from
-the thermalization configurations folders all the configurations
-\[lq]from hot\[rq] referring to the affected volume.
-At that point BaHaMAS will resume the crashed simulation correctly
-\[lq]from hot\[rq].
+\[lq]from conf\[rq] is being done.\f[R] This might not be what the user
+wants, though.
+If e.g.\ a thermalization \[lq]from hot\[rq] is finished but one other
+crashed and the user wishes to resume it, then the automatic mechanism
+should be disabled.
+This can be comfortably done using the \f[B]--fromHot\f[R] option.
 .PP
 The input file of each simulation is adjusted according to the option
 passed and some sanity checks are performed.

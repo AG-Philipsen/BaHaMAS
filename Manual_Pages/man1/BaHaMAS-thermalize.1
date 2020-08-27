@@ -22,9 +22,11 @@ The starting configuration for the thermalization is automatically
 searched in the thermalized configurations folder and information about
 it is given to the user.
 If no configuration with the same parameters of the actual position is
-found, a thermalization \[lq]from hot\[rq] will be started.
-If at least one thermalized configuration \[lq]from hot\[rq] exists,
-then a thermalization \[lq]from conf\[rq] will be started.
+found or if the \f[B]--fromHot\f[R] option is given, a thermalization
+\[lq]from hot\[rq] will be started.
+If at least one thermalized configuration \[lq]from hot\[rq] exists and
+if the \f[B]--fromHot\f[R] option is not given, then a thermalization
+\[lq]from conf\[rq] will be started.
 .PP
 Most of the information for the simulation input file(s) is retrieved
 from the \f[B]betas\f[R] file, but the user can also tune some input via

@@ -115,7 +115,7 @@ function EnsureThatNeededFilesAreOnRunDiskForEachBeta()
             betaFolder+="${BHMAS_betaPostfix}"
             runBetaDirectory="${BHMAS_runDirWithBetaFolders}/${betaFolder}"
             startConfiguration="${BHMAS_startConfigurationGlobalPath[${betaFolder#${BHMAS_betaPrefix}}]}"
-            if [[ "${startConfiguration}" != 'notFoundHenceStartFromHot' ]]; then
+            if [[ "${startConfiguration}" != "${BHMAS_labelToStartFromHot}" ]]; then
                 cecho -n lg ' Symlinking ' emph "starting configuration" ' to ' dir "${runBetaDirectory}" '...'
                 ln -s "${startConfiguration}"\
                    "${runBetaDirectory}/$(basename ${startConfiguration})" || exit ${BHMAS_fatalBuiltin}

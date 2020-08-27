@@ -115,7 +115,7 @@ function FindConfigurationGlobalPathFromWhichToStartTheSimulation()
                 ;;
 
             _thermalizeFromHot )
-                BHMAS_startConfigurationGlobalPath[${runId}]="notFoundHenceStartFromHot"
+                BHMAS_startConfigurationGlobalPath[${runId}]="${BHMAS_labelToStartFromHot}"
                 ;;
 
             * )

@@ -49,7 +49,7 @@ function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
                          emph "${runId}" ' but needs to be specified to prepare the job\n'\
                          'script! Failure in function ' emph "${FUNCNAME}"
             fi
-            if [[ "${startingConfigurationFilename}" != 'notFoundHenceStartFromHot' ]]; then
+            if [[ "${startingConfigurationFilename}" != "${BHMAS_labelToStartFromHot}" ]]; then
                 runCommandOptions+="-c ${startingConfigurationFilename}"
             fi
             ;;
@@ -76,7 +76,7 @@ function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
         mode:thermalize | mode:prepare-only | mode:new-chain )
             # Here the startingConfigurationFilename variable set above contains
             # a configuration filename from the thermalized pool -> use it
-            if [[ "${startingConfigurationFilename}" = 'notFoundHenceStartFromHot' ]]; then
+            if [[ "${startingConfigurationFilename}" = "${BHMAS_labelToStartFromHot}" ]]; then
                 shiftConfs=0
             else
                 shiftConfs=${startingConfigurationFilename[0]##*_trNr}
