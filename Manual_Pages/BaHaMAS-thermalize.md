@@ -27,6 +27,9 @@ Most of the information for the simulation input file(s) is retrieved from the *
 \--betasfile *filename*
 :   Use *filename* instead of **betas** file.
 
+\--fromHot
+:   Force BaHaMAS to act on thermalization(s) from hot without determining itself the thermalization type.
+
 \--measurements, \-m *number*
 :   Specify the number of trajectories that should be done (default: 1000).
 

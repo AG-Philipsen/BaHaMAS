@@ -134,6 +134,7 @@ function ParseRemainingCommandLineOptions()
     # https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/issues/27
     local modeSpecificAllSoftwareParser
     modeSpecificAllSoftwareParser=(
+        'mode:thermalize'
         'mode:continue'
         'mode:continue-thermalization'
         'mode:job-status'

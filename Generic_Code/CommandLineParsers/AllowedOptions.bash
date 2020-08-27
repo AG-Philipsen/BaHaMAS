@@ -66,9 +66,9 @@ function _BaHaMAS_DeclareAllowedOptionsPerModeOrSoftware()
         ['mode:prepare-only']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
         ['mode:submit-only']+='--betasfile --jobscript_prefix'
         ['mode:new-chain']+="--betasfile  ${productionOptions} --jobscript_prefix ${clusterOptions}"
-        ['mode:thermalize']+="--betasfile  ${productionOptions} --jobscript_prefix ${clusterOptions}"
+        ['mode:thermalize']+="--betasfile --fromHot  ${productionOptions} --jobscript_prefix ${clusterOptions}"
         ['mode:continue']+="--betasfile --measurements --jobscript_prefix ${clusterOptions}"
-        ['mode:continue-thermalization']+="--betasfile --measurements --jobscript_prefix ${clusterOptions}"
+        ['mode:continue-thermalization']+="--betasfile --fromHot --measurements --jobscript_prefix ${clusterOptions}"
         ['mode:job-status']+='--partition'
         ['mode:simulation-status']+=''
         ['mode:acceptance-rate-report']+='--betasfile'

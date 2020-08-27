@@ -1,5 +1,8 @@
 # OPTIONS
 
+\--fromHot
+:   Force BaHaMAS to act on thermalization(s) from hot without determining itself the thermalization type.
+
 \--till, \-t *number*
 :   Specify till which trajectory number the simulations should be continued.
 
