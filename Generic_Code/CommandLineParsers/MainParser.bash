@@ -104,7 +104,10 @@ function ParseCommandLineOptionsTillMode()
         readonly BHMAS_lqcdSoftware
     fi
     #If user specified --help in a given mode, act accrdingly
-    if [[ ! ${BHMAS_executionMode} =~ ^mode:(help|version|setup)$ ]]; then
+    if [[ ${BHMAS_executionMode} =~ ^mode:(help|version|setup)$ ]]; then
+        #Ignore anything after these modes
+        BHMAS_commandLineOptionsToBeParsed=()
+    else
         if  ElementInArray '--help' "${BHMAS_commandLineOptionsToBeParsed[@]}" "${BHMAS_optionsToBePassedToDatabase[@]}"; then
             BHMAS_executionMode+='-help'
         fi
@@ -350,6 +353,13 @@ function WasAnyOfTheseOptionsGivenToBaHaMAS()
     for option in "$@"; do
         if ElementInArray "${option}" "${BHMAS_specifiedCommandLineOptions[@]}"; then
             return 0
+        fi
+        # Ignore any option given after 'help', 'version', 'setup'.
+        # This avoids the functions IsBaHaMASRunInSetupMode and
+        # IsBaHaMASRunInHelpOrVersionMode in case the user specifies
+        # more than one of these options, e.g. "--version --setup".
+        if [[ ${option} =~ ^(--)?(help|version|setup)$ ]]; then
+            break
         fi
     done
     return 1
