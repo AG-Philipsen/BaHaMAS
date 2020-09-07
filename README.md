@@ -1,4 +1,4 @@
-<img src="https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/raw/images/Logo.png" align="right" width="30%" height="30%"/>
+<img src="https://github.com/AG-Philipsen/BaHaMAS/blob/images/Logo.png?raw=true" align="right" width="30%" height="30%"/>
 
 # BaHaMAS
 
