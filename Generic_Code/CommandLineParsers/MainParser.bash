@@ -365,11 +365,10 @@ function WasAnyOfTheseOptionsGivenToBaHaMAS()
     return 1
 }
 
-# This function is needed before the variable
-# BHMAS_executionMode is available and set!
+# These functions are needed before the variable BHMAS_executionMode is available and set!
 function IsBaHaMASRunInSetupMode()
 {
-    if WasAnyOfTheseOptionsGivenToBaHaMAS 'setup' '--setup'; then
+    if __static__IsBaHaMASRunInMode 'setup'; then
         return 0
     else
         return 1
@@ -378,11 +377,30 @@ function IsBaHaMASRunInSetupMode()
 
 function IsBaHaMASRunInHelpOrVersionMode()
 {
-    if WasAnyOfTheseOptionsGivenToBaHaMAS '-h' '--help' 'help' '--version' 'version'; then
+    if __static__IsBaHaMASRunInMode 'help' || __static__IsBaHaMASRunInMode 'version'; then
         return 0
     else
         return 1
     fi
 }
+
+# Here we need to handle correctly the corner cases where the user specifies more core
+# options (e.g. "--version --setup") testing the first command line option.
+function __static__IsBaHaMASRunInMode()
+{
+    local modeToCheck; modeToCheck="$1"
+    set -- "${BHMAS_specifiedCommandLineOptions[@]}"
+    if [[ $1 =~ ^(CL2QCD|openQCD-FASTSUM)$ ]]; then
+        shift
+    fi
+    if [[ ${modeToCheck} = 'help' &&  $1 = '-h' ]]; then
+        return 0
+    elif [[ $1 =~ ^(--)?${modeToCheck}$ ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 
 MakeFunctionsDefinedInThisFileReadonly
