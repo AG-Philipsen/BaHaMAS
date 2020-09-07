@@ -188,14 +188,14 @@ wait -n #Wait for the first process to finish
 errorCodeFirst=\${?}
 
 if kill -0 "\${pidRun}" 2>/dev/null && kill -0 "\${pidRename}" 2>/dev/null; then
-    printf 'FATAL: Some child process finished (\$(date +'%d.%m.%Y %H:%M:%S')), but neither openQCD-FASTSUM nor renaming mechanism!\n'
+    printf "FATAL: Some child process finished (\$(date +'%d.%m.%Y %H:%M:%S')), but neither openQCD-FASTSUM nor renaming mechanism!\n"
     exit 1
 elif kill -0 "\${pidRun}" 2>/dev/null; then
-    printf '\nFATAL: Renaming mechanism failed (\$(date +'%d.%m.%Y %H:%M:%S')), terminating openQCD-FASTSUM and exiting job...\n'
+    printf "FATAL: Renaming mechanism failed (\$(date +'%d.%m.%Y %H:%M:%S')), terminating openQCD-FASTSUM and exiting job...\n"
     kill "\${pidRun}"
     exit 113
 elif kill -0 "\${pidRename}" 2>/dev/null; then
-    printf 'openQCD-FASTSUM exited (\$(date +'%d.%m.%Y %H:%M:%S')), wait for renaming mechanism to finish...\n\n'
+    printf "openQCD-FASTSUM exited (\$(date +'%d.%m.%Y %H:%M:%S')), wait for renaming mechanism to finish...\n"
     wait "\${pidRename}"
     errorCodeSecond=\${?}
     printf "\n     Date and time: \$(date +'%d.%m.%Y %H:%M:%S')\n"
