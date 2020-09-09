@@ -32,6 +32,7 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 ## [Unreleased]
 
+* :white_check_mark: Implement system requirements overview in general in-terminal help.
 * :new: Add `--fromHot` option to `thermalize` and `continue-thermalization` execution modes to explicitly act on thermalization(s) from hot.
 * :boom: Gauge observables of openQCD-FASTSUM have been divided by the number of colours, i.e. by 3, in the standardized output file.
 * :sos: The `simulation-status` execution mode now correctly handles freshly submitted simulations.

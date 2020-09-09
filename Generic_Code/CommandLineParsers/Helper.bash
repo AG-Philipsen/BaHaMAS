@@ -87,6 +87,9 @@ function PrintMainHelper()
     )
     __static__PrintHelperHeaderAndUsage
     __static__PrintModesDescription
+    cecho wg '\n System requirements overview:\n'
+    CheckSystemRequirementsAndMakeReport
+    cecho ''
 }
 
 function __static__PrintHelperHeaderAndUsage()
@@ -108,16 +111,20 @@ function __static__PrintHelperHeaderAndUsage()
 function __static__PrintModesDescription()
 {
     CheckIfVariablesAreDeclared sectionHeaders "${!sectionHeaders[@]}"
-    local section mode reference
+    local section label tmpModes tmpDescriptions index
     cecho bb '\n  Here in the following you find an overview of the existing execution modes.'
     for section in "${!sectionHeaders[@]}"; do
         cecho ly "\n  ${sectionHeaders[${section}]}"
-        declare -n reference="${section}"
-        for mode in "${!reference[@]}"; do
+        # The following eval usage and the following trick are meant to avoid
+        # to use a bash 4.3 feature  ->  declare -n reference="${section}"
+        tmpModes=( $(eval "echo \${!${section}[@]}") )
+        label="${section}[@]"
+        tmpDescriptions=( "${!label}" )
+        for index in "${!tmpModes[@]}"; do
             printf '%45s%3s%s\n'\
-                   "$(cecho lc emph "${mode}")"\
+                   "$(cecho lc emph "${tmpModes[index]}")"\
                    ''\
-                   "$(cecho lc "${reference[${mode}]}")"
+                   "$(cecho lc "${tmpDescriptions[index]}")"
         done | sort --ignore-leading-blanks
         unset -v 'reference'
     done
