@@ -32,6 +32,9 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 ## [Unreleased]
 
+
+## [Version 0.3.0] &ensp;<sub><sup>10 September 2020</sup></sub>
+
 * :white_check_mark: Implement system requirements overview in general in-terminal help.
 * :new: Add `--fromHot` option to `thermalize` and `continue-thermalization` execution modes to explicitly act on thermalization(s) from hot.
 * :boom: Gauge observables of openQCD-FASTSUM have been divided by the number of colours, i.e. by 3, in the standardized output file.
@@ -75,6 +78,7 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 * :sos: Fix tests failures due to hard-coded path in tests setup.
 
 
-[Unreleased]: https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/compare/BaHaMAS-0.2.0...develop
-[Version 0.2.0]: https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/-/releases/BaHaMAS-0.2.0
-[Version 0.1.0]: https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/-/releases/BaHaMAS-0.1.0
+[Unreleased]: https://github.com/AG-Philipsen/BaHaMAS/compare/BaHaMAS-0.3.0...develop
+[Version 0.3.0]: https://github.com/AG-Philipsen/BaHaMAS/releases/tag/BaHaMAS-0.3.0
+[Version 0.2.0]: https://github.com/AG-Philipsen/BaHaMAS/releases/tag/BaHaMAS-0.2.0
+[Version 0.1.0]: https://github.com/AG-Philipsen/BaHaMAS/releases/tag/BaHaMAS-0.1.0
