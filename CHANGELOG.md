@@ -32,6 +32,7 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 ## [Unreleased]
 
+* :sos: **Hot-fix:** Many execution modes (e.g. `thermalize`) were broken with multiple simulations per job. This has been fixed now.
 
 ## [Version 0.3.0] &ensp;<sub><sup>10 September 2020</sup></sub>
 
