@@ -1,6 +1,6 @@
-% BaHaMAS-continue(1) Version 1.0.0 | User Manual
+% BaHaMAS-continue(1) Version 0.3.0 | User Manual
 % [Alessandro Sciarra](sciarra@itp.uni-frankfurt.de)
-% 27 March 2020
+% 10 September 2020
 
 # NAME
 
@@ -89,9 +89,8 @@ If possible, based on the provided information, it is checked if each simulation
 
 # openQCD-FASTSUM OPTIONS
 
-\--processorsGrid, \-p
-:   Specify 4 integers which refer to how many processors have to be used to split the lattice in every direction (default: 1 1 1 1).
-    The first entry refer to the temporal lattice direction and the other three to the spatial ones.
+\--coresPerNode
+:   Specify how many nodes should be used per node (default: own setup).
 
 # FILES
 

@@ -1,6 +1,6 @@
-% BaHaMAS-continue-thermalization(1) Version 1.0.0 | User Manual
+% BaHaMAS-continue-thermalization(1) Version 0.3.0 | User Manual
 % [Alessandro Sciarra](sciarra@itp.uni-frankfurt.de)
-% 14 April 2020
+% 10 September 2020
 
 # NAME
 
@@ -17,11 +17,9 @@ This mode operates exclusively on thermalization jobs and it tries to continue t
 
 Whether a thermalization "from hot" or a thermalization "from conf" should be continued is determined based on the existence of an already thermalized configuration from hot in the folder of thermalized configurations.
 **If at least one exists, then it is assumed that a thermalization "from conf" is being done.**
-This might not be ideal for the user, though.
-If a thermalization "from hot" is finished but one other crashed and the user wishes to resume it, the at-the-moment implemented logic will not allow it.
-Some work is planned to improve this aspect.
-For the time being the work-around would be to temporarily move out from the thermalization configurations folders all the configurations "from hot" referring to the affected volume.
-At that point BaHaMAS will resume the crashed simulation correctly "from hot".
+This might not be what the user wants, though.
+If e.g. a thermalization "from hot" is finished but one other crashed and the user wishes to resume it, then the automatic mechanism should be disabled.
+This can be comfortably done using the **\--fromHot** option.
 
 The input file of each simulation is adjusted according to the option passed and some sanity checks are performed.
 The number of trajectories which will be done is determined as follows.
@@ -42,6 +40,9 @@ If possible, based on the provided information, it is checked if each simulation
 
 \--betasfile *filename*
 :   Use *filename* instead of **betas** file.
+
+\--fromHot
+:   Force BaHaMAS to act on thermalization(s) from hot without determining itself the thermalization type.
 
 \--measurements, \-m *number*
 :   Specify the number of trajectories that should be done (default: 1000).
@@ -93,9 +94,8 @@ If possible, based on the provided information, it is checked if each simulation
 
 # openQCD-FASTSUM OPTIONS
 
-\--processorsGrid, \-p
-:   Specify 4 integers which refer to how many processors have to be used to split the lattice in every direction (default: 1 1 1 1).
-    The first entry refer to the temporal lattice direction and the other three to the spatial ones.
+\--coresPerNode
+:   Specify how many nodes should be used per node (default: own setup).
 
 # FILES
 

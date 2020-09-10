@@ -33,12 +33,13 @@ function ExtractTrajectoryNumberFromConfigurationSymlink()
     if [[ ${folderName} =~ _thermalizeFromHot$ ]]; then
         trNumber=0
     else
-        # NOTE: Leave glob match the seed (since it might be different in continue mode)
+        # NOTE: Leave glob match the seed (since it might be different in continue mode),
+        #       the beta value (since it might be different thermalisation from conf),
         #       and the parameters which might be different when this function is
         #       called in database mode through the ListSimulationsStatus function.
         IFS='*'; parametersGlob="${BHMAS_parameterPrefixes[*]}"; unset -v 'IFS'
         parametersGlob="${parametersGlob[@]//[*]/*_}*"
-        initialConfiguration=( "${betaFolderGlobalPath}/conf."${parametersGlob}"_${folderName%%_*}"* )
+        initialConfiguration=( "${betaFolderGlobalPath}/conf."${parametersGlob}"_${BHMAS_betaPrefix}"* )
         for index in "${#initialConfiguration[@]}"; do
             if [[ ! -L "${initialConfiguration[index]:-}" ]]; then
                 unset -v 'initialConfiguration[index]'

@@ -162,6 +162,7 @@ function MakeTestPreliminaryOperations()
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateThermalizedConfigurationFolder
             __static__CreateThermalizedConfiguration "fromConf_trNr5000"
+            __static__AddStringToFirstLineBetasFile "t120"
             if [[ $1 =~ goal ]]; then
                 __static__AddStringToFirstLineBetasFile "g15000"
             fi
@@ -355,7 +356,7 @@ function MakeTestPreliminaryOperations()
         database* )
             local databaseFolder; databaseFolder="${submitTestFolder}/${projectFolder}/SimulationsOverview"
             mkdir -p "${databaseFolder}"
-            cp "${BHMAS_testsFolderAuxFiles}/fakeOverviewDatabase" "${databaseFolder}/2022_01_01_OverviewDatabase"
+            cp "${BHMAS_testsFolderAuxFiles}/fakeOverviewDatabase" "${databaseFolder}/2022_01_01_OverviewDatabase_$(whoami)"
             if [[ $1 =~ update ]]; then
                 __static__CreateBetaFolder
                 __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"

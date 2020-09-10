@@ -30,6 +30,22 @@
 #       later (general in the sense of common to more than one
 #       execution mode). These are parsed in the main parser.
 
+function ParseSpecificModeOptions_thermalize()
+{
+    set -- "${BHMAS_commandLineOptionsToBeParsed[@]}"
+    BHMAS_commandLineOptionsToBeParsed=()
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --fromHot )
+                readonly BHMAS_betaPostfix='_thermalizeFromHot'
+                shift ;;
+            * )
+                BHMAS_commandLineOptionsToBeParsed+=( "$1" )
+                shift ;;
+        esac
+    done
+}
+
 function ParseSpecificModeOptions_continue()
 {
     set -- "${BHMAS_commandLineOptionsToBeParsed[@]}"
@@ -54,6 +70,7 @@ function ParseSpecificModeOptions_continue()
 
 function ParseSpecificModeOptions_continue-thermalization()
 {
+    ParseSpecificModeOptions_thermalize
     ParseSpecificModeOptions_continue
 }
 
@@ -150,11 +167,11 @@ function ParseSpecificModeOptions_complete-betas-file()
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --chains )
-                if [[ ! ${1:-} =~ ^(-|$) ]]; then
-                    if [[ ! $1 =~ ^[0-9]+$ ]];then
+                if [[ ! ${2:-} =~ ^(-|$) ]]; then
+                    if [[ ! $2 =~ ^[0-9]+$ ]];then
                         PrintOptionSpecificationErrorAndExit "complete-betas-file"
                     else
-                        BHMAS_numberOfChainsToBeInTheBetasFile=$1
+                        BHMAS_numberOfChainsToBeInTheBetasFile=$2
                     fi
                 fi
                 shift 2 ;;

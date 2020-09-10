@@ -74,17 +74,22 @@ function ConvertWalltimeToSeconds()
 {
     local walltime walltimeSplit result
     walltime="$1"
-    if [[ ! ${walltime} =~ ^([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]]; then
+    if [[ ! ${walltime} =~ ^((0|[1-9][0-9]*)-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]]; then
         Internal "Walltime in wrong format passed to ${FUNCNAME}."
     elif [[ ${walltime} != *-* ]]; then
         walltime="0-${walltime}"
     fi
     walltimeSplit=( ${walltime//[-:]/ } )
+    # Bring hours in two digits format if not so to safely remove
+    # later the leading 0 (if it is just 0 this must not be removed!)
+    if [[ ${walltimeSplit[1]} =~ ^[0-9]$ ]]; then
+        walltimeSplit[1]="0${walltimeSplit[1]}"
+    fi
     result=0
     (( result += 86400*${walltimeSplit[0]} ))
-    (( result +=  3600*${walltimeSplit[1]} ))
-    (( result +=    60*${walltimeSplit[2]} ))
-    (( result +=       ${walltimeSplit[3]} ))
+    (( result +=  3600*${walltimeSplit[1]/#0/} ))
+    (( result +=    60*${walltimeSplit[2]/#0/} ))
+    (( result +=       ${walltimeSplit[3]/#0/} ))
     printf '%d' ${result}
 }
 
@@ -92,33 +97,13 @@ function GetLargestWalltimeBetweenTwo()
 {
     [[ ! $1 =~ ^([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]] && return 1
     [[ ! $2 =~ ^([0-9]+-)?[0-9]{1,2}:[0-9]{2}:[0-9]{2}$ ]] && return 1
-    local first second
-    first="$1"; second="$2"
-    [[ ! ${first} =~ ^[0-9]+- ]] && first="0-${first}"
-    [[ ! ${second} =~ ^[0-9]+- ]] && second="0-${second}"
-    if [[ ${first%%-*} -gt ${second%%-*} ]]; then
-        printf "$1"; return 0
-    elif [[ ${first%%-*} -lt ${second%%-*} ]]; then
+    local firstInSeconds secondInSeconds
+    firstInSeconds=$(ConvertWalltimeToSeconds "$1")
+    secondInSeconds=$(ConvertWalltimeToSeconds "$2")
+    if [[ ${firstInSeconds} -lt ${secondInSeconds} ]]; then
         printf "$2"; return 0
     else
-        first=${first##*-}; second=${second##*-}
-        if [[ $(cut -d':' -f1 <<< "${first}") -gt $(cut -d':' -f1 <<< "${second}") ]]; then
-            printf "$1"; return 0
-        elif [[ $(cut -d':' -f1 <<< "${first}") -lt $(cut -d':' -f1 <<< "${second}") ]]; then
-            printf "$2"; return 0
-        else
-            if [[ $(cut -d':' -f2 <<< "${first}") -gt $(cut -d':' -f2 <<< "${second}") ]]; then
-                printf "$1"; return 0
-            elif [[ $(cut -d':' -f2 <<< "${first}") -lt $(cut -d':' -f2 <<< "${second}") ]]; then
-                printf "$2"; return 0
-            else
-                if [[ $(cut -d':' -f3 <<< "${first}") -gt $(cut -d':' -f3 <<< "${second}") ]]; then
-                    printf "$1"; return 0
-                else
-                    printf "$2"; return 0
-                fi
-            fi
-        fi
+        printf "$1"; return 0
     fi
 }
 

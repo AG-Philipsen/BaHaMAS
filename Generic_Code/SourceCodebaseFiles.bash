@@ -55,29 +55,39 @@ function __static__SourceCodebaseGeneralFiles()
     for fileToBeSourced in "${schedulerIndependentFiles[@]}"; do
         source "${BHMAS_repositoryTopLevelPath}/Generic_Code/${fileToBeSourced}" || exit ${BHMAS_fatalBuiltin}
     done
-    SourceClusterSpecificCode
-    SourceLqcdSoftwareSpecificCode
 
     #User file to be sourced depending on test mode
     if IsBaHaMASRunInSetupMode; then
+        return 0
+    elif IsBaHaMASRunInHelpOrVersionMode; then
+        if [[ -f "${BHMAS_userSetupFile}" ]]; then
+            source "${BHMAS_userSetupFile}" || exit ${BHMAS_fatalBuiltin}
+        fi
         return 0
     elif IsTestModeOn; then
         source ${BHMAS_repositoryTopLevelPath}/Tests/SetupUserVariables.bash || exit ${BHMAS_fatalBuiltin}
     else
         if [[ ! -f "${BHMAS_userSetupFile}" ]]; then
             declare -g BHMAS_coloredOutput='FALSE' #This is needed in cecho but is a user variable! Declare it here manually
-            if ! WasAnyOfTheseOptionsGivenToBaHaMAS '-h' '--help'; then
-                Fatal ${BHMAS_fatalFileNotFound} "BaHaMAS has not been configured, yet! Please, run BaHaMAS with the --setup option to configure it!"
-            fi
+            Fatal ${BHMAS_fatalFileNotFound} "BaHaMAS has not been configured, yet! Please, run BaHaMAS with the --setup option to configure it!"
         else
             source "${BHMAS_userSetupFile}" || exit ${BHMAS_fatalBuiltin}
         fi
     fi
+
+    # Sourcing software/cluster code is not needed in setup/help/version modes.
+    # Moreover, the scheduler has to be there and if not an error is print,
+    # what we might not wish in these three modes.
+    SourceClusterSpecificCode
+    SourceLqcdSoftwareSpecificCode
 }
 
 #Call the function above and source the codebase files when this script is sourced
 if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
     BHMAS_specifiedCommandLineOptions=( "$@" )
+    if [[ "${#BHMAS_specifiedCommandLineOptions[@]}" -eq 0 ]]; then
+        BHMAS_specifiedCommandLineOptions=( '--help' )
+    fi
     __static__SourceCodebaseGeneralFiles
 fi
 

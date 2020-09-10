@@ -33,6 +33,27 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 ## [Unreleased]
 
 
+## [Version 0.3.0] &ensp;<sub><sup>10 September 2020</sup></sub>
+
+* :white_check_mark: Implement system requirements overview in general in-terminal help.
+* :new: Add `--fromHot` option to `thermalize` and `continue-thermalization` execution modes to explicitly act on thermalization(s) from hot.
+* :boom: Gauge observables of openQCD-FASTSUM have been divided by the number of colours, i.e. by 3, in the standardized output file.
+* :sos: The `simulation-status` execution mode now correctly handles freshly submitted simulations.
+* :sos: Fix bug in `complete-betas-file` execution mode.
+* :white_check_mark: Improve quoting expansions in `continue` mode which was hitting a [`bash-5.0` bug](https://unix.stackexchange.com/a/596526/370049).
+* :sos: Fix minor bug in sourcing order to let `help`, `version` and `setup` mode work also when no scheduler is available.
+* :sos: Fix typo in job script for production for CL2QCD which was causing immediate simulation crash.
+* :white_check_mark: Improve run-time checkpoints renaming mechanism of openQCD-FASTSUM in `continue` mode.
+* :sos: Fix bug in adding information to metadata file (only the last run ID was considered).
+* :white_check_mark: Require minimum version (`1.8.5`) for `git` and adjust `--version` mode accordingly.
+* :sos: Fix bug in checking prefixes in invocation path and make path handling stricter to avoid ambiguities.
+* :white_check_mark: Add pending time information (up to present) to `job-status` mode for pending jobs.
+* :sos: Fix a bug in `simulation-status` mode which was not correctly determining the status of jobs.
+* :sos: Require `bash 4.4` as minimum version since BaHaMAS uses the `-d` option of `readarray`.
+* :white_check_mark: Add command line option to change number of cores per node to be used.
+* :sos: Fix minor bug in command line autocompletion of software specific options.
+* :sos: Fix bug in `job-status` mode due to node information interpreted as glob pattern.
+
 ## [Version 0.2.0] &ensp;<sub><sup>29 May 2020</sup></sub>
 
 * :new: All execution modes except from `measure` one are now supported for openQCD-FASTSUM software. The measure mode will not be implemented in the next future.
@@ -57,6 +78,7 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 * :sos: Fix tests failures due to hard-coded path in tests setup.
 
 
-[Unreleased]: https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/compare/BaHaMAS-0.2.0...develop
-[Version 0.2.0]: https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/-/releases/BaHaMAS-0.2.0
-[Version 0.1.0]: https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/-/releases/BaHaMAS-0.1.0
+[Unreleased]: https://github.com/AG-Philipsen/BaHaMAS/compare/BaHaMAS-0.3.0...develop
+[Version 0.3.0]: https://github.com/AG-Philipsen/BaHaMAS/releases/tag/BaHaMAS-0.3.0
+[Version 0.2.0]: https://github.com/AG-Philipsen/BaHaMAS/releases/tag/BaHaMAS-0.2.0
+[Version 0.1.0]: https://github.com/AG-Philipsen/BaHaMAS/releases/tag/BaHaMAS-0.1.0

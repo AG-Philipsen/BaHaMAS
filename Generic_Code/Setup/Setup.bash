@@ -113,6 +113,7 @@ function __static__GiveMessageToUserAboutEnvironmentVariables()
     if [[ ! ${PATH} =~ (^|:)${BHMAS_repositoryTopLevelPath// /\\ }(:|$) ]]; then
         grepString='# To use BaHaMAS from any position'
         if [[ $(grep -c "${grepString}" "${HOME}/.bashrc") -eq 0 ]]; then
+            cecho lc "\n================================================================================="
             cecho wg '\n'\
                   'If you would like to be able to use ' emph 'BaHaMAS' ' as command from any position,\n'\
                   'you can add the following snippet to your shell login file (e.g. ~/.bashrc):'\
@@ -144,6 +145,7 @@ function __static__GiveMessageToUserAboutEnvironmentVariables()
     if [[ ! ${MANPATH:-} =~ (^|:)${manualPath// /\\ }(:|$) ]]; then
         grepString='# To have access to BaHaMAS manuals'
         if [[ $(grep -c "${grepString}" "${HOME}/.bashrc") -eq 0 ]]; then
+            cecho lc "\n================================================================================="
             cecho wg '\n'\
                   'If you would like to be able to use the ' emph 'man' ' command to get information\n'\
                   'about BaHaMAS and its execution modes, you can add the following snippet\n'\
@@ -162,7 +164,7 @@ function __static__GiveMessageToUserAboutEnvironmentVariables()
                       'if [[ ! "${MANPATH:-}" =~ (^|:)'"${manualPath// /\\ }"'(:|$) ]]; then\n'\
                       '    export MANPATH="${MANPATH:-}:'"${manualPath}\"\n"\
                       'fi' >> "${HOME}/.bashrc"
-                cecho lo '\nDo not forget to source the ' emph '~/.bashrc' ' file in order to let the changes take effect.\n'
+                cecho lo '\nDo not forget to source the ' emph '~/.bashrc' ' file in order to let the changes take effect.'
             fi
         else
             manpathAlreadyAdded='TRUE'
@@ -175,6 +177,7 @@ function __static__GiveMessageToUserAboutEnvironmentVariables()
     # Check/work on autocompletion
     grepString='# To activate BaHaMAS command-line autocompletion'
     if [[ $(grep -c "${grepString}" "${HOME}/.bashrc") -eq 0 ]]; then
+        cecho lc "\n================================================================================="
         cecho wg '\n'\
               'If you would like to be able to use ' emph 'autocompletion' ' on the command line\n'\
               'of BaHaMAS, you can add the following snippet to your shell login file (e.g. ~/.bashrc):'\
@@ -191,6 +194,7 @@ function __static__GiveMessageToUserAboutEnvironmentVariables()
                   >> "${HOME}/.bashrc"
             cecho lo '\nDo not forget to source the ' emph '~/.bashrc' ' file in order to let the changes take effect.\n'
         fi
+        cecho lc "=================================================================================\n"
     fi
     if [[ ${pathAlreadyAdded:-}${manpathAlreadyAdded:-} = *TRUE* ]]; then
         cecho ''

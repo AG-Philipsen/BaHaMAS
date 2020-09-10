@@ -58,7 +58,7 @@ function _BaHaMAS_DeclareAllowedOptionsPerModeOrSoftware()
     local productionOptionsCL2QCD clusterOptions
     productionOptions='--measurements --checkpointEvery'
     productionOptionsCL2QCD='--pf --confSaveEvery --cgbs --togglePbp'
-    productionOptionsOpenQCD='--processorsGrid'
+    productionOptionsOpenQCD='--processorsGrid --coresPerNode'
     clusterOptions='--walltime  --partition  --node  --constraint  --resource'
     allowedOptionsPerModeOrSoftware+=(
         #-------------------------------------------------------------------------------
@@ -66,9 +66,9 @@ function _BaHaMAS_DeclareAllowedOptionsPerModeOrSoftware()
         ['mode:prepare-only']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
         ['mode:submit-only']+='--betasfile --jobscript_prefix'
         ['mode:new-chain']+="--betasfile  ${productionOptions} --jobscript_prefix ${clusterOptions}"
-        ['mode:thermalize']+="--betasfile  ${productionOptions} --jobscript_prefix ${clusterOptions}"
+        ['mode:thermalize']+="--betasfile --fromHot  ${productionOptions} --jobscript_prefix ${clusterOptions}"
         ['mode:continue']+="--betasfile --measurements --jobscript_prefix ${clusterOptions}"
-        ['mode:continue-thermalization']+="--betasfile --measurements --jobscript_prefix ${clusterOptions}"
+        ['mode:continue-thermalization']+="--betasfile --fromHot --measurements --jobscript_prefix ${clusterOptions}"
         ['mode:job-status']+='--partition'
         ['mode:simulation-status']+=''
         ['mode:acceptance-rate-report']+='--betasfile'
@@ -88,8 +88,8 @@ function _BaHaMAS_DeclareAllowedOptionsPerModeOrSoftware()
         ["mode:prepare-only_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"
         ["mode:new-chain_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"
         ["mode:thermalize_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"
-        ["mode:continue_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"
-        ["mode:continue-thermalization_openQCD-FASTSUM"]+="${productionOptionsOpenQCD}"
+        ["mode:continue_openQCD-FASTSUM"]+='--coresPerNode'
+        ["mode:continue-thermalization_openQCD-FASTSUM"]+='--coresPerNode'
         #-------------------------------------------------------------------------------
         # All-modes, specific-software options
         ['CL2QCD']+=''

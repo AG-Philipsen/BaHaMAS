@@ -19,12 +19,13 @@
 
 function GatherAndPrintJobsInformation()
 {
-    local jobsInformation\
+    local jobsInformation string\
           jobId jobName jobStatus jobNodeList jobSubmissionTime jobWalltime\
           jobStartTime jobRunTime jobEndTime jobSubmissionFolder jobNumberOfNodes\
-          lengthOfLongestEntry\
+          lengthOfLongestJobName lengthOfLongestJobId\
           numberOfJobs numberOfRunningJobs numberOfPendingJobs numberOfOtherJobs\
-          lineOfEquals tableFormat index
+          lineOfEquals tableFormat index\
+          nodesPendingTimeString startEndTime runWallTime submissionTimeString
     #Call function scheduler specific: It will fill jobsInformation
     GatherJobsInformationForJobStatusMode
     if [[ "${#jobsInformation[@]}" -eq 0 ]]; then
@@ -32,57 +33,73 @@ function GatherAndPrintJobsInformation()
         return 0
     fi
     #Split job information in different arrays using '@' as separator
-    # NOTE: it might be done with builtins only, but less compact and less readable!
-    jobId=(               $(cut -d'@' -f1  <<< "$(printf '%s\n' ${jobsInformation[@]})") )
-    jobName=(             $(cut -d'@' -f2  <<< "$(printf '%s\n' ${jobsInformation[@]})") )
-    jobStatus=(           $(cut -d'@' -f3  <<< "$(printf '%s\n' ${jobsInformation[@]})") )
-    jobNodeList=(         $(cut -d'@' -f4  <<< "$(printf '%s\n' ${jobsInformation[@]})") )
-    jobSubmissionTime=(   $(cut -d'@' -f5  <<< "$(printf '%s\n' ${jobsInformation[@]})") )
-    jobWalltime=(         $(cut -d'@' -f6  <<< "$(printf '%s\n' ${jobsInformation[@]})") )
-    jobStartTime=(        $(cut -d'@' -f7  <<< "$(printf '%s\n' ${jobsInformation[@]})") )
-    jobRunTime=(          $(cut -d'@' -f8  <<< "$(printf '%s\n' ${jobsInformation[@]})") )
-    jobEndTime=(          $(cut -d'@' -f9  <<< "$(printf '%s\n' ${jobsInformation[@]})") )
-    jobSubmissionFolder=( $(cut -d'@' -f10 <<< "$(printf '%s\n' ${jobsInformation[@]})") )
-    jobNumberOfNodes=(    $(cut -d'@' -f11 <<< "$(printf '%s\n' ${jobsInformation[@]})") )
+    #NOTE: Here the strings could contain glob patterns (e.g. NodeList)
+    #      and it is important to quote them, since nullglob is set.
+    for string in "${jobsInformation[@]}"; do
+        jobId+=(               "${string%%@*}" ); string="${string#*@}"
+        jobName+=(             "${string%%@*}" ); string="${string#*@}"
+        jobStatus+=(           "${string%%@*}" ); string="${string#*@}"
+        jobNodeList+=(         "${string%%@*}" ); string="${string#*@}"
+        jobSubmissionTime+=(   "${string%%@*}" ); string="${string#*@}"
+        jobWalltime+=(         "${string%%@*}" ); string="${string#*@}"
+        jobStartTime+=(        "${string%%@*}" ); string="${string#*@}"
+        jobRunTime+=(          "${string%%@*}" ); string="${string#*@}"
+        jobEndTime+=(          "${string%%@*}" ); string="${string#*@}"
+        jobSubmissionFolder+=( "${string%%@*}" ); string="${string#*@}"
+        jobNumberOfNodes+=(    "${string%%@*}" )
+    done
     #Shorten path (it works only if the user is 'whoami'
     jobSubmissionFolder=( ${jobSubmissionFolder[@]/${BHMAS_submitDiskGlobalPath}/SUBMIT} )
     jobSubmissionFolder=( ${jobSubmissionFolder[@]/${BHMAS_runDiskGlobalPath}/WORK} )
     #Some counting for the table
-    lengthOfLongestEntry=$(LengthOfLongestEntryInArray ${jobName[@]})
     numberOfJobs=${#jobId[@]}
     set +e
     numberOfRunningJobs=$(grep -o "RUNNING" <<< "${jobStatus[@]}" | wc -l)
     numberOfPendingJobs=$(grep -o "PENDING" <<< "${jobStatus[@]}" | wc -l)
     set -e
     numberOfOtherJobs=$(( numberOfJobs - numberOfRunningJobs - numberOfPendingJobs ))
-    #------------------------------------------------------------------------------------------------------------------------------#
+
     #Table header
     printf -v lineOfEquals '%*s' $(( $(tput cols) - 3 )) ''
     lineOfEquals=${lineOfEquals// /=}
-    tableFormat="%-8s%-5s%-$((2+${lengthOfLongestEntry}))s%-5s%-25s%-5s%-19s%-5s%+14s%-5s%-s"
+    lengthOfLongestJobId=$(LengthOfLongestEntryInArray "${jobId[@]}")
+    lengthOfLongestJobName=$(LengthOfLongestEntryInArray "${jobName[@]}")
+    tableFormat="%-$((5+lengthOfLongestJobId))s%-$((5+lengthOfLongestJobName))s%-26s%-24s%+12s     %-s"
     cecho lc "\n" B "${lineOfEquals}\n"\
-          o "$(printf "${tableFormat}" "jobId:" ""   "  JOB NAME:" ""   "STATUS:" ""   "START/END TIME:" ""   "WALL/RUNTIME:" ""   "SUBMITTED FROM:")"
+          bb "$(printf "${tableFormat}" "JOB ID" "JOB NAME" "STATUS" "START/END TIME" "WALL/RUNTIME" "SUBMITTED FROM")"
+
     #Print table sorting according jobname
     while [[ ${#jobName[@]} -gt 0 ]]; do
         index=$(FindPositionOfFirstMinimumOfArray "${jobName[@]}")
-
-        if [[ ${jobStatus[${index}]} = "RUNNING" ]]; then
-            cecho -d -n lg
-        elif [[ ${jobStatus[${index}]} == "PENDING" ]]; then
-            if [[ ${jobStartTime[${index}]} != "N/A" ]]; then
-                cecho -d -n  ly
-            else
-                cecho -d -n lo
-            fi
-        else
-            cecho -d -n lm
-        fi
+        __static__ChangeOutputColor "${jobStatus[${index}]}" "${jobStartTime[${index}]}"
 
         if [[ ${jobStatus[${index}]} == "RUNNING" ]]; then
-            cecho "$(printf "${tableFormat}\e[0m\n"   "${jobId[${index}]}" "" "  ${jobName[${index}]}" "" "${jobStatus[${index}]} on ${jobNodeList[${index}]}" "" "${jobEndTime[${index}]}" "" "${jobRunTime[${index}]}" "" "${jobSubmissionFolder[${index}]}")"
+            if [[ ${jobNumberOfNodes[${index}]} -eq 1 ]]; then
+                nodesPendingTimeString=" on ${jobNodeList[${index}]}"
+            else
+                nodesPendingTimeString=" on ${jobNumberOfNodes[${index}]} nodes"
+            fi
+            startEndTime="${jobEndTime[${index}]}"
+            runWallTime="${jobRunTime[${index}]}"
+            submissionTimeString=''
         else
-            cecho "$(printf "${tableFormat}\e[0m\n"   "${jobId[${index}]}" "" "  ${jobName[${index}]}" "" "${jobStatus[${index}]}" "" "${jobStartTime[${index}]}" "" "${jobWalltime[${index}]}" "" "${jobSubmissionFolder[${index}]} on ${jobSubmissionTime[${index}]}")"
+            if [[ ${jobStatus[${index}]} == "PENDING" ]]; then
+                nodesPendingTimeString=" for $(__static__GetQueuingTime ${jobSubmissionTime[${index}]})"
+            else
+                nodesPendingTimeString=''
+            fi
+            startEndTime="${jobStartTime[${index}]}"
+            runWallTime="${jobWalltime[${index}]}"
+            submissionTimeString=" on ${jobSubmissionTime[${index}]}"
         fi
+
+        printf "${tableFormat}\e[0m\n"\
+               "${jobId[${index}]}"\
+               "${jobName[${index}]}"\
+               "${jobStatus[${index}]}${nodesPendingTimeString}"\
+               "${startEndTime}"\
+               "${runWallTime}"\
+               "${jobSubmissionFolder[${index}]}${submissionTimeString}"
 
         unset -v 'jobId[${index}]';               jobId=(               ${jobId[@]+"${jobId[@]}"} )
         unset -v 'jobName[${index}]';             jobName=(             ${jobName[@]+"${jobName[@]}"} )
@@ -97,7 +114,35 @@ function GatherAndPrintJobsInformation()
         unset -v 'jobRunTime[${index}]';          jobRunTime=(          ${jobRunTime[@]+"${jobRunTime[@]}"} )
     done
     cecho o "\n  Total number of submitted jobs: " B "${numberOfJobs}" uB " (" B lg "Running: ${numberOfRunningJobs}" ly "     Pending: ${numberOfPendingJobs}" lm "     Others: ${numberOfOtherJobs}" uB o ")"
-    cecho lc B "${lineOfEquals}\n"
+    cecho lc B "${lineOfEquals}"
+}
+
+
+function __static__ChangeOutputColor()
+{
+    local status startingTime color
+    status="$1"
+    startingTime="$2"
+    if [[ "${status}" = 'RUNNING' ]]; then
+        color='lg'
+    elif [[ "${status}" = 'PENDING' ]]; then
+        if [[ "${startingTime}" != 'N/A' ]]; then
+            color='ly'
+        else
+            color='lo'
+        fi
+    else
+        color='lm'
+    fi
+    cecho -d -n "${color}"
+}
+
+function __static__GetQueuingTime()
+{
+    local submissionTime queuingTime
+    submissionTime="$1"
+    queuingTime=$(( $(date +'%s') - $(date -d "${submissionTime}" +'%s') ))
+    printf "%d-%s" $((queuingTime/86400)) $(date -d@${queuingTime} -u +'%H:%M:%S')
 }
 
 

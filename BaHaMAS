@@ -78,7 +78,7 @@ if [[ ${BHMAS_executionMode} != 'mode:job-status' ]]; then
 fi
 
 if [[ ${BHMAS_executionMode} != 'mode:database' ]] && [[ ${BHMAS_executionMode} != 'mode:job-status' ]]; then
-    CheckSingleOccurrenceInPath $(sed 's/\// /g' <<< "${BHMAS_submitDiskGlobalPath}")\
+    CheckSingleOccurrenceInPath "${BHMAS_submitDiskGlobalPath}"\
                                 "${BHMAS_nflavourPrefix}${BHMAS_nflavourRegex}"\
                                 "${BHMAS_chempotPrefix}${BHMAS_chempotRegex}"\
                                 "${BHMAS_massPrefix}${BHMAS_massRegex}"\

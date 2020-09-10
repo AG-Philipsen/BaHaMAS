@@ -26,7 +26,7 @@
 # In the DATABASE setup the BHMAS_parametersString is built using the argument given.
 function ListSimulationsStatus()
 {
-    local localParametersPath localParametersString jobsMetainformationArray runId betaFolderName\
+    local localParametersPath localParametersString jobsInformation runId betaFolderName\
           postfixFromFolder jobStatus outputFileGlobalPath inputFileGlobalPath\
           averageTimePerTrajectory timeLastTrajectory toBeCleaned trajectoriesDone\
           numberLastTrajectory acceptanceAllRun acceptanceLastBunchOfTrajectories\
@@ -47,7 +47,7 @@ function ListSimulationsStatus()
     __static__PrintSimulationStatusHeader
     GatherJobsInformationForSimulationStatusMode
 
-    for betaFolderName in "${BHMAS_betaPrefix}"${BHMAS_betaGlob}"_${BHMAS_seedPrefix}"${BHMAS_seedGlob}'_'{continueWithNewChain,thermalizeFrom{Hot,Cold,Conf}}; do
+    for betaFolderName in "${BHMAS_betaPrefix}"${BHMAS_betaGlob}"_${BHMAS_seedPrefix}"${BHMAS_seedGlob}'_'{thermalizeFrom{Hot,Cold,Conf},continueWithNewChain}; do
         runId=${betaFolderName#${BHMAS_betaPrefix}}
         if ! SetLqcdSoftwareFromMetadata "${runId}"; then
             if [[ ${BHMAS_simulationStatusVerbose} = 'TRUE' ]]; then
@@ -64,7 +64,11 @@ function ListSimulationsStatus()
         # NOTE: Do not use BHMAS_runDirWithBetaFolders because it would break database
         #       which needs to change the ${localParametersPath} variable needed here.
         outputFileGlobalPath="${BHMAS_runDiskGlobalPath}/${BHMAS_projectSubpath}${localParametersPath}/${BHMAS_betaPrefix}${runId}/${BHMAS_outputStandardizedFilename}"
-        CreateOutputFileInTheStandardFormat "${runId}"
+        inputFileGlobalPath="${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath}${localParametersPath}/${BHMAS_betaPrefix}${runId}/${BHMAS_inputFilename}"
+        integrationSteps0='--'
+        integrationSteps1='--'
+        integrationSteps2='--'
+        kappaMassPreconditioning='-----'
         toBeCleaned=0
         trajectoriesDone='-----'
         numberLastTrajectory='----'
@@ -77,23 +81,20 @@ function ListSimulationsStatus()
         timeFromLastTrajectory='------'
         averageTimePerTrajectory='----'
         timeLastTrajectory='----'
-        if [[ -s "${outputFileGlobalPath}" ]]; then
-            __static__CheckIfOutputFileShouldBeCleaned
-            __static__ExtractTrajectoryNumbers
-            __static__ExtractAcceptanceInformation
-            __static__ExtractActionAndPlaquetteInformation
-            if [[ ${jobStatus} = 'RUNNING' ]]; then
-                __static__ExtractTimeFromLastTrajectory
-            fi
-            if [[ ${BHMAS_simulationStatusMeasureTimeOption} = 'TRUE' ]]; then
-                __static__ExtractTrajectoryTimes
+        if CreateOutputFileInTheStandardFormat "${runId}"; then
+            if [[ -s "${outputFileGlobalPath}" ]]; then
+                __static__CheckIfOutputFileShouldBeCleaned
+                __static__ExtractTrajectoryNumbers
+                __static__ExtractAcceptanceInformation
+                __static__ExtractActionAndPlaquetteInformation
+                if [[ ${jobStatus} = 'RUNNING' ]]; then
+                    __static__ExtractTimeFromLastTrajectory
+                fi
+                if [[ ${BHMAS_simulationStatusMeasureTimeOption} = 'TRUE' ]]; then
+                    __static__ExtractTrajectoryTimes
+                fi
             fi
         fi
-        inputFileGlobalPath="${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath}${localParametersPath}/${BHMAS_betaPrefix}${runId}/${BHMAS_inputFilename}"
-        integrationSteps0='--'
-        integrationSteps1='--'
-        integrationSteps2='--'
-        kappaMassPreconditioning='-----'
         if [[ -f "${inputFileGlobalPath}" ]]; then
             ExtractSimulationInformationFromInputFile
         fi
@@ -113,7 +114,8 @@ function ListSimulationsStatus()
 
 function __static__GetJobStatus()
 {
-    local runId parametersString betaValue seedPart postfix jobNameRegex value counter jobStatus
+    local runId parametersString betaValue seedPart postfix jobNameRegex\
+          value counter jobStatus
     runId="$1"
     parametersString="$2"
     #Assume runId format is fixed, as often done
@@ -123,16 +125,16 @@ function __static__GetJobStatus()
     betaValue="${betaValue[0]}"
     case "${postfix}" in
         continueWithNewChain )
-            postfix="NC"
+            postfix=''
             ;;
         thermalizeFromConf )
-            postfix="TC"
+            postfix='_TC'
             ;;
        thermalizeFromHot )
-            postfix="TH"
+            postfix='_TH'
             ;;
     esac
-    jobNameRegex="${parametersString}_${BHMAS_betaPrefix}${betaValue}(_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/})*_${seedPart}(_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/})*_${postfix}"
+    jobNameRegex="${parametersString}__${BHMAS_betaPrefix}${betaValue}(_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/})*_${seedPart}(_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/})*${postfix}"
     CheckIfVariablesAreDeclared jobsInformation
     #Assume each element of jobsInformation is of the form "jobName@jobStatus"
     counter=0

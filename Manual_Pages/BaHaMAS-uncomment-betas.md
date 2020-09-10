@@ -1,6 +1,6 @@
-% BaHaMAS-uncomment-betas(1) Version 1.0.0 | User Manual
+% BaHaMAS-uncomment-betas(1) Version 0.3.0 | User Manual
 % [Alessandro Sciarra](sciarra@itp.uni-frankfurt.de)
-% 14 April 2020
+% 10 September 2020
 
 # NAME
 

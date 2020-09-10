@@ -148,6 +148,7 @@ function DeclareBaHaMASGlobalVariables()
     readonly BHMAS_deltaHColumn=8
     readonly BHMAS_acceptanceColumn=9
     readonly BHMAS_trajectoryTimeColumn=10
+    readonly BHMAS_labelToStartFromHot='toBeStartedFromHot'
 
     #Metadata variables
     readonly BHMAS_metadataFilename='.BaHaMAS_metadata'
@@ -240,15 +241,11 @@ function DeclareAllGlobalVariables()
 {
     if IsBaHaMASRunInSetupMode; then
         return 0
-    else
-        if ! IsTestModeOn && [[ ! -f "${BHMAS_userSetupFile}" ]]; then
-            if WasAnyOfTheseOptionsGivenToBaHaMAS '-h' '--help'; then
-                #Make a fake BaHaMAS setup here to treat this corner case
-                function DeclareOutputRelatedGlobalVariables() { BHMAS_coloredOutput='FALSE'; }
-                function DeclareUserDefinedGlobalVariables() { :; }
-            else
-                Internal "Global variable declaration mechanism should not be hit in this scenario!"
-            fi
+    elif IsBaHaMASRunInHelpOrVersionMode; then
+        if [[ ! -f "${BHMAS_userSetupFile}" ]]; then
+            #Make a fake BaHaMAS setup here to treat this corner case
+            function DeclareOutputRelatedGlobalVariables() { BHMAS_coloredOutput='FALSE'; }
+            function DeclareUserDefinedGlobalVariables() { :; }
         fi
     fi
     DeclareOutputRelatedGlobalVariables

@@ -103,7 +103,7 @@ function AddSoftwareSpecificPartToMeasurementJobScript_CL2QCD()
             "    if hash mbuffer 2>/dev/null; then"\
             "        time \${dir${index}}/${BHMAS_measurementExecutableFilename} \${line} --deviceId=${index} 2>> \${dir${index}}/\${errFile} | mbuffer -q -m2M >> \${dir${index}}/\${outFile}"\
             "    else"\
-            "        time srun -n 1 \${dir${index}}/${BHMAS_measurementExecutableFilename} \${line} --deviceId=${index} 2>> \${dir${index}}/\${errFile} >> \${dir${index}}/\${outFile}"\
+            "        time ${BHMAS_jobRunCommand} -n 1 \${dir${index}}/${BHMAS_measurementExecutableFilename} \${line} --deviceId=${index} 2>> \${dir${index}}/\${errFile} >> \${dir${index}}/\${outFile}"\
             "    fi"\
             "    if [[ \$? -ne 0 ]]; then"\
             "        printf \"\nError occurred in simulation at b${betaValues[${index}]%_*}.\n\""\

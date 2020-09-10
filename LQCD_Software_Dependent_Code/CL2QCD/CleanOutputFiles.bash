@@ -35,14 +35,14 @@ function CleanOutputFilesForGivenSimulation_CL2QCD()
     if sort --numeric-sort --unique --check=silent --key 1,1 "${outputFileGlobalPath}"; then
         cecho lm "   The file " file "$(basename "${outputFileGlobalPath}")" " has not to be cleaned!"
     else
-        __static__CleanFile "${runId}" "${outputFileGlobalPath}" "TRUE" || return 1
+        __static__CleanFile_CL2QCD "${runId}" "${outputFileGlobalPath}" "TRUE" || return 1
     fi
 
     if [[ -f "${outputFilePbpGlobalPath}" ]]; then
         if sort --numeric-sort --unique --check=silent --key 1,1 "${outputFilePbpGlobalPath}"; then
             cecho lm "   The file " file "$(basename "${outputFilePbpGlobalPath}")" " has not to be cleaned!"
         else
-            __static__CleanFile "${runId}" "${outputFilePbpGlobalPath}" "FALSE" || return 1
+            __static__CleanFile_CL2QCD "${runId}" "${outputFilePbpGlobalPath}" "FALSE" || return 1
         fi
     fi
 }

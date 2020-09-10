@@ -24,10 +24,6 @@ done && unset -v 'fileToBeSourced'
 
 function ParseCommandLineOptionsTillMode()
 {
-    if [[ ${#BHMAS_commandLineOptionsToBeParsed[@]} -eq 0 ]]; then
-        BHMAS_executionMode='mode:help'
-        return 0
-    fi
     #Locally set function arguments to take advantage of shift
     set -- "${BHMAS_commandLineOptionsToBeParsed[@]}"
     #The first option can be a LQCD software
@@ -108,7 +104,10 @@ function ParseCommandLineOptionsTillMode()
         readonly BHMAS_lqcdSoftware
     fi
     #If user specified --help in a given mode, act accrdingly
-    if [[ ! ${BHMAS_executionMode} =~ ^mode:(help|version|setup)$ ]]; then
+    if [[ ${BHMAS_executionMode} =~ ^mode:(help|version|setup)$ ]]; then
+        #Ignore anything after these modes
+        BHMAS_commandLineOptionsToBeParsed=()
+    else
         if  ElementInArray '--help' "${BHMAS_commandLineOptionsToBeParsed[@]}" "${BHMAS_optionsToBePassedToDatabase[@]}"; then
             BHMAS_executionMode+='-help'
         fi
@@ -138,6 +137,7 @@ function ParseRemainingCommandLineOptions()
     # https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/issues/27
     local modeSpecificAllSoftwareParser
     modeSpecificAllSoftwareParser=(
+        'mode:thermalize'
         'mode:continue'
         'mode:continue-thermalization'
         'mode:job-status'
@@ -196,7 +196,7 @@ function __static__CheckIfOnlyValidOptionsWereGiven()
     for option in "${BHMAS_commandLineOptionsToBeParsed[@]}"; do
         [[ ! ${option} =~ ^- ]] && continue
         if ! ElementInArray "${option}" "${validOptions[@]}"; then
-            Fatal ${BHMAS_fatalCommandLine} 'Option ' emph "${option}" ' non accepted in ' emph "${BHMAS_executionMode#mode:}" ' mode.'
+            Fatal ${BHMAS_fatalCommandLine} 'Option ' emph "${option}" ' not accepted in ' emph "${BHMAS_executionMode#mode:}" ' mode.'
         fi
     done
 }
@@ -328,6 +328,14 @@ function __static__ParseRemainingGeneralOptions()
                 fi
                 shift
                 ;;
+            --coresPerNode )
+                if [[ ! ${2:-} =~ ^[1-9][0-9]*$ ]]; then
+                    PrintOptionSpecificationErrorAndExit "$1"
+                else
+                    BHMAS_coresPerNode=$2
+                fi
+                shift 2
+                ;;
             * )
                 PrintInvalidOptionErrorAndExit "$1" ;;
         esac
@@ -346,19 +354,53 @@ function WasAnyOfTheseOptionsGivenToBaHaMAS()
         if ElementInArray "${option}" "${BHMAS_specifiedCommandLineOptions[@]}"; then
             return 0
         fi
+        # Ignore any option given after 'help', 'version', 'setup'.
+        # This avoids the functions IsBaHaMASRunInSetupMode and
+        # IsBaHaMASRunInHelpOrVersionMode in case the user specifies
+        # more than one of these options, e.g. "--version --setup".
+        if [[ ${option} =~ ^(--)?(help|version|setup)$ ]]; then
+            break
+        fi
     done
     return 1
 }
 
-# This function is needed before the variable
-# BHMAS_executionMode is available and set!
+# These functions are needed before the variable BHMAS_executionMode is available and set!
 function IsBaHaMASRunInSetupMode()
 {
-    if WasAnyOfTheseOptionsGivenToBaHaMAS 'setup' '--setup'; then
+    if __static__IsBaHaMASRunInMode 'setup'; then
         return 0
     else
         return 1
     fi
 }
+
+function IsBaHaMASRunInHelpOrVersionMode()
+{
+    if __static__IsBaHaMASRunInMode 'help' || __static__IsBaHaMASRunInMode 'version'; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Here we need to handle correctly the corner cases where the user specifies more core
+# options (e.g. "--version --setup") testing the first command line option.
+function __static__IsBaHaMASRunInMode()
+{
+    local modeToCheck; modeToCheck="$1"
+    set -- "${BHMAS_specifiedCommandLineOptions[@]}"
+    if [[ $1 =~ ^(CL2QCD|openQCD-FASTSUM)$ ]]; then
+        shift
+    fi
+    if [[ ${modeToCheck} = 'help' &&  $1 = '-h' ]]; then
+        return 0
+    elif [[ $1 =~ ^(--)?${modeToCheck}$ ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 
 MakeFunctionsDefinedInThisFileReadonly

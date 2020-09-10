@@ -54,6 +54,7 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
         BHMAS_approxHeatbathFilename
         BHMAS_approxMDFilename
         BHMAS_approxMetropolisFilename
+        BHMAS_jobRunCommand
         BHMAS_clusterPartition
         BHMAS_clusterNode
         BHMAS_clusterConstraint
@@ -131,9 +132,19 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
     fi
     if [[ "${BHMAS_measurePbp:-}" != '' ]]; then
         if [[ "${BHMAS_measurePbp}" != 'TRUE' ]] && [[ "${BHMAS_measurePbp}" != 'FALSE' ]]; then
-        Error -n B emph 'BHMAS_measurePbp' uB ' variable must be set either to ' emph 'TRUE' ' or to ' emph 'FALSE'
-        mustReturn='FALSE'
+            Error -n B emph 'BHMAS_measurePbp' uB ' variable must be set either to ' emph 'TRUE' ' or to ' emph 'FALSE' '.'
+            mustReturn='FALSE'
         fi
+    fi
+    if [[ "${BHMAS_jobRunCommand:-}" != '' ]]; then
+        if ! hash "${BHMAS_jobRunCommand}" 2>/dev/null; then
+            Error -n 'Program ' B emph "${BHMAS_jobRunCommand}" uB ' was not found, but it was specified in the setup as ' emph 'BHMAS_jobRunCommand' uB '.'
+            mustReturn='FALSE'
+        else
+            readonly BHMAS_jobRunCommand
+        fi
+    else
+        readonly BHMAS_jobRunCommand="$(GetDefaultCommandToRunSoftware)"
     fi
 
     #If variables remained in arrays, print error
@@ -361,9 +372,11 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnExecutionM
         for variable in "${variablesThatMustBeNotEmpty[@]}"; do
             listOfVariablesAsString+="\n$(cecho -d ly " " B) ${variable}"
         done
-        Error "To run " B "BaHaMAS" uB " in " emph "${BHMAS_executionMode#mode:}"\
-              " execution mode, the following " emph "variable(s)" " must be " emph "set" " and " emph "not empty" ": ${listOfVariablesAsString}"
-        Fatal ${BHMAS_fatalVariableUnset} -n "Please set the above variables properly using the " emph "setup" " mode and run " B "BaHaMAS" uB " again."
+        Error 'To run ' B 'BaHaMAS' uB ' in ' emph "${BHMAS_executionMode#mode:}"\
+              ' execution mode with ' emph "${BHMAS_lqcdSoftware}" ',\nthe following '\
+              emph 'variable(s)' ' must be ' emph 'set' ' and ' emph 'not empty' ": ${listOfVariablesAsString}"
+        Fatal ${BHMAS_fatalVariableUnset} -n 'Please set the above variables properly using the '\
+              emph 'setup' ' mode and run ' B 'BaHaMAS' uB ' again.'
     else
         for index in "${!neededFolders[@]}"; do
             if [[ -d "${neededFolders[${index}]}" ]]; then
@@ -387,9 +400,11 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnExecutionM
         for variable in ${neededFiles[@]+"${neededFiles[@]}"}; do
             listOfVariablesAsString+="\n$(cecho -d file " ") ${variable}"
         done
-        Error "To run " B "BaHaMAS" uB " in " emph "${BHMAS_executionMode}"\
-              " execution mode, the following specified " B dir "folder(s)" uB " or " file "file(s)" " must " emph "exist" ": ${listOfVariablesAsString}"
-        Fatal ${BHMAS_fatalFileNotFound} -n "Please check the path variables in the " B "BaHaMAS" uB " setup and run the program again."
+        Error 'To run ' B 'BaHaMAS' uB ' in ' emph "${BHMAS_executionMode}"\
+              ' execution mode with ' emph "{BHMAS_lqcdSoftware}" ',\nthe following specified '\
+              B dir 'folder(s)' uB ' or ' file 'file(s)' ' must ' emph 'exist' ": ${listOfVariablesAsString}"
+        Fatal ${BHMAS_fatalFileNotFound} -n 'Please check the path variables in the '\
+              B 'BaHaMAS' uB ' setup and run the program again.'
     fi
 }
 

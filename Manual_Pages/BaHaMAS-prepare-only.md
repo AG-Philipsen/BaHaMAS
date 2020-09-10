@@ -1,6 +1,6 @@
-% BaHaMAS-prepare-only(1) Version 1.0.0 | User Manual
+% BaHaMAS-prepare-only(1) Version 0.3.0 | User Manual
 % [Alessandro Sciarra](sciarra@itp.uni-frankfurt.de)
-% 14 April 2020
+% 10 September 2020
 
 # NAME
 
@@ -75,6 +75,9 @@ If successfully run, the user can have a look at the files created and submit th
 \--processorsGrid, \-p
 :   Specify 4 integers which refer to how many processors have to be used to split the lattice in every direction (default: 1 1 1 1).
     The first entry refer to the temporal lattice direction and the other three to the spatial ones.
+
+\--coresPerNode
+:   Specify how many nodes should be used per node (default: own setup).
 
 # FILES
 

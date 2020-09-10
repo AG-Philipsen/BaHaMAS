@@ -20,18 +20,24 @@
 function SetBetaPostfixDependingOnExistingThermalizedConfigurations()
 {
     local confGlobalPathPrefix foundConfigurations
-    #Here we fix the beta postfix just looking for thermalized conf from hot at the actual parameters (no matter at which beta);
-    #if at least one configuration thermalized from hot is present, it means the thermalization has to be done from conf (the
-    #correct beta to be used is selected then later in the script ---> see where the array BHMAS_startConfigurationGlobalPath is filled
+    # Here we fix the beta postfix just looking for thermalized conf from hot at the actual parameters (no matter at which beta).
+    # If at least one thermalized configuration from hot is present, it means the thermalization has to be done from conf (the
+    # correct beta to be used is selected then later in the script -> see where the array BHMAS_startConfigurationGlobalPath is filled).
     #
-    # TODO: If a thermalization from hot is finished but one other crashed and one wishes to resume it, the postfix should be
-    #       from Hot but it is from conf since in ${BHMAS_thermConfsGlobalPath} a conf from hot is found. Think about how to fix this.
-    confGlobalPathPrefix="${BHMAS_thermConfsGlobalPath}/conf.${BHMAS_parametersString}"
-    foundConfigurations=( "${confGlobalPathPrefix}_${BHMAS_betaPrefix}"${BHMAS_betaGlob}"_${BHMAS_seedPrefix}"${BHMAS_seedGlob}"_fromHot_trNr"+([0-9]) )
-    if [[ ${#foundConfigurations[@]} -eq 0 ]]; then
-        BHMAS_betaPostfix="_thermalizeFromHot"
-    else
-        BHMAS_betaPostfix="_thermalizeFromConf"
+    # NOTE: In the GlobalVariables.bash file, the BHMAS_betaPostfix is declared and initialized to '_continueWithNewChain'.
+    #       Here it is supposed to be overwritten according to configurations pool state. However, if the user wishes to do
+    #       a thermalization from hot and some is already existing, then a fromConf one would be done. Hence the --fromHot
+    #       command line option. This has to be considered here. Hence the if-clause to understand if the postfix was changed
+    #       in the parser or not.
+    if [[ ${BHMAS_betaPostfix} = '_continueWithNewChain' ]]; then
+       confGlobalPathPrefix="${BHMAS_thermConfsGlobalPath}/conf.${BHMAS_parametersString}"
+       foundConfigurations=( "${confGlobalPathPrefix}_${BHMAS_betaPrefix}"${BHMAS_betaGlob}"_${BHMAS_seedPrefix}"${BHMAS_seedGlob}"_fromHot_trNr"+([0-9]) )
+       if [[ ${#foundConfigurations[@]} -eq 0 ]]; then
+           BHMAS_betaPostfix="_thermalizeFromHot"
+       else
+           BHMAS_betaPostfix="_thermalizeFromConf"
+       fi
+       readonly BHMAS_betaPostfix
     fi
 }
 
@@ -109,7 +115,7 @@ function FindConfigurationGlobalPathFromWhichToStartTheSimulation()
                 ;;
 
             _thermalizeFromHot )
-                BHMAS_startConfigurationGlobalPath[${runId}]="notFoundHenceStartFromHot"
+                BHMAS_startConfigurationGlobalPath[${runId}]="${BHMAS_labelToStartFromHot}"
                 ;;
 
             * )

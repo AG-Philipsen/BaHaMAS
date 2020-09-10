@@ -20,7 +20,10 @@
 
 function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
 {
-    local jobScriptGlobalPath runId mpirunCommandOptions startingConfigurationFilename
+    local jobScriptGlobalPath runId runCommandOptions startingConfigurationFilename\
+          deltaConfs initialConf index shiftConfs\
+          thermalizeFunction thermalizeFunctionCall thermalizeType\
+          logFileGlobalpath timeTr initialSleepTime
     jobScriptGlobalPath="$1"; shift
     betaValues=( "$@" )
 
@@ -32,7 +35,7 @@ function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
     fi
 
     #Set additional command line options for openQCD executable
-    mpirunCommandOptions=''
+    runCommandOptions=''
     case ${BHMAS_executionMode} in
         mode:thermalize | mode:new-chain | mode:prepare-only )
             # openQCD does not accept a global path as configuration filename and requires
@@ -46,16 +49,16 @@ function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
                          emph "${runId}" ' but needs to be specified to prepare the job\n'\
                          'script! Failure in function ' emph "${FUNCNAME}"
             fi
-            if [[ "${startingConfigurationFilename}" != 'notFoundHenceStartFromHot' ]]; then
-                mpirunCommandOptions+="-c ${startingConfigurationFilename}"
+            if [[ "${startingConfigurationFilename}" != "${BHMAS_labelToStartFromHot}" ]]; then
+                runCommandOptions+="-c ${startingConfigurationFilename}"
             fi
             ;;
         mode:continue* )
             # openQCD-FASTSUM takes care of using the last checkpoint which has
             # previously been prepared in the processing operations for continue
-            mpirunCommandOptions+="-c -a"
+            runCommandOptions+="-c -a"
             if [[ ! -f "${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}/${BHMAS_outputFilename}.rng" ]]; then
-                mpirunCommandOptions+=" -seed ${RANDOM}"
+                runCommandOptions+=" -seed ${RANDOM}"
             fi
             ;;
         * )
@@ -65,7 +68,6 @@ function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
 
     # Determine needed information for checkpoint renaming mechanism
     # To be on the safe side, extract delta from the input file
-    local deltaConfs initialConf index shiftConfs
     deltaConfs=$(ExtractGapBetweenCheckpointsFromInputFile "${runId}")
     # Extract initial tr. number either from initial configuration file
     # or from symbolic link to it. Note that the symbolic link is created
@@ -74,7 +76,7 @@ function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
         mode:thermalize | mode:prepare-only | mode:new-chain )
             # Here the startingConfigurationFilename variable set above contains
             # a configuration filename from the thermalized pool -> use it
-            if [[ "${startingConfigurationFilename}" = 'notFoundHenceStartFromHot' ]]; then
+            if [[ "${startingConfigurationFilename}" = "${BHMAS_labelToStartFromHot}" ]]; then
                 shiftConfs=0
             else
                 shiftConfs=${startingConfigurationFilename[0]##*_trNr}
@@ -93,7 +95,6 @@ function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
 
     # If in thermalization mode we want to add a function to copy the
     # last configuration to the pool together with its call
-    local thermalizeFunction thermalizeFunctionCall thermalizeType
     if [[ ${BHMAS_executionMode} = 'mode:thermalize' ]] || [[ ${BHMAS_executionMode} = "mode:continue-thermalization" ]]; then
         if [[ ${BHMAS_betaPostfix} == "_thermalizeFromHot" ]]; then
             thermalizeType='fromHot'
@@ -110,6 +111,38 @@ function AddSoftwareSpecificPartToProductionJobScript_openQCD-FASTSUM()
         thermalizeFunction=''
         thermalizeFunctionCall=''
     fi
+
+    # For the renaming mechanism it is important to give a sensible starting
+    # sleeping time because the startup of openQCD and the reading of the
+    # first checkpoint in case of a continue could take a while. In continue
+    # mode, then, it is crucial to not rename the resume checkpoint before
+    # it has been read. The idea here is to use the log file to deduce the
+    # time per trajectory and set the initial sleeping time to 50% of the
+    # time between two checkpoints. In different modes this problem does not
+    # occur and and hard-coded value is then chosen.
+    case ${BHMAS_executionMode} in
+        mode:continue* )
+            logFileGlobalpath="${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}/${BHMAS_outputFilename}.log"
+            if [[ ! -f "${logFileGlobalpath}" ]]; then
+                Fatal ${BHMAS_fatalLogicError}\
+                      'Unable to find opneQCD log file\n' file "${logFileGlobalpath}" '\nin job script creation process.'
+            fi
+            timeTr=$(awk '$0 ~ /^Time per trajectory = /{sum+=$5; count++}END{printf "%d", count==0 ? 0 : sum/count}' "${logFileGlobalpath}")
+            initialSleepTime=$(( timeTr * deltaConfs / 2 ))
+            if [[ ${initialSleepTime} -eq 0 ]]; then
+                Fatal ${BHMAS_fatalLogicError}\
+                      'Initial sleep time for first renaming deduced to be 0s, invalid!\n'\
+                      'Please, check how often you store checkpoints and how fast is your run.\n'\
+                      'Simulation cannot be resumed.'
+            elif [[ ${initialSleepTime} -le 60 ]]; then
+                Warning 'Initial sleep time for first renaming deduced to be ' emph "${initialSleepTime}s"\
+                        '.\nIf the resuming checkpoint gets renamed before openQCD reads it, the simulation will fail.'
+            fi
+            ;;
+        * )
+            initialSleepTime=10
+            ;;
+    esac
 
     exec 5>&1 1>> "${jobScriptGlobalPath}"
     cat <<END_OF_JOBSCRIPT_FILE
@@ -143,28 +176,29 @@ runDir="${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}"
 cd \${runDir}
 
 printf "Running openQCD-FASTSUM from '\$(pwd)':\n"
-printf '  mpirun \${submitDir}/${BHMAS_productionExecutableFilename} -i \${submitDir}/${BHMAS_inputFilename} -noms -noloc ${mpirunCommandOptions}\n\n'
+printf '  ${BHMAS_jobRunCommand} \${submitDir}/${BHMAS_productionExecutableFilename} -i \${submitDir}/${BHMAS_inputFilename} -noms -noloc ${runCommandOptions}\n\n'
 
-mpirun \${submitDir}/${BHMAS_productionExecutableFilename} -i \${submitDir}/${BHMAS_inputFilename} -noms -noloc ${mpirunCommandOptions} &
+${BHMAS_jobRunCommand} \${submitDir}/${BHMAS_productionExecutableFilename} -i \${submitDir}/${BHMAS_inputFilename} -noms -noloc ${runCommandOptions} &
 pidRun=\${!}
 
-__static__MonitorAndRenameCheckpointFiles "\${pidRun}" 10 "${BHMAS_outputFilename}" ${deltaConfs} ${shiftConfs} "${BHMAS_configurationPrefix//\\/}" "${BHMAS_prngPrefix//\\/}" "${BHMAS_dataPrefix//\\/}" ${BHMAS_checkpointMinimumNumberOfDigits} &
+__static__MonitorAndRenameCheckpointFiles "\${pidRun}" ${initialSleepTime} "${BHMAS_outputFilename}" ${deltaConfs} ${shiftConfs} "${BHMAS_configurationPrefix//\\/}" "${BHMAS_prngPrefix//\\/}" "${BHMAS_dataPrefix//\\/}" ${BHMAS_checkpointMinimumNumberOfDigits} &
 pidRename=\${!}
 
 wait -n #Wait for the first process to finish
 errorCodeFirst=\${?}
 
 if kill -0 "\${pidRun}" 2>/dev/null && kill -0 "\${pidRename}" 2>/dev/null; then
-    printf 'FATAL: Some child process finished, but neither openQCD-FASTSUM nor renaming mechanism!\n'
+    printf "FATAL: Some child process finished (\$(date +'%d.%m.%Y %H:%M:%S')), but neither openQCD-FASTSUM nor renaming mechanism!\n"
     exit 1
 elif kill -0 "\${pidRun}" 2>/dev/null; then
-    printf '\nFATAL: Renaming mechanism failed, terminating openQCD-FASTSUM and exiting job...\n'
+    printf "FATAL: Renaming mechanism failed (\$(date +'%d.%m.%Y %H:%M:%S')), terminating openQCD-FASTSUM and exiting job...\n"
     kill "\${pidRun}"
     exit 113
 elif kill -0 "\${pidRename}" 2>/dev/null; then
-    printf 'openQCD-FASTSUM exited, wait for renaming mechanism to finish...\n\n'
+    printf "openQCD-FASTSUM exited (\$(date +'%d.%m.%Y %H:%M:%S')), wait for renaming mechanism to finish...\n"
     wait "\${pidRename}"
     errorCodeSecond=\${?}
+    printf "\n     Date and time: \$(date +'%d.%m.%Y %H:%M:%S')\n"
     printf "Renaming exit code: \${errorCodeSecond}\n"
     printf "open-QCD exit code: \${errorCodeFirst}\n"
     if [[ \${errorCodeFirst} -ne 0 ]] || [[ \${errorCodeSecond} -ne 0 ]]; then
@@ -248,14 +282,16 @@ function __static__RenameCheckpointFiles()
 
 function __static__BackupFile()
 {
-    local sourceGlobalPath destinationFolderGlobalPath
+    local sourceGlobalPath destinationGlobalPath
     sourceGlobalPath="$1"
-    destinationFolderGlobalPath="$2"
+    destinationGlobalPath="${2}/$(basename "${sourceGlobalPath}")"
     if [[ ! -f "${sourceGlobalPath}" ]]; then
         printf 'ERROR [${FUNCNAME}]: No output file to be copied found!\n'
         exit 111
     fi
-    cp "${sourceGlobalPath}" "${destinationFolderGlobalPath}/." || exit 111
+    if [[ "${sourceGlobalPath}" != "${destinationGlobalPath}" ]]; then
+        cp "${sourceGlobalPath}" "${destinationGlobalPath}" || exit 111
+    fi
 }
 
 function __static__BackupLastConfiguration()

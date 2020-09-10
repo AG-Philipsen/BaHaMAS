@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 #  Copyright (c) 2017-2018,2020 Alessandro Sciarra
 #
@@ -43,6 +43,7 @@ readonly BHMAS_testsFolderAuxFiles=${BHMAS_testsFolder}/AuxiliaryFiles
 #Load needed files
 readonly BHMAS_filesToBeSourced=( "${BHMAS_repositoryTopLevelPath}/Generic_Code/UtilityFunctions.bash"
                                   "${BHMAS_repositoryTopLevelPath}/Generic_Code/OutputFunctionality.bash"
+                                  "${BHMAS_repositoryTopLevelPath}/Generic_Code/SystemRequirements.bash"
                                   "${BHMAS_testsFolder}/AuxiliaryFunctions.bash"
                                   "${BHMAS_testsFolder}/CommandLineParser.bash" )
 #Source error codes and fail with error hard coded since variable defined in file which is sourced!
@@ -55,6 +56,9 @@ done
 if ElementInArray '-h' "$@" || ElementInArray '--help' "$@"; then
     ParseCommandLineOption '--help'
 fi
+
+#Ensure system can run BaHaMAS
+CheckSystemRequirements
 
 #BaHaMAS tests global variables
 cleanTestFolder='TRUE'
@@ -83,11 +87,12 @@ availableTests=(
     ['help-3']='--help'
     ['version-1']='--version'
     ['version-2']='version'
-    ['CL2QCD-prepare-only']='CL2QCD prepare-only -w=1d --togglePbp'
+    ['CL2QCD-prepare-only']='CL2QCD prepare-only --togglePbp'
     ['CL2QCD-submit-only']='CL2QCD submit-only --betasfile betas'
     ['CL2QCD-new-chain']='CL2QCD new-chain --walltime = 1d'
     ['CL2QCD-new-chain-goal']='CL2QCD new-chain --walltime= 1d'
     ['CL2QCD-thermalize-hot']='CL2QCD thermalize --walltime 1d'
+    ['CL2QCD-thermalize-hot-forced']='CL2QCD thermalize --fromHot --walltime 1d'
     ['CL2QCD-thermalize-conf']='CL2QCD thermalize --walltime 1d'
     ['CL2QCD-continue-save']='CL2QCD continue --walltime 1d -F 80 -f 140 -m=1234'
     ['CL2QCD-continue-last']='CL2QCD continue --walltime 1d --pf 3'
@@ -99,6 +104,7 @@ availableTests=(
     ['CL2QCD-continue-therm-resume']='CL2QCD continue-thermalization --walltime 1d'
     ['CL2QCD-continue-therm-num']='CL2QCD continue-thermalization --till 5000 --walltime 1d'
     ['CL2QCD-continue-therm-goal']='CL2QCD continue-thermalization --walltime 1d'
+    ['CL2QCD-continue-therm-hot']='CL2QCD continue-thermalization --fromHot --walltime 1d'
     ['CL2QCD-simulation-status']='CL2QCD simulation-status'
     ['CL2QCD-simulation-status-time']='CL2QCD simulation-status --doNotMeasureTime'
     ['CL2QCD-simulation-status-queued']='CL2QCD simulation-status --showOnlyQueued'
@@ -108,22 +114,23 @@ availableTests=(
     ['CL2QCD-accRateReport-num']='CL2QCD acceptance-rate-report --interval 300'
     ['CL2QCD-cleanOutputFiles']='CL2QCD clean-output-files'
     ['CL2QCD-cleanOutputFiles-all']='CL2QCD clean-output-files --all'
-    ['openQCD-FASTSUM-prepare-only']='openQCD-FASTSUM prepare-only -w=1d --processorsGrid 1 2 4 6'
+    ['openQCD-FASTSUM-prepare-only']='openQCD-FASTSUM prepare-only -w=1d --processorsGrid 1 2 4 4 --coresPerNode 32'
     ['openQCD-FASTSUM-submit-only']='openQCD-FASTSUM submit-only --betasfile betas'
     ['openQCD-FASTSUM-new-chain']='openQCD-FASTSUM new-chain --walltime = 1d --processorsGrid 1 2 4 6'
     ['openQCD-FASTSUM-new-chain-goal']='openQCD-FASTSUM new-chain --walltime= 1d --processorsGrid 1 2 4 6'
     ['openQCD-FASTSUM-thermalize-hot']='openQCD-FASTSUM thermalize --walltime 1d --processorsGrid 1 2 4 6'
+    ['openQCD-FASTSUM-thermalize-hot-forced']='openQCD-FASTSUM thermalize --fromHot --walltime 1d --processorsGrid 1 2 4 6'
     ['openQCD-FASTSUM-thermalize-conf']='openQCD-FASTSUM thermalize --walltime 1d --processorsGrid 1 2 4 6'
     ['openQCD-FASTSUM-continue']='openQCD-FASTSUM continue --walltime 1d -m=1400'
     ['openQCD-FASTSUM-continue-last']='openQCD-FASTSUM continue --walltime 1d'
     ['openQCD-FASTSUM-continue-resume']='openQCD-FASTSUM continue --walltime 1d'
     ['openQCD-FASTSUM-continue-num']='openQCD-FASTSUM continue --till 10000 --walltime 1d'
     ['openQCD-FASTSUM-continue-goal']='openQCD-FASTSUM continue --walltime 1d'
-    ['openQCD-FASTSUM-continue-therm-save']='openQCD-FASTSUM continue-thermalization --walltime 1d -m=1234'
-    ['openQCD-FASTSUM-continue-therm-last']='openQCD-FASTSUM continue-thermalization --walltime 1d'
+    ['openQCD-FASTSUM-continue-therm-last']='openQCD-FASTSUM continue-thermalization --walltime 1d -m=1234'
     ['openQCD-FASTSUM-continue-therm-resume']='openQCD-FASTSUM continue-thermalization --walltime 1d'
     ['openQCD-FASTSUM-continue-therm-num']='openQCD-FASTSUM continue-thermalization --till 5000 --walltime 1d'
     ['openQCD-FASTSUM-continue-therm-goal']='openQCD-FASTSUM continue-thermalization --walltime 1d'
+    ['openQCD-FASTSUM-continue-therm-hot']='openQCD-FASTSUM continue-thermalization --fromHot --walltime 1d'
     ['openQCD-FASTSUM-simulation-status']='openQCD-FASTSUM simulation-status'
     ['openQCD-FASTSUM-simulation-status-time']='openQCD-FASTSUM simulation-status --doNotMeasureTime'
     ['openQCD-FASTSUM-simulation-status-queued']='openQCD-FASTSUM simulation-status --showOnlyQueued'

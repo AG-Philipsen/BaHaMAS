@@ -93,7 +93,7 @@ function _BaHaMAS_completions()
             selectedMode=${COMP_WORDS[1]}
             listOfOptionsToProposeAsString=''
         fi
-        listOfOptionsToProposeAsString+="${allowedOptionsPerModeOrSoftware[mode:${selectedMode}]}"
+        listOfOptionsToProposeAsString+=" ${allowedOptionsPerModeOrSoftware[mode:${selectedMode}]}"
         #Ensure spaces at the edges of the string to allow following mechanism to work
         listOfOptionsToProposeAsString=" ${listOfOptionsToProposeAsString} "
         for option in "${COMP_WORDS[@]:2}"; do

@@ -1,6 +1,6 @@
-% BaHaMAS-thermalize(1) Version 1.0.0 | User Manual
+% BaHaMAS-thermalize(1) Version 0.3.0 | User Manual
 % [Alessandro Sciarra](sciarra@itp.uni-frankfurt.de)
-% 14 April 2020
+% 10 September 2020
 
 # NAME
 
@@ -17,8 +17,8 @@ This mode operates exclusively on thermalization jobs.
 After having prepared everything that is needed (e.g. input file. job script), jobs for the selected betas are submitted.
 
 The starting configuration for the thermalization is automatically searched in the thermalized configurations folder and information about it is given to the user.
-If no configuration with the same parameters of the actual position is found, a thermalization "from hot" will be started.
-If at least one thermalized configuration "from hot" exists, then a thermalization "from conf" will be started.
+If no configuration with the same parameters of the actual position is found or if the **\--fromHot** option is given, a thermalization "from hot" will be started.
+If at least one thermalized configuration "from hot" exists and if the **\--fromHot** option is not given, then a thermalization "from conf" will be started.
 
 Most of the information for the simulation input file(s) is retrieved from the **betas** file, but the user can also tune some input via the command line options.
 
@@ -26,6 +26,9 @@ Most of the information for the simulation input file(s) is retrieved from the *
 
 \--betasfile *filename*
 :   Use *filename* instead of **betas** file.
+
+\--fromHot
+:   Force BaHaMAS to act on thermalization(s) from hot without determining itself the thermalization type.
 
 \--measurements, \-m *number*
 :   Specify the number of trajectories that should be done (default: 1000).
@@ -80,6 +83,9 @@ Most of the information for the simulation input file(s) is retrieved from the *
 \--processorsGrid, \-p
 :   Specify 4 integers which refer to how many processors have to be used to split the lattice in every direction (default: 1 1 1 1).
     The first entry refer to the temporal lattice direction and the other three to the spatial ones.
+
+\--coresPerNode
+:   Specify how many nodes should be used per node (default: own setup).
 
 # FILES
 

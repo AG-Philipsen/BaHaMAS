@@ -21,6 +21,10 @@
 # BaHaMAS format from the software output file(s). This file global
 # path is is given in the variable ${outputFileGlobalPath} and for
 # openQCD it has to be build from the log file.
+#
+# ATTENTION: To retrieve later the time from last trajectories, it
+#            is important to set the last modification date of the
+#            standardized file to that of the output file.
 function CreateOutputFileInTheStandardFormat_openQCD-FASTSUM()
 {
     CheckIfVariablesAreDeclared outputFileGlobalPath
@@ -43,6 +47,7 @@ function CreateOutputFileInTheStandardFormat_openQCD-FASTSUM()
     fi
     # NOTE: "N.A." is printed for information that openQCD does not give
     #       "nan" are printed for not found numbers -> https://stackoverflow.com/a/23622339
+    #       Plaquette and Polyakov loop values are divided by Nc=3 since not done in the code!
     awk -v offset="${trShift}"\
         '
         function PrintLineToFile(tr, plaq, L_re, L_im, L_norm, dH, acc, time)
@@ -54,7 +59,7 @@ function CreateOutputFileInTheStandardFormat_openQCD-FASTSUM()
             if(dH == ""){dH="nan"}
             if(acc == ""){acc="nan"}
             if(time == ""){time="nan"}
-            printf "%8d%25s%10s%10s%25s%25s%25.15f%15s%6d%10.1f\n", tr, plaq, "N.A.", "N.A.", L_re, L_im, L_norm, dH, acc, time
+            printf "%8d%25.15f%10s%10s%25.15f%25.15f%25.15f%15s%6d%10.1f\n", tr, plaq, "N.A.", "N.A.", L_re, L_im, L_norm, dH, acc, time
         }
         {
             if( $0 ~ /^Trajectory no [1-9][0-9]*$/ )
@@ -75,14 +80,14 @@ function CreateOutputFileInTheStandardFormat_openQCD-FASTSUM()
             }
             if( $0 ~ /^Average plaquette =/ )
             {
-                plaquette=$4
+                plaquette=$4/3.0
                 next
             }
             if( $0 ~ /^Polyakov loop =/ )
             {
-                polyRe=$4
-                polyIm=$5
-                polyNorm=sqrt($4**2+$5**2)
+                polyRe=$4/3.0
+                polyIm=$5/3.0
+                polyNorm=sqrt(polyRe**2+polyIm**2)
                 next
             }
             if( $0 ~ /^Time per trajectory =/ )
@@ -94,6 +99,9 @@ function CreateOutputFileInTheStandardFormat_openQCD-FASTSUM()
         END{
             PrintLineToFile(trajectory, plaquette, polyRe, polyIm, polyNorm, deltaH, accepted, trTime)
         } ' "${softwareOutputFileGlobalPath}" > "${outputFileGlobalPath}"
+
+    #Adjust timestamp of standardized file
+    touch -d "$(stat -c %y "${softwareOutputFileGlobalPath}")" "${outputFileGlobalPath}" || exit ${BHMAS_fatalBuiltin}
 }
 
 # This function has to extract from the ${inputFileGlobalPath} file

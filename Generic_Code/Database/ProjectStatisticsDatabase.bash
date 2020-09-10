@@ -142,7 +142,7 @@ function projectStatisticsDatabase()
     # Then it has to be initialized accordingly!
     if [[ "${UPDATE}" = "FALSE" ]]; then
         if [[ "${FILENAME_GIVEN_AS_INPUT}" = "" ]]; then
-            LATEST_DATABASE_FILE=$(ls ${BHMAS_databaseGlobalPath} | grep -E "[0-9]{2}_[0-9]{2}_[0-9]{2}_${BHMAS_databaseFilename}" | sort -t "_" -k 1,1 -k 2,2 -k 3,3 | tail -n1)
+            LATEST_DATABASE_FILE=$(ls ${BHMAS_databaseGlobalPath} | grep -E "[0-9]{2}_[0-9]{2}_[0-9]{2}_${BHMAS_databaseFilename}_$(whoami)" | sort -t "_" -k 1,1 -k 2,2 -k 3,3 | tail -n1)
             if [[ "${LATEST_DATABASE_FILE}" = "" ]]; then
                 Fatal ${BHMAS_fatalFileNotFound} "No older database versions found!"
             fi
@@ -162,7 +162,7 @@ function projectStatisticsDatabase()
         else
             local FILE_WITH_DIRECTORIES=''
         fi
-        local PROJECT_DATABASE_FILE=${BHMAS_databaseGlobalPath}/$(date +%Y_%m_%d)_${BHMAS_databaseFilename}
+        local PROJECT_DATABASE_FILE=${BHMAS_databaseGlobalPath}/$(date +%Y_%m_%d)_${BHMAS_databaseFilename}_$(whoami)
     fi
 
 
@@ -470,7 +470,7 @@ function projectStatisticsDatabase()
             fi
 
             #Updating the content of PROJECT_DATABASE_FILE
-            local PROJECT_DATABASE_FILE=${BHMAS_databaseGlobalPath}/$(date +%Y_%m_%d)_${BHMAS_databaseFilename}
+            local PROJECT_DATABASE_FILE=${BHMAS_databaseGlobalPath}/$(date +%Y_%m_%d)_${BHMAS_databaseFilename}_$(whoami)
             cp ${TEMPORARY_DATABASE_FILE} ${PROJECT_DATABASE_FILE}
 
             #Clean up
