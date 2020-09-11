@@ -19,19 +19,19 @@
 
 function SubmitJobsForValidBetaValues()
 {
-    if [[ ${#BHMAS_betaValuesToBeSubmitted[@]} -gt 0 ]]; then
+    if [[ ${#BHMAS_betaSeedStringsToBeSubmitted[@]} -gt 0 ]]; then
         local index betaString stringToBeGreppedFor submittingDirectory jobScriptFilename usedCoresHours
         cecho lc "\n==================================================================================="
         cecho bb " Jobs will be submitted for the following beta values:"
-        for index in ${!BHMAS_betaValuesToBeSubmitted[@]}; do
-            betaString="${BHMAS_betaValuesToBeSubmitted[index]}"
+        for index in ${!BHMAS_betaSeedStringsToBeSubmitted[@]}; do
+            betaString="${BHMAS_betaSeedStringsToBeSubmitted[index]}"
             cecho "  Job $((index+1)): ${betaString}"
         done
         if [[ ${BHMAS_useMPI} = 'TRUE' ]]; then
             cecho lc "==================================================================================="
             cecho wg " To-be-used core-h (assuming ${BHMAS_coresPerNode} cores per node):"
-            for index in ${!BHMAS_betaValuesToBeSubmitted[@]}; do
-                betaString="${BHMAS_betaValuesToBeSubmitted[index]}"
+            for index in ${!BHMAS_betaSeedStringsToBeSubmitted[@]}; do
+                betaString="${BHMAS_betaSeedStringsToBeSubmitted[index]}"
                 submittingDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_jobScriptFolderName}"
                 jobScriptFilename="$(GetJobScriptFilename ${betaString})"
                 if [[ ! -f "${jobScriptFilename}" ]]; then
@@ -40,7 +40,7 @@ function SubmitJobsForValidBetaValues()
                 fi
             done
         fi
-        for betaString in ${BHMAS_betaValuesToBeSubmitted[@]}; do
+        for betaString in ${BHMAS_betaSeedStringsToBeSubmitted[@]}; do
             if [[ ${BHMAS_useMultipleChains} == "FALSE" ]]; then
                 stringToBeGreppedFor="${BHMAS_betaPrefix}${BHMAS_betaRegex}"
             else
@@ -58,8 +58,8 @@ function SubmitJobsForValidBetaValues()
         fi
         cecho lc "==================================================================================="
         cecho bb " Jobs submission:"
-        for index in ${!BHMAS_betaValuesToBeSubmitted[@]}; do
-            betaString="${BHMAS_betaValuesToBeSubmitted[index]}"
+        for index in ${!BHMAS_betaSeedStringsToBeSubmitted[@]}; do
+            betaString="${BHMAS_betaSeedStringsToBeSubmitted[index]}"
             submittingDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_jobScriptFolderName}"
             jobScriptFilename="$(GetJobScriptFilename ${betaString})"
             cd ${submittingDirectory}

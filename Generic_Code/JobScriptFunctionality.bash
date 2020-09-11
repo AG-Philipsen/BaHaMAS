@@ -167,7 +167,8 @@ function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
             fi
             __static__ProduceJobScript "${jobScriptGlobalPath}" "${walltime}" "${betasForJobScript[@]}"
             if [[ -e ${jobScriptGlobalPath} ]]; then
-                BHMAS_betaValuesToBeSubmitted+=( "${betasString}" )
+                BHMAS_betaSeedStringsToBeSubmitted+=( "${betasString}" )
+                BHMAS_betaValuesToBeSubmitted+=( "${betasForJobScript[@]}" )
             else
                 cecho lr "\n Jobscript " file "${jobScriptFilename}" " failed to be created! Skipping this job submission!\n"
                 BHMAS_problematicBetaValues+=( "${betasString}" )
@@ -175,7 +176,8 @@ function PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles()
             fi
         else
             if [[ -e ${jobScriptGlobalPath} ]]; then
-                BHMAS_betaValuesToBeSubmitted+=( "${betasString}" )
+                BHMAS_betaSeedStringsToBeSubmitted+=( "${betasString}" )
+                BHMAS_betaValuesToBeSubmitted+=( "${betasForJobScript[@]}" )
                 cecho "  - ${betasString}"
             else
                 cecho lr "\n Jobscript " file "${jobScriptFilename}" " not found! Mode " emph "submit-only" " cannot conclude! Skipping this job submission!\n"

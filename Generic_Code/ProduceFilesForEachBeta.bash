@@ -60,7 +60,7 @@ function ProduceExecutableFileForEachBeta()
     local betaFolder submitBetaDirectory listOfFolders
     listOfFolders=()
     for betaFolder in "${BHMAS_betaValuesToBeSubmitted[@]}"; do
-        betaFolder+="${BHMAS_betaPostfix}"
+        betaFolder="${BHMAS_betaPrefix}${betaFolder}"
         submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${betaFolder}"
         if [[ ! -d "${submitBetaDirectory}" ]]; then
             Internal 'The directory ' dir "${submitBetaDirectory}"\
@@ -78,7 +78,7 @@ function EnsureThatNeededFilesAreOnRunDiskForEachBeta()
         local submitBetaDirectory runBetaDirectory inputFileGlobalPath\
               executableGlobalPath startConfiguration betaFolder file
         for betaFolder in "${BHMAS_betaValuesToBeSubmitted[@]}"; do
-            betaFolder+="${BHMAS_betaPostfix}"
+            betaFolder="${BHMAS_betaPrefix}${betaFolder}"
             submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${betaFolder}"
             runBetaDirectory="${BHMAS_runDirWithBetaFolders}/${betaFolder}"
             inputFileGlobalPath="${submitBetaDirectory}/${BHMAS_inputFilename}"
@@ -112,7 +112,7 @@ function EnsureThatNeededFilesAreOnRunDiskForEachBeta()
     # e.g. openQCD, but it helps in general also if not required by the software!
     if [[ ${BHMAS_executionMode} =~ ^mode:(prepare-only|thermalize|new-chain)$ ]]; then
         for betaFolder in "${BHMAS_betaValuesToBeSubmitted[@]}"; do
-            betaFolder+="${BHMAS_betaPostfix}"
+            betaFolder="${BHMAS_betaPrefix}${betaFolder}"
             runBetaDirectory="${BHMAS_runDirWithBetaFolders}/${betaFolder}"
             startConfiguration="${BHMAS_startConfigurationGlobalPath[${betaFolder#${BHMAS_betaPrefix}}]}"
             if [[ "${startConfiguration}" != "${BHMAS_labelToStartFromHot}" ]]; then

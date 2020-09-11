@@ -33,6 +33,11 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 ## [Unreleased]
 
 
+
+## [Version 0.3.1] &ensp;<sub><sup>11 September 2020</sup></sub>
+
+* :sos: **Hot-fix:** Many execution modes (e.g. `thermalize`) were broken with multiple simulations per job. This has been fixed now.
+
 ## [Version 0.3.0] &ensp;<sub><sup>10 September 2020</sup></sub>
 
 * :white_check_mark: Implement system requirements overview in general in-terminal help.
@@ -78,7 +83,8 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 * :sos: Fix tests failures due to hard-coded path in tests setup.
 
 
-[Unreleased]: https://github.com/AG-Philipsen/BaHaMAS/compare/BaHaMAS-0.3.0...develop
+[Unreleased]: https://github.com/AG-Philipsen/BaHaMAS/compare/BaHaMAS-0.3.1...develop
+[Version 0.3.1]: https://github.com/AG-Philipsen/BaHaMAS/releases/tag/BaHaMAS-0.3.1
 [Version 0.3.0]: https://github.com/AG-Philipsen/BaHaMAS/releases/tag/BaHaMAS-0.3.0
 [Version 0.2.0]: https://github.com/AG-Philipsen/BaHaMAS/releases/tag/BaHaMAS-0.2.0
 [Version 0.1.0]: https://github.com/AG-Philipsen/BaHaMAS/releases/tag/BaHaMAS-0.1.0
