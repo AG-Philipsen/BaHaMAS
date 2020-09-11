@@ -76,7 +76,8 @@ readonly logFile="${BHMAS_testsFolder}/Tests.log"
 readonly userVariablesFile="${BHMAS_testsFolder}/SetupUserVariables.bash"
 testParametersString='' # Global but to be filled in each
 testParametersPath=''   # test to change formulation
-betaFolder='b5.1111_s3333_continueWithNewChain' # To be changed in thermalization
+betaFolders=()          # To be filled depending on betafile
+jobBetaSeedsString=''   # To be created depending on betafile
 readonly listOfAuxiliaryFilesAndFolders=( "${testFolder}" "${logFile}" "${userVariablesFile}" )
 
 

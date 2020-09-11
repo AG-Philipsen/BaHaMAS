@@ -37,14 +37,14 @@ done
 
 #Check if being on a release branch -> https://stackoverflow.com/a/6245587
 actualBranch="$(git rev-parse --abbrev-ref HEAD)"
-if [[ ! ${actualBranch} =~ ^release/BaHaMAS-[0-9]+.[0-9]+.[0-9]+$ ]]; then
+if [[ ! ${actualBranch} =~ ^(release|hotfix)/BaHaMAS-[0-9]+.[0-9]+.[0-9]+$ ]]; then
     Fatal ${BHMAS_fatalLogicError}\
           'You cannot bump version on the present branch ' emph "${actualBranch}"\
-          ', because\nit is not a release branch with correct name, e.g. ' emph "release/BaHaMAS-1.0.0" '.'
+          ', because\nit is not a release or bugfix branch, e.g. ' emph "release/BaHaMAS-1.0.0" '.'
 fi
 
 releaseDate="$(date +'%d %B %Y')"
-newVersion="${actualBranch/#release\/BaHaMAS-/}"
+newVersion="${actualBranch#*BaHaMAS-}"
 
 #Parse command line options
 if [[ $# -gt 1 ]]; then
