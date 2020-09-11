@@ -1,6 +1,6 @@
-% BaHaMAS(1) Version 0.3.0 | General User Manual
+% BaHaMAS(1) Version 0.3.1 | General User Manual
 % Alessandro Sciarra
-% 10 September 2020
+% 11 September 2020
 
 # NAME
 
