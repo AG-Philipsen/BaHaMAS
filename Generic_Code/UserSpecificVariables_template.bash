@@ -60,9 +60,9 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_outputFilename=""
     readonly BHMAS_useRationalApproxFiles='FALSE'
     readonly BHMAS_rationalApproxGlobalPath=""
-    readonly BHMAS_approxHeatbathFilename=""
-    readonly BHMAS_approxMDFilename=""
-    readonly BHMAS_approxMetropolisFilename=""
+    readonly BHMAS_approxHeatbathFilenameSuffix=""
+    readonly BHMAS_approxMDFilenameSuffix=""
+    readonly BHMAS_approxMetropolisFilenameSuffix=""
     readonly BHMAS_databaseFilename=""
     readonly BHMAS_databaseGlobalPath=""
     readonly BHMAS_measurementExecutableGlobalPath=""
@@ -106,9 +106,9 @@ MakeFunctionsDefinedInThisFileReadonly
 #     BHMAS_jobScriptPrefix                  -->  prefix of the jobscript name
 #     BHMAS_outputFilename                   -->  name of the outputfile
 #     BHMAS_rationalApproxGlobalPath         -->  global path to the folder containing the rational approximations
-#     BHMAS_approxHeatbathFilename           -->  rational approximation used for the pseudofermion fields
-#     BHMAS_approxMDFilename                 -->  rational approximation used for the molecular dynamis
-#     BHMAS_approxMetropolisFilename         -->  rational approximation used for the metropolis test
+#     BHMAS_approxHeatbathFilenameSuffix     -->  rational approximation used for the pseudofermion fields
+#     BHMAS_approxMDFilenameSuffix           -->  rational approximation used for the molecular dynamis
+#     BHMAS_approxMetropolisFilenameSuffix   -->  rational approximation used for the metropolis test
 #     BHMAS_measurementExecutableGlobalPath  -->  inverter executable global path
 #     BHMAS_thermConfsGlobalPath             -->  global path to the folder containing the thermalized configurations
 #     BHMAS_databaseGlobalPath               -->  directory where the the simulation status files are stored (it MUST be a GLOBALPATH)

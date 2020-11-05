@@ -42,9 +42,9 @@ function DeclareUserDefinedGlobalVariables()
     readonly BHMAS_outputFilename="fakeOutput"
     readonly BHMAS_useRationalApproxFiles=''
     readonly BHMAS_rationalApproxGlobalPath=''
-    readonly BHMAS_approxHeatbathFilename=''
-    readonly BHMAS_approxMDFilename=''
-    readonly BHMAS_approxMetropolisFilename=''
+    readonly BHMAS_approxHeatbathFilenameSuffix=''
+    readonly BHMAS_approxMDFilenameSuffix=''
+    readonly BHMAS_approxMetropolisFilenameSuffix=''
     readonly BHMAS_databaseFilename="OverviewDatabase"
     readonly BHMAS_databaseGlobalPath="${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath}/SimulationsOverview"
     readonly BHMAS_measurementExecutableGlobalPath=''

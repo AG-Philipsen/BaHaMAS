@@ -51,9 +51,9 @@ function CheckUserDefinedVariablesAndDefineDependentAdditionalVariables()
         BHMAS_excludeNodesGlobalPath
         BHMAS_useRationalApproxFiles
         BHMAS_rationalApproxGlobalPath
-        BHMAS_approxHeatbathFilename
-        BHMAS_approxMDFilename
-        BHMAS_approxMetropolisFilename
+        BHMAS_approxHeatbathFilenameSuffix
+        BHMAS_approxMDFilenameSuffix
+        BHMAS_approxMetropolisFilenameSuffix
         BHMAS_jobRunCommand
         BHMAS_clusterPartition
         BHMAS_clusterNode
@@ -400,8 +400,8 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnExecutionM
         for variable in ${neededFiles[@]+"${neededFiles[@]}"}; do
             listOfVariablesAsString+="\n$(cecho -d file " ") ${variable}"
         done
-        Error 'To run ' B 'BaHaMAS' uB ' in ' emph "${BHMAS_executionMode}"\
-              ' execution mode with ' emph "{BHMAS_lqcdSoftware}" ',\nthe following specified '\
+        Error 'To run ' B 'BaHaMAS' uB ' in ' emph "${BHMAS_executionMode#mode:}"\
+              ' execution mode with ' emph "${BHMAS_lqcdSoftware}" ',\nthe following specified '\
               B dir 'folder(s)' uB ' or ' file 'file(s)' ' must ' emph 'exist' ": ${listOfVariablesAsString}"
         Fatal ${BHMAS_fatalFileNotFound} -n 'Please check the path variables in the '\
               B 'BaHaMAS' uB ' setup and run the program again.'

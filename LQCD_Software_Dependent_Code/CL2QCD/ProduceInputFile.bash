@@ -50,14 +50,14 @@ function ProduceInputFile_CL2QCD()
             __static__AddToInputFile "readRationalApproxFromFile=1"
             if [[ ${BHMAS_numberOfPseudofermions} -eq 1 ]]; then
                 __static__AddToInputFile\
-                    "rationalApproxFileHB=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_${BHMAS_approxHeatbathFilename}"\
-                    "rationalApproxFileMD=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_${BHMAS_approxMDFilename}"\
-                    "rationalApproxFileMetropolis=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_${BHMAS_approxMetropolisFilename}"
+                    "rationalApproxFileHB=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_${BHMAS_approxHeatbathFilenameSuffix}"\
+                    "rationalApproxFileMD=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_${BHMAS_approxMDFilenameSuffix}"\
+                    "rationalApproxFileMetropolis=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_${BHMAS_approxMetropolisFilenameSuffix}"
             else
                 __static__AddToInputFile\
-                    "rationalApproxFileHB=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${BHMAS_numberOfPseudofermions}_${BHMAS_approxHeatbathFilename}"\
-                    "rationalApproxFileMD=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${BHMAS_numberOfPseudofermions}_${BHMAS_approxMDFilename}"\
-                    "rationalApproxFileMetropolis=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${BHMAS_numberOfPseudofermions}_${BHMAS_approxMetropolisFilename}"
+                    "rationalApproxFileHB=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${BHMAS_numberOfPseudofermions}_${BHMAS_approxHeatbathFilenameSuffix}"\
+                    "rationalApproxFileMD=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${BHMAS_numberOfPseudofermions}_${BHMAS_approxMDFilenameSuffix}"\
+                    "rationalApproxFileMetropolis=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${BHMAS_numberOfPseudofermions}_${BHMAS_approxMetropolisFilenameSuffix}"
             fi
         else
             __static__AddToInputFile "readRationalApproxFromFile=0"
