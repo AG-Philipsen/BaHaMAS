@@ -77,7 +77,7 @@ readonly userVariablesFile="${BHMAS_testsFolder}/SetupUserVariables.bash"
 testParametersString='' # Global but to be filled in each
 testParametersPath=''   # test to change formulation
 betaFolders=()          # To be filled depending on betafile
-jobBetaSeedsString=''   # To be created depending on betafile
+jobBetaSeedsStrings=()  # To be created depending on betafile and software
 readonly listOfAuxiliaryFilesAndFolders=( "${testFolder}" "${logFile}" "${userVariablesFile}" )
 
 

@@ -32,7 +32,7 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 ## [Unreleased]
 
-
+* :white_check_mark: Improve functional tests to cover more real-life cases.
 
 ## [Version 0.3.1] &ensp;<sub><sup>11 September 2020</sup></sub>
 

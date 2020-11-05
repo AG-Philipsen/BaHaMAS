@@ -42,9 +42,19 @@ function __static__CreateParametersFolders()
 
 function __static__SetBetaFoldersAndPrepareJobVariables()
 {
-    betaFolders=( $(awk '{printf "b%s_%s_continueWithNewChain\n", $1, $2}' "${submitDirWithBetaFolders}/betas") )
+    betaFolders=( $(awk '/^[[:space:]]*#/{next} {printf "b%s_%s_continueWithNewChain\n", $1, $2}' "${submitDirWithBetaFolders}/betas") )
     # Here assume that beta values in the fakeBetas file are all the same, only seeds change!
-    jobBetaSeedsString="$(awk 'NR==1{printf "b%s_%s", $1, $2} NR>1{printf "_%s", $2}' "${submitDirWithBetaFolders}/betas")"
+    case "${software}" in
+        CL2QCD )
+            jobBetaSeedsStrings[0]="$(awk '/^[[:space:]]*#/{next} {if(betaPrinted==0){printf "b%s_%s", $1, $2; betaPrinted=1}else{printf "_%s", $2}}' "${submitDirWithBetaFolders}/betas")"
+            ;;
+        openQCD-FASTSUM )
+            jobBetaSeedsStrings=( $(awk '/^[[:space:]]*#/{next} {printf "b%s_%s ", $1, $2}' "${submitDirWithBetaFolders}/betas") ) #Word split on spaces
+            ;;
+        * )
+            Fatal ${BHMAS_fatalLogicError} "Unknown software in \"${FUNCNAME}\" function!"
+            ;;
+    esac
 }
 
 function __static__CreateRationalApproxFolderWithFiles()
@@ -97,7 +107,7 @@ function __static__CreatenfiguratiornSymlinkInRunBetaFolder()
 
 function __static__AddStringToAllLinesOfBetasFile()
 {
-    awk -i inplace -v new="$1" '{printf "%s   %s\n", $0, new}' "${submitDirWithBetaFolders}/betas" || exit ${BHMAS_fatalBuiltin}
+    awk -i inplace -v new="$1" '/^[[:space:]]*#/{next} {printf "%s   %s\n", $0, new}' "${submitDirWithBetaFolders}/betas" || exit ${BHMAS_fatalBuiltin}
 }
 
 function __static__CopyAuxiliaryFileAtBetaFolderLevel()
@@ -202,7 +212,7 @@ function MakeTestPreliminaryOperations()
             __static__CopyAuxiliaryFilesToRunBetaFolders "fakeInput" "fakeExecutable"
             __static__CreatenfiguratiornSymlinkInRunBetaFolder "fromConf_trNr5000"
             mkdir "Jobscripts_TEST" || exit ${BHMAS_fatalBuiltin}
-            printf "#SBATCH --time=2:45:00\n" > "${submitDirWithBetaFolders}/Jobscripts_TEST/fakePrefix_${testParametersString}__${jobBetaSeedsString}"
+            printf "#SBATCH --time=2:45:00\n" > "${submitDirWithBetaFolders}/Jobscripts_TEST/fakePrefix_${testParametersString}__${jobBetaSeedsStrings[0]}"
             ;;
 
         CL2QCD-thermalize* )
@@ -296,7 +306,10 @@ function MakeTestPreliminaryOperations()
             __static__CreateFilesInRunBetaFolders "qcd1_1_2_4_6"
             __static__CreatenfiguratiornSymlinkInRunBetaFolder "fromConf_trNr5000"
             mkdir "Jobscripts_TEST" || exit ${BHMAS_fatalBuiltin}
-            printf "#SBATCH --time=2:45:00\n" > "${submitDirWithBetaFolders}/Jobscripts_TEST/fakePrefix_${testParametersString}__${jobBetaSeedsString}"
+            local string
+            for string in "${jobBetaSeedsStrings[@]}"; do
+                printf "#SBATCH --time=2:45:00\n" > "${submitDirWithBetaFolders}/Jobscripts_TEST/fakePrefix_${testParametersString}__${string}"
+            done
             ;;
 
         openQCD-FASTSUM-thermalize* )
@@ -404,8 +417,10 @@ function InhibitBaHaMASCommands()
     function sbatch(){ cecho -d "sbatch $*"; }
     function make(){ cecho -d "make $*"; touch "${@: -1}"; }
     #To make liststatus find running job and then test measure time
+    #NOTE: jobBetaSeedsStrings is an array because with openQCD each run handle one seed only!
+    #      Here we fake mark the first entry as running to have something running for all codes.
     if [[ $1 =~ ^(liststatus|database) ]]; then
-        export jobnameForSqueue="${testParametersString}__${jobBetaSeedsString}@RUNNING"
+        export jobnameForSqueue="${testParametersString}__${jobBetaSeedsStrings[0]}@RUNNING"
     fi
     function squeue(){ cecho -d -n "${jobnameForSqueue:-}"; }
     export -f less sbatch make squeue
