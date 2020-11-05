@@ -383,9 +383,10 @@ function CheckBaHaMASVariablesAndExistenceOfFilesAndFoldersDependingOnExecutionM
                 unset -v 'neededFolders[${index}]'
             fi
         done
+        #Since we have possible glob * in name of files, let us filename expand the array
+        neededFiles=( ${neededFiles[@]} )
         for index in "${!neededFiles[@]}"; do
-            #use stat in if instead of [[ -f ]] since we have a glob * in name
-            if stat -t ${neededFiles[${index}]} >/dev/null 2>&1; then
+            if [[ -f "${neededFiles[${index}]}" ]]; then
                 unset -v 'neededFiles[${index}]'
             fi
         done
