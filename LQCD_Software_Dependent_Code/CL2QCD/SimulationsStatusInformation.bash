@@ -59,32 +59,37 @@ function ExtractSimulationInformationFromInputFile_CL2QCD()
 {
     CheckIfVariablesAreDeclared integrationSteps0 integrationSteps1\
                                 integrationSteps2 kappaMassPreconditioning
-    local tmpString
+    local numScales tmpString
     # The input file here exists
+    numScales=$(sed -n 's/^nTimeScales=\([[:digit:]]\+\)/\1/p' "${inputFileGlobalPath}")
+    if [[ ${numScales} = '' ]]; then
+        return 0
+    fi
     tmpString=$(sed -n 's/^integrationSteps0=\([[:digit:]]\+\)/\1/p' "${inputFileGlobalPath}")
     if [[ "${tmpString}" != '' ]]; then
         integrationSteps0="${tmpString}"
+        integrationSteps1='' # To avoid dashes in one times scale case
     fi
-    tmpString=$(sed -n 's/^integrationSteps1=\([[:digit:]]\+\)/\1/p' "${inputFileGlobalPath}")
-    if [[ "${tmpString}" != '' ]]; then
-        integrationSteps1="${tmpString}"
-    fi
-    if [[ $(grep -o "useMP=1" ${inputFileGlobalPath} | wc -l) -eq 1 ]]; then
-        tmpString=$(sed -n 's/^integrationSteps2=\([[:digit:]]\+\)/\1/p' "${inputFileGlobalPath}")
+    if [[ ${numScales} -gt 1 ]]; then
+        tmpString=$(sed -n 's/^integrationSteps1=\([[:digit:]]\+\)/\1/p' "${inputFileGlobalPath}")
         if [[ "${tmpString}" != '' ]]; then
-            integrationSteps2="-${tmpString}"
-        else
-            integrationSteps2='--'
+            integrationSteps1="-${tmpString}"
         fi
-        tmpString=$(sed -n 's/^kappaMP=\([[:digit:]]\+[.][[:digit:]]\+\)/\1/p' "${inputFileGlobalPath}")
-        if [[ "${tmpString}" != '' ]]; then
-            kappaMassPreconditioning="-${tmpString}"
-        else
-            kappaMassPreconditioning='-----'
+    fi
+    if [[ ${numScales} -eq 3 ]]; then
+        if [[ $(grep -o "useMP=1" ${inputFileGlobalPath} | wc -l) -eq 1 ]]; then
+            tmpString=$(sed -n 's/^integrationSteps2=\([[:digit:]]\+\)/\1/p' "${inputFileGlobalPath}")
+            if [[ "${tmpString}" != '' ]]; then
+                integrationSteps2="-${tmpString}"
+            fi
+            tmpString=$(sed -n 's/^kappaMP=\([[:digit:]]\+[.][[:digit:]]\+\)/\1/p' "${inputFileGlobalPath}")
+            if [[ "${tmpString}" != '' ]]; then
+                kappaMassPreconditioning="-${tmpString}"
+            fi
         fi
     else
-        integrationSteps2="  "
-        kappaMassPreconditioning="      "
+        integrationSteps2=''
+        kappaMassPreconditioning=''
     fi
 }
 
