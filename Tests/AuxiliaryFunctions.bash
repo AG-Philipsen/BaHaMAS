@@ -125,6 +125,19 @@ function __static__CopyAuxiliaryFilesToSubmitBetaFolders()
     done
 }
 
+function __static__SetNumberOfIntegratorScalesInInputFile()
+{
+    local folder file numScales
+    folder="$1"
+    file="$2"
+    numScales="$3"
+    if [[ ${software} == 'CL2QCD' ]]; then
+        sed -E -i 's@nTimeScales=[0-9]+@'"nTimeScales=${numScales}"'@g'   "${submitDirWithBetaFolders}/${folder}/${file}" || exit ${BHMAS_fatalBuiltin}
+    elif [[ ${software} == 'openQCD-FASTSUM' ]]; then
+        sed -E -i 's@nlv[[:space:]]+[0-9]+@'"$(printf "%-13s%s" "nlv" "${numScales}")"'@g'   "${submitDirWithBetaFolders}/${folder}/${file}" || exit ${BHMAS_fatalBuiltin}
+    fi
+}
+
 function __static__CopyAuxiliaryFilesToRunBetaFolders()
 {
     local folder file
@@ -231,6 +244,7 @@ function MakeTestPreliminaryOperations()
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateBetaFolders
             __static__CopyAuxiliaryFilesToSubmitBetaFolders "fakeInput"
+            __static__SetNumberOfIntegratorScalesInInputFile "${betaFolders[0]}" "fakeInput" 1
             __static__CopyAuxiliaryFilesToRunBetaFolders "fakeExecutable" "fakeOutput" "fakeOutput_pbp.dat"
             __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
             __static__CompleteInputFilesWithCorrectPaths
@@ -263,6 +277,7 @@ function MakeTestPreliminaryOperations()
             __static__CreateBetaFolders
             __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
             __static__CopyAuxiliaryFilesToSubmitBetaFolders "fakeExecutable.123456.out" "fakeInput"
+            __static__SetNumberOfIntegratorScalesInInputFile "${betaFolders[-1]}" "fakeInput" 1
             __static__CopyAuxiliaryFilesToRunBetaFolders "fakeOutput"
             ;;
 
@@ -332,6 +347,7 @@ function MakeTestPreliminaryOperations()
             fi
             __static__CreateBetaFolders
             __static__CopyAuxiliaryFilesToSubmitBetaFolders "fakeInput"
+            __static__SetNumberOfIntegratorScalesInInputFile "${betaFolders[0]}" "fakeInput" 1
             __static__CopyAuxiliaryFilesToRunBetaFolders "fakeOutput.log"
             __static__CreateFilesInSubmitBetaFolders "qcd1_1_2_4_6"
             __static__CreateFilesInRunBetaFolders "qcd1_1_2_4_6"
@@ -363,6 +379,7 @@ function MakeTestPreliminaryOperations()
             __static__CreateBetaFolders
             __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
             __static__CopyAuxiliaryFilesToSubmitBetaFolders "fakeInput"
+            __static__SetNumberOfIntegratorScalesInInputFile "${betaFolders[-1]}" "fakeInput" 1
             __static__CopyAuxiliaryFilesToRunBetaFolders "fakeOutput.log"
             __static__CreatenfiguratiornSymlinkInRunBetaFolder "fromConf_trNr5000"
             ;;
