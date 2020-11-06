@@ -102,12 +102,18 @@ function __static__CheckAndParseSingleLine()
             i* )
                 entry=${1:1}
                 __static__CheckFormatBetasFileEntry integrationSteps "${entry}"
-                if [[ $(grep -o "-" <<< "${entry}" | wc -l) -ne 1 ]]; then
-                    Fatal ${BHMAS_fatalMissingFeature} "Unable to use a different number of integration steps different than " emph "2" " for " emph "beta = ${beta%_*}" "!"
-                fi
-                BHMAS_scaleZeroIntegrationSteps["${beta}"]=${entry%%-*}
-                BHMAS_scaleOneIntegrationSteps["${beta}"]=${entry##*-}
-                #If generalized in future, something like  BHMAS_integrationSteps["${beta}"]=( ${entry//-/} )
+                case $(grep -o "-" <<< "${entry}" | wc -l) in
+                    0 )
+                        BHMAS_scaleZeroIntegrationSteps["${beta}"]=${entry%%-*}
+                        ;;
+                    1 )
+                        BHMAS_scaleZeroIntegrationSteps["${beta}"]=${entry%%-*}
+                        BHMAS_scaleOneIntegrationSteps["${beta}"]=${entry##*-}
+                        ;;
+                    * )
+                        Fatal ${BHMAS_fatalMissingFeature} "Unable to use a different number of integration steps than " emph "1 or 2" " for " emph "beta = ${beta%_*}" "!"
+                        ;;
+                esac
                 ;;
             mp* )
                 if [[ ${BHMAS_lqcdSoftware} != 'CL2QCD' || ${BHMAS_wilson} == 'FALSE' ]]; then
@@ -162,7 +168,7 @@ function __static__CheckConsistencyInformationExtractedFromBetasFile()
         Fatal ${BHMAS_fatalWrongBetasFile} "No beta values in betas file."
     fi
     for beta in "${BHMAS_betaValues[@]}"; do
-        if ! KeyInArray "${beta}" BHMAS_scaleZeroIntegrationSteps || ! KeyInArray "${beta}" BHMAS_scaleOneIntegrationSteps; then
+        if ! KeyInArray "${beta}" BHMAS_scaleZeroIntegrationSteps; then
             Fatal ${BHMAS_fatalWrongBetasFile} "Integration steps information missing in " file "${BHMAS_betasFilename}" " file for " emph "beta = ${beta%_*}" "!"
         fi
     done
@@ -220,7 +226,7 @@ function __static__PrintReportOnExtractedInformationFromBetasFile()
     cecho lc "\n============================================================================================================"
     cecho lp " Read beta values:"
     for BETA in ${BHMAS_betaValues[@]}; do
-        cecho -n "   - ${BETA} [Integrator steps $(printf "%2d-%2d"  "${BHMAS_scaleZeroIntegrationSteps[${BETA}]}" "${BHMAS_scaleOneIntegrationSteps[${BETA}]}") ]"
+        cecho -n "   - ${BETA} [Integrator steps $(printf "%2d%1s%2s"  "${BHMAS_scaleZeroIntegrationSteps[${BETA}]}" "${BHMAS_scaleOneIntegrationSteps[${BETA}]:+-}" "${BHMAS_scaleOneIntegrationSteps[${BETA}]:-}") ]"
         if KeyInArray ${BETA} BHMAS_trajectoriesToBeResumedFrom; then
             cecho -n "$(printf "   [resume from tr. %+7s]" "${BHMAS_trajectoriesToBeResumedFrom[${BETA}]}")"
         else
