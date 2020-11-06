@@ -110,9 +110,14 @@ function __static__CheckAndParseSingleLine()
                 #If generalized in future, something like  BHMAS_integrationSteps["${beta}"]=( ${entry//-/} )
                 ;;
             mp* )
-                entry=${1:2}
-                __static__CheckFormatBetasFileEntry massPreconditioning "${entry}"
-                BHMAS_massPreconditioningValues["${beta}"]=${entry} ;;
+                if [[ ${BHMAS_lqcdSoftware} != 'CL2QCD' || ${BHMAS_wilson} == 'FALSE' ]]; then
+                    Fatal ${BHMAS_fatalMissingFeature} 'Mass preconditioning in betas file can be used with ' emph 'CL2QCD and Wilson fermions only' '!'
+                else
+                    entry=${1:2}
+                    __static__CheckFormatBetasFileEntry massPreconditioning "${entry}"
+                    BHMAS_massPreconditioningValues["${beta}"]=${entry}
+                fi
+                ;;
             r* )
                 entry=${1:1}
                 __static__CheckFormatBetasFileEntry resumeFrom "${entry}"
