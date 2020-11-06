@@ -83,10 +83,14 @@ function ProduceInputFile_CL2QCD()
     fi
     #Information about solver and measurements
     if [[ ${BHMAS_wilson} = "TRUE" ]]; then
-        __static__AddToInputFile "solver=cg"
+        __static__AddToInputFile \
+            "solver=cg"\
+            "solverRestartEvery=2000"\
+            "useKernelMergingFermionMatrix=1"
     fi
     __static__AddToInputFile \
         "solverMaxIterations=${BHMAS_inverterMaxIterations}"\
+        "solverResiduumCheckEvery=${BHMAS_inverterBlockSize}"\
         "measureCorrelators=0"
     if [[ ${BHMAS_measurePbp} = "TRUE" ]]; then
         __static__AddToInputFile \
@@ -105,35 +109,34 @@ function ProduceInputFile_CL2QCD()
             "fermObsPbpPrefix=${BHMAS_outputFilename}"
     fi
     #Information about integrators
-    if [[ ${BHMAS_wilson} = "TRUE" ]]; then
-        __static__AddToInputFile \
-            "solverRestartEvery=2000"\
-            "useKernelMergingFermionMatrix=1"
-        if KeyInArray "${betaValue}" BHMAS_massPreconditioningValues; then
+    __static__AddToInputFile "tau=1"
+    if KeyInArray "${betaValue}" BHMAS_massPreconditioningValues; then
+        if [[ ${BHMAS_wilson} = "FALSE" ]]; then
+            Fatal ${BHMAS_fatalLogicError} 'Mass preconditioning in CL2QCD can be used only with Wilson fermions!'
+        else
             __static__AddToInputFile \
-                "solverResiduumCheckEvery=10"\
                 "useMP=1"\
                 "solverMP=cg"\
                 "kappaMP=0.${BHMAS_massPreconditioningValues[${betaValue}]#*,}"\
                 "nTimeScales=3"\
                 "integrator2=twomn"\
                 "integrationSteps2=${BHMAS_massPreconditioningValues[${betaValue}]%,*}"
-        else
-            __static__AddToInputFile \
-                "solverResiduumCheckEvery=${BHMAS_inverterBlockSize}"\
-                "nTimeScales=2"
         fi
-    elif [[ ${BHMAS_staggered} = "TRUE" ]]; then
+    elif KeyInArray "${betaValue}" BHMAS_scaleOneIntegrationSteps; then # Second timescale was specified
         __static__AddToInputFile \
-            "solverResiduumCheckEvery=${BHMAS_inverterBlockSize}"\
-            "nTimeScales=2"
+            "nTimeScales=2"\
+            "integrator0=twomn"\
+            "integrator1=twomn"\
+            "integrationSteps0=${BHMAS_scaleZeroIntegrationSteps[${betaValue}]}"\
+            "integrationSteps1=${BHMAS_scaleOneIntegrationSteps[${betaValue}]}"
+    else # Just one timescale specified in the betas file
+        __static__AddToInputFile \
+            "nTimeScales=1"\
+            "integrator0=twomn"\
+            "integrationSteps0=${BHMAS_scaleZeroIntegrationSteps[${betaValue}]}"
     fi
+    #Other physical parameters
     __static__AddToInputFile \
-        "tau=1"\
-        "integrator0=twomn"\
-        "integrator1=twomn"\
-        "integrationSteps0=${BHMAS_scaleZeroIntegrationSteps[${betaValue}]}"\
-        "integrationSteps1=${BHMAS_scaleOneIntegrationSteps[${betaValue}]}"\
         "nSpace=${BHMAS_nspace}"\
         "nTime=${BHMAS_ntime}"
     if [[ ${BHMAS_wilson} = "TRUE" ]]; then
