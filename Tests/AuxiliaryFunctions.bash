@@ -419,10 +419,10 @@ function InhibitBaHaMASCommands()
     #To make liststatus find running job and then test measure time
     #NOTE: jobBetaSeedsStrings is an array because with openQCD each run handle one seed only!
     #      Here we fake mark the first entry as running to have something running for all codes.
-    if [[ $1 =~ ^(liststatus|database) ]]; then
+    if [[ $1 =~ (simulation-status|database) ]]; then
         export jobnameForSqueue="${testParametersString}__${jobBetaSeedsStrings[0]}@RUNNING"
     fi
-    function squeue(){ cecho -d -n "${jobnameForSqueue:-}"; }
+    function squeue(){ cecho -d "${jobnameForSqueue:-}"; }
     export -f less sbatch make squeue
 }
 
