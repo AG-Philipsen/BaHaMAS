@@ -66,8 +66,8 @@ function ListSimulationsStatus()
         outputFileGlobalPath="${BHMAS_runDiskGlobalPath}/${BHMAS_projectSubpath}${localParametersPath}/${BHMAS_betaPrefix}${runId}/${BHMAS_outputStandardizedFilename}"
         inputFileGlobalPath="${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath}${localParametersPath}/${BHMAS_betaPrefix}${runId}/${BHMAS_inputFilename}"
         integrationSteps0='--'
-        integrationSteps1='--'
-        integrationSteps2='--'
+        integrationSteps1='---' # Steps after the 0 contain a separation dash
+        integrationSteps2='---'
         kappaMassPreconditioning='-----'
         toBeCleaned=0
         trajectoriesDone='-----'
@@ -299,7 +299,7 @@ function __static__PrintSimulationStatusLine()
     formattingString+="$(__static__ColorClean ${toBeCleaned})%10s${BHMAS_defaultListstatusColor} "
     formattingString+="($(GoodAcc ${acceptanceAllRun})%s %%${BHMAS_defaultListstatusColor}) "
     formattingString+="[$(GoodAcc ${acceptanceLastBunchOfTrajectories})%7s %%${BHMAS_defaultListstatusColor}] "
-    formattingString+="%s-%s%s%s"
+    formattingString+="%2s%-3s%-3s%-5s"
     formattingString+="$(__static__ColorStatus ${jobStatus})%12s${BHMAS_defaultListstatusColor}"
     formattingString+="$(__static__ColorDelta S ${maxSpikeToMeanAsNSigma})%13s${BHMAS_defaultListstatusColor}   "
     formattingString+="%12s%12s  $(__static__ColorDelta P ${maxSpikePlaquetteAsNSigma})%9s${BHMAS_defaultListstatusColor}   "
