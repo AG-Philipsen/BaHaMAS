@@ -285,7 +285,12 @@ function __static__HandleMultiplePseudofermionsInInputFile_CL2QCD()
 
 function __static__HandleMassPreconditioningInInputFile_CL2QCD()
 {
-    if [[ ${BHMAS_wilson} = "TRUE" ]]; then #Mass preconditioning simply ignored if not Wilson
+    #ATTENTION: In this function we leave nTimeScales UNCHANGED, because the function
+    #           __static__HandleIntegrationStepsInInputFile_CL2QCD will set it properly
+    #           according on what requested by the user in the betas file.
+    #
+    # Mass preconditioning simply ignored here if not Wilson, since this function is always called!
+    if [[ ${BHMAS_wilson} = "TRUE" ]]; then
         local string massPreconditioningStrings optionsToBeAddedOrModified
         if KeyInArray ${runId} BHMAS_massPreconditioningValues; then
             optionsToBeAddedOrModified=("useMP=1")
@@ -303,21 +308,21 @@ function __static__HandleMassPreconditioningInInputFile_CL2QCD()
                                              "integrator2=twomn" "integrationSteps2=${BHMAS_massPreconditioningValues[${runId}]%,*}")
                 AddOptionsToInputFile "${optionsToBeAddedOrModified[@]}"
                 PrintAddedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
-                optionsToBeAddedOrModified=("nTimeScales=3" "solverResiduumCheckEvery=10")
+                optionsToBeAddedOrModified=("solverResiduumCheckEvery=${BHMAS_inverterBlockSize}")
                 ModifyOptionsInInputFile_CL2QCD "${optionsToBeAddedOrModified[@]}" || return 1
                 PrintModifiedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
             else
                 #Here I assume that the specifications for mass preconditioning are already in the input file and I just modify them!
                 #In any case, the function 'ModifyOptionsInInputFile_CL2QCD' will catch any missing option and the beta will be skipped
-                optionsToBeAddedOrModified+=("kappaMP=0.${BHMAS_massPreconditioningValues[${runId}]#*,}" "nTimeScales=3"
-                                             "intsteps2=${BHMAS_massPreconditioningValues[${runId}]%,*}" "solverResiduumCheckEvery=10")
+                optionsToBeAddedOrModified+=("kappaMP=0.${BHMAS_massPreconditioningValues[${runId}]#*,}"
+                                             "intsteps2=${BHMAS_massPreconditioningValues[${runId}]%,*}" "solverResiduumCheckEvery=${BHMAS_inverterBlockSize}")
                 ModifyOptionsInInputFile_CL2QCD "${optionsToBeAddedOrModified[@]}" || return 1
                 PrintModifiedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
             fi
         else
             #Here check if mass preconditioning is in the input file and if so switch it off
             if [[ $(grep -c "useMP" ${inputFileGlobalPath}) -gt 0 ]]; then #Use '-gt 0' instead of '-eq 1' so that we also check multiple occurences
-                optionsToBeAddedOrModified=("useMP=0" "solverResiduumCheckEvery=50" "nTimeScales=2")
+                optionsToBeAddedOrModified=("useMP=0" "solverResiduumCheckEvery=${BHMAS_inverterBlockSize}")
                 ModifyOptionsInInputFile_CL2QCD "${optionsToBeAddedOrModified[@]}" || return 1
                 PrintModifiedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
             fi
@@ -380,9 +385,27 @@ function __static__HandlePRNGStateInInputFile_CL2QCD()
 
 function __static__HandleIntegrationStepsInInputFile_CL2QCD()
 {
+    # NOTE: It would be easier to always put all information in the inputfile and rely on its presence and
+    #       just modify the needed information here ---> It is not the case for CL2QCD at the moment.
     local optionsToBeAddedOrModified
-    #Always set the integrator steps, that could have changed or not
-    optionsToBeAddedOrModified=("intsteps0=${BHMAS_scaleZeroIntegrationSteps[${runId}]}" "intsteps1=${BHMAS_scaleOneIntegrationSteps[${runId}]}")
+    if KeyInArray ${runId} BHMAS_massPreconditioningValues; then
+        optionsToBeAddedOrModified=('nTimeScales=3')
+    elif KeyInArray ${runId} BHMAS_scaleOneIntegrationSteps; then # Second timescale was specified
+        optionsToBeAddedOrModified=('nTimeScales=2' "intsteps0=${BHMAS_scaleZeroIntegrationSteps[${runId}]}")
+        if [[ $(grep -c "integrator1=[[:alpha:]]\+" ${inputFileGlobalPath}) -eq 0 ]]; then
+            AddOptionsToInputFile 'integrator1=twomn'
+            PrintAddedOptionsToStandardOutput 'integrator1=twomn'
+        fi
+        if [[ $(grep -c "integrationSteps1=[0-9]\+" ${inputFileGlobalPath}) -eq 0 ]]; then
+            AddOptionsToInputFile "intsteps1=${BHMAS_scaleOneIntegrationSteps[${runId}]}"
+            PrintAddedOptionsToStandardOutput "intsteps1=${BHMAS_scaleOneIntegrationSteps[${runId}]}"
+        else
+            optionsToBeAddedOrModified+=("intsteps1=${BHMAS_scaleOneIntegrationSteps[${runId}]}")
+        fi
+    else
+        optionsToBeAddedOrModified=('nTimeScales=1' "intsteps0=${BHMAS_scaleZeroIntegrationSteps[${runId}]}")
+        sed -i '/integrationSteps1/d' ${inputFileGlobalPath}
+    fi
     ModifyOptionsInInputFile_CL2QCD "${optionsToBeAddedOrModified[@]}" || return 1
     PrintModifiedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
 }
