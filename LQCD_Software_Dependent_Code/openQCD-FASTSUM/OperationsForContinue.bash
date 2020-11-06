@@ -332,11 +332,19 @@ function FindAndSetNumberOfTrajectoriesAlreadyProduced_openQCD-FASTSUM()
 function __static__HandleIntegrationStepsInInputFile_openQCD-FASTSUM()
 {
     local optionsToBeAddedOrModified
-    #Always set the integrator steps, that could have changed or not
-    optionsToBeAddedOrModified=(
-        "intsteps0=${BHMAS_scaleZeroIntegrationSteps[${runId}]}"
-        "intsteps1=${BHMAS_scaleOneIntegrationSteps[${runId}]}"
-    )
+    if KeyInArray ${runId} BHMAS_scaleOneIntegrationSteps; then # Second timescale was specified
+        optionsToBeAddedOrModified=(
+            'nTimeScales=2'
+            "intsteps0=${BHMAS_scaleZeroIntegrationSteps[${runId}]}"
+            "intsteps1=${BHMAS_scaleOneIntegrationSteps[${runId}]}"
+        )
+    else
+        optionsToBeAddedOrModified=(
+            'nTimeScales=1'
+            "intsteps0=${BHMAS_scaleZeroIntegrationSteps[${runId}]}"
+        )
+    fi
+    #Here we assume both [Level 0,1] blocks are already in the input file as it should be
     ModifyOptionsInInputFile_openQCD-FASTSUM "${optionsToBeAddedOrModified[@]}" || return 1
     PrintModifiedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
 }
@@ -368,6 +376,10 @@ function ModifyOptionsInInputFile_openQCD-FASTSUM()
             measurements=* )
                 oldString="ntr[[:space:]]+[0-9]+"
                 newString="$(printf "%-13s%s" "ntr" "${1#*=}")"
+                ;;
+            nTimeScales=* )
+                oldString="nlv[[:space:]]+[0-9]+"
+                newString="$(printf "%-13s%s" "nlv" "${1#*=}")"
                 ;;
             intsteps0=* )
                 # Need FindAndReplaceFirstOccurenceInInputFileAfterLabel
