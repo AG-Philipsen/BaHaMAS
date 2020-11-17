@@ -521,27 +521,60 @@ function CleanTestsEnvironmentForFollowingTest()
     fi
 }
 
+function __static__PrintCenteredString()
+{
+    local tmpString stringTotalWidth indentation tmpStringLength padding
+    tmpString="$1"
+    if [[ $# -gt 1 ]]; then
+        stringTotalWidth="$2"
+    else
+        stringTotalWidth="$(tput cols)"
+    fi
+    indentation="${3-}"
+    tmpStringLength=$(printf '%s' "${tmpString}" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,3})*)?[mGK]//g" | wc -c)
+    padding="$(printf '%0.1s' ' '{1..500})"
+    printf "${indentation}%0.*s %s %0.*s\n"\
+           "$(( (stringTotalWidth - 2 - tmpStringLength)/2 ))"\
+           "${padding}"\
+           "${tmpString}"\
+           "$(( (stringTotalWidth - 2 - tmpStringLength)/2 ))"\
+           "${padding}"
+}
+
 function PrintTestsReport()
 {
-    local indentation name percentage
+    local indentation leftMargin testNameStringLength index lineOfEquals name percentage
     indentation='          '
+    leftMargin='   '
+    testNameStringLength=$(printf '%s\n' "${testsToBeRun[@]}" | wc -L)
+    if [[ ${testNameStringLength} -lt 25 ]]; then # Minimum length
+        testNameStringLength=25
+    fi
+    if (( testNameStringLength % 2 == 1 )); then # Aesthetics
+        (( testNameStringLength+=1 ))
+    fi
+    for((index=0; index<testNameStringLength+3+2*${#leftMargin}; index++)); do
+        lineOfEquals+='='
+    done
     if [[ ${reportLevel} -ge 1 ]]; then
-        cecho bb "\n${indentation}===============================\n"\
-              lp "${indentation}   Run " emph "$(printf '%2d' ${testsRun})" " test(s): "\
-              lg "$(printf '%2d' ${testsPassed}) passed\n"\
-              lr "${indentation}                   $(printf '%2d' ${testsFailed}) failed\n"\
-              bb "${indentation}==============================="
+        local passedString failedString
+        passedString="$(cecho lp "Run " emph "$(printf '%2d' ${testsRun})" " test(s): " lg "$(printf '%2d' ${testsPassed}) passed")"
+        failedString="$(cecho lr "                $(printf '%2d' ${testsFailed}) failed")"
+        cecho bb "\n${indentation}${lineOfEquals}"
+        __static__PrintCenteredString "${passedString}" ${#lineOfEquals} "${indentation}"
+        __static__PrintCenteredString "${failedString}" ${#lineOfEquals} "${indentation}"
+        cecho bb "${indentation}${lineOfEquals}"
     fi
     if [[ ${reportLevel} -ge 2 ]]; then
-        percentage=$(awk '{printf "%3.0f%%%%", 100*$1/$2}' <<< "${testsPassed} ${testsRun}")
-        cecho wg "${indentation}     ${percentage} of tests passed!"
-        cecho bb "${indentation}==============================="
+        percentage=$(awk '{printf "%.0f%%", 100*$1/$2}' <<< "${testsPassed} ${testsRun}")
+        __static__PrintCenteredString "${percentage} $(cecho wg "of tests passed!")" ${#lineOfEquals} "${indentation}"
+        cecho bb "${indentation}${lineOfEquals}"
         if [[ ${testsFailed} -ne 0 ]]; then
-            cecho lr "${indentation}  The following tests failed:"
+            cecho lr "${indentation}${leftMargin}The following tests failed:"
             for name in "${whichFailed[@]}"; do
-                cecho lr "${indentation}   - " emph "${name}"
+                cecho lr "${indentation}${leftMargin} - " emph "${name}"
             done
-            cecho bb "${indentation}==============================="
+            cecho bb "${indentation}${lineOfEquals}"
         fi
     fi
     cecho ''
