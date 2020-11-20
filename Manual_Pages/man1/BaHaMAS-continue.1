@@ -59,6 +59,13 @@ Use \f[I]filename\f[R] instead of \f[B]betas\f[R] file.
 .B --measurements, -m \f[I]number\f[R]
 Specify the number of trajectories that should be done (default: 1000).
 .TP
+.B --updateExecutable
+Make BaHaMAS produce again the executable file and replace the existing
+one in the beta folder(s), instead of simply using it.
+This option can be handy e.g.\ if the administrators of the cluster
+changed or updated some software and you are then required to recreate
+your executable(s).
+.TP
 .B --jobscript_prefix \f[I]string\f[R]
 Specify the prefix of the jobscript file (default: own setup).
 .TP

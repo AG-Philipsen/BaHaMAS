@@ -160,6 +160,7 @@ function DeclareBaHaMASGlobalVariables()
 
     #Values of execution mode options
     BHMAS_trajectoryNumberUpToWhichToContinue=0
+    BHMAS_reproduceExecutable='FALSE'
     BHMAS_jobstatusUser="$(whoami)"
     BHMAS_jobstatusAll='FALSE'
     BHMAS_jobstatusLocal='FALSE'

@@ -42,6 +42,10 @@ If possible, based on the provided information, it is checked if each simulation
 \--measurements, \-m *number*
 :   Specify the number of trajectories that should be done (default: 1000).
 
+\--updateExecutable
+:   Make BaHaMAS produce again the executable file and replace the existing one in the beta folder(s), instead of simply using it.
+    This option can be handy e.g. if the administrators of the cluster changed or updated some software and you are then required to recreate your executable(s).
+
 \--jobscript_prefix *string*
 :   Specify the prefix of the jobscript file (default: own setup).
 

@@ -3,6 +3,10 @@
 \--fromHot
 :   Force BaHaMAS to act on thermalization(s) from hot without determining itself the thermalization type.
 
+\--updateExecutable
+:   Make BaHaMAS produce again the executable file and replace the existing one in the beta folder(s), instead of simply using it.
+    This option can be handy e.g. if the administrators of the cluster changed or updated some software and you are then required to recreate your executable(s).
+
 \--till, \-t *number*
 :   Specify till which trajectory number the simulations should be continued.
 

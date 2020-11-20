@@ -61,6 +61,9 @@ function ParseSpecificModeOptions_continue()
                     fi
                 fi
                 shift 2 ;;
+            --updateExecutable )
+                readonly BHMAS_reproduceExecutable='TRUE'
+                shift ;;
             * )
                 BHMAS_commandLineOptionsToBeParsed+=( "$1" )
                 shift ;;

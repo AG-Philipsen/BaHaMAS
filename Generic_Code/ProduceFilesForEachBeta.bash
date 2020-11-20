@@ -72,6 +72,13 @@ function ProduceExecutableFileForEachBeta()
     ProduceExecutableFileInGivenBetaDirectories "${listOfFolders[@]}"
 }
 
+function ReproduceExecutableFileForEachBetaIfNeeded()
+{
+    if [[ ${BHMAS_reproduceExecutable} = 'TRUE' ]]; then
+        ProduceExecutableFileForEachBeta
+    fi
+}
+
 function EnsureThatNeededFilesAreOnRunDiskForEachBeta()
 {
     if [[ "${BHMAS_submitDiskGlobalPath}" != "${BHMAS_runDiskGlobalPath}" ]]; then
@@ -95,7 +102,7 @@ function EnsureThatNeededFilesAreOnRunDiskForEachBeta()
             if [[ ${BHMAS_executionMode} != 'mode:measure' ]]; then
                 __static__CheckExistenceOfFileAndCopyIt 'input' "${inputFileGlobalPath}" "${runBetaDirectory}"
             fi
-            if [[ ${BHMAS_executionMode} != mode:continue* ]]; then
+            if [[ ${BHMAS_executionMode} != mode:continue* ]] || [[ ${BHMAS_reproduceExecutable} = 'TRUE' ]]; then
                 __static__CheckExistenceOfFileAndCopyIt 'executable' "${executableGlobalPath}" "${runBetaDirectory}"
             else
                 executableGlobalPath="${runBetaDirectory}/${BHMAS_productionExecutableFilename}"
