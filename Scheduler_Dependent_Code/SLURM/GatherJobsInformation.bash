@@ -51,7 +51,7 @@ function GatherJobsInformationForJobStatusMode_SLURM()
           jobId jobSubmissionTime jobSubmissionFolder
     declare -A squeueFormatCode=()
     squeueFormatCodeString=''; squeueAdditionalOptions=''
-    slurmOkVersion='slurm 14.03.0'; slurmVersion="$(squeue --version)"
+    slurmOkVersion='14.03.0'; slurmVersion="$(squeue --version | awk '{print $NF}')"
     #Format codes for squeue command in order to get specific information
     squeueFormatCode=(
         ["JobId"]="%i"
