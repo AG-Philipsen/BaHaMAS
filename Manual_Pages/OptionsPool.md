@@ -23,7 +23,7 @@
 :   Only the jobs enqueued by the specified user are considered in the report (default: user that runs the command).
 
 \--local, \-l @mode:job-status@
-:   Only jobs submitted from the present directory are considered in the report.
+:   Only jobs submitted from the present directory or a sub-folder of it are considered in the report.
 
 \--all, \-a @mode:clean-output-files@
 :   All existing new-chain folders are considered and the **betas** file is not parsed.

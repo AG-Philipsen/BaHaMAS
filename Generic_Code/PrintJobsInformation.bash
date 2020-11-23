@@ -28,13 +28,14 @@ function GatherAndPrintJobsInformation()
           nodesPendingTimeString startEndTime runWallTime submissionTimeString
     #Call function scheduler specific: It will fill jobsInformation
     GatherJobsInformationForJobStatusMode
-    if [[ "${#jobsInformation[@]}" -eq 0 ]]; then
-        cecho lc "\n No job found according to given options!"
-        return 0
-    fi
     #Split job information in different arrays using '@' as separator
-    #NOTE: Here the strings could contain glob patterns (e.g. NodeList)
-    #      and it is important to quote them, since nullglob is set.
+    #
+    # NOTE: Here the strings could contain glob patterns (e.g. NodeList)
+    #       and it is important to quote them, since nullglob is set.
+    jobId=();                jobName=();             jobStatus=()
+    jobNodeList=();          jobSubmissionTime=();   jobWalltime=()
+    jobStartTime=();         jobRunTime=();          jobEndTime=()
+    jobSubmissionFolder=();  jobNumberOfNodes=()
     for string in "${jobsInformation[@]}"; do
         jobId+=(               "${string%%@*}" ); string="${string#*@}"
         jobName+=(             "${string%%@*}" ); string="${string#*@}"
@@ -47,7 +48,21 @@ function GatherAndPrintJobsInformation()
         jobEndTime+=(          "${string%%@*}" ); string="${string#*@}"
         jobSubmissionFolder+=( "${string%%@*}" ); string="${string#*@}"
         jobNumberOfNodes+=(    "${string%%@*}" )
+        if [[ ${BHMAS_jobstatusLocal} = 'TRUE' ]]; then
+            if [[ ! ${jobSubmissionFolder[-1]} =~ ^$(pwd) ]]; then
+                unset -v\
+                      'jobId[-1]' 'jobName[-1]' 'jobStatus[-1]' 'jobNodeList[-1]'\
+                      'jobSubmissionTime[-1]' 'jobWalltime[-1]' 'jobStartTime[-1]'\
+                      'jobRunTime[-1]' 'jobEndTime[-1]' 'jobSubmissionFolder[-1]'\
+                      'jobNumberOfNodes[-1]'
+            fi
+        fi
     done
+    # The if here below considers both no queued jobs or no "--local" jobs in a non empty queue
+    if [[ ${#jobId[@]} -eq 0 ]]; then
+        cecho lc "\n No job found according to given options!"
+        return 0
+    fi
     #Shorten path (it works only if the user is 'whoami'
     jobSubmissionFolder=( ${jobSubmissionFolder[@]/${BHMAS_submitDiskGlobalPath}/SUBMIT} )
     jobSubmissionFolder=( ${jobSubmissionFolder[@]/${BHMAS_runDiskGlobalPath}/WORK} )

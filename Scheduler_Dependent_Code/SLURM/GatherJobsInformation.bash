@@ -124,9 +124,6 @@ function GatherJobsInformationForJobStatusMode_SLURM()
                                     }' <<< "$(printf '%s\n' ${jobsInformation[@]})")" )
     fi
     #------------------------------------------------------------------------------------------------------------------------------#
-    if [[ ${BHMAS_jobstatusLocal} = 'TRUE' ]]; then
-        jobsInformation="$(grep --color=never "${PWD}" <<< "$(printf '%s\n' ${jobsInformation[@]})")"
-    fi
     #If any field is empty (like the node list for pending jobs) replace value with 'empty' word, it facilitate later handling
     jobsInformation=( "${jobsInformation[@]//@@/@empty@}" )
     if [[ ${jobsInformation[@]} =~ @@ ]]; then

@@ -29,7 +29,7 @@ The report terminates with a numerical summary.
 :   Only the jobs enqueued by the specified user are considered in the report (default: user that runs the command).
 
 \--local, \-l
-:   Only jobs submitted from the present directory are considered in the report.
+:   Only jobs submitted from the present directory or a sub-folder of it are considered in the report.
 
 \--all, \-a
 :   All enqueued jobs are considered in the report.
