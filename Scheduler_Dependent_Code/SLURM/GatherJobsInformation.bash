@@ -103,25 +103,25 @@ function GatherJobsInformationForJobStatusMode_SLURM()
             jobSubmissionTime="${jobSubmissionTime}|${jobId}@${extractedJobInformation[SubmitTime]}"
             unset -v 'extractedJobInformation'
         done
-        jobsInformation=$(awk --posix -v subFolder="${jobSubmissionFolder:1}" \
-                            -v subTime="${jobSubmissionTime:1}" '
-                                BEGIN{
-                                    split(subFolder, tmpSubFold, "|")
-                                    split(subTime, tmpSubTime, "|")
-                                    for(i in tmpSubFold){
-                                        split(tmpSubFold[i], resultFold, "@")
-                                        jobSubmissionFolder[resultFold[1]]=resultFold[2]
-                                        split(tmpSubTime[i], resultTime, "@")
-                                        jobSubmissionTime[resultTime[1]]=resultTime[2]
+        jobsInformation=( "$(awk --posix -v subFolder="${jobSubmissionFolder:1}" \
+                                -v subTime="${jobSubmissionTime:1}" '
+                                    BEGIN{
+                                        split(subFolder, tmpSubFold, "|")
+                                        split(subTime, tmpSubTime, "|")
+                                        for(i in tmpSubFold){
+                                            split(tmpSubFold[i], resultFold, "@")
+                                            jobSubmissionFolder[resultFold[1]]=resultFold[2]
+                                            split(tmpSubTime[i], resultTime, "@")
+                                            jobSubmissionTime[resultTime[1]]=resultTime[2]
+                                        }
+                                        FS="@"
+                                        OFS="@"
                                     }
-                                    FS="@"
-                                    OFS="@"
-                                }
-                                {
-                                    $5=jobSubmissionTime[$1]
-                                    $10=jobSubmissionFolder[$1]
-                                    print $0
-                                }' <<< "$(printf '%s\n' ${jobsInformation[@]})")
+                                    {
+                                        $5=jobSubmissionTime[$1]
+                                        $10=jobSubmissionFolder[$1]
+                                        print $0
+                                    }' <<< "$(printf '%s\n' ${jobsInformation[@]})")" )
     fi
     #------------------------------------------------------------------------------------------------------------------------------#
     if [[ ${BHMAS_jobstatusLocal} = 'TRUE' ]]; then
