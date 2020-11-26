@@ -12,7 +12,7 @@ Therefore, the structure of the code allows for easy generalisations and it shou
 
 ### Supported LQCD software and job scheduler
 
-Any (software,scheduler) combination among the supported ones is allowed.
+Any (software, scheduler) combination among the supported ones is allowed.
 
 |     **LQCD software**      |   **Scheduler**   |
 |     :---------------:      |   :-----------:   |
@@ -40,11 +40,11 @@ Once cloned the repository, it can be run straight away.
 Nevertheless, to be able to properly work, it needs to be configured with some information, running an intuitive and interactive setup.
 Its usage on the command line is `git`-inspired and you can explore the funcitonality yourself running `BaHaMAS` without arguments and then following the compact _getting started_ you will obtain.
 Each `BaHaMAS` execution mode has a dedicated manual that you can read directly in the terminal.
-To have a more complete and descriptive overview, you can refer to the Wiki, where also a more abstract description of how `BaHaMAS` works is offered.
+To have a more complete and descriptive overview, you can refer to the [Wiki], where also a more abstract description of how `BaHaMAS` works is offered.
 
 ## Authors
 
-`BaHaMAS` was born in 2014 and it has been developed in a very small team.
+`BaHaMAS` was born in 2014 and it has been developed in [a very small team][authors].
 Use [git] functionalities like, for example, `git shortlog -sne` if you are interested in getting an overview of contributions by different authors.
 Feel free to contact us if you have suggestions, feedbacks, bug reports or anything else about the software.
 
@@ -64,5 +64,7 @@ The logo of `BaHaMAS` as well as the Wiki cover picture have been drawn by Auror
    [slurm]: <https://slurm.schedmd.com/>
    [CL<sup>2</sup>QCD]: <https://github.com/AG-Philipsen/cl2qcd>
    [openQCD-FASTSUM]: <https://gitlab.com/fastsum/openqcd-fastsum>
+   [Wiki]: <https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/-/wikis/home>
    [git]: <https://git-scm.com>
-   [logo]: <https://github.com/AG-Philipsen/BaHaMAS/blob/master/Logo.png>
+   [logo]: <https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/-/blob/images/Logo.png>
+   [authors]: <https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/-/wikis/Authors>
