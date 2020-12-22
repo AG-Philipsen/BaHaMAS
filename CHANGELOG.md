@@ -32,6 +32,7 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 ## [Unreleased]
 
+* :sos: With CL2QCD, the `BHMAS_useRationalApproxFiles` was ignored in the `continue*` execution modes and unnecessary modifications of the input file were attempted. This is fixed now.
 * :sos: The `--local` option of the `job-status` mode has been fixed (it was not always working as it should have worked).
 * :new: It is now possible to ask BaHaMAS to recreate the executable file(s) in the `continue` and `continue-thermalization` modes via the `--updateExecutable` option.
 * :new: It is now possible to use one time scale only for the MD integration specifying only one integer in the `i` field in the betas file.

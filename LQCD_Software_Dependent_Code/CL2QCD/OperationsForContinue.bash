@@ -263,22 +263,41 @@ function __static__HandleMultiplePseudofermionsInInputFile_CL2QCD()
             ModifyOptionsInInputFile_CL2QCD "${optionsToBeAddedOrModified[@]}" || return 1
             PrintModifiedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
         fi
-        #Always replace approx files with correct ones (maybe unnecessary, but easy to be done always)
-        if [[ ${BHMAS_numberOfPseudofermions} -eq 1 ]]; then
-            optionsToBeAddedOrModified=(
-                "rationalApproxFileHB=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Heatbath"
-                "rationalApproxFileMD=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_MD"
-                "rationalApproxFileMetropolis=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Metropolis"
-            )
-        else
-            optionsToBeAddedOrModified=(
-                "rationalApproxFileHB=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${BHMAS_numberOfPseudofermions}_Approx_Heatbath"
-                "rationalApproxFileMD=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${BHMAS_numberOfPseudofermions}_Approx_MD"
-                "rationalApproxFileMetropolis=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${BHMAS_numberOfPseudofermions}_Approx_Metropolis"
-            )
+        if [[ ${BHMAS_useRationalApproxFiles} = "TRUE" ]]; then
+            # This might be relevant if user changed in the setup BHMAS_useRationalApproxFiles
+            # from FALSE to TRUE while the simulation was already started.
+            optionsToBeAddedOrModified=()
+            if [[ $(grep -c "rationalApproxFileHB" ${inputFileGlobalPath}) -eq 0 ]]; then
+                optionsToBeAddedOrModified+=( "rationalApproxFileHB=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Heatbath" )
+            fi
+            if [[ $(grep -c "rationalApproxFileMD" ${inputFileGlobalPath}) -eq 0 ]]; then
+                optionsToBeAddedOrModified+=( "rationalApproxFileMD=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_MD" )
+            fi
+            if [[ $(grep -c "rationalApproxFileMetropolis" ${inputFileGlobalPath}) -eq 0 ]]; then
+                optionsToBeAddedOrModified+=( "rationalApproxFileMetropolis=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Metropolis" )
+            fi
+            if [[ ${#optionsToBeAddedOrModified[@]} -ne 0 ]]; then
+                AddOptionsToInputFile "${optionsToBeAddedOrModified[@]}"
+                PrintAddedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
+            fi
+            # Always replace approx files with correct ones (maybe unnecessary, but easy to be done always)
+            # NOTE: Here it is correct to assume that rationalApproxFile* lines are present in the inputfile (guaranteed above)
+            if [[ ${BHMAS_numberOfPseudofermions} -eq 1 ]]; then
+                optionsToBeAddedOrModified=(
+                    "rationalApproxFileHB=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Heatbath"
+                    "rationalApproxFileMD=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_MD"
+                    "rationalApproxFileMetropolis=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Metropolis"
+                )
+            else
+                optionsToBeAddedOrModified=(
+                    "rationalApproxFileHB=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${BHMAS_numberOfPseudofermions}_Approx_Heatbath"
+                    "rationalApproxFileMD=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${BHMAS_numberOfPseudofermions}_Approx_MD"
+                    "rationalApproxFileMetropolis=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${BHMAS_numberOfPseudofermions}_Approx_Metropolis"
+                )
+            fi
+            ModifyOptionsInInputFile_CL2QCD "${optionsToBeAddedOrModified[@]}" || return 1
+            PrintModifiedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
         fi
-        ModifyOptionsInInputFile_CL2QCD "${optionsToBeAddedOrModified[@]}"
-        PrintModifiedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
     fi
     return 0
 }
