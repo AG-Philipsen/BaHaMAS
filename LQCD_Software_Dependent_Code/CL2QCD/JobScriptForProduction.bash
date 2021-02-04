@@ -1,6 +1,6 @@
 #
 #  Copyright (c) 2015-2016 Christopher Czaban
-#  Copyright (c) 2015-2018,2020 Alessandro Sciarra
+#  Copyright (c) 2015-2018,2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -88,7 +88,7 @@ function AddSoftwareSpecificPartToProductionJobScript_CL2QCD()
             "if hash mbuffer 2>/dev/null; then"\
             "    time \${dir${index}}/${BHMAS_productionExecutableFilename} --inputFile=\${dir${index}}/${BHMAS_inputFilename} --deviceId=${index} --beta=${betaValues[${index}]%%_*} 2> \${dir${index}}/\${errFile} | mbuffer -q -m2M > \${dir${index}}/\${outFile} &"\
             "else"\
-            "    time ${BHMAS_jobRunCommand} -n 1 \${dir${index}}/${BHMAS_productionExecutableFilename} --inputFile=\${dir${index}}/${BHMAS_inputFilename} --deviceId=${index} --beta=${betaValues[${index}]%%_*} > \${dir${index}}/\${outFile} 2> \${dir${index}}/\${errFile} &"\
+            "    time \${dir${index}}/${BHMAS_productionExecutableFilename} --inputFile=\${dir${index}}/${BHMAS_inputFilename} --deviceId=${index} --beta=${betaValues[${index}]%%_*} > \${dir${index}}/\${outFile} 2> \${dir${index}}/\${errFile} &"\
             "fi"\
             "PID_SRUN_${index}=\${!}"\
             ""
