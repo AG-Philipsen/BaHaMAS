@@ -1,4 +1,4 @@
-<img src="https://github.com/AG-Philipsen/BaHaMAS/blob/images/Logo.png?raw=true" align="right" width="30%" height="30%"/>
+<img src="https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/BaHaMAS/-/wikis/images/LogoDigital.png" align="right" width="30%" height="30%"/>
 
 # BaHaMAS
 
@@ -16,7 +16,7 @@ Any (software, scheduler) combination among the supported ones is allowed.
 
 |     **LQCD software**      |   **Scheduler**   |
 |     :---------------:      |   :-----------:   |
-| [CL<sup>2</sup>QCD]        | [slurm]           | 
+| [CL<sup>2</sup>QCD]        | [slurm]           |
 | [openQCD-FASTSUM]          |                   |
 
 ## Main Features
@@ -52,7 +52,8 @@ Feel free to contact us if you have suggestions, feedbacks, bug reports or anyth
 License
 ----
 
-The logo of `BaHaMAS` as well as the Wiki cover picture have been drawn by Aurora Somaglia, while the other pictures in the Wiki have been realized by Alessandro Sciarra.
+The logo of `BaHaMAS` has been created and drawn by **Aurora Somaglia** and then digitalized by **Carine Thalman**.
+Other hand drawn pictures have been realized by Aurora Somaglia as well, while the remaining digital ones in the Wiki have been done by **Alessandro Sciarra**.
 
 |     **Code**      |   **Logo and Images**   |
 |     :------:      |   :-----------------:   |
