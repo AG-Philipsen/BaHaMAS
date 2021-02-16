@@ -21,6 +21,7 @@ If no configuration with the same parameters of the actual position is found or 
 If at least one thermalized configuration "from hot" exists and if the **\--fromHot** option is not given, then a thermalization "from conf" will be started.
 
 Most of the information for the simulation input file(s) is retrieved from the **betas** file, but the user can also tune some input via the command line options.
+The **g***number* and **pf***number* fields in the **betas** file have priority on the **\--measurements** and **\--pf** command line options, respectively.
 
 # OPTIONS
 

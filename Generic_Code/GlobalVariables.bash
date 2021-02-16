@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2017-2018,2020 Alessandro Sciarra
+#  Copyright (c) 2017-2018,2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -144,6 +144,7 @@ function DeclareBaHaMASGlobalVariables()
     declare -gA BHMAS_massPreconditioningValues=()
     declare -gA BHMAS_timesPerTrajectory=()
     declare -gA BHMAS_goalStatistics=()
+    declare -gA BHMAS_pseudofermionsNumbers=()
     declare -gA BHMAS_startConfigurationGlobalPath=()
     readonly BHMAS_plaquetteColumn=2
     readonly BHMAS_deltaHColumn=8

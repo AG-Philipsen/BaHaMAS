@@ -44,6 +44,16 @@ at a later stage).
 For \f[B]openQCD-FASTSUM\f[R] the run will be resumed as if
 \f[B]rlast\f[R] was specified.
 .PP
+The number of pseudofermions to be used is determined as follows.
+.IP \[bu] 2
+If the \f[B]--pf\f[R] option is given, then it will be used.
+.IP \[bu] 2
+Otherwise, if the \f[B]pf\f[R]\f[I]number\f[R] field is present in the
+\f[B]betas\f[R] file, then it will be used.
+.IP \[bu] 2
+Otherwise, the number of pseudofermions in the input file is not
+modified.
+.PP
 If possible, based on the provided information, it is checked if each
 simulation is finished and, if so, it is not continued and a message is
 printed for the user.

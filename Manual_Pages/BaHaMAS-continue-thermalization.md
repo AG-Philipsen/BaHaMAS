@@ -22,16 +22,7 @@ If e.g. a thermalization "from hot" is finished but one other crashed and the us
 This can be comfortably done using the **\--fromHot** option.
 
 The input file of each simulation is adjusted according to the option passed and some sanity checks are performed.
-The number of trajectories which will be done is determined as follows.
-
- * If the **\--measurements** option is given, then it will be used.
- * Otherwise, if the **\--till***=number* option is given, then it will be used.
- * Otherwise, if the **g***number* field is present in the **betas** file, then it will be used.
- * Otherwise, the measurement option in the input file is not modified.
-
-To resume a simulation from a given trajectory, add a **r***number* field in the **betas** file.
-Use **rlast** in the **betas** file to resume a simulation from the last saved checkpoint.
-If possible, based on the provided information, it is checked if each simulation is finished and, if so, it is not continued and a message is printed for the user.
+Refer to the manual page of the **continue** execution mode to read in detail how the input file is adjusted.
 
 # OPTIONS
 
@@ -108,7 +99,7 @@ If possible, based on the provided information, it is checked if each simulation
 
 # SEE ALSO
 
-**BaHaMAS**(1)
+**BaHaMAS**(1), **BaHaMAS-continue**(1)
 
 # BAHAMAS
 

@@ -31,25 +31,8 @@ This can be comfortably done using the \f[B]--fromHot\f[R] option.
 .PP
 The input file of each simulation is adjusted according to the option
 passed and some sanity checks are performed.
-The number of trajectories which will be done is determined as follows.
-.IP \[bu] 2
-If the \f[B]--measurements\f[R] option is given, then it will be used.
-.IP \[bu] 2
-Otherwise, if the \f[B]--till\f[R]\f[I]=number\f[R] option is given,
-then it will be used.
-.IP \[bu] 2
-Otherwise, if the \f[B]g\f[R]\f[I]number\f[R] field is present in the
-\f[B]betas\f[R] file, then it will be used.
-.IP \[bu] 2
-Otherwise, the measurement option in the input file is not modified.
-.PP
-To resume a simulation from a given trajectory, add a
-\f[B]r\f[R]\f[I]number\f[R] field in the \f[B]betas\f[R] file.
-Use \f[B]rlast\f[R] in the \f[B]betas\f[R] file to resume a simulation
-from the last saved checkpoint.
-If possible, based on the provided information, it is checked if each
-simulation is finished and, if so, it is not continued and a message is
-printed for the user.
+Refer to the manual page of the \f[B]continue\f[R] execution mode to
+read in detail how the input file is adjusted.
 .SH OPTIONS
 .TP
 .B --till, -t \f[I]number\f[R]
@@ -142,7 +125,7 @@ Only uncommented lines in the \f[B]betas\f[R] file are considered in
 this mode.
 .SH SEE ALSO
 .PP
-\f[B]BaHaMAS\f[R](1)
+\f[B]BaHaMAS\f[R](1), \f[B]BaHaMAS-continue\f[R](1)
 .SH BAHAMAS
 .PP
 Part of the \f[B]BaHaMAS\f[R] software.

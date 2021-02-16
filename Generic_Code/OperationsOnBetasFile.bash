@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2017,2020 Alessandro Sciarra
+#  Copyright (c) 2017,2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -36,10 +36,11 @@ function __static__CheckExistenceBetasFileAndAddEndOfLineAtTheEndIfMissing()
 
 function __static__CheckFormatBetasFileEntry()
 {
-    local beta integrationStepsRegex massPreconditioningRegex resumeRegex statisticsRegex timesRegex
+    local beta integrationStepsRegex massPreconditioningRegex pseudofermionsRegex resumeRegex statisticsRegex timesRegex
     #Grep regexes, we eliminate backslashes easily with variable expansion
     integrationStepsRegex='[0-9]\+\(-[0-9]\+\)*'
     massPreconditioningRegex='[0-9]\+,[0-9]\+'
+    pseudofermionsRegex='[1-9][0-9]*'
     resumeRegex='\([0-9]\+\|last\)'
     statisticsRegex='[1-9][0-9]*'
     timesRegex='[0-9]\+\([.][0-9]*\)\?'
@@ -51,6 +52,10 @@ function __static__CheckFormatBetasFileEntry()
         massPreconditioning )
             if [[ ! $2 =~ ^${massPreconditioningRegex//\\/}$ ]]; then
                 Fatal ${BHMAS_fatalWrongBetasFile} "Mass preconditioning entry " emph "$2" " in " file "${BHMAS_betasFilename}" " file does not match expected format!"
+            fi ;;
+        pseudofermions )
+            if [[ ! $2 =~ ^${pseudofermionsRegex//\\/}$ ]]; then
+                Fatal ${BHMAS_fatalWrongBetasFile} "Pseudofermions entry " emph "$2" " in " file "${BHMAS_betasFilename}" " file does not match expected format!"
             fi ;;
         resumeFrom )
             if [[ ! $2 =~ ^${resumeRegex//\\/}$ ]]; then
@@ -122,6 +127,15 @@ function __static__CheckAndParseSingleLine()
                     entry=${1:2}
                     __static__CheckFormatBetasFileEntry massPreconditioning "${entry}"
                     BHMAS_massPreconditioningValues["${beta}"]=${entry}
+                fi
+                ;;
+            pf* )
+                if [[ ${BHMAS_lqcdSoftware} != 'CL2QCD' || ${BHMAS_staggered} == 'FALSE' ]]; then
+                    Fatal ${BHMAS_fatalMissingFeature} 'Number of pseudofermions in betas file can be used with ' emph 'CL2QCD and staggered fermions only' '!'
+                else
+                    entry=${1:2}
+                    __static__CheckFormatBetasFileEntry pseudofermions "${entry}"
+                    BHMAS_pseudofermionsNumbers["${beta}"]=${entry}
                 fi
                 ;;
             r* )

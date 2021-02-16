@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2020 Alessandro Sciarra
+#  Copyright (c) 2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -19,12 +19,13 @@
 
 function ProduceInputFile_openQCD-FASTSUM()
 {
-    local runId inputFileGlobalPath numberOfTrajectoriesToBeDone\
+    local runId inputFileGlobalPath numberOfTrajectoriesToBeDone numberOfPseudofermionsToBeUsed\
           betaValue seedValue massAsNumber nTimeScales scaleOneIntegrationStepsToBeUsed\
           forcesInLevelZero solverToBeUsed sapArrayToBeUsed
     runId="$1"
     inputFileGlobalPath="$2"
     numberOfTrajectoriesToBeDone=$3
+    numberOfPseudofermionsToBeUsed=$4  # <-- Not used at the moment but passed to the function
     if [[ ! ${runId} =~ ^(${BHMAS_betaRegex//\\/})_${BHMAS_seedPrefix}(${BHMAS_seedRegex//\\/})${BHMAS_betaPostfix}$ ]]; then
         Internal 'Run ID ' emph "${runId}" ' in ' emph "${FUNCNAME}" ' does not match expected format!'
     else

@@ -32,8 +32,9 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 ## [Unreleased]
 
+* :new: The number of pseudofermions can be now specified in the betas file (for CL2QCD and staggered fermions only).
 * :boom: Default number of chiral condensate measurements with CL2QCD and staggered fermions changed from 8 to 16 but still left hard-coded (consistent with Wilson fermions now).
-* :sos: With CL2QCD, the `BHMAS_useRationalApproxFiles` was ignored in the `continue*` execution modes and unnecessary modifications of the input file were attempted. This is fixed now.
+* :sos: With CL2QCD, the `BHMAS_useRationalApproxFiles` was ignored in the `continue*` modes and unnecessary modifications of the input file were attempted. This is fixed now.
 * :sos: The `--local` option of the `job-status` mode has been fixed (it was not always working as it should have worked).
 * :new: It is now possible to ask BaHaMAS to recreate the executable file(s) in the `continue` and `continue-thermalization` modes via the `--updateExecutable` option.
 * :new: It is now possible to use one time scale only for the MD integration specifying only one integer in the `i` field in the betas file.

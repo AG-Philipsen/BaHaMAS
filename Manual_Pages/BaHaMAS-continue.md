@@ -29,6 +29,12 @@ If the **r** field is absent in the **betas** file, the adopted behaviour is sof
  * For **CL2QCD**, which support a temporary check-point mechanism, this will be used (and a cleaning of the output file(s) will be needed at a later stage).
  * For **openQCD-FASTSUM** the run will be resumed as if **rlast** was specified.
 
+The number of pseudofermions to be used is determined as follows.
+
+ * If the **\--pf** option is given, then it will be used.
+ * Otherwise, if the **pf***number* field is present in the **betas** file, then it will be used.
+ * Otherwise, the number of pseudofermions in the input file is not modified.
+
 If possible, based on the provided information, it is checked if each simulation is finished and, if so, it is not continued and a message is printed for the user.
 
 # OPTIONS

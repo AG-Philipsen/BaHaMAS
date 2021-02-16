@@ -19,7 +19,8 @@
 
 function ProduceInputFileAndJobScriptForEachBeta()
 {
-    local betaValuesCopy index beta submitBetaDirectory existingFiles temporaryNumberOfTrajectories
+    local betaValuesCopy index beta submitBetaDirectory existingFiles\
+          temporaryNumberOfTrajectories temporaryNumberOfPseudofermions
     betaValuesCopy=(${BHMAS_betaValues[@]})
     for index in "${!betaValuesCopy[@]}"; do
         submitBetaDirectory="${BHMAS_submitDirWithBetaFolders}/${BHMAS_betaPrefix}${betaValuesCopy[${index}]}"
@@ -49,7 +50,14 @@ function ProduceInputFileAndJobScriptForEachBeta()
         else
             temporaryNumberOfTrajectories=${BHMAS_numberOfTrajectories}
         fi
-        ProduceInputFile "${beta}" "${submitBetaDirectory}/${BHMAS_inputFilename}" ${temporaryNumberOfTrajectories}
+        if KeyInArray "${beta}" BHMAS_pseudofermionsNumbers; then
+            temporaryNumberOfPseudofermions=${BHMAS_pseudofermionsNumbers["${beta}"]}
+        else
+            temporaryNumberOfPseudofermions=${BHMAS_numberOfPseudofermions}
+        fi
+        ProduceInputFile\
+            "${beta}" "${submitBetaDirectory}/${BHMAS_inputFilename}"\
+            ${temporaryNumberOfTrajectories} ${temporaryNumberOfPseudofermions}
     done
     mkdir -p ${BHMAS_submitDirWithBetaFolders}/${BHMAS_jobScriptFolderName} || exit ${BHMAS_fatalBuiltin}
     PackBetaValuesPerGpuAndCreateOrLookForJobScriptFiles "${betaValuesCopy[@]}"

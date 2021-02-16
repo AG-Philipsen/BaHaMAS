@@ -27,10 +27,12 @@ function __static__AddToInputFile()
 
 function ProduceInputFile_CL2QCD()
 {
-    local betaValue inputFileGlobalPath numberOfTrajectoriesToBeDone massAsNumber
+    local betaValue inputFileGlobalPath numberOfTrajectoriesToBeDone\
+          numberOfPseudofermionsToBeUsed massAsNumber
     betaValue="$1"
     inputFileGlobalPath="$2"
     numberOfTrajectoriesToBeDone=$3
+    numberOfPseudofermionsToBeUsed=$4
     rm -f ${inputFileGlobalPath} || exit ${BHMAS_fatalBuiltin}
     touch ${inputFileGlobalPath} || exit ${BHMAS_fatalBuiltin}
     if [[ $(grep -c "[.]" <<< "${BHMAS_mass}") -eq 0 ]]; then
@@ -48,21 +50,21 @@ function ProduceInputFile_CL2QCD()
             "nTastes=${BHMAS_nflavour}"
         if [[ ${BHMAS_useRationalApproxFiles} = "TRUE" ]]; then
             __static__AddToInputFile "readRationalApproxFromFile=1"
-            if [[ ${BHMAS_numberOfPseudofermions} -eq 1 ]]; then
+            if [[ ${numberOfPseudofermionsToBeUsed} -eq 1 ]]; then
                 __static__AddToInputFile\
                     "rationalApproxFileHB=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_${BHMAS_approxHeatbathFilenameSuffix}"\
                     "rationalApproxFileMD=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_${BHMAS_approxMDFilenameSuffix}"\
                     "rationalApproxFileMetropolis=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_${BHMAS_approxMetropolisFilenameSuffix}"
             else
                 __static__AddToInputFile\
-                    "rationalApproxFileHB=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${BHMAS_numberOfPseudofermions}_${BHMAS_approxHeatbathFilenameSuffix}"\
-                    "rationalApproxFileMD=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${BHMAS_numberOfPseudofermions}_${BHMAS_approxMDFilenameSuffix}"\
-                    "rationalApproxFileMetropolis=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${BHMAS_numberOfPseudofermions}_${BHMAS_approxMetropolisFilenameSuffix}"
+                    "rationalApproxFileHB=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${numberOfPseudofermionsToBeUsed}_${BHMAS_approxHeatbathFilenameSuffix}"\
+                    "rationalApproxFileMD=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${numberOfPseudofermionsToBeUsed}_${BHMAS_approxMDFilenameSuffix}"\
+                    "rationalApproxFileMetropolis=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${numberOfPseudofermionsToBeUsed}_${BHMAS_approxMetropolisFilenameSuffix}"
             fi
         else
             __static__AddToInputFile "readRationalApproxFromFile=0"
         fi
-        __static__AddToInputFile "nPseudoFermions=${BHMAS_numberOfPseudofermions}"\
+        __static__AddToInputFile "nPseudoFermions=${numberOfPseudofermionsToBeUsed}"\
                                  "findminmaxMaxIterations=10000"
 
     fi
