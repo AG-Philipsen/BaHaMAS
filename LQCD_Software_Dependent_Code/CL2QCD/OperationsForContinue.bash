@@ -239,7 +239,7 @@ function __static__HandlePbpInInputFile_CL2QCD()
         if [[ ${BHMAS_wilson} = "TRUE" ]]; then
             optionsToBeAddedOrModified+=( "nSources=16" )
         elif [[ ${BHMAS_staggered} = "TRUE" ]]; then
-            optionsToBeAddedOrModified+=( "nSources=1" "pbpMeasurements=8" "fermObsInSingleFile=1" "fermObsPbpPrefix=${BHMAS_outputFilename}" )
+            optionsToBeAddedOrModified+=( "nSources=1" "pbpMeasurements=16" "fermObsInSingleFile=1" "fermObsPbpPrefix=${BHMAS_outputFilename}" )
         fi
         AddOptionsToInputFile "${optionsToBeAddedOrModified[@]}"
         PrintAddedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"

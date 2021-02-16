@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2015,2017-2018,2020 Alessandro Sciarra
+#  Copyright (c) 2015,2017-2018,2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -102,7 +102,7 @@ function ProduceInputFile_CL2QCD()
         elif [[ ${BHMAS_staggered} = "TRUE" ]]; then
             __static__AddToInputFile \
                 "nSources=1"\
-                "pbpMeasurements=8"
+                "pbpMeasurements=16"
         fi
         __static__AddToInputFile \
             "fermObsInSingleFile=1"\
