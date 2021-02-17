@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2017-2018,2020 Alessandro Sciarra
+#  Copyright (c) 2017-2018,2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -114,8 +114,8 @@ function ListSimulationsStatus()
 
 function __static__GetJobStatus()
 {
-    local runId parametersString betaValue seedPart postfix jobNameRegex\
-          value counter jobStatus
+    local runId parametersString betaValue seedPart postfix betaInJobnameRegex\
+          seedInJobnameRegex betaSeedsInJobnameRegex jobNameRegex value counter jobStatus
     runId="$1"
     parametersString="$2"
     #Assume runId format is fixed, as often done
@@ -134,7 +134,10 @@ function __static__GetJobStatus()
             postfix='_TH'
             ;;
     esac
-    jobNameRegex="${parametersString}__${BHMAS_betaPrefix}${betaValue}(_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/})*_${seedPart}(_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/})*${postfix}"
+    betaInJobnameRegex="__${BHMAS_betaPrefix}${BHMAS_betaRegex//\\/}"
+    seedInJobnameRegex="_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/}"
+    betaSeedsInJobnameRegex="${betaInJobnameRegex}(${seedInJobnameRegex})+"
+    jobNameRegex="${parametersString}(${betaSeedsInJobnameRegex})*__${BHMAS_betaPrefix}${betaValue}(${seedInJobnameRegex})*_${seedPart}(${seedInJobnameRegex})*(${betaSeedsInJobnameRegex})*${postfix}"
     CheckIfVariablesAreDeclared jobsInformation
     #Assume each element of jobsInformation is of the form "jobName@jobStatus"
     counter=0
