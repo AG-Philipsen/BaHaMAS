@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2017-2018,2020 Alessandro Sciarra
+#  Copyright (c) 2017-2018,2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -56,6 +56,7 @@ function PrintDatabaseHelper()
     __static__AddOptionToDatabaseHelper "--sum" "Summing up the trajectory numbers of each parameter set."
     sectionColor='wg'
     __static__AddSectionLine "Filtering"
+    __static__AddOptionToDatabaseHelper "--nf"   "Specify filtering values for nf."
     __static__AddOptionToDatabaseHelper "--mu" "Specify filtering values for mu."
     __static__AddOptionToDatabaseHelper "--${MASS_PARAMETER}" "Specify filtering values for ${MASS_PARAMETER}$(cecho -n -d ${groupExclusiveColor})."
     __static__AddOptionToDatabaseHelper "--nt"   "Specify filtering values for nt."
