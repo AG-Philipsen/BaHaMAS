@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-#  Copyright (c) 2017-2018,2020 Alessandro Sciarra
+#  Copyright (c) 2017-2018,2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -156,6 +156,7 @@ availableTests=(
     ['jobStatus']='job-status'
     ['jobStatus-user']="job-status --user $(whoami)"
     ['jobStatus-local']='job-status --local'
+    ['jobStatus-partition']='job-status --partition test --onlyGivenPartition'
     ['database-help']='database --help'
     ['database-display']='database --sum'
     ['database-local']='database --local'

@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2017,2020 Alessandro Sciarra
+#  Copyright (c) 2017,2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -442,8 +442,8 @@ function InhibitBaHaMASCommands()
     elif [[ $1 =~ jobStatus ]]; then
         function squeue(){
             printf '%s\n'\
-                   '464756@Nf2_mui0_k1350_nt12_ns60__b6.1960_s1960_TH@PENDING@@2020-11-23T15:29:03@4:10:00@2020-11-24T20:00:06@0:00@2020-11-25T00:10:06@/fake/path/to/job@25'\
-                   '448275@Nf2_mui0_k1300_nt12_ns60__b6.2350_s6107@RUNNING@FakeNodeList@2020-11-09T17:21:31@11-13:47:00@2020-11-15T11:29:59@8-05:41:12@2020-11-27T01:16:59@/fake/path/to/job@25'
+                   '464756@Nf2_mui0_k1350_nt12_ns60__b6.1960_s1960_TH@PENDING@@2020-11-23T15:29:03@4:10:00@2020-11-24T20:00:06@0:00@2020-11-25T00:10:06@/fake/path/to/job@25@test'\
+                   '448275@Nf2_mui0_k1300_nt12_ns60__b6.2350_s6107@RUNNING@FakeNodeList@2020-11-09T17:21:31@11-13:47:00@2020-11-15T11:29:59@8-05:41:12@2020-11-27T01:16:59@/fake/path/to/job@25@test'
         }
     else
         function squeue(){ printf ''; }

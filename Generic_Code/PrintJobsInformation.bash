@@ -135,16 +135,21 @@ function GatherAndPrintJobsInformation()
                "${jobSubmissionFolder[index]}${submissionTimeString}"
     done
     cecho\
-        o B "\n  Total number of submitted jobs: ${numberOfJobs} ("\
-        lg "Running: ${numberOfRunningJobs}"\
-        ly "     Pending: ${numberOfPendingJobs}"\
-        lm "     Others: ${numberOfOtherJobs}" o ")\n" uB \
-        lo "    Node usage of submitted jobs: $((numberOfRunningNodes+numberOfPendingNodes+numberOfOtherNodes)) ("\
-        lg "Running: ${numberOfRunningNodes}"\
-        ly "     Pending: ${numberOfPendingNodes}"\
-        lm "     Others: ${numberOfOtherNodes}" lo ")"\
+        o B "\n  Total number of submitted jobs: $(__static__PrintThreeDigitsNumber ${numberOfJobs}) ("\
+        lg "Running: $(__static__PrintThreeDigitsNumber ${numberOfRunningJobs})"\
+        ly "     Pending: $(__static__PrintThreeDigitsNumber ${numberOfPendingJobs})"\
+        lm "     Others: $(__static__PrintThreeDigitsNumber ${numberOfOtherJobs})" o ")\n" uB \
+        lo "    Node usage of submitted jobs: $(__static__PrintThreeDigitsNumber $((numberOfRunningNodes+numberOfPendingNodes+numberOfOtherNodes)) ) ("\
+        lg "Running: $(__static__PrintThreeDigitsNumber ${numberOfRunningNodes})"\
+        ly "     Pending: $(__static__PrintThreeDigitsNumber ${numberOfPendingNodes})"\
+        lm "     Others: $(__static__PrintThreeDigitsNumber ${numberOfOtherNodes})" lo ")"\
         lc " <-- NOTE: Depending on the cluster, different jobs might use the same node(s).\n"\
         lc B "${lineOfEquals}"
+}
+
+function __static__PrintThreeDigitsNumber()
+{
+    printf "%3d" $1
 }
 
 

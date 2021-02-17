@@ -74,8 +74,12 @@ function GatherJobsInformationForJobStatusMode_SLURM()
     done
     #Get information via squeue and in case filter jobs -> ATTENTION: Double quoting here is CRUCIAL (to respect endlines)!!
     #NOTE: It seems that the sacct command can give a similar result, but at the moment there is no analog to the %Z field.
-    if [[ "${BHMAS_clusterPartition}" != '' ]]; then
-        squeueAdditionalOptions+="-p ${BHMAS_clusterPartition} "
+    if [[ "${BHMAS_jobstatusOnlyPartition}" = 'TRUE' ]]; then
+        if [[ "${BHMAS_clusterPartition}" != '' ]]; then
+            squeueAdditionalOptions+="-p ${BHMAS_clusterPartition} "
+        else
+            Warning -N "It was asked to consider only a partition, but none was specified! Considering all partitions."
+        fi
     fi
     if [[ ${BHMAS_jobstatusAll} = 'FALSE' ]]; then
         squeueAdditionalOptions+="-u ${BHMAS_jobstatusUser} "

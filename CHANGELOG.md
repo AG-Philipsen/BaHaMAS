@@ -32,6 +32,7 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 ## [Unreleased]
 
+* :white_check_mark: Improve `job-status` exeution mode to run faster and report on node usage.
 * :sos: The job status in simulation-status execution mode was not always correctly determined and it has been fixed now.
 * :new: The number of pseudofermions can be now specified in the betas file (for CL2QCD and staggered fermions only).
 * :boom: Default number of chiral condensate measurements with CL2QCD and staggered fermions changed from 8 to 16 but still left hard-coded (consistent with Wilson fermions now).

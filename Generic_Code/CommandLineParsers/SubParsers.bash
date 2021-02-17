@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2017-2018,2020 Alessandro Sciarra
+#  Copyright (c) 2017-2018,2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -90,11 +90,14 @@ function ParseSpecificModeOptions_job-status()
                     BHMAS_jobstatusUser="$2"
                 fi
                 shift 2 ;;
+            --allUsers )
+                BHMAS_jobstatusAll='TRUE'
+                shift ;;
             --local )
                 BHMAS_jobstatusLocal='TRUE'
                 shift ;;
-            --all )
-                BHMAS_jobstatusAll='TRUE'
+            --onlyGivenPartition )
+                BHMAS_jobstatusOnlyPartition='TRUE'
                 shift ;;
             * )
                 BHMAS_commandLineOptionsToBeParsed+=( "$1" )

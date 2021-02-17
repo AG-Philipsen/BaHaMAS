@@ -165,6 +165,7 @@ function DeclareBaHaMASGlobalVariables()
     BHMAS_jobstatusUser="$(whoami)"
     BHMAS_jobstatusAll='FALSE'
     BHMAS_jobstatusLocal='FALSE'
+    BHMAS_jobstatusOnlyPartition='FALSE'
     BHMAS_simulationStatusMeasureTimeOption='TRUE'
     BHMAS_simulationStatusShowOnlyQueuedOption='FALSE'
     BHMAS_simulationStatusVerbose='FALSE'
