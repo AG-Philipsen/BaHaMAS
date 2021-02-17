@@ -131,18 +131,18 @@ function GatherAndPrintJobsInformation()
                "${runWallTime}"\
                "${jobSubmissionFolder[${index}]}${submissionTimeString}"
 
-        unset -v 'jobId[${index}]';               jobId=(               ${jobId[@]+"${jobId[@]}"} )
-        unset -v 'jobName[${index}]';             jobName=(             ${jobName[@]+"${jobName[@]}"} )
-        unset -v 'jobStatus[${index}]';           jobStatus=(           ${jobStatus[@]+"${jobStatus[@]}"} )
-        unset -v 'jobStartTime[${index}]';        jobStartTime=(        ${jobStartTime[@]+"${jobStartTime[@]}"} )
-        unset -v 'jobEndTime[${index}]';          jobEndTime=(          ${jobEndTime[@]+"${jobEndTime[@]}"} )
-        unset -v 'jobSubmissionTime[${index}]';   jobSubmissionTime=(   ${jobSubmissionTime[@]+"${jobSubmissionTime[@]}"} )
-        unset -v 'jobSubmissionFolder[${index}]'; jobSubmissionFolder=( ${jobSubmissionFolder[@]+"${jobSubmissionFolder[@]}"} )
-        unset -v 'jobNumberOfNodes[${index}]';    jobNumberOfNodes=(    ${jobNumberOfNodes[@]+"${jobNumberOfNodes[@]}"} )
-        unset -v 'jobNodeList[${index}]';         jobNodeList=(         ${jobNodeList[@]+"${jobNodeList[@]}"} )
-        unset -v 'jobWalltime[${index}]';         jobWalltime=(         ${jobWalltime[@]+"${jobWalltime[@]}"} )
-        unset -v 'jobRunTime[${index}]';          jobRunTime=(          ${jobRunTime[@]+"${jobRunTime[@]}"} )
-        unset -v 'jobPartition[${index}]';        jobPartition=(        ${jobPartition[@]+"${jobPartition[@]}"} )
+        unset -v 'jobId[${index}]';               jobId=(               "${jobId[@]}" )
+        unset -v 'jobName[${index}]';             jobName=(             "${jobName[@]}" )
+        unset -v 'jobStatus[${index}]';           jobStatus=(           "${jobStatus[@]}" )
+        unset -v 'jobStartTime[${index}]';        jobStartTime=(        "${jobStartTime[@]}" )
+        unset -v 'jobEndTime[${index}]';          jobEndTime=(          "${jobEndTime[@]}" )
+        unset -v 'jobSubmissionTime[${index}]';   jobSubmissionTime=(   "${jobSubmissionTime[@]}" )
+        unset -v 'jobSubmissionFolder[${index}]'; jobSubmissionFolder=( "${jobSubmissionFolder[@]}" )
+        unset -v 'jobNumberOfNodes[${index}]';    jobNumberOfNodes=(    "${jobNumberOfNodes[@]}" )
+        unset -v 'jobNodeList[${index}]';         jobNodeList=(         "${jobNodeList[@]}" )
+        unset -v 'jobWalltime[${index}]';         jobWalltime=(         "${jobWalltime[@]}" )
+        unset -v 'jobRunTime[${index}]';          jobRunTime=(          "${jobRunTime[@]}" )
+        unset -v 'jobPartition[${index}]';        jobPartition=(        "${jobPartition[@]}" )
     done
     cecho\
         o B "\n  Total number of submitted jobs: ${numberOfJobs} ("\
