@@ -28,11 +28,14 @@ The report terminates with a numerical summary.
 \--user, \-u
 :   Only the jobs enqueued by the specified user are considered in the report (default: user that runs the command).
 
+\--allUsers, \-a
+:   Jobs enqueued by any user are considered in the report, even if a specific user is specified.
+
 \--local, \-l
 :   Only jobs submitted from the present directory or a sub-folder of it are considered in the report.
 
-\--all, \-a
-:   All enqueued jobs are considered in the report.
+\--onlyGivenPartition
+:   Only jobs enqueued in the given partition (either on the command line or in the own setup) are considered in the report.
 
 \--partition *string*
 :   Limit the report to the specified partition (default: own setup).

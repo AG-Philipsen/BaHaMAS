@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2017,2020 Alessandro Sciarra
+#  Copyright (c) 2017,2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -65,16 +65,21 @@ function GatherJobsInformationForJobStatusMode_SLURM()
         ["EndTime"]="%e"
         ["WorkDir"]="%Z"
         ["NumNodes"]="%D"
+        ["Partition"]="%P"
     )
     #Space before NodeList is crucial if one wants to parse the output of scontrol show job because there are also ReqNodeList and ExcNodeList
-    squeueFormatCodeOrder=("JobId" "Name" "JobState" "[[:space:]]NodeList" "SubmitTime" "TimeLimit" "StartTime" "RunTime" "EndTime" "WorkDir" "NumNodes")
+    squeueFormatCodeOrder=("JobId" "Name" "JobState" "[[:space:]]NodeList" "SubmitTime" "TimeLimit" "StartTime" "RunTime" "EndTime" "WorkDir" "NumNodes" "Partition")
     for label in "${squeueFormatCodeOrder[@]}"; do
         squeueFormatCodeString+="@${squeueFormatCode[${label}]}"
     done
     #Get information via squeue and in case filter jobs -> ATTENTION: Double quoting here is CRUCIAL (to respect endlines)!!
     #NOTE: It seems that the sacct command can give a similar result, but at the moment there is no analog to the %Z field.
-    if [[ "${BHMAS_clusterPartition}" != '' ]]; then
-        squeueAdditionalOptions+="-p ${BHMAS_clusterPartition} "
+    if [[ "${BHMAS_jobstatusOnlyPartition}" = 'TRUE' ]]; then
+        if [[ "${BHMAS_clusterPartition}" != '' ]]; then
+            squeueAdditionalOptions+="-p ${BHMAS_clusterPartition} "
+        else
+            Warning -N "It was asked to consider only a partition, but none was specified! Considering all partitions."
+        fi
     fi
     if [[ ${BHMAS_jobstatusAll} = 'FALSE' ]]; then
         squeueAdditionalOptions+="-u ${BHMAS_jobstatusUser} "

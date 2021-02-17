@@ -13,11 +13,14 @@
 \--interval *number*
 :   Specify how many trajectories should be considered to calculate the acceptance rate.
 
-\--all, \-a @mode:job-status@
-:   All enqueued jobs are considered in the report.
+\--allUsers, \-a
+:   Jobs enqueued by any user are considered in the report, even if a specific user is specified.
 
 \--partition *string* @mode:job-status@
 :   Limit the report to the specified partition (default: own setup).
+
+\--onlyGivenPartition
+:   Only jobs enqueued in the given partition (either on the command line or in the own setup) are considered in the report.
 
 \--user, \-u @mode:job-status@
 :   Only the jobs enqueued by the specified user are considered in the report (default: user that runs the command).

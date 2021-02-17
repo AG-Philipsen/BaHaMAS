@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2020 Alessandro Sciarra
+#  Copyright (c) 2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -36,7 +36,7 @@ function _BaHaMAS_DeclareAllowedOptionsPerModeOrSoftware()
         allowedOptionsPerModeOrSoftware=(
             ['mode:continue']='--till '
             ['mode:continue-thermalization']='--till '
-            ['mode:job-status']='--user --local --all '
+            ['mode:job-status']='--user --allUsers --local --onlyGivenPartition '
             ['mode:simulation-status']='--doNotMeasureTime --showOnlyQueued --verbose '
             ['mode:acceptance-rate-report']='--interval '
             ['mode:clean-output-files']='--all '
