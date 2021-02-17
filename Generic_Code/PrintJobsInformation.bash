@@ -29,6 +29,10 @@ function GatherAndPrintJobsInformation()
           nodesPendingTimeString startEndTime runWallTime submissionTimeString
     #Call function scheduler specific: It will fill jobsInformation
     GatherJobsInformationForJobStatusMode
+    #Sort job information according to jobname to be able to easily printlater
+    if [[ ${#jobsInformation[@]} -ne 0 ]]; then
+        readarray -d $'\0' -t jobsInformation < <(printf '%s\0' "${jobsInformation[@]}" | sort -z -t'@' -k2)
+    fi
     #Split job information in different arrays using '@' as separator
     #
     # NOTE: Here the strings could contain glob patterns (e.g. NodeList)
@@ -97,9 +101,8 @@ function GatherAndPrintJobsInformation()
     cecho lc "\n" B "${lineOfEquals}\n"\
           bb "$(printf "${tableFormat}" "JOB ID" "JOB NAME" "STATUS" "PARTITION" "START/END TIME" "WALL/RUNTIME" "SUBMITTED FROM")"
 
-    #Print table sorting according jobname
-    while [[ ${#jobName[@]} -gt 0 ]]; do
-        index=$(FindPositionOfFirstMinimumOfArray "${jobName[@]}")
+    #Print table (sorting according jobname already done, just iterate)
+    for index in "${!jobName[@]}"; do
         __static__ChangeOutputColor "${jobStatus[${index}]}" "${jobStartTime[${index}]}"
 
         if [[ ${jobStatus[${index}]} == "RUNNING" ]]; then
@@ -123,26 +126,13 @@ function GatherAndPrintJobsInformation()
         fi
 
         printf "${tableFormat}\e[0m\n"\
-               "${jobId[${index}]}"\
-               "${jobName[${index}]}"\
-               "${jobStatus[${index}]}${nodesPendingTimeString}"\
-               "${jobPartition}"\
+               "${jobId[index]}"\
+               "${jobName[index]}"\
+               "${jobStatus[index]}${nodesPendingTimeString}"\
+               "${jobPartition[index]}"\
                "${startEndTime}"\
                "${runWallTime}"\
-               "${jobSubmissionFolder[${index}]}${submissionTimeString}"
-
-        unset -v 'jobId[${index}]';               jobId=(               "${jobId[@]}" )
-        unset -v 'jobName[${index}]';             jobName=(             "${jobName[@]}" )
-        unset -v 'jobStatus[${index}]';           jobStatus=(           "${jobStatus[@]}" )
-        unset -v 'jobStartTime[${index}]';        jobStartTime=(        "${jobStartTime[@]}" )
-        unset -v 'jobEndTime[${index}]';          jobEndTime=(          "${jobEndTime[@]}" )
-        unset -v 'jobSubmissionTime[${index}]';   jobSubmissionTime=(   "${jobSubmissionTime[@]}" )
-        unset -v 'jobSubmissionFolder[${index}]'; jobSubmissionFolder=( "${jobSubmissionFolder[@]}" )
-        unset -v 'jobNumberOfNodes[${index}]';    jobNumberOfNodes=(    "${jobNumberOfNodes[@]}" )
-        unset -v 'jobNodeList[${index}]';         jobNodeList=(         "${jobNodeList[@]}" )
-        unset -v 'jobWalltime[${index}]';         jobWalltime=(         "${jobWalltime[@]}" )
-        unset -v 'jobRunTime[${index}]';          jobRunTime=(          "${jobRunTime[@]}" )
-        unset -v 'jobPartition[${index}]';        jobPartition=(        "${jobPartition[@]}" )
+               "${jobSubmissionFolder[index]}${submissionTimeString}"
     done
     cecho\
         o B "\n  Total number of submitted jobs: ${numberOfJobs} ("\
