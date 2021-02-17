@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2017-2018,2020 Alessandro Sciarra
+#  Copyright (c) 2017-2018,2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -135,17 +135,15 @@ function __static__ReplaceShortOptionsWithLongOnesAndFillGlobalArray()
     databaseOption='FALSE'
     BHMAS_specifiedCommandLineOptions=() # Empty it to fill it again with only long options
     for option in "$@"; do
-        #Replace short options if they are NOT for database!
-        if [[ ${databaseOption} = 'FALSE' ]]; then
-           KeyInArray ${option} mapOptions && option=${mapOptions[${option}]}
-           #More logic for repeated short options with different long one
-           if [[ ${option} = '-h' ]]; then
-               option='--help'
-           fi
+        if [[ ${option} = '-h' ]]; then
+            option='--help'
         else
-           if [[ ${option} = '-h' ]]; then
-               option='--helpDatabase'
-           fi
+            #Replace short options if they are NOT for database!
+            if [[ ${databaseOption} = 'FALSE' ]]; then
+                if KeyInArray ${option} mapOptions; then
+                    option=${mapOptions[${option}]}
+                fi
+            fi
         fi
         BHMAS_specifiedCommandLineOptions[${#BHMAS_specifiedCommandLineOptions[@]}]="${option}"
         if ElementInArray 'database' "${BHMAS_specifiedCommandLineOptions[@]}"; then
