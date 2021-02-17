@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2017,2020 Alessandro Sciarra
+#  Copyright (c) 2017,2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -65,9 +65,10 @@ function GatherJobsInformationForJobStatusMode_SLURM()
         ["EndTime"]="%e"
         ["WorkDir"]="%Z"
         ["NumNodes"]="%D"
+        ["Partition"]="%P"
     )
     #Space before NodeList is crucial if one wants to parse the output of scontrol show job because there are also ReqNodeList and ExcNodeList
-    squeueFormatCodeOrder=("JobId" "Name" "JobState" "[[:space:]]NodeList" "SubmitTime" "TimeLimit" "StartTime" "RunTime" "EndTime" "WorkDir" "NumNodes")
+    squeueFormatCodeOrder=("JobId" "Name" "JobState" "[[:space:]]NodeList" "SubmitTime" "TimeLimit" "StartTime" "RunTime" "EndTime" "WorkDir" "NumNodes" "Partition")
     for label in "${squeueFormatCodeOrder[@]}"; do
         squeueFormatCodeString+="@${squeueFormatCode[${label}]}"
     done

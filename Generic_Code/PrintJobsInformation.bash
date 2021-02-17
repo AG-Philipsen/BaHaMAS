@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2020 Alessandro Sciarra
+#  Copyright (c) 2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -22,8 +22,9 @@ function GatherAndPrintJobsInformation()
     local jobsInformation string\
           jobId jobName jobStatus jobNodeList jobSubmissionTime jobWalltime\
           jobStartTime jobRunTime jobEndTime jobSubmissionFolder jobNumberOfNodes\
-          lengthOfLongestJobName lengthOfLongestJobId\
+          jobPartition lengthOfLongestJobName lengthOfLongestJobId\
           numberOfJobs numberOfRunningJobs numberOfPendingJobs numberOfOtherJobs\
+          numberOfRunningNodes numberOfPendingNodes numberOfOtherNodes\
           lineOfEquals tableFormat index\
           nodesPendingTimeString startEndTime runWallTime submissionTimeString
     #Call function scheduler specific: It will fill jobsInformation
@@ -35,7 +36,7 @@ function GatherAndPrintJobsInformation()
     jobId=();                jobName=();             jobStatus=()
     jobNodeList=();          jobSubmissionTime=();   jobWalltime=()
     jobStartTime=();         jobRunTime=();          jobEndTime=()
-    jobSubmissionFolder=();  jobNumberOfNodes=()
+    jobSubmissionFolder=();  jobNumberOfNodes=();    jobPartition=()
     for string in "${jobsInformation[@]}"; do
         jobId+=(               "${string%%@*}" ); string="${string#*@}"
         jobName+=(             "${string%%@*}" ); string="${string#*@}"
@@ -47,7 +48,8 @@ function GatherAndPrintJobsInformation()
         jobRunTime+=(          "${string%%@*}" ); string="${string#*@}"
         jobEndTime+=(          "${string%%@*}" ); string="${string#*@}"
         jobSubmissionFolder+=( "${string%%@*}" ); string="${string#*@}"
-        jobNumberOfNodes+=(    "${string%%@*}" )
+        jobNumberOfNodes+=(    "${string%%@*}" ); string="${string#*@}"
+        jobPartition+=(        "${string%%@*}" )
         if [[ ${BHMAS_jobstatusLocal} = 'TRUE' ]]; then
             if [[ ! ${jobSubmissionFolder[-1]} =~ ^$(pwd) ]]; then
                 unset -v\
@@ -68,20 +70,32 @@ function GatherAndPrintJobsInformation()
     jobSubmissionFolder=( ${jobSubmissionFolder[@]/${BHMAS_runDiskGlobalPath}/WORK} )
     #Some counting for the table
     numberOfJobs=${#jobId[@]}
-    set +e
-    numberOfRunningJobs=$(grep -o "RUNNING" <<< "${jobStatus[@]}" | wc -l)
-    numberOfPendingJobs=$(grep -o "PENDING" <<< "${jobStatus[@]}" | wc -l)
-    set -e
-    numberOfOtherJobs=$(( numberOfJobs - numberOfRunningJobs - numberOfPendingJobs ))
-
+    numberOfPendingJobs=0
+    numberOfRunningJobs=0
+    numberOfOtherJobs=0
+    numberOfPendingNodes=0
+    numberOfRunningNodes=0
+    numberOfOtherNodes=0
+    for((index=0; index<numberOfJobs; index++)); do
+        if [[ ${jobStatus[index]} = 'RUNNING' ]]; then
+            (( numberOfRunningJobs+=1 )) || true
+            (( numberOfRunningNodes+=jobNumberOfNodes[index] )) || true
+        elif [[ ${jobStatus[index]} = 'PENDING' ]]; then
+            (( numberOfPendingJobs+=1 )) || true
+            (( numberOfPendingNodes+=jobNumberOfNodes[index] )) || true
+        else
+            (( numberOfOtherJobs+=1 )) || true
+            (( numberOfOtherNodes+=jobNumberOfNodes[index] )) || true
+        fi
+    done
     #Table header
     printf -v lineOfEquals '%*s' $(( $(tput cols) - 3 )) ''
     lineOfEquals=${lineOfEquals// /=}
     lengthOfLongestJobId=$(LengthOfLongestEntryInArray "${jobId[@]}")
     lengthOfLongestJobName=$(LengthOfLongestEntryInArray "${jobName[@]}")
-    tableFormat="%-$((5+lengthOfLongestJobId))s%-$((5+lengthOfLongestJobName))s%-26s%-24s%+12s     %-s"
+    tableFormat="%-$((5+lengthOfLongestJobId))s%-$((5+lengthOfLongestJobName))s%-26s%-15s%-24s%+12s     %-s"
     cecho lc "\n" B "${lineOfEquals}\n"\
-          bb "$(printf "${tableFormat}" "JOB ID" "JOB NAME" "STATUS" "START/END TIME" "WALL/RUNTIME" "SUBMITTED FROM")"
+          bb "$(printf "${tableFormat}" "JOB ID" "JOB NAME" "STATUS" "PARTITION" "START/END TIME" "WALL/RUNTIME" "SUBMITTED FROM")"
 
     #Print table sorting according jobname
     while [[ ${#jobName[@]} -gt 0 ]]; do
@@ -112,6 +126,7 @@ function GatherAndPrintJobsInformation()
                "${jobId[${index}]}"\
                "${jobName[${index}]}"\
                "${jobStatus[${index}]}${nodesPendingTimeString}"\
+               "${jobPartition}"\
                "${startEndTime}"\
                "${runWallTime}"\
                "${jobSubmissionFolder[${index}]}${submissionTimeString}"
@@ -127,9 +142,19 @@ function GatherAndPrintJobsInformation()
         unset -v 'jobNodeList[${index}]';         jobNodeList=(         ${jobNodeList[@]+"${jobNodeList[@]}"} )
         unset -v 'jobWalltime[${index}]';         jobWalltime=(         ${jobWalltime[@]+"${jobWalltime[@]}"} )
         unset -v 'jobRunTime[${index}]';          jobRunTime=(          ${jobRunTime[@]+"${jobRunTime[@]}"} )
+        unset -v 'jobPartition[${index}]';        jobPartition=(        ${jobPartition[@]+"${jobPartition[@]}"} )
     done
-    cecho o "\n  Total number of submitted jobs: " B "${numberOfJobs}" uB " (" B lg "Running: ${numberOfRunningJobs}" ly "     Pending: ${numberOfPendingJobs}" lm "     Others: ${numberOfOtherJobs}" uB o ")"
-    cecho lc B "${lineOfEquals}"
+    cecho\
+        o B "\n  Total number of submitted jobs: ${numberOfJobs} ("\
+        lg "Running: ${numberOfRunningJobs}"\
+        ly "     Pending: ${numberOfPendingJobs}"\
+        lm "     Others: ${numberOfOtherJobs}" o ")\n" uB \
+        lo "    Node usage of submitted jobs: $((numberOfRunningNodes+numberOfPendingNodes+numberOfOtherNodes)) ("\
+        lg "Running: ${numberOfRunningNodes}"\
+        ly "     Pending: ${numberOfPendingNodes}"\
+        lm "     Others: ${numberOfOtherNodes}" lo ")"\
+        lc " <-- NOTE: Depending on the cluster, different jobs might use the same node(s).\n"\
+        lc B "${lineOfEquals}"
 }
 
 
