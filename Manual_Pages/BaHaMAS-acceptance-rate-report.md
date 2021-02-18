@@ -13,7 +13,8 @@ BaHaMAS-acceptance-rate-report - Produce a table with acceptance rates in subseq
 # DESCRIPTION
 
 The **betas** file is parsed in order to gather information about on which folders it should be acted (only uncommented lines are considered in this mode).
-This mode operates exclusively on new-chains folders and in particular on the simulation output files.
+This mode operates on the newest beta folders and in particular on the simulation output files.
+This means that if no new chain folder exist, a thermalization from conf is considered and if this is also not existing, a thermalization from hot is used.
 
 Looking for the Metropolis test acceptance output, BaHaMAS calculates and prints to the output a report in which the acceptance rates will be summarized.
 The interval width can be adjusted using the **\--interval** option.
