@@ -19,22 +19,30 @@
 
 function AcceptanceRateReport()
 {
-    local runId betaValuesCopy index outputFileGlobalPath
+    local runId betaValuesCopy index runIdFolder outputFileGlobalPath
+    if [[ ${BHMAS_accRateReportOnlySome} = 'TRUE' ]]; then
+        cecho lg '\n Some folder might not exist and hence skipped for report if not found.'
+    fi
     betaValuesCopy=( "${BHMAS_betaValues[@]}" )
     BHMAS_simulationStatusVerbose='TRUE' #Patch to activate error messages in CreateOutputFileInTheStandardFormat function
     for index in "${!betaValuesCopy[@]}"; do
         runId="${betaValuesCopy[${index}]}"
-        outputFileGlobalPath="${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}/${BHMAS_outputStandardizedFilename}"
-        if ! CreateOutputFileInTheStandardFormat "${runId}"; then
-            Error 'File ' file "${BHMAS_outputStandardizedFilename}" " failed to be created in\n"\
-                  dir "$(dirname "${outputFileGlobalPath}")"\
-                  "\n folder! The " emph "run ID = ${betaValuesCopy[${index}]}" " will be skipped!\n"
-            BHMAS_problematicBetaValues+=( ${betaValuesCopy[${index}]} )
+        runIdFolder="${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}"
+        outputFileGlobalPath="${runIdFolder}/${BHMAS_outputStandardizedFilename}"
+        if [[ ! -d "${runIdFolder}" ]]; then
             unset 'betaValuesCopy[${index}]' #Here betaValuesCopy becomes sparse
+        else
+            if ! CreateOutputFileInTheStandardFormat "${runId}"; then
+                Error -n -N 'File ' file "${BHMAS_outputStandardizedFilename}" " failed to be created in\n"\
+                      dir "$(dirname "${outputFileGlobalPath}")"\
+                      "\n folder! The " emph "run ID = ${betaValuesCopy[${index}]}" " will be skipped!\n"
+                BHMAS_problematicBetaValues+=( ${betaValuesCopy[${index}]} )
+                unset 'betaValuesCopy[${index}]' #Here betaValuesCopy becomes sparse
+            fi
         fi
     done
     if [[ ${#betaValuesCopy[@]} -eq 0 ]]; then
-        cecho '' && return
+        return
     else
         betaValuesCopy=( ${betaValuesCopy[@]} )
     fi

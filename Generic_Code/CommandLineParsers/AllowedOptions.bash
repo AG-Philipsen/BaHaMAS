@@ -39,7 +39,7 @@ function _BaHaMAS_DeclareAllowedOptionsPerModeOrSoftware()
             ['mode:continue-thermalization']='--till --fromHot '
             ['mode:job-status']='--user --allUsers --local --onlyGivenPartition '
             ['mode:simulation-status']='--doNotMeasureTime --showOnlyQueued --verbose '
-            ['mode:acceptance-rate-report']='--interval '
+            ['mode:acceptance-rate-report']='--interval --onlyFromHot --onlyFromConf --onlyNewChains '
             ['mode:clean-output-files']='--all '
             ['mode:complete-betas-file']='--chains '
             ['mode:comment-betas']='--betas '

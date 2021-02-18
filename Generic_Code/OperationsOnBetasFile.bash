@@ -271,7 +271,7 @@ function __static__AdjustRunIdsPostfixAccordingToHierarchy()
 {
     local runId
     runId="$1"
-    if [[ ${BHMAS_executionMode} = 'mode:acceptance-rate-report' ]]; then
+    if [[ ${BHMAS_executionMode} = 'mode:acceptance-rate-report' && ${BHMAS_accRateReportOnlySome} = 'FALSE' ]]; then
         if [[ ! -d "${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}" ]]; then
             runId="${runId/%continueWithNewChain/thermalizeFromConf}"
             if [[ ! -d "${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}" ]]; then

@@ -25,6 +25,15 @@ Only the acceptance for complete intervals is calculated.
 \--interval *number*
 :   Specify how many trajectories should be considered to calculate the acceptance rate.
 
+\--onlyFromHot
+:   Only thermalizations from hot will be included in the acceptance rate report.
+
+\--onlyFromConf
+:   Only thermalizations from conf will be included in the acceptance rate report.
+
+\--onlyNewChains
+:   Only new chains will be included in the acceptance rate report.
+
 \--betasfile *filename*
 :   Use *filename* instead of **betas** file.
 
