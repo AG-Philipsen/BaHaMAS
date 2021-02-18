@@ -300,8 +300,8 @@ function __static__PrintSimulationStatusLine()
     runId="$1"
     formattingString="$(__static__ColorBeta)%-18s"
     formattingString+="$(__static__ColorClean ${toBeCleaned})%10s${BHMAS_defaultListstatusColor} "
-    formattingString+="($(GoodAcc ${acceptanceAllRun})%s %%${BHMAS_defaultListstatusColor}) "
-    formattingString+="[$(GoodAcc ${acceptanceLastBunchOfTrajectories})%7s %%${BHMAS_defaultListstatusColor}] "
+    formattingString+="($(GetAcceptanceColor ${acceptanceAllRun})%s %%${BHMAS_defaultListstatusColor}) "
+    formattingString+="[$(GetAcceptanceColor ${acceptanceLastBunchOfTrajectories})%7s %%${BHMAS_defaultListstatusColor}] "
     formattingString+="%2s%-3s%-3s%-5s"
     formattingString+="$(__static__ColorStatus ${jobStatus})%12s${BHMAS_defaultListstatusColor}"
     formattingString+="$(__static__ColorDelta S ${maxSpikeToMeanAsNSigma})%13s${BHMAS_defaultListstatusColor}   "
@@ -346,7 +346,7 @@ function __static__GetShortenedBetaString()
     printf "${runId%_*}_${shortPostfix[${runId##*_}]}"
 }
 
-function GoodAcc()
+function GetAcceptanceColor() # Used in the acceptance-rate-report mode as well
 {
     awk -v tl="${BHMAS_tooLowAcceptanceListstatusColor/\\/\\\\}" \
         -v l="${BHMAS_lowAcceptanceListstatusColor/\\/\\\\}" \

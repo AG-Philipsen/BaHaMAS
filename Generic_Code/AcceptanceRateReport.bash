@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2017,2020 Alessandro Sciarra
+#  Copyright (c) 2017,2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -19,103 +19,115 @@
 
 function AcceptanceRateReport()
 {
-    local runId betaValuesCopy index
-    betaValuesCopy=(${BHMAS_betaValues[@]})
+    local runId betaValuesCopy index outputFileGlobalPath
+    betaValuesCopy=( "${BHMAS_betaValues[@]}" )
     BHMAS_simulationStatusVerbose='TRUE' #Patch to activate error messages in CreateOutputFileInTheStandardFormat function
-    for INDEX in "${!betaValuesCopy[@]}"; do
-        runId="${betaValuesCopy[${INDEX}]}"
-        local outputFileGlobalPath="${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}/${BHMAS_outputStandardizedFilename}"
+    for index in "${!betaValuesCopy[@]}"; do
+        runId="${betaValuesCopy[${index}]}"
+        outputFileGlobalPath="${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}/${BHMAS_outputStandardizedFilename}"
         if ! CreateOutputFileInTheStandardFormat "${runId}"; then
             Error 'File ' file "${BHMAS_outputStandardizedFilename}" " failed to be created in\n"\
                   dir "$(dirname "${outputFileGlobalPath}")"\
-                  "\n folder! The " emph "run ID = ${betaValuesCopy[${INDEX}]}" " will be skipped!\n"
-            BHMAS_problematicBetaValues+=( ${betaValuesCopy[${INDEX}]} )
-            unset betaValuesCopy[${INDEX}] #Here betaValuesCopy becomes sparse
+                  "\n folder! The " emph "run ID = ${betaValuesCopy[${index}]}" " will be skipped!\n"
+            BHMAS_problematicBetaValues+=( ${betaValuesCopy[${index}]} )
+            unset 'betaValuesCopy[${index}]' #Here betaValuesCopy becomes sparse
         fi
     done
-    #Make betaValuesCopy not sparse if not empty
     if [[ ${#betaValuesCopy[@]} -eq 0 ]]; then
         cecho '' && return
     else
         betaValuesCopy=( ${betaValuesCopy[@]} )
     fi
 
-    #Implementation of the report
-    local columnsNumberOfLines dataArray betaStringPositionInDataArray\
-          numberOfLines counter positionIndex lengthOfLongestColumn\
-          emptySeparator spaceAtTheBeginningOfEachLine\
-          spaceAfterAcceptanceField acceptanceFieldLength lineOfEquals\
-          position dataIndex
-    columnsNumberOfLines=()
+    # Implementation of the report
+    #
+    # NOTE: Calculate acceptance rates concatenating data in single array
+    #       In dataArray also the ID for the table header are included!
+    local dataArray runIdPositionInDataArray lengthOfLongestColumn intervalsPerRunId\
+          headerSeparator fieldSeparator indentation lineOfEquals
     dataArray=()
-    betaStringPositionInDataArray=()
-    #Loop on betas and calculate acceptance concatenating data in single array
+    runIdPositionInDataArray=()
+    intervalsPerRunId=()
     for runId in ${betaValuesCopy[@]}; do
         outputFileGlobalPath="${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}/${BHMAS_outputStandardizedFilename}"
-        columnsNumberOfLines+=( $(awk '{if(NR%'${BHMAS_accRateReportInterval}'==0){counter++;}}END{print counter}' ${outputFileGlobalPath}) )
-        betaStringPositionInDataArray+=( ${#dataArray[@]} )
-        dataArray+=( "b${runId%_*}" )
-        dataArray+=( $(awk '{if(NR%'${BHMAS_accRateReportInterval}'==0){printf("%.2f \n", sum/'${BHMAS_accRateReportInterval}'*100);sum=0}}{sum+=$'${BHMAS_acceptanceColumn}'}' ${outputFileGlobalPath}) )
+        runIdPositionInDataArray+=( ${#dataArray[@]} )
+        dataArray+=( "${BHMAS_betaPrefix}${runId%_*}" )
+        dataArray+=( $(__static__GetAcceptanceRatesOnFile "${outputFileGlobalPath}") ) # Let word splitting split entries
+        intervalsPerRunId+=( $(( ${#dataArray[@]} - runIdPositionInDataArray[-1] - 1 )) )
     done
-    #Find largest number of intervals to print table properly
-    lengthOfLongestColumn=0
-    for numberOfLines in ${columnsNumberOfLines[@]}; do
-        [[ ${numberOfLines} -gt ${lengthOfLongestColumn} ]] && lengthOfLongestColumn=${numberOfLines}
-    done
-    #Print table in proper form
-    printf -v spaceAtTheBeginningOfEachLine '%*s' 10 ''
-    emptySeparator="   "
-    #Here we evaluate the numbers to center the acceptance under the beta header:
-    #
-    #     |----beta_header----|
-    #             xx.yy
-    #      <----------------->    this is ${#dataArray[0]}
-    #             <--->           this is 5 (for the moment hard coded)
-    #                  <----->    this is (${#dataArray[0]} - 5 + 1)/2 where the +1 is to put one more in case of odd result of the subtraction
-    #      <---------->           this is ${#dataArray[0]} - (${#dataArray[0]} - 5 + 1)/2
-    #
-    spaceAfterAcceptanceField=$(( (${#dataArray[0]} - 5 + 1)/2 )) #The first entry in dataArray is a beta that is print in the header
-    acceptanceFieldLength=$(( ${#dataArray[0]} - ${spaceAfterAcceptanceField} ))
-
-    # Print Header
-    printf -v lineOfEquals '%*s' $((9 + (${#betaValuesCopy[@]} + 1) * (2 *  ${#emptySeparator}) + ${#betaValuesCopy[@]} * ${#dataArray[0]} )) ''
-    cecho lc "\n${spaceAtTheBeginningOfEachLine}${lineOfEquals// /=}"
-    counter=0
-    cecho lp -n "${spaceAtTheBeginningOfEachLine}${emptySeparator}Intervals${emptySeparator}"
-    while [[ ${counter} -lt ${#betaValuesCopy[@]} ]]; do
-        cecho lp -n "$(printf "${emptySeparator}%s${emptySeparator}" ${dataArray[${betaStringPositionInDataArray[${counter}]}]})"
-        (( counter++ )) || true #'|| true' because of set -e option
-    done
-    cecho lc "\n${spaceAtTheBeginningOfEachLine}${lineOfEquals// /=}"
-
-    # Print Body
-    counter=1
-    while [[ ${counter} -le ${lengthOfLongestColumn} ]];do
-        cecho -n "$(printf "${spaceAtTheBeginningOfEachLine}${emptySeparator}%6d   ${emptySeparator}" ${counter})"
-        local positionIndex=1
-        for position in ${betaStringPositionInDataArray[@]}; do
-            dataIndex=$(expr ${position} + ${counter})
-            if [[ ${positionIndex} -eq ${#betaStringPositionInDataArray[@]} ]]; then                  # "If I am printing the last column"
-                if [[ ${dataIndex} -lt ${#dataArray[@]} ]]; then                                     # "If there are still data to print, print"
-                    cecho -n "$(printf "$(GoodAcc ${dataArray[${dataIndex}]})${emptySeparator}%${acceptanceFieldLength}s%${spaceAfterAcceptanceField}s${emptySeparator}\e[0m" ${dataArray[${dataIndex}]} "")"
-                else                                                                               # "otherwise print blank space"
-                    cecho -n "{${emptySeparator}}${emptySeparator}"
-                fi
-            elif [[ ${positionIndex} -lt ${#betaStringPositionInDataArray[@]} ]]; then                # "If I am printing not the last column"
-                if [[ ${dataIndex} -lt ${betaStringPositionInDataArray[${positionIndex}]} ]]; then     # "If there are still data to print, print"
-                    cecho -n "$(printf "$(GoodAcc ${dataArray[${dataIndex}]})${emptySeparator}%${acceptanceFieldLength}s%${spaceAfterAcceptanceField}s${emptySeparator}\e[0m" ${dataArray[${dataIndex}]} "")"
-                else                                                                               # "otherwise print blank space"
-                    cecho -n "${emptySeparator}${emptySeparator}"
-                fi
-            fi
-            (( positionIndex++ ))
-        done
-        cecho ''
-        (( counter++ ))
-    done
-    cecho lc "${spaceAtTheBeginningOfEachLine}${lineOfEquals// /=}"
-
+    lengthOfLongestColumn=$(MaximumOfArray "${intervalsPerRunId[@]}")
+    __static__SetSpacingVariables
+    __static__PrintHeader
+    __static__PrintBody
 }
+
+#----------------------------------------------------------------#
+# The following functions rely on the local variable of the main #
+# function above and they are not checked again for existence.   #
+#----------------------------------------------------------------#
+
+function __static__GetAcceptanceRatesOnFile()
+{
+    awk -v width="${BHMAS_accRateReportInterval}"\
+        -v column="${BHMAS_acceptanceColumn}"\
+        '{
+            if(NR%width==0){
+                printf("%.2f \n", sum/width*100);
+                sum=0
+            }
+        }
+        { sum+=$column }' "$1"
+}
+
+function __static__SetSpacingVariables()
+{
+    printf -v indentation '%*s' 4 ''
+    printf -v headerSeparator '%*s' 4 ''
+    printf -v fieldSeparator  '%*s' $(( 7 + ${#headerSeparator} )) ''
+    printf -v lineOfEquals '%*s' $(( 9 + 2 * ${#headerSeparator} + ${#intervalsPerRunId[@]} * (${#dataArray[0]} + ${#headerSeparator}) )) ''
+    lineOfEquals="${lineOfEquals// /=}"
+}
+
+function __static__PrintHeader()
+{
+    local index
+    cecho lc "\n${indentation}${lineOfEquals}"
+    cecho lp -n "${indentation}${headerSeparator}Intervals"
+    for index in ${runIdPositionInDataArray[@]}; do
+        cecho lp -n "$(printf "${headerSeparator}%s" ${dataArray[index]})"
+    done
+    cecho lc "\n${indentation}${lineOfEquals}"
+}
+
+function __static__PrintBody()
+{
+    local index
+    for((index=0; index<lengthOfLongestColumn; index++)); do
+        cecho "$(__static__GetFormattedLine ${index})"
+    done
+    cecho lc "${indentation}${lineOfEquals}"
+}
+
+function __static__GetFormattedLine()
+{
+    CheckIfVariablesAreDeclared indentation dataArray runIdPositionInDataArray intervalsPerRunId
+    local interval resultingLine index dataIndex tmpData colorData
+    interval=$1
+    printf -v resultingLine "${indentation}${headerSeparator}%5d" $((interval+1))
+    for index in ${!runIdPositionInDataArray[@]}; do
+        if [[ ${interval} -ge ${intervalsPerRunId[index]} ]]; then
+            tmpData=""
+            colorData=""
+        else
+            (( dataIndex=runIdPositionInDataArray[index]+1+interval ))
+            tmpData="${dataArray[${dataIndex}]}"
+            colorData="$(GetAcceptanceColor ${dataArray[${dataIndex}]})"
+        fi
+        printf -v resultingLine "%s${fieldSeparator}${colorData}%6s\e[0m"  "${resultingLine}"  "${tmpData}"
+    done
+    printf "%s" "${resultingLine}"
+}
+
 
 
 MakeFunctionsDefinedInThisFileReadonly
