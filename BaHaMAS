@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 #  Copyright (c) 2014-2016 Christopher Czaban
-#  Copyright (c) 2014-2017,2020 Alessandro Sciarra
+#  Copyright (c) 2014-2017,2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -173,7 +173,6 @@ case ${BHMAS_executionMode} in
     mode:acceptance-rate-report )
 
         ParseBetasFile
-        ValidateParsedBetaValues
         AcceptanceRateReport
         ;;
 

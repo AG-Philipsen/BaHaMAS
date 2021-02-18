@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2020 Alessandro Sciarra
+#  Copyright (c) 2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -69,7 +69,6 @@ function __static__ValidateMetadata()
         'continue-thermalization'
         'measure'
         'submit-only'
-        'acceptance-rate-report'
         'clean-output-files'
     )
     modesThatRequireNoEntryInMetadata=(
