@@ -32,6 +32,7 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 ## [Unreleased]
 
+* :sos: The `--togglePbp` command line option of CL2QCD was broken and has been fixed now.
 * :sos: The production job for CL2QCD was deleting the executable file at the end of the run breaking following `continue*` mode usage. This is fixed now.
 * :new: It is now possible to force pbp measurement both in `thermalize` and in `continue-thermalization` execution modes.
 * :white_check_mark: Improve `acceptance-rate-report` exeution mode making it act on any folder and optionally consider thermalizations only.
