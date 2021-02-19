@@ -143,6 +143,18 @@ function ParseSpecificModeOptions_acceptance-rate-report()
                     fi
                 fi
                 shift 2 ;;
+            --onlyFromHot )
+                readonly BHMAS_betaPostfix='_thermalizeFromHot'
+                BHMAS_accRateReportOnlySome='TRUE'
+                shift ;;
+            --onlyFromConf )
+                readonly BHMAS_betaPostfix='_thermalizeFromConf'
+                BHMAS_accRateReportOnlySome='TRUE'
+                shift ;;
+            --onlyNewChains )
+                readonly BHMAS_betaPostfix
+                BHMAS_accRateReportOnlySome='TRUE'
+                shift ;;
             * )
                 BHMAS_commandLineOptionsToBeParsed+=( "$1" )
                 shift ;;

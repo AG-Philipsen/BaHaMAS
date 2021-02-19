@@ -25,11 +25,11 @@ The **g***number* and **pf***number* fields in the **betas** file have priority 
 
 # OPTIONS
 
-\--betasfile *filename*
-:   Use *filename* instead of **betas** file.
-
 \--fromHot
 :   Force BaHaMAS to act on thermalization(s) from hot without determining itself the thermalization type.
+
+\--betasfile *filename*
+:   Use *filename* instead of **betas** file.
 
 \--measurements, \-m *number*
 :   Specify the number of trajectories that should be done (default: 1000).

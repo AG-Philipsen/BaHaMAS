@@ -170,6 +170,7 @@ function DeclareBaHaMASGlobalVariables()
     BHMAS_simulationStatusShowOnlyQueuedOption='FALSE'
     BHMAS_simulationStatusVerbose='FALSE'
     BHMAS_accRateReportInterval=1000
+    BHMAS_accRateReportOnlySome='FALSE'
     BHMAS_cleanAllOutputFiles='FALSE'
     BHMAS_numberOfChainsToBeInTheBetasFile=4
     BHMAS_betasWithSeedToBeToggled=()

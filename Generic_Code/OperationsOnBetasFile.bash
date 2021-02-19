@@ -99,6 +99,7 @@ function __static__CheckAndParseSingleLine()
         fi
         beta+="_${BHMAS_seedPrefix}${tmpSeed}${BHMAS_betaPostfix}"
     fi
+    beta=$(__static__AdjustRunIdsPostfixAccordingToHierarchy "${beta}")
     set -- "${entriesToBeParsed[@]}"
     #Put information in global variables
     BHMAS_betaValues+=( "${beta}" )
@@ -239,15 +240,16 @@ function __static__PrintReportOnExtractedInformationFromBetasFile()
 {
     cecho lc "\n============================================================================================================"
     cecho lp " Read beta values:"
-    for BETA in ${BHMAS_betaValues[@]}; do
-        cecho -n "   - ${BETA} [Integrator steps $(printf "%2d%1s%2s"  "${BHMAS_scaleZeroIntegrationSteps[${BETA}]}" "${BHMAS_scaleOneIntegrationSteps[${BETA}]:+-}" "${BHMAS_scaleOneIntegrationSteps[${BETA}]:-}") ]"
-        if KeyInArray ${BETA} BHMAS_trajectoriesToBeResumedFrom; then
-            cecho -n "$(printf "   [resume from tr. %+7s]" "${BHMAS_trajectoriesToBeResumedFrom[${BETA}]}")"
+    local runId
+    for runId in ${BHMAS_betaValues[@]}; do
+        cecho -n "   - $(printf "%-35s" ${runId}) [Integrator steps $(printf "%2d%1s%2s"  "${BHMAS_scaleZeroIntegrationSteps[${runId}]}" "${BHMAS_scaleOneIntegrationSteps[${runId}]:+-}" "${BHMAS_scaleOneIntegrationSteps[${runId}]:-}") ]"
+        if KeyInArray ${runId} BHMAS_trajectoriesToBeResumedFrom; then
+            cecho -n "$(printf "   [resume from tr. %+7s]" "${BHMAS_trajectoriesToBeResumedFrom[${runId}]}")"
         else
             cecho -n "                          "
         fi
-        if KeyInArray ${BETA} BHMAS_massPreconditioningValues; then
-            cecho -n "$(printf "   MP=(%d-0.%4d)" "${BHMAS_massPreconditioningValues[${BETA}]%,*}" "${BHMAS_massPreconditioningValues[${BETA}]#*,}")"
+        if KeyInArray ${runId} BHMAS_massPreconditioningValues; then
+            cecho -n "$(printf "   MP=(%d-0.%4d)" "${BHMAS_massPreconditioningValues[${runId}]%,*}" "${BHMAS_massPreconditioningValues[${runId}]#*,}")"
         fi
         cecho ''
     done
@@ -265,6 +267,25 @@ function ParseBetasFile()
 
 #------------------------------------------------------------------------------------------------------------------------------#
 
+function __static__AdjustRunIdsPostfixAccordingToHierarchy()
+{
+    local runId
+    runId="$1"
+    if [[ ${BHMAS_executionMode} = 'mode:acceptance-rate-report' && ${BHMAS_accRateReportOnlySome} = 'FALSE' ]]; then
+        if [[ ! -d "${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}" ]]; then
+            runId="${runId/%continueWithNewChain/thermalizeFromConf}"
+            if [[ ! -d "${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}" ]]; then
+                runId="${runId/%Conf/Hot}"
+                if [[ ! -d "${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}" ]]; then
+                    Fatal ${BHMAS_fatalWrongBetasFile} 'No beta folder found for ID ' emph "${runId%_*}" ' in ' dir "${BHMAS_runDirWithBetaFolders}" '.'
+                fi
+            fi
+        fi
+    fi
+    printf "%s" "${runId}"
+}
+
+#------------------------------------------------------------------------------------------------------------------------------#
 #In the function below we complete the betas file adding new chains until the desired number
 #is reached. The adopted strategy is the following:
 #

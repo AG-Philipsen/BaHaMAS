@@ -14,8 +14,11 @@ in subsequent intervals
 The \f[B]betas\f[R] file is parsed in order to gather information about
 on which folders it should be acted (only uncommented lines are
 considered in this mode).
-This mode operates exclusively on new-chains folders and in particular
-on the simulation output files.
+This mode operates on the newest beta folders and in particular on the
+simulation output files.
+This means that if no new chain folder exist, a thermalization from conf
+is considered and if this is also not existing, a thermalization from
+hot is used.
 .PP
 Looking for the Metropolis test acceptance output, BaHaMAS calculates
 and prints to the output a report in which the acceptance rates will be
@@ -28,6 +31,17 @@ Only the acceptance for complete intervals is calculated.
 .B --interval \f[I]number\f[R]
 Specify how many trajectories should be considered to calculate the
 acceptance rate.
+.TP
+.B --onlyFromHot
+Only thermalizations from hot will be included in the acceptance rate
+report.
+.TP
+.B --onlyFromConf
+Only thermalizations from conf will be included in the acceptance rate
+report.
+.TP
+.B --onlyNewChains
+Only new chains will be included in the acceptance rate report.
 .TP
 .B --betasfile \f[I]filename\f[R]
 Use \f[I]filename\f[R] instead of \f[B]betas\f[R] file.

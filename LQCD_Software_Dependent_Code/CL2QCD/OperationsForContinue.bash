@@ -256,20 +256,22 @@ function __static__HandleMultiplePseudofermionsInInputFile_CL2QCD()
     if [[ ${BHMAS_staggered} = "TRUE" ]]; then #Multiple pseudofermions simply ignored if not staggered
         local oldOption newOption optionsToBeAddedOrModified numberOfPseudofermionsToBeUsed
         # Handle pseudofermions options
-        optionsToBeAddedOrModified=()
+        numberOfPseudofermionsToBeUsed=''
         if WasAnyOfTheseOptionsGivenToBaHaMAS '--pf'; then
             numberOfPseudofermionsToBeUsed="${BHMAS_numberOfPseudofermions}"
         elif KeyInArray ${runId} BHMAS_pseudofermionsNumbers; then
             numberOfPseudofermionsToBeUsed="${BHMAS_pseudofermionsNumbers[${runId}]}"
         fi
-        optionsToBeAddedOrModified+=( "nPseudoFermions=${numberOfPseudofermionsToBeUsed}" )
-        if [[ ${#optionsToBeAddedOrModified[@]} -ne 0 ]]; then
-            if [[ $(grep -c "nPseudoFermions" ${inputFileGlobalPath}) -eq 0 ]]; then
-                AddOptionsToInputFile "${optionsToBeAddedOrModified[@]}"
-                PrintAddedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
-            else
-                ModifyOptionsInInputFile_CL2QCD "${optionsToBeAddedOrModified[@]}" || return 1
-                PrintModifiedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
+        if [[ ${numberOfPseudofermionsToBeUsed} != '' ]]; then
+            optionsToBeAddedOrModified=( "nPseudoFermions=${numberOfPseudofermionsToBeUsed}" )
+            if [[ ${#optionsToBeAddedOrModified[@]} -ne 0 ]]; then
+                if [[ $(grep -c "nPseudoFermions" ${inputFileGlobalPath}) -eq 0 ]]; then
+                    AddOptionsToInputFile "${optionsToBeAddedOrModified[@]}"
+                    PrintAddedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
+                else
+                    ModifyOptionsInInputFile_CL2QCD "${optionsToBeAddedOrModified[@]}" || return 1
+                    PrintModifiedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
+                fi
             fi
         fi
         # Handle rational approximation options

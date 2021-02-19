@@ -34,11 +34,12 @@ function _BaHaMAS_DeclareAllowedOptionsPerModeOrSoftware()
     # Sub-parser options
     if [[ "${BHMAS_MANUALMODE-x}" = 'TRUE' ]] || [[ "${BHMAS_AUTOCOMPLETION-x}" = 'TRUE' ]]; then
         allowedOptionsPerModeOrSoftware=(
+            ['mode:thermalize']='--fromHot '
             ['mode:continue']='--till '
-            ['mode:continue-thermalization']='--till '
+            ['mode:continue-thermalization']='--till --fromHot '
             ['mode:job-status']='--user --allUsers --local --onlyGivenPartition '
             ['mode:simulation-status']='--doNotMeasureTime --showOnlyQueued --verbose '
-            ['mode:acceptance-rate-report']='--interval '
+            ['mode:acceptance-rate-report']='--interval --onlyFromHot --onlyFromConf --onlyNewChains '
             ['mode:clean-output-files']='--all '
             ['mode:complete-betas-file']='--chains '
             ['mode:comment-betas']='--betas '
@@ -66,9 +67,9 @@ function _BaHaMAS_DeclareAllowedOptionsPerModeOrSoftware()
         ['mode:prepare-only']+="--betasfile ${productionOptions} --jobscript_prefix ${clusterOptions}"
         ['mode:submit-only']+='--betasfile --jobscript_prefix'
         ['mode:new-chain']+="--betasfile  ${productionOptions} --jobscript_prefix ${clusterOptions}"
-        ['mode:thermalize']+="--betasfile --fromHot  ${productionOptions} --jobscript_prefix ${clusterOptions}"
+        ['mode:thermalize']+="--betasfile  ${productionOptions} --jobscript_prefix ${clusterOptions}"
         ['mode:continue']+="--betasfile --measurements --updateExecutable --jobscript_prefix ${clusterOptions}"
-        ['mode:continue-thermalization']+="--betasfile --fromHot --measurements --updateExecutable --jobscript_prefix ${clusterOptions}"
+        ['mode:continue-thermalization']+="--betasfile --measurements --updateExecutable --jobscript_prefix ${clusterOptions}"
         ['mode:job-status']+='--partition'
         ['mode:simulation-status']+=''
         ['mode:acceptance-rate-report']+='--betasfile'

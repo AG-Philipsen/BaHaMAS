@@ -13,6 +13,15 @@
 \--interval *number*
 :   Specify how many trajectories should be considered to calculate the acceptance rate.
 
+\--onlyFromHot
+:   Only thermalizations from hot will be included in the acceptance rate report.
+
+\--onlyFromConf
+:   Only thermalizations from conf will be included in the acceptance rate report.
+
+\--onlyNewChains
+:   Only new chains will be included in the acceptance rate report.
+
 \--allUsers, \-a
 :   Jobs enqueued by any user are considered in the report, even if a specific user is specified.
 
