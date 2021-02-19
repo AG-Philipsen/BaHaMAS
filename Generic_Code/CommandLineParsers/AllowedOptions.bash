@@ -34,9 +34,9 @@ function _BaHaMAS_DeclareAllowedOptionsPerModeOrSoftware()
     # Sub-parser options
     if [[ "${BHMAS_MANUALMODE-x}" = 'TRUE' ]] || [[ "${BHMAS_AUTOCOMPLETION-x}" = 'TRUE' ]]; then
         allowedOptionsPerModeOrSoftware=(
-            ['mode:thermalize']='--fromHot '
+            ['mode:thermalize']='--fromHot --measurePbp '
             ['mode:continue']='--till '
-            ['mode:continue-thermalization']='--till --fromHot '
+            ['mode:continue-thermalization']='--till --fromHot --measurePbp '
             ['mode:job-status']='--user --allUsers --local --onlyGivenPartition '
             ['mode:simulation-status']='--doNotMeasureTime --showOnlyQueued --verbose '
             ['mode:acceptance-rate-report']='--interval --onlyFromHot --onlyFromConf --onlyNewChains '

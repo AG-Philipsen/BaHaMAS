@@ -32,6 +32,9 @@ Refer to the manual page of the **continue** execution mode to read in detail ho
 \--fromHot
 :   Force BaHaMAS to act on thermalization(s) from hot without determining itself the thermalization type.
 
+\--measurePbp
+:   Force BaHaMAS to measure the pbp ignoring the setup value and the fact being in a thermalization run.
+
 \--betasfile *filename*
 :   Use *filename* instead of **betas** file.
 

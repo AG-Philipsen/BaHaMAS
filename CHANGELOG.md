@@ -32,6 +32,7 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 ## [Unreleased]
 
+* :new: It is now possible to force pbp measurement both in `thermalize` and in `continue-thermalization` execution modes.
 * :white_check_mark: Improve `acceptance-rate-report` exeution mode making it act on any folder and optionally consider thermalizations only.
 * :white_check_mark: Improve `job-status` exeution mode to run faster and report on node usage.
 * :sos: The job status in simulation-status execution mode was not always correctly determined and it has been fixed now.

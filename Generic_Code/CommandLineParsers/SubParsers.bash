@@ -39,6 +39,9 @@ function ParseSpecificModeOptions_thermalize()
             --fromHot )
                 readonly BHMAS_betaPostfix='_thermalizeFromHot'
                 shift ;;
+            --measurePbp )
+                readonly BHMAS_thermalizeForcePbpMeasurement='TRUE'
+                shift ;;
             * )
                 BHMAS_commandLineOptionsToBeParsed+=( "$1" )
                 shift ;;

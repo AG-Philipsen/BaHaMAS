@@ -3,6 +3,9 @@
 \--fromHot
 :   Force BaHaMAS to act on thermalization(s) from hot without determining itself the thermalization type.
 
+\--measurePbp
+:   Force BaHaMAS to measure the pbp ignoring the setup value and the fact being in a thermalization run.
+
 \--updateExecutable
 :   Make BaHaMAS produce again the executable file and replace the existing one in the beta folder(s), instead of simply using it.
     This option can be handy e.g. if the administrators of the cluster changed or updated some software and you are then required to recreate your executable(s).

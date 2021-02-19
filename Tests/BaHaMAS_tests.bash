@@ -94,7 +94,7 @@ availableTests=(
     ['CL2QCD-new-chain-goal']='CL2QCD new-chain --walltime= 1d'
     ['CL2QCD-thermalize-hot']='CL2QCD thermalize --walltime 1d'
     ['CL2QCD-thermalize-hot-forced']='CL2QCD thermalize --fromHot --walltime 1d'
-    ['CL2QCD-thermalize-conf']='CL2QCD thermalize --walltime 1d'
+    ['CL2QCD-thermalize-conf']='CL2QCD thermalize --walltime 1d --measurePbp'
     ['CL2QCD-continue-save']='CL2QCD continue --walltime 1d -F 80 -f 140 -m=1234'
     ['CL2QCD-continue-last']='CL2QCD continue --walltime 1d --pf 3'
     ['CL2QCD-continue-resume']='CL2QCD continue --walltime 1d'

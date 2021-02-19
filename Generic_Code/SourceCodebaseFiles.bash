@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2020 Alessandro Sciarra
+#  Copyright (c) 2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -50,6 +50,7 @@ function __static__SourceCodebaseGeneralFiles()
         'SubmitJobs.bash'
         'Setup/Setup.bash'
         'SystemRequirements.bash'
+        'ThermalizationOperations.bash'
         'Version.bash'
     )
     for fileToBeSourced in "${schedulerIndependentFiles[@]}"; do
