@@ -126,10 +126,6 @@ function AddSoftwareSpecificPartToProductionJobScript_CL2QCD()
             __static__AddToJobscriptFile "cp \${workdir${index}}/${BHMAS_outputFilename} \${dir${index}}/${BHMAS_outputFilename}.\${SLURM_JOB_ID} || exit ${BHMAS_fatalBuiltin}" ""
         done
     fi
-    __static__AddToJobscriptFile "# Remove executable"
-    for index in "${!betaValues[@]}"; do
-        __static__AddToJobscriptFile "rm \${dir${index}}/${BHMAS_productionExecutableFilename} || exit ${BHMAS_fatalBuiltin}"
-    done
     __static__AddToJobscriptFile ""
 
     #If a thermalization was done, copy produced thermalized configuration to pool
