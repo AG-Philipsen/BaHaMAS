@@ -116,19 +116,26 @@ function ExtractSimulationInformationFromInputFile_openQCD-FASTSUM()
 {
     CheckIfVariablesAreDeclared integrationSteps0 integrationSteps1\
                                 integrationSteps2 kappaMassPreconditioning
-    local tmpString
+    local numScales tmpString
     # The input file here exists
+    numScales=$(sed -n 's/^nlv[[:space:]]\+\([[:digit:]]\+\)/\1/p' "${inputFileGlobalPath}")
+    if [[ ${numScales} = '' ]]; then
+        return 0
+    fi
     tmpString=$(__static__FindFirstOccurenceAfterLabel '[[]Level 0[]]' 'nstep[[:space:]]+[0-9]+')
     if [[ "${tmpString}" != '' ]]; then
         integrationSteps0="${tmpString}"
+        integrationSteps1='' # To avoid dashes in one times scale case
     fi
-    tmpString=$(__static__FindFirstOccurenceAfterLabel '[[]Level 1[]]' 'nstep[[:space:]]+[0-9]+')
-    if [[ "${tmpString}" != '' ]]; then
-        integrationSteps1="${tmpString}"
+    if [[ ${numScales} -gt 1 ]]; then
+        tmpString=$(__static__FindFirstOccurenceAfterLabel '[[]Level 1[]]' 'nstep[[:space:]]+[0-9]+')
+        if [[ "${tmpString}" != '' ]]; then
+            integrationSteps1="-${tmpString}"
+        fi
     fi
     # At the moment no mass preconditioning supported with openQCD
-    integrationSteps2="  "
-    kappaMassPreconditioning="      "
+    integrationSteps2=''
+    kappaMassPreconditioning=''
 }
 
 function __static__FindFirstOccurenceAfterLabel()

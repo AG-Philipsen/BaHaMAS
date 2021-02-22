@@ -3,23 +3,42 @@
 \--fromHot
 :   Force BaHaMAS to act on thermalization(s) from hot without determining itself the thermalization type.
 
+\--measurePbp
+:   Force BaHaMAS to measure the pbp ignoring the setup value and the fact being in a thermalization run.
+
+\--updateExecutable
+:   Make BaHaMAS produce again the executable file and replace the existing one in the beta folder(s), instead of simply using it.
+    This option can be handy e.g. if the administrators of the cluster changed or updated some software and you are then required to recreate your executable(s).
+
 \--till, \-t *number*
 :   Specify till which trajectory number the simulations should be continued.
 
 \--interval *number*
 :   Specify how many trajectories should be considered to calculate the acceptance rate.
 
-\--all, \-a @mode:job-status@
-:   All enqueued jobs are considered in the report.
+\--onlyFromHot
+:   Only thermalizations from hot will be included in the acceptance rate report.
+
+\--onlyFromConf
+:   Only thermalizations from conf will be included in the acceptance rate report.
+
+\--onlyNewChains
+:   Only new chains will be included in the acceptance rate report.
+
+\--allUsers, \-a
+:   Jobs enqueued by any user are considered in the report, even if a specific user is specified.
 
 \--partition *string* @mode:job-status@
 :   Limit the report to the specified partition (default: own setup).
+
+\--onlyGivenPartition
+:   Only jobs enqueued in the given partition (either on the command line or in the own setup) are considered in the report.
 
 \--user, \-u @mode:job-status@
 :   Only the jobs enqueued by the specified user are considered in the report (default: user that runs the command).
 
 \--local, \-l @mode:job-status@
-:   Only jobs submitted from the present directory are considered in the report.
+:   Only jobs submitted from the present directory or a sub-folder of it are considered in the report.
 
 \--all, \-a @mode:clean-output-files@
 :   All existing new-chain folders are considered and the **betas** file is not parsed.

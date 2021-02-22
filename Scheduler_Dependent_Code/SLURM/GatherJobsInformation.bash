@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2017,2020 Alessandro Sciarra
+#  Copyright (c) 2017,2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -51,7 +51,7 @@ function GatherJobsInformationForJobStatusMode_SLURM()
           jobId jobSubmissionTime jobSubmissionFolder
     declare -A squeueFormatCode=()
     squeueFormatCodeString=''; squeueAdditionalOptions=''
-    slurmOkVersion='slurm 14.03.0'; slurmVersion="$(squeue --version)"
+    slurmOkVersion='14.03.0'; slurmVersion="$(squeue --version | awk '{print $NF}')"
     #Format codes for squeue command in order to get specific information
     squeueFormatCode=(
         ["JobId"]="%i"
@@ -65,16 +65,21 @@ function GatherJobsInformationForJobStatusMode_SLURM()
         ["EndTime"]="%e"
         ["WorkDir"]="%Z"
         ["NumNodes"]="%D"
+        ["Partition"]="%P"
     )
     #Space before NodeList is crucial if one wants to parse the output of scontrol show job because there are also ReqNodeList and ExcNodeList
-    squeueFormatCodeOrder=("JobId" "Name" "JobState" "[[:space:]]NodeList" "SubmitTime" "TimeLimit" "StartTime" "RunTime" "EndTime" "WorkDir" "NumNodes")
+    squeueFormatCodeOrder=("JobId" "Name" "JobState" "[[:space:]]NodeList" "SubmitTime" "TimeLimit" "StartTime" "RunTime" "EndTime" "WorkDir" "NumNodes" "Partition")
     for label in "${squeueFormatCodeOrder[@]}"; do
         squeueFormatCodeString+="@${squeueFormatCode[${label}]}"
     done
     #Get information via squeue and in case filter jobs -> ATTENTION: Double quoting here is CRUCIAL (to respect endlines)!!
     #NOTE: It seems that the sacct command can give a similar result, but at the moment there is no analog to the %Z field.
-    if [[ "${BHMAS_clusterPartition}" != '' ]]; then
-        squeueAdditionalOptions+="-p ${BHMAS_clusterPartition} "
+    if [[ "${BHMAS_jobstatusOnlyPartition}" = 'TRUE' ]]; then
+        if [[ "${BHMAS_clusterPartition}" != '' ]]; then
+            squeueAdditionalOptions+="-p ${BHMAS_clusterPartition} "
+        else
+            Warning -N "It was asked to consider only a partition, but none was specified! Considering all partitions."
+        fi
     fi
     if [[ ${BHMAS_jobstatusAll} = 'FALSE' ]]; then
         squeueAdditionalOptions+="-u ${BHMAS_jobstatusUser} "
@@ -103,30 +108,27 @@ function GatherJobsInformationForJobStatusMode_SLURM()
             jobSubmissionTime="${jobSubmissionTime}|${jobId}@${extractedJobInformation[SubmitTime]}"
             unset -v 'extractedJobInformation'
         done
-        jobsInformation=$(awk --posix -v subFolder="${jobSubmissionFolder:1}" \
-                            -v subTime="${jobSubmissionTime:1}" '
-                                BEGIN{
-                                    split(subFolder, tmpSubFold, "|")
-                                    split(subTime, tmpSubTime, "|")
-                                    for(i in tmpSubFold){
-                                        split(tmpSubFold[i], resultFold, "@")
-                                        jobSubmissionFolder[resultFold[1]]=resultFold[2]
-                                        split(tmpSubTime[i], resultTime, "@")
-                                        jobSubmissionTime[resultTime[1]]=resultTime[2]
+        jobsInformation=( "$(awk --posix -v subFolder="${jobSubmissionFolder:1}" \
+                                -v subTime="${jobSubmissionTime:1}" '
+                                    BEGIN{
+                                        split(subFolder, tmpSubFold, "|")
+                                        split(subTime, tmpSubTime, "|")
+                                        for(i in tmpSubFold){
+                                            split(tmpSubFold[i], resultFold, "@")
+                                            jobSubmissionFolder[resultFold[1]]=resultFold[2]
+                                            split(tmpSubTime[i], resultTime, "@")
+                                            jobSubmissionTime[resultTime[1]]=resultTime[2]
+                                        }
+                                        FS="@"
+                                        OFS="@"
                                     }
-                                    FS="@"
-                                    OFS="@"
-                                }
-                                {
-                                    $5=jobSubmissionTime[$1]
-                                    $10=jobSubmissionFolder[$1]
-                                    print $0
-                                }' <<< "$(printf '%s\n' ${jobsInformation[@]})")
+                                    {
+                                        $5=jobSubmissionTime[$1]
+                                        $10=jobSubmissionFolder[$1]
+                                        print $0
+                                    }' <<< "$(printf '%s\n' ${jobsInformation[@]})")" )
     fi
     #------------------------------------------------------------------------------------------------------------------------------#
-    if [[ ${BHMAS_jobstatusLocal} = 'TRUE' ]]; then
-        jobsInformation="$(grep --color=never "${PWD}" <<< "$(printf '%s\n' ${jobsInformation[@]})")"
-    fi
     #If any field is empty (like the node list for pending jobs) replace value with 'empty' word, it facilitate later handling
     jobsInformation=( "${jobsInformation[@]//@@/@empty@}" )
     if [[ ${jobsInformation[@]} =~ @@ ]]; then

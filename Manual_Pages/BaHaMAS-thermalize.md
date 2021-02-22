@@ -1,6 +1,6 @@
-% BaHaMAS-thermalize(1) Version 0.3.1 | User Manual
+% BaHaMAS-thermalize(1) Version 0.4.0 | User Manual
 % [Alessandro Sciarra](sciarra@itp.uni-frankfurt.de)
-% 11 September 2020
+% 22 February 2021
 
 # NAME
 
@@ -21,14 +21,18 @@ If no configuration with the same parameters of the actual position is found or 
 If at least one thermalized configuration "from hot" exists and if the **\--fromHot** option is not given, then a thermalization "from conf" will be started.
 
 Most of the information for the simulation input file(s) is retrieved from the **betas** file, but the user can also tune some input via the command line options.
+The **g***number* and **pf***number* fields in the **betas** file have priority on the **\--measurements** and **\--pf** command line options, respectively.
 
 # OPTIONS
 
-\--betasfile *filename*
-:   Use *filename* instead of **betas** file.
-
 \--fromHot
 :   Force BaHaMAS to act on thermalization(s) from hot without determining itself the thermalization type.
+
+\--measurePbp
+:   Force BaHaMAS to measure the pbp ignoring the setup value and the fact being in a thermalization run.
+
+\--betasfile *filename*
+:   Use *filename* instead of **betas** file.
 
 \--measurements, \-m *number*
 :   Specify the number of trajectories that should be done (default: 1000).

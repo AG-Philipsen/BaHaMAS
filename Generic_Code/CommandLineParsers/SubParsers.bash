@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2017-2018,2020 Alessandro Sciarra
+#  Copyright (c) 2017-2018,2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -39,6 +39,9 @@ function ParseSpecificModeOptions_thermalize()
             --fromHot )
                 readonly BHMAS_betaPostfix='_thermalizeFromHot'
                 shift ;;
+            --measurePbp )
+                readonly BHMAS_thermalizeForcePbpMeasurement='TRUE'
+                shift ;;
             * )
                 BHMAS_commandLineOptionsToBeParsed+=( "$1" )
                 shift ;;
@@ -61,6 +64,9 @@ function ParseSpecificModeOptions_continue()
                     fi
                 fi
                 shift 2 ;;
+            --updateExecutable )
+                readonly BHMAS_reproduceExecutable='TRUE'
+                shift ;;
             * )
                 BHMAS_commandLineOptionsToBeParsed+=( "$1" )
                 shift ;;
@@ -87,11 +93,14 @@ function ParseSpecificModeOptions_job-status()
                     BHMAS_jobstatusUser="$2"
                 fi
                 shift 2 ;;
+            --allUsers )
+                BHMAS_jobstatusAll='TRUE'
+                shift ;;
             --local )
                 BHMAS_jobstatusLocal='TRUE'
                 shift ;;
-            --all )
-                BHMAS_jobstatusAll='TRUE'
+            --onlyGivenPartition )
+                BHMAS_jobstatusOnlyPartition='TRUE'
                 shift ;;
             * )
                 BHMAS_commandLineOptionsToBeParsed+=( "$1" )
@@ -137,6 +146,18 @@ function ParseSpecificModeOptions_acceptance-rate-report()
                     fi
                 fi
                 shift 2 ;;
+            --onlyFromHot )
+                readonly BHMAS_betaPostfix='_thermalizeFromHot'
+                BHMAS_accRateReportOnlySome='TRUE'
+                shift ;;
+            --onlyFromConf )
+                readonly BHMAS_betaPostfix='_thermalizeFromConf'
+                BHMAS_accRateReportOnlySome='TRUE'
+                shift ;;
+            --onlyNewChains )
+                readonly BHMAS_betaPostfix
+                BHMAS_accRateReportOnlySome='TRUE'
+                shift ;;
             * )
                 BHMAS_commandLineOptionsToBeParsed+=( "$1" )
                 shift ;;

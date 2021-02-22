@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2020 Alessandro Sciarra
+#  Copyright (c) 2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -19,11 +19,13 @@
 
 function ProduceInputFile_openQCD-FASTSUM()
 {
-    local runId inputFileGlobalPath numberOfTrajectoriesToBeDone\
-          betaValue seedValue massAsNumber solverToBeUsed sapArrayToBeUsed
+    local runId inputFileGlobalPath numberOfTrajectoriesToBeDone numberOfPseudofermionsToBeUsed\
+          betaValue seedValue massAsNumber nTimeScales scaleOneIntegrationStepsToBeUsed\
+          forcesInLevelZero solverToBeUsed sapArrayToBeUsed
     runId="$1"
     inputFileGlobalPath="$2"
     numberOfTrajectoriesToBeDone=$3
+    numberOfPseudofermionsToBeUsed=$4  # <-- Not used at the moment but passed to the function
     if [[ ! ${runId} =~ ^(${BHMAS_betaRegex//\\/})_${BHMAS_seedPrefix}(${BHMAS_seedRegex//\\/})${BHMAS_betaPostfix}$ ]]; then
         Internal 'Run ID ' emph "${runId}" ' in ' emph "${FUNCNAME}" ' does not match expected format!'
     else
@@ -34,6 +36,17 @@ function ProduceInputFile_openQCD-FASTSUM()
         massAsNumber="0.${BHMAS_mass}"
     else
         massAsNumber="${BHMAS_mass}"
+    fi
+
+    # Handle integrator time scales here
+    if KeyInArray "${runId}" BHMAS_scaleOneIntegrationSteps; then # Second timescale was specified
+        nTimeScales=2
+        forcesInLevelZero='0'
+        scaleOneIntegrationStepsToBeUsed="${BHMAS_scaleOneIntegrationSteps[${runId}]}"
+    else # Just one timescale specified in the betas file
+        nTimeScales=1
+        forcesInLevelZero='0 1'
+        scaleOneIntegrationStepsToBeUsed=1 #placeholder in input file, not used
     fi
 
     # This check has to be done here because the number of
@@ -55,6 +68,10 @@ function ProduceInputFile_openQCD-FASTSUM()
         sapArrayToBeUsed=( ${BHMAS_sapBlockSize[@]} )
     fi
 
+    #ATTENTION: Since openQCD-FASTSUM supports it, it is better to always put in the
+    #           input file all blocks of information, even though some might not be used.
+    #           This simplifies a lot the continue logic, since there we can then assume
+    #           that blocks of input are in the inputfile (e.g. switch from 1 to 2 timescales).
     exec 5>&1 1> "${inputFileGlobalPath}"
 
     cat <<END_OF_INPUTFILE
@@ -85,7 +102,7 @@ theta        0.0 0.0 0.0
 actions      0 1
 npf          1
 mu           0.0
-nlv          2
+nlv          ${nTimeScales}
 tau          1
 
 [MD trajectories]
@@ -94,18 +111,6 @@ ntr          ${numberOfTrajectoriesToBeDone}
 dtr_log      1
 dtr_ms       10000000 # i.e. never measure
 dtr_cnfg     ${BHMAS_checkpointFrequency}
-
-[Level 0]
-integrator   OMF2
-lambda       0.1931833275037836
-nstep        ${BHMAS_scaleZeroIntegrationSteps[${runId}]}
-forces       0
-
-[Level 1]
-integrator   OMF2
-lambda       0.1931833275037836
-nstep        ${BHMAS_scaleOneIntegrationSteps[${runId}]}
-forces       1
 
 [Action 0]
 action       ACG
@@ -146,6 +151,18 @@ res          1.0e-6
 solver       CGNE
 nmx          ${BHMAS_inverterMaxIterations}
 res          1.0e-12
+
+[Level 0]
+integrator   OMF2
+lambda       0.1931833275037836
+nstep        ${BHMAS_scaleZeroIntegrationSteps[${runId}]}
+forces       ${forcesInLevelZero}
+
+[Level 1]
+integrator   OMF2
+lambda       0.1931833275037836
+nstep        ${scaleOneIntegrationStepsToBeUsed}
+forces       1
 
 [SAP]
 bs ${sapArrayToBeUsed[@]}

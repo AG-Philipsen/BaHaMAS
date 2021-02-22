@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2017-2018,2020 Alessandro Sciarra
+#  Copyright (c) 2017-2018,2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -144,6 +144,7 @@ function DeclareBaHaMASGlobalVariables()
     declare -gA BHMAS_massPreconditioningValues=()
     declare -gA BHMAS_timesPerTrajectory=()
     declare -gA BHMAS_goalStatistics=()
+    declare -gA BHMAS_pseudofermionsNumbers=()
     declare -gA BHMAS_startConfigurationGlobalPath=()
     readonly BHMAS_plaquetteColumn=2
     readonly BHMAS_deltaHColumn=8
@@ -160,13 +161,17 @@ function DeclareBaHaMASGlobalVariables()
 
     #Values of execution mode options
     BHMAS_trajectoryNumberUpToWhichToContinue=0
+    BHMAS_reproduceExecutable='FALSE'
+    BHMAS_thermalizeForcePbpMeasurement='FALSE'
     BHMAS_jobstatusUser="$(whoami)"
     BHMAS_jobstatusAll='FALSE'
     BHMAS_jobstatusLocal='FALSE'
+    BHMAS_jobstatusOnlyPartition='FALSE'
     BHMAS_simulationStatusMeasureTimeOption='TRUE'
     BHMAS_simulationStatusShowOnlyQueuedOption='FALSE'
     BHMAS_simulationStatusVerbose='FALSE'
     BHMAS_accRateReportInterval=1000
+    BHMAS_accRateReportOnlySome='FALSE'
     BHMAS_cleanAllOutputFiles='FALSE'
     BHMAS_numberOfChainsToBeInTheBetasFile=4
     BHMAS_betasWithSeedToBeToggled=()

@@ -34,6 +34,23 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 
 
+## [Version 0.4.0] &ensp;<sub><sup>22 February 2021</sup></sub>
+
+* :sos: The `--togglePbp` command line option of CL2QCD was broken and has been fixed now.
+* :sos: The production job for CL2QCD was deleting the executable file at the end of the run breaking following `continue*` mode usage. This is fixed now.
+* :new: It is now possible to force pbp measurement both in `thermalize` and in `continue-thermalization` execution modes.
+* :white_check_mark: Improve `acceptance-rate-report` exeution mode making it act on any folder and optionally consider thermalizations only.
+* :white_check_mark: Improve `job-status` exeution mode to run faster and report on node usage.
+* :sos: The job status in simulation-status execution mode was not always correctly determined and it has been fixed now.
+* :new: The number of pseudofermions can be now specified in the betas file (for CL2QCD and staggered fermions only).
+* :boom: Default number of chiral condensate measurements with CL2QCD and staggered fermions changed from 8 to 16 but still left hard-coded (consistent with Wilson fermions now).
+* :sos: With CL2QCD, the `BHMAS_useRationalApproxFiles` was ignored in the `continue*` modes and unnecessary modifications of the input file were attempted. This is fixed now.
+* :sos: The `--local` option of the `job-status` mode has been fixed (it was not always working as it should have worked).
+* :new: It is now possible to ask BaHaMAS to recreate the executable file(s) in the `continue` and `continue-thermalization` modes via the `--updateExecutable` option.
+* :new: It is now possible to use one time scale only for the MD integration specifying only one integer in the `i` field in the betas file.
+* :boom: Some setup variable names have been improved. This require running the `setup` mode once again to update the user-setup.
+* :white_check_mark: Improve functional tests to cover more real-life cases.
+
 ## [Version 0.3.1] &ensp;<sub><sup>11 September 2020</sup></sub>
 
 * :sos: **Hot-fix:** Many execution modes (e.g. `thermalize`) were broken with multiple simulations per job. This has been fixed now.
@@ -83,8 +100,9 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 * :sos: Fix tests failures due to hard-coded path in tests setup.
 
 
-[Unreleased]: https://github.com/AG-Philipsen/BaHaMAS/compare/BaHaMAS-0.3.1...develop
-[Version 0.3.1]: https://github.com/AG-Philipsen/BaHaMAS/releases/tag/BaHaMAS-0.3.1
-[Version 0.3.0]: https://github.com/AG-Philipsen/BaHaMAS/releases/tag/BaHaMAS-0.3.0
-[Version 0.2.0]: https://github.com/AG-Philipsen/BaHaMAS/releases/tag/BaHaMAS-0.2.0
-[Version 0.1.0]: https://github.com/AG-Philipsen/BaHaMAS/releases/tag/BaHaMAS-0.1.0
+[Unreleased]: https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/bahamas/-/compare/BaHaMAS-0.4.0...develop
+[Version 0.4.0]: https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/bahamas/-/releases/BaHaMAS-0.4.0
+[Version 0.3.1]: https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/bahamas/-/releases/BaHaMAS-0.3.1
+[Version 0.3.0]: https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/bahamas/-/releases/BaHaMAS-0.3.0
+[Version 0.2.0]: https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/bahamas/-/releases/BaHaMAS-0.2.0
+[Version 0.1.0]: https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/bahamas/-/releases/BaHaMAS-0.1.0

@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2017,2020 Alessandro Sciarra
+#  Copyright (c) 2017,2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -36,10 +36,11 @@ function __static__CheckExistenceBetasFileAndAddEndOfLineAtTheEndIfMissing()
 
 function __static__CheckFormatBetasFileEntry()
 {
-    local beta integrationStepsRegex massPreconditioningRegex resumeRegex statisticsRegex timesRegex
+    local beta integrationStepsRegex massPreconditioningRegex pseudofermionsRegex resumeRegex statisticsRegex timesRegex
     #Grep regexes, we eliminate backslashes easily with variable expansion
     integrationStepsRegex='[0-9]\+\(-[0-9]\+\)*'
     massPreconditioningRegex='[0-9]\+,[0-9]\+'
+    pseudofermionsRegex='[1-9][0-9]*'
     resumeRegex='\([0-9]\+\|last\)'
     statisticsRegex='[1-9][0-9]*'
     timesRegex='[0-9]\+\([.][0-9]*\)\?'
@@ -51,6 +52,10 @@ function __static__CheckFormatBetasFileEntry()
         massPreconditioning )
             if [[ ! $2 =~ ^${massPreconditioningRegex//\\/}$ ]]; then
                 Fatal ${BHMAS_fatalWrongBetasFile} "Mass preconditioning entry " emph "$2" " in " file "${BHMAS_betasFilename}" " file does not match expected format!"
+            fi ;;
+        pseudofermions )
+            if [[ ! $2 =~ ^${pseudofermionsRegex//\\/}$ ]]; then
+                Fatal ${BHMAS_fatalWrongBetasFile} "Pseudofermions entry " emph "$2" " in " file "${BHMAS_betasFilename}" " file does not match expected format!"
             fi ;;
         resumeFrom )
             if [[ ! $2 =~ ^${resumeRegex//\\/}$ ]]; then
@@ -94,6 +99,7 @@ function __static__CheckAndParseSingleLine()
         fi
         beta+="_${BHMAS_seedPrefix}${tmpSeed}${BHMAS_betaPostfix}"
     fi
+    beta=$(__static__AdjustRunIdsPostfixAccordingToHierarchy "${beta}")
     set -- "${entriesToBeParsed[@]}"
     #Put information in global variables
     BHMAS_betaValues+=( "${beta}" )
@@ -102,17 +108,37 @@ function __static__CheckAndParseSingleLine()
             i* )
                 entry=${1:1}
                 __static__CheckFormatBetasFileEntry integrationSteps "${entry}"
-                if [[ $(grep -o "-" <<< "${entry}" | wc -l) -ne 1 ]]; then
-                    Fatal ${BHMAS_fatalMissingFeature} "Unable to use a different number of integration steps different than " emph "2" " for " emph "beta = ${beta%_*}" "!"
-                fi
-                BHMAS_scaleZeroIntegrationSteps["${beta}"]=${entry%%-*}
-                BHMAS_scaleOneIntegrationSteps["${beta}"]=${entry##*-}
-                #If generalized in future, something like  BHMAS_integrationSteps["${beta}"]=( ${entry//-/} )
+                case $(grep -o "-" <<< "${entry}" | wc -l) in
+                    0 )
+                        BHMAS_scaleZeroIntegrationSteps["${beta}"]=${entry%%-*}
+                        ;;
+                    1 )
+                        BHMAS_scaleZeroIntegrationSteps["${beta}"]=${entry%%-*}
+                        BHMAS_scaleOneIntegrationSteps["${beta}"]=${entry##*-}
+                        ;;
+                    * )
+                        Fatal ${BHMAS_fatalMissingFeature} "Unable to use a different number of integration steps than " emph "1 or 2" " for " emph "beta = ${beta%_*}" "!"
+                        ;;
+                esac
                 ;;
             mp* )
-                entry=${1:2}
-                __static__CheckFormatBetasFileEntry massPreconditioning "${entry}"
-                BHMAS_massPreconditioningValues["${beta}"]=${entry} ;;
+                if [[ ${BHMAS_lqcdSoftware} != 'CL2QCD' || ${BHMAS_wilson} == 'FALSE' ]]; then
+                    Fatal ${BHMAS_fatalMissingFeature} 'Mass preconditioning in betas file can be used with ' emph 'CL2QCD and Wilson fermions only' '!'
+                else
+                    entry=${1:2}
+                    __static__CheckFormatBetasFileEntry massPreconditioning "${entry}"
+                    BHMAS_massPreconditioningValues["${beta}"]=${entry}
+                fi
+                ;;
+            pf* )
+                if [[ ${BHMAS_lqcdSoftware} != 'CL2QCD' || ${BHMAS_staggered} == 'FALSE' ]]; then
+                    Fatal ${BHMAS_fatalMissingFeature} 'Number of pseudofermions in betas file can be used with ' emph 'CL2QCD and staggered fermions only' '!'
+                else
+                    entry=${1:2}
+                    __static__CheckFormatBetasFileEntry pseudofermions "${entry}"
+                    BHMAS_pseudofermionsNumbers["${beta}"]=${entry}
+                fi
+                ;;
             r* )
                 entry=${1:1}
                 __static__CheckFormatBetasFileEntry resumeFrom "${entry}"
@@ -157,7 +183,7 @@ function __static__CheckConsistencyInformationExtractedFromBetasFile()
         Fatal ${BHMAS_fatalWrongBetasFile} "No beta values in betas file."
     fi
     for beta in "${BHMAS_betaValues[@]}"; do
-        if ! KeyInArray "${beta}" BHMAS_scaleZeroIntegrationSteps || ! KeyInArray "${beta}" BHMAS_scaleOneIntegrationSteps; then
+        if ! KeyInArray "${beta}" BHMAS_scaleZeroIntegrationSteps; then
             Fatal ${BHMAS_fatalWrongBetasFile} "Integration steps information missing in " file "${BHMAS_betasFilename}" " file for " emph "beta = ${beta%_*}" "!"
         fi
     done
@@ -214,15 +240,16 @@ function __static__PrintReportOnExtractedInformationFromBetasFile()
 {
     cecho lc "\n============================================================================================================"
     cecho lp " Read beta values:"
-    for BETA in ${BHMAS_betaValues[@]}; do
-        cecho -n "   - ${BETA} [Integrator steps $(printf "%2d-%2d"  "${BHMAS_scaleZeroIntegrationSteps[${BETA}]}" "${BHMAS_scaleOneIntegrationSteps[${BETA}]}") ]"
-        if KeyInArray ${BETA} BHMAS_trajectoriesToBeResumedFrom; then
-            cecho -n "$(printf "   [resume from tr. %+7s]" "${BHMAS_trajectoriesToBeResumedFrom[${BETA}]}")"
+    local runId
+    for runId in ${BHMAS_betaValues[@]}; do
+        cecho -n "   - $(printf "%-35s" ${runId}) [Integrator steps $(printf "%2d%1s%2s"  "${BHMAS_scaleZeroIntegrationSteps[${runId}]}" "${BHMAS_scaleOneIntegrationSteps[${runId}]:+-}" "${BHMAS_scaleOneIntegrationSteps[${runId}]:-}") ]"
+        if KeyInArray ${runId} BHMAS_trajectoriesToBeResumedFrom; then
+            cecho -n "$(printf "   [resume from tr. %+7s]" "${BHMAS_trajectoriesToBeResumedFrom[${runId}]}")"
         else
             cecho -n "                          "
         fi
-        if KeyInArray ${BETA} BHMAS_massPreconditioningValues; then
-            cecho -n "$(printf "   MP=(%d-0.%4d)" "${BHMAS_massPreconditioningValues[${BETA}]%,*}" "${BHMAS_massPreconditioningValues[${BETA}]#*,}")"
+        if KeyInArray ${runId} BHMAS_massPreconditioningValues; then
+            cecho -n "$(printf "   MP=(%d-0.%4d)" "${BHMAS_massPreconditioningValues[${runId}]%,*}" "${BHMAS_massPreconditioningValues[${runId}]#*,}")"
         fi
         cecho ''
     done
@@ -240,6 +267,25 @@ function ParseBetasFile()
 
 #------------------------------------------------------------------------------------------------------------------------------#
 
+function __static__AdjustRunIdsPostfixAccordingToHierarchy()
+{
+    local runId
+    runId="$1"
+    if [[ ${BHMAS_executionMode} = 'mode:acceptance-rate-report' && ${BHMAS_accRateReportOnlySome} = 'FALSE' ]]; then
+        if [[ ! -d "${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}" ]]; then
+            runId="${runId/%continueWithNewChain/thermalizeFromConf}"
+            if [[ ! -d "${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}" ]]; then
+                runId="${runId/%Conf/Hot}"
+                if [[ ! -d "${BHMAS_runDirWithBetaFolders}/${BHMAS_betaPrefix}${runId}" ]]; then
+                    Fatal ${BHMAS_fatalWrongBetasFile} 'No beta folder found for ID ' emph "${runId%_*}" ' in ' dir "${BHMAS_runDirWithBetaFolders}" '.'
+                fi
+            fi
+        fi
+    fi
+    printf "%s" "${runId}"
+}
+
+#------------------------------------------------------------------------------------------------------------------------------#
 #In the function below we complete the betas file adding new chains until the desired number
 #is reached. The adopted strategy is the following:
 #

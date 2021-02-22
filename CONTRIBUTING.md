@@ -10,7 +10,7 @@ Actually, it is by now quite popular and it gained a spot in the official Bitbuc
 If you are new to it, you can read [the original post](https://nvie.com/posts/a-successful-git-branching-model/) by the author and/or the [Bitbucket page](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow) on it.
 
 If you want to contribute to `BaHaMAS`, you should probably work on a feature branch and then submit a merge request.
-We encourage you to use the [AVH Edition](https://github.com/petervanderdoes/gitflow-avh) of git-flow since it should include some ameliorated feature with respect [to the original implementation](https://github.com/nvie/gitflow) of the author, which seem [not to be maintained anymore](https://github.com/nvie/gitflow/issues/6452).
+We encourage you to use the [AVH Edition](https://github.com/petervanderdoes/gitflow-avh) of git-flow since it should include ameliorated features with respect [to the original implementation](https://github.com/nvie/gitflow) of the author, which seems [not to be maintained anymore](https://github.com/nvie/gitflow/issues/6452).
 
 ## Comply with the codebase style
 

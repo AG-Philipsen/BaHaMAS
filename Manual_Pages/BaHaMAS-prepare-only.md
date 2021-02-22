@@ -1,6 +1,6 @@
-% BaHaMAS-prepare-only(1) Version 0.3.1 | User Manual
+% BaHaMAS-prepare-only(1) Version 0.4.0 | User Manual
 % [Alessandro Sciarra](sciarra@itp.uni-frankfurt.de)
-% 11 September 2020
+% 22 February 2021
 
 # NAME
 
@@ -14,6 +14,8 @@ BaHaMAS-prepare-only - Prepare needed files and folders to submit new-chain simu
 
 The **betas** file is parsed in order to gather information about which simulation should be prepared (only uncommented lines are considered in this mode).
 This mode operates exclusively on new-chain jobs and it prepares everything is needed to submit them.
+
+The **g***number* and **pf***number* fields in the **betas** file have priority on the **\--measurements** and **\--pf** command line options, respectively.
 
 If successfully run, the user can have a look at the files created and submit the jobs at a later point using the **submit-only** execution mode.
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-#  Copyright (c) 2017-2018,2020 Alessandro Sciarra
+#  Copyright (c) 2017-2018,2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -77,7 +77,7 @@ readonly userVariablesFile="${BHMAS_testsFolder}/SetupUserVariables.bash"
 testParametersString='' # Global but to be filled in each
 testParametersPath=''   # test to change formulation
 betaFolders=()          # To be filled depending on betafile
-jobBetaSeedsString=''   # To be created depending on betafile
+jobBetaSeedsStrings=()  # To be created depending on betafile and software
 readonly listOfAuxiliaryFilesAndFolders=( "${testFolder}" "${logFile}" "${userVariablesFile}" )
 
 
@@ -94,15 +94,17 @@ availableTests=(
     ['CL2QCD-new-chain-goal']='CL2QCD new-chain --walltime= 1d'
     ['CL2QCD-thermalize-hot']='CL2QCD thermalize --walltime 1d'
     ['CL2QCD-thermalize-hot-forced']='CL2QCD thermalize --fromHot --walltime 1d'
-    ['CL2QCD-thermalize-conf']='CL2QCD thermalize --walltime 1d'
+    ['CL2QCD-thermalize-conf']='CL2QCD thermalize --walltime 1d --measurePbp'
     ['CL2QCD-continue-save']='CL2QCD continue --walltime 1d -F 80 -f 140 -m=1234'
     ['CL2QCD-continue-last']='CL2QCD continue --walltime 1d --pf 3'
     ['CL2QCD-continue-resume']='CL2QCD continue --walltime 1d'
+    ['CL2QCD-continue-new-exec']='CL2QCD continue --walltime 1d --updateExecutable'
     ['CL2QCD-continue-num']='CL2QCD continue --till 10000 --walltime 1d'
     ['CL2QCD-continue-goal']='CL2QCD continue --walltime 1d'
     ['CL2QCD-continue-therm-save']='CL2QCD continue-thermalization --walltime 1d -F 80 -f 140 -m=1234'
     ['CL2QCD-continue-therm-last']='CL2QCD continue-thermalization --walltime 1d'
     ['CL2QCD-continue-therm-resume']='CL2QCD continue-thermalization --walltime 1d'
+    ['CL2QCD-continue-therm-new-exec']='CL2QCD continue-thermalization --walltime 1d --updateExecutable'
     ['CL2QCD-continue-therm-num']='CL2QCD continue-thermalization --till 5000 --walltime 1d'
     ['CL2QCD-continue-therm-goal']='CL2QCD continue-thermalization --walltime 1d'
     ['CL2QCD-continue-therm-hot']='CL2QCD continue-thermalization --fromHot --walltime 1d'
@@ -125,10 +127,12 @@ availableTests=(
     ['openQCD-FASTSUM-continue']='openQCD-FASTSUM continue --walltime 1d -m=1400'
     ['openQCD-FASTSUM-continue-last']='openQCD-FASTSUM continue --walltime 1d'
     ['openQCD-FASTSUM-continue-resume']='openQCD-FASTSUM continue --walltime 1d'
+    ['openQCD-FASTSUM-continue-new-exec']='openQCD-FASTSUM continue --walltime 1d --updateExecutable'
     ['openQCD-FASTSUM-continue-num']='openQCD-FASTSUM continue --till 10000 --walltime 1d'
     ['openQCD-FASTSUM-continue-goal']='openQCD-FASTSUM continue --walltime 1d'
     ['openQCD-FASTSUM-continue-therm-last']='openQCD-FASTSUM continue-thermalization --walltime 1d -m=1234'
     ['openQCD-FASTSUM-continue-therm-resume']='openQCD-FASTSUM continue-thermalization --walltime 1d'
+    ['openQCD-FASTSUM-continue-therm-new-exec']='openQCD-FASTSUM continue-thermalization --walltime 1d --updateExecutable'
     ['openQCD-FASTSUM-continue-therm-num']='openQCD-FASTSUM continue-thermalization --till 5000 --walltime 1d'
     ['openQCD-FASTSUM-continue-therm-goal']='openQCD-FASTSUM continue-thermalization --walltime 1d'
     ['openQCD-FASTSUM-continue-therm-hot']='openQCD-FASTSUM continue-thermalization --fromHot --walltime 1d'
@@ -149,6 +153,10 @@ availableTests=(
     ['uncommentBetas-num-seed']='uncomment-betas --betas 5.1111_s3333_NC'
     ['completeBetasFile']='complete-betas-file'
     ['completeBetasFile-num']='complete-betas-file --chains 3'
+    ['jobStatus']='job-status'
+    ['jobStatus-user']="job-status --user $(whoami)"
+    ['jobStatus-local']='job-status --local'
+    ['jobStatus-partition']='job-status --partition test --onlyGivenPartition'
     ['database-help']='database --help'
     ['database-display']='database --sum'
     ['database-local']='database --local'

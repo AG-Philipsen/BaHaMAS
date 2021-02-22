@@ -54,15 +54,15 @@ function PrepareSoftwareSpecificGlobalVariableValidation_CL2QCD()
     if [[ ${BHMAS_useRationalApproxFiles} = 'TRUE' ]]; then
         productionJobsNeededVariables+=(
             BHMAS_rationalApproxGlobalPath
-            BHMAS_approxHeatbathFilename
-            BHMAS_approxMDFilename
-            BHMAS_approxMetropolisFilename
+            BHMAS_approxHeatbathFilenameSuffix
+            BHMAS_approxMDFilenameSuffix
+            BHMAS_approxMetropolisFilenameSuffix
         )
         rationalApproxFolder+=( "${BHMAS_rationalApproxGlobalPath}" )
         rationalApproxFiles+=(
-            "${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}*${BHMAS_approxHeatbathFilename}"
-            "${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}*${BHMAS_approxMDFilename}"
-            "${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}*${BHMAS_approxMetropolisFilename}"
+            "${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}*${BHMAS_approxHeatbathFilenameSuffix}"
+            "${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}*${BHMAS_approxMDFilenameSuffix}"
+            "${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}*${BHMAS_approxMetropolisFilenameSuffix}"
         )
     fi
 

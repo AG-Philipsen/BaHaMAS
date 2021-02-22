@@ -81,17 +81,17 @@ function __static__MakeTemporaryCopyOfOriginalInputFile()
     #This is to avoid to modify some parameters and then skip beta because of some error leaving the input file modified!
     #If the beta is skipped this temporary file is used to restore the original input file, otherwise it is deleted.
     originalInputFileGlobalPath="${inputFileGlobalPath}_original"
-    cp ${inputFileGlobalPath} ${originalInputFileGlobalPath} || exit ${BHMAS_fatalBuiltin}
+    cp "${inputFileGlobalPath}" "${originalInputFileGlobalPath}" || exit ${BHMAS_fatalBuiltin}
 }
 
 function __static__RestoreOriginalInputFile()
 {
-    mv ${originalInputFileGlobalPath} ${inputFileGlobalPath} || exit ${BHMAS_fatalBuiltin}
+    mv "${originalInputFileGlobalPath}" "${inputFileGlobalPath}" || exit ${BHMAS_fatalBuiltin}
 }
 
 function __static__RemoveOriginalInputFile()
 {
-    rm ${originalInputFileGlobalPath} || exit ${BHMAS_fatalBuiltin}
+    rm "${originalInputFileGlobalPath}" || exit ${BHMAS_fatalBuiltin}
 }
 
 

@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2017-2018,2020 Alessandro Sciarra
+#  Copyright (c) 2017-2018,2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -275,12 +275,12 @@ function __static__ParseRemainingGeneralOptions()
                 shift 2
                 ;;
             --togglePbp )
-                if [[ BHMAS_measurePbp='FALSE' ]]; then
+                if [[ ${BHMAS_measurePbp} = 'FALSE' ]]; then
                     BHMAS_measurePbp='TRUE'
-                    cecho lg ' Measurement of the ' B 'pbp' uB ' has been switched ' B 'ON'
+                    cecho lg '\n Measurement of the ' B 'pbp' uB ' has been switched ' B 'ON'
                 else
                     BHMAS_measurePbp='FALSE'
-                    cecho lg ' Measurement of the ' B 'pbp' uB ' has been switched ' B 'OFF'
+                    cecho lg '\n Measurement of the ' B 'pbp' uB ' has been switched ' B 'OFF'
                 fi
                 shift
                 ;;

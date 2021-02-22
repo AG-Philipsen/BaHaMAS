@@ -1,6 +1,6 @@
-% BaHaMAS-new-chain(1) Version 0.3.1 | User Manual
+% BaHaMAS-new-chain(1) Version 0.4.0 | User Manual
 % [Alessandro Sciarra](sciarra@itp.uni-frankfurt.de)
-% 11 September 2020
+% 22 February 2021
 
 # NAME
 
@@ -22,6 +22,7 @@ If one with the same seed of the one being considered exists, it is used.
 Otherwise one of those with the same parameters but different seed is chosen (if more than one exist, the user is asked to choose).
 
 Most of the information for the simulation input file(s) is retrieved from the **betas** file, but the user can also tune some input via the command line options.
+The **g***number* and **pf***number* fields in the **betas** file have priority on the **\--measurements** and **\--pf** command line options, respectively.
 
 # OPTIONS
 

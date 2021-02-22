@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2020 Alessandro Sciarra
+#  Copyright (c) 2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -239,7 +239,7 @@ function __static__HandlePbpInInputFile_CL2QCD()
         if [[ ${BHMAS_wilson} = "TRUE" ]]; then
             optionsToBeAddedOrModified+=( "nSources=16" )
         elif [[ ${BHMAS_staggered} = "TRUE" ]]; then
-            optionsToBeAddedOrModified+=( "nSources=1" "pbpMeasurements=8" "fermObsInSingleFile=1" "fermObsPbpPrefix=${BHMAS_outputFilename}" )
+            optionsToBeAddedOrModified+=( "nSources=1" "pbpMeasurements=16" "fermObsInSingleFile=1" "fermObsPbpPrefix=${BHMAS_outputFilename}" )
         fi
         AddOptionsToInputFile "${optionsToBeAddedOrModified[@]}"
         PrintAddedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
@@ -254,38 +254,76 @@ function __static__HandlePbpInInputFile_CL2QCD()
 function __static__HandleMultiplePseudofermionsInInputFile_CL2QCD()
 {
     if [[ ${BHMAS_staggered} = "TRUE" ]]; then #Multiple pseudofermions simply ignored if not staggered
-        local oldOption newOption optionsToBeAddedOrModified
-        optionsToBeAddedOrModified=("nPseudoFermions=${BHMAS_numberOfPseudofermions}")
-        if [[ $(grep -c "nPseudoFermions" ${inputFileGlobalPath}) -eq 0 ]]; then
-            AddOptionsToInputFile "${optionsToBeAddedOrModified[@]}"
-            PrintAddedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
-        else
-            ModifyOptionsInInputFile_CL2QCD "${optionsToBeAddedOrModified[@]}" || return 1
-            PrintModifiedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
+        local oldOption newOption optionsToBeAddedOrModified numberOfPseudofermionsToBeUsed
+        # Handle pseudofermions options
+        numberOfPseudofermionsToBeUsed=''
+        if WasAnyOfTheseOptionsGivenToBaHaMAS '--pf'; then
+            numberOfPseudofermionsToBeUsed="${BHMAS_numberOfPseudofermions}"
+        elif KeyInArray ${runId} BHMAS_pseudofermionsNumbers; then
+            numberOfPseudofermionsToBeUsed="${BHMAS_pseudofermionsNumbers[${runId}]}"
         fi
-        #Always replace approx files with correct ones (maybe unnecessary, but easy to be done always)
-        if [[ ${BHMAS_numberOfPseudofermions} -eq 1 ]]; then
-            optionsToBeAddedOrModified=(
-                "rationalApproxFileHB=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Heatbath"
-                "rationalApproxFileMD=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_MD"
-                "rationalApproxFileMetropolis=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Metropolis"
-            )
-        else
-            optionsToBeAddedOrModified=(
-                "rationalApproxFileHB=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${BHMAS_numberOfPseudofermions}_Approx_Heatbath"
-                "rationalApproxFileMD=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${BHMAS_numberOfPseudofermions}_Approx_MD"
-                "rationalApproxFileMetropolis=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${BHMAS_numberOfPseudofermions}_Approx_Metropolis"
-            )
+        if [[ ${numberOfPseudofermionsToBeUsed} != '' ]]; then
+            optionsToBeAddedOrModified=( "nPseudoFermions=${numberOfPseudofermionsToBeUsed}" )
+            if [[ ${#optionsToBeAddedOrModified[@]} -ne 0 ]]; then
+                if [[ $(grep -c "nPseudoFermions" ${inputFileGlobalPath}) -eq 0 ]]; then
+                    AddOptionsToInputFile "${optionsToBeAddedOrModified[@]}"
+                    PrintAddedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
+                else
+                    ModifyOptionsInInputFile_CL2QCD "${optionsToBeAddedOrModified[@]}" || return 1
+                    PrintModifiedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
+                fi
+            fi
         fi
-        ModifyOptionsInInputFile_CL2QCD "${optionsToBeAddedOrModified[@]}"
-        PrintModifiedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
+        # Handle rational approximation options
+        if [[ ${BHMAS_useRationalApproxFiles} = "TRUE" ]]; then
+            # This might be relevant if user changed in the setup BHMAS_useRationalApproxFiles
+            # from FALSE to TRUE while the simulation was already started.
+            optionsToBeAddedOrModified=()
+            if [[ $(grep -c "rationalApproxFileHB" ${inputFileGlobalPath}) -eq 0 ]]; then
+                optionsToBeAddedOrModified+=( "rationalApproxFileHB=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Heatbath" )
+            fi
+            if [[ $(grep -c "rationalApproxFileMD" ${inputFileGlobalPath}) -eq 0 ]]; then
+                optionsToBeAddedOrModified+=( "rationalApproxFileMD=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_MD" )
+            fi
+            if [[ $(grep -c "rationalApproxFileMetropolis" ${inputFileGlobalPath}) -eq 0 ]]; then
+                optionsToBeAddedOrModified+=( "rationalApproxFileMetropolis=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Metropolis" )
+            fi
+            if [[ ${#optionsToBeAddedOrModified[@]} -ne 0 ]]; then
+                AddOptionsToInputFile "${optionsToBeAddedOrModified[@]}"
+                PrintAddedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
+            fi
+            # Always replace approx files with correct ones (maybe unnecessary, but easy to be done always)
+            # NOTE: Here it is correct to assume that rationalApproxFile* lines are present in the inputfile (guaranteed above)
+            if [[ ${numberOfPseudofermionsToBeUsed} != '' ]]; then
+                if [[ ${numberOfPseudofermionsToBeUsed} -eq 1 ]]; then
+                    optionsToBeAddedOrModified=(
+                        "rationalApproxFileHB=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Heatbath"
+                        "rationalApproxFileMD=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_MD"
+                        "rationalApproxFileMetropolis=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_Approx_Metropolis"
+                    )
+                else
+                    optionsToBeAddedOrModified=(
+                        "rationalApproxFileHB=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${numberOfPseudofermionsToBeUsed}_Approx_Heatbath"
+                        "rationalApproxFileMD=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${numberOfPseudofermionsToBeUsed}_Approx_MD"
+                        "rationalApproxFileMetropolis=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${numberOfPseudofermionsToBeUsed}_Approx_Metropolis"
+                    )
+                fi
+                ModifyOptionsInInputFile_CL2QCD "${optionsToBeAddedOrModified[@]}" || return 1
+                PrintModifiedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
+            fi
+       fi
     fi
     return 0
 }
 
 function __static__HandleMassPreconditioningInInputFile_CL2QCD()
 {
-    if [[ ${BHMAS_wilson} = "TRUE" ]]; then #Mass preconditioning simply ignored if not Wilson
+    #ATTENTION: In this function we leave nTimeScales UNCHANGED, because the function
+    #           __static__HandleIntegrationStepsInInputFile_CL2QCD will set it properly
+    #           according on what requested by the user in the betas file.
+    #
+    # Mass preconditioning simply ignored here if not Wilson, since this function is always called!
+    if [[ ${BHMAS_wilson} = "TRUE" ]]; then
         local string massPreconditioningStrings optionsToBeAddedOrModified
         if KeyInArray ${runId} BHMAS_massPreconditioningValues; then
             optionsToBeAddedOrModified=("useMP=1")
@@ -303,21 +341,21 @@ function __static__HandleMassPreconditioningInInputFile_CL2QCD()
                                              "integrator2=twomn" "integrationSteps2=${BHMAS_massPreconditioningValues[${runId}]%,*}")
                 AddOptionsToInputFile "${optionsToBeAddedOrModified[@]}"
                 PrintAddedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
-                optionsToBeAddedOrModified=("nTimeScales=3" "solverResiduumCheckEvery=10")
+                optionsToBeAddedOrModified=("solverResiduumCheckEvery=${BHMAS_inverterBlockSize}")
                 ModifyOptionsInInputFile_CL2QCD "${optionsToBeAddedOrModified[@]}" || return 1
                 PrintModifiedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
             else
                 #Here I assume that the specifications for mass preconditioning are already in the input file and I just modify them!
                 #In any case, the function 'ModifyOptionsInInputFile_CL2QCD' will catch any missing option and the beta will be skipped
-                optionsToBeAddedOrModified+=("kappaMP=0.${BHMAS_massPreconditioningValues[${runId}]#*,}" "nTimeScales=3"
-                                             "intsteps2=${BHMAS_massPreconditioningValues[${runId}]%,*}" "solverResiduumCheckEvery=10")
+                optionsToBeAddedOrModified+=("kappaMP=0.${BHMAS_massPreconditioningValues[${runId}]#*,}"
+                                             "intsteps2=${BHMAS_massPreconditioningValues[${runId}]%,*}" "solverResiduumCheckEvery=${BHMAS_inverterBlockSize}")
                 ModifyOptionsInInputFile_CL2QCD "${optionsToBeAddedOrModified[@]}" || return 1
                 PrintModifiedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
             fi
         else
             #Here check if mass preconditioning is in the input file and if so switch it off
             if [[ $(grep -c "useMP" ${inputFileGlobalPath}) -gt 0 ]]; then #Use '-gt 0' instead of '-eq 1' so that we also check multiple occurences
-                optionsToBeAddedOrModified=("useMP=0" "solverResiduumCheckEvery=50" "nTimeScales=2")
+                optionsToBeAddedOrModified=("useMP=0" "solverResiduumCheckEvery=${BHMAS_inverterBlockSize}")
                 ModifyOptionsInInputFile_CL2QCD "${optionsToBeAddedOrModified[@]}" || return 1
                 PrintModifiedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
             fi
@@ -380,9 +418,27 @@ function __static__HandlePRNGStateInInputFile_CL2QCD()
 
 function __static__HandleIntegrationStepsInInputFile_CL2QCD()
 {
+    # NOTE: It would be easier to always put all information in the inputfile and rely on its presence and
+    #       just modify the needed information here ---> It is not the case for CL2QCD at the moment.
     local optionsToBeAddedOrModified
-    #Always set the integrator steps, that could have changed or not
-    optionsToBeAddedOrModified=("intsteps0=${BHMAS_scaleZeroIntegrationSteps[${runId}]}" "intsteps1=${BHMAS_scaleOneIntegrationSteps[${runId}]}")
+    if KeyInArray ${runId} BHMAS_massPreconditioningValues; then
+        optionsToBeAddedOrModified=('nTimeScales=3')
+    elif KeyInArray ${runId} BHMAS_scaleOneIntegrationSteps; then # Second timescale was specified
+        optionsToBeAddedOrModified=('nTimeScales=2' "intsteps0=${BHMAS_scaleZeroIntegrationSteps[${runId}]}")
+        if [[ $(grep -c "integrator1=[[:alpha:]]\+" ${inputFileGlobalPath}) -eq 0 ]]; then
+            AddOptionsToInputFile 'integrator1=twomn'
+            PrintAddedOptionsToStandardOutput 'integrator1=twomn'
+        fi
+        if [[ $(grep -c "integrationSteps1=[0-9]\+" ${inputFileGlobalPath}) -eq 0 ]]; then
+            AddOptionsToInputFile "intsteps1=${BHMAS_scaleOneIntegrationSteps[${runId}]}"
+            PrintAddedOptionsToStandardOutput "intsteps1=${BHMAS_scaleOneIntegrationSteps[${runId}]}"
+        else
+            optionsToBeAddedOrModified+=("intsteps1=${BHMAS_scaleOneIntegrationSteps[${runId}]}")
+        fi
+    else
+        optionsToBeAddedOrModified=('nTimeScales=1' "intsteps0=${BHMAS_scaleZeroIntegrationSteps[${runId}]}")
+        sed -i '/integrationSteps1/d' ${inputFileGlobalPath}
+    fi
     ModifyOptionsInInputFile_CL2QCD "${optionsToBeAddedOrModified[@]}" || return 1
     PrintModifiedOptionsToStandardOutput "${optionsToBeAddedOrModified[@]}"
 }

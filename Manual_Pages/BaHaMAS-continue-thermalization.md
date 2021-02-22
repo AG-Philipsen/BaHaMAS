@@ -1,6 +1,6 @@
-% BaHaMAS-continue-thermalization(1) Version 0.3.1 | User Manual
+% BaHaMAS-continue-thermalization(1) Version 0.4.0 | User Manual
 % [Alessandro Sciarra](sciarra@itp.uni-frankfurt.de)
-% 11 September 2020
+% 22 February 2021
 
 # NAME
 
@@ -22,30 +22,28 @@ If e.g. a thermalization "from hot" is finished but one other crashed and the us
 This can be comfortably done using the **\--fromHot** option.
 
 The input file of each simulation is adjusted according to the option passed and some sanity checks are performed.
-The number of trajectories which will be done is determined as follows.
-
- * If the **\--measurements** option is given, then it will be used.
- * Otherwise, if the **\--till***=number* option is given, then it will be used.
- * Otherwise, if the **g***number* field is present in the **betas** file, then it will be used.
- * Otherwise, the measurement option in the input file is not modified.
-
-To resume a simulation from a given trajectory, add a **r***number* field in the **betas** file.
-Use **rlast** in the **betas** file to resume a simulation from the last saved checkpoint.
-If possible, based on the provided information, it is checked if each simulation is finished and, if so, it is not continued and a message is printed for the user.
+Refer to the manual page of the **continue** execution mode to read in detail how the input file is adjusted.
 
 # OPTIONS
 
 \--till, \-t *number*
 :   Specify till which trajectory number the simulations should be continued.
 
-\--betasfile *filename*
-:   Use *filename* instead of **betas** file.
-
 \--fromHot
 :   Force BaHaMAS to act on thermalization(s) from hot without determining itself the thermalization type.
 
+\--measurePbp
+:   Force BaHaMAS to measure the pbp ignoring the setup value and the fact being in a thermalization run.
+
+\--betasfile *filename*
+:   Use *filename* instead of **betas** file.
+
 \--measurements, \-m *number*
 :   Specify the number of trajectories that should be done (default: 1000).
+
+\--updateExecutable
+:   Make BaHaMAS produce again the executable file and replace the existing one in the beta folder(s), instead of simply using it.
+    This option can be handy e.g. if the administrators of the cluster changed or updated some software and you are then required to recreate your executable(s).
 
 \--jobscript_prefix *string*
 :   Specify the prefix of the jobscript file (default: own setup).
@@ -104,7 +102,7 @@ If possible, based on the provided information, it is checked if each simulation
 
 # SEE ALSO
 
-**BaHaMAS**(1)
+**BaHaMAS**(1), **BaHaMAS-continue**(1)
 
 # BAHAMAS
 

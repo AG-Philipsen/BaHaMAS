@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2017,2020 Alessandro Sciarra
+#  Copyright (c) 2017,2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -42,9 +42,19 @@ function __static__CreateParametersFolders()
 
 function __static__SetBetaFoldersAndPrepareJobVariables()
 {
-    betaFolders=( $(awk '{printf "b%s_%s_continueWithNewChain\n", $1, $2}' "${submitDirWithBetaFolders}/betas") )
+    betaFolders=( $(awk '/^[[:space:]]*#/{next} {printf "b%s_%s_continueWithNewChain\n", $1, $2}' "${submitDirWithBetaFolders}/betas") )
     # Here assume that beta values in the fakeBetas file are all the same, only seeds change!
-    jobBetaSeedsString="$(awk 'NR==1{printf "b%s_%s", $1, $2} NR>1{printf "_%s", $2}' "${submitDirWithBetaFolders}/betas")"
+    case "${software}" in
+        CL2QCD )
+            jobBetaSeedsStrings[0]="$(awk '/^[[:space:]]*#/{next} {if(betaPrinted==0){printf "b%s_%s", $1, $2; betaPrinted=1}else{printf "_%s", $2}}' "${submitDirWithBetaFolders}/betas")"
+            ;;
+        openQCD-FASTSUM )
+            jobBetaSeedsStrings=( $(awk '/^[[:space:]]*#/{next} {printf "b%s_%s ", $1, $2}' "${submitDirWithBetaFolders}/betas") ) #Word split on spaces
+            ;;
+        * )
+            Fatal ${BHMAS_fatalLogicError} "Unknown software in \"${FUNCNAME}\" function!"
+            ;;
+    esac
 }
 
 function __static__CreateRationalApproxFolderWithFiles()
@@ -97,7 +107,7 @@ function __static__CreatenfiguratiornSymlinkInRunBetaFolder()
 
 function __static__AddStringToAllLinesOfBetasFile()
 {
-    awk -i inplace -v new="$1" '{printf "%s   %s\n", $0, new}' "${submitDirWithBetaFolders}/betas" || exit ${BHMAS_fatalBuiltin}
+    awk -i inplace -v new="$1" '/^[[:space:]]*#/{next} {printf "%s   %s\n", $0, new}' "${submitDirWithBetaFolders}/betas" || exit ${BHMAS_fatalBuiltin}
 }
 
 function __static__CopyAuxiliaryFileAtBetaFolderLevel()
@@ -113,6 +123,19 @@ function __static__CopyAuxiliaryFilesToSubmitBetaFolders()
             cp "${BHMAS_testsFolderAuxFiles}/${software}/${file}" "${submitDirWithBetaFolders}/${folder}" || exit ${BHMAS_fatalBuiltin}
         done
     done
+}
+
+function __static__SetNumberOfIntegratorScalesInInputFile()
+{
+    local folder file numScales
+    folder="$1"
+    file="$2"
+    numScales="$3"
+    if [[ ${software} == 'CL2QCD' ]]; then
+        sed -E -i 's@nTimeScales=[0-9]+@'"nTimeScales=${numScales}"'@g'   "${submitDirWithBetaFolders}/${folder}/${file}" || exit ${BHMAS_fatalBuiltin}
+    elif [[ ${software} == 'openQCD-FASTSUM' ]]; then
+        sed -E -i 's@nlv[[:space:]]+[0-9]+@'"$(printf "%-13s%s" "nlv" "${numScales}")"'@g'   "${submitDirWithBetaFolders}/${folder}/${file}" || exit ${BHMAS_fatalBuiltin}
+    fi
 }
 
 function __static__CopyAuxiliaryFilesToRunBetaFolders()
@@ -202,7 +225,7 @@ function MakeTestPreliminaryOperations()
             __static__CopyAuxiliaryFilesToRunBetaFolders "fakeInput" "fakeExecutable"
             __static__CreatenfiguratiornSymlinkInRunBetaFolder "fromConf_trNr5000"
             mkdir "Jobscripts_TEST" || exit ${BHMAS_fatalBuiltin}
-            printf "#SBATCH --time=2:45:00\n" > "${submitDirWithBetaFolders}/Jobscripts_TEST/fakePrefix_${testParametersString}__${jobBetaSeedsString}"
+            printf "#SBATCH --time=2:45:00\n" > "${submitDirWithBetaFolders}/Jobscripts_TEST/fakePrefix_${testParametersString}__${jobBetaSeedsStrings[0]}"
             ;;
 
         CL2QCD-thermalize* )
@@ -221,6 +244,7 @@ function MakeTestPreliminaryOperations()
             __static__CreateRationalApproxFolderWithFiles
             __static__CreateBetaFolders
             __static__CopyAuxiliaryFilesToSubmitBetaFolders "fakeInput"
+            __static__SetNumberOfIntegratorScalesInInputFile "${betaFolders[0]}" "fakeInput" 1
             __static__CopyAuxiliaryFilesToRunBetaFolders "fakeExecutable" "fakeOutput" "fakeOutput_pbp.dat"
             __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
             __static__CompleteInputFilesWithCorrectPaths
@@ -253,6 +277,7 @@ function MakeTestPreliminaryOperations()
             __static__CreateBetaFolders
             __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
             __static__CopyAuxiliaryFilesToSubmitBetaFolders "fakeExecutable.123456.out" "fakeInput"
+            __static__SetNumberOfIntegratorScalesInInputFile "${betaFolders[-1]}" "fakeInput" 1
             __static__CopyAuxiliaryFilesToRunBetaFolders "fakeOutput"
             ;;
 
@@ -296,7 +321,10 @@ function MakeTestPreliminaryOperations()
             __static__CreateFilesInRunBetaFolders "qcd1_1_2_4_6"
             __static__CreatenfiguratiornSymlinkInRunBetaFolder "fromConf_trNr5000"
             mkdir "Jobscripts_TEST" || exit ${BHMAS_fatalBuiltin}
-            printf "#SBATCH --time=2:45:00\n" > "${submitDirWithBetaFolders}/Jobscripts_TEST/fakePrefix_${testParametersString}__${jobBetaSeedsString}"
+            local string
+            for string in "${jobBetaSeedsStrings[@]}"; do
+                printf "#SBATCH --time=2:45:00\n" > "${submitDirWithBetaFolders}/Jobscripts_TEST/fakePrefix_${testParametersString}__${string}"
+            done
             ;;
 
         openQCD-FASTSUM-thermalize* )
@@ -319,6 +347,7 @@ function MakeTestPreliminaryOperations()
             fi
             __static__CreateBetaFolders
             __static__CopyAuxiliaryFilesToSubmitBetaFolders "fakeInput"
+            __static__SetNumberOfIntegratorScalesInInputFile "${betaFolders[0]}" "fakeInput" 1
             __static__CopyAuxiliaryFilesToRunBetaFolders "fakeOutput.log"
             __static__CreateFilesInSubmitBetaFolders "qcd1_1_2_4_6"
             __static__CreateFilesInRunBetaFolders "qcd1_1_2_4_6"
@@ -350,6 +379,7 @@ function MakeTestPreliminaryOperations()
             __static__CreateBetaFolders
             __static__CopyAuxiliaryFileAtBetaFolderLevel "${software}/fakeMetadata" ".BaHaMAS_metadata"
             __static__CopyAuxiliaryFilesToSubmitBetaFolders "fakeInput"
+            __static__SetNumberOfIntegratorScalesInInputFile "${betaFolders[-1]}" "fakeInput" 1
             __static__CopyAuxiliaryFilesToRunBetaFolders "fakeOutput.log"
             __static__CreatenfiguratiornSymlinkInRunBetaFolder "fromConf_trNr5000"
             ;;
@@ -404,10 +434,20 @@ function InhibitBaHaMASCommands()
     function sbatch(){ cecho -d "sbatch $*"; }
     function make(){ cecho -d "make $*"; touch "${@: -1}"; }
     #To make liststatus find running job and then test measure time
-    if [[ $1 =~ ^(liststatus|database) ]]; then
-        export jobnameForSqueue="${testParametersString}__${jobBetaSeedsString}@RUNNING"
+    #NOTE: jobBetaSeedsStrings is an array because with openQCD each run handle one seed only!
+    #      Here we fake mark the first entry as running to have something running for all codes.
+    if [[ $1 =~ (simulation-status|database) ]]; then
+        export jobnameForSqueue="${testParametersString}__${jobBetaSeedsStrings[0]}@RUNNING"
+        function squeue(){ cecho -d "${jobnameForSqueue:-}"; }
+    elif [[ $1 =~ jobStatus ]]; then
+        function squeue(){
+            printf '%s\n'\
+                   '464756@Nf2_mui0_k1350_nt12_ns60__b6.1960_s1960_TH@PENDING@@2020-11-23T15:29:03@4:10:00@2020-11-24T20:00:06@0:00@2020-11-25T00:10:06@/fake/path/to/job@25@test'\
+                   '448275@Nf2_mui0_k1300_nt12_ns60__b6.2350_s6107@RUNNING@FakeNodeList@2020-11-09T17:21:31@11-13:47:00@2020-11-15T11:29:59@8-05:41:12@2020-11-27T01:16:59@/fake/path/to/job@25@test'
+        }
+    else
+        function squeue(){ printf ''; }
     fi
-    function squeue(){ cecho -d -n "${jobnameForSqueue:-}"; }
     export -f less sbatch make squeue
 }
 
@@ -489,27 +529,60 @@ function CleanTestsEnvironmentForFollowingTest()
     fi
 }
 
+function __static__PrintCenteredString()
+{
+    local tmpString stringTotalWidth indentation tmpStringLength padding
+    tmpString="$1"
+    if [[ $# -gt 1 ]]; then
+        stringTotalWidth="$2"
+    else
+        stringTotalWidth="$(tput cols)"
+    fi
+    indentation="${3-}"
+    tmpStringLength=$(printf '%s' "${tmpString}" | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,3})*)?[mGK]//g" | wc -c)
+    padding="$(printf '%0.1s' ' '{1..500})"
+    printf "${indentation}%0.*s %s %0.*s\n"\
+           "$(( (stringTotalWidth - 2 - tmpStringLength)/2 ))"\
+           "${padding}"\
+           "${tmpString}"\
+           "$(( (stringTotalWidth - 2 - tmpStringLength)/2 ))"\
+           "${padding}"
+}
+
 function PrintTestsReport()
 {
-    local indentation name percentage
+    local indentation leftMargin testNameStringLength index lineOfEquals name percentage
     indentation='          '
+    leftMargin='   '
+    testNameStringLength=$(printf '%s\n' "${testsToBeRun[@]}" | wc -L)
+    if [[ ${testNameStringLength} -lt 25 ]]; then # Minimum length
+        testNameStringLength=25
+    fi
+    if (( testNameStringLength % 2 == 1 )); then # Aesthetics
+        (( testNameStringLength+=1 ))
+    fi
+    for((index=0; index<testNameStringLength+3+2*${#leftMargin}; index++)); do
+        lineOfEquals+='='
+    done
     if [[ ${reportLevel} -ge 1 ]]; then
-        cecho bb "\n${indentation}===============================\n"\
-              lp "${indentation}   Run " emph "$(printf '%2d' ${testsRun})" " test(s): "\
-              lg "$(printf '%2d' ${testsPassed}) passed\n"\
-              lr "${indentation}                   $(printf '%2d' ${testsFailed}) failed\n"\
-              bb "${indentation}==============================="
+        local passedString failedString
+        passedString="$(cecho lp "Run " emph "$(printf '%2d' ${testsRun})" " test(s): " lg "$(printf '%2d' ${testsPassed}) passed")"
+        failedString="$(cecho lr "                $(printf '%2d' ${testsFailed}) failed")"
+        cecho bb "\n${indentation}${lineOfEquals}"
+        __static__PrintCenteredString "${passedString}" ${#lineOfEquals} "${indentation}"
+        __static__PrintCenteredString "${failedString}" ${#lineOfEquals} "${indentation}"
+        cecho bb "${indentation}${lineOfEquals}"
     fi
     if [[ ${reportLevel} -ge 2 ]]; then
-        percentage=$(awk '{printf "%3.0f%%%%", 100*$1/$2}' <<< "${testsPassed} ${testsRun}")
-        cecho wg "${indentation}     ${percentage} of tests passed!"
-        cecho bb "${indentation}==============================="
+        percentage=$(awk '{printf "%.0f%%", 100*$1/$2}' <<< "${testsPassed} ${testsRun}")
+        __static__PrintCenteredString "${percentage} $(cecho wg "of tests passed!")" ${#lineOfEquals} "${indentation}"
+        cecho bb "${indentation}${lineOfEquals}"
         if [[ ${testsFailed} -ne 0 ]]; then
-            cecho lr "${indentation}  The following tests failed:"
+            cecho lr "${indentation}${leftMargin}The following tests failed:"
             for name in "${whichFailed[@]}"; do
-                cecho lr "${indentation}   - " emph "${name}"
+                cecho lr "${indentation}${leftMargin} - " emph "${name}"
             done
-            cecho bb "${indentation}==============================="
+            cecho bb "${indentation}${lineOfEquals}"
         fi
     fi
     cecho ''

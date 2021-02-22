@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2017-2018,2020 Alessandro Sciarra
+#  Copyright (c) 2017-2018,2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -66,8 +66,8 @@ function ListSimulationsStatus()
         outputFileGlobalPath="${BHMAS_runDiskGlobalPath}/${BHMAS_projectSubpath}${localParametersPath}/${BHMAS_betaPrefix}${runId}/${BHMAS_outputStandardizedFilename}"
         inputFileGlobalPath="${BHMAS_submitDiskGlobalPath}/${BHMAS_projectSubpath}${localParametersPath}/${BHMAS_betaPrefix}${runId}/${BHMAS_inputFilename}"
         integrationSteps0='--'
-        integrationSteps1='--'
-        integrationSteps2='--'
+        integrationSteps1='---' # Steps after the 0 contain a separation dash
+        integrationSteps2='---'
         kappaMassPreconditioning='-----'
         toBeCleaned=0
         trajectoriesDone='-----'
@@ -114,8 +114,8 @@ function ListSimulationsStatus()
 
 function __static__GetJobStatus()
 {
-    local runId parametersString betaValue seedPart postfix jobNameRegex\
-          value counter jobStatus
+    local runId parametersString betaValue seedPart postfix betaInJobnameRegex\
+          seedInJobnameRegex betaSeedsInJobnameRegex jobNameRegex value counter jobStatus
     runId="$1"
     parametersString="$2"
     #Assume runId format is fixed, as often done
@@ -134,7 +134,10 @@ function __static__GetJobStatus()
             postfix='_TH'
             ;;
     esac
-    jobNameRegex="${parametersString}__${BHMAS_betaPrefix}${betaValue}(_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/})*_${seedPart}(_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/})*${postfix}"
+    betaInJobnameRegex="__${BHMAS_betaPrefix}${BHMAS_betaRegex//\\/}"
+    seedInJobnameRegex="_${BHMAS_seedPrefix}${BHMAS_seedRegex//\\/}"
+    betaSeedsInJobnameRegex="${betaInJobnameRegex}(${seedInJobnameRegex})+"
+    jobNameRegex="${parametersString}(${betaSeedsInJobnameRegex})*__${BHMAS_betaPrefix}${betaValue}(${seedInJobnameRegex})*_${seedPart}(${seedInJobnameRegex})*(${betaSeedsInJobnameRegex})*${postfix}"
     CheckIfVariablesAreDeclared jobsInformation
     #Assume each element of jobsInformation is of the form "jobName@jobStatus"
     counter=0
@@ -297,9 +300,9 @@ function __static__PrintSimulationStatusLine()
     runId="$1"
     formattingString="$(__static__ColorBeta)%-18s"
     formattingString+="$(__static__ColorClean ${toBeCleaned})%10s${BHMAS_defaultListstatusColor} "
-    formattingString+="($(GoodAcc ${acceptanceAllRun})%s %%${BHMAS_defaultListstatusColor}) "
-    formattingString+="[$(GoodAcc ${acceptanceLastBunchOfTrajectories})%7s %%${BHMAS_defaultListstatusColor}] "
-    formattingString+="%s-%s%s%s"
+    formattingString+="($(GetAcceptanceColor ${acceptanceAllRun})%s %%${BHMAS_defaultListstatusColor}) "
+    formattingString+="[$(GetAcceptanceColor ${acceptanceLastBunchOfTrajectories})%7s %%${BHMAS_defaultListstatusColor}] "
+    formattingString+="%2s%-3s%-3s%-5s"
     formattingString+="$(__static__ColorStatus ${jobStatus})%12s${BHMAS_defaultListstatusColor}"
     formattingString+="$(__static__ColorDelta S ${maxSpikeToMeanAsNSigma})%13s${BHMAS_defaultListstatusColor}   "
     formattingString+="%12s%12s  $(__static__ColorDelta P ${maxSpikePlaquetteAsNSigma})%9s${BHMAS_defaultListstatusColor}   "
@@ -343,7 +346,7 @@ function __static__GetShortenedBetaString()
     printf "${runId%_*}_${shortPostfix[${runId##*_}]}"
 }
 
-function GoodAcc()
+function GetAcceptanceColor() # Used in the acceptance-rate-report mode as well
 {
     awk -v tl="${BHMAS_tooLowAcceptanceListstatusColor/\\/\\\\}" \
         -v l="${BHMAS_lowAcceptanceListstatusColor/\\/\\\\}" \

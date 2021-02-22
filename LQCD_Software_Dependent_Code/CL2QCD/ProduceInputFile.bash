@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2015,2017-2018,2020 Alessandro Sciarra
+#  Copyright (c) 2015,2017-2018,2020-2021 Alessandro Sciarra
 #
 #  This file is part of BaHaMAS.
 #
@@ -27,10 +27,12 @@ function __static__AddToInputFile()
 
 function ProduceInputFile_CL2QCD()
 {
-    local betaValue inputFileGlobalPath numberOfTrajectoriesToBeDone massAsNumber
+    local betaValue inputFileGlobalPath numberOfTrajectoriesToBeDone\
+          numberOfPseudofermionsToBeUsed massAsNumber
     betaValue="$1"
     inputFileGlobalPath="$2"
     numberOfTrajectoriesToBeDone=$3
+    numberOfPseudofermionsToBeUsed=$4
     rm -f ${inputFileGlobalPath} || exit ${BHMAS_fatalBuiltin}
     touch ${inputFileGlobalPath} || exit ${BHMAS_fatalBuiltin}
     if [[ $(grep -c "[.]" <<< "${BHMAS_mass}") -eq 0 ]]; then
@@ -48,21 +50,21 @@ function ProduceInputFile_CL2QCD()
             "nTastes=${BHMAS_nflavour}"
         if [[ ${BHMAS_useRationalApproxFiles} = "TRUE" ]]; then
             __static__AddToInputFile "readRationalApproxFromFile=1"
-            if [[ ${BHMAS_numberOfPseudofermions} -eq 1 ]]; then
+            if [[ ${numberOfPseudofermionsToBeUsed} -eq 1 ]]; then
                 __static__AddToInputFile\
-                    "rationalApproxFileHB=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_${BHMAS_approxHeatbathFilename}"\
-                    "rationalApproxFileMD=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_${BHMAS_approxMDFilename}"\
-                    "rationalApproxFileMetropolis=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_${BHMAS_approxMetropolisFilename}"
+                    "rationalApproxFileHB=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_${BHMAS_approxHeatbathFilenameSuffix}"\
+                    "rationalApproxFileMD=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_${BHMAS_approxMDFilenameSuffix}"\
+                    "rationalApproxFileMetropolis=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_${BHMAS_approxMetropolisFilenameSuffix}"
             else
                 __static__AddToInputFile\
-                    "rationalApproxFileHB=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${BHMAS_numberOfPseudofermions}_${BHMAS_approxHeatbathFilename}"\
-                    "rationalApproxFileMD=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${BHMAS_numberOfPseudofermions}_${BHMAS_approxMDFilename}"\
-                    "rationalApproxFileMetropolis=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${BHMAS_numberOfPseudofermions}_${BHMAS_approxMetropolisFilename}"
+                    "rationalApproxFileHB=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${numberOfPseudofermionsToBeUsed}_${BHMAS_approxHeatbathFilenameSuffix}"\
+                    "rationalApproxFileMD=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${numberOfPseudofermionsToBeUsed}_${BHMAS_approxMDFilenameSuffix}"\
+                    "rationalApproxFileMetropolis=${BHMAS_rationalApproxGlobalPath}/${BHMAS_nflavourPrefix}${BHMAS_nflavour}_pf${numberOfPseudofermionsToBeUsed}_${BHMAS_approxMetropolisFilenameSuffix}"
             fi
         else
             __static__AddToInputFile "readRationalApproxFromFile=0"
         fi
-        __static__AddToInputFile "nPseudoFermions=${BHMAS_numberOfPseudofermions}"\
+        __static__AddToInputFile "nPseudoFermions=${numberOfPseudofermionsToBeUsed}"\
                                  "findminmaxMaxIterations=10000"
 
     fi
@@ -83,10 +85,14 @@ function ProduceInputFile_CL2QCD()
     fi
     #Information about solver and measurements
     if [[ ${BHMAS_wilson} = "TRUE" ]]; then
-        __static__AddToInputFile "solver=cg"
+        __static__AddToInputFile \
+            "solver=cg"\
+            "solverRestartEvery=2000"\
+            "useKernelMergingFermionMatrix=1"
     fi
     __static__AddToInputFile \
         "solverMaxIterations=${BHMAS_inverterMaxIterations}"\
+        "solverResiduumCheckEvery=${BHMAS_inverterBlockSize}"\
         "measureCorrelators=0"
     if [[ ${BHMAS_measurePbp} = "TRUE" ]]; then
         __static__AddToInputFile \
@@ -98,42 +104,41 @@ function ProduceInputFile_CL2QCD()
         elif [[ ${BHMAS_staggered} = "TRUE" ]]; then
             __static__AddToInputFile \
                 "nSources=1"\
-                "pbpMeasurements=8"
+                "pbpMeasurements=16"
         fi
         __static__AddToInputFile \
             "fermObsInSingleFile=1"\
             "fermObsPbpPrefix=${BHMAS_outputFilename}"
     fi
     #Information about integrators
-    if [[ ${BHMAS_wilson} = "TRUE" ]]; then
-        __static__AddToInputFile \
-            "solverRestartEvery=2000"\
-            "useKernelMergingFermionMatrix=1"
-        if KeyInArray "${betaValue}" BHMAS_massPreconditioningValues; then
+    __static__AddToInputFile "tau=1"
+    if KeyInArray "${betaValue}" BHMAS_massPreconditioningValues; then
+        if [[ ${BHMAS_wilson} = "FALSE" ]]; then
+            Fatal ${BHMAS_fatalLogicError} 'Mass preconditioning in CL2QCD can be used only with Wilson fermions!'
+        else
             __static__AddToInputFile \
-                "solverResiduumCheckEvery=10"\
                 "useMP=1"\
                 "solverMP=cg"\
                 "kappaMP=0.${BHMAS_massPreconditioningValues[${betaValue}]#*,}"\
                 "nTimeScales=3"\
                 "integrator2=twomn"\
                 "integrationSteps2=${BHMAS_massPreconditioningValues[${betaValue}]%,*}"
-        else
-            __static__AddToInputFile \
-                "solverResiduumCheckEvery=${BHMAS_inverterBlockSize}"\
-                "nTimeScales=2"
         fi
-    elif [[ ${BHMAS_staggered} = "TRUE" ]]; then
+    elif KeyInArray "${betaValue}" BHMAS_scaleOneIntegrationSteps; then # Second timescale was specified
         __static__AddToInputFile \
-            "solverResiduumCheckEvery=${BHMAS_inverterBlockSize}"\
-            "nTimeScales=2"
+            "nTimeScales=2"\
+            "integrator0=twomn"\
+            "integrator1=twomn"\
+            "integrationSteps0=${BHMAS_scaleZeroIntegrationSteps[${betaValue}]}"\
+            "integrationSteps1=${BHMAS_scaleOneIntegrationSteps[${betaValue}]}"
+    else # Just one timescale specified in the betas file
+        __static__AddToInputFile \
+            "nTimeScales=1"\
+            "integrator0=twomn"\
+            "integrationSteps0=${BHMAS_scaleZeroIntegrationSteps[${betaValue}]}"
     fi
+    #Other physical parameters
     __static__AddToInputFile \
-        "tau=1"\
-        "integrator0=twomn"\
-        "integrator1=twomn"\
-        "integrationSteps0=${BHMAS_scaleZeroIntegrationSteps[${betaValue}]}"\
-        "integrationSteps1=${BHMAS_scaleOneIntegrationSteps[${betaValue}]}"\
         "nSpace=${BHMAS_nspace}"\
         "nTime=${BHMAS_ntime}"
     if [[ ${BHMAS_wilson} = "TRUE" ]]; then
