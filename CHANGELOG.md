@@ -32,6 +32,10 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 
 ## [Unreleased]
 
+
+
+## [Version 0.4.0] &ensp;<sub><sup>22 February 2021</sup></sub>
+
 * :sos: The `--togglePbp` command line option of CL2QCD was broken and has been fixed now.
 * :sos: The production job for CL2QCD was deleting the executable file at the end of the run breaking following `continue*` mode usage. This is fixed now.
 * :new: It is now possible to force pbp measurement both in `thermalize` and in `continue-thermalization` execution modes.
@@ -96,8 +100,9 @@ However, it is impossible to avoid those, especially in an earlier phase of deve
 * :sos: Fix tests failures due to hard-coded path in tests setup.
 
 
-[Unreleased]: https://github.com/AG-Philipsen/BaHaMAS/compare/BaHaMAS-0.3.1...develop
-[Version 0.3.1]: https://github.com/AG-Philipsen/BaHaMAS/releases/tag/BaHaMAS-0.3.1
-[Version 0.3.0]: https://github.com/AG-Philipsen/BaHaMAS/releases/tag/BaHaMAS-0.3.0
-[Version 0.2.0]: https://github.com/AG-Philipsen/BaHaMAS/releases/tag/BaHaMAS-0.2.0
-[Version 0.1.0]: https://github.com/AG-Philipsen/BaHaMAS/releases/tag/BaHaMAS-0.1.0
+[Unreleased]: https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/bahamas/-/compare/BaHaMAS-0.4.0...develop
+[Version 0.4.0]: https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/bahamas/-/releases/BaHaMAS-0.4.0
+[Version 0.3.1]: https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/bahamas/-/releases/BaHaMAS-0.3.1
+[Version 0.3.0]: https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/bahamas/-/releases/BaHaMAS-0.3.0
+[Version 0.2.0]: https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/bahamas/-/releases/BaHaMAS-0.2.0
+[Version 0.1.0]: https://gitlab.itp.uni-frankfurt.de/lattice-qcd/ag-philipsen/bahamas/-/releases/BaHaMAS-0.1.0

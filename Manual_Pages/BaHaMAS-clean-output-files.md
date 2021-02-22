@@ -1,6 +1,6 @@
-% BaHaMAS-clean-output-files(1) Version 0.3.1 | User Manual
+% BaHaMAS-clean-output-files(1) Version 0.4.0 | User Manual
 % [Alessandro Sciarra](sciarra@itp.uni-frankfurt.de)
-% 11 September 2020
+% 22 February 2021
 
 # NAME
 
